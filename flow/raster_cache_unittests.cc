@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/display_list_test_utils.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "gtest/gtest.h"
@@ -14,65 +15,6 @@
 
 namespace flutter {
 namespace testing {
-namespace {
-
-sk_sp<SkPicture> GetSamplePicture() {
-  SkPictureRecorder recorder;
-  recorder.beginRecording(SkRect::MakeWH(150, 100));
-  SkPaint paint;
-  paint.setColor(SK_ColorRED);
-  recorder.getRecordingCanvas()->drawRect(SkRect::MakeXYWH(10, 10, 80, 80),
-                                          paint);
-  return recorder.finishRecordingAsPicture();
-}
-
-sk_sp<DisplayList> GetSampleDisplayList() {
-  DisplayListBuilder builder(SkRect::MakeWH(150, 100));
-  builder.setColor(SK_ColorRED);
-  builder.drawRect(SkRect::MakeXYWH(10, 10, 80, 80));
-  return builder.Build();
-}
-
-sk_sp<SkPicture> GetSampleNestedPicture() {
-  SkPictureRecorder recorder;
-  recorder.beginRecording(SkRect::MakeWH(150, 100));
-  SkCanvas* canvas = recorder.getRecordingCanvas();
-  SkPaint paint;
-  for (int y = 10; y <= 60; y += 10) {
-    for (int x = 10; x <= 60; x += 10) {
-      paint.setColor(((x + y) % 20) == 10 ? SK_ColorRED : SK_ColorBLUE);
-      canvas->drawRect(SkRect::MakeXYWH(x, y, 80, 80), paint);
-    }
-  }
-  SkPictureRecorder outer_recorder;
-  outer_recorder.beginRecording(SkRect::MakeWH(150, 100));
-  canvas = outer_recorder.getRecordingCanvas();
-  canvas->drawPicture(recorder.finishRecordingAsPicture());
-  return outer_recorder.finishRecordingAsPicture();
-}
-
-sk_sp<DisplayList> GetSampleNestedDisplayList() {
-  DisplayListBuilder builder(SkRect::MakeWH(150, 100));
-  for (int y = 10; y <= 60; y += 10) {
-    for (int x = 10; x <= 60; x += 10) {
-      builder.setColor(((x + y) % 20) == 10 ? SK_ColorRED : SK_ColorBLUE);
-      builder.drawRect(SkRect::MakeXYWH(x, y, 80, 80));
-    }
-  }
-  DisplayListBuilder outer_builder(SkRect::MakeWH(150, 100));
-  outer_builder.drawDisplayList(builder.Build());
-  return outer_builder.Build();
-}
-
-sk_sp<DisplayList> GetSampleDisplayList(int ops) {
-  DisplayListBuilder builder(SkRect::MakeWH(150, 100));
-  for (int i = 0; i < ops; i++) {
-    builder.drawColor(SK_ColorRED, SkBlendMode::kSrc);
-  }
-  return builder.Build();
-}
-
-}  // namespace
 
 TEST(RasterCache, SimpleInitialization) {
   flutter::RasterCache cache;
@@ -492,11 +434,11 @@ TEST(RasterCache, NaiveComplexityScoringDisplayList) {
 
   // Five raster ops will not be cached
   auto display_list = GetSampleDisplayList(5);
-  unsigned int complexity_score = calculator->compute(display_list.get());
+  unsigned int complexity_score = calculator->Compute(display_list.get());
 
   ASSERT_EQ(complexity_score, 5u);
   ASSERT_EQ(display_list->op_count(), 5u);
-  ASSERT_FALSE(calculator->should_be_cached(complexity_score));
+  ASSERT_FALSE(calculator->ShouldBeCached(complexity_score));
 
   SkCanvas dummy_canvas;
 
@@ -517,11 +459,11 @@ TEST(RasterCache, NaiveComplexityScoringDisplayList) {
 
   // Six raster ops should be cached
   display_list = GetSampleDisplayList(6);
-  complexity_score = calculator->compute(display_list.get());
+  complexity_score = calculator->Compute(display_list.get());
 
   ASSERT_EQ(complexity_score, 6u);
   ASSERT_EQ(display_list->op_count(), 6u);
-  ASSERT_TRUE(calculator->should_be_cached(complexity_score));
+  ASSERT_TRUE(calculator->ShouldBeCached(complexity_score));
 
   cache.PrepareNewFrame();
 
@@ -681,5 +623,4 @@ TEST(RasterCache, RasterCacheKeySameType) {
 }
 
 }  // namespace testing
-
 }  // namespace flutter
