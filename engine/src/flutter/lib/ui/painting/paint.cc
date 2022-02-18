@@ -301,7 +301,8 @@ bool Paint::sync_to(DisplayListBuilder* builder,
         SkBlurStyle blur_style =
             static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
         double sigma = float_data[kMaskFilterSigmaIndex];
-        builder->setMaskBlurFilter(blur_style, sigma);
+        DlBlurMaskFilter dl_filter(blur_style, sigma);
+        builder->setMaskFilter(&dl_filter);
         break;
     }
   }

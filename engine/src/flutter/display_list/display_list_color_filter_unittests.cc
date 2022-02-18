@@ -19,6 +19,7 @@ static const float matrix[20] = {
 TEST(DisplayListColorFilter, FromSkiaNullFilter) {
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(nullptr);
   ASSERT_EQ(filter, nullptr);
+  ASSERT_EQ(filter.get(), nullptr);
 }
 
 TEST(DisplayListColorFilter, FromSkiaBlendFilter) {
@@ -75,6 +76,7 @@ TEST(DisplayListColorFilter, FromSkiaUnrecognizedFilter) {
   ASSERT_EQ(filter->type(), DlColorFilter::kUnknown);
   ASSERT_EQ(filter->asBlend(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
+  ASSERT_EQ(filter->sk_filter(), sk_filter);
 }
 
 TEST(DisplayListColorFilter, BlendConstructor) {
@@ -88,8 +90,7 @@ TEST(DisplayListColorFilter, BlendShared) {
 }
 
 TEST(DisplayListColorFilter, BlendAsBlend) {
-  DlBlendColorFilter filter =
-      DlBlendColorFilter(SK_ColorRED, SkBlendMode::kDstATop);
+  DlBlendColorFilter filter(SK_ColorRED, SkBlendMode::kDstATop);
   ASSERT_NE(filter.asBlend(), nullptr);
   ASSERT_EQ(filter.asBlend(), &filter);
 }
