@@ -96,10 +96,10 @@ abstract class MaterialLocalizations {
   /// The tooltip for the more button on an overflowing text selection menu.
   String get moreButtonTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "next month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "next month" button.
   String get nextMonthTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "previous month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "previous month" button.
   String get previousMonthTooltip;
 
   /// The tooltip for the [PaginatedDataTable]'s "first page" button.
