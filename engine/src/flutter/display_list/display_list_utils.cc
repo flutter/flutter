@@ -86,12 +86,8 @@ void SkPaintDispatchHelper::setColorFilter(const DlColorFilter* filter) {
 void SkPaintDispatchHelper::setPathEffect(sk_sp<SkPathEffect> effect) {
   paint_.setPathEffect(effect);
 }
-void SkPaintDispatchHelper::setMaskFilter(sk_sp<SkMaskFilter> filter) {
-  paint_.setMaskFilter(filter);
-}
-void SkPaintDispatchHelper::setMaskBlurFilter(SkBlurStyle style,
-                                              SkScalar sigma) {
-  paint_.setMaskFilter(SkMaskFilter::MakeBlur(style, sigma));
+void SkPaintDispatchHelper::setMaskFilter(const DlMaskFilter* filter) {
+  paint_.setMaskFilter(filter ? filter->sk_filter() : nullptr);
 }
 
 sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() const {
@@ -272,14 +268,8 @@ void DisplayListBoundsCalculator::setColorFilter(const DlColorFilter* filter) {
 void DisplayListBoundsCalculator::setPathEffect(sk_sp<SkPathEffect> effect) {
   path_effect_ = std::move(effect);
 }
-void DisplayListBoundsCalculator::setMaskFilter(sk_sp<SkMaskFilter> filter) {
-  mask_filter_ = std::move(filter);
-  mask_sigma_pad_ = 0.0f;
-}
-void DisplayListBoundsCalculator::setMaskBlurFilter(SkBlurStyle style,
-                                                    SkScalar sigma) {
-  mask_sigma_pad_ = std::max(3.0f * sigma, 0.0f);
-  mask_filter_ = nullptr;
+void DisplayListBoundsCalculator::setMaskFilter(const DlMaskFilter* filter) {
+  mask_filter_ = filter ? filter->shared() : nullptr;
 }
 void DisplayListBoundsCalculator::save() {
   SkMatrixDispatchHelper::save();
@@ -601,15 +591,18 @@ bool DisplayListBoundsCalculator::AdjustBoundsForPaint(
 
   if (flags.applies_mask_filter()) {
     if (mask_filter_) {
-      SkPaint p;
-      p.setMaskFilter(mask_filter_);
-      if (!p.canComputeFastBounds()) {
-        return false;
+      const DlBlurMaskFilter* blur_filter = mask_filter_->asBlur();
+      if (blur_filter) {
+        SkScalar mask_sigma_pad = blur_filter->sigma() * 3.0;
+        bounds.outset(mask_sigma_pad, mask_sigma_pad);
+      } else {
+        SkPaint p;
+        p.setMaskFilter(mask_filter_->sk_filter());
+        if (!p.canComputeFastBounds()) {
+          return false;
+        }
+        bounds = p.computeFastBounds(bounds, &bounds);
       }
-      bounds = p.computeFastBounds(bounds, &bounds);
-    }
-    if (mask_sigma_pad_ > 0.0f) {
-      bounds.outset(mask_sigma_pad_, mask_sigma_pad_);
     }
   }
 

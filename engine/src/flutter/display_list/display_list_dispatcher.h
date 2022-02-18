@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_color_filter.h"
+#include "flutter/display_list/display_list_mask_filter.h"
 
 namespace flutter {
 
@@ -46,12 +47,7 @@ class Dispatcher {
   virtual void setBlendMode(SkBlendMode mode) = 0;
   virtual void setBlender(sk_sp<SkBlender> blender) = 0;
   virtual void setPathEffect(sk_sp<SkPathEffect> effect) = 0;
-  virtual void setMaskFilter(sk_sp<SkMaskFilter> filter) = 0;
-  // setMaskBlurFilter is a quick way to set the parameters for a
-  // mask blur filter without constructing an SkMaskFilter object.
-  // It is equivalent to setMaskFilter(SkMaskFilter::MakeBlur(style, sigma)).
-  // To reset the filter use setMaskFilter(nullptr).
-  virtual void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) = 0;
+  virtual void setMaskFilter(const DlMaskFilter* filter) = 0;
   virtual void setImageFilter(sk_sp<SkImageFilter> filter) = 0;
 
   // All of the following methods are nearly 1:1 with their counterparts

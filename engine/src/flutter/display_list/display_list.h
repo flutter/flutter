@@ -87,10 +87,7 @@ namespace flutter {
                                     \
   V(ClearMaskFilter)                \
   V(SetMaskFilter)                  \
-  V(SetMaskBlurFilterNormal)        \
-  V(SetMaskBlurFilterSolid)         \
-  V(SetMaskBlurFilterOuter)         \
-  V(SetMaskBlurFilterInner)         \
+  V(SetSkMaskFilter)                \
                                     \
   V(Save)                           \
   V(SaveLayer)                      \

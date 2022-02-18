@@ -111,12 +111,6 @@ class DlColorFilter {
   // pixels non-transparent and therefore expand the bounds.
   virtual bool modifies_transparent_black() const = 0;
 
-  // Return a shared version of a DlColorFilter pointer, or nullptr if the
-  // pointer is null.
-  static std::shared_ptr<DlColorFilter> Shared(const DlColorFilter* filter) {
-    return filter == nullptr ? nullptr : filter->shared();
-  }
-
   // Return a shared version of |this| ColorFilter. The |shared_ptr| returned
   // will reference a copy of this object so that the lifetime of the shared
   // version is not tied to the storage of this particular instance.

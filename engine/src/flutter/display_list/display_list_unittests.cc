@@ -108,8 +108,11 @@ static const sk_sp<SkPathEffect> TestPathEffect1 =
     SkDashPathEffect::Make(TestDashes1, 2, 0.0f);
 static const sk_sp<SkPathEffect> TestPathEffect2 =
     SkDashPathEffect::Make(TestDashes2, 2, 0.0f);
-static const sk_sp<SkMaskFilter> TestMaskFilter =
-    SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, 5.0);
+static const DlBlurMaskFilter TestMaskFilter1(kNormal_SkBlurStyle, 3.0);
+static const DlBlurMaskFilter TestMaskFilter2(kNormal_SkBlurStyle, 5.0);
+static const DlBlurMaskFilter TestMaskFilter3(kSolid_SkBlurStyle, 3.0);
+static const DlBlurMaskFilter TestMaskFilter4(kInner_SkBlurStyle, 3.0);
+static const DlBlurMaskFilter TestMaskFilter5(kOuter_SkBlurStyle, 3.0);
 constexpr SkRect TestBounds = SkRect::MakeLTRB(10, 10, 50, 60);
 static const SkRRect TestRRect = SkRRect::MakeRectXY(TestBounds, 5, 5);
 static const SkRRect TestRRectRect = SkRRect::MakeRect(TestBounds);
@@ -364,12 +367,11 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "SetMaskFilter", {
-      {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(TestMaskFilter);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kNormal_SkBlurStyle, 3.0);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kNormal_SkBlurStyle, 5.0);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kSolid_SkBlurStyle, 3.0);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kInner_SkBlurStyle, 3.0);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kOuter_SkBlurStyle, 3.0);}},
+      {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(&TestMaskFilter1);}},
+      {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(&TestMaskFilter2);}},
+      {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(&TestMaskFilter3);}},
+      {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(&TestMaskFilter4);}},
+      {0, 24, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(&TestMaskFilter5);}},
       {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(nullptr);}},
     }
   },
@@ -1264,27 +1266,6 @@ TEST(DisplayList, DisplayListImageFilterRefHandling) {
   ASSERT_TRUE(tester.ref_is_unique());
 }
 
-TEST(DisplayList, DisplayListMaskFilterRefHandling) {
-  class MaskFilterRefTester : public virtual AttributeRefTester {
-   public:
-    void setRefToPaint(SkPaint& paint) const override {
-      paint.setMaskFilter(mask_filter);
-    }
-    void setRefToDisplayList(DisplayListBuilder& builder) const override {
-      builder.setMaskFilter(mask_filter);
-    }
-    bool ref_is_unique() const override { return mask_filter->unique(); }
-
-   private:
-    sk_sp<SkMaskFilter> mask_filter =
-        SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 2.0);
-  };
-
-  MaskFilterRefTester tester;
-  tester.test();
-  ASSERT_TRUE(tester.ref_is_unique());
-}
-
 TEST(DisplayList, DisplayListBlenderRefHandling) {
   class BlenderRefTester : public virtual AttributeRefTester {
    public:
@@ -1394,30 +1375,6 @@ TEST(DisplayList, DisplayListFullPerspectiveTransformHandling) {
     SkM44 dl_matrix = canvas->getLocalToDevice();
     ASSERT_NE(sk_matrix, dl_matrix);
   }
-}
-
-TEST(DisplayList, SetMaskBlurSigmaZeroResetsMaskFilter) {
-  DisplayListBuilder builder;
-  builder.setMaskBlurFilter(SkBlurStyle::kNormal_SkBlurStyle, 2.0);
-  builder.drawRect({10, 10, 20, 20});
-  builder.setMaskBlurFilter(SkBlurStyle::kNormal_SkBlurStyle, 0.0);
-  EXPECT_EQ(builder.getMaskFilter(), nullptr);
-  builder.drawRect({30, 30, 40, 40});
-  sk_sp<DisplayList> display_list = builder.Build();
-  ASSERT_EQ(display_list->op_count(), 2u);
-  ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
-}
-
-TEST(DisplayList, SetMaskFilterNullResetsMaskFilter) {
-  DisplayListBuilder builder;
-  builder.setMaskBlurFilter(SkBlurStyle::kNormal_SkBlurStyle, 2.0);
-  builder.drawRect({10, 10, 20, 20});
-  builder.setMaskFilter(nullptr);
-  EXPECT_EQ(builder.getMaskFilter(), nullptr);
-  builder.drawRect({30, 30, 40, 40});
-  sk_sp<DisplayList> display_list = builder.Build();
-  ASSERT_EQ(display_list->op_count(), 2u);
-  ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
 }
 
 TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
