@@ -993,7 +993,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// ** See code in examples/api/lib/widgets/transitions/animated_builder.0.dart **
 /// {@end-tool}
 ///
-/// {@template flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// {@template flutter.flutter.changenotifier.rebuild}
 /// ## Granular rebuilds with AnimatedBuilder and ChangeNotifier
 ///
 /// A [State.setState] method call requires Flutter to entirely rebuild the
@@ -1010,81 +1010,18 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// of the state of a simple counter, a [ChangeNotifier] can be created and
 /// exposed to the widgets below using an [InheritedWidget].
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This is an example that shows how an [InheritedWidget] can expose a
-/// [ChangeNotifier] to a widget and its children.
+/// [ChangeNotifier] to a widget and its children. Whenever one of the two
+/// button is pressed, only the widgets inside the [AnimatedBuilder] are
+/// rebuilt while the `CounterPage` widget and its children are untouched.
 ///
-/// ```dart
-/// class Counter extends ChangeNotifier {
-///   int _counter;
-///
-///   Counter({int value = 0}) : _counter = value;
-///
-///   int get value => _counter;
-///   set value(int value) {
-///     if (_counter != value) {
-///       _counter = value;
-///       notifyListeners();
-///     }
-///   }
-/// }
-///
-/// class CounterWidget extends InheritedWidget {
-///   const CounterWidget({
-///     Key? key,
-///     required this.counter,
-///     required Widget child,
-///   }) : super(key: key, child: child);
-///
-///   final Counter counter;
-///
-///   static CounterWidget of(BuildContext context) {
-///     final result = context.dependOnInheritedWidgetOfExactType<CounterWidget>();
-///     assert(result != null, 'No CounterWidget found in context');
-///     return result!;
-///   }
-///
-///   @override
-///   bool updateShouldNotify(CounterWidget oldWidget) {
-///     return counter.value != oldWidget.counter.value;
-///   }
-/// }
-/// ```
+/// With this approach, only those widgets that really need to be updated are
+/// rebuilt. With [State.setState] instead, the entire widget and the children
+/// would have been rebuilt regardless.
+/// 
+/// ** See code in examples/api/lib/foundation/change_notifier/change_notifier.0.dart **
 /// {@end-tool}
-///
-/// In the following example, `CounterPage` is a child of `CounterWidget` so
-/// it can use the context to retrieve the `Counter` instance. Whenever the
-/// button is pressed, only the [Text] inside the [AnimatedBuilder] is
-/// rebuilt while the `CounterPage` widget itself and its children aren't.
-///
-/// ```dart
-/// class CounterPage extends StatelessWidget {
-///   const CounterPage({Key? key,}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     final counter = CounterWidget.of(context).counter;
-///
-///     return Scaffold(
-///       body: Row(
-///         children: <Widget>[
-///           const Text('Increments: '),
-///           AnimatedBuilder(
-///             animation: counter,
-///             builder: (context, _) => Text('${counter.value}'),
-///           ),
-///         ],
-///       ),
-///       floatingActionButton: FloatingActionButton(
-///         onPressed: () => CounterWidget.of(context).counter.value++,
-///         tooltip: 'Increment',
-///         child: const Icon(Icons.add),
-///       ),
-////    );
-///   }
-/// }
-/// ```
 /// {@endtemplate}
 ///
 /// See also:
