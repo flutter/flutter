@@ -1,4 +1,4 @@
-Signature: 635546bb5a0154e908718de73e8cd2b0
+Signature: 14476c8d050bdd400f89bc1c967ec042
 
 UNUSED LICENSES:
 
@@ -10132,6 +10132,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/Iterators.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/data.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/bool.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/class_id.dart
