@@ -249,9 +249,10 @@ class TextField extends StatefulWidget {
   /// which is evaluated after the supplied [inputFormatters], if any.
   /// The [maxLength] value must be either null or greater than zero.
   ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, and the error counter and divider will
-  /// switch to the [decoration].errorStyle when the limit is exceeded.
+  /// If [maxLengthEnforcement] is set to [MaxLengthEnforcement.none], then more
+  /// than [maxLength] characters may be entered, and the error counter and
+  /// divider will switch to the [decoration].errorStyle when the limit is
+  /// exceeded.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -262,8 +263,8 @@ class TextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
-  /// [selectionHeightStyle], [selectionWidthStyle], [enableSuggestions], and
+  /// [scrollPadding], [maxLines], [maxLength], [selectionHeightStyle],
+  /// [selectionWidthStyle], [enableSuggestions], and
   /// [enableIMEPersonalizedLearning] arguments must not be null.
   ///
   /// See also:
@@ -547,11 +548,10 @@ class TextField extends StatefulWidget {
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
   ///
-  /// If [maxLengthEnforced] is set to false or [maxLengthEnforcement] is
-  /// [MaxLengthEnforcement.none], then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will switch
-  /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
-  /// exceeded.
+  /// If [maxLengthEnforcement] is [MaxLengthEnforcement.none], then more than
+  /// [maxLength] characters may be entered, but the error counter and divider
+  /// will switch to the [decoration]'s [InputDecoration.errorStyle] when the
+  /// limit is exceeded.
   ///
   /// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
   final int? maxLength;

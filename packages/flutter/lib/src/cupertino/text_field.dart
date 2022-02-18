@@ -194,10 +194,10 @@ class CupertinoTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], [enableSuggestions], and [enableIMEPersonalizedLearning]
-  /// properties must not be null.
+  /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
+  /// [suffixMode], [textAlign], [selectionHeightStyle], [selectionWidthStyle],
+  /// [enableSuggestions], and [enableIMEPersonalizedLearning] properties must
+  /// not be null.
   ///
   /// See also:
   ///
@@ -359,9 +359,9 @@ class CupertinoTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
+  /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
+  /// [suffixMode], [textAlign], [selectionHeightStyle], [selectionWidthStyle],
+  /// and [enableSuggestions] properties must not be null.
   ///
   /// See also:
   ///
