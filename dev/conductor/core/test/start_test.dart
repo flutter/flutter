@@ -19,6 +19,7 @@ import './common.dart';
 
 void main() {
   group('start command', () {
+    const String branchPointRevision = '5131a6e5e0c50b8b7b2906cd58dab8746d6450be';
     const String flutterRoot = '/flutter';
     const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
     const String frameworkMirror = 'https://github.com/user/flutter.git';
@@ -93,7 +94,7 @@ void main() {
           '--$kCandidateOption',
           candidateBranch,
           '--$kReleaseOption',
-          'dev',
+          'beta',
           '--$kStateOption',
           '/path/to/statefile.json',
           '--$kIncrementOption',
@@ -309,7 +310,6 @@ void main() {
       stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
       const String revision2 = 'def789';
       const String revision3 = '123abc';
-      const String branchPointRevision = 'deadbeef';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
@@ -434,6 +434,12 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'merge-base', candidateBranch, 'master'],
           stdout: branchPointRevision,
+        ),
+        // check if commit is tagged
+        const FakeCommand(
+          command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
+          // non-zero exit means commit is not tagged
+          exitCode: 128,
         ),
         const FakeCommand(
           command: <String>['git', 'tag', branchPointTag, branchPointRevision],
@@ -625,6 +631,14 @@ void main() {
           stdout: '$previousVersion-42-gabc123',
         ),
         const FakeCommand(
+          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          stdout: branchPointRevision,
+        ),
+        // check if commit is tagged, 0 exit code thus it is tagged
+        const FakeCommand(
+          command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
+        ),
+        const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
           stdout: revision3,
         ),
@@ -810,6 +824,12 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'merge-base', candidateBranch, 'master'],
           stdout: branchPointRevision,
+        ),
+        // check if commit is tagged
+        const FakeCommand(
+          command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
+          // non-zero exit code means branch point is NOT tagged
+          exitCode: 128,
         ),
         const FakeCommand(
           command: <String>['git', 'tag', branchPointTag, branchPointRevision],
