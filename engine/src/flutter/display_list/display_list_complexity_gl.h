@@ -32,7 +32,13 @@ class DisplayListGLComplexityCalculator
  private:
   class GLHelper : public ComplexityCalculatorHelper {
    public:
-    GLHelper(unsigned int ceiling) : ComplexityCalculatorHelper(ceiling) {}
+    GLHelper(unsigned int ceiling)
+        : ComplexityCalculatorHelper(ceiling),
+          save_layer_count_(0),
+          draw_text_blob_count_(0) {}
+
+    void saveLayer(const SkRect* bounds,
+                   const SaveLayerOptions options) override;
 
     void drawLine(const SkPoint& p0, const SkPoint& p1) override;
     void drawRect(const SkRect& rect) override;
@@ -75,7 +81,11 @@ class DisplayListGLComplexityCalculator
                    bool render_with_attributes,
                    SkCanvas::SrcRectConstraint constraint) override;
 
-    unsigned int SaveLayerComplexity() override;
+    unsigned int BatchedComplexity() override;
+
+   private:
+    unsigned int save_layer_count_;
+    unsigned int draw_text_blob_count_;
   };
 
   DisplayListGLComplexityCalculator()

@@ -26,27 +26,45 @@ DisplayListMetalComplexityCalculator::GetInstance() {
 }
 
 unsigned int
-DisplayListMetalComplexityCalculator::MetalHelper::SaveLayerComplexity() {
+DisplayListMetalComplexityCalculator::MetalHelper::BatchedComplexity() {
   // Calculate the impact of saveLayer.
   unsigned int save_layer_complexity;
-  if (SaveLayerCount() == 0) {
+  if (save_layer_count_ == 0) {
     save_layer_complexity = 0;
   } else {
     // saveLayer seems to have two trends; if the count is < 200,
     // then the individual cost of a saveLayer is higher than if
     // the count is > 200.
-    if (SaveLayerCount() > 200) {
+    if (save_layer_count_ > 200) {
       // m = 1/5
       // c = 1
-      save_layer_complexity = (SaveLayerCount() + 5) * 40000;
+      save_layer_complexity = (save_layer_count_ + 5) * 40000;
     } else {
       // m = 1/2
       // c = 1
-      save_layer_complexity = (SaveLayerCount() + 2) * 100000;
+      save_layer_complexity = (save_layer_count_ + 2) * 100000;
     }
   }
 
-  return save_layer_complexity;
+  unsigned int draw_text_blob_complexity;
+  if (draw_text_blob_count_ == 0) {
+    draw_text_blob_complexity = 0;
+  } else {
+    // m = 1/240
+    // c = 0.75
+    draw_text_blob_complexity = (draw_text_blob_count_ + 180) * 2500 / 3;
+  }
+
+  return save_layer_complexity + draw_text_blob_complexity;
+}
+
+void DisplayListMetalComplexityCalculator::MetalHelper::saveLayer(
+    const SkRect* bounds,
+    const SaveLayerOptions options) {
+  if (IsComplex()) {
+    return;
+  }
+  save_layer_count_++;
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawLine(
@@ -552,36 +570,13 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
   if (IsComplex()) {
     return;
   }
-  // There are two classes here, hairline vs non-hairline.
-  //
-  // Hairline scales loglinearly with the number of glyphs.
-  // Non-hairline scales linearly.
 
-  // Unfortunately there is currently no way for us to figure out the glyph
-  // count from an SkTextBlob. We will need to figure out a better solution
-  // here, but for now just use a placeholder value of 100 glyphs.
-  unsigned int glyph_count = 100;
+  // DrawTextBlob has a high fixed cost, but if we call it multiple times
+  // per frame, that fixed cost is greatly reduced per subsequent call. This
+  // is likely because there is batching being done in SkCanvas.
 
-  // These values were worked out by creating a straight line graph (y=mx+c)
-  // approximately matching the measured data, normalising the data so that
-  // 0.0005ms resulted in a score of 100 then simplifying down the formula.
-  unsigned int complexity;
-  if (IsHairline() && Style() == SkPaint::Style::kStroke_Style) {
-    // If hairlines are on, we hit a degenerative case within Skia that causes
-    // our time to skyrocket.
-    //
-    // m = 1/3000
-    // c = 1.75
-    // x = glyph_count * log2(glyph_count)
-    unsigned int x = glyph_count * log(glyph_count);
-    complexity = (x + 5250) * 200 / 3;
-  } else {
-    // m = 1/5000
-    // c = 0.75
-    complexity = 40 * (glyph_count + 3750);
-  }
-
-  AccumulateComplexity(complexity);
+  // Increment draw_text_blob_count_ and calculate the cost at the end.
+  draw_text_blob_count_++;
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawShadow(

@@ -1182,48 +1182,20 @@ void BM_DrawTextBlob(benchmark::State& state,
                                  DisplayListOpFlags::kDrawTextBlobFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextBlobFlags);
 
-  size_t glyph_runs = state.range(0);
+  size_t draw_calls = state.range(0);
   size_t canvas_size = kFixedCanvasSize;
   canvas_provider->InitializeSurface(canvas_size, canvas_size);
   auto canvas = canvas_provider->GetSurface()->getCanvas();
 
-  // We're just using plain Latin-1 where glyph count == character count
-  const char* string_fragment = "This text has exactly 32 glyphs.";
-  size_t fragment_length = strlen(string_fragment);
-  state.SetComplexityN(glyph_runs * fragment_length);
+  state.counters["DrawCallCount_Varies"] = draw_calls;
+  state.counters["GlyphCount"] = draw_calls;
+  char character[2] = {'A', '\0'};
 
-  // TODO(gw280): different fonts
-  SkFont font;
-
-  auto blob_fragment = SkTextBlob::MakeFromString(string_fragment, font);
-  auto bounds = blob_fragment->bounds();
-
-  // Calculate the approximate number of these glyph runs we can fit on a single
-  // canvas.
-  size_t x_count_max = canvas_size / bounds.width();
-  size_t y_count_max = canvas_size / bounds.height();
-  size_t remaining_runs = glyph_runs;
-
-  SkTextBlobBuilder blob_builder;
-  size_t current_y = 0;
-  while (remaining_runs > 0) {
-    size_t runs_this_pass = std::min(x_count_max, remaining_runs);
-    auto buffer = blob_builder.allocRun(
-        font, runs_this_pass * fragment_length, 0,
-        ((current_y % y_count_max) + 1) * bounds.height());
-    for (size_t i = 0; i < runs_this_pass; i++) {
-      font.textToGlyphs(string_fragment, fragment_length, SkTextEncoding::kUTF8,
-                        buffer.glyphs + (i * fragment_length), fragment_length);
-    }
-    remaining_runs -= runs_this_pass;
-    current_y++;
+  for (size_t i = 0; i < draw_calls; i++) {
+    character[0] = 'A' + (i % 26);
+    auto blob = SkTextBlob::MakeFromString(character, SkFont());
+    builder.drawTextBlob(blob, 50.0f, 50.0f);
   }
-
-  auto blob = blob_builder.make();
-
-  state.counters["DrawCallCount"] = 1;
-  state.counters["GlyphCount"] = glyph_runs * fragment_length;
-  builder.drawTextBlob(blob, 0.0f, 0.0f);
 
   auto display_list = builder.Build();
 
@@ -1233,7 +1205,7 @@ void BM_DrawTextBlob(benchmark::State& state,
   }
 
   auto filename = canvas_provider->BackendName() + "-DrawTextBlob-" +
-                  std::to_string(glyph_runs * fragment_length) + ".png";
+                  std::to_string(draw_calls) + ".png";
   canvas_provider->Snapshot(filename);
 }
 

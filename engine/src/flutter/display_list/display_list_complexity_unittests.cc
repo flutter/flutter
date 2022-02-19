@@ -304,9 +304,16 @@ TEST(DisplayListComplexity, DrawTextBlob) {
   builder.drawTextBlob(text_blob, 0.0f, 0.0f);
   auto display_list = builder.Build();
 
+  DisplayListBuilder builder_multiple;
+  builder_multiple.drawTextBlob(text_blob, 0.0f, 0.0f);
+  builder_multiple.drawTextBlob(text_blob, 0.0f, 0.0f);
+  auto display_list_multiple = builder_multiple.Build();
+
   auto calculators = AccumulatorCalculators();
   for (auto calculator : calculators) {
     ASSERT_NE(calculator->Compute(display_list.get()), 0u);
+    ASSERT_GT(calculator->Compute(display_list_multiple.get()),
+              calculator->Compute(display_list.get()));
   }
 }
 
