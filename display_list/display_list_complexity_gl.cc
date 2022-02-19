@@ -25,19 +25,36 @@ DisplayListGLComplexityCalculator::GetInstance() {
   return instance_;
 }
 
-unsigned int
-DisplayListGLComplexityCalculator::GLHelper::SaveLayerComplexity() {
+unsigned int DisplayListGLComplexityCalculator::GLHelper::BatchedComplexity() {
   // Calculate the impact of saveLayer.
   unsigned int save_layer_complexity;
-  if (SaveLayerCount() == 0) {
+  if (save_layer_count_ == 0) {
     save_layer_complexity = 0;
   } else {
     // m = 1/5
     // c = 10
-    save_layer_complexity = (SaveLayerCount() + 50) * 40000;
+    save_layer_complexity = (save_layer_count_ + 50) * 40000;
   }
 
-  return save_layer_complexity;
+  unsigned int draw_text_blob_complexity;
+  if (draw_text_blob_count_ == 0) {
+    draw_text_blob_complexity = 0;
+  } else {
+    // m = 1/240
+    // c = 0.25
+    draw_text_blob_complexity = (draw_text_blob_count_ + 60) * 2500 / 3;
+  }
+
+  return save_layer_complexity + draw_text_blob_complexity;
+}
+
+void DisplayListGLComplexityCalculator::GLHelper::saveLayer(
+    const SkRect* bounds,
+    const SaveLayerOptions options) {
+  if (IsComplex()) {
+    return;
+  }
+  save_layer_count_++;
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawLine(const SkPoint& p0,
@@ -611,33 +628,13 @@ void DisplayListGLComplexityCalculator::GLHelper::drawTextBlob(
   if (IsComplex()) {
     return;
   }
-  // There are two classes here, hairline vs non-hairline.
-  // Hairline scales loglinearly with the number of glyphs.
-  // Non-hairline scales linearly.
 
-  // Unfortunately there is currently no way for us to figure out the glyph
-  // count from an SkTextBlob. We will need to figure out a better solution
-  // here, but for now just use a placeholder value of 100 glyphs.
-  unsigned int glyph_count = 100;
+  // DrawTextBlob has a high fixed cost, but if we call it multiple times
+  // per frame, that fixed cost is greatly reduced per subsequent call. This
+  // is likely because there is batching being done in SkCanvas.
 
-  // These values were worked out by creating a straight line graph (y=mx+c)
-  // approximately matching the measured data, normalising the data so that
-  // 0.0005ms resulted in a score of 100 then simplifying down the formula.
-  unsigned int complexity;
-  if (IsHairline() && Style() == SkPaint::Style::kStroke_Style) {
-    // If hairlines are on, we hit a degenerative case within Skia that causes
-    // our time to skyrocket.
-    //
-    // m = 1/65
-    // c = 1
-    complexity = (glyph_count + 65) * 40000 / 13;
-  } else {
-    // m = 1/3500
-    // c = 0.5
-    complexity = (glyph_count + 1750) * 40 / 7;
-  }
-
-  AccumulateComplexity(complexity);
+  // Increment draw_text_blob_count_ and calculate the cost at the end.
+  draw_text_blob_count_++;
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawShadow(
