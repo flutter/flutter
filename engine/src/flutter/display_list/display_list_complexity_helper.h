@@ -96,10 +96,7 @@ class ComplexityCalculatorHelper
       public virtual IgnoreTransformDispatchHelper {
  public:
   ComplexityCalculatorHelper(unsigned int ceiling)
-      : is_complex_(false),
-        ceiling_(ceiling),
-        save_layer_count_(0),
-        complexity_score_(0) {}
+      : is_complex_(false), ceiling_(ceiling), complexity_score_(0) {}
 
   virtual ~ComplexityCalculatorHelper() = default;
 
@@ -129,14 +126,6 @@ class ComplexityCalculatorHelper
 
   void setStrokeWidth(SkScalar width) override {
     current_paint_.setStrokeWidth(width);
-  }
-
-  void saveLayer(const SkRect* bounds,
-                 const SaveLayerOptions options) override {
-    if (IsComplex()) {
-      return;
-    }
-    save_layer_count_++;
   }
 
   void drawColor(SkColor color, SkBlendMode mode) override {
@@ -221,15 +210,16 @@ class ComplexityCalculatorHelper
       return Ceiling();
     }
 
-    // Calculate the impact of saveLayer.
-    unsigned int save_layer_complexity = SaveLayerComplexity();
+    // Calculate the impact of any draw ops where the complexity is dependent
+    // on the number of calls made.
+    unsigned int batched_complexity = BatchedComplexity();
 
     // Check for overflow
-    if (Ceiling() - complexity_score_ < save_layer_complexity) {
+    if (Ceiling() - complexity_score_ < batched_complexity) {
       return Ceiling();
     }
 
-    return complexity_score_ + save_layer_complexity;
+    return complexity_score_ + batched_complexity;
   }
 
  protected:
@@ -248,7 +238,6 @@ class ComplexityCalculatorHelper
   inline SkPaint::Style Style() { return current_paint_.getStyle(); }
   inline bool IsComplex() { return is_complex_; }
   inline unsigned int Ceiling() { return ceiling_; }
-  inline unsigned int SaveLayerCount() { return save_layer_count_; }
   inline unsigned int CurrentComplexityScore() { return complexity_score_; }
 
   unsigned int CalculatePathComplexity(const SkPath& path,
@@ -285,7 +274,10 @@ class ComplexityCalculatorHelper
                          bool render_with_attributes,
                          SkCanvas::SrcRectConstraint constraint) = 0;
 
-  virtual unsigned int SaveLayerComplexity() = 0;
+  // This calculates and returns the cost of draw calls which are batched and
+  // thus have a time cost proportional to the number of draw calls made, such
+  // as saveLayer and drawTextBlob.
+  virtual unsigned int BatchedComplexity() = 0;
 
  private:
   SkPaint current_paint_;
@@ -296,7 +288,6 @@ class ComplexityCalculatorHelper
   bool is_complex_;
   unsigned int ceiling_;
 
-  unsigned int save_layer_count_;
   unsigned int complexity_score_;
 };
 
