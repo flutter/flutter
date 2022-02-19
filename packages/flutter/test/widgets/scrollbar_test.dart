@@ -1734,7 +1734,7 @@ void main() {
     );
   });
 
-  testWidgets('shape and trackShape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
+  testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1743,10 +1743,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             shape: const BeveledRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            ),
-            trackShape: const BeveledRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              borderRadius: BorderRadius.all(Radius.circular(8.0))
             ),
             controller: scrollController,
             isAlwaysShown: true,
@@ -1760,16 +1757,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..path(
-          includes: const <Offset>[
-            Offset(797.0, 0.0),
-            Offset(797.0, 18.0),
-          ],
-          excludes: const <Offset>[
-            Offset(796.0, 0.0),
-            Offset(798.0, 0.0),
-          ],
-        )
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
         ..path(
           includes: const <Offset>[
             Offset(797.0, 0.0),
@@ -1809,7 +1797,7 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
   });
 
-  testWidgets('shape and trackShape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
+  testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1818,7 +1806,6 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             shape: const CircleBorder(side: BorderSide(width: 2.0)),
-            trackShape: const CircleBorder(side: BorderSide(width: 2.0)),
             thickness: 36.0,
             controller: scrollController,
             isAlwaysShown: true,
@@ -1833,7 +1820,15 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..circle(x: 782.0, y: 300.0, radius: 17.0, strokeWidth: 2.0)
+        ..path(
+          includes: const <Offset>[
+            Offset(782.0, 180.0),
+            Offset(782.0, 180.0 - 18.0),
+            Offset(782.0 + 18.0, 180),
+            Offset(782.0, 180.0 + 18.0),
+            Offset(782.0 - 18.0, 180),
+          ],
+        )
         ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0)
     );
   });
@@ -1863,7 +1858,7 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
   });
 
-  testWidgets('shape and trackShape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
+  testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1873,7 +1868,6 @@ void main() {
           child: RawScrollbar(
             thickness: 20,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8))),
-            trackShape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8))),
             controller: scrollController,
             isAlwaysShown: true,
             child: SingleChildScrollView(
@@ -1886,14 +1880,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..path(
-          includes: const <Offset>[
-            Offset(800.0, 0.0),
-          ],
-          excludes: const <Offset>[
-            Offset(780.0, 0.0),
-          ],
-        )
+        ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
         ..path(
           includes: const <Offset>[
             Offset(800.0, 0.0),
@@ -1937,8 +1924,7 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
   });
 
-  testWidgets('not passing any shape or radius or trackShape or trackRadius to RawScrollbar '
-      'will draw the usual rectangular thumb and track', (WidgetTester tester) async {
+  testWidgets('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -2254,8 +2240,6 @@ void main() {
       Color color = const Color(0xFF000000),
       Animation<double> fadeoutOpacityAnimation = kAlwaysCompleteAnimation,
       Color trackColor = const Color(0x00000000),
-      Radius? trackRadius,
-      OutlinedBorder? trackShape,
       Color trackBorderColor = const Color(0x00000000),
       TextDirection textDirection = TextDirection.ltr,
       double thickness = _kThickness,
@@ -2263,6 +2247,7 @@ void main() {
       double mainAxisMargin = 0.0,
       double crossAxisMargin = 0.0,
       Radius? radius,
+      Radius? trackRadius,
       OutlinedBorder? shape,
       double minLength = _kMinThumbExtent,
       double? minOverscrollLength,
@@ -2272,8 +2257,6 @@ void main() {
         color: color,
         fadeoutOpacityAnimation: fadeoutOpacityAnimation,
         trackColor: trackColor,
-        trackRadius: trackRadius,
-        trackShape: trackShape,
         trackBorderColor: trackBorderColor,
         textDirection: textDirection,
         thickness: thickness,
@@ -2281,6 +2264,7 @@ void main() {
         mainAxisMargin: mainAxisMargin,
         crossAxisMargin: crossAxisMargin,
         radius: radius,
+        trackRadius: trackRadius,
         shape: shape,
         minLength: minLength,
         minOverscrollLength: minOverscrollLength,
@@ -2301,7 +2285,6 @@ void main() {
     expect(painter.shouldRepaint(createPainter(radius: const Radius.circular(1.0))), true);
     expect(painter.shouldRepaint(createPainter(trackRadius: const Radius.circular(1.0))), true);
     expect(painter.shouldRepaint(createPainter(shape: const CircleBorder(side: BorderSide(width: 2.0)))), true);
-    expect(painter.shouldRepaint(createPainter(trackShape: const CircleBorder(side: BorderSide(width: 2.0)))), true);
     expect(painter.shouldRepaint(createPainter(minLength: _kMinThumbExtent + 1.0)), true);
     expect(painter.shouldRepaint(createPainter(minOverscrollLength: 1.0)), true);
     expect(painter.shouldRepaint(createPainter(scrollbarOrientation: ScrollbarOrientation.bottom)), true);
