@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 
@@ -256,6 +257,8 @@ _dartdevc("flutter_dartdevc_kernel_sdk") {
   outputs = [
     "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy/dart_sdk.js.map",
   ]
 
   args = [
@@ -300,6 +303,8 @@ _dartdevc("flutter_dartdevc_canvaskit_kernel_sdk") {
   outputs = [
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit/dart_sdk.js.map",
   ]
 
   args = [
@@ -346,6 +351,8 @@ _dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk") {
   outputs = [
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html/dart_sdk.js.map",
   ]
 
   args = [
@@ -392,6 +399,8 @@ _dartdevc("flutter_dartdevc_kernel_sdk_sound") {
   outputs = [
     "$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-sound/dart_sdk.js.map",
   ]
 
   args = [
@@ -437,6 +446,8 @@ _dartdevc("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
   outputs = [
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-sound/dart_sdk.js.map",
   ]
 
   args = [
@@ -483,6 +494,8 @@ _dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
   outputs = [
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html-sound/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html-sound/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html-sound/dart_sdk.js.map",
   ]
 
   args = [
@@ -550,4 +563,60 @@ _kernel_worker("flutter_dartdevc_kernel_sdk_outline_sound") {
     "--source",
     "dart:_engine",
   ]
+}
+
+# Archives Flutter Web SDK
+zip_bundle("flutter_web_sdk_archive") {
+  output = "flutter-web-sdk-${host_os_cpu_name}.zip"
+  deps = [
+    ":flutter_dartdevc_canvaskit_html_kernel_sdk",
+    ":flutter_dartdevc_canvaskit_html_kernel_sdk_sound",
+    ":flutter_dartdevc_canvaskit_kernel_sdk",
+    ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
+    ":flutter_dartdevc_kernel_sdk",
+    ":flutter_dartdevc_kernel_sdk_outline",
+    ":flutter_dartdevc_kernel_sdk_outline_sound",
+    ":flutter_dartdevc_kernel_sdk_sound",
+    ":web_engine_sources",
+    ":web_ui_library",
+    ":web_ui_sources",
+  ]
+  sources = get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk")
+  sources +=
+      get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk_sound")
+  sources += get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk")
+  sources += get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk_sound")
+  sources += get_target_outputs(":flutter_dartdevc_kernel_sdk")
+  sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline")
+  sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
+  sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_sound")
+  sources += get_target_outputs(":web_ui_library")
+  tmp_files = []
+  foreach(source, sources) {
+    tmp_files += [
+      {
+        source = source
+        destination = rebase_path(source, "$root_build_dir")
+      },
+    ]
+  }
+  foreach(source, web_ui_sources) {
+    rebased_path = rebase_path(source, "//flutter/lib/web_ui/lib")
+    tmp_files += [
+      {
+        source = source
+        destination = "flutter_web_sdk/lib/ui/$rebased_path"
+      },
+    ]
+  }
+  foreach(source, web_engine_sources) {
+    rebased_path = rebase_path(source, "//flutter/lib/web_ui/lib/src")
+    tmp_files += [
+      {
+        source = source
+        destination = "flutter_web_sdk/lib/_engine/$rebased_path"
+      },
+    ]
+  }
+  files = tmp_files
 }
