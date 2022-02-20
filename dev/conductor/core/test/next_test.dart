@@ -191,7 +191,7 @@ void main() {
 
       test('updates lastPhase if user responds yes', () async {
         const String remoteUrl = 'https://github.com/org/repo.git';
-        const String releaseChannel = 'dev';
+        const String releaseChannel = 'beta';
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
@@ -1175,7 +1175,7 @@ void _initializeCiYamlFile(
   File file, {
   List<String>? enabledBranches,
 }) {
-  enabledBranches ??= <String>['master', 'dev', 'beta', 'stable'];
+  enabledBranches ??= <String>['master', 'beta', 'stable'];
   file.createSync(recursive: true);
   final StringBuffer buffer = StringBuffer('enabled_branches:\n');
   for (final String branch in enabledBranches) {

@@ -138,7 +138,8 @@ void main() {
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+
+      const FakeCommand fakeCmd = FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -151,23 +152,15 @@ void main() {
           'assembleRelease',
         ],
         exitCode: 1,
-        stderr: '\nSome gradle message\n'
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=false',
-          '-Ptree-shake-icons=false',
-          'assembleRelease',
-        ],
-        exitCode: 1,
-        stderr: '\nSome gradle message\n'
-      ));
+        stderr: '\nSome gradle message\n',
+      );
+
+      processManager.addCommand(fakeCmd);
+
+      const int maxRetries = 2;
+      for (int i = 0; i < maxRetries; i++) {
+        processManager.addCommand(fakeCmd);
+      }
 
       fileSystem.directory('android')
         .childFile('build.gradle')
@@ -186,6 +179,7 @@ void main() {
       int testFnCalled = 0;
       await expectLater(() async {
        await builder.buildGradleApp(
+          maxRetries: maxRetries,
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
@@ -221,7 +215,10 @@ void main() {
         message: 'Gradle task assembleRelease failed with exit code 1'
       ));
 
-      expect(testFnCalled, equals(2));
+      expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
+      expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
+
+      expect(testFnCalled, equals(maxRetries + 1));
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
