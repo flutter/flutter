@@ -2450,9 +2450,16 @@ void main() {
   testWidgets('AppBar can show leading and endDrawer together', (WidgetTester tester) async {
     const Page<void> page1 = MaterialPage<void>(child: Scaffold());
     final Page<void> page2 = MaterialPage<void>(
-      child: Scaffold(
-        appBar: AppBar(),
-        endDrawer: const Drawer(),
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            appBar: AppBar(),
+            endDrawer: const Drawer(),
+            onEndDrawerChanged: (_) {
+              setState.call(() {});
+            },
+          );
+        },
       ),
     );
     await tester.pumpWidget(
@@ -2464,9 +2471,17 @@ void main() {
       ),
     );
 
-    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
-    expect(find.byType(BackButton), findsOneWidget);
-    expect(endDrawerFinder, findsOneWidget);
+    Finder findBackButton() => find.byType(BackButton);
+    Finder findEndDrawer() => find.byTooltip('Open navigation menu');
+
+    expect(findBackButton(), findsOneWidget);
+    expect(findEndDrawer(), findsOneWidget);
+
+    await tester.tap(findEndDrawer());
+    await tester.pump();
+
+    expect(findBackButton(), findsOneWidget);
+    expect(findEndDrawer(), findsOneWidget);
   });
 
   testWidgets("AppBar with endDrawer doesn't have leading if there's no route below scaffold and drawer is open", (WidgetTester tester) async {
