@@ -2447,7 +2447,29 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 
-  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+  testWidgets('AppBar can show leading and endDrawer together', (WidgetTester tester) async {
+    const Page<void> page1 = MaterialPage<void>(child: Scaffold());
+    final Page<void> page2 = MaterialPage<void>(
+      child: Scaffold(
+        appBar: AppBar(),
+        endDrawer: const Drawer(),
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: <Page<void>>[ page1, page2 ],
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+
+    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(endDrawerFinder, findsOneWidget);
+  });
+
+  testWidgets("AppBar with endDrawer doesn't have leading if there's no route below scaffold and drawer is open", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(),
