@@ -1103,14 +1103,10 @@ class _InteractiveViewerBuilt extends StatelessWidget {
       );
     }
 
-    if (clipBehavior != Clip.none) {
-      child = ClipRect(
-        clipBehavior: clipBehavior,
-        child: child,
-      );
-    }
-
-    return child;
+    return ClipRect(
+      clipBehavior: clipBehavior,
+      child: child,
+    );
   }
 }
 
