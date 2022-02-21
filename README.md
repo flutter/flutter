@@ -3,6 +3,10 @@
 [![Build Status - Cirrus][]][Build status]
 [![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
+<a href="https://www.youtube.com/c/flutterdev?sub_confirmation=1">
+  <img alt="Flutter" src="https://img.shields.io/youtube/channel/subscribers/UCwXdFgeE9KYzlDdR7TG9cMw?style=social" />
+</a>
+
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
