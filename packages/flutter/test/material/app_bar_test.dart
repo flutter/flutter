@@ -2455,7 +2455,7 @@ void main() {
           return Scaffold(
             appBar: AppBar(),
             endDrawer: const Drawer(),
-            onEndDrawerChanged: (_) {
+            onEndDrawerChanged: (bool isOpened) {
               setState.call(() {});
             },
           );
