@@ -37,11 +37,11 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     } else if (startEvent != null && eventName == 'Frame') {
       final String phase = event['ph'] as String;
       final int timestamp = event['ts'] as int;
-      if (phase == 'B') {
+      if (phase == 'B' || phase == 'b') {
         assert(frameStart == null);
         frameStart = timestamp;
       } else {
-        assert(phase == 'E');
+        assert(phase == 'E' || phase == 'e');
         final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
         durations[routeName]!.add(timestamp - frameStart!);
@@ -130,7 +130,6 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
-      timeout: const Duration(seconds: 30),
     );
 
     for (int i = 0; i < 2; i += 1) {
@@ -181,7 +180,10 @@ void main([List<String> args = const <String>[]]) {
       // Assert that we can use semantics related finders in profile mode.
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics);
+    },
+        skip: !withSemantics, // [intended] test only makes sense when semantics are turned on.
+        timeout: Timeout.none,
+    );
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
@@ -218,6 +220,6 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(unprofiledDemos.toList(), driver);
       }
 
-    }, timeout: const Timeout(Duration(minutes: 5)));
+    }, timeout: Timeout.none);
   });
 }

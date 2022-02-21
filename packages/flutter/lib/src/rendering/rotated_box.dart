@@ -104,8 +104,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     return result.addWithPaintTransform(
       transform: _paintTransform,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
-        return child!.hitTest(result, position: position!);
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return child!.hitTest(result, position: position);
       },
     );
   }
@@ -117,19 +117,25 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _transformLayer = context.pushTransform(
+      _transformLayer.layer = context.pushTransform(
         needsCompositing,
         offset,
         _paintTransform!,
         _paintChild,
-        oldLayer: _transformLayer,
+        oldLayer: _transformLayer.layer,
       );
     } else {
-      _transformLayer = null;
+      _transformLayer.layer = null;
     }
   }
 
-  TransformLayer? _transformLayer;
+  final LayerHandle<TransformLayer> _transformLayer = LayerHandle<TransformLayer>();
+
+  @override
+  void dispose() {
+    _transformLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

@@ -26,6 +26,13 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// [EdgeInsets.zero], should be used to prevent clipping larger [child]
 /// widgets.
 ///
+/// {@tool dartpad}
+/// This sample shows produces an enabled and disabled [CupertinoButton] and
+/// [CupertinoButton.filled].
+///
+/// ** See code in examples/api/lib/cupertino/button/cupertino_button.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>
@@ -148,8 +155,8 @@ class CupertinoButton extends StatefulWidget {
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
-  static const Duration kFadeOutDuration = Duration(milliseconds: 10);
-  static const Duration kFadeInDuration = Duration(milliseconds: 100);
+  static const Duration kFadeOutDuration = Duration(milliseconds: 120);
+  static const Duration kFadeInDuration = Duration(milliseconds: 180);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0);
 
   late AnimationController _animationController;
@@ -213,8 +220,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       return;
     final bool wasHeldDown = _buttonHeldDown;
     final TickerFuture ticker = _buttonHeldDown
-        ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
-        : _animationController.animateTo(0.0, duration: kFadeInDuration);
+        ? _animationController.animateTo(1.0, duration: kFadeOutDuration, curve: Curves.easeInOutCubicEmphasized)
+        : _animationController.animateTo(0.0, duration: kFadeInDuration, curve: Curves.easeOutCubic);
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();

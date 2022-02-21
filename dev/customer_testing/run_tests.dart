@@ -41,22 +41,18 @@ Future<bool> run(List<String> arguments) async {
     )
     ..addFlag(
       'skip-on-fetch-failure',
-      defaultsTo: false,
       help: 'Whether to skip tests that we fail to download.',
     )
     ..addFlag(
       'skip-template',
-      defaultsTo: false,
       help: 'Whether to skip tests named "template.test".',
     )
     ..addFlag(
       'verbose',
-      defaultsTo: false,
       help: 'Describe what is happening in detail.',
     )
     ..addFlag(
       'help',
-      defaultsTo: false,
       negatable: false,
       help: 'Print this help message.',
     );

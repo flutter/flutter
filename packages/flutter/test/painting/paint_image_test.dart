@@ -5,7 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestCanvas implements Canvas {
@@ -52,6 +52,7 @@ void main() {
 
   test('debugInvertOversizedImages', () async {
     debugInvertOversizedImages = true;
+    expect(PaintingBinding.instance.window.devicePixelRatio != 1.0, true);
     final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
@@ -60,7 +61,7 @@ void main() {
     };
 
     final TestCanvas canvas = TestCanvas();
-    const Rect rect = Rect.fromLTWH(50.0, 50.0, 200.0, 100.0);
+    const Rect rect = Rect.fromLTWH(50.0, 50.0, 100.0, 50.0);
 
     paintImage(
       canvas: canvas,
@@ -88,7 +89,7 @@ void main() {
     );
     expect(commands[1].memberName, #translate);
     expect(commands[1].positionalArguments[0], 0.0);
-    expect(commands[1].positionalArguments[1], 100.0);
+    expect(commands[1].positionalArguments[1], 75.0);
 
     expect(commands[2].memberName, #scale);
     expect(commands[2].positionalArguments[0], 1.0);
@@ -97,12 +98,12 @@ void main() {
 
     expect(commands[3].memberName, #translate);
     expect(commands[3].positionalArguments[0], 0.0);
-    expect(commands[3].positionalArguments[1], -100.0);
+    expect(commands[3].positionalArguments[1], -75.0);
 
     expect(
       messages.single,
-      'Image TestImage has a display size of 200×100 but a decode size of 300×300, which uses an additional 364KB.\n\n'
-      'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 200, a cacheHeight parameter of 100, or using a ResizeImage.',
+      'Image TestImage has a display size of 300×150 but a decode size of 300×300, which uses an additional 234KB.\n\n'
+      'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 300, a cacheHeight parameter of 150, or using a ResizeImage.',
     );
 
     debugInvertOversizedImages = false;
@@ -179,7 +180,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
     expect(imageSizeInfo.imageSize, const Size(300, 300));
-    expect(imageSizeInfo.displaySize, const Size(200, 100));
+    expect(imageSizeInfo.displaySize, const Size(200, 100) * PaintingBinding.instance.window.devicePixelRatio);
 
     // Make sure that we don't report an identical image size info if we
     // redraw in the next frame.
@@ -218,7 +219,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
     expect(imageSizeInfo.imageSize, const Size(300, 300));
-    expect(imageSizeInfo.displaySize, const Size(200, 100));
+    expect(imageSizeInfo.displaySize, const Size(200, 100) * PaintingBinding.instance.window.devicePixelRatio);
 
     // Make sure that we don't report an identical image size info if we
     // redraw in the next frame.
@@ -236,7 +237,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
     expect(imageSizeInfo.imageSize, const Size(300, 300));
-    expect(imageSizeInfo.displaySize, const Size(200, 150));
+    expect(imageSizeInfo.displaySize, const Size(200, 150) * PaintingBinding.instance.window.devicePixelRatio);
 
     debugOnPaintImage = null;
   });
@@ -260,7 +261,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, '<Unknown Image(300×200)>');
     expect(imageSizeInfo.imageSize, const Size(300, 200));
-    expect(imageSizeInfo.displaySize, const Size(200, 100));
+    expect(imageSizeInfo.displaySize, const Size(200, 100) * PaintingBinding.instance.window.devicePixelRatio);
 
     debugOnPaintImage = null;
   });

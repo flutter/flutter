@@ -8,6 +8,10 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
+  runMainApp();
+}
+
+void runMainApp() {
   runApp(const Center(child: Flavor()));
 }
 

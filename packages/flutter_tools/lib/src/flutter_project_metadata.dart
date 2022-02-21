@@ -13,6 +13,8 @@ enum FlutterProjectType {
   /// It is different than the "module" template in that it exposes and doesn't
   /// manage the platform code.
   app,
+  /// A List/Detail app template that follows community best practices.
+  skeleton,
   /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
   module,
@@ -21,9 +23,14 @@ enum FlutterProjectType {
   package,
   /// This is a native plugin project.
   plugin,
+  /// This is an FFI native plugin project.
+  ffiPlugin,
 }
 
 String flutterProjectTypeToString(FlutterProjectType type) {
+  if (type == FlutterProjectType.ffiPlugin) {
+    return 'plugin_ffi';
+  }
   return getEnumName(type);
 }
 

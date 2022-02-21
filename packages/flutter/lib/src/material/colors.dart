@@ -71,9 +71,6 @@ class MaterialAccentColor extends ColorSwatch<int> {
   const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
 
   /// The lightest shade.
-  Color get shade50 => this[50]!;
-
-  /// The second lightest shade.
   Color get shade100 => this[100]!;
 
   /// The default shade.
@@ -307,8 +304,9 @@ class Colors {
   ///  * [Typography.white], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white70, white60, white54, white38, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white70], [white60], [white54], [white38], [white30], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   ///  * [black], a solid black color.
   ///  * [transparent], a fully-transparent color.
   static const Color white = Color(0xFFFFFFFF);
@@ -324,8 +322,9 @@ class Colors {
   ///  * [Typography.white], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white54, white38, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white38], [white30], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white70 = Color(0xB3FFFFFF);
 
   /// White with 60% opacity.
@@ -340,8 +339,8 @@ class Colors {
   ///  * [ExpandIcon], which uses this color for dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white54, white30, white38, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white54], [white30], [white38], [white12], [white10], which
+  ///    are variants on this color but with different opacities.
   static const Color white60 = Color(0x99FFFFFF);
 
   /// White with 54% opacity.
@@ -352,8 +351,8 @@ class Colors {
   ///
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white38, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white38], [white30], [white12], [white10], which
+  ///    are variants on this color but with different opacities.
   static const Color white54 = Color(0x8AFFFFFF);
 
   /// White with 38% opacity.
@@ -367,8 +366,9 @@ class Colors {
   ///  * [ThemeData.disabledColor], which uses this color by default in dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white54, white70, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white70], [white30], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white38 = Color(0x62FFFFFF);
 
   /// White with 30% opacity.
@@ -379,8 +379,9 @@ class Colors {
   ///
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white54, white70, white38, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white70], [white38], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white30 = Color(0x4DFFFFFF);
 
   /// White with 24% opacity.
@@ -391,7 +392,8 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white60, white54, white70, white38, white30, white10], which are variants on this color
+  ///  * [white], [white60], [white54], [white70], [white38], [white30],
+  ///    [white10], which are variants on this color
   ///    but with different opacities.
   static const Color white24 = Color(0x3DFFFFFF);
 
@@ -403,8 +405,9 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white60, white54, white70, white38, white30, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white70], [white38], [white30],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white12 = Color(0x1FFFFFFF);
 
   /// White with 10% opacity.
@@ -413,7 +416,8 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white60, white54, white70, white38, white30, white12], which are variants on this color
+  ///  * [white], [white60], [white54], [white70], [white38], [white30],
+  ///    [white12], which are variants on this color
   ///    but with different opacities.
   ///  * [transparent], a fully-transparent color, not far from this one.
   static const Color white10 = Color(0x1AFFFFFF);

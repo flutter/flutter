@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
@@ -22,7 +24,7 @@ import 'shortcuts.dart';
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
 
 /// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
@@ -83,90 +85,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 /// This is a core framework widget with very basic UI.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create a very basic autocomplete widget using the
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/widgets.dart';
-///
-/// void main() => runApp(const AutocompleteExampleApp());
-///
-/// class AutocompleteExampleApp extends StatelessWidget {
-///   const AutocompleteExampleApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('RawAutocomplete Basic'),
-///         ),
-///         body: const Center(
-///           child: AutocompleteBasicExample(),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class AutocompleteBasicExample extends StatelessWidget {
-///   const AutocompleteBasicExample({Key? key}) : super(key: key);
-///
-///   static const List<String> _options = <String>[
-///     'aardvark',
-///     'bobcat',
-///     'chameleon',
-///   ];
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return RawAutocomplete<String>(
-///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         return _options.where((String option) {
-///           return option.contains(textEditingValue.text.toLowerCase());
-///         });
-///       },
-///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-///         return TextFormField(
-///           controller: textEditingController,
-///           focusNode: focusNode,
-///           onFieldSubmitted: (String value) {
-///             onFieldSubmitted();
-///           },
-///         );
-///       },
-///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-///         return Align(
-///           alignment: Alignment.topLeft,
-///           child: Material(
-///             elevation: 4.0,
-///             child: SizedBox(
-///               height: 200.0,
-///               child: ListView.builder(
-///                 padding: const EdgeInsets.all(8.0),
-///                 itemCount: options.length,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   final String option = options.elementAt(index);
-///                   return GestureDetector(
-///                     onTap: () {
-///                       onSelected(option);
-///                     },
-///                     child: ListTile(
-///                       title: Text(option),
-///                     ),
-///                   );
-///                 },
-///               ),
-///             ),
-///           ),
-///         );
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.0.dart **
 /// {@end-tool}
 ///
 /// The type parameter T represents the type of the options. Most commonly this
@@ -175,313 +98,17 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// Options will be compared using `==`, so it may be beneficial to override
 /// [Object.==] and [Object.hashCode] for custom types.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/widgets.dart';
-///
-/// void main() => runApp(const AutocompleteExampleApp());
-///
-/// class AutocompleteExampleApp extends StatelessWidget {
-///   const AutocompleteExampleApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('RawAutocomplete Custom Type'),
-///         ),
-///         body: const Center(
-///           child: AutocompleteCustomTypeExample(),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// // An example of a type that someone might want to autocomplete a list of.
-/// @immutable
-/// class User {
-///   const User({
-///     required this.email,
-///     required this.name,
-///   });
-///
-///   final String email;
-///   final String name;
-///
-///   @override
-///   String toString() {
-///     return '$name, $email';
-///   }
-///
-///   @override
-///   bool operator ==(Object other) {
-///     if (other.runtimeType != runtimeType) {
-///       return false;
-///     }
-///     return other is User
-///         && other.name == name
-///         && other.email == email;
-///   }
-///
-///   @override
-///   int get hashCode => hashValues(email, name);
-/// }
-///
-/// class AutocompleteCustomTypeExample extends StatelessWidget {
-///   const AutocompleteCustomTypeExample({Key? key}) : super(key: key);
-///
-///   static const List<User> _userOptions = <User>[
-///     User(name: 'Alice', email: 'alice@example.com'),
-///     User(name: 'Bob', email: 'bob@example.com'),
-///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
-///   ];
-///
-///   static String _displayStringForOption(User option) => option.name;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return RawAutocomplete<User>(
-///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         return _userOptions.where((User option) {
-///           // Search based on User.toString, which includes both name and
-///           // email, even though the display string is just the name.
-///           return option.toString().contains(textEditingValue.text.toLowerCase());
-///         });
-///       },
-///       displayStringForOption: _displayStringForOption,
-///       fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-///         return TextFormField(
-///           controller: textEditingController,
-///           focusNode: focusNode,
-///           onFieldSubmitted: (String value) {
-///             onFieldSubmitted();
-///           },
-///         );
-///       },
-///       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
-///         return Align(
-///           alignment: Alignment.topLeft,
-///           child: Material(
-///             elevation: 4.0,
-///             child: SizedBox(
-///               height: 200.0,
-///               child: ListView.builder(
-///                 padding: const EdgeInsets.all(8.0),
-///                 itemCount: options.length,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   final User option = options.elementAt(index);
-///                   return GestureDetector(
-///                     onTap: () {
-///                       onSelected(option);
-///                     },
-///                     child: ListTile(
-///                       title: Text(_displayStringForOption(option)),
-///                     ),
-///                   );
-///                 },
-///               ),
-///             ),
-///           ),
-///         );
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows the use of RawAutocomplete in a form.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/widgets.dart';
-///
-/// void main() => runApp(const AutocompleteExampleApp());
-///
-/// class AutocompleteExampleApp extends StatelessWidget {
-///   const AutocompleteExampleApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('RawAutocomplete Form'),
-///         ),
-///         body: const Center(
-///           child: AutocompleteFormExample(),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class AutocompleteFormExample extends StatefulWidget {
-///   const AutocompleteFormExample({Key? key}) : super(key: key);
-///
-///   @override
-///   AutocompleteFormExampleState createState() => AutocompleteFormExampleState();
-/// }
-///
-/// class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
-///   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-///   final TextEditingController _textEditingController = TextEditingController();
-///   String? _dropdownValue;
-///   String? _autocompleteSelection;
-///
-///   static const List<String> _options = <String>[
-///     'aardvark',
-///     'bobcat',
-///     'chameleon',
-///   ];
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Form(
-///       key: _formKey,
-///       child: Column(
-///         children: <Widget>[
-///           DropdownButtonFormField<String>(
-///             value: _dropdownValue,
-///             icon: const Icon(Icons.arrow_downward),
-///             hint: const Text('This is a regular DropdownButtonFormField'),
-///             iconSize: 24,
-///             elevation: 16,
-///             style: const TextStyle(color: Colors.deepPurple),
-///             onChanged: (String? newValue) {
-///               setState(() {
-///                 _dropdownValue = newValue;
-///               });
-///             },
-///             items: <String>['One', 'Two', 'Free', 'Four']
-///                 .map<DropdownMenuItem<String>>((String value) {
-///               return DropdownMenuItem<String>(
-///                 value: value,
-///                 child: Text(value),
-///               );
-///             }).toList(),
-///             validator: (String? value) {
-///               if (value == null) {
-///                 return 'Must make a selection.';
-///               }
-///               return null;
-///             },
-///           ),
-///           TextFormField(
-///             controller: _textEditingController,
-///             decoration: const InputDecoration(
-///               hintText: 'This is a regular TextFormField',
-///             ),
-///             validator: (String? value) {
-///               if (value == null || value.isEmpty) {
-///                 return "Can't be empty.";
-///               }
-///               return null;
-///             },
-///           ),
-///           RawAutocomplete<String>(
-///             optionsBuilder: (TextEditingValue textEditingValue) {
-///               return _options.where((String option) {
-///                 return option.contains(textEditingValue.text.toLowerCase());
-///               });
-///             },
-///             onSelected: (String selection) {
-///               setState(() {
-///                 _autocompleteSelection = selection;
-///               });
-///             },
-///             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-///               return TextFormField(
-///                 controller: textEditingController,
-///                 decoration: const InputDecoration(
-///                   hintText: 'This is a RawAutocomplete!',
-///                 ),
-///                 focusNode: focusNode,
-///                 onFieldSubmitted: (String value) {
-///                   onFieldSubmitted();
-///                 },
-///                 validator: (String? value) {
-///                   if (!_options.contains(value)) {
-///                     return 'Nothing selected.';
-///                   }
-///                   return null;
-///                 },
-///               );
-///             },
-///             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-///               return Align(
-///                 alignment: Alignment.topLeft,
-///                 child: Material(
-///                   elevation: 4.0,
-///                   child: SizedBox(
-///                     height: 200.0,
-///                     child: ListView.builder(
-///                       padding: const EdgeInsets.all(8.0),
-///                       itemCount: options.length,
-///                       itemBuilder: (BuildContext context, int index) {
-///                         final String option = options.elementAt(index);
-///                         return GestureDetector(
-///                           onTap: () {
-///                             onSelected(option);
-///                           },
-///                           child: ListTile(
-///                             title: Text(option),
-///                           ),
-///                         );
-///                       },
-///                     ),
-///                   ),
-///                 ),
-///               );
-///             },
-///           ),
-///           ElevatedButton(
-///             onPressed: () {
-///               FocusScope.of(context).requestFocus(new FocusNode());
-///               if (!_formKey.currentState!.validate()) {
-///                 return;
-///               }
-///               showDialog<void>(
-///                 context: context,
-///                 builder: (BuildContext context) {
-///                   return AlertDialog(
-///                     title: const Text('Successfully submitted'),
-///                     content: SingleChildScrollView(
-///                       child: ListBody(
-///                         children: <Widget>[
-///                           Text('DropdownButtonFormField: "$_dropdownValue"'),
-///                           Text('TextFormField: "${_textEditingController.text}"'),
-///                           Text('RawAutocomplete: "$_autocompleteSelection"'),
-///                         ],
-///                       ),
-///                     ),
-///                     actions: <Widget>[
-///                       TextButton(
-///                         child: const Text('Ok'),
-///                         onPressed: () {
-///                           Navigator.of(context).pop();
-///                         },
-///                       ),
-///                     ],
-///                   );
-///                 },
-///               );
-///             },
-///             child: const Text('Submit'),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -540,93 +167,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// FocusNode and TextEditingController can be passed both to that text field
   /// and to RawAutocomplete.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// This examples shows how to create an autocomplete widget with the text
   /// field in the AppBar and the results in the main body of the app.
   ///
-  /// ```dart main
-  /// import 'package:flutter/material.dart';
-  /// import 'package:flutter/widgets.dart';
-  ///
-  /// void main() => runApp(const AutocompleteExampleApp());
-  ///
-  /// class AutocompleteExampleApp extends StatelessWidget {
-  ///   const AutocompleteExampleApp({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return const MaterialApp(
-  ///       home: RawAutocompleteSplit(),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// const List<String> _options = <String>[
-  ///   'aardvark',
-  ///   'bobcat',
-  ///   'chameleon',
-  /// ];
-  ///
-  /// class RawAutocompleteSplit extends StatefulWidget {
-  ///   const RawAutocompleteSplit({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   RawAutocompleteSplitState createState() => RawAutocompleteSplitState();
-  /// }
-  ///
-  /// class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
-  ///   final TextEditingController _textEditingController = TextEditingController();
-  ///   final FocusNode _focusNode = FocusNode();
-  ///   final GlobalKey _autocompleteKey = GlobalKey();
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Scaffold(
-  ///       appBar: AppBar(
-  ///         // This is where the real field is being built.
-  ///         title: TextFormField(
-  ///           controller: _textEditingController,
-  ///           focusNode: _focusNode,
-  ///           decoration: const InputDecoration(
-  ///             hintText: 'Split RawAutocomplete App',
-  ///           ),
-  ///           onFieldSubmitted: (String value) {
-  ///             RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
-  ///           },
-  ///         ),
-  ///       ),
-  ///       body: Align(
-  ///         alignment: Alignment.topLeft,
-  ///         child: RawAutocomplete<String>(
-  ///           key: _autocompleteKey,
-  ///           focusNode: _focusNode,
-  ///           textEditingController: _textEditingController,
-  ///           optionsBuilder: (TextEditingValue textEditingValue) {
-  ///             return _options.where((String option) {
-  ///               return option.contains(textEditingValue.text.toLowerCase());
-  ///             }).toList();
-  ///           },
-  ///           optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-  ///             return Material(
-  ///               elevation: 4.0,
-  ///               child: ListView(
-  ///                 children: options.map((String option) => GestureDetector(
-  ///                   onTap: () {
-  ///                     onSelected(option);
-  ///                   },
-  ///                   child: ListTile(
-  ///                     title: Text(option),
-  ///                   ),
-  ///                 )).toList(),
-  ///               ),
-  ///             );
-  ///           },
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart **
   /// {@end-tool}
   /// {@endtemplate}
   ///
@@ -732,8 +277,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   late final Map<Type, Action<Intent>> _actionMap;
   late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
   late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
+  late final _AutocompleteCallbackAction<DismissIntent> _hideOptionsAction;
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
+  bool _userHidOptions = false;
+  String _lastFieldText = '';
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
@@ -746,31 +294,41 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+    return !_userHidOptions && _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
   }
 
   // Called when _textEditingController changes.
-  void _onChangedField() {
-    final Iterable<T> options = widget.optionsBuilder(
-      _textEditingController.value,
+  Future<void> _onChangedField() async {
+    final TextEditingValue value = _textEditingController.value;
+    final Iterable<T> options = await widget.optionsBuilder(
+      value,
     );
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
     if (_selection != null
-        && _textEditingController.text != widget.displayStringForOption(_selection!)) {
+        && value.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
+    }
+
+    // Make sure the options are no longer hidden if the content of the field
+    // changes (ignore selection changes).
+    if (value.text != _lastFieldText) {
+      _userHidOptions = false;
+      _lastFieldText = value.text;
     }
     _updateOverlay();
   }
 
   // Called when the field's FocusNode changes.
   void _onChangedFocus() {
+    // Options should no longer be hidden when the field is re-focused.
+    _userHidOptions = !_focusNode.hasFocus;
     _updateOverlay();
   }
 
   // Called from fieldViewBuilder when the user submits the field.
   void _onFieldSubmitted() {
-    if (_options.isEmpty) {
+    if (_options.isEmpty || _userHidOptions) {
       return;
     }
     _select(_options.elementAt(_highlightedOptionIndex.value));
@@ -795,11 +353,28 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
+    if (_userHidOptions) {
+      _userHidOptions = false;
+      _updateOverlay();
+      return;
+    }
     _updateHighlight(_highlightedOptionIndex.value - 1);
   }
 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
+    if (_userHidOptions) {
+      _userHidOptions = false;
+      _updateOverlay();
+      return;
+    }
     _updateHighlight(_highlightedOptionIndex.value + 1);
+  }
+
+  void _hideOptions(DismissIntent intent) {
+    if (!_userHidOptions) {
+      _userHidOptions = true;
+      _updateOverlay();
+    }
   }
 
   void _setActionsEnabled(bool enabled) {
@@ -809,11 +384,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     // can be used to navigate them.
     _previousOptionAction.enabled = enabled;
     _nextOptionAction.enabled = enabled;
+    _hideOptionsAction.enabled = enabled;
   }
 
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
-    _setActionsEnabled(_shouldShowOptions);
+    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _options.isNotEmpty);
     if (_shouldShowOptions) {
       _floatingOptions?.remove();
       _floatingOptions = OverlayEntry(
@@ -889,11 +465,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _focusNode.addListener(_onChangedFocus);
     _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
     _nextOptionAction = _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption);
+    _hideOptionsAction = _AutocompleteCallbackAction<DismissIntent>(onInvoke: _hideOptions);
     _actionMap = <Type, Action<Intent>> {
       AutocompletePreviousOptionIntent: _previousOptionAction,
       AutocompleteNextOptionIntent: _nextOptionAction,
+      DismissIntent: _hideOptionsAction,
     };
-    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
   }
@@ -906,7 +484,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       widget.textEditingController,
     );
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
-    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
   }
@@ -967,16 +545,12 @@ class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
 }
 
 /// An [Intent] to highlight the previous option in the autocomplete list.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class AutocompletePreviousOptionIntent extends Intent {
   /// Creates an instance of AutocompletePreviousOptionIntent.
   const AutocompletePreviousOptionIntent();
 }
 
 /// An [Intent] to highlight the next option in the autocomplete list.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class AutocompleteNextOptionIntent extends Intent {
   /// Creates an instance of AutocompleteNextOptionIntent.
   const AutocompleteNextOptionIntent();

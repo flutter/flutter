@@ -70,7 +70,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 }
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
-class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget  {
+class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget {
   const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
 
   @override
@@ -96,7 +96,7 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 
 // A hit test entry that can be assigned with a [TestAnnotationTarget] and an
 // optional transform matrix.
-class TestAnnotationEntry extends HitTestEntry {
+class TestAnnotationEntry extends HitTestEntry<TestAnnotationTarget> {
   TestAnnotationEntry(TestAnnotationTarget target, [Matrix4? transform])
     : transform = transform ?? Matrix4.identity(), super(target);
 

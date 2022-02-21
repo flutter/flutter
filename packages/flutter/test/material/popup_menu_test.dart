@@ -438,7 +438,6 @@ void main() {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(
-                      enabled: true,
                       value: 1,
                       child: Text('Tap me please!', key: childKey),
                     ),
@@ -557,9 +556,9 @@ void main() {
     testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
       expect(() {
         PopupMenuButton<int>(
-            child: const Text('heyo'),
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
+            child: const Text('heyo'),
         );
       }, throwsAssertionError);
     });
@@ -1700,8 +1699,8 @@ void main() {
     expect(() {
       PopupMenuButton<int>(
         itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
-        child: Container(),
         icon: const Icon(Icons.error),
+        child: Container(),
       );
     }, throwsAssertionError);
   });
@@ -1984,7 +1983,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -2007,7 +2006,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -2031,7 +2030,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
@@ -2043,7 +2042,7 @@ void main() {
 
     const double statusBarHeight = 24.0;
     final PopupMenuItem<int> firstItem = choices[0];
-    int _selectedValue = choices[0].value!;
+    int selectedValue = choices[0].value!;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2062,10 +2061,10 @@ void main() {
                   PopupMenuButton<int>(
                     onSelected: (int result) {
                       setState(() {
-                        _selectedValue = result;
+                        selectedValue = result;
                       });
                     },
-                    initialValue: _selectedValue,
+                    initialValue: selectedValue,
                     itemBuilder: (BuildContext context) {
                       return choices;
                     },
@@ -2479,6 +2478,96 @@ void main() {
     // The menu should be positioned directly next to the top of the button.
     // The 8.0 pixels is [_kMenuScreenPadding].
     expect(popupMenu, const Offset(8.0, 50.0));
+  });
+
+  testWidgets('PopupMenuButton custom splash radius', (WidgetTester tester) async {
+    Future<void> buildFrameWithoutChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> buildFrameWithChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                child: const Text('An item'),
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuDivider()
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await buildFrameWithoutChild();
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        Material.defaultSplashRadius);
+    await buildFrameWithChild();
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius, null);
+
+
+    const double testSplashRadius = 50;
+
+    await buildFrameWithoutChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        testSplashRadius);
+    await buildFrameWithChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius,
+        testSplashRadius);
+  });
+
+  testWidgets('Can override menu size constraints', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              constraints: const BoxConstraints(
+                minWidth: 500,
+              ),
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
   });
 }
 

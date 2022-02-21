@@ -148,7 +148,7 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(12, 3, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
@@ -162,21 +162,21 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, 0);
+          xcodeProjectInterpreter.version = Version(12, 5, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 2);
+          xcodeProjectInterpreter.version = Version(12, 3, 1);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is false when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(11, 0, 0);
+          xcodeProjectInterpreter.version = Version(12, null, null);
 
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
@@ -189,28 +189,28 @@ void main() {
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(13, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 0);
+          xcodeProjectInterpreter.version = Version(14, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, 0);
+          xcodeProjectInterpreter.version = Version(13, 3, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 2);
+          xcodeProjectInterpreter.version = Version(13, 0, 2);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
@@ -232,7 +232,7 @@ void main() {
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(12, 3, null);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -326,7 +326,7 @@ void main() {
           processManager: fakeProcessManager,
           logger: logger,
           xcode: xcode,
-          platform: null,
+          platform: FakePlatform(operatingSystem: 'macos'),
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
@@ -354,7 +354,7 @@ void main() {
           processManager: fakeProcessManager,
           logger: logger,
           xcode: xcode,
-          platform: null,
+          platform: FakePlatform(operatingSystem: 'macos'),
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
@@ -513,15 +513,15 @@ void main() {
           expect(devices, hasLength(3));
           expect(devices[0].id, '00008027-00192736010F802E');
           expect(devices[0].name, 'An iPhone (Space Gray)');
-          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3');
+          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
           expect(devices[0].cpuArchitecture, DarwinArch.arm64);
           expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
           expect(devices[1].name, 'iPad 1');
-          expect(await devices[1].sdkNameAndVersion, 'iOS 10.1');
+          expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[1].cpuArchitecture, DarwinArch.armv7);
           expect(devices[2].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
           expect(devices[2].name, 'iPad 2');
-          expect(await devices[2].sdkNameAndVersion, 'iOS 10.1');
+          expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
@@ -626,6 +626,72 @@ void main() {
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
           Artifacts: () => Artifacts.test(),
+        });
+
+        testUsingContext('Sdk Version is parsed correctly',()  async {
+          const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "00008027-00192736010F802E",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "An iPhone (Space Gray)"
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "10.1",
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPad11,4",
+    "identifier" : "234234234234234234345445687594e089dede3c44",
+    "architecture" : "arm64",
+    "modelName" : "iPad Air 3rd Gen",
+    "name" : "A networked iPad"
+  },
+  {
+    "simulator" : false,
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPad11,4",
+    "identifier" : "f577a7903cc54959be2e34bc4f7f80b7009efcf4",
+    "architecture" : "BOGUS",
+    "modelName" : "iPad Air 3rd Gen",
+    "name" : "iPad 2"
+  }
+]
+''';
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: devicesOutput,
+          ));
+
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(await devices[0].sdkNameAndVersion,'iOS 13.3 17C54');
+          expect(await devices[1].sdkNameAndVersion,'iOS 10.1');
+          expect(await devices[2].sdkNameAndVersion,'iOS unknown version');
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
+        });
+
+        testUsingContext('handles bad output',()  async {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: 'Something bad happened, not JSON',
+          ));
+
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(devices, isEmpty);
+          expect(logger.errorText, contains('xcdevice returned non-JSON response'));
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
         });
       });
 

@@ -24,6 +24,7 @@ class UserMessages {
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
+  String devToolsVersion(String version) => 'DevTools version $version';
   String pubMirrorURL(String url) => 'Pub download mirror $url';
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
@@ -117,7 +118,7 @@ class UserMessages {
       'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
-  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
+  String androidSdkBuildToolsOutdated(int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String get androidMissingCmdTools => 'cmdline-tools component is missing\n'
@@ -145,9 +146,14 @@ class UserMessages {
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
 
-  String xcodeOutdated(String currentVersion, String recommendedVersion) =>
-      'Xcode $currentVersion out of date ($recommendedVersion is recommended).\n'
+  String xcodeOutdated(String requiredVersion) =>
+      'Flutter requires a minimum Xcode version of $requiredVersion.\n'
       'Download the latest version or update via the Mac App Store.';
+
+  String xcodeRecommended(String recommendedVersion) =>
+      'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
+      'Download the latest version or update via the Mac App Store.';
+
   String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
@@ -241,8 +247,8 @@ class UserMessages {
   String get flutterNoDevelopmentDevice =>
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
-  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
-      "matching '$deviceId'";
+  String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
+      "matching '$deviceId'.";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>

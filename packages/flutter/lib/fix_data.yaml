@@ -9,11 +9,1700 @@
 # from other fixes. In a comment, include a link to the PR where the change
 # requiring the fix was made.
 
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Chip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputChip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RawChip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'Chip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'InputChip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'RawChip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'cupertino.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'CupertinoScrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoScrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'RawScrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'RawScrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96115
+  - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
+    date: 2022-01-04
+    element:
+      uris: [ 'material.dart' ]
+      field: 'pie_chart_outlined'
+      inClass: 'Icons'
+    changes:
+      - kind: 'rename'
+        newName: 'pie_chart_outline'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'light'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'dark'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastLight'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastDark'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Migrate 'primaryVariant' to 'primaryContainer'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'primaryVariant'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'primaryContainer'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Migrate 'secondaryVariant' to 'secondaryContainer'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'secondaryVariant'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'secondaryContainer'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'backgroundColor'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      getter: color
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'addParameter'
+      index: 12
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 13
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'addParameter'
+      index: 13
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 14
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    changes:
+    - kind: 'addParameter'
+      index: 32
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 33
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+      - kind: 'addParameter'
+        index: 24
+        name: 'toolbarTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.bodyText2'
+          requiredIf: "textTheme != ''"
+      - kind: 'addParameter'
+        index: 25
+        name: 'titleTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.headline6'
+          requiredIf: "textTheme != ''"
+      - kind: 'removeParameter'
+        name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 34
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 34
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87839
+  - title: "Migrate to 'disallowIndicator'"
+    date: 2021-08-06
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'disallowGlow'
+      inClass: 'OverscrollIndicatorNotification'
+    changes:
+      - kind: 'rename'
+        newName: 'disallowIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      field: 'accentColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.secondary'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+            requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+        - kind: 'removeParameter'
+          name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'clipToSize'
+      inClass: 'RenderListWheelViewport'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelViewport'
+    changes:
+    - kind: 'rename'
+      newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.hardEdge'
+          requiredIf: "clipToSize == 'true'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.none'
+          requiredIf: "clipToSize == 'false'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'useDelegate'
+      inClass: 'ListWheelScrollView'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelScrollView'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelScrollView'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'overflow'
+      inClass: 'RenderStack'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderStack'
+    oneOf:
+      - if: "overflow == 'Overflow.clip'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "overflow == 'Overflow.clip'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+      - if: "overflow == 'Overflow.visible'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "overflow == 'Overflow.visible'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+    variables:
+      overflow:
+        kind: 'fragment'
+        value: 'arguments[overflow]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81303
+  - title: "Migrate to 'setEnabledSystemUIMode'"
+    date: 2021-06-08
+    element:
+      uris: [ 'services.dart' ]
+      method: 'setEnabledSystemUIOverlays'
+      inClass: 'SystemChrome'
+    changes:
+      - kind: 'rename'
+        newName: 'setEnabledSystemUIMode'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'mode'
+        style: required_positional
+        argumentValue:
+          expression: 'SystemUiMode.manual'
+      - kind: 'addParameter'
+        index: 1
+        name: 'overlays'
+        style: optional_named
+        argumentValue:
+          expression: '{% overlays %}'
+          requiredIf: "overlays != ''"
+    variables:
+      overlays:
+        kind: 'fragment'
+        value: 'arguments[0]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'TextureAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'SurfaceAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
 
   # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
@@ -831,22 +2520,6 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -885,22 +2558,6 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'
@@ -964,22 +2621,6 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -1018,22 +2659,6 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'

@@ -385,7 +385,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   /// Throws an exception saying that the object does not support returning
-  /// intrinsic dimensions if, in checked mode, we are not in the
+  /// intrinsic dimensions if, in debug mode, we are not in the
   /// [RenderObject.debugCheckingIntrinsics] mode.
   ///
   /// This is used by [computeMinIntrinsicWidth] et al because viewports do not
@@ -632,21 +632,27 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (firstChild == null)
       return;
     if (hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
         _paintContents,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
     } else {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       _paintContents(context, offset);
     }
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   void _paintContents(PaintingContext context, Offset offset) {
     for (final RenderSliver child in childrenInPaintOrder) {
@@ -1712,37 +1718,40 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  Iterable<RenderSliver> get childrenInPaintOrder sync* {
+  Iterable<RenderSliver> get childrenInPaintOrder {
+    final List<RenderSliver> children = <RenderSliver>[];
     if (firstChild == null)
-      return;
+      return children;
     RenderSliver? child = firstChild;
     while (child != center) {
-      yield child!;
+      children.add(child!);
       child = childAfter(child);
     }
     child = lastChild;
     while (true) {
-      yield child!;
+      children.add(child!);
       if (child == center)
-        return;
+        return children;
       child = childBefore(child);
     }
   }
 
   @override
-  Iterable<RenderSliver> get childrenInHitTestOrder sync* {
+  Iterable<RenderSliver> get childrenInHitTestOrder {
+    final List<RenderSliver> children = <RenderSliver>[];
     if (firstChild == null)
-      return;
+      return children;
     RenderSliver? child = center;
     while (child != null) {
-      yield child;
+      children.add(child);
       child = childAfter(child);
     }
     child = childBefore(center!);
     while (child != null) {
-      yield child;
+      children.add(child);
       child = childBefore(child);
     }
+    return children;
   }
 
   @override
@@ -1913,19 +1922,31 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     assert(correctedOffset.isFinite);
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
-    _hasVisualOverflow = false;
+    // Since the viewport is shrinkwrapped, we know that any negative overscroll
+    // into the potentially infinite mainAxisExtent will overflow the end of
+    // the viewport.
+    _hasVisualOverflow = correctedOffset < 0.0;
+    switch (cacheExtentStyle) {
+      case CacheExtentStyle.pixel:
+        _calculatedCacheExtent = cacheExtent;
+        break;
+      case CacheExtentStyle.viewport:
+        _calculatedCacheExtent = mainAxisExtent * _cacheExtent;
+        break;
+    }
+
     return layoutChildSequence(
       child: firstChild,
       scrollOffset: math.max(0.0, correctedOffset),
       overlap: math.min(0.0, correctedOffset),
-      layoutOffset: 0.0,
-      remainingPaintExtent: mainAxisExtent,
+      layoutOffset: math.max(0.0, -correctedOffset),
+      remainingPaintExtent: mainAxisExtent + math.min(0.0, correctedOffset),
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
-      remainingCacheExtent: mainAxisExtent + 2 * _cacheExtent,
-      cacheOrigin: -_cacheExtent,
+      remainingCacheExtent: mainAxisExtent + 2 * _calculatedCacheExtent!,
+      cacheOrigin: -_calculatedCacheExtent!,
     );
   }
 
@@ -2012,20 +2033,24 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   String labelForChild(int index) => 'child $index';
 
   @override
-  Iterable<RenderSliver> get childrenInPaintOrder sync* {
+  Iterable<RenderSliver> get childrenInPaintOrder {
+    final List<RenderSliver> children = <RenderSliver>[];
     RenderSliver? child = lastChild;
     while (child != null) {
-      yield child;
+      children.add(child);
       child = childBefore(child);
     }
+    return children;
   }
 
   @override
-  Iterable<RenderSliver> get childrenInHitTestOrder sync* {
+  Iterable<RenderSliver> get childrenInHitTestOrder {
+    final List<RenderSliver> children = <RenderSliver>[];
     RenderSliver? child = firstChild;
     while (child != null) {
-      yield child;
+      children.add(child);
       child = childAfter(child);
     }
+    return children;
   }
 }

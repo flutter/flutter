@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/material.dart';
@@ -77,6 +81,27 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  // Regression test for https://github.com/flutter/flutter/issues/95886
+  testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
+    await _loadIconFont();
+
+    await tester.pumpWidget(MaterialApp(
+      home: IconTheme(
+        data: const IconThemeData(size: 200),
+        child: Wrap(
+          children: const <Icon>[
+            Icon(Icons.water_drop),
+            Icon(Icons.water_drop_outlined),
+            Icon(Icons.water_drop_rounded),
+            Icon(Icons.water_drop_sharp),
+          ],
+        ),
+      ),
+    ));
+
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 

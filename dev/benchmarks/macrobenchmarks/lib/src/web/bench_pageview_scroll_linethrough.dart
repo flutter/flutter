@@ -26,7 +26,7 @@ class BenchPageViewScrollLineThrough extends WidgetRecorder {
 }
 
 class _MyScrollContainer extends StatefulWidget {
-  const _MyScrollContainer({Key key}) : super(key: key);
+  const _MyScrollContainer({Key? key}) : super(key: key);
 
   @override
   State<_MyScrollContainer> createState() => _MyScrollContainerState();
@@ -35,7 +35,7 @@ class _MyScrollContainer extends StatefulWidget {
 class _MyScrollContainerState extends State<_MyScrollContainer> {
   static const Duration stepDuration = Duration(milliseconds: 500);
 
-  PageController pageController;
+  late PageController pageController;
   int pageNumber = 0;
 
   @override
@@ -56,8 +56,8 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
 
   @override
   void dispose() {
-    super.dispose();
     pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -77,8 +77,8 @@ class _CustomPainter extends CustomPainter {
   _CustomPainter(this.text);
 
   final String text;
-  Paint _linePainter;
-  TextPainter _textPainter;
+  final Paint _linePainter = Paint();
+  final TextPainter _textPainter = TextPainter();
   static const double lineWidth = 0.5;
 
   @override
@@ -91,14 +91,12 @@ class _CustomPainter extends CustomPainter {
     const double viewPadding = 5;
     const double circlePadding = 4;
     yPosition = viewPadding;
-    _textPainter = _textPainter ?? TextPainter();
     _textPainter.textDirection = TextDirection.ltr;
     _textPainter.textWidthBasis = TextWidthBasis.longestLine;
     _textPainter.textScaleFactor = 1;
     const TextStyle textStyle =
         TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
 
-    _linePainter = _linePainter ?? Paint();
     _linePainter.isAntiAlias = true;
     for (int i = 0; i < 42; i++) {
       _linePainter.color = Colors.white;
@@ -115,7 +113,7 @@ class _CustomPainter extends CustomPainter {
 
       _textPainter.text = span;
 
-      _textPainter.layout(minWidth: 0, maxWidth: width);
+      _textPainter.layout(maxWidth: width);
       _linePainter.style = PaintingStyle.fill;
       canvas.drawRect(
           Rect.fromLTWH(xPosition, yPosition - viewPadding, width, height),

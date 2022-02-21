@@ -165,7 +165,7 @@ class SourceStats {
 SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {
   stats ??= SourceStats();
 
-  for (final FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
+  for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is File && name.endsWith('.dart')) {
       stats.files += 1;

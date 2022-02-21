@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -163,6 +164,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(ClipRRect), findsNothing);
+    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+    expect(renderClip.clipBehavior, equals(Clip.none));
   });
 }

@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:flutter_devicelab/common.dart';
 
 import '../framework/devices.dart';
 import '../framework/task_result.dart';
@@ -19,10 +16,9 @@ import '../framework/utils.dart';
 abstract class BuildTestTask {
   BuildTestTask(this.args, {this.workingDirectory, this.runFlutterClean = true,}) {
     final ArgResults argResults = argParser.parse(args);
-    applicationBinaryPath = argResults[kApplicationBinaryPathOption] as String;
+    applicationBinaryPath = argResults[kApplicationBinaryPathOption] as String?;
     buildOnly = argResults[kBuildOnlyFlag] as bool;
     testOnly = argResults[kTestOnlyFlag] as bool;
-
   }
 
   static const String kApplicationBinaryPathOption = 'application-binary-path';
@@ -49,10 +45,10 @@ abstract class BuildTestTask {
   /// Path to a built application to use in [test].
   ///
   /// If not given, will default to child's expected location.
-  String applicationBinaryPath;
+  String? applicationBinaryPath;
 
   /// Where the test artifacts are stored, such as performance results.
-  final Directory workingDirectory;
+  final Directory? workingDirectory;
 
   /// Run Flutter build to create [applicationBinaryPath].
   Future<void> build() async {
@@ -94,7 +90,7 @@ abstract class BuildTestTask {
   ///
   /// Tasks can override to support default values. Otherwise, it will default
   /// to needing to be passed as an argument in the test runner.
-  String getApplicationBinaryPath() => applicationBinaryPath;
+  String? getApplicationBinaryPath() => applicationBinaryPath;
 
   /// Run this task.
   ///
@@ -109,7 +105,7 @@ abstract class BuildTestTask {
     }
 
     if (!testOnly) {
-      unawaited(build());
+      await build();
     }
 
     if (buildOnly) {

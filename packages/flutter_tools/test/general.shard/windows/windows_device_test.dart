@@ -73,10 +73,10 @@ void main() {
   testWithoutContext('WindowsDevices does not list devices if the workflow is unsupported', () async {
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
-        featureFlags: TestFeatureFlags(isWindowsEnabled: false),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(operatingSystem: 'windows'),
       ),
-      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
+      featureFlags: TestFeatureFlags(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -114,6 +114,22 @@ void main() {
       featureFlags: featureFlags,
       uwptool: FakeUwpTool(),
     ).devices, hasLength(2));
+  });
+
+  testWithoutContext('WindowsDevices has windows and winuwp well known devices', () async {
+    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
+    expect(WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      featureFlags: featureFlags,
+      uwptool: FakeUwpTool(),
+    ).wellKnownIds, <String>['windows', 'winuwp']);
   });
 
   testWithoutContext('WindowsDevices ignores the timeout provided to discoverDevices', () async {

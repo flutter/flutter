@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
@@ -27,6 +25,14 @@ TaskFunction createFlavorsTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
+    extraOptions: <String>['--flavor', 'paid'],
+  );
+}
+
+TaskFunction createIntegrationTestFlavorsTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/flavors',
+    'integration_test/integration_test.dart',
     extraOptions: <String>['--flavor', 'paid'],
   );
 }
@@ -73,13 +79,6 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   );
 }
 
-TaskFunction createCodegenerationIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/codegen',
-    'lib/main.dart',
-  );
-}
-
 TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
@@ -91,6 +90,13 @@ TaskFunction createEndToEndKeyboardTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_resize.dart',
+  );
+}
+
+TaskFunction createEndToEndFrameNumberTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/frame_number.dart',
   );
 }
 
@@ -137,14 +143,12 @@ class DriverTest {
     this.testDirectory,
     this.testTarget, {
       this.extraOptions = const <String>[],
-      this.environment =  const <String, String>{},
     }
   );
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
-  final Map<String, String> environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -162,7 +166,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options, environment: Map<String, String>.from(environment));
+      await flutter('drive', options: options);
 
       return TaskResult.success(null);
     });
@@ -170,10 +174,16 @@ class DriverTest {
 }
 
 class IntegrationTest {
-  IntegrationTest(this.testDirectory, this.testTarget);
+  IntegrationTest(
+    this.testDirectory,
+    this.testTarget, {
+      this.extraOptions = const <String>[],
+    }
+  );
 
   final String testDirectory;
   final String testTarget;
+  final List<String> extraOptions;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -187,6 +197,7 @@ class IntegrationTest {
         '-d',
         deviceId,
         testTarget,
+        ...extraOptions,
       ];
       await flutter('test', options: options);
 

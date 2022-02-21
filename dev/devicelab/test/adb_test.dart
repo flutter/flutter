@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/devices.dart';
@@ -13,12 +11,11 @@ import 'common.dart';
 
 void main() {
   group('device', () {
-    Device device;
+    late Device device;
 
     setUp(() {
       FakeDevice.resetLog();
-      device = null;
-      device = FakeDevice();
+      device = FakeDevice(deviceId: 'fakeDeviceId');
     });
 
     tearDown(() {
@@ -30,8 +27,8 @@ void main() {
         final AndroidDevice androidDevice = device as AndroidDevice;
         expect(await androidDevice.isArm64(), isTrue);
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
-          cmd(command: 'getprop', arguments: <String>['ro.product.cpu.abi'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
+          cmd(command: 'getprop', arguments: <String>['ro.product.cpu.abi']),
         ]);
       });
     });
@@ -39,6 +36,12 @@ void main() {
     group('isAwake/isAsleep', () {
       test('reads Awake', () async {
         FakeDevice.pretendAwake();
+        expect(await device.isAwake(), isTrue);
+        expect(await device.isAsleep(), isFalse);
+      });
+
+      test('reads Awake - samsung devices', () async {
+        FakeDevice.pretendAwakeSamsung();
         expect(await device.isAwake(), isTrue);
         expect(await device.isAsleep(), isFalse);
       });
@@ -54,7 +57,7 @@ void main() {
       test('sends power event', () async {
         await device.togglePower();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'input', arguments: <String>['keyevent', '26']),
         ]);
       });
@@ -65,7 +68,7 @@ void main() {
         FakeDevice.pretendAwake();
         await device.wakeUp();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
         ]);
       });
@@ -74,7 +77,7 @@ void main() {
         FakeDevice.pretendAsleep();
         await device.wakeUp();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '26']),
         ]);
@@ -86,7 +89,7 @@ void main() {
         FakeDevice.pretendAsleep();
         await device.sendToSleep();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
         ]);
       });
@@ -95,7 +98,7 @@ void main() {
         FakeDevice.pretendAwake();
         await device.sendToSleep();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '26']),
         ]);
@@ -107,7 +110,7 @@ void main() {
         FakeDevice.pretendAwake();
         await device.unlock();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '82']),
         ]);
@@ -118,7 +121,7 @@ void main() {
       test('tap', () async {
         await device.tap(100, 200);
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'input', arguments: <String>['tap', '100', '200']),
         ]);
       });
@@ -131,9 +134,9 @@ void expectLog(List<CommandArgs> log) {
 }
 
 CommandArgs cmd({
-  String command,
-  List<String> arguments,
-  Map<String, String> environment,
+  required String command,
+  List<String>? arguments,
+  Map<String, String>? environment,
 }) {
   return CommandArgs(
     command: command,
@@ -146,11 +149,11 @@ typedef ExitErrorFactory = dynamic Function();
 
 @immutable
 class CommandArgs {
-  const CommandArgs({ this.command, this.arguments, this.environment });
+  const CommandArgs({ required this.command, this.arguments, this.environment });
 
   final String command;
-  final List<String> arguments;
-  final Map<String, String> environment;
+  final List<String>? arguments;
+  final Map<String, String>? environment;
 
   @override
   String toString() => 'CommandArgs(command: $command, arguments: $arguments, environment: $environment)';
@@ -166,19 +169,18 @@ class CommandArgs {
   }
 
   @override
-  int get hashCode => 17 * (17 * command.hashCode + _hashArguments) + _hashEnvironment;
-
-  int get _hashArguments => arguments != null
-    ? const ListEquality<String>().hash(arguments)
-    : null.hashCode;
-
-  int get _hashEnvironment => environment != null
-    ? const MapEquality<String, String>().hash(environment)
-    : null.hashCode;
+  int get hashCode {
+    return Object.hash(
+      command,
+      Object.hashAll(arguments ?? const <String>[]),
+      Object.hashAllUnordered(environment?.keys ?? const <String>[]),
+      Object.hashAllUnordered(environment?.values ?? const <String>[]),
+    );
+  }
 }
 
 class FakeDevice extends AndroidDevice {
-  FakeDevice({String deviceId}) : super(deviceId: deviceId);
+  FakeDevice({required String deviceId}) : super(deviceId: deviceId);
 
   static String output = '';
 
@@ -191,6 +193,12 @@ class FakeDevice extends AndroidDevice {
   static void pretendAwake() {
     output = '''
       mWakefulness=Awake
+    ''';
+  }
+
+  static void pretendAwakeSamsung() {
+    output = '''
+      getWakefulnessLocked()=Awake
     ''';
   }
 
@@ -207,7 +215,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) async {
+  Future<String> shellEval(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
@@ -217,7 +225,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) async {
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,

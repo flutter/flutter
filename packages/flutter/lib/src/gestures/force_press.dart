@@ -79,7 +79,7 @@ typedef GestureForcePressUpdateCallback = void Function(ForcePressDetails detail
 typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
 
 /// Signature used by [ForcePressGestureRecognizer] for interpolating the raw
-/// device pressure to a value in the range [0, 1] given the device's pressure
+/// device pressure to a value in the range `[0, 1]` given the device's pressure
 /// min and pressure max.
 typedef GestureForceInterpolation = double Function(double pressureMin, double pressureMax, double pressure);
 
@@ -249,7 +249,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         if (pressure > startPressure) {
           _state = _ForceState.started;
           resolve(GestureDisposition.accepted);
-        } else if (event.delta.distanceSquared > computeHitSlop(event.kind)) {
+        } else if (event.delta.distanceSquared > computeHitSlop(event.kind, gestureSettings)) {
           resolve(GestureDisposition.rejected);
         }
       }

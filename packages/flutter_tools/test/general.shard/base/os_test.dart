@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -43,7 +45,7 @@ void main() {
           exitCode: 1,
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
       expect(utils.which(kExecutable), isNull);
     });
 
@@ -57,7 +59,7 @@ void main() {
           stdout: kPath1,
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
       expect(utils.which(kExecutable)!.path, kPath1);
     });
 
@@ -72,7 +74,7 @@ void main() {
           stdout: '$kPath1\n$kPath2',
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
       expect(result[0].path, kPath1);
@@ -176,7 +178,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
@@ -192,7 +194,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
@@ -409,7 +411,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -441,7 +442,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -462,7 +462,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -492,12 +491,38 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'undefinedOperatingSystemVersion',
         ),
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Pretty Name');
+    });
+
+    // See https://snyk.io/research/zip-slip-vulnerability for more context
+    testWithoutContext('Windows validates paths when unzipping', () {
+      // on POSIX systems we use the `unzip` binary, which will fail to extract
+      // files with paths outside the target directory
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final File fakeZipFile = fs.file('archive.zip');
+      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
+      const String content = 'hello, world!';
+      final Archive archive = Archive()..addFile(
+        // This file would be extracted outside of the target extraction dir
+        ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
+      );
+      final List<int> zipData = ZipEncoder().encode(archive)!;
+      fakeZipFile.writeAsBytesSync(zipData);
+      expect(
+        () => utils.unzip(fakeZipFile, targetDirectory),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'correct error message',
+            contains('Tried to extract the file '),
+          ),
+        ),
+      );
     });
   });
 
@@ -526,7 +551,7 @@ void main() {
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       processManager: fakeProcessManager,
     );
 
@@ -534,6 +559,81 @@ void main() {
       () => osUtils.unzip(bar, foo),
       throwsProcessException(message: exceptionMessage),
     );
+  });
+
+  group('unzip on macOS', () {
+    testWithoutContext('falls back to unzip when rsync cannot run', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fakeProcessManager.excludedExecutables.add('rsync');
+
+      final BufferLogger logger = BufferLogger.test();
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory targetDirectory = fileSystem.currentDirectory;
+      fakeProcessManager.addCommand(FakeCommand(
+        command: <String>['unzip', '-o', '-q', 'foo.zip', '-d', targetDirectory.path],
+      ));
+
+      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.traceText, contains('Unable to find rsync'));
+    });
+
+    testWithoutContext('unzip and rsyncs', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory targetDirectory = fileSystem.currentDirectory;
+      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'unzip',
+            '-o',
+            '-q',
+            'foo.zip',
+            '-d',
+            tempDirectory.path,
+          ],
+          onRun: () {
+            expect(tempDirectory, exists);
+            tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
+            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+          },
+        ),
+        FakeCommand(command: <String>[
+          'rsync',
+          '-8',
+          '-av',
+          '--delete',
+          tempDirectory.childDirectory('dirA').path,
+          targetDirectory.path,
+        ]),
+        FakeCommand(command: <String>[
+          'rsync',
+          '-8',
+          '-av',
+          '--delete',
+          tempDirectory.childDirectory('dirB').path,
+          targetDirectory.path,
+        ]),
+      ]);
+
+      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(tempDirectory, isNot(exists));
+    });
   });
 
   group('display an install message when unzip cannot be run', () {
@@ -544,7 +644,7 @@ void main() {
       final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
         processManager: fakeProcessManager,
       );
 

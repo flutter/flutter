@@ -42,7 +42,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 0);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket!.restorationId, 'root-child');
-    expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
+    expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
 
     expect(find.text('Hello'), findsOneWidget);
   });
@@ -80,7 +80,7 @@ void main() {
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket!.restorationId, 'root-child');
-    expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
+    expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
   });
 
   testWidgets('no delay when root is available synchronously', (WidgetTester tester) async {
@@ -106,7 +106,7 @@ void main() {
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket!.restorationId, 'root-child');
-    expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
+    expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
   });
 
   testWidgets('does not insert root when restoration id is null', (WidgetTester tester) async {
@@ -201,7 +201,7 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket!.restorationId, 'root-child');
-    expect(inScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
+    expect((inScopeRawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
 
     // Move out of scope.
     final Completer<RestorationBucket> bucketCompleter = Completer<RestorationBucket>();
@@ -230,7 +230,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
     expect(state.bucket!.restorationId, 'root-child');
-    expect(outOfScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
+    expect((outOfScopeRawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
     expect(inScopeRawData, isEmpty);
 
     // Move into scope.
@@ -254,7 +254,7 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
     expect(state.bucket!.restorationId, 'root-child');
     expect(outOfScopeRawData, isEmpty);
-    expect(inScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
+    expect((inScopeRawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
   });
 
   testWidgets('injects new root when old one is decommissioned', (WidgetTester tester) async {
@@ -278,7 +278,7 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     state.bucket!.write('foo', 42);
-    expect(firstRawData[childrenMapKey]['root-child'][valuesMapKey]['foo'], 42);
+    expect((((firstRawData[childrenMapKey] as Map<Object?, Object?>)['root-child']! as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 42);
     final RestorationBucket firstBucket = state.bucket!;
 
     // Replace with new root.

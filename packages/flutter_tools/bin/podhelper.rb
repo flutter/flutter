@@ -33,9 +33,6 @@ end
 def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
-  # Return if it's not a Flutter plugin (transitive dependency).
-  return unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
-
   # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
 
@@ -52,10 +49,18 @@ def flutter_additional_ios_build_settings(target)
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release', 'Flutter.xcframework'), __FILE__)
 
   target.build_configurations.each do |build_configuration|
+    # Build both x86_64 and arm64 simulator archs for all dependencies. If a single plugin does not support arm64 simulators,
+    # the app and all frameworks will fall back to x86_64. Unfortunately that case is not detectable in this script.
+    # Therefore all pods must have a x86_64 slice available, or linking a x86_64 app will fail.
+    build_configuration.build_settings['ONLY_ACTIVE_ARCH'] = 'NO' if build_configuration.type == :debug
+
+    # Skip other updates if it's not a Flutter plugin (transitive dependency).
+    next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
+
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
-      if xcframework_file.end_with?("-simulator") # ios-x86_64-simulator
+      if xcframework_file.end_with?("-simulator") # ios-arm64_x86_64-simulator
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       elsif xcframework_file.start_with?("ios-") # ios-armv7_arm64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
@@ -72,8 +77,9 @@ def flutter_additional_ios_build_settings(target)
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
 
-    # Apple Silicon ARM simulators not yet supported.
-    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
+    # Override legacy Xcode 11 style VALID_ARCHS[sdk=iphonesimulator*]=x86_64 and prefer Xcode 12 EXCLUDED_ARCHS.
+    build_configuration.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = '$(ARCHS_STANDARD)'
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
   end
 end
 
@@ -176,7 +182,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
         s.license          = { :type => 'MIT' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.ios.deployment_target = '8.0'
+        s.ios.deployment_target = '9.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -249,7 +255,8 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
-    if (plugin_name && plugin_path)
+    has_native_build = plugin_hash.fetch('native_build', true)
+    if (plugin_name && plugin_path && has_native_build)
       symlink = File.join(symlink_plugins_dir, plugin_name)
       File.symlink(plugin_path, symlink)
 

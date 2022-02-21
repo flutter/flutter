@@ -81,68 +81,10 @@ class _TableElementRow {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This sample shows a `Table` with borders, multiple types of column widths and different vertical cell alignments.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Table(
-///     border: TableBorder.all(),
-///     columnWidths: const <int, TableColumnWidth>{
-///       0: IntrinsicColumnWidth(),
-///       1: FlexColumnWidth(),
-///       2: FixedColumnWidth(64),
-///     },
-///     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-///     children: <TableRow>[
-///       TableRow(
-///         children: <Widget>[
-///           Container(
-///             height: 32,
-///             color: Colors.green,
-///           ),
-///           TableCell(
-///             verticalAlignment: TableCellVerticalAlignment.top,
-///             child: Container(
-///               height: 32,
-///               width: 32,
-///               color: Colors.red,
-///             ),
-///           ),
-///           Container(
-///             height: 64,
-///             color: Colors.blue,
-///           ),
-///         ],
-///       ),
-///       TableRow(
-///         decoration: const BoxDecoration(
-///           color: Colors.grey,
-///         ),
-///         children: <Widget>[
-///           Container(
-///             height: 64,
-///             width: 128,
-///             color: Colors.purple,
-///           ),
-///           Container(
-///             height: 32,
-///             color: Colors.yellow,
-///           ),
-///           Center(
-///             child: Container(
-///               height: 32,
-///               width: 32,
-///               color: Colors.orange,
-///             ),
-///           ),
-///         ],
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/table/table.0.dart **
 /// {@end-tool}
 ///
 /// If you only have one row, the [Row] widget is more appropriate. If you only
@@ -176,7 +118,7 @@ class Table extends RenderObjectWidget {
     Key? key,
     this.children = const <TableRow>[],
     this.columnWidths,
-    this.defaultColumnWidth = const FlexColumnWidth(1.0),
+    this.defaultColumnWidth = const FlexColumnWidth(),
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
@@ -343,9 +285,6 @@ class _TableElement extends RenderObjectElement {
   _TableElement(Table widget) : super(widget);
 
   @override
-  Table get widget => super.widget as Table;
-
-  @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
   List<_TableElementRow> _children = const<_TableElementRow>[];
@@ -358,7 +297,7 @@ class _TableElement extends RenderObjectElement {
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
     int rowIndex = -1;
-    _children = widget.children.map<_TableElementRow>((TableRow row) {
+    _children = (widget as Table).children.map<_TableElementRow>((TableRow row) {
       int columnIndex = 0;
       rowIndex += 1;
       return _TableElementRow(

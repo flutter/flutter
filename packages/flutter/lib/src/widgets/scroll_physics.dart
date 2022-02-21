@@ -224,7 +224,7 @@ class ScrollPhysics {
     assert(metrics != null);
     assert(context != null);
     if (parent == null) {
-      final double maxPhysicalPixels = WidgetsBinding.instance!.window.physicalSize.longestSide;
+      final double maxPhysicalPixels = WidgetsBinding.instance.window.physicalSize.longestSide;
       return velocity.abs() > maxPhysicalPixels;
     }
     return parent!.recommendDeferredLoading(velocity, metrics, context);
@@ -356,8 +356,8 @@ class ScrollPhysics {
   static final Tolerance _kDefaultTolerance = Tolerance(
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * WidgetsBinding.instance!.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / WidgetsBinding.instance!.window.devicePixelRatio, // logical pixels
+    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
+    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
@@ -428,8 +428,12 @@ class ScrollPhysics {
 /// Scroll physics that attempt to keep the scroll position in range when the
 /// contents change dimensions suddenly.
 ///
-/// If the scroll position is already out of range, this attempts to maintain
-/// the amount of overscroll or underscroll already present.
+/// This attempts to maintain the amount of overscroll or underscroll already present,
+/// if the scroll position is already out of range _and_ the extents
+/// have decreased, meaning that some content was removed. The reason for this
+/// condition is that when new content is added, keeping the same overscroll
+/// would mean that instead of showing it to the user, all of it is
+/// being skipped by jumping right to the max extent.
 ///
 /// If the scroll activity is animating the scroll position, sudden changes to
 /// the scroll dimensions are allowed to happen (so as to prevent animations
@@ -513,9 +517,9 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       maintainOverscroll = false;
       if (oldPosition.minScrollExtent.isFinite && oldPosition.maxScrollExtent.isFinite &&
           newPosition.minScrollExtent.isFinite && newPosition.maxScrollExtent.isFinite) {
-        // In addition, if the position changed then we only enforce
-        // the new boundary if the previous boundary was not entirely
-        // finite. A common case where the position changes while one
+        // In addition, if the position changed then we don't enforce the new
+        // boundary if both the new and previous boundaries are entirely finite.
+        // A common case where the position changes while one
         // of the extents is infinite is a lazily-loaded list. (If the
         // boundaries were finite, and the position changed, then we
         // assume it was intentional.)
@@ -529,13 +533,19 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       enforceBoundary = false;
     }
     if (maintainOverscroll) {
-      // Force the new position to be no more out of range
-      // than it was before, if it was overscrolled.
-      if (oldPosition.pixels < oldPosition.minScrollExtent) {
+      // Force the new position to be no more out of range than it was before, if:
+      //  * it was overscrolled, and
+      //  * the extents have decreased, meaning that some content was removed. The
+      //    reason for this condition is that when new content is added, keeping
+      //    the same overscroll would mean that instead of showing it to the user,
+      //    all of it is being skipped by jumping right to the max extent.
+      if (oldPosition.pixels < oldPosition.minScrollExtent &&
+          newPosition.minScrollExtent > oldPosition.minScrollExtent) {
         final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
         return newPosition.minScrollExtent - oldDelta;
       }
-      if (oldPosition.pixels > oldPosition.maxScrollExtent) {
+      if (oldPosition.pixels > oldPosition.maxScrollExtent &&
+          newPosition.maxScrollExtent < oldPosition.maxScrollExtent) {
         final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
         return newPosition.maxScrollExtent + oldDelta;
       }

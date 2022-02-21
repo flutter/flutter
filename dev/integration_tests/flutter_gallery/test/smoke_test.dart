@@ -77,9 +77,9 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
-  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance!.renderViewElement!.toStringDeep());
-  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView.toStringDeep() ?? '');
-  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? '');
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement!.toStringDeep());
+  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance.renderView.toStringDeep());
+  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? '');
 
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
@@ -118,7 +118,7 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
   // Switch back to system theme setting: first menu button, choose 'System Default'
   await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('System Default').at(1));
+  await tester.tap(find.text('System Default').at(1), warnIfMissed: false); // https://github.com/flutter/flutter/issues/82908
   await tester.pumpAndSettle();
 
   // Switch text direction: first switch
@@ -162,7 +162,7 @@ Future<void> smokeGallery(WidgetTester tester) async {
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (final GalleryDemo demo in kGalleryCategoryToDemos[category]!) {
-      await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
+      await Scrollable.ensureVisible(tester.element(find.text(demo.title)));
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
     }
@@ -176,11 +176,15 @@ Future<void> smokeGallery(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('Flutter Gallery app smoke test', smokeGallery);
+  testWidgets(
+    'Flutter Gallery app smoke test',
+    smokeGallery,
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }),
+  );
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
-    RendererBinding.instance!.setSemanticsEnabled(true);
+    RendererBinding.instance.setSemanticsEnabled(true);
     await smokeGallery(tester);
-    RendererBinding.instance!.setSemanticsEnabled(false);
+    RendererBinding.instance.setSemanticsEnabled(false);
   });
 }

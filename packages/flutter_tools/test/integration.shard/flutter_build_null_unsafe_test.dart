@@ -67,7 +67,6 @@ String unsafeString = null;
 
   for (final String targetPlatform in targetPlatforms) {
     testWithoutContext('flutter build $targetPlatform --no-sound-null-safety', () {
-      print(tempDir);
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -77,7 +76,10 @@ String unsafeString = null;
         '--no-sound-null-safety',
         if (targetPlatform == 'ios') '--no-codesign',
       ], workingDirectory: projectRoot.path);
-      expect(result.exitCode, 0);
-    }, timeout: const Timeout(Duration(minutes: 3)));
+
+      if (result.exitCode != 0) {
+        fail('build --no-sound-null-safety failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+      }
+    });
   }
 }

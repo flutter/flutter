@@ -175,8 +175,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Get the offset of the current widget from the global screen coordinates.
-  // TODO(justinmc): Protect against calling this during first build.
   static Offset getOffset(BuildContext context) {
+    assert(context.findRenderObject() != null, 'The given context must have a renderObject, such as after the first build has completed.');
     final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     return renderObject.localToGlobal(Offset.zero);
   }
@@ -334,8 +334,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       Offset(nextTranslation.dx, nextTranslation.dy),
     );
     if (!inBoundaries) {
-      // TODO(justinmc): Instead of canceling translation when it goes out of
-      // bounds, stop translation at boundary.
       return matrix;
     }
 

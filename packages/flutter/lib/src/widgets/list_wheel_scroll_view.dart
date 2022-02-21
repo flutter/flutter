@@ -759,31 +759,33 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != null && widget.controller != scrollController) {
       final ScrollController? oldScrollController = scrollController;
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         oldScrollController!.dispose();
       });
       scrollController = widget.controller;
     }
   }
 
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth == 0
+        && widget.onSelectedItemChanged != null
+        && notification is ScrollUpdateNotification
+        && notification.metrics is FixedExtentMetrics) {
+      final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
+      final int currentItemIndex = metrics.itemIndex;
+      if (currentItemIndex != _lastReportedItemIndex) {
+        _lastReportedItemIndex = currentItemIndex;
+        final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
+        widget.onSelectedItemChanged!(trueIndex);
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        if (notification.depth == 0
-            && widget.onSelectedItemChanged != null
-            && notification is ScrollUpdateNotification
-            && notification.metrics is FixedExtentMetrics) {
-          final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
-          final int currentItemIndex = metrics.itemIndex;
-          if (currentItemIndex != _lastReportedItemIndex) {
-            _lastReportedItemIndex = currentItemIndex;
-            final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
-            widget.onSelectedItemChanged!(trueIndex);
-          }
-        }
-        return false;
-      },
+      onNotification: _handleScrollNotification,
       child: _FixedExtentScrollable(
         controller: scrollController,
         physics: widget.physics,
@@ -817,9 +819,6 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   ListWheelElement(ListWheelViewport widget) : super(widget);
 
   @override
-  ListWheelViewport get widget => super.widget as ListWheelViewport;
-
-  @override
   RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;
 
   // We inflate widgets at two different times:
@@ -838,7 +837,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   void update(ListWheelViewport newWidget) {
-    final ListWheelViewport oldWidget = widget;
+    final ListWheelViewport oldWidget = widget as ListWheelViewport;
     super.update(newWidget);
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
@@ -850,7 +849,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  int? get childCount => widget.childDelegate.estimatedChildCount;
+  int? get childCount => (widget as ListWheelViewport).childDelegate.estimatedChildCount;
 
   @override
   void performRebuild() {
@@ -878,7 +877,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   /// will be cached. However when the element is rebuilt, the cache will be
   /// cleared.
   Widget? retrieveWidget(int index) {
-    return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
+    return _childWidgets.putIfAbsent(index, () => (widget as ListWheelViewport).childDelegate.build(this, index));
   }
 
   @override

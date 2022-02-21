@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1084,7 +1085,7 @@ void main() {
     expect(tabController.index, 0);
 
     // switch tabs 0 -> 1
-    setState((){
+    setState(() {
       tabController.index = 1;
     });
 
@@ -1093,7 +1094,7 @@ void main() {
     expect(tabController.index, 1);
 
     // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
-    setState((){
+    setState(() {
       tabBarViewCnt = 1;
       tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
     });
@@ -1523,6 +1524,7 @@ void main() {
     await tester.pumpWidget(Container());
     final dynamic exception = tester.takeException();
     expect(
+      // ignore: avoid_dynamic_calls
       exception.message,
       equalsIgnoringHashCodes(
         'Tried to build dirty widget in the wrong build scope.\n'
@@ -1542,11 +1544,11 @@ void main() {
   });
 
   testWidgets('Can create BuildOwner that does not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
-    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
+    final int pointerRouterCount = GestureBinding.instance.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
     BuildOwner(focusManager: FocusManager());
-    expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
+    expect(GestureBinding.instance.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
 
@@ -1584,7 +1586,29 @@ void main() {
     // occur.
     expect(() => element.state, throwsA(isA<TypeError>()));
     expect(() => element.widget, throwsA(isA<TypeError>()));
-  }, skip: kIsWeb);
+  });
+
+  testWidgets('LayerLink can be swapped between parent and child container layers', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96959.
+    final LayerLink link = LayerLink();
+    await tester.pumpWidget(_TestLeaderLayerWidget(
+        link: link,
+        child: const _TestLeaderLayerWidget(
+          child: Placeholder(),
+        )
+    ));
+    expect(tester.takeException(), isNull);
+
+    // Swaps the layer link.
+    await tester.pumpWidget(_TestLeaderLayerWidget(
+        child: _TestLeaderLayerWidget(
+          link: link,
+          child: const Placeholder(),
+        ),
+    ));
+    expect(tester.takeException(), isNull);
+
+  });
 
   testWidgets('Deactivate and activate are called correctly', (WidgetTester tester) async {
     final List<String> states = <String>[];
@@ -1620,7 +1644,7 @@ void main() {
     expect(states, <String>['deactivate', 'dispose']);
   });
 
-  testWidgets('RenderObjectElement.unmount dispsoes of its renderObject', (WidgetTester tester) async {
+  testWidgets('RenderObjectElement.unmount disposes of its renderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     final RenderObjectElement element = tester.allElements.whereType<RenderObjectElement>().first;
     final RenderObject renderObject = element.renderObject;
@@ -1654,6 +1678,21 @@ The findRenderObject() method was called for the following element:
   StatefulElement#00000(DEFUNCT)'''),
       )),
     );
+  });
+
+  testWidgets('Elements use the identity hashCode', (WidgetTester tester) async {
+    final StatefulElement statefulElement = StatefulElement(const _StatefulLeaf());
+    expect(statefulElement.hashCode, identityHashCode(statefulElement));
+
+    final StatelessElement statelessElement = StatelessElement(const Placeholder());
+
+    expect(statelessElement.hashCode, identityHashCode(statelessElement));
+
+    final InheritedElement inheritedElement = InheritedElement(
+      const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
+    );
+
+    expect(inheritedElement.hashCode, identityHashCode(inheritedElement));
   });
 }
 
@@ -2014,4 +2053,54 @@ class _EmptyElement extends Element {
 
   @override
   void performRebuild() {}
+}
+
+class _TestLeaderLayerWidget extends SingleChildRenderObjectWidget {
+  const _TestLeaderLayerWidget({
+    Key? key,
+    this.link,
+    Widget? child,
+  }) : super(key: key, child: child);
+  final LayerLink? link;
+
+  @override
+  _RenderTestLeaderLayerWidget createRenderObject(BuildContext context) {
+    return _RenderTestLeaderLayerWidget(
+      link: link,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderTestLeaderLayerWidget renderObject) {
+    renderObject.link = link;
+  }
+}
+
+class _RenderTestLeaderLayerWidget extends RenderProxyBox {
+  _RenderTestLeaderLayerWidget({
+    LayerLink? link,
+    RenderBox? child,
+  }) : _link = link,
+        super(child);
+
+  LayerLink? get link => _link;
+  LayerLink? _link;
+  set link(LayerLink? value) {
+    if (_link == value) {
+      return;
+    }
+    _link = value;
+    markNeedsPaint();
+  }
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    if (_link != null) {
+      context.pushLayer(LeaderLayer(link: _link!, offset: offset),(_, __){}, Offset.zero);
+    }
+  }
 }

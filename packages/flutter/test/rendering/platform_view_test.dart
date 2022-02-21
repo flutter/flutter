@@ -14,12 +14,12 @@ import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
 
   group('PlatformViewRenderBox', () {
     late FakePlatformViewController fakePlatformViewController;
     late PlatformViewRenderBox platformViewRenderBox;
     setUp(() {
-      renderer; // Initialize bindings
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
@@ -40,13 +40,13 @@ void main() {
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
-    test('send semantics update if id is changed', (){
+    test('send semantics update if id is changed', () {
       final RenderConstrainedBox tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
           listener: () {
             ++semanticsUpdateCount;
           },
@@ -99,11 +99,10 @@ void main() {
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
 
-  }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
-    renderer; // Initialize bindings.
     final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController viewController =

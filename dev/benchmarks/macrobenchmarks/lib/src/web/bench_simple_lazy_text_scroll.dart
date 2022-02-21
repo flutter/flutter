@@ -25,7 +25,6 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
       child: Row(
         children: const <Widget>[
           Flexible(
-            flex: 1,
             child: _TestScrollingWidget(
               initialScrollOffset: 0,
               scrollDistance: 300,
@@ -33,7 +32,6 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
             ),
           ),
           Flexible(
-            flex: 1,
             child: _TestScrollingWidget(
               initialScrollOffset: 1000,
               scrollDistance: 500,
@@ -41,7 +39,6 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
             ),
           ),
           Flexible(
-            flex: 1,
             child: _TestScrollingWidget(
               initialScrollOffset: 2000,
               scrollDistance: 700,
@@ -56,9 +53,9 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
 
 class _TestScrollingWidget extends StatefulWidget {
   const _TestScrollingWidget({
-    @required this.initialScrollOffset,
-    @required this.scrollDistance,
-    @required this.scrollDuration,
+    required this.initialScrollOffset,
+    required this.scrollDistance,
+    required this.scrollDuration,
   });
 
   final double initialScrollOffset;
@@ -72,7 +69,7 @@ class _TestScrollingWidget extends StatefulWidget {
 }
 
 class _TestScrollingWidgetState extends State<_TestScrollingWidget> {
-  ScrollController scrollController;
+  late ScrollController scrollController;
 
   @override
   void initState() {
@@ -96,6 +93,12 @@ class _TestScrollingWidgetState extends State<_TestScrollingWidget> {
         forward = !forward;
       }
     });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override

@@ -470,7 +470,6 @@ void main() {
     // optionsBuilder returns nothing for an empty field query.
     focusNode.requestFocus();
     textEditingController.value = const TextEditingValue(
-      text: '',
       selection: TextSelection(baseOffset: 0, extentOffset: 0),
     );
     await tester.pump();
@@ -647,6 +646,67 @@ void main() {
     );
   });
 
+  testWidgets('support asynchronous options builder', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    Duration? delay;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              if (delay == null) {
+                return options;
+              }
+              return Future<Iterable<String>>.delayed(delay, () => options);
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    // Enter text to build the options with delay.
+    focusNode.requestFocus();
+    delay = const Duration(milliseconds: 500);
+    await tester.enterText(find.byKey(fieldKey), 'go');
+    await tester.pumpAndSettle();
+
+    // The options have not yet been built.
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(lastOptions, isNull);
+
+    // Await asynchronous options builder.
+    await tester.pumpAndSettle(delay);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
+
+    // Enter text to rebuild the options without delay.
+    delay = null;
+    await tester.enterText(find.byKey(fieldKey), 'ngo');
+    await tester.pump();
+    expect(lastOptions, <String>['dingo', 'flamingo']);
+  });
+
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
@@ -731,6 +791,96 @@ void main() {
     expect(find.byKey(fieldKey), findsOneWidget);
     expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, 'goose');
+  });
+
+  testWidgets('can hide and show options with the keyboard', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextFormField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+                onFieldSubmitted: (String value) {
+                  onFieldSubmitted();
+                },
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Enter text. The options are filtered by the text.
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pumpAndSettle();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 2);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+
+    // Hide the options.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Show the options again by pressing arrow keys
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Show the options again by re-focusing the field.
+    focusNode.unfocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Show the options again by editing the text (but not when selecting text
+    // or moving the caret).
+    await tester.enterText(find.byKey(fieldKey), 'elep');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+    textEditingController.selection = TextSelection.fromPosition(const TextPosition(offset: 3));
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
   });
 
   testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {

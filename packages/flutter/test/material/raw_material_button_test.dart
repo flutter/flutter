@@ -236,7 +236,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -457,7 +456,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -467,7 +466,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -476,7 +475,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
+      buildFrame(),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
@@ -593,7 +592,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -608,7 +607,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -623,6 +622,6 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

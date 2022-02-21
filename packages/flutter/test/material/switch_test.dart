@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -237,7 +241,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                    dragStartBehavior: DragStartBehavior.start,
                     value: value,
                     onChanged: (bool newValue) {
                       setState(() {
@@ -749,14 +752,14 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${describeEnum(platform)}');
+      expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${platform.name}');
 
       final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
-      expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${describeEnum(platform)}');
+      expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${platform.name}');
 
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      expect(value, isFalse, reason: 'on ${platform.name}');
       await tester.tap(find.byType(Switch));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+      expect(value, isTrue, reason: 'on ${platform.name}');
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
@@ -764,9 +767,9 @@ void main() {
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.
       expect(find.byType(CupertinoSwitch), findsNothing);
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      expect(value, isFalse, reason: 'on ${platform.name}');
       await tester.tap(find.byType(Switch));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+      expect(value, isTrue, reason: 'on ${platform.name}');
     }
   });
 
@@ -1023,7 +1026,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test Switch() constructor
     await tester.pumpWidget(
@@ -1047,7 +1050,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1069,7 +1072,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1091,7 +1094,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await tester.pumpAndSettle();
   });
@@ -1596,7 +1599,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildSwitch(active: false, useOverlay: false));
+    await tester.pumpWidget(buildSwitch(useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 
@@ -1626,7 +1629,7 @@ void main() {
       reason: 'Default active pressed Switch should have overlay color from thumbColor',
     );
 
-    await tester.pumpWidget(buildSwitch(active: false));
+    await tester.pumpWidget(buildSwitch());
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 

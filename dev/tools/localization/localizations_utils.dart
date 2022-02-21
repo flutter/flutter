@@ -118,7 +118,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     return originalString
       .split('_')
       .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-      .join('');
+      .join();
   }
 
   @override
@@ -128,9 +128,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   @override
-  int get hashCode {
-    return originalString.hashCode;
-  }
+  int get hashCode => originalString.hashCode;
 
   @override
   String toString() {
@@ -234,17 +232,14 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     ..addFlag(
       'overwrite',
       abbr: 'w',
-      defaultsTo: false,
     )
     ..addFlag(
       'material',
       help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
-      defaultsTo: false,
     )
     ..addFlag(
       'cupertino',
       help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
-      defaultsTo: false,
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   final bool writeToFile = args['overwrite'] as bool;

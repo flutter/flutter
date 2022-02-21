@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 Widget wrap({Widget? child}) {
   return MediaQuery(
@@ -740,5 +741,97 @@ void main() {
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
     expect(textColor('title'), activeColor);
+  });
+
+  testWidgets('RadioListTile respects visualDensity', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return tester.pumpWidget(
+        wrap(
+          child: Center(
+            child: RadioListTile<bool>(
+              key: key,
+              value: false,
+              groupValue: true,
+              onChanged: (bool? value) {},
+              autofocus: true,
+              visualDensity: visualDensity,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(VisualDensity.standard);
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 56)));
+  });
+
+  testWidgets('RadioListTile respects focusNode', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: RadioListTile<bool>(
+            value: false,
+            groupValue: true,
+            title: Text('A', key: childKey),
+            onChanged: (bool? value) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final FocusNode tileNode = Focus.of(childKey.currentContext!);
+    tileNode.requestFocus();
+    await tester.pump(); // Let the focus take effect.
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
+    expect(tileNode.hasPrimaryFocus, isTrue);
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('RadioListTile respects enableFeedback', (WidgetTester tester) async {
+      const Key key = Key('test');
+      Future<void> buildTest(bool enableFeedback) async {
+        return tester.pumpWidget(
+          wrap(
+            child: Center(
+              child: RadioListTile<bool>(
+                key: key,
+                value: false,
+                groupValue: true,
+                selected: true,
+                onChanged: (bool? value) {},
+                enableFeedback: enableFeedback,
+              ),
+            ),
+          ),
+        );
+      }
+
+      await buildTest(false);
+      await tester.tap(find.byKey(key));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+
+      await buildTest(true);
+      await tester.tap(find.byKey(key));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }

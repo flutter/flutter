@@ -16,6 +16,10 @@ FakeHttpClient createMockImageHttpClient(SecurityContext? _) {
 }
 
 class FakeHttpClient extends Fake implements HttpClient {
+  FakeHttpClient([this.context]);
+
+  SecurityContext? context;
+
   @override
   bool autoUncompress = false;
 
@@ -60,4 +64,4 @@ class FakeHttpClientResponse extends Fake implements HttpClientResponse {
   }
 }
 
-class FakeHttpHeaders extends Fake implements HttpHeaders {}
+class FakeHttpHeaders extends Fake implements HttpHeaders { }

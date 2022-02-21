@@ -151,6 +151,70 @@ void main() {
       expect(scope.traversalDescendants.contains(child2), isFalse);
     });
 
+    testWidgets('descendantsAreTraversable disables traversal for descendants.', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent2);
+
+      expect(scope.traversalDescendants, equals(<FocusNode>[child1, parent1, child2, parent2]));
+
+      parent2.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[child1, parent1, parent2]));
+
+      parent1.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[parent1, parent2]));
+
+      parent1.descendantsAreTraversable = true;
+      parent2.descendantsAreTraversable = true;
+      scope.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[]));
+    });
+
+    testWidgets("canRequestFocus doesn't affect traversalChildren", (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent2);
+      child1.requestFocus();
+      await tester.pump();
+
+      expect(tester.binding.focusManager.primaryFocus, equals(child1));
+      expect(scope.focusedChild, equals(child1));
+      expect(parent2.traversalChildren.contains(child2), isTrue);
+      expect(scope.traversalChildren.contains(parent2), isTrue);
+
+      parent2.canRequestFocus = false;
+      await tester.pump();
+      expect(parent2.traversalChildren.contains(child2), isTrue);
+      expect(scope.traversalChildren.contains(parent2), isFalse);
+    });
+
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       FocusNode(
@@ -160,12 +224,107 @@ void main() {
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
+        'descendantsAreTraversable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
       ]);
     });
+
+    testWidgets('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node 3');
+      List<List<KeyEventResult>> results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      final List<int> logs = <int>[];
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: FocusNode(debugLabel: 'Test Node 1'),
+          onKeyEvent: (_, KeyEvent event) {
+            logs.add(0);
+            return results[0][0];
+          },
+          onKey: (_, RawKeyEvent event) {
+            logs.add(1);
+            return results[0][1];
+          },
+          child: Focus(
+            focusNode: FocusNode(debugLabel: 'Test Node 2'),
+            onKeyEvent: (_, KeyEvent event) {
+              logs.add(10);
+              return results[1][0];
+            },
+            onKey: (_, RawKeyEvent event) {
+              logs.add(11);
+              return results[1][1];
+            },
+            child: Focus(
+              focusNode: focusNode,
+              onKeyEvent: (_, KeyEvent event) {
+                logs.add(20);
+                return results[2][0];
+              },
+              onKey: (_, RawKeyEvent event) {
+                logs.add(21);
+                return results[2][1];
+              },
+              child: const SizedBox(width: 200, height: 100),
+            ),
+          ),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // All ignored.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
+          false);
+      expect(logs, <int>[20, 21, 10, 11, 0, 1]);
+      logs.clear();
+
+      // The onKeyEvent should be able to stop propagation.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.handled, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
+          true);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+
+      // The onKey should be able to stop propagation.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.handled],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
+          true);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+
+      // KeyEventResult.skipRemainingHandlers works.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.skipRemainingHandlers, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
+          false);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
+
   group(FocusScopeNode, () {
 
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
@@ -386,7 +545,7 @@ void main() {
 
     testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', canRequestFocus: true);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       final FocusAttachment scopeAttachment = scope.attach(context);
       final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
@@ -408,6 +567,8 @@ void main() {
       expect(scope.focusedChild, equals(child1));
       expect(scope.traversalDescendants.contains(child1), isTrue);
       expect(scope.traversalDescendants.contains(child2), isTrue);
+      expect(scope.traversalChildren.contains(parent1), isTrue);
+      expect(parent1.traversalChildren.contains(child2), isTrue);
 
       scope.canRequestFocus = false;
       await tester.pump();
@@ -418,11 +579,13 @@ void main() {
       expect(scope.focusedChild, equals(child1));
       expect(scope.traversalDescendants.contains(child1), isFalse);
       expect(scope.traversalDescendants.contains(child2), isFalse);
+      expect(scope.traversalChildren.contains(parent1), isFalse);
+      expect(parent1.traversalChildren.contains(child2), isFalse);
     });
 
     testWidgets("skipTraversal doesn't affect children.", (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', skipTraversal: false);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       final FocusAttachment scopeAttachment = scope.attach(context);
       final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
@@ -707,7 +870,7 @@ void main() {
       expect(scope1.focusedChild, equals(child1));
       expect(scope2.focusedChild, equals(child3));
 
-      child1.unfocus(disposition: UnfocusDisposition.scope);
+      child1.unfocus();
       await tester.pump();
       // Focused child doesn't change.
       expect(scope1.focusedChild, isNull);
@@ -729,7 +892,7 @@ void main() {
       expect(child3.hasPrimaryFocus, isFalse);
 
       // The same thing happens when unfocusing a second time.
-      child1.unfocus(disposition: UnfocusDisposition.scope);
+      child1.unfocus();
       await tester.pump();
       expect(scope1.focusedChild, isNull);
       expect(scope2.focusedChild, equals(child3));
@@ -742,7 +905,7 @@ void main() {
       // gets focus, but it doesn't mess with the focused children.
       child1.requestFocus();
       await tester.pump();
-      scope1.unfocus(disposition: UnfocusDisposition.scope);
+      scope1.unfocus();
       await tester.pump();
       expect(scope1.focusedChild, equals(child1));
       expect(scope2.focusedChild, equals(child3));
@@ -798,7 +961,7 @@ void main() {
       expect(scope2.focusedChild, equals(child3));
       expect(child3.hasPrimaryFocus, isTrue);
 
-      child1.unfocus(disposition: UnfocusDisposition.scope);
+      child1.unfocus();
       await tester.pump();
       expect(child3.hasPrimaryFocus, isTrue);
       expect(scope1.focusedChild, equals(child1));
@@ -935,7 +1098,7 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
@@ -955,7 +1118,7 @@ void main() {
 
     testWidgets('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-      RendererBinding.instance!.initMouseTracker(); // Clear out the mouse state.
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
@@ -964,7 +1127,7 @@ void main() {
 
     testWidgets('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-      RendererBinding.instance!.initMouseTracker(); // Clear out the mouse state.
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
@@ -1027,6 +1190,7 @@ void main() {
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
+        'descendantsAreTraversable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
@@ -1102,6 +1266,148 @@ void main() {
           '           PRIMARY FOCUS\n',
         ),
       );
+    });
+  });
+
+
+  group('Autofocus', () {
+    testWidgets(
+      'works when the previous focused node is detached',
+      (WidgetTester tester) async {
+        final FocusNode node1 = FocusNode();
+        final FocusNode node2 = FocusNode();
+
+        await tester.pumpWidget(
+          FocusScope(
+            child: Focus(autofocus: true, focusNode: node1, child: const Placeholder()),
+          ),
+        );
+        await tester.pump();
+        expect(node1.hasPrimaryFocus, isTrue);
+
+        await tester.pumpWidget(
+          FocusScope(
+            child: SizedBox(
+              child: Focus(autofocus: true, focusNode: node2, child: const Placeholder()),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(node2.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets(
+      'node detached before autofocus is applied',
+      (WidgetTester tester) async {
+        final FocusScopeNode scopeNode = FocusScopeNode();
+        final FocusNode node1 = FocusNode();
+
+        await tester.pumpWidget(
+          FocusScope(
+            node: scopeNode,
+            child: Focus(
+              autofocus: true,
+              focusNode: node1,
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        await tester.pumpWidget(
+          FocusScope(
+            node: scopeNode,
+            child: const Focus(child: Placeholder()),
+          ),
+        );
+
+        await tester.pump();
+        expect(node1.hasPrimaryFocus, isFalse);
+        expect(scopeNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('autofocus the first candidate', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode();
+      final FocusNode node2 = FocusNode();
+      final FocusNode node3 = FocusNode();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              Focus(
+                autofocus: true,
+                focusNode: node1,
+                child: const SizedBox(),
+              ),
+              Focus(
+                autofocus: true,
+                focusNode: node2,
+                child: const SizedBox(),
+              ),
+              Focus(
+                autofocus: true,
+                focusNode: node3,
+                child: const SizedBox(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(node1.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Autofocus works with global key reparenting', (WidgetTester tester) async {
+      final FocusNode node = FocusNode();
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              FocusScope(
+                node: scope1,
+                child: Focus(
+                  key: key,
+                  focusNode: node,
+                  child: const SizedBox(),
+                ),
+              ),
+              FocusScope(node: scope2, child: const SizedBox()),
+            ],
+          ),
+        ),
+      );
+
+      // _applyFocusChange will be called before persistentCallbacks,
+      // guaranteeing the focus changes are applied before the BuildContext
+      // `node` attaches to gets reparented.
+      scope1.autofocus(node);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              FocusScope(node: scope1, child: const SizedBox()),
+              FocusScope(
+                node: scope2,
+                child: Focus(
+                  key: key,
+                  focusNode: node,
+                  child: const SizedBox(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(node.hasPrimaryFocus, isTrue);
+      expect(scope2.hasFocus, isTrue);
     });
   });
 
@@ -1350,5 +1656,51 @@ void main() {
     notifyCount = 0;
 
     tester.binding.focusManager.removeListener(handleFocusChange);
+  });
+
+  testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
+    final bool oldDebugFocusChanges = debugFocusChanges;
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    final StringBuffer messages = StringBuffer();
+    debugPrint = (String? message, {int? wrapWidth}) {
+      messages.writeln(message ?? '');
+    };
+    debugFocusChanges = true;
+    try {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      child1Attachment.reparent(parent: parent1);
+
+      int notifyCount = 0;
+      void handleFocusChange() {
+        notifyCount++;
+      }
+      tester.binding.focusManager.addListener(handleFocusChange);
+
+      parent1.requestFocus();
+      expect(notifyCount, equals(0));
+      await tester.pump();
+      expect(notifyCount, equals(1));
+      notifyCount = 0;
+
+      child1.requestFocus();
+      await tester.pump();
+      expect(notifyCount, equals(1));
+      notifyCount = 0;
+
+      tester.binding.focusManager.removeListener(handleFocusChange);
+    } finally {
+      debugFocusChanges = oldDebugFocusChanges;
+      debugPrint = oldDebugPrint;
+    }
+    final String messagesStr = messages.toString();
+    expect(messagesStr.split('\n').length, equals(58));
+    expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
+    expect(messagesStr, contains('FOCUS: Notifying 2 dirty nodes'));
+    expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 }

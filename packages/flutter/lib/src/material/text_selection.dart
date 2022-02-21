@@ -45,7 +45,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
@@ -100,7 +100,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
         return const Offset(_kHandleSize, 0);
       case TextSelectionHandleType.right:
         return Offset.zero;
-      default:
+      case TextSelectionHandleType.collapsed:
         return const Offset(_kHandleSize / 2, -4);
     }
   }

@@ -25,6 +25,19 @@ const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
 // user releases a page mid swipe.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
+/// Barrier color used for a barrier visible during transitions for Cupertino
+/// page routes.
+///
+/// This barrier color is only used for full-screen page routes with
+/// `fullscreenDialog: false`.
+///
+/// By default, `fullscreenDialog` Cupertino route transitions have no
+/// `barrierColor`, and [CupertinoDialogRoute]s and [CupertinoModalPopupRoute]s
+/// have a `barrierColor` defined by [kCupertinoModalBarrierColor].
+///
+/// A relatively rigorous eyeball estimation.
+const Color _kCupertinoPageTransitionBarrierColor = Color(0x18000000);
+
 /// Barrier color for a Cupertino modal barrier.
 ///
 /// Extracted from https://developer.apple.com/design/resources/.
@@ -126,7 +139,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
-  Color? get barrierColor => null;
+  Color? get barrierColor => fullscreenDialog ? null : _kCupertinoPageTransitionBarrierColor;
 
   @override
   String? get barrierLabel => null;
@@ -791,8 +804,6 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     end: const _CupertinoEdgeShadowDecoration._(
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
-        Color(0x38000000),
-        Color(0x12000000),
         Color(0x04000000),
         Color(0x00000000),
       ],
@@ -1127,8 +1138,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_cupertino}
-///
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Cupertino modal route.
 /// This is accomplished by enabling state restoration by specifying
 /// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1136,47 +1146,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     navigationBar: const CupertinoNavigationBar(
-///       middle: Text('Home'),
-///     ),
-///     child: Center(child: CupertinoButton(
-///       onPressed: () {
-///         Navigator.of(context).restorablePush(_modalBuilder);
-///       },
-///       child: const Text('Open Modal'),
-///     )),
-///   );
-/// }
-///
-/// static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
-///   return CupertinoModalPopupRoute<void>(
-///     builder: (BuildContext context) {
-///       return CupertinoActionSheet(
-///         title: const Text('Title'),
-///         message: const Text('Message'),
-///         actions: <CupertinoActionSheetAction>[
-///           CupertinoActionSheetAction(
-///             child: const Text('Action One'),
-///             onPressed: () {
-///               Navigator.pop(context);
-///             },
-///           ),
-///           CupertinoActionSheetAction(
-///             child: const Text('Action Two'),
-///             onPressed: () {
-///               Navigator.pop(context);
-///             },
-///           ),
-///         ],
-///       );
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/cupertino/route/show_cupertino_modal_popup.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1268,8 +1238,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_cupertino}
-///
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Cupertino dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1277,38 +1246,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     navigationBar: const CupertinoNavigationBar(
-///       middle: Text('Home'),
-///     ),
-///     child: Center(child: CupertinoButton(
-///       onPressed: () {
-///         Navigator.of(context).restorablePush(_dialogBuilder);
-///       },
-///       child: const Text('Open Dialog'),
-///     )),
-///   );
-/// }
-///
-/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///   return CupertinoDialogRoute<void>(
-///     context: context,
-///     builder: (BuildContext context) {
-///       return const CupertinoAlertDialog(
-///         title: Text('Title'),
-///         content: Text('Content'),
-///         actions: <Widget>[
-///           CupertinoDialogAction(child: Text('Yes')),
-///           CupertinoDialogAction(child: Text('No')),
-///         ],
-///       );
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/cupertino/route/show_cupertino_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:

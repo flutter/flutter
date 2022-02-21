@@ -55,7 +55,6 @@ final FakePlatform macosPlatformCustomEnv = FakePlatform(
 );
 
 final Platform notMacosPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }
@@ -132,7 +131,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
     ), throwsToolExit(message: 'No macOS desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
@@ -149,7 +148,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
-    ), throwsToolExit(message: '"build macos" only supported on macOS hosts.'));
+    ), throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
@@ -170,7 +169,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('macOS build forwards error stdout to status logger error', () async {
@@ -390,16 +389,17 @@ void main() {
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
+    final bool supported = BuildMacosCommand(verboseHelp: false).supported;
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
-      throwsToolExit());
+      supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
     expect(BuildMacosCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Platform: () => macosPlatform,
   });
 

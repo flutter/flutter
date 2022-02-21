@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -29,6 +28,9 @@ import 'transitions.dart';
 // Examples can assume:
 // dynamic routeObserver;
 // late NavigatorState navigator;
+// late BuildContext context;
+// Future<bool> askTheUserIfTheyAreSure() async { return true; }
+// abstract class MyWidget extends StatefulWidget { const MyWidget({Key? key}) : super(key: key); }
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -127,7 +129,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   //
   // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
-  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed;
+  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed && !_popFinalized;
+
+  bool _popFinalized = false;
 
   /// The animation that drives the route's transition and the previous route's
   /// forward transition.
@@ -147,9 +151,21 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animation<double>? get secondaryAnimation => _secondaryAnimation;
   final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
+  /// Whether to takeover the [controller] created by [createAnimationController].
+  ///
+  /// If true, this route will call [AnimationController.dispose] when the
+  /// controller is no longer needed.
+  /// If false, the controller should be disposed by whoever owned it.
+  ///
+  /// It defaults to `true`.
+  bool willDisposeAnimationController = true;
+
   /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
+  ///
+  /// The returned controller will be disposed by [AnimationController.dispose]
+  /// if the [willDisposeAnimationController] is `true`.
   AnimationController createAnimationController() {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
@@ -192,6 +208,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // removing the route and disposing it.
         if (!isActive) {
           navigator!.finalizeRoute(this);
+          _popFinalized = true;
         }
         break;
     }
@@ -420,7 +437,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
-    _controller?.dispose();
+    if (willDisposeAnimationController) {
+      _controller?.dispose();
+    }
     _transitionCompleter.complete(_result);
     super.dispose();
   }
@@ -444,7 +463,7 @@ class LocalHistoryEntry {
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
-    _owner!.removeLocalHistoryEntry(this);
+    _owner?.removeLocalHistoryEntry(this);
     assert(_owner == null);
   }
 
@@ -616,11 +635,11 @@ mixin LocalHistoryRoute<T> on Route<T> {
     entry._owner = null;
     entry._notifyRemoved();
     if (_localHistory!.isEmpty) {
-      if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
         // elements during finalizeTree. The state is locked at this moment, and
         // we can only notify state has changed in the next frame.
-        SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           changedInternalState();
         });
       } else {
@@ -739,7 +758,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
     ];
     _listenable = Listenable.merge(animations);
-    if (widget.route.isCurrent) {
+    if (widget.route.isCurrent && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -748,7 +767,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   void didUpdateWidget(_ModalScope<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
-    if (widget.route.isCurrent) {
+    if (widget.route.isCurrent && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -776,10 +795,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       (widget.route.navigator?.userGestureInProgress ?? false);
   }
 
+  bool get _shouldRequestFocus {
+    return widget.route.navigator!.widget.requestFocus;
+  }
+
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
+    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
@@ -814,7 +837,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
-                      child: _FocusTrap(
+                      child: FocusTrap(
                         focusScopeNode: focusScopeNode,
                         child: RepaintBoundary(
                           child: AnimatedBuilder(
@@ -896,11 +919,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
+  /// {@tool snippet}
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ModalRoute route = ModalRoute.of(context);
+  /// ModalRoute<int>? route = ModalRoute.of<int>(context);
   /// ```
+  /// {@end-tool}
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
   /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
@@ -993,22 +1019,26 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// topmost route, e.g. because the use pressed the back button, the
   /// primary animation runs from 1.0 to 0.0.
   ///
+  /// {@tool snippet}
   /// The following example uses the primary animation to drive a
   /// [SlideTransition] that translates the top of the new route vertically
   /// from the bottom of the screen when it is pushed on the Navigator's
   /// stack. When the route is popped the SlideTransition translates the
   /// route from the top of the screen back to the bottom.
   ///
+  /// We've used [PageRouteBuilder] to demonstrate the [buildTransitions] method
+  /// here. The body of an override of the [buildTransitions] method would be
+  /// defined in the same way.
+  ///
   /// ```dart
   /// PageRouteBuilder(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
-  ///       Widget child,
   ///   ) {
   ///     return Scaffold(
-  ///       appBar: AppBar(title: Text('Hello')),
-  ///       body: Center(
+  ///       appBar: AppBar(title: const Text('Hello')),
+  ///       body: const Center(
   ///         child: Text('Hello World'),
   ///       ),
   ///     );
@@ -1027,12 +1057,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       child: child, // child is the value returned by pageBuilder
   ///     );
   ///   },
-  /// );
+  /// )
   /// ```
-  ///
-  /// We've used [PageRouteBuilder] to demonstrate the [buildTransitions] method
-  /// here. The body of an override of the [buildTransitions] method would be
-  /// defined in the same way.
+  /// {@end-tool}
   ///
   /// When the [Navigator] pushes a route on the top of its stack, the
   /// [secondaryAnimation] can be used to define how the route that was on
@@ -1043,6 +1070,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// runs from 0.0 to 1.0. When the Navigator pops the topmost route, the
   /// secondaryAnimation for the route below it runs from 1.0 to 0.0.
   ///
+  /// {@tool snippet}
   /// The example below adds a transition that's driven by the
   /// [secondaryAnimation]. When this route disappears because a new route has
   /// been pushed on top of it, it translates in the opposite direction of
@@ -1050,6 +1078,18 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// route has been popped off.
   ///
   /// ```dart
+  /// PageRouteBuilder(
+  ///   pageBuilder: (BuildContext context,
+  ///       Animation<double> animation,
+  ///       Animation<double> secondaryAnimation,
+  ///   ) {
+  ///     return Scaffold(
+  ///       appBar: AppBar(title: const Text('Hello')),
+  ///       body: const Center(
+  ///         child: Text('Hello World'),
+  ///       ),
+  ///     );
+  ///   },
   ///   transitionsBuilder: (
   ///       BuildContext context,
   ///       Animation<double> animation,
@@ -1057,20 +1097,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Widget child,
   ///   ) {
   ///     return SlideTransition(
-  ///       position: AlignmentTween(
+  ///       position: Tween<Offset>(
   ///         begin: const Offset(0.0, 1.0),
   ///         end: Offset.zero,
   ///       ).animate(animation),
   ///       child: SlideTransition(
-  ///         position: TweenOffset(
+  ///         position: Tween<Offset>(
   ///           begin: Offset.zero,
   ///           end: const Offset(0.0, 1.0),
   ///         ).animate(secondaryAnimation),
   ///         child: child,
   ///       ),
-  ///     );
-  ///   }
+  ///      );
+  ///   },
+  /// )
   /// ```
+  /// {@end-tool}
   ///
   /// In practice the `secondaryAnimation` is used pretty rarely.
   ///
@@ -1108,7 +1150,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   TickerFuture didPush() {
-    if (_scopeKey.currentState != null) {
+    if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
       navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
@@ -1116,7 +1158,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didAdd() {
-    if (_scopeKey.currentState != null) {
+    if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
       navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
@@ -1363,7 +1405,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
+    for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
       if (await callback() != true)
         return RoutePopDisposition.doNotPop;
     }
@@ -1372,6 +1414,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Enables this route to veto attempts by the user to dismiss it.
   ///
+  /// {@tool snippet}
   /// This callback is typically added using a [WillPopScope] widget. That
   /// widget finds the enclosing [ModalRoute] and uses this function to register
   /// this callback:
@@ -1379,11 +1422,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WillPopScope(
-  ///     onWillPop: askTheUserIfTheyAreSure,
-  ///     child: ...,
+  ///     onWillPop: () async {
+  ///       // ask the user if they are sure
+  ///       return true;
+  ///     },
+  ///     child: Container(),
   ///   );
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// This callback runs asynchronously and it's possible that it will be called
   /// after its route has been disposed. The callback should check [State.mounted]
@@ -1393,34 +1440,48 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// unsaved [Form] data if the user attempts to back out of the form. In that
   /// case, use the [Form.onWillPop] property to register the callback.
   ///
+  /// {@tool snippet}
   /// To register a callback manually, look up the enclosing [ModalRoute] in a
   /// [State.didChangeDependencies] callback:
   ///
   /// ```dart
-  /// ModalRoute<dynamic> _route;
+  /// abstract class _MyWidgetState extends State<MyWidget> {
+  ///   ModalRoute<dynamic>? _route;
   ///
-  /// @override
-  /// void didChangeDependencies() {
-  ///  super.didChangeDependencies();
-  ///  _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///  _route = ModalRoute.of(context);
-  ///  _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///   // ...
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///    super.didChangeDependencies();
+  ///    _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///    _route = ModalRoute.of(context);
+  ///    _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
+  /// {@tool snippet}
   /// If you register a callback manually, be sure to remove the callback with
   /// [removeScopedWillPopCallback] by the time the widget has been disposed. A
   /// stateful widget can do this in its dispose method (continuing the previous
   /// example):
   ///
   /// ```dart
-  /// @override
-  /// void dispose() {
-  ///   _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///   _route = null;
-  ///   super.dispose();
+  /// abstract class _MyWidgetState2 extends State<MyWidget> {
+  ///   ModalRoute<dynamic>? _route;
+  ///
+  ///   // ...
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///     _route = null;
+  ///     super.dispose();
+  ///   }
   /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -1573,9 +1634,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   late OverlayEntry _modalScope;
 
   @override
-  Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier);
-    yield _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
+  Iterable<OverlayEntry> createOverlayEntries() {
+    return <OverlayEntry>[
+      _modalBarrier = OverlayEntry(builder: _buildModalBarrier),
+      _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState),
+    ];
   }
 
   @override
@@ -1679,6 +1742,19 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 
+  /// Whether this observer is managing changes for the specified route.
+  ///
+  /// If asserts are disabled, this method will throw an exception.
+  @visibleForTesting
+  bool debugObservingRoute(R route) {
+    late bool contained;
+    assert(() {
+      contained = _listeners.containsKey(route);
+      return true;
+    }());
+    return contained;
+  }
+
   /// Subscribe [routeAware] to be informed about changes to [route].
   ///
   /// Going forward, [routeAware] will be informed about qualifying changes
@@ -1699,9 +1775,15 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
-    for (final R route in _listeners.keys) {
+    final List<R> routes = _listeners.keys.toList();
+    for (final R route in routes) {
       final Set<RouteAware>? subscribers = _listeners[route];
-      subscribers?.remove(routeAware);
+      if (subscribers != null) {
+        subscribers.remove(routeAware);
+        if (subscribers.isEmpty) {
+          _listeners.remove(route);
+        }
+      }
     }
   }
 
@@ -1908,8 +1990,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_material}
-///
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1917,33 +1998,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: OutlinedButton(
-///         onPressed: () {
-///           Navigator.of(context).restorablePush(_dialogBuilder);
-///         },
-///         child: const Text('Open Dialog'),
-///       ),
-///     ),
-///   );
-/// }
-///
-/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///   return RawDialogRoute<void>(
-///     pageBuilder: (
-///       BuildContext context,
-///       Animation<double> animation,
-///       Animation<double> secondaryAnimation,
-///     ) {
-///       return const AlertDialog(title: Text('Alert!'));
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/widgets/routes/show_general_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1987,16 +2042,32 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
 
+/// The [FocusTrap] widget removes focus when a mouse primary pointer makes contact with another
+/// region of the screen.
+///
 /// When a primary pointer makes contact with the screen, this widget determines if that pointer
 /// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
 /// focus state. This allows [TextField]s and other focusable widgets to give up their focus
 /// state, without creating a gesture detector that competes with others on screen.
-class _FocusTrap extends SingleChildRenderObjectWidget {
-  const _FocusTrap({
+///
+/// In cases where focus is conceptually larger than the focused render object, a [FocusTrapArea]
+/// can be used to expand the focus area to include all render objects below that. This is used by
+/// the [TextField] widgets to prevent a loss of focus when interacting with decorations on the
+/// text area.
+///
+/// See also:
+///
+///  * [FocusTrapArea], the widget that allows expanding the conceptual focus area.
+class FocusTrap extends SingleChildRenderObjectWidget {
+
+  /// Create a new [FocusTrap] widget scoped to the provided [focusScopeNode].
+  const FocusTrap({
     required this.focusScopeNode,
     required Widget child,
-  }) : super(child: child);
+    Key? key,
+  }) : super(child: child, key: key);
 
+  /// The [focusScopeNode] that this focus trap widget operates on.
   final FocusScopeNode focusScopeNode;
 
   @override
@@ -2005,17 +2076,53 @@ class _FocusTrap extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderFocusTrap renderObject) {
-    renderObject.focusScopeNode = focusScopeNode;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    if (renderObject is _RenderFocusTrap)
+      renderObject.focusScopeNode = focusScopeNode;
   }
 }
 
-class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
-  _RenderFocusTrap(this._focusScopeNode) {
-    focusScopeNode.addListener(_currentFocusListener);
+/// Declares a widget subtree which is part of the provided [focusNode]'s focus area
+/// without attaching focus to that region.
+///
+/// This is used by text field widgets which decorate a smaller editable text area.
+/// This area is conceptually part of the editable text, but not attached to the
+/// focus context. The [FocusTrapArea] is used to inform the framework of this
+/// relationship, so that primary pointer contact inside of this region but above
+/// the editable text focus will not trigger loss of focus.
+///
+/// See also:
+///
+///  * [FocusTrap], the widget which removes focus based on primary pointer interactions.
+class FocusTrapArea extends SingleChildRenderObjectWidget {
+
+  /// Create a new [FocusTrapArea] that expands the area of the provided [focusNode].
+  const FocusTrapArea({required this.focusNode, Key? key, Widget? child}) : super(key: key, child: child);
+
+  /// The [FocusNode] that the focus trap area will expand to.
+  final FocusNode focusNode;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFocusTrapArea(focusNode);
   }
 
-  FocusNode? currentFocus;
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    if (renderObject is _RenderFocusTrapArea)
+      renderObject.focusNode = focusNode;
+  }
+}
+
+class _RenderFocusTrapArea extends RenderProxyBox {
+  _RenderFocusTrapArea(this.focusNode);
+
+  FocusNode focusNode;
+}
+
+class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
+  _RenderFocusTrap(this._focusScopeNode);
+
   Rect? currentFocusRect;
   Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
 
@@ -2024,13 +2131,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   set focusScopeNode(FocusScopeNode value) {
     if (focusScopeNode == value)
       return;
-    focusScopeNode.removeListener(_currentFocusListener);
     _focusScopeNode = value;
-    focusScopeNode.addListener(_currentFocusListener);
-  }
-
-  void _currentFocusListener() {
-    currentFocus = focusScopeNode.focusedChild;
   }
 
   @override
@@ -2069,11 +2170,11 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       || event.buttons != kPrimaryButton
       || event.kind != PointerDeviceKind.mouse
       || _shouldIgnoreEvents
-      || currentFocus == null) {
+      || _focusScopeNode.focusedChild == null) {
       return;
     }
     final BoxHitTestResult? result = cachedResults[entry];
-    final FocusNode? focusNode = currentFocus;
+    final FocusNode? focusNode = _focusScopeNode.focusedChild;
     if (focusNode == null || result == null)
       return;
 
@@ -2088,8 +2189,12 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         hitCurrentFocus = true;
         break;
       }
+      if (target is _RenderFocusTrapArea && target.focusNode == focusNode) {
+        hitCurrentFocus = true;
+        break;
+      }
     }
     if (!hitCurrentFocus)
-      focusNode.unfocus(disposition: UnfocusDisposition.scope);
+      focusNode.unfocus();
   }
 }

@@ -96,7 +96,6 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Slider(
-              min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
               label: '$seed',
@@ -960,7 +959,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       }
       _text = buffer.toString();
     });
-    SchedulerBinding.instance?.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');

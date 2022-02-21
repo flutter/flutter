@@ -6,8 +6,8 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
-import '../globals_null_migrated.dart' as globals;
-import '../project.dart';
+import '../cmake_project.dart';
+import '../globals.dart' as globals;
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({required String projectBundleId}) : super(id: projectBundleId);

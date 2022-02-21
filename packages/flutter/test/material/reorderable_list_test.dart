@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -69,7 +73,6 @@ void main() {
         final List<String> currentListItems = listItems.take(1).toList();
         final ReorderableListView reorderableListView = ReorderableListView(
           header: const Text('Header'),
-          scrollDirection: Axis.vertical,
           onReorder: (_, __) => onReorderWasCalled = true,
           children: currentListItems.map<Widget>(listItemToWidget).toList(),
         );
@@ -156,7 +159,6 @@ void main() {
 
       testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = ReorderableListView(
-          scrollDirection: Axis.vertical,
           onReorder: (int oldIndex, int newIndex) { },
           children: const <Widget>[
             SizedBox(
@@ -336,7 +338,6 @@ void main() {
                 width: 100,
                 height: 100,
                 child: ReorderableListView(
-                  scrollDirection: Axis.vertical,
                   children: const <Widget>[
                     SizedBox(key: firstBox, width: 10, height: 10),
                   ],
@@ -620,7 +621,6 @@ void main() {
         testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           final Widget reorderableListView = ReorderableListView(
-            scrollDirection: Axis.vertical,
             onReorder: (int oldIndex, int newIndex) { },
             children: <Widget>[
               const SizedBox(
@@ -1316,7 +1316,6 @@ void main() {
     testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
       const Key testItemKey = Key('Test item');
       final Widget reorderableListView = ReorderableListView(
-        scrollDirection: Axis.vertical,
         onReorder: (int oldIndex, int newIndex) { },
         children: const <Widget>[
           SizedBox(
@@ -1521,10 +1520,10 @@ void main() {
 
   testWidgets('ReorderableListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     expect(() => ReorderableListView(
-      children: const <Widget>[],
       itemExtent: 30,
       prototypeItem: const SizedBox(),
       onReorder: (int fromIndex, int toIndex) { },
+      children: const <Widget>[],
     ), throwsAssertionError);
   });
 

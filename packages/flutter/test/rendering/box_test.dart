@@ -37,6 +37,8 @@ class MissingSetSizeRenderBox extends RenderBox {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('should size to render view', () {
     final RenderBox root = RenderDecoratedBox(
       decoration: BoxDecoration(
@@ -341,7 +343,7 @@ void main() {
     );
     // Check that we can update the constrained axis to null.
     unconstrained.constrainedAxis = null;
-    renderer.reassembleApplication();
+    TestRenderingFlutterBinding.instance.reassembleApplication();
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(200.0), reason: 'unconstrained height');
@@ -384,7 +386,7 @@ void main() {
     void exhaustErrors() {
       FlutterErrorDetails? next;
       do {
-        next = renderer.takeFlutterErrorDetails();
+        next = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
         firstErrorDetails ??= next;
       } while (next != null);
     }
@@ -596,7 +598,6 @@ void main() {
       constrainedAxis: Axis.horizontal,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
-        direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
         children: <RenderBox>[flexible],
       ),
@@ -648,7 +649,7 @@ void main() {
       child: box200x200,
     );
     layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultBox.paint(context, Offset.zero);
+    context.paintChild(defaultBox, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
@@ -659,7 +660,7 @@ void main() {
           clipBehavior: clip,
       );
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      box.paint(context, Offset.zero);
+      context.paintChild(box, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });
@@ -1085,9 +1086,9 @@ void main() {
 
     test('localToGlobal with ancestor', () {
       final RenderConstrainedBox innerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
-      final RenderPositionedBox innerCenter = RenderPositionedBox(alignment: Alignment.center, child: innerConstrained);
+      final RenderPositionedBox innerCenter = RenderPositionedBox(child: innerConstrained);
       final RenderConstrainedBox outerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100), child: innerCenter);
-      final RenderPositionedBox outerCentered = RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
+      final RenderPositionedBox outerCentered = RenderPositionedBox(child: outerConstrained);
 
       layout(outerCentered);
 

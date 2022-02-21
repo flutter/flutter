@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -37,7 +36,6 @@ void main() {
     final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
 
     expect(app.name, 'my_project');
-    expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
   });
 
   group('FlutterTesterDevices', () {
@@ -83,7 +81,7 @@ void main() {
     TestBuildSystem buildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),
@@ -97,7 +95,6 @@ void main() {
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         artifacts: Artifacts.test(),
-        buildDirectory: 'build',
         logger: BufferLogger.test(),
         flutterVersion: FakeFlutterVersion(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
@@ -157,7 +154,7 @@ void main() {
         completer: completer,
         stdout:
         '''
-Observatory listening on $observatoryUri
+The Dart VM service is listening on $observatoryUri
 Hello!
 ''',
       ));
@@ -181,7 +178,6 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
     artifacts: Artifacts.test(),
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
-    config: Config.test(),
     flutterVersion: FakeFlutterVersion(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
   );

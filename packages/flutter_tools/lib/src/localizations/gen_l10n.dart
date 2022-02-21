@@ -87,7 +87,7 @@ List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.map((Placeholder placeholder) {
-    final String? type = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '$type ${placeholder.name}';
   }).toList();
 }
@@ -111,20 +111,28 @@ String generateDateFormattingLogic(Message message) {
           'date formats.'
         );
       }
-      if (!placeholder.hasValidDateFormat) {
+      final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
+      if (!placeholder.hasValidDateFormat
+          && (isCustomDateFormat == null || !isCustomDateFormat)) {
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
           "constructor\n. Check the intl library's DateFormat class "
-          'constructors for allowed date formats.'
+          'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
+          'to "true".'
         );
       }
-      return dateFormatTemplate
+      if (placeholder.hasValidDateFormat) {
+        return dateFormatTemplate
+          .replaceAll('@(placeholder)', placeholder.name)
+          .replaceAll('@(format)', placeholderFormat);
+      }
+      return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholderFormat);
+        .replaceAll('@(format)', generateString(placeholderFormat));
     });
 
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
+  return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
 String generateNumberFormattingLogic(Message message) {
@@ -166,7 +174,60 @@ String generateNumberFormattingLogic(Message message) {
       }
     });
 
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
+  return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
+}
+
+/// To make it easier to parse plurals or select messages, temporarily replace
+/// each "{placeholder}" parameter with "#placeholder#" for example.
+String _replacePlaceholdersBraces(
+  String translationForMessage,
+  Iterable<Placeholder> placeholders,
+  String replacementBraces,
+) {
+  assert(replacementBraces.length == 2);
+  String easyMessage = translationForMessage;
+  for (final Placeholder placeholder in placeholders) {
+    easyMessage = easyMessage.replaceAll(
+      '{${placeholder.name}}',
+      '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}',
+    );
+  }
+  return easyMessage;
+}
+
+/// Replaces message with the interpolated variable name of the given placeholders
+/// with the ability to change braces to something other than {...}.
+///
+/// Examples:
+///
+/// * Replacing `{userName}`.
+/// ```dart
+/// final message = 'Hello my name is {userName}';
+/// final transformed = _replacePlaceholdersWithVariables(message, placeholders);
+/// // transformed == 'Hello my name is $userName'
+/// ```
+/// * Replacing `#choice#`.
+/// ```dart
+/// final message = 'I would like to have some #choice#';
+/// final transformed = _replacePlaceholdersWithVariables(message, placeholders, '##');
+/// transformed == 'I would like to have some $choice'
+/// ```
+String _replacePlaceholdersWithVariables(String message, Iterable<Placeholder> placeholders, [String braces = '{}']) {
+  assert(braces.length == 2);
+  String messageWithValues = message;
+  for (final Placeholder placeholder in placeholders) {
+    String variable = placeholder.name;
+    if (placeholder.requiresFormatting) {
+      variable += 'String';
+    }
+    messageWithValues = messageWithValues.replaceAll(
+      '${braces[0]}${placeholder.name}${braces[1]}',
+      _needsCurlyBracketStringInterpolation(messageWithValues, placeholder.name)
+        ? '\${$variable}'
+        : '\$$variable'
+    );
+  }
+  return messageWithValues;
 }
 
 String _generatePluralMethod(Message message, String translationForMessage) {
@@ -178,12 +239,7 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     );
   }
 
-  // To make it easier to parse the plurals message, temporarily replace each
-  // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = translationForMessage;
-  for (final Placeholder placeholder in message.placeholders) {
-    easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
-  }
+  final String easyMessage = _replacePlaceholdersBraces(translationForMessage, message.placeholders, '##');
 
   final Placeholder countPlaceholder = message.getCountPlaceholder();
   const Map<String, String> pluralIds = <String, String>{
@@ -200,44 +256,121 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
     final RegExpMatch? match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      String argValue = generateString(match.group(2)!);
-      for (final Placeholder placeholder in message.placeholders) {
-        if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}String}'
-              : '\$${placeholder.name}String'
-          );
-        } else {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}}'
-              : '\$${placeholder.name}'
-          );
-        }
-      }
+      final String argValue = _replacePlaceholdersWithVariables(generateString(match.group(2)!), message.placeholders, '##');
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
 
   final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String? placeholderType = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? placeholderType = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '$placeholderType ${placeholder.name}';
   }).toList();
 
   final String comment = message.description ?? 'No description provided in @${message.resourceId}';
 
-  return pluralMethodTemplate
+  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
+    return pluralMethodTemplate
+      .replaceAll('@(comment)', comment)
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(count)', countPlaceholder.name)
+      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
+      .replaceAll('@(none)\n', '');
+  }
+
+  const String variable = 'pluralString';
+  final String string = _replaceWithVariable(translationForMessage, variable);
+  return pluralMethodTemplateInString
     .replaceAll('@(comment)', comment)
     .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(parameters)', parameters.join(', '))
     .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
     .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+    .replaceAll('@(parameters)', parameters.join(', '))
+    .replaceAll('@(variable)', variable)
     .replaceAll('@(count)', countPlaceholder.name)
     .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-    .replaceAll('@(none)\n', '');
+    .replaceAll('@(none)\n', '')
+    .replaceAll('@(string)', string);
+}
+
+String _replaceWithVariable(String translation, String variable) {
+  String prefix = generateString(translation.substring(0, translation.indexOf('{')));
+  prefix = prefix.substring(0, prefix.length - 1);
+  String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
+  suffix = suffix.substring(1);
+
+  // escape variable when the suffix can be combined with the variable
+  if (suffix.isNotEmpty && !suffix.startsWith(' ')) {
+    variable = '{$variable}';
+  }
+  return prefix + r'$' + variable + suffix;
+}
+
+String _generateSelectMethod(Message message, String translationForMessage) {
+  if (message.placeholders.isEmpty) {
+    throw L10nException(
+      'Unable to find placeholders for the select message: ${message.resourceId}.\n'
+      'Check to see if the select message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  }
+
+  final String easyMessage = _replacePlaceholdersBraces(translationForMessage, message.placeholders, '##');
+
+  final List<String> cases = <String>[];
+
+  final RegExpMatch? selectMatch = LocalizationsGenerator._selectRE.firstMatch(easyMessage);
+  String? choice;
+  if (selectMatch != null && selectMatch.groupCount == 2) {
+    choice = selectMatch.group(1);
+    final String pattern = selectMatch.group(2)!;
+    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
+    for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
+      if (patternMatch.groupCount == 2) {
+        String value = patternMatch.group(2)!
+          .replaceAll("'", r"\'")
+          .replaceAll('"', r'\"');
+        value = _replacePlaceholdersWithVariables(value, message.placeholders, '##');
+        cases.add(
+          "        '${patternMatch.group(1)}': '$value'",
+        );
+      }
+    }
+  } else {
+    throw L10nException(
+      'Incorrect select message format for: ${message.resourceId}.\n'
+      'Check to see if the select message is in the proper ICU syntax format.'
+    );
+  }
+
+  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
+    final String placeholderType = placeholder.type ?? 'object';
+    return '$placeholderType ${placeholder.name}';
+  }).toList();
+
+  final String description = message.description ?? 'No description provided in @${message.resourceId}';
+
+  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
+    return selectMethodTemplate
+        .replaceAll('@(name)', message.resourceId)
+        .replaceAll('@(parameters)', parameters.join(', '))
+        .replaceAll('@(choice)', choice!)
+        .replaceAll('@(cases)', cases.join(',\n').trim())
+        .replaceAll('@(description)', description);
+  }
+
+  const String variable = 'selectString';
+  final String string = _replaceWithVariable(translationForMessage, variable);
+  return selectMethodTemplateInString
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(variable)', variable)
+      .replaceAll('@(choice)', choice!)
+      .replaceAll('@(cases)', cases.join(',\n').trim())
+      .replaceAll('@(description)', description)
+      .replaceAll('@(string)', string);
 }
 
 bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
@@ -279,30 +412,15 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
 
 String _generateMethod(Message message, String translationForMessage) {
   String generateMessage() {
-    String messageValue = generateString(translationForMessage);
-    for (final Placeholder placeholder in message.placeholders) {
-      if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}String}'
-            : '\$${placeholder.name}String'
-        );
-      } else {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}}'
-            : '\$${placeholder.name}'
-        );
-      }
-    }
-
-    return messageValue;
+    return _replacePlaceholdersWithVariables(generateString(translationForMessage), message.placeholders);
   }
 
   if (message.isPlural) {
     return _generatePluralMethod(message, translationForMessage);
+  }
+
+  if (message.isSelect) {
+    return _generateSelectMethod(message, translationForMessage);
   }
 
   if (message.placeholdersRequireFormatting) {
@@ -541,11 +659,11 @@ String _generateDelegateClass({
     useDeferredLoading ? loadBodyDeferredLoadingTemplate : loadBodyTemplate
   )
     .replaceAll('@(class)', className)
-    .replaceAll('@(lookupName)', '_lookup$className');
+    .replaceAll('@(lookupName)', 'lookup$className');
   final String lookupFunction = (useDeferredLoading ?
   lookupFunctionDeferredLoadingTemplate : lookupFunctionTemplate)
     .replaceAll('@(class)', className)
-    .replaceAll('@(lookupName)', '_lookup$className')
+    .replaceAll('@(lookupName)', 'lookup$className')
     .replaceAll('@(lookupBody)', lookupBody);
   return delegateClassTemplate
     .replaceAll('@(class)', className)
@@ -740,6 +858,8 @@ class LocalizationsGenerator {
   /// Resource attributes provide metadata about the message.
   @visibleForTesting
   final bool areResourceAttributesRequired;
+
+  static final RegExp _selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1071,6 +1191,12 @@ class LocalizationsGenerator {
 
     final String directory = _fs.path.basename(outputDirectory.path);
     final String outputFileName = _fs.path.basename(baseOutputFile.path);
+    if (!outputFileName.endsWith('.dart')) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The file name must have a .dart extension.'
+      );
+    }
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
@@ -1093,10 +1219,18 @@ class LocalizationsGenerator {
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
-    final String fileName = outputFileName.split('.')[0];
+    final int extensionIndex = outputFileName.indexOf('.');
+    if (extensionIndex <= 0) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The base name cannot be empty.'
+      );
+    }
+    final String fileName = outputFileName.substring(0, extensionIndex);
+    final String fileExtension = outputFileName.substring(extensionIndex + 1);
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.dart');
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
 
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
@@ -1133,9 +1267,9 @@ class LocalizationsGenerator {
       .map((LocaleInfo locale) {
         final String library = '${fileName}_${locale.toString()}';
         if (useDeferredLoading) {
-          return "import '$library.dart' deferred as $library;";
+          return "import '$library.$fileExtension' deferred as $library;";
         } else {
-          return "import '$library.dart';";
+          return "import '$library.$fileExtension';";
         }
       })
       .toList()
@@ -1168,7 +1302,11 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _requiresIntlImport() => _allMessages.any((Message message) => message.isPlural || message.placeholdersRequireFormatting);
+  bool _requiresIntlImport() => _allMessages.any((Message message) {
+    return message.isPlural
+        || message.isSelect
+        || message.placeholdersRequireFormatting;
+  });
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
@@ -1177,7 +1315,9 @@ class LocalizationsGenerator {
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.
     if (useSyntheticPackage) {
-      final Directory syntheticPackageDirectory = _fs.directory(_defaultSyntheticPackagePath(_fs));
+      final Directory syntheticPackageDirectory = projectDirectory != null
+          ? projectDirectory!.childDirectory(_defaultSyntheticPackagePath(_fs))
+          : _fs.directory(_defaultSyntheticPackagePath(_fs));
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {

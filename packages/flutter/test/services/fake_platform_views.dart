@@ -59,7 +59,7 @@ class FakeAndroidViewController implements AndroidViewController {
   final int viewId;
 
   @override
-  Offset Function(Offset position)? pointTransformer;
+  late PointTransformer pointTransformer;
 
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
@@ -96,9 +96,6 @@ class FakeAndroidViewController implements AndroidViewController {
   @override
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) =>
       throw UnimplementedError();
-
-  @override
-  int get id => throw UnimplementedError();
 
   @override
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
@@ -141,6 +138,8 @@ class FakeAndroidPlatformViewsController {
 
   int? lastClearedFocusViewId;
 
+  bool synchronizeToNativeViewHierarchy = true;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -148,7 +147,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance!.defaultBinaryMessenger
+    ServicesBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
@@ -166,6 +165,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'synchronizeToNativeViewHierarchy':
+        return _synchronizeToNativeViewHierarchy(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -208,11 +209,10 @@ class FakeAndroidPlatformViewsController {
 
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
+    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
 
-    // ignore: avoid_dynamic_calls
-    final int id = call.arguments['id'] as int;
-    // ignore: avoid_dynamic_calls
-    final bool hybrid = call.arguments['hybrid'] as bool;
+    final int id = arguments['id']! as int;
+    final bool hybrid = arguments['hybrid']! as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {
       throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
@@ -298,6 +298,11 @@ class FakeAndroidPlatformViewsController {
       );
 
     lastClearedFocusViewId = id;
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _synchronizeToNativeViewHierarchy(MethodCall call) {
+    synchronizeToNativeViewHierarchy = call.arguments as bool;
     return Future<dynamic>.sync(() => null);
   }
 }

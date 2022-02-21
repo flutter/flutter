@@ -28,7 +28,7 @@ const FakeCommand kARMCheckCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=8.0',
+  '-miphoneos-version-min=9.0',
   '-isysroot',
   'path/to/sdk',
   '-dynamiclib',
@@ -83,7 +83,6 @@ void main() {
 
       final int result = await genSnapshot.run(
         snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
-        darwinArch: null,
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -141,7 +140,6 @@ void main() {
 
       final int result = await genSnapshot.run(
         snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
-        darwinArch: null,
         additionalArgs: <String>['--strip'],
       );
 
@@ -186,7 +184,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       ), isNot(equals(0)));
     });
@@ -200,7 +197,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       ), isNot(0));
     });
@@ -214,7 +210,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       ), isNot(0));
     });
@@ -245,7 +240,7 @@ void main() {
           'cc',
           '-arch',
           'armv7',
-          '-miphoneos-version-min=8.0',
+          '-miphoneos-version-min=9.0',
           '-isysroot',
           'path/to/sdk',
           '-fembed-bitcode',
@@ -259,7 +254,7 @@ void main() {
           'clang',
           '-arch',
           'armv7',
-          '-miphoneos-version-min=8.0',
+          '-miphoneos-version-min=9.0',
           '-isysroot',
           'path/to/sdk',
           '-dynamiclib',
@@ -288,7 +283,6 @@ void main() {
         darwinArch: DarwinArch.armv7,
         sdkRoot: 'path/to/sdk',
         bitcode: true,
-        splitDebugInfo: null,
         dartObfuscation: false,
       );
 
@@ -325,7 +319,7 @@ void main() {
           'cc',
           '-arch',
           'armv7',
-          '-miphoneos-version-min=8.0',
+          '-miphoneos-version-min=9.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -385,7 +379,7 @@ void main() {
           'cc',
           '-arch',
           'armv7',
-          '-miphoneos-version-min=8.0',
+          '-miphoneos-version-min=9.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -410,7 +404,6 @@ void main() {
         darwinArch: DarwinArch.armv7,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: true,
       );
 
@@ -443,7 +436,7 @@ void main() {
           'cc',
           '-arch',
           'armv7',
-          '-miphoneos-version-min=8.0',
+          '-miphoneos-version-min=9.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -468,7 +461,6 @@ void main() {
         darwinArch: DarwinArch.armv7,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       );
 
@@ -499,7 +491,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=8.0',
+          '-miphoneos-version-min=9.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -524,7 +516,6 @@ void main() {
         darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       );
 
@@ -553,7 +544,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       );
 
@@ -615,7 +605,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: true,
       );
 
@@ -671,7 +660,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
       );
 
@@ -697,7 +685,6 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
         dartObfuscation: false,
         extraGenSnapshotOptions: const <String>['--no-strip'],
       );

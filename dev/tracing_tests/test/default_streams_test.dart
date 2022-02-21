@@ -37,5 +37,5 @@ void main() {
       'Embedder',
       'GC',
     ]));
-  }, skip: isBrowser); // uses dart:isolate and io
+  }, skip: isBrowser); // [intended] uses dart:isolate and io.
 }

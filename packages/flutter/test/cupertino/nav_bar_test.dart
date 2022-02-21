@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -138,7 +142,6 @@ void main() {
             // the nav bar position it horizontally.
             middle: Align(
               key: middleBox,
-              alignment: Alignment.center,
               widthFactor: 1.0,
               child: const Text('Title'),
             ),
@@ -971,8 +974,11 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
-  });
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ));
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -991,8 +997,11 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
-  });
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ));
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoNavigationBarBackButton());
@@ -1185,8 +1194,6 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 CupertinoSliverNavigationBar(
-                  automaticallyImplyLeading: true,
-                  automaticallyImplyTitle: true,
                   previousPageTitle: 'previous title',
                 ),
               ],
@@ -1279,7 +1286,6 @@ void main() {
                 const CupertinoSliverNavigationBar(
                   trailing: trailingText,
                   largeTitle: titleText,
-                  stretch: false,
                 ),
                 SliverToBoxAdapter(
                   child: Container(

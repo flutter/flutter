@@ -7,7 +7,7 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show FakePlatform;
+import 'package:platform/platform.dart' show FakePlatform, Platform;
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import '../prepare_package.dart';
@@ -34,7 +34,7 @@ void main() {
       )),
     );
   });
-  for (final String platformName in <String>['macos', 'linux', 'windows']) {
+  for (final String platformName in <String>[Platform.macOS, Platform.linux, Platform.windows]) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{
@@ -74,16 +74,17 @@ void main() {
       });
     });
     group('ArchiveCreator for $platformName', () {
-      ArchiveCreator creator;
-      Directory tempDir;
+      late ArchiveCreator creator;
+      late Directory tempDir;
       Directory flutterDir;
       Directory cacheDir;
-      FakeProcessManager processManager;
+      late FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
-      String flutter;
+      late String flutter;
+      late String dart;
 
-      Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String> headers}) {
+      Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String>? headers}) {
         return Future<Uint8List>.value(Uint8List(0));
       }
 
@@ -106,7 +107,10 @@ void main() {
           platform: platform,
           httpReader: fakeHttpReader,
         );
-        flutter = path.join(creator.flutterRoot.absolute.path, 'bin', 'flutter');
+        flutter = path.join(creator.flutterRoot.absolute.path,
+          'bin', 'flutter');
+        dart = path.join(creator.flutterRoot.absolute.path,
+          'bin', 'cache', 'dart-sdk', 'bin', 'dart');
       });
 
       tearDown(() async {
@@ -118,11 +122,18 @@ void main() {
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
 
-        processManager.addCommands(convertResults(<String, List<ProcessResult>>{
+        processManager.addCommands(convertResults(<String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
+          '$dart --version': <ProcessResult>[
+            ProcessResult(0, 0, 'Dart SDK version: 2.17.0-63.0.dev (dev) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_x64"', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -147,11 +158,65 @@ void main() {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
+          '$dart --version': <ProcessResult>[
+            ProcessResult(0, 0, 'Dart SDK version: 2.17.0-63.0.dev (dev) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_x64"', ''),
+          ],
+          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
+          '$flutter doctor': null,
+          '$flutter update-packages': null,
+          '$flutter precache': null,
+          '$flutter ide-config': null,
+          '$flutter create --template=app ${createBase}app': null,
+          '$flutter create --template=package ${createBase}package': null,
+          '$flutter create --template=plugin ${createBase}plugin': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
+          if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
+          if (platform.isWindows) 'attrib -h .git': null,
+          if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
+          else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
+        };
+        processManager.addCommands(convertResults(calls));
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.dev,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+        );
+        await creator.initializeRepo();
+        await creator.createArchive();
+      });
+
+      test('adds the arch name to the archive for non-x64', () async {
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_arm64_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
+          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git reset --hard $testRef': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
+          '$dart --version': <ProcessResult>[
+            ProcessResult(0, 0, 'Dart SDK version: 2.17.0-63.0.dev (dev) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_arm64"', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -197,11 +262,18 @@ void main() {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
+          '$dart --version': <ProcessResult>[
+            ProcessResult(0, 0, 'Dart SDK version: 2.17.0-63.0.dev (dev) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_x64"', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -239,11 +311,18 @@ void main() {
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final ProcessResult codesignFailure = ProcessResult(1, 1, '', 'code object is not signed at all');
         final String binPath = path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
+          '$dart --version': <ProcessResult>[
+            ProcessResult(0, 0, 'Dart SDK version: 2.17.0-63.0.dev (dev) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_x64"', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -266,7 +345,6 @@ void main() {
           tempDir,
           testRef,
           Branch.dev,
-          strict: true,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -282,14 +360,14 @@ void main() {
             contains('The binary $binPath was not codesigned!'),
           )),
         );
-      }, skip: !platform.isMacOS);
+      }, skip: !platform.isMacOS); // [intended] codesign is only available on macOS
     });
 
     group('ArchivePublisher for $platformName', () {
-      FakeProcessManager processManager;
-      Directory tempDir;
+      late FakeProcessManager processManager;
+      late Directory tempDir;
       final String gsutilCall = platform.isWindows
-          ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+          ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
           : 'gsutil.py';
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
@@ -346,7 +424,7 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
@@ -363,7 +441,11 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
           outputFile,
           false,
           processManager: processManager,
@@ -399,6 +481,85 @@ void main() {
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
+      });
+
+      test('contains Dart SDK version info', () async {
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final String gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final String releasesJson = '''
+{
+  "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
+  "current_release": {
+    "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
+    "dev": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
+  },
+  "releases": [
+    {
+      "hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0",
+      "channel": "dev",
+      "version": "v0.2.3",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip",
+      "sha256": "4fe85a822093e81cb5a66c7fc263f68de39b5797b294191b6d75e7afcc86aff8"
+    },
+    {
+      "hash": "b9bd51cc36b706215915711e580851901faebb40",
+      "channel": "beta",
+      "version": "v0.2.2",
+      "release_date": "2018-03-16T18:48:13.375013Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip",
+      "sha256": "6073331168cdb37a4637a5dc073d6a7ef4e466321effa2c529fa27d2253a4d4b"
+    },
+    {
+      "hash": "$testRef",
+      "channel": "stable",
+      "version": "v0.0.0",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip",
+      "sha256": "5dd34873b3a3e214a32fd30c2c319a0f46e608afb72f0d450b2d621a6d02aebd"
+    }
+  ]
+}
+''';
+        File(jsonPath).writeAsStringSync(releasesJson);
+        File(archivePath).writeAsStringSync('archive contents');
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
+          // This process fails because the file does NOT already exist
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
+        };
+        processManager.addCommands(convertResults(calls));
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        outputFile.createSync();
+        assert(tempDir.existsSync());
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
+          outputFile,
+          false,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        assert(tempDir.existsSync());
+        await publisher.publishArchive();
+
+        final File releaseFile = File(jsonPath);
+        expect(releaseFile.existsSync(), isTrue);
+        final String contents = releaseFile.readAsStringSync();
+        expect(contents, contains('"dart_sdk_version": "3.2.1"'));
+        expect(contents, contains('"dart_sdk_arch": "x64"'));
       });
 
       test('updates base_url from old bucket to new bucket', () async {
@@ -442,7 +603,7 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
@@ -459,7 +620,11 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
           outputFile,
           false,
           processManager: processManager,
@@ -483,7 +648,11 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
           outputFile,
           false,
           processManager: processManager,
@@ -495,7 +664,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.addCommands(convertResults(calls));
-        expect(() async => publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(), throwsException);
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
@@ -505,7 +674,11 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
           outputFile,
           false,
           processManager: processManager,
@@ -552,7 +725,7 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -567,10 +740,10 @@ void main() {
   }
 }
 
-List<FakeCommand> convertResults(Map<String, List<ProcessResult>> results) {
+List<FakeCommand> convertResults(Map<String, List<ProcessResult>?> results) {
   final List<FakeCommand> commands = <FakeCommand>[];
   for (final String key in results.keys) {
-    final List<ProcessResult> candidates = results[key];
+    final List<ProcessResult>? candidates = results[key];
     final List<String> args = key.split(' ');
     if (candidates == null) {
       commands.add(FakeCommand(
@@ -581,8 +754,8 @@ List<FakeCommand> convertResults(Map<String, List<ProcessResult>> results) {
         commands.add(FakeCommand(
           command: args,
           exitCode: result.exitCode,
-          stderr: result.stderr?.toString(),
-          stdout: result.stdout?.toString(),
+          stderr: result.stderr.toString(),
+          stdout: result.stdout.toString(),
         ));
       }
     }

@@ -17,6 +17,8 @@ int countSemanticsChildren(RenderObject object) {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderOpacity and children and semantics', () {
     final RenderOpacity box = RenderOpacity(
       child: RenderParagraph(
@@ -42,7 +44,6 @@ void main() {
   test('RenderOpacity and children and semantics', () {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final RenderAnimatedOpacity box = RenderAnimatedOpacity(
-      alwaysIncludeSemantics: false,
       opacity: controller,
       child: RenderParagraph(
         const TextSpan(),

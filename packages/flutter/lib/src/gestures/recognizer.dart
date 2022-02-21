@@ -14,6 +14,7 @@ import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'events.dart';
+import 'gesture_settings.dart';
 import 'pointer_router.dart';
 import 'team.dart';
 
@@ -80,6 +81,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This is used in the [toString] serialization to report the object for which
   /// this gesture recognizer was created, to aid in debugging.
   final Object? debugOwner;
+
+  /// Optional device specific configuration for device gestures that will
+  /// take precedence over framework defaults.
+  DeviceGestureSettings? gestureSettings;
 
   /// The kind of devices that are allowed to be recognized as provided by
   /// `supportedDevices` in the constructor, or the currently deprecated `kind`.
@@ -194,10 +199,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield StringProperty('Handler', name);
-          yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
-        };
+        collector = () => <DiagnosticsNode>[
+          StringProperty('Handler', name),
+          DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty),
+        ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(
@@ -295,7 +300,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
-    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.from(_entries.values);
+    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.of(_entries.values);
     _entries.clear();
     for (final GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
@@ -317,7 +322,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void dispose() {
     resolve(GestureDisposition.rejected);
     for (final int pointer in _trackedPointers)
-      GestureBinding.instance!.pointerRouter.removeRoute(pointer, handleEvent);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
     super.dispose();
@@ -347,7 +352,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   GestureArenaEntry _addPointerToArena(int pointer) {
     if (_team != null)
       return _team!.add(pointer, this);
-    return GestureBinding.instance!.gestureArena.add(pointer, this);
+    return GestureBinding.instance.gestureArena.add(pointer, this);
   }
 
   /// Causes events related to the given pointer ID to be routed to this recognizer.
@@ -366,7 +371,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// This is called by [OneSequenceGestureRecognizer.addAllowedPointer].
   @protected
   void startTrackingPointer(int pointer, [Matrix4? transform]) {
-    GestureBinding.instance!.pointerRouter.addRoute(pointer, handleEvent, transform);
+    GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent, transform);
     _trackedPointers.add(pointer);
     assert(!_entries.containsValue(pointer));
     _entries[pointer] = _addPointerToArena(pointer);
@@ -381,7 +386,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   void stopTrackingPointer(int pointer) {
     if (_trackedPointers.contains(pointer)) {
-      GestureBinding.instance!.pointerRouter.removeRoute(pointer, handleEvent);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
       _trackedPointers.remove(pointer);
       if (_trackedPointers.isEmpty)
         didStopTrackingLastPointer(pointer);

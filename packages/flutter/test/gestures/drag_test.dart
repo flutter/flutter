@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize pan', (GestureTester tester) {
     final PanGestureRecognizer pan = PanGestureRecognizer();
@@ -578,7 +578,7 @@ void main() {
       velocity = details.velocity;
     };
 
-    final TestPointer pointer = TestPointer(1);
+    final TestPointer pointer = TestPointer();
     final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
     drag.addPointer(down);
     tester.closeArena(1);
@@ -611,7 +611,7 @@ void main() {
       velocity = details.velocity;
     };
 
-    final TestPointer pointer = TestPointer(1);
+    final TestPointer pointer = TestPointer();
     final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
     drag.addPointer(down);
     tester.closeArena(1);
@@ -751,7 +751,7 @@ void main() {
     };
 
     // Using a touch pointer to drag shouldn't be recognized.
-    final TestPointer touchPointer = TestPointer(5, PointerDeviceKind.touch);
+    final TestPointer touchPointer = TestPointer(5);
     final PointerDownEvent touchDown = touchPointer.down(const Offset(10.0, 10.0));
     drag.addPointer(touchDown);
     tester.closeArena(5);
@@ -1114,8 +1114,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1135,12 +1135,12 @@ void main() {
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['downT', 'upT']);
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['cancelH']);
       logs.clear();
     },
@@ -1167,8 +1167,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1188,13 +1188,13 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       // Tap is not triggered because pointer2 is not its primary pointer
       expect(logs, <String>[]);
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['cancelH', 'downT', 'upT']);
       logs.clear();
     },
@@ -1221,8 +1221,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1246,12 +1246,12 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>[]);
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1278,8 +1278,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1299,7 +1299,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['downT', 'upT']);
       logs.clear();
 
@@ -1308,7 +1308,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1335,8 +1335,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer();
+      final TestPointer pointer2 = TestPointer(2);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1364,7 +1364,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1390,10 +1390,10 @@ void main() {
       addTearDown(tap.dispose);
       addTearDown(drag.dispose);
 
-      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
-      final TestPointer pointer3 = TestPointer(3, PointerDeviceKind.touch);
-      final TestPointer pointer4 = TestPointer(4, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer();
+      final TestPointer pointer2 = TestPointer(2);
+      final TestPointer pointer3 = TestPointer(3);
+      final TestPointer pointer4 = TestPointer(4);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 11.0));
@@ -1426,7 +1426,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>[]);
 
       tester.route(pointer4.cancel());

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/file.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -12,6 +13,12 @@ import 'base/template.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 
+/// The Kotlin keywords which are not Java keywords.
+/// They are escaped in Kotlin files.
+///
+/// https://kotlinlang.org/docs/keyword-reference.html
+const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
 /// that should be replaced with the corresponding image from
@@ -21,7 +28,9 @@ import 'dart/package_map.dart';
 /// such a directory may also contain the '.tmpl' or '.img.tmpl' extensions and
 /// will be considered for expansion. In case certain files need to be copied
 /// but without template expansion (data files, etc.), the '.copy.tmpl'
-/// extension may be used.
+/// extension may be used. Furthermore, templates may contain additional
+/// test files intended to run on the CI. Test files must end in `.test.tmpl`
+/// and are only included when the --implementation-tests flag is enabled.
 ///
 /// Folders with platform/language-specific content must be named
 /// '<platform>-<language>.tmpl'.
@@ -29,7 +38,24 @@ import 'dart/package_map.dart';
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  Template(Directory templateSource, Directory baseDir, this.imageSourceDir, {
+  factory Template(Directory templateSource, Directory? imageSourceDir, {
+    required FileSystem fileSystem,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+    Set<Uri>? templateManifest,
+  }) {
+    return Template._(
+      <Directory>[templateSource],
+      imageSourceDir != null ? <Directory>[imageSourceDir] : <Directory>[],
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
+      templateManifest: templateManifest,
+    );
+  }
+
+  Template._(
+    List<Directory> templateSources, this.imageSourceDirectories, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
@@ -38,12 +64,18 @@ class Template {
        _logger = logger,
        _templateRenderer = templateRenderer,
        _templateManifest = templateManifest ?? <Uri>{} {
-    if (!templateSource.existsSync()) {
-      return;
+    for (final Directory sourceDirectory in templateSources) {
+      if (!sourceDirectory.existsSync()) {
+        throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
+      }
     }
 
-    final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
-    for (final FileSystemEntity entity in templateFiles.whereType<File>()) {
+    final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
+      for (final Directory sourceDirectory in templateSources)
+        for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true))
+          entity: sourceDirectory,
+    };
+    for (final FileSystemEntity entity in templateFiles.keys.whereType<File>()) {
       if (_templateManifest.isNotEmpty && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
         _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
@@ -51,7 +83,7 @@ class Template {
       }
 
       final String relativePath = fileSystem.path.relative(entity.path,
-          from: baseDir.absolute.path);
+          from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
@@ -70,9 +102,33 @@ class Template {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
     final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
-    return Template(
-      templateDir,
-      templateDir, imageDir,
+    return Template._(
+      <Directory>[templateDir],
+      <Directory>[imageDir],
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
+      templateManifest: templateManifest,
+    );
+  }
+
+  static Future<Template> merged(List<String> names, Directory directory, {
+    required FileSystem fileSystem,
+    required Set<Uri> templateManifest,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+  }) async {
+    // All named templates are placed in the 'templates' directory
+    return Template._(
+      <Directory>[
+        for (final String name in names)
+          _templateDirectoryInPackage(name, fileSystem)
+      ],
+      <Directory>[
+        for (final String name in names)
+          if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
+            await _templateImageDirectory(name, fileSystem, logger)
+      ],
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,
@@ -88,8 +144,9 @@ class Template {
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
   static const String imageTemplateExtension = '.img.tmpl';
+  static const String testTemplateExtension = '.test.tmpl';
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
-  final Directory imageSourceDir;
+  final List<Directory> imageSourceDirectories;
 
   final Map<String /* relative */, String /* absolute source */> _templateFilePaths = <String, String>{};
 
@@ -109,6 +166,7 @@ class Template {
       throwToolExit('Failed to flutter create at ${destination.path}.');
     }
     int fileCount = 0;
+    final bool implementationTests = (context['implementationTests'] as bool?) == true;
 
     /// Returns the resolved destination path corresponding to the specified
     /// raw destination path, after performing language filtering and template
@@ -172,6 +230,7 @@ class Template {
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(copyTemplateExtension, '')
         .replaceAll(imageTemplateExtension, '')
+        .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
       if (android != null && android && androidIdentifier != null) {
@@ -194,6 +253,10 @@ class Template {
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final bool withRootModule = context['withRootModule'] as bool? ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
+        return;
+      }
+
+      if (!implementationTests && absoluteSourcePath.contains(testTemplateExtension)) {
         return;
       }
 
@@ -243,9 +306,19 @@ class Template {
       //         to be copied from the template image package.
 
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
-        final File imageSourceFile = _fileSystem.file(_fileSystem.path.join(
-            imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')));
-        imageSourceFile.copySync(finalDestinationFile.path);
+        final List<File> potentials = <File>[
+          for (final Directory imageSourceDir in imageSourceDirectories)
+            _fileSystem.file(_fileSystem.path
+                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')))
+        ];
+
+        if (potentials.any((File file) => file.existsSync())) {
+          final File imageSourceFile = potentials.firstWhere((File file) => file.existsSync());
+
+          imageSourceFile.copySync(finalDestinationFile.path);
+        } else {
+          throwToolExit('Image File not found ${finalDestinationFile.path}');
+        }
 
         return;
       }
@@ -255,6 +328,11 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
+        final String? androidIdentifier = context['androidIdentifier'] as String?;
+        if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
+          context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
+        }
+
         final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
@@ -292,4 +370,12 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Lo
       .parent
       .childDirectory('templates')
       .childDirectory(name);
+}
+
+String _escapeKotlinKeywords(String androidIdentifier) {
+  final List<String> segments = androidIdentifier.split('.');
+  final List<String> correctedSegments = segments.map(
+    (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
+  ).toList();
+  return correctedSegments.join('.');
 }

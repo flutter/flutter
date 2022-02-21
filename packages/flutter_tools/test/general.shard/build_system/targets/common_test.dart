@@ -37,7 +37,7 @@ void main() {
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    fileSystem = MemoryFileSystem.test(style: FileSystemStyle.posix);
+    fileSystem = MemoryFileSystem.test();
     androidEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -475,7 +475,7 @@ void main() {
         'cc',
         '-arch',
         'armv7',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-c',
@@ -488,7 +488,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-c',
@@ -501,7 +501,7 @@ void main() {
         'clang',
         '-arch',
         'armv7',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',
@@ -524,7 +524,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',
@@ -583,7 +583,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
@@ -598,7 +598,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',
@@ -659,7 +659,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
@@ -674,7 +674,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',

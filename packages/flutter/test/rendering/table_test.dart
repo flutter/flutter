@@ -15,6 +15,8 @@ RenderBox sizedBox(double width, double height) {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Table control test; tight', () {
     RenderTable table;
     layout(table = RenderTable(textDirection: TextDirection.ltr));
@@ -240,7 +242,7 @@ void main() {
         ),
       ],
       columnWidths: const <int, TableColumnWidth>{
-        0: FlexColumnWidth(1.0),
+        0: FlexColumnWidth(),
         1: FlexColumnWidth(0.123),
         2: FlexColumnWidth(0.123),
         3: FlexColumnWidth(0.123),
@@ -253,4 +255,26 @@ void main() {
     layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
     expect(table.hasSize, true);
   });
+
+  test('Table paints a borderRadius', () {
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.ltr,
+      border: TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0))),
+    );
+    layout(table);
+    table.setFlatChildren(2, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(),
+    ]);
+    pumpFrame();
+    expect(table, paints
+      ..path()
+      ..path()
+      ..drrect(
+        outer: RRect.fromLTRBR(0.0, 0.0, 800.0, 0.0, const Radius.circular(8.0)),
+        inner: RRect.fromLTRBR(1.0, 1.0, 799.0, -1.0, const Radius.circular(7.0)),
+      )
+    );
+  });
+
 }

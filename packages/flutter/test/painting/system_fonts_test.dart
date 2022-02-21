@@ -18,7 +18,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
       (ByteData? data) { },
@@ -36,7 +36,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -57,7 +57,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -75,12 +75,13 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
+    // ignore: avoid_dynamic_calls
     final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -101,13 +102,14 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
+    // ignore: avoid_dynamic_calls
     final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     // Simulates font missing.
     cache.clear();
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -128,20 +130,26 @@ void main() {
     );
     final dynamic state = tester.state(find.byType(CupertinoTimerPicker));
     // Simulates wrong metrics due to font missing.
+    // ignore: avoid_dynamic_calls
     state.numberLabelWidth = 0.0;
+    // ignore: avoid_dynamic_calls
     state.numberLabelHeight = 0.0;
+    // ignore: avoid_dynamic_calls
     state.numberLabelBaseline = 0.0;
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
     );
     // Metrics should be refreshed
+    // ignore: avoid_dynamic_calls
     expect(state.numberLabelWidth - 46.0 < precisionErrorTolerance, isTrue);
+    // ignore: avoid_dynamic_calls
     expect(state.numberLabelHeight - 23.0 < precisionErrorTolerance, isTrue);
+    // ignore: avoid_dynamic_calls
     expect(state.numberLabelBaseline - 18.400070190429688 < precisionErrorTolerance, isTrue);
     final Element element = tester.element(find.byType(CupertinoTimerPicker));
     expect(element.dirty, isTrue);
@@ -161,7 +169,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -187,7 +195,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -231,7 +239,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },

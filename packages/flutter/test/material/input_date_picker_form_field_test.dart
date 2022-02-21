@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -34,7 +36,7 @@ void main() {
           child: InputDatePickerFormField(
             key: key,
             initialDate: initialDate ?? DateTime(2016, DateTime.january, 15),
-            firstDate: firstDate ?? DateTime(2001, DateTime.january, 1),
+            firstDate: firstDate ?? DateTime(2001),
             lastDate: lastDate ?? DateTime(2031, DateTime.december, 31),
             onDateSubmitted: onDateSubmitted,
             onDateSaved: onDateSaved,
@@ -269,7 +271,6 @@ void main() {
       await tester.pumpWidget(_inputDatePickerField(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
           inputDecorationTheme: const InputDecorationTheme(
-            filled: false,
             border: border,
           ),
         ),
@@ -283,9 +284,13 @@ void main() {
         matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
       ));
       final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+      // ignore: avoid_dynamic_calls
       final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+      // ignore: avoid_dynamic_calls
       final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      // ignore: avoid_dynamic_calls
       final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      // ignore: avoid_dynamic_calls
       final Color containerColor = inputBorderPainter.blendedColor as Color;
 
       // Border should match
@@ -296,20 +301,4 @@ void main() {
     });
 
   });
-}
-
-class MockClipboard {
-  dynamic _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
 }

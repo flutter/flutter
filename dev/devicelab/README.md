@@ -27,7 +27,9 @@ When a device in the lab is free, it will pickup tasks that need to be completed
 
 1. If the task succeeds, the test runner reports the success and uploads its performance metrics to Flutter's infrastructure. Not
 all tasks record performance metrics.
-2. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
+2. If task fails, an auto rerun happens. Whenever the last run succeeds, the task will be reported as a success. For this case,
+a flake will be flagged and populated to the test result.
+3. If the task fails in all reruns, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
 
 ## Running tests locally
 
@@ -204,27 +206,14 @@ There are several PRs needed to add a DeviceLab task to CI.
 _TASK_- the name of your test that also matches the name of the
   file in `bin/tasks` without the `.dart` extension.
 
-1. Add prod builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
-  - Example PR: https://github.com/flutter/infra/pull/401/files
-  - This will need to soak for 15 minutes after merged to propagate (should show up in [LUCI console](https://ci.chromium.org/p/flutter/g/devicelab/console))
-  - There are various lists for the different testbeds a test can run on
-2. Add task to [flutter/flutter prod_builders.json](https://github.com/flutter/flutter/blob/master/dev/prod_builders.json)
-  - Example PR: https://github.com/flutter/flutter/pull/79913/files
-  - Set `flaky: true` for validation before blocking tree
-3. After 10 green runs, update [flutter/flutter prod_builders.json](https://github.com/flutter/flutter/blob/master/dev/prod_builders.json) to `flaky:false`
+1. Add target to
+   [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml)
+   - Mirror an existing one that has the recipe `devicelab_drone`
 
-If your test needs to run on multiple operating systems, create a separate test
-for each operating system.
+If your test needs to run on multiple operating systems, create a separate
+target for each operating system.
 
 ## Adding tests to presubmit
 
-Flutter's DeviceLab does not currently have capacity to run tests against physical devices in presubmit.
-
-Note that DeviceLab tests should generally require a tethered device. If you are adding host-only tests, considering adding your test to `packages/flutter_tools/test/integration.shard`.  Example: https://github.com/flutter/flutter/pull/73577/files"
-
-1. Add try builder to [flutter/infra devicelab_config.star](https://github.com/flutter/infra/blob/master/config/devicelab_config.star)
-  - Example PR: https://github.com/flutter/infra/pull/401/files
-  - This will need to soak for 15 minutes after merged to propagate
-  - There are various lists for the different testbeds a test can run on
-2. Add task to [flutter/flutter try_builders.json](https://github.com/flutter/flutter/blob/master/dev/try_builders.json)
-  - Example PR: https://github.com/flutter/flutter/pull/79913/files
+Flutter's DeviceLab has a limited capacity in presubmit. File an infra ticket
+to investigate feasibility of adding a test to presubmit.

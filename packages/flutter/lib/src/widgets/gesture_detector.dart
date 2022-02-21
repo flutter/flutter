@@ -114,6 +114,8 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// If this widget has a child, it defers to that child for its sizing behavior.
 /// If it does not have a child, it grows to fit the parent instead.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
+///
 /// By default a GestureDetector with an invisible child ignores touches;
 /// this behavior can be controlled with [behavior].
 ///
@@ -127,68 +129,24 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
-/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/gesture_detector.mp4}
+/// {@tool dartpad}
+/// This example contains a black light bulb wrapped in a [GestureDetector]. It
+/// turns the light bulb yellow when the "TURN LIGHT ON" button is tapped by
+/// setting the `_lights` field, and off again when "TURN LIGHT OFF" is tapped.
 ///
-/// {@tool snippet}
-///
-/// This example of a [Container] contains a black light bulb wrapped in a [GestureDetector].
-/// It turns the light bulb yellow when the "turn lights on" button is tapped
-/// by setting the `_lights` field. Above animation shows the code in use:
-///
-/// ```dart
-/// Container(
-///   alignment: FractionalOffset.center,
-///   color: Colors.white,
-///   child: Column(
-///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: <Widget>[
-///       Padding(
-///         padding: const EdgeInsets.all(8.0),
-///         child: Icon(
-///           Icons.lightbulb_outline,
-///           color: _lights ? Colors.yellow.shade600 : Colors.black,
-///           size: 60,
-///         ),
-///       ),
-///       GestureDetector(
-///         onTap: () {
-///           setState(() {
-///             _lights = true;
-///           });
-///         },
-///         child: Container(
-///           color: Colors.yellow.shade600,
-///           padding: const EdgeInsets.all(8),
-///           child: const Text('TURN LIGHTS ON'),
-///         ),
-///       ),
-///     ],
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/widgets/gesture_detector/gesture_detector.0.dart **
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This example uses a [Container] that wraps a [GestureDetector] widget which
+/// detects a tap.
 ///
-/// This example of a [Container] wraps a [GestureDetector] widget.
-/// Since the [GestureDetector] does not have a child it takes on the size of
-/// its parent making the entire area of the surrounding [Container] clickable.
-/// When tapped the [Container] turns yellow by setting the `_color` field:
+/// Since the [GestureDetector] does not have a child, it takes on the size of its
+/// parent, making the entire area of the surrounding [Container] clickable. When
+/// tapped, the [Container] turns yellow by setting the `_color` field. When
+/// tapped again, it goes back to white.
 ///
-/// ```dart
-/// Container(
-///   color: _color,
-///   height: 200.0,
-///   width: 200.0,
-///   child: GestureDetector(
-///     onTap: () {
-///       setState(() {
-///         _color = Colors.yellow;
-///       });
-///     },
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/widgets/gesture_detector/gesture_detector.1.dart **
 /// {@end-tool}
 ///
 /// ## Debugging

@@ -167,6 +167,19 @@ class VisualStudio {
     ]);
   }
 
+  /// The generator string to pass to CMake to select this Visual Studio
+  /// version.
+  String? get cmakeGenerator {
+    // From https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html#visual-studio-generators
+    switch (_majorVersion) {
+      case 17:
+        return 'Visual Studio 17 2022';
+      case 16:
+      default:
+        return 'Visual Studio 16 2019';
+    }
+  }
+
   /// The major version of the Visual Studio install, as an integer.
   int? get _majorVersion => fullVersion != null ? int.tryParse(fullVersion!.split('.')[0]) : null;
 
@@ -348,11 +361,7 @@ class VisualStudio {
   ///
   /// If no installation is found, the cached VS details are set to an empty map
   /// to avoid repeating vswhere queries that have already not found an installation.
-  Map<String, dynamic>? _cachedUsableVisualStudioDetails;
-  Map<String, dynamic> get _usableVisualStudioDetails {
-    if (_cachedUsableVisualStudioDetails != null) {
-      return _cachedUsableVisualStudioDetails!;
-    }
+  late final Map<String, dynamic> _usableVisualStudioDetails = (){
     final List<String> minimumVersionArguments = <String>[
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
@@ -370,16 +379,16 @@ class VisualStudio {
       }
     }
 
+    Map<String, dynamic>? usableVisualStudioDetails;
     if (visualStudioDetails != null) {
       if (installationHasIssues(visualStudioDetails)) {
         _cachedAnyVisualStudioDetails = visualStudioDetails;
       } else {
-        _cachedUsableVisualStudioDetails = visualStudioDetails;
+        usableVisualStudioDetails = visualStudioDetails;
       }
     }
-    _cachedUsableVisualStudioDetails ??= <String, dynamic>{};
-    return _cachedUsableVisualStudioDetails!;
-  }
+    return usableVisualStudioDetails ?? <String, dynamic>{};
+  }();
 
   /// Returns the details dictionary of the latest version of Visual Studio,
   /// regardless of components and version, or {} if no such installation is

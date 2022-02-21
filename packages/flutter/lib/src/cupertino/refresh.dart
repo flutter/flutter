@@ -266,54 +266,12 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
-/// {@tool dartpad --template=stateful_widget_cupertino}
-///
+/// {@tool dartpad}
 /// When the user scrolls past [refreshTriggerPullDistance],
 /// this sample shows the default iOS pull to refresh indicator for 1 second and
 /// adds a new item to the top of the list view.
 ///
-/// ```dart
-/// List<Color> colors = <Color>[
-///   CupertinoColors.systemYellow,
-///   CupertinoColors.systemOrange,
-///   CupertinoColors.systemPink
-/// ];
-/// List<Widget> items = <Widget>[
-///   Container(color: CupertinoColors.systemPink, height: 100.0),
-///   Container(color: CupertinoColors.systemOrange, height: 100.0),
-///   Container(color: CupertinoColors.systemYellow, height: 100.0),
-/// ];
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoApp(
-///     home: CupertinoPageScaffold(
-///       child: CustomScrollView(
-///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-///         slivers: <Widget>[
-///           const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
-///           CupertinoSliverRefreshControl(
-///             refreshTriggerPullDistance: 100.0,
-///             refreshIndicatorExtent: 60.0,
-///             onRefresh: () async {
-///               await Future<void>.delayed(const Duration(milliseconds: 1000));
-///               setState(() {
-///                 items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
-///               });
-///             },
-///           ),
-///           SliverList(
-///             delegate: SliverChildBuilderDelegate(
-///               (BuildContext context, int index) => items[index],
-///               childCount: items.length,
-///             ),
-///           ),
-///         ],
-///       )
-///     )
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/refresh/cupertino_sliver_refresh_control.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -506,10 +464,10 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
       nextState = RefreshIndicatorMode.done;
       // Either schedule the RenderSliver to re-layout on the next frame
       // when not currently in a frame or schedule it on the next frame.
-      if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
         setState(() => hasSliverLayoutExtent = false);
       } else {
-        SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
           setState(() => hasSliverLayoutExtent = false);
         });
       }
@@ -535,7 +493,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
             // Call onRefresh after this frame finished since the function is
             // user supplied and we're always here in the middle of the sliver's
             // performLayout.
-            SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+            SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
               refreshTask = widget.onRefresh!()..whenComplete(() {
                 if (mounted) {
                   setState(() => refreshTask = null);

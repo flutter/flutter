@@ -161,19 +161,21 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm)? f) {
-    throw UnimplementedError();
-  }
+  // ignore: override_on_non_overriding_member
+  Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
 
   @override
-  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm)? f) {
-    throw UnimplementedError();
-  }
+  Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
 
   @override
-  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port)? callback) {
-    throw UnimplementedError();
-  }
+  Future<bool> Function(String host, int port, String scheme, String realm)? authenticateProxy;
+
+  @override
+  bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
+
+  @override
+  // ignore: override_on_non_overriding_member
+  Function(String line)? keyLog;
 
   @override
   void close({bool force = false}) { }
@@ -190,7 +192,7 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
-  set findProxy(String Function(Uri url)? f) { }
+  String Function(Uri url)? findProxy;
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {

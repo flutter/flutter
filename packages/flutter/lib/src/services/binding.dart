@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -14,6 +13,9 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
+import 'message_codec.dart';
+import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -30,23 +32,49 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
+    _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [ServicesBinding], if one has been created.
-  static ServicesBinding? get instance => _instance;
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static ServicesBinding get instance => BindingBase.checkInstance(_instance);
   static ServicesBinding? _instance;
+
+  /// The global singleton instance of [HardwareKeyboard], which can be used to
+  /// query keyboard states.
+  HardwareKeyboard get keyboard => _keyboard;
+  late final HardwareKeyboard _keyboard;
+
+  /// The global singleton instance of [KeyEventManager], which is used
+  /// internally to dispatch key messages.
+  KeyEventManager get keyEventManager => _keyEventManager;
+  late final KeyEventManager _keyEventManager;
+
+  void _initKeyboard() {
+    _keyboard = HardwareKeyboard();
+    _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
+    window.onKeyData = _keyEventManager.handleKeyData;
+    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+  }
 
   /// The default instance of [BinaryMessenger].
   ///
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
+  ///
+  /// The default implementation returns a [BinaryMessenger] that delivers the
+  /// messages in the same order in which they are sent.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  late BinaryMessenger _defaultBinaryMessenger;
+  late final BinaryMessenger _defaultBinaryMessenger;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -72,6 +100,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
+  ///
+  /// Many Flutter framework components that communicate with the platform
+  /// assume messages are received by the platform in the same order in which
+  /// they are sent. When overriding this method, be sure the [BinaryMessenger]
+  /// implementation guarantees FIFO delivery.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
@@ -84,7 +117,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {
+    rootBundle.clear();
+  }
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.
@@ -113,49 +148,36 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     LicenseRegistry.addLicense(_addLicenses);
   }
 
-  Stream<LicenseEntry> _addLicenses() async* {
-    // Using _something_ here to break
-    // this into two parts is important because isolates take a while to copy
-    // data at the moment, and if we receive the data in the same event loop
-    // iteration as we send the data to the next isolate, we are definitely
-    // going to miss frames. Another solution would be to have the work all
-    // happen in one isolate, and we may go there eventually, but first we are
-    // going to see if isolate communication can be made cheaper.
-    // See: https://github.com/dart-lang/sdk/issues/31959
-    //      https://github.com/dart-lang/sdk/issues/31960
-    // TODO(ianh): Remove this complexity once these bugs are fixed.
-    final Completer<String> rawLicenses = Completer<String>();
-    scheduleTask(() async {
-      rawLicenses.complete(
-        kIsWeb
-            // NOTICES for web isn't compressed since we don't have access to
-            // dart:io on the client side and it's already compressed between
-            // the server and client.
-            ? rootBundle.loadString('NOTICES', cache: false)
-            : () async {
-              // The compressed version doesn't have a more common .gz extension
-              // because gradle for Android non-transparently manipulates .gz files.
-              final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
-              List<int> bytes = licenseBytes.buffer.asUint8List();
-              bytes = gzip.decode(bytes);
-              return utf8.decode(bytes);
-            }(),
-      );
-    }, Priority.animation);
-    await rawLicenses.future;
-    final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
-    scheduleTask(() async {
-      parsedLicenses.complete(compute<String, List<LicenseEntry>>(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
-    }, Priority.animation);
-    await parsedLicenses.future;
-    yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
+  Stream<LicenseEntry> _addLicenses() {
+    late final StreamController<LicenseEntry> controller;
+    controller = StreamController<LicenseEntry>(
+      onListen: () async {
+        late final String rawLicenses;
+        if (kIsWeb) {
+          // NOTICES for web isn't compressed since we don't have access to
+          // dart:io on the client side and it's already compressed between
+          // the server and client.
+          rawLicenses = await rootBundle.loadString('NOTICES', cache: false);
+        } else {
+          // The compressed version doesn't have a more common .gz extension
+          // because gradle for Android non-transparently manipulates .gz files.
+          final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
+          final List<int> unzippedBytes = await compute<List<int>, List<int>>(gzip.decode, licenseBytes.buffer.asUint8List(), debugLabel: 'decompressLicenses');
+          rawLicenses = await compute<List<int>, String>(utf8.decode, unzippedBytes, debugLabel: 'utf8DecodeLicenses');
+        }
+        final List<LicenseEntry> licenses = await compute<String, List<LicenseEntry>>(_parseLicenses, rawLicenses, debugLabel: 'parseLicenses');
+        licenses.forEach(controller.add);
+        await controller.close();
+      },
+    );
+    return controller.stream;
   }
 
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
-    final String _licenseSeparator = '\n${'-' * 80}\n';
+    final String licenseSeparator = '\n${'-' * 80}\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
-    final List<String> licenses = rawLicenses.split(_licenseSeparator);
+    final List<String> licenses = rawLicenses.split(licenseSeparator);
     for (final String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
@@ -229,6 +251,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return null;
   }
 
+  Future<void> _handlePlatformMessage(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    // There is only one incoming method call currently possible.
+    assert(method == 'SystemChrome.systemUIChange');
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    if (_systemUiChangeCallback != null) {
+      await _systemUiChangeCallback!(args[0] as bool);
+    }
+  }
+
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
@@ -263,7 +295,32 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   RestorationManager createRestorationManager() {
     return RestorationManager();
   }
+
+  SystemUiChangeCallback? _systemUiChangeCallback;
+
+  /// Sets the callback for the `SystemChrome.systemUIChange` method call
+  /// received on the [SystemChannels.platform] channel.
+  ///
+  /// This is typically not called directly. System UI changes that this method
+  /// responds to are associated with [SystemUiMode]s, which are configured
+  /// using [SystemChrome]. Use [SystemChrome.setSystemUIChangeCallback] to configure
+  /// along with other SystemChrome settings.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
+  ///     [SystemUiMode] to have visible when the application is running.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
+  void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
+    _systemUiChangeCallback = callback;
+  }
+
 }
+
+/// Signature for listening to changes in the [SystemUiMode].
+///
+/// Set by [SystemChrome.setSystemUIChangeCallback].
+typedef SystemUiChangeCallback = Future<void> Function(bool systemOverlaysAreVisible);
 
 /// The default implementation of [BinaryMessenger].
 ///
@@ -322,7 +379,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         try {
           response = await handler(data);
         } catch (exception, stack) {
-
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,

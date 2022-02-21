@@ -15,6 +15,7 @@ import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/logical_key_data.dart';
 import 'package:gen_keycodes/macos_code_gen.dart';
 import 'package:gen_keycodes/physical_key_data.dart';
+import 'package:gen_keycodes/testing_key_codes_gen.dart';
 import 'package:gen_keycodes/utils.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
 import 'package:gen_keycodes/windows_code_gen.dart';
@@ -71,7 +72,20 @@ String readDataFile(String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
+bool _assertsEnabled() {
+  bool enabledAsserts = false;
+  assert(() {
+    enabledAsserts = true;
+    return true;
+  }());
+  return enabledAsserts;
+}
+
 Future<void> main(List<String> rawArguments) async {
+  if (!_assertsEnabled()) {
+    print('The gen_keycodes script must be run with --enable-asserts.');
+    return;
+  }
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'engine-root',
@@ -118,7 +132,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'collect',
-    defaultsTo: false,
     negatable: false,
     help: 'If this flag is set, then collect and parse header files from '
         'Chromium and Android instead of reading pre-parsed data from '
@@ -127,7 +140,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -149,14 +161,10 @@ Future<void> main(List<String> rawArguments) async {
     final String supplementalHidCodes = readDataFile('supplemental_hid_codes.inc');
     final String androidScanCodes = await getAndroidScanCodes();
     final String androidToDomKey = readDataFile('android_key_name_to_name.json');
-    final String glfwKeyCodes = await getGlfwKeyCodes();
-    final String glfwToDomKey = readDataFile('glfw_key_name_to_name.json');
     physicalData = PhysicalKeyData(
       <String>[baseHidCodes, supplementalHidCodes].join('\n'),
       androidScanCodes,
       androidToDomKey,
-      glfwKeyCodes,
-      glfwToDomKey,
     );
 
     // Logical
@@ -169,6 +177,8 @@ Future<void> main(List<String> rawArguments) async {
     final String macosLogicalToPhysical = readDataFile('macos_logical_to_physical.json');
     final String iosLogicalToPhysical = readDataFile('ios_logical_to_physical.json');
     final String androidKeyCodes = await getAndroidKeyCodes();
+    final String glfwKeyCodes = await getGlfwKeyCodes();
+    final String glfwToDomKey = readDataFile('glfw_key_name_to_name.json');
 
     logicalData = LogicalKeyData(
       <String>[webLogicalKeys, supplementalKeyData].join('\n'),
@@ -180,6 +190,8 @@ Future<void> main(List<String> rawArguments) async {
       androidToDomKey,
       macosLogicalToPhysical,
       iosLogicalToPhysical,
+      glfwKeyCodes,
+      glfwToDomKey,
       physicalData,
     );
 
@@ -207,6 +219,14 @@ Future<void> main(List<String> rawArguments) async {
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
+
+  final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
+      'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'));
+  if (!mapsFile.existsSync()) {
+    mapsFile.createSync(recursive: true);
+  }
+  print('Writing ${'engine key codes'.padRight(15)}${mapsFile.absolute}');
+  await keyCodesFile.writeAsString(KeyCodesCcGenerator(physicalData, logicalData).generate());
 
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(

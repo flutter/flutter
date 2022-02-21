@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_navigation_bar.dart';
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Defines default property values for descendant [BottomNavigationBar]
@@ -44,6 +45,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
     this.showUnselectedLabels,
     this.type,
     this.enableFeedback,
+    this.landscapeLayout,
+    this.mouseCursor,
   });
 
   /// The color of the [BottomNavigationBar] itself.
@@ -77,13 +80,13 @@ class BottomNavigationBarThemeData with Diagnosticable {
   final IconThemeData? unselectedIconTheme;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.title].
+  /// [BottomNavigationBarItem.label].
   ///
   /// See [BottomNavigationBar.selectedItemColor].
   final Color? selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.title]s.
+  /// [BottomNavigationBarItem.label]s.
   ///
   /// See [BottomNavigationBar.unselectedItemColor].
   final Color? unselectedItemColor;
@@ -120,6 +123,12 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// If [BottomNavigationBar.enableFeedback] is provided, [enableFeedback] is ignored.
   final bool? enableFeedback;
 
+  /// If non-null, overrides the [BottomNavigationBar.landscapeLayout] property.
+  final BottomNavigationBarLandscapeLayout? landscapeLayout;
+
+  /// If specified, overrides the default value of [BottomNavigationBar.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomNavigationBarThemeData copyWith({
@@ -135,6 +144,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
     bool? showUnselectedLabels,
     BottomNavigationBarType? type,
     bool? enableFeedback,
+    BottomNavigationBarLandscapeLayout? landscapeLayout,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -149,6 +160,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
       showUnselectedLabels: showUnselectedLabels ?? this.showUnselectedLabels,
       type: type ?? this.type,
       enableFeedback: enableFeedback ?? this.enableFeedback,
+      landscapeLayout: landscapeLayout ?? this.landscapeLayout,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -172,6 +185,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
       showUnselectedLabels: t < 0.5 ? a?.showUnselectedLabels : b?.showUnselectedLabels,
       type: t < 0.5 ? a?.type : b?.type,
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
+      landscapeLayout: t < 0.5 ? a?.landscapeLayout : b?.landscapeLayout,
+      mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
     );
   }
 
@@ -190,6 +205,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
       showUnselectedLabels,
       type,
       enableFeedback,
+      landscapeLayout,
+      mouseCursor,
     );
   }
 
@@ -211,7 +228,9 @@ class BottomNavigationBarThemeData with Diagnosticable {
         && other.showSelectedLabels == showSelectedLabels
         && other.showUnselectedLabels == showUnselectedLabels
         && other.type == type
-        && other.enableFeedback == enableFeedback;
+        && other.enableFeedback == enableFeedback
+        && other.landscapeLayout == landscapeLayout
+        && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -229,6 +248,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('showUnselectedLabels', showUnselectedLabels, defaultValue: null));
     properties.add(DiagnosticsProperty<BottomNavigationBarType>('type', type, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<BottomNavigationBarLandscapeLayout>('landscapeLayout', landscapeLayout, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 

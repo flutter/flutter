@@ -5,9 +5,28 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/87099
+  testWidgets('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Navigator(
+            pages: <Page<void>>[_APage(), _BPage()],
+            onPopPage: (Route<dynamic> route, dynamic result) {
+              return false;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Dialog interaction', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
@@ -119,6 +138,9 @@ void main() {
     await tester.idle();
 
     expect(tester.testTextInput.isVisible, isTrue);
+    // Prevent the gesture recognizer from recognizing the next tap as a
+    // double-tap.
+    await tester.pump(const Duration(seconds: 1));
 
     tester.testTextInput.hide();
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
@@ -429,4 +451,117 @@ void main() {
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
+    final FocusNode focusNodeA = FocusNode();
+    final Key iconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              TextField(
+                focusNode: focusNodeA,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.copy_all, key: iconKey),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down1.up();
+    await down1.removePointer();
+
+    expect(focusNodeA.hasFocus, true);
+
+    // Click on the icon which has a different RO than the text field's focus node context
+    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(iconKey)), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down2.up();
+    await down2.removePointer();
+
+    expect(focusNodeA.hasFocus, true);
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
+    final FocusNode focusNodeA = FocusNode();
+    final FocusNode focusNodeB = FocusNode();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              const TextField(),
+              const TextField(),
+              TextField(
+                focusNode: focusNodeA,
+              ),
+              Container(
+                key: key,
+                height: 200,
+              ),
+              TextField(
+                focusNode: focusNodeB,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    // Tab over to the 3rd text field.
+    for (int i = 0; i < 3; i += 1) {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    }
+
+    expect(focusNodeA.hasFocus, true);
+    expect(focusNodeB.hasFocus, false);
+
+    // Click on the container to not hit either text field.
+    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(key)), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down2.up();
+    await down2.removePointer();
+
+    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeB.hasFocus, false);
+
+    // Second text field can still gain focus.
+
+    final TestGesture down3 = await tester.startGesture(tester.getCenter(find.byType(TextField).last), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down3.up();
+    await down3.removePointer();
+
+    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeB.hasFocus, true);
+  }, variant: TargetPlatformVariant.desktop());
+}
+
+class _APage extends Page<void> {
+  @override
+  Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
+    settings: this,
+    pageBuilder: (_, __, ___) => const TextField(autofocus: true),
+  );
+}
+
+class _BPage extends Page<void> {
+  @override
+  Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
+    settings: this,
+    pageBuilder: (_, __, ___) => const Text('B'),
+  );
 }

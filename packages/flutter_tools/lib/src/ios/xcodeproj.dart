@@ -58,6 +58,7 @@ class XcodeProjectInterpreter {
           processManager: processManager,
         ),
         _version = version,
+        _versionText = version?.toString(),
         _usage = usage;
 
   /// Create an [XcodeProjectInterpreter] for testing.
@@ -172,6 +173,7 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -183,6 +185,13 @@ class XcodeProjectInterpreter {
         ...<String>['-configuration', configuration],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
+      '-destination',
+      if (deviceId != null)
+        'id=$deviceId'
+      else if (buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=iOS'
+      else
+        'generic/platform=iOS Simulator',
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory())}',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
@@ -210,6 +219,61 @@ class XcodeProjectInterpreter {
       }
       _logger.printTrace('Unexpected failure to get Xcode build settings: $error.');
       return const <String, String>{};
+    } finally {
+      status.stop();
+    }
+  }
+
+  /// Asynchronously retrieve xcode build settings for the generated Pods.xcodeproj plugins project.
+  ///
+  /// Returns the stdout of the Xcode command.
+  Future<String?> pluginsBuildSettingsOutput(
+      Directory podXcodeProject, {
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
+    if (!podXcodeProject.existsSync()) {
+      // No plugins.
+      return null;
+    }
+    final Status status = _logger.startSpinner();
+    final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
+    final List<String> showBuildSettingsCommand = <String>[
+      ...xcrunCommand(),
+      'xcodebuild',
+      '-alltargets',
+      '-sdk',
+      'iphonesimulator',
+      '-project',
+      podXcodeProject.path,
+      '-showBuildSettings',
+      'BUILD_DIR=$buildDirectory',
+      'OBJROOT=$buildDirectory',
+    ];
+    try {
+      // showBuildSettings is reported to occasionally timeout. Here, we give it
+      // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+      // When there is a timeout, we retry once.
+      final RunResult result = await _processUtils.run(
+        showBuildSettingsCommand,
+        throwOnError: true,
+        workingDirectory: podXcodeProject.path,
+        timeout: timeout,
+        timeoutRetries: 1,
+      );
+
+      // Return the stdout only. Do not parse with parseXcodeBuildSettings, `-alltargets` prints the build settings
+      // for all targets (one per plugin), so it would require a Map of Maps.
+      return result.stdout.trim();
+    } on Exception catch (error) {
+      if (error is ProcessException && error.toString().contains('timed out')) {
+        BuildEvent('xcode-show-build-settings-timeout',
+          type: 'ios',
+          command: showBuildSettingsCommand.join(' '),
+          flutterUsage: _usage,
+        ).send();
+      }
+      _logger.printTrace('Unexpected failure to get Pod Xcode project build settings: $error.');
+      return null;
     } finally {
       status.stop();
     }
@@ -295,14 +359,20 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 
 @immutable
 class XcodeProjectBuildContext {
-  const XcodeProjectBuildContext({this.scheme, this.configuration, this.environmentType = EnvironmentType.physical});
+  const XcodeProjectBuildContext({
+    this.scheme,
+    this.configuration,
+    this.environmentType = EnvironmentType.physical,
+    this.deviceId,
+  });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
+  final String? deviceId;
 
   @override
-  int get hashCode => scheme.hashCode ^ configuration.hashCode ^ environmentType.hashCode;
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
 
   @override
   bool operator ==(Object other) {
@@ -312,6 +382,7 @@ class XcodeProjectBuildContext {
     return other is XcodeProjectBuildContext &&
         other.scheme == scheme &&
         other.configuration == configuration &&
+        other.deviceId == deviceId &&
         other.environmentType == environmentType;
   }
 }
@@ -320,7 +391,7 @@ class XcodeProjectBuildContext {
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  XcodeProjectInfo(
+  const XcodeProjectInfo(
     this.targets,
     this.buildConfigurations,
     this.schemes,
@@ -364,7 +435,7 @@ class XcodeProjectInfo {
   /// The expected scheme for [buildInfo].
   @visibleForTesting
   static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return toTitleCase(buildInfo?.flavor ?? 'runner');
+    return sentenceCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].

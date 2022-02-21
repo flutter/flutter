@@ -9,7 +9,6 @@ import 'dart:ui' show
   Offset,
   Size,
   Rect,
-  TextAffinity,
   TextAlign,
   TextDirection,
   hashValues;
@@ -17,12 +16,14 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import '../../services.dart' show Clipboard;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
+import 'text_editing_delta.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -174,14 +175,17 @@ class TextInputType {
   /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
   static const TextInputType streetAddress = TextInputType._(9);
 
+  /// Prevent the OS from showing the on-screen virtual keyboard.
+  static const TextInputType none = TextInputType._(10);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -462,7 +466,9 @@ class TextInputConfiguration {
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
-    this.autofillConfiguration,
+    this.autofillConfiguration = AutofillConfiguration.disabled,
+    this.enableIMEPersonalizedLearning = true,
+    this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -471,7 +477,9 @@ class TextInputConfiguration {
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
-       assert(textCapitalization != null);
+       assert(textCapitalization != null),
+       assert(enableIMEPersonalizedLearning != null),
+       assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -497,7 +505,7 @@ class TextInputConfiguration {
   /// to the platform. This will prevent the corresponding input field from
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
-  final AutofillConfiguration? autofillConfiguration;
+  final AutofillConfiguration autofillConfiguration;
 
   /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -587,8 +595,83 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// {@template flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  /// Whether to enable that the IME update personalized data such as typing
+  /// history and user dictionary data.
+  ///
+  /// This flag only affects Android. On iOS, there is no equivalent flag.
+  ///
+  /// Defaults to true. Cannot be null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#IME_FLAG_NO_PERSONALIZED_LEARNING>
+  /// {@endtemplate}
+  final bool enableIMEPersonalizedLearning;
+
+  /// Creates a copy of this [TextInputConfiguration] with the given fields
+  /// replaced with new values.
+  TextInputConfiguration copyWith({
+    TextInputType? inputType,
+    bool? readOnly,
+    bool? obscureText,
+    bool? autocorrect,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool? enableSuggestions,
+    String? actionLabel,
+    TextInputAction? inputAction,
+    Brightness? keyboardAppearance,
+    TextCapitalization? textCapitalization,
+    bool? enableIMEPersonalizedLearning,
+    AutofillConfiguration? autofillConfiguration,
+    bool? enableDeltaModel,
+  }) {
+    return TextInputConfiguration(
+      inputType: inputType ?? this.inputType,
+      readOnly: readOnly ?? this.readOnly,
+      obscureText: obscureText ?? this.obscureText,
+      autocorrect: autocorrect ?? this.autocorrect,
+      smartDashesType: smartDashesType ?? this.smartDashesType,
+      smartQuotesType: smartQuotesType ?? this.smartQuotesType,
+      enableSuggestions: enableSuggestions ?? this.enableSuggestions,
+      inputAction: inputAction ?? this.inputAction,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
+      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
+      autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
+    );
+  }
+
+  /// Whether to enable that the engine sends text input updates to the
+  /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  ///
+  /// Enabling this flag results in granular text updates being received from the
+  /// platform's text input control.
+  ///
+  /// When this is enabled:
+  ///  * You must implement [DeltaTextInputClient] and not [TextInputClient] to
+  ///    receive granular updates from the platform's text input.
+  ///  * Platform text input updates will come through
+  ///    [DeltaTextInputClient.updateEditingValueWithDeltas].
+  ///  * If [TextInputClient] is implemented with this property enabled then
+  ///    you will experience unexpected behavior as [TextInputClient] does not implement
+  ///    a delta channel.
+  ///
+  /// When this is disabled:
+  ///  * If [DeltaTextInputClient] is implemented then updates for the
+  ///    editing state will continue to come through the
+  ///    [DeltaTextInputClient.updateEditingValue] channel.
+  ///  * If [TextInputClient] is implemented then updates for the editing
+  ///    state will come through [TextInputClient.updateEditingValue].
+  ///
+  /// Defaults to false. Cannot be null.
+  final bool enableDeltaModel;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
+    final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
     return <String, dynamic>{
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
@@ -601,7 +684,9 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
+      'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
+      if (autofill != null) 'autofill': autofill,
+      'enableDeltaModel' : enableDeltaModel,
     };
   }
 }
@@ -659,6 +744,9 @@ class TextEditingValue {
   ///
   /// The [text], [selection], and [composing] arguments must not be null but
   /// each have default values.
+  ///
+  /// The default value of [selection] is `TextSelection.collapsed(offset: -1)`.
+  /// This indicates that there is no selection at all.
   const TextEditingValue({
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
@@ -684,26 +772,42 @@ class TextEditingValue {
     );
   }
 
-  /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{
-      'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
-      'composingBase': composing.start,
-      'composingExtent': composing.end,
-    };
-  }
-
   /// The current text being edited.
   final String text;
 
   /// The range of text that is currently selected.
+  ///
+  /// When [selection] is a [TextSelection] that has the same non-negative
+  /// `baseOffset` and `extentOffset`, the [selection] property represents the
+  /// caret position.
+  ///
+  /// If the current [selection] has a negative `baseOffset` or `extentOffset`,
+  /// then the text currently does not have a selection or a caret location, and
+  /// most text editing operations that rely on the current selection (for
+  /// instance, insert a character at the caret location) will do nothing.
   final TextSelection selection;
 
   /// The range of text that is still being composed.
+  ///
+  /// Composing regions are created by input methods (IMEs) to indicate the text
+  /// within a certain range is provisional. For instance, the Android Gboard
+  /// app's English keyboard puts the current word under the caret into a
+  /// composing region to indicate the word is subject to autocorrect or
+  /// prediction changes.
+  ///
+  /// Composing regions can also be used for performing multistage input, which
+  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// ideographic symbols. As an example, many CJK keyboards require the user to
+  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// iOS, the default software keyboards do not have a dedicated view to show
+  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// field, inside of a composing region.
+  ///
+  /// The composing region should typically only be changed by the IME, or the
+  /// user via interacting with the IME.
+  ///
+  /// If the range represented by this property is [TextRange.empty], then the
+  /// text is not currently being composed.
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
@@ -732,6 +836,68 @@ class TextEditingValue {
   /// it usually indicates the current [composing] range is invalid because of a
   /// programming error.
   bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
+
+  /// Returns a new [TextEditingValue], which is this [TextEditingValue] with
+  /// its [text] partially replaced by the `replacementString`.
+  ///
+  /// The `replacementRange` parameter specifies the range of the
+  /// [TextEditingValue.text] that needs to be replaced.
+  ///
+  /// The `replacementString` parameter specifies the string to replace the
+  /// given range of text with.
+  ///
+  /// This method also adjusts the selection range and the composing range of the
+  /// resulting [TextEditingValue], such that they point to the same substrings
+  /// as the correspoinding ranges in the original [TextEditingValue]. For
+  /// example, if the original [TextEditingValue] is "Hello world" with the word
+  /// "world" selected, replacing "Hello" with a different string using this
+  /// method will not change the selected word.
+  ///
+  /// This method does nothing if the given `replacementRange` is not
+  /// [TextRange.isValid].
+  TextEditingValue replaced(TextRange replacementRange, String replacementString) {
+    if (!replacementRange.isValid) {
+      return this;
+    }
+    final String newText = text.replaceRange(replacementRange.start, replacementRange.end, replacementString);
+
+    if (replacementRange.end - replacementRange.start == replacementString.length) {
+      return copyWith(text: newText);
+    }
+
+    int adjustIndex(int originalIndex) {
+      // The length added by adding the replacementString.
+      final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
+      // The length removed by removing the replacementRange.
+      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
+      return originalIndex + replacedLength - removedLength;
+    }
+
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection(
+        baseOffset: adjustIndex(selection.baseOffset),
+        extentOffset: adjustIndex(selection.extentOffset),
+      ),
+      composing: TextRange(
+        start: adjustIndex(composing.start),
+        end: adjustIndex(composing.end),
+      ),
+    );
+  }
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'text': text,
+      'selectionBase': selection.baseOffset,
+      'selectionExtent': selection.extentOffset,
+      'selectionAffinity': selection.affinity.toString(),
+      'selectionIsDirectional': selection.isDirectional,
+      'composingBase': composing.start,
+      'composingExtent': composing.end,
+    };
+  }
 
   @override
   String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
@@ -784,15 +950,18 @@ enum SelectionChangedCause {
   /// location of the cursor.
   ///
   /// An example is when the user taps on select all in the tool bar.
-  toolBar,
+  toolbar,
 
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
   drag,
+
+  /// The user used iPadOS 14+ Scribble to change the selection.
+  scribble,
 }
 
-/// A mixin for manipulating the selection, to be used by the implementer
-/// of the toolbar widget.
+/// A mixin for manipulating the selection, provided for toolbar or shortcut
+/// keys.
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
@@ -843,14 +1012,45 @@ mixin TextSelectionDelegate {
 
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
+
+  /// Cut current selection to [Clipboard].
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  void cutSelection(SelectionChangedCause cause);
+
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  Future<void> pasteText(SelectionChangedCause cause);
+
+  /// Set the current selection to contain the entire text value.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
+  /// will be scrolled into view.
+  void selectAll(SelectionChangedCause cause);
+
+  /// Copy current selection to [Clipboard].
+  ///
+  /// If [cause] is [SelectionChangedCause.toolbar], the position of
+  /// [bringIntoView] to selection will be called and hide toolbar.
+  void copySelection(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
+///
+/// If [TextInputConfiguration.enableDeltaModel] is set to true,
+/// [DeltaTextInputClient] must be implemented instead of this class.
 ///
 /// See also:
 ///
 ///  * [TextInput.attach]
 ///  * [EditableText], a [TextInputClient] implementation.
+///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
+///    granular information from the platform's text input.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -887,10 +1087,10 @@ abstract class TextInputClient {
   /// between certain input methods and their clients.
   ///
   /// See also:
-  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///   * [performPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand\(java.lang.String,%20android.os.Bundle\)),
   ///     which is the Android documentation for performPrivateCommand, used to
   ///     send a command from the input method.
-  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///   * [sendAppPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand),
   ///     which is the Android documentation for sendAppPrivateCommand, used to
   ///     send a command to the input method.
   void performPrivateCommand(String action, Map<String, dynamic> data);
@@ -908,6 +1108,106 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+
+  /// Requests that the client show the editing toolbar, for example when the
+  /// platform changes the selection through a non-flutter method such as
+  /// scribble.
+  void showToolbar() {}
+
+  /// Requests that the client add a text placeholder to reserve visual space
+  /// in the text.
+  ///
+  /// For example, this is called when responding to UIKit requesting
+  /// a text placeholder be added at the current selection, such as when
+  /// requesting additional writing space with iPadOS14 Scribble.
+  void insertTextPlaceholder(Size size) {}
+
+  /// Requests that the client remove the text placeholder.
+  void removeTextPlaceholder() {}
+}
+
+/// An interface to receive focus from the engine.
+///
+/// This is currently only used to handle UIIndirectScribbleInteraction.
+abstract class ScribbleClient {
+  /// A unique identifier for this element.
+  String get elementIdentifier;
+
+  /// Called by the engine when the [ScribbleClient] should receive focus.
+  ///
+  /// For example, this method is called during a UIIndirectScribbleInteraction.
+  void onScribbleFocus(Offset offset);
+
+  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds.
+  bool isInScribbleRect(Rect rect);
+
+  /// The current bounds of the [ScribbleClient].
+  Rect get bounds;
+}
+
+/// Represents a selection rect for a character and it's position in the text.
+///
+/// This is used to report the current text selection rect and position data
+/// to the engine for Scribble support on iPadOS 14.
+@immutable
+class SelectionRect {
+  /// Constructor for creating a [SelectionRect] from a text [position] and
+  /// [bounds].
+  const SelectionRect({required this.position, required this.bounds});
+
+  /// The position of this selection rect within the text String.
+  final int position;
+
+  /// The rectangle representing the bounds of this selection rect within the
+  /// currently focused [RenderEditable]'s coordinate space.
+  final Rect bounds;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
+    return other is SelectionRect
+        && other.position == position
+        && other.bounds   == bounds;
+  }
+
+  @override
+  int get hashCode => hashValues(position, bounds);
+
+  @override
+  String toString() => 'SelectionRect($position, $bounds)';
+}
+
+/// An interface to receive granular information from [TextInput].
+///
+/// See also:
+///
+///  * [TextInput.attach]
+///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
+///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
+abstract class DeltaTextInputClient extends TextInputClient {
+  /// Requests that this client update its editing state by applying the deltas
+  /// received from the engine.
+  ///
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
+  ///
+  /// Here is an example of what implementation of this method could look like:
+  /// {@tool snippet}
+  /// @override
+  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///   TextEditingValue newValue = _previousValue;
+  ///   for (final TextEditingDelta delta in textEditingDeltas) {
+  ///     newValue = delta.apply(newValue);
+  ///   }
+  ///   _localValue = newValue;
+  /// }
+  /// {@end-tool}
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
 /// An interface for interacting with a text input control.
@@ -927,6 +1227,7 @@ class TextInputConnection {
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
   Rect? _cachedCaretRect;
+  List<SelectionRect> _cachedSelectionRects = <SelectionRect>[];
 
   static int _nextId = 1;
   final int _id;
@@ -948,6 +1249,12 @@ class TextInputConnection {
 
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
+
+  /// Whether there is currently a Scribble interaction in progress.
+  ///
+  /// This is used to make sure selection handles are shown when UIKit changes
+  /// the selection during a Scribble interaction.
+  bool get scribbleInProgress => TextInput._instance.scribbleInProgress;
 
   /// Requests that the text input control become visible.
   void show() {
@@ -1045,6 +1352,19 @@ class TextInputConnection {
         'y': validRect.top,
       },
     );
+  }
+
+  /// Send the bounding boxes of the current selected glyphs in the client to
+  /// the platform's text input plugin.
+  ///
+  /// These are used by the engine during a UIDirectScribbleInteraction.
+  void setSelectionRects(List<SelectionRect> selectionRects) {
+    if (!listEquals(_cachedSelectionRects, selectionRects)) {
+      _cachedSelectionRects = selectionRects;
+      TextInput._instance._setSelectionRects(selectionRects.map((SelectionRect rect) {
+        return <num>[rect.bounds.left, rect.bounds.top, rect.bounds.width, rect.bounds.height, rect.position];
+      }).toList());
+    }
   }
 
   /// Send text styling information.
@@ -1308,10 +1628,43 @@ class TextInput {
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
+  final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
+  bool _scribbleInProgress = false;
+
+  /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list.
+  @visibleForTesting
+  static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
+
+  /// Returns true if a scribble interaction is currently happening.
+  bool get scribbleInProgress => _scribbleInProgress;
+
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    if (method == 'TextInputClient.focusElement') {
+      final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+      return;
+    } else if (method == 'TextInputClient.requestElementsInRect') {
+      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
+      return _scribbleClients.keys.where((String elementIdentifier) {
+        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false))
+          return false;
+        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
+      }).map((String elementIdentifier) {
+        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
+        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+      }).toList();
+    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
+      _scribbleInProgress = true;
+      return;
+    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
+      _scribbleInProgress = false;
+      return;
+    }
     if (_currentConnection == null)
       return;
-    final String method = methodCall.method;
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
@@ -1338,7 +1691,10 @@ class TextInput {
         final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
-        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
       }
 
       return;
@@ -1365,6 +1721,19 @@ class TextInput {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
+
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['deltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          deltas.add(delta);
+        }
+
+        (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
+        break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         break;
@@ -1386,6 +1755,15 @@ class TextInput {
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        break;
+      case 'TextInputClient.showToolbar':
+        _currentConnection!._client.showToolbar();
+        break;
+      case 'TextInputClient.insertTextPlaceholder':
+        _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        break;
+      case 'TextInputClient.removeTextPlaceholder':
+        _currentConnection!._client.removeTextPlaceholder();
         break;
       default:
         throw MissingPluginException();
@@ -1460,6 +1838,13 @@ class TextInput {
     );
   }
 
+  void _setSelectionRects(List<List<num>> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setSelectionRects',
+      args,
+    );
+  }
+
   void _setStyle(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
@@ -1521,5 +1906,19 @@ class TextInput {
       'TextInput.finishAutofillContext',
       shouldSave,
     );
+  }
+
+  /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused
+  /// by the engine.
+  ///
+  /// For example, the registered [ScribbleClient] list is used to respond to
+  /// UIIndirectScribbleInteraction on an iPad.
+  static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
+    TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
+  }
+
+  /// Unregisters a [ScribbleClient] with [elementIdentifier].
+  static void unregisterScribbleElement(String elementIdentifier) {
+    TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 }

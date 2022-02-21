@@ -6,12 +6,12 @@ import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
 import 'divider.dart';
+import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
-const Curve _materialBannerFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [MaterialBanner] was closed.
 ///
@@ -54,70 +54,17 @@ enum MaterialBannerClosedReason {
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-///
+/// {@tool dartpad}
 /// Banners placed directly into the widget tree are static.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('The MaterialBanner is below'),
-///     ),
-///     body: const MaterialBanner(
-///       padding: EdgeInsets.all(20),
-///       content: Text('Hello, I am a Material Banner'),
-///       leading: Icon(Icons.agriculture_outlined),
-///       backgroundColor: Color(0xFFE0E0E0),
-///       actions: <Widget>[
-///         TextButton(
-///           child: Text('OPEN'),
-///           onPressed: null,
-///         ),
-///         TextButton(
-///           child: Text('DISMISS'),
-///           onPressed: null,
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/banner/material_banner.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-///
+/// {@tool dartpad}
 /// MaterialBanner's can also be presented through a [ScaffoldMessenger].
 /// Here is an example where ScaffoldMessengerState.showMaterialBanner() is used to show the MaterialBanner.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('The MaterialBanner is below'),
-///     ),
-///     body: Center(
-///       child: ElevatedButton(
-///         child: const Text('Show MaterialBanner'),
-///         onPressed: () => ScaffoldMessenger.of(context).showMaterialBanner(
-///           const MaterialBanner(
-///             padding: EdgeInsets.all(20),
-///             content: Text('Hello, I am a Material Banner'),
-///             leading: Icon(Icons.agriculture_outlined),
-///             backgroundColor: Colors.green,
-///             actions: <Widget>[
-///               TextButton(
-///                 child: Text('DISMISS'),
-///                 onPressed: null,
-///               ),
-///             ],
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/banner/material_banner.1.dart **
 /// {@end-tool}
 ///
 /// The [actions] will be placed beside the [content] if there is only one.
@@ -137,12 +84,14 @@ class MaterialBanner extends StatefulWidget {
   /// Creates a [MaterialBanner].
   ///
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
-  /// The [actions.length] must be greater than 0.
+  /// The [actions].length must be greater than 0. The [elevation] must be null or
+  /// non-negative.
   const MaterialBanner({
     Key? key,
     required this.content,
     this.contentTextStyle,
     required this.actions,
+    this.elevation,
     this.leading,
     this.backgroundColor,
     this.padding,
@@ -151,7 +100,8 @@ class MaterialBanner extends StatefulWidget {
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible
-  }) : assert(content != null),
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(content != null),
        assert(actions != null),
        assert(forceActionsBelow != null),
        super(key: key);
@@ -172,6 +122,18 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// Typically this is a list of [TextButton] widgets.
   final List<Widget> actions;
+
+  /// The z-coordinate at which to place the material banner.
+  ///
+  /// This controls the size of the shadow below the material banner.
+  ///
+  /// Defines the banner's [Material.elevation].
+  ///
+  /// If this property is null, then [MaterialBannerThemeData.elevation] of
+  /// [ThemeData.bannerTheme] is used, if that is also null, the default value is 0.
+  /// If the elevation is 0, the [Scaffold]'s body will be pushed down by the
+  /// MaterialBanner when used with [ScaffoldMessenger].
+  final double? elevation;
 
   /// The (optional) leading widget of the [MaterialBanner].
   ///
@@ -241,6 +203,7 @@ class MaterialBanner extends StatefulWidget {
       content: content,
       contentTextStyle: contentTextStyle,
       actions: actions,
+      elevation: elevation,
       leading: leading,
       backgroundColor: backgroundColor,
       padding: padding,
@@ -267,11 +230,11 @@ class _MaterialBannerState extends State<MaterialBanner> {
 
   @override
   void didUpdateWidget(MaterialBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
       widget.animation?.addStatusListener(_onAnimationStatusChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -323,6 +286,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       ),
     );
 
+    final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? theme.colorScheme.surface;
@@ -331,34 +295,40 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? theme.textTheme.bodyText2;
 
     Widget materialBanner = Container(
-      color: backgroundColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: padding,
-            child: Row(
-              children: <Widget>[
-                if (widget.leading != null)
-                  Padding(
-                    padding: leadingPadding,
-                    child: widget.leading,
+      margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
+      child: Material(
+        elevation: elevation,
+        color: backgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: padding,
+              child: Row(
+                children: <Widget>[
+                  if (widget.leading != null)
+                    Padding(
+                      padding: leadingPadding,
+                      child: widget.leading,
+                    ),
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: textStyle!,
+                      child: widget.content,
+                    ),
                   ),
-                Expanded(
-                  child: DefaultTextStyle(
-                    style: textStyle!,
-                    child: widget.content,
-                  ),
-                ),
-                if (isSingleRow)
-                  buttonBar,
-              ],
+                  if (isSingleRow)
+                    buttonBar,
+                ],
+              ),
             ),
-          ),
-          if (!isSingleRow)
-            buttonBar,
-          const Divider(height: 0),
-        ],
+            if (!isSingleRow)
+              buttonBar,
+
+            if (elevation == 0)
+              const Divider(height: 0),
+          ],
+        ),
       ),
     );
 
@@ -366,12 +336,18 @@ class _MaterialBannerState extends State<MaterialBanner> {
     if (widget.animation == null)
       return materialBanner;
 
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
-    final CurvedAnimation fadeOutAnimation = CurvedAnimation(
-      parent: widget.animation!,
-      curve: _materialBannerFadeOutCurve,
-      reverseCurve: const Threshold(0.0),
+    materialBanner = SafeArea(
+      child: materialBanner,
     );
+
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
+    final Animation<Offset> slideOutAnimation = Tween<Offset>(
+      begin: const Offset(0.0, -1.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: widget.animation!,
+      curve: const Threshold(0.0),
+    ));
 
     materialBanner = Semantics(
       container: true,
@@ -381,8 +357,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
       },
       child: mediaQueryData.accessibleNavigation
           ? materialBanner
-          : FadeTransition(
-        opacity: fadeOutAnimation,
+          : SlideTransition(
+        position: slideOutAnimation,
         child: materialBanner,
       ),
     );
@@ -405,8 +381,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
     }
 
     return Hero(
-      child: ClipRect(child: materialBannerTransition),
       tag: '<MaterialBanner Hero tag - ${widget.content}>',
+      child: ClipRect(child: materialBannerTransition),
     );
   }
 }

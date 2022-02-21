@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=382757700"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,15 +101,15 @@ void main() {
       ),
     );
 
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
     await tester.tap(find.byType(ListView));
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.drag(find.byType(ListView), const Offset(0.0, -10.0));
-    expect(SchedulerBinding.instance!.transientCallbackCount, greaterThan(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
@@ -128,7 +135,7 @@ void main() {
       of: find.byType(Scrollbar),
       matching: find.byType(CustomPaint),
     ).first);
-    final dynamic scrollPainter = custom.foregroundPainter;
+    final ScrollbarPainter? scrollPainter = custom.foregroundPainter as ScrollbarPainter?;
     // Dragging makes the scrollbar first appear.
     await tester.drag(find.text('0'), const Offset(0.0, -10.0));
     await tester.pump(const Duration(milliseconds: 200));
@@ -141,13 +148,121 @@ void main() {
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
     );
-    scrollPainter.update(metrics, AxisDirection.down);
+    // ignore: avoid_dynamic_calls
+    scrollPainter!.update(metrics, AxisDirection.down);
 
     final TestCanvas canvas = TestCanvas();
+    // ignore: avoid_dynamic_calls
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
 
     // Scrollbar is not supposed to draw anything if there isn't enough content.
     expect(canvas.invocations.isEmpty, isTrue);
+  });
+
+  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: const Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+  });
+
+  testWidgets('When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: Scrollbar(
+            thumbVisibility: true,
+            controller: controller,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+  });
+
+  testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: Scrollbar(
+            thumbVisibility: true,
+            controller: controller,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), paints..rect());
+  });
+
+  testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: PrimaryScrollController(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                return const Scrollbar(
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    primary: true,
+                    child: SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), paints..rect());
   });
 
   testWidgets(
@@ -171,7 +286,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -199,7 +314,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -943,6 +1058,140 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
   );
 
+  testWidgets('ScrollbarThemeData.thickness replaces hoverThickness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
+          thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
+          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            return states.contains(MaterialState.hovered);
+          }),
+          thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered))
+              return 40.0;
+            // Default thickness
+            return 8.0;
+          }),
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(756.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(756.0, 0.0),
+          p2: const Offset(756.0, 600.0),
+          strokeWidth: 1.0,
+          color: _kDefaultIdleThumbColor,
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(758.0, 0.0, 798.0, 90.0),
+            _kDefaultThumbRadius,
+          ),
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
+          isAlwaysShown: true,
+          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered))
+              return true;
+            return false;
+          }),
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: _kDefaultIdleThumbColor,
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+            _kDefaultThumbRadius,
+          ),
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1087,7 +1336,6 @@ void main() {
             behavior: const NoScrollbarBehavior(),
             child: Scrollbar(
               key: key2,
-              notificationPredicate: null,
               child: SingleChildScrollView(
                 key: outerKey,
                 child: SizedBox(
@@ -1097,7 +1345,6 @@ void main() {
                     children: <Widget>[
                       Scrollbar(
                         key: key1,
-                        notificationPredicate: null,
                         child: SizedBox(
                           height: 300.0,
                           width: double.infinity,
@@ -1207,6 +1454,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
+    int tapCount = 0;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -1215,8 +1463,18 @@ void main() {
           child: Scrollbar(
             isAlwaysShown: true,
             controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
+            child: SingleChildScrollView(
+              dragStartBehavior: DragStartBehavior.down,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  tapCount += 1;
+                },
+                child: const SizedBox(
+                  width: 4000.0,
+                  height: 4000.0,
+                ),
+              ),
             ),
           ),
         ),
@@ -1244,30 +1502,49 @@ void main() {
     );
 
     // Try to drag the thumb down.
-    const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
-    await tester.pumpAndSettle();
-    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
-    await tester.pumpAndSettle();
-    await dragScrollbarThumbGesture.up();
+    const double scrollAmount = 50.0;
+    await tester.dragFrom(
+      const Offset(797.0, 45.0),
+      const Offset(0.0, scrollAmount),
+      touchSlopY: 0.0,
+    );
     await tester.pumpAndSettle();
     // Dragging on the thumb does not change the offset.
     expect(scrollController.offset, 0.0);
+    expect(tapCount, 0);
 
-    // Drag in the track area to validate pass through to scrollable.
-    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
-    await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
-    await tester.pumpAndSettle();
-    await dragPassThroughTrack.up();
+    // Try to drag up in the thumb area to validate pass through to scrollable.
+    await tester.dragFrom(
+      const Offset(797.0, 45.0),
+      const Offset(0.0, -scrollAmount),
+    );
     await tester.pumpAndSettle();
     // The scroll view received the drag.
     expect(scrollController.offset, scrollAmount);
+    expect(tapCount, 0);
 
-    // Tap on the track to validate the scroll view will not page.
-    await tester.tapAt(const Offset(797.0, 200.0));
+    // Drag in the track area to validate pass through to scrollable.
+    await tester.dragFrom(
+      const Offset(797.0, 45.0),
+      const Offset(0.0, -scrollAmount),
+      touchSlopY: 0.0,
+    );
+    await tester.pumpAndSettle();
+    // The scroll view received the drag.
+    expect(scrollController.offset, scrollAmount * 2);
+    expect(tapCount, 0);
+
+    // Tap on the thumb to validate the scroll view receives a click.
+    await tester.tapAt(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    expect(tapCount, 1);
+
+    // Tap on the track to validate the scroll view will not page and receives a click.
+    await tester.tapAt(const Offset(797.0, 400.0));
     await tester.pumpAndSettle();
     // The offset should not have changed.
-    expect(scrollController.offset, scrollAmount);
+    expect(scrollController.offset, scrollAmount * 2);
+    expect(tapCount, 2);
   });
 
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
@@ -1538,8 +1815,8 @@ void main() {
           color: Colors.transparent,
         )
         ..line(
-          p1: Offset.zero,
-          p2: const Offset(0.0, 600.0),
+          p1: const Offset(4.0, 0.0),
+          p2: const Offset(4.0, 600.0),
           strokeWidth: 1.0,
           color: Colors.transparent,
         )

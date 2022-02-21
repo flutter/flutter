@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -704,7 +708,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
 
     // Test default cursor
@@ -728,7 +732,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -751,7 +755,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Radio button fill color resolves in enabled/disabled states', (WidgetTester tester) async {
@@ -1003,7 +1007,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildRadio(active: false, useOverlay: false));
+    await tester.pumpWidget(buildRadio(useOverlay: false));
     await tester.press(_findRadio());
     await tester.pumpAndSettle();
 
@@ -1031,7 +1035,7 @@ void main() {
       reason: 'Default active pressed Radio should have overlay color from fillColor',
     );
 
-    await tester.pumpWidget(buildRadio(active: false));
+    await tester.pumpWidget(buildRadio());
     await tester.press(_findRadio());
     await tester.pumpAndSettle();
 

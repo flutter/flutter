@@ -157,68 +157,19 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// Here is an example of a [SnackBar] with an [action] button implemented using
 /// [SnackBarAction].
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ElevatedButton(
-///     child: const Text('Show Snackbar'),
-///     onPressed: () {
-///       ScaffoldMessenger.of(context).showSnackBar(
-///         SnackBar(
-///           content: const Text('Awesome Snackbar!'),
-///           action: SnackBarAction(
-///             label: 'Action',
-///             onPressed: () {
-///               // Code to execute.
-///             },
-///           ),
-///         ),
-///       );
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// Here is an example of a customized [SnackBar]. It utilizes
 /// [behavior], [shape], [padding], [width], and [duration] to customize the
 /// location, appearance, and the duration for which the [SnackBar] is visible.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ElevatedButton(
-///     child: const Text('Show Snackbar'),
-///     onPressed: () {
-///       ScaffoldMessenger.of(context).showSnackBar(
-///         SnackBar(
-///           action: SnackBarAction(
-///             label: 'Action',
-///             onPressed: () {
-///               // Code to execute.
-///             },
-///           ),
-///           content: const Text('Awesome SnackBar!'),
-///           duration: const Duration(milliseconds: 1500),
-///           width: 280.0, // Width of the SnackBar.
-///           padding: const EdgeInsets.symmetric(
-///             horizontal: 8.0,  // Inner padding for SnackBar content.
-///           ),
-///           behavior: SnackBarBehavior.floating,
-///           shape: RoundedRectangleBorder(
-///             borderRadius: BorderRadius.circular(10.0),
-///           ),
-///         ),
-///       );
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -255,14 +206,6 @@ class SnackBar extends StatefulWidget {
     this.dismissDirection = DismissDirection.down,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
-       assert(
-         margin == null || behavior == SnackBarBehavior.floating,
-         'Margin can only be used with floating behavior',
-       ),
-       assert(
-         width == null || behavior == SnackBarBehavior.floating,
-         'Width can only be used with floating behavior',
-       ),
        assert(
          width == null || margin == null,
          'Width and margin can not be used together',
@@ -304,10 +247,29 @@ class SnackBar extends StatefulWidget {
   /// The amount of padding to apply to the snack bar's content and optional
   /// action.
   ///
-  /// If this property is null, then the default depends on the [behavior] and
-  /// the presence of an [action]. The start padding is 24 if [behavior] is
-  /// [SnackBarBehavior.fixed] and 16 if it is [SnackBarBehavior.floating]. If
-  /// there is no [action], the same padding is added to the end.
+  /// If this property is null, the default padding values for:
+  ///
+  /// * [content]
+  ///     * Top and bottom paddings are 14.
+  ///     * Left padding is 24 if [behavior] is [SnackBarBehavior.fixed],
+  ///       16 if [behavior] is [SnackBarBehavior.floating]
+  ///     * Right padding is same as start padding if there is no [action], otherwise 0.
+  /// * [action]
+  ///     * Top and bottom paddings are 14
+  ///     * Left and right paddings are half of [content]'s left padding.
+  ///
+  /// If this property is not null, the padding assignment for:
+  ///
+  /// * [content]
+  ///     * Left, top and bottom paddings are assigned normally.
+  ///     * Right padding is assigned normally if there is no [action], otherwise 0.
+  /// * [action]
+  ///     * Left padding is replaced with half value of right padding.
+  ///     * Top and bottom paddings are assigned normally.
+  ///     * Right padding has an additional half value of right padding.
+  ///       ```dart
+  ///       right + (right / 2)
+  ///       ```
   final EdgeInsetsGeometry? padding;
 
   /// The width of the snack bar.
@@ -423,11 +385,11 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   void didUpdateWidget(SnackBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
       widget.animation!.addStatusListener(_onAnimationStatusChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -459,7 +421,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
+    final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -471,8 +433,6 @@ class _SnackBarState extends State<SnackBar> {
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
-        // For the button color, the spec says it should be primaryVariant, but for
-        // backward compatibility on light themes we are leaving it as secondary.
         secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
@@ -489,6 +449,26 @@ class _SnackBarState extends State<SnackBar> {
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    assert((){
+      // Whether the behavior is set through the constructor or the theme,
+      // assert that our other properties are configured properly.
+      if (snackBarBehavior != SnackBarBehavior.floating) {
+        String message(String parameter) {
+          final String prefix = '$parameter can only be used with floating behavior.';
+          if (widget.behavior != null) {
+            return '$prefix SnackBarBehavior.fixed was set in the SnackBar constructor.';
+          } else if (snackBarTheme.behavior != null) {
+            return '$prefix SnackBarBehavior.fixed was set by the inherited SnackBarThemeData.';
+          } else {
+            return '$prefix SnackBarBehavior.fixed was set by default.';
+          }
+        }
+        assert(widget.margin == null, message('Margin'));
+        assert(widget.width == null, message('Width'));
+      }
+      return true;
+    }());
+
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding
@@ -507,11 +487,10 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = Padding(
       padding: padding,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
+              padding: widget.padding == null ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding) : null,
               child: DefaultTextStyle(
                 style: contentTextStyle!,
                 child: widget.content,
@@ -546,7 +525,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
-      ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+      ?? (isFloatingSnackBar ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))) : null);
 
     snackBar = Material(
       shape: shape,
@@ -633,7 +612,7 @@ class _SnackBarState extends State<SnackBar> {
 
     return Hero(
       tag: '<SnackBar Hero tag - ${widget.content}>',
-      child: ClipRect(child: snackBarTransition),
+      child: snackBarTransition,
     );
   }
 }

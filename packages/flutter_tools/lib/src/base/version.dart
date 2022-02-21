@@ -98,7 +98,7 @@ class Version implements Comparable<Version> {
   }
 
   @override
-  int get hashCode => major ^ minor ^ patch;
+  int get hashCode => Object.hash(major, minor, patch);
 
   bool operator <(Version other) => compareTo(other) < 0;
   bool operator >(Version other) => compareTo(other) > 0;

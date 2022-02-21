@@ -237,6 +237,8 @@ abstract class ScrollView extends StatelessWidget {
   /// scroll view needs to be recomputed whenever the scroll position changes.
   ///
   /// Defaults to false.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=LUqDNnv_dh0}
   /// {@endtemplate}
   final bool shrinkWrap;
 
@@ -499,8 +501,7 @@ abstract class ScrollView extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
-///
+/// {@tool dartpad}
 /// By default, if items are inserted at the "top" of a scrolling container like
 /// [ListView] or [CustomScrollView], the top item and all of the items below it
 /// are scrolled downwards. In some applications, it's preferable to have the
@@ -510,61 +511,7 @@ abstract class ScrollView extends StatelessWidget {
 /// of the bottom SliverList. The top one SliverList will grow upwards, and the
 /// bottom SliverList will grow downwards.
 ///
-/// ```dart
-/// List<int> top = <int>[];
-/// List<int> bottom = <int>[0];
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   const Key centerKey = ValueKey<String>('bottom-sliver-list');
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Press on the plus to add items above and below'),
-///       leading: IconButton(
-///         icon: const Icon(Icons.add),
-///         onPressed: () {
-///           setState(() {
-///             top.add(-top.length - 1);
-///             bottom.add(bottom.length);
-///           });
-///         },
-///       ),
-///     ),
-///     body: CustomScrollView(
-///       center: centerKey,
-///       slivers: <Widget>[
-///         SliverList(
-///           delegate: SliverChildBuilderDelegate(
-///             (BuildContext context, int index) {
-///               return Container(
-///                 alignment: Alignment.center,
-///                 color: Colors.blue[200 + top[index] % 4 * 100],
-///                 height: 100 + top[index] % 4 * 20.0,
-///                 child: Text('Item: ${top[index]}'),
-///               );
-///             },
-///             childCount: top.length,
-///           ),
-///         ),
-///         SliverList(
-///           key: centerKey,
-///           delegate: SliverChildBuilderDelegate(
-///             (BuildContext context, int index) {
-///               return Container(
-///                 alignment: Alignment.center,
-///                 color: Colors.blue[200 + bottom[index] % 4 * 100],
-///                 height: 100 + bottom[index] % 4 * 20.0,
-///                 child: Text('Item: ${bottom[index]}'),
-///               );
-///             },
-///             childCount: bottom.length,
-///           ),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scroll_view/custom_scroll_view.1.dart **
 /// {@end-tool}
 ///
 /// ## Accessibility

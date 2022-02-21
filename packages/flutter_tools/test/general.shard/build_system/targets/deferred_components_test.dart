@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -35,8 +36,8 @@ void main() {
       defines: <String, String>{
         kDeferredComponents: 'true',
       },
-      artifacts: null,
-      processManager: null,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -68,8 +69,8 @@ void main() {
       defines: <String, String>{
         kDeferredComponents: 'true',
       },
-      artifacts: null,
-      processManager: null,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -100,8 +101,8 @@ void main() {
       defines: <String, String>{
         kDeferredComponents: 'true',
       },
-      artifacts: null,
-      processManager: null,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: logger,
     );

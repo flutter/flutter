@@ -171,7 +171,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -207,6 +207,26 @@ void main() {
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, MockScrollBehavior);
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
+  });
+
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      MediaQuery(
+        key: uniqueKey,
+        data: const MediaQueryData(),
+        child: CupertinoApp(
+          useInheritedMediaQuery: true,
+          builder: (BuildContext context, Widget? child) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      ),
+    );
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 }
 

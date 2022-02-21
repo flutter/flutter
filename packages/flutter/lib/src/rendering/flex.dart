@@ -1084,17 +1084,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return;
 
     if (clipBehavior == Clip.none) {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       defaultPaint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
         defaultPaint,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
     }
 
@@ -1141,7 +1141,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }());
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasOverflow ? Offset.zero & size : null;
@@ -1149,8 +1155,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (_hasOverflow)
-      header += ' OVERFLOWING';
+    if (!kReleaseMode) {
+      if (_hasOverflow)
+        header += ' OVERFLOWING';
+    }
     return header;
   }
 

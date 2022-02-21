@@ -7,8 +7,8 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
@@ -20,6 +20,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
@@ -75,6 +76,8 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 );
 
 void main() {
+  Cache.flutterRoot = '';
+
   testWithoutContext('Does not serve devtools if launcher is null', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
@@ -102,10 +105,9 @@ void main() {
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      persistentToolState: null,
+      botDetector: const FakeBotDetector(false),
     );
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       // Uses real devtools instance which should be a no-op if
@@ -427,6 +429,13 @@ void main() {
     expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
     expect(handler.launchedInBrowser, isTrue);
   });
+
+  testWithoutContext('Converts a VmService URI with a query parameter to a pretty display string', () {
+    const String value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
+    final Uri uri = Uri.parse(value);
+
+    expect(urlToDisplayString(uri), 'http://127.0.0.1:9100?uri=http://127.0.0.1:57922/_MXpzytpH20=/');
+  });
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -437,9 +446,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   Uri devToolsUrl;
 
   @override
-  Future<DevToolsServerAddress> serve() {
-    return null;
-  }
+  Future<DevToolsServerAddress> serve() async => null;
 
   @override
   Future<void> get ready => readyCompleter.future;
@@ -466,4 +473,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android_arm;
 }
 
-class FakeDevice extends Fake implements Device {}
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class FakeDevice extends Fake implements Device { }

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'states.dart';
 
 void main() {
@@ -19,7 +19,6 @@ void main() {
         child: GridView.count(
           dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children: const <Widget>[],
         ),
       ),
     );

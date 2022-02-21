@@ -76,6 +76,8 @@ class RenderInvalidIntrinsics extends RenderBox {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Whether using intrinsics means you get hooked into layout', () {
     RenderBox root;
     RenderFixedSize inner;
@@ -86,8 +88,6 @@ void main() {
         ),
       ),
       constraints: const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
         maxWidth: 1000.0,
         maxHeight: 1000.0,
       ),
@@ -110,8 +110,6 @@ void main() {
         ),
       ),
       constraints: const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
         maxWidth: 1000.0,
         maxHeight: 1000.0,
       ),
@@ -130,13 +128,11 @@ void main() {
     layout(
       RenderInvalidIntrinsics(),
       constraints: const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
         maxWidth: 1000.0,
         maxHeight: 1000.0,
       ),
       onErrors: () {
-        errorDetails.addAll(renderer.takeAllFlutterErrorDetails());
+        errorDetails.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
       },
     );
 

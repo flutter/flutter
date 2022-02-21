@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -12,6 +10,7 @@ import 'dart:isolate';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'devices.dart';
@@ -43,11 +42,15 @@ bool _isTaskRegistered = false;
 ///
 /// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
-Future<TaskResult> task(TaskFunction task) async {
+///
+/// If no `processManager` is provided, a default [LocalProcessManager] is created
+/// for the task.
+Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) async {
   if (_isTaskRegistered)
     throw StateError('A task is already registered');
-
   _isTaskRegistered = true;
+
+  processManager ??= const LocalProcessManager();
 
   // TODO(ianh): allow overriding logging.
   Logger.root.level = Level.ALL;
@@ -55,23 +58,27 @@ Future<TaskResult> task(TaskFunction task) async {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
-  final _TaskRunner runner = _TaskRunner(task);
+  final _TaskRunner runner = _TaskRunner(task, processManager);
   runner.keepVmAliveUntilTaskRunRequested();
   return runner.whenDone;
 }
 
 class _TaskRunner {
-  _TaskRunner(this.task) {
+  _TaskRunner(this.task, this.processManager) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
-      final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
-        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+      final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
+        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
         : null;
-      // This is only expected to be passed in unit test runs so they do not
-      // kill the Dart process that is running them and waste time running config.
-      final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false';
+      final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false'; // used by tests to avoid changing the configuration
       final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
-      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup, runFlutterConfig: runFlutterConfig);
+      final String? localEngine = parameters['localEngine'];
+      final TaskResult result = await run(
+        taskTimeout,
+        runProcessCleanup: runProcessCleanup,
+        runFlutterConfig: runFlutterConfig,
+        localEngine: localEngine,
+      );
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -81,8 +88,9 @@ class _TaskRunner {
   }
 
   final TaskFunction task;
+  final ProcessManager processManager;
 
-  Future<Device/*?*/> _getWorkingDeviceIfAvailable() async {
+  Future<Device?> _getWorkingDeviceIfAvailable() async {
     try {
       return await devices.workingDevice;
     } on DeviceException {
@@ -91,8 +99,8 @@ class _TaskRunner {
   }
 
   // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
-  RawReceivePort _keepAlivePort;
-  Timer _startTaskTimeout;
+  RawReceivePort? _keepAlivePort;
+  Timer? _startTaskTimeout;
   bool _taskStarted = false;
 
   final Completer<TaskResult> _completer = Completer<TaskResult>();
@@ -102,33 +110,33 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration taskTimeout, {
+  Future<TaskResult> run(Duration? taskTimeout, {
     bool runFlutterConfig = true,
     bool runProcessCleanup = true,
+    required String? localEngine,
   }) async {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
-      Set<RunningProcessInfo> beforeRunningDartInstances;
+      late Set<RunningProcessInfo> beforeRunningDartInstances;
       if (runProcessCleanup) {
         section('Checking running Dart$exe processes');
         beforeRunningDartInstances = await getRunningProcesses(
           processName: 'dart$exe',
-        ).toSet();
-        final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
+          processManager: processManager,
+        );
+        final Set<RunningProcessInfo> allProcesses = await getRunningProcesses(processManager: processManager);
         beforeRunningDartInstances.forEach(print);
         for (final RunningProcessInfo info in allProcesses) {
           if (info.commandLine.contains('iproxy')) {
             print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
           }
         }
-      } else {
-        section('Skipping check running Dart$exe processes');
       }
 
       if (runFlutterConfig) {
-        print('enabling configs for macOS, Linux, Windows, and Web...');
+        print('Enabling configs for macOS, Linux, Windows, and Web...');
         final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
           'config',
           '-v',
@@ -141,16 +149,18 @@ class _TaskRunner {
         if (configResult != 0) {
           print('Failed to enable configuration, tasks may not run.');
         }
-      } else {
-        print('Skipping enabling configs for macOS, Linux, Windows, and Web');
       }
 
-      final Device/*?*/ device = await _getWorkingDeviceIfAvailable();
-      /*late*/ TaskResult result;
-      IOSink/*?*/ sink;
+      final Device? device = await _getWorkingDeviceIfAvailable();
+
+      // Some tests assume the phone is in home
+      await device?.home();
+
+      late TaskResult result;
+      IOSink? sink;
       try {
         if (device != null && device.canStreamLogs && hostAgent.dumpDirectory != null) {
-          sink = File(path.join(hostAgent.dumpDirectory.path, '${device.deviceId}.log')).openWrite();
+          sink = File(path.join(hostAgent.dumpDirectory!.path, '${device.deviceId}.log')).openWrite();
           await device.startLoggingToSink(sink);
         }
 
@@ -167,26 +177,24 @@ class _TaskRunner {
       }
 
       if (runProcessCleanup) {
-        section('Checking running Dart$exe processes after task...');
-        final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+        section('Terminating lingering Dart$exe processes after task...');
+        final Set<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
           processName: 'dart$exe',
-        ).toList();
+          processManager: processManager,
+        );
         for (final RunningProcessInfo info in afterRunningDartInstances) {
           if (!beforeRunningDartInstances.contains(info)) {
             print('$info was leaked by this test.');
             if (result is TaskResultCheckProcesses) {
               result = TaskResult.failure('This test leaked dart processes');
             }
-            final bool killed = await killProcess(info.pid);
-            if (!killed) {
-              print('Failed to kill process ${info.pid}.');
-            } else {
+            if (await info.terminate(processManager: processManager)) {
               print('Killed process id ${info.pid}.');
+            } else {
+              print('Failed to kill process ${info.pid}.');
             }
           }
         }
-      } else {
-        print('Skipping check running Dart$exe processes after task');
       }
       _completer.complete(result);
       return result;
@@ -212,7 +220,7 @@ class _TaskRunner {
       final File rebootFile = _rebootFile();
       int runCount;
       if (rebootFile.existsSync()) {
-        runCount = int.tryParse(rebootFile.readAsStringSync().trim());
+        runCount = int.tryParse(rebootFile.readAsStringSync().trim()) ?? 0;
       } else {
         runCount = 0;
       }
@@ -283,10 +291,10 @@ class _TaskRunner {
 
 File _rebootFile() {
   if (Platform.isLinux || Platform.isMacOS) {
-    return File(path.join(Platform.environment['HOME'], '.reboot-count'));
+    return File(path.join(Platform.environment['HOME']!, '.reboot-count'));
   }
   if (!Platform.isWindows) {
     throw StateError('Unexpected platform ${Platform.operatingSystem}');
   }
-  return File(path.join(Platform.environment['USERPROFILE'], '.reboot-count'));
+  return File(path.join(Platform.environment['USERPROFILE']!, '.reboot-count'));
 }
