@@ -814,4 +814,53 @@ void main() {
     expect(fieldValue, '123456');
     expect(formKey.currentState!.validate(), isFalse);
   });
+
+
+  testWidgets('invalidFields returns a list of all the invalid fields in a form', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const String validString = 'Valid string';
+    String? validator(String? s) => s == validString ? null : 'Error text';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: ListView(
+                    children: <Widget>[
+                      TextFormField(
+                        key: fieldKey1,
+                        initialValue: validString,
+                        validator: validator,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                      TextFormField(
+                        key: fieldKey2,
+                        initialValue: '',
+                        validator: validator,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    expect(formKey.currentState!.invalidFields().length, 1);
+    expect(formKey.currentState!.invalidFields().first, fieldKey2.currentState);
+  });
+
 }
