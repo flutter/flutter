@@ -883,7 +883,8 @@ class _AppBarState extends State<AppBar> {
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
-        if (canPop && !(hasEndDrawer && isFirstRoute && isEndDrawerOpen)) {
+        final bool canHaveLeadingWithEndDrawer = !(hasEndDrawer && isFirstRoute && isEndDrawerOpen);
+        if (canPop && canHaveLeadingWithEndDrawer) {
           leading = useCloseButton ? const CloseButton() : const BackButton();
         }
       }
