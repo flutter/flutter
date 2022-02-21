@@ -78,7 +78,7 @@ editor plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio].
 Flutter provides [tens of thousands of packages][Flutter packages] to speed your
 development, regardless of your target platform. And accessing other native code
 is easy, with support for both [FFI] and [platform-specific APIs][platform
-channels].
+channels].  
 
 Flutter is a fully open-source project, and we welcome contributions.
 Information on how to get started can be found in our
