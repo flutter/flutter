@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:fake_async/fake_async.dart';
@@ -14,7 +15,7 @@ import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
+  final TestRenderingFlutterBinding binding = TestRenderingFlutterBinding.ensureInitialized();
 
   group('PlatformViewRenderBox', () {
     late FakePlatformViewController fakePlatformViewController;
@@ -148,6 +149,45 @@ void main() {
     });
 
     // Passes if no crashes.
+  });
+
+  test('render object changed its visual appearance after texture is created', () {
+    FakeAsync().run((FakeAsync async) {
+      final AndroidViewController viewController =
+        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      final RenderAndroidView renderBox = RenderAndroidView(
+        viewController: viewController,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+      );
+
+      final Completer<void> viewCreation = Completer<void>();
+      const MethodChannel channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        assert(methodCall.method == 'create', 'Unexpected method call');
+        await viewCreation.future;
+        return /*textureId=*/ 0;
+      });
+
+      layout(renderBox);
+      pumpFrame(phase: EnginePhase.paint);
+
+      expect(renderBox.debugLayer, isNotNull);
+      expect(renderBox.debugLayer!.hasChildren, isFalse);
+      expect(viewController.isCreated, isFalse);
+      expect(renderBox.debugNeedsPaint, isFalse);
+
+      viewCreation.complete();
+      async.flushMicrotasks();
+
+      expect(viewController.isCreated, isTrue);
+      expect(renderBox.debugNeedsPaint, isTrue);
+      expect(renderBox.debugLayer!.hasChildren, isFalse);
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(renderBox.debugLayer!.hasChildren, isTrue);
+      expect(renderBox.debugLayer!.firstChild, isA<TextureLayer>());
+    });
   });
 }
 
