@@ -28,7 +28,7 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// By default, on [TargetPlatformVariant.desktop] platforms each item will
-/// have a drag handle added on top it that will allow the user to grab it
+/// have a drag handle added on top of it that will allow the user to grab it
 /// to move the item. On [TargetPlatformVariant.mobile], no drag handle will be
 /// added, but when the user long presses anywhere on the item it will start
 /// moving the item. Displaying drag handles can be controlled with
