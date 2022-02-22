@@ -11,6 +11,7 @@
 
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
+#include "impeller/geometry/type_traits.h"
 
 namespace impeller {
 
@@ -26,6 +27,11 @@ struct TPoint {
   template <class U>
   explicit constexpr TPoint(const TPoint<U>& other)
       : TPoint(static_cast<Type>(other.x), static_cast<Type>(other.y)) {}
+
+  template <class U>
+  explicit constexpr TPoint(const TSize<U>& other)
+      : TPoint(static_cast<Type>(other.width),
+               static_cast<Type>(other.height)) {}
 
   constexpr TPoint(Type x, Type y) : x(x), y(y) {}
 
@@ -45,16 +51,18 @@ struct TPoint {
     return {x + p.x, y + p.y};
   }
 
-  constexpr TPoint operator+(const TSize<Type>& s) const {
-    return {x + s.width, y + s.height};
+  template <class U>
+  constexpr TPoint operator+(const TSize<U>& s) const {
+    return {x + static_cast<Type>(s.width), y + static_cast<Type>(s.height)};
   }
 
   constexpr TPoint operator-(const TPoint& p) const {
     return {x - p.x, y - p.y};
   }
 
-  constexpr TPoint operator-(const TSize<Type>& s) const {
-    return {x - s.width, y - s.height};
+  template <class U>
+  constexpr TPoint operator-(const TSize<U>& s) const {
+    return {x - static_cast<Type>(s.width), y - static_cast<Type>(s.height)};
   }
 
   constexpr TPoint operator*(Scalar scale) const {
@@ -65,8 +73,9 @@ struct TPoint {
     return {x * p.x, y * p.y};
   }
 
-  constexpr TPoint operator*(const TSize<Type>& s) const {
-    return {x * s.width, y * s.height};
+  template <class U>
+  constexpr TPoint operator*(const TSize<U>& s) const {
+    return {x * static_cast<Type>(s.width), y * static_cast<Type>(s.height)};
   }
 
   constexpr TPoint operator/(Scalar d) const { return {x / d, y / d}; }
@@ -75,8 +84,9 @@ struct TPoint {
     return {x / p.x, y / p.y};
   }
 
-  constexpr TPoint operator/(const TSize<Type>& s) const {
-    return {x / s.width, y / s.height};
+  template <class U>
+  constexpr TPoint operator/(const TSize<U>& s) const {
+    return {x / static_cast<Type>(s.width), y / static_cast<Type>(s.height)};
   }
 
   constexpr Type GetDistanceSquared(const TPoint& p) const {
@@ -111,6 +121,70 @@ struct TPoint {
 
   constexpr bool IsZero() const { return x == 0 && y == 0; }
 };
+
+// Specializations for mixed (float & integer) algebraic operations.
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator+(const TPoint<F>& p1, const TPoint<I>& p2) {
+  return {p1.x + static_cast<F>(p2.x), p1.y + static_cast<F>(p2.y)};
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator+(const TPoint<I>& p1, const TPoint<F>& p2) {
+  return p2 + p1;
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator-(const TPoint<F>& p1, const TPoint<I>& p2) {
+  return {p1.x - static_cast<F>(p2.x), p1.y - static_cast<F>(p2.y)};
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator-(const TPoint<I>& p1, const TPoint<F>& p2) {
+  return {static_cast<F>(p1.x) - p2.x, static_cast<F>(p1.y) - p2.y};
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator*(const TPoint<F>& p1, const TPoint<I>& p2) {
+  return {p1.x * static_cast<F>(p2.x), p1.y * static_cast<F>(p2.y)};
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator*(const TPoint<I>& p1, const TPoint<F>& p2) {
+  return p2 * p1;
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator/(const TPoint<F>& p1, const TPoint<I>& p2) {
+  return {p1.x / static_cast<F>(p2.x), p1.y / static_cast<F>(p2.y)};
+}
+
+template <class F, class I, class = MixedOp<F, I>>
+constexpr TPoint<F> operator/(const TPoint<I>& p1, const TPoint<F>& p2) {
+  return {static_cast<F>(p1.x) / p2.x, static_cast<F>(p1.y) / p2.y};
+}
+
+// RHS algebraic operations with TSize.
+
+template <class T, class U>
+constexpr TPoint<T> operator+(const TSize<U>& s, const TPoint<T>& p) {
+  return p + s;
+}
+
+template <class T, class U>
+constexpr TPoint<T> operator-(const TSize<U>& s, const TPoint<T>& p) {
+  return {static_cast<T>(s.width) - p.x, static_cast<T>(s.height) - p.y};
+}
+
+template <class T, class U>
+constexpr TPoint<T> operator*(const TSize<U>& s, const TPoint<T>& p) {
+  return p * s;
+}
+
+template <class T, class U>
+constexpr TPoint<T> operator/(const TSize<U>& s, const TPoint<T>& p) {
+  return {static_cast<T>(s.width) / p.x, static_cast<T>(s.height) / p.y};
+}
 
 using Point = TPoint<Scalar>;
 using IPoint = TPoint<int64_t>;

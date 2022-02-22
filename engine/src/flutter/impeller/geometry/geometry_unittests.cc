@@ -226,12 +226,169 @@ TEST(GeometryTest, CanConvertTTypesExplicitly) {
   }
 
   {
+    Size s1(1.0, 2.0);
+    Point p1 = static_cast<Point>(s1);
+    ASSERT_EQ(p1.x, 1u);
+    ASSERT_EQ(p1.y, 2u);
+  }
+
+  {
     Rect r1(1.0, 2.0, 3.0, 4.0);
     IRect r2 = static_cast<IRect>(r1);
     ASSERT_EQ(r2.origin.x, 1u);
     ASSERT_EQ(r2.origin.y, 2u);
     ASSERT_EQ(r2.size.width, 3u);
     ASSERT_EQ(r2.size.height, 4u);
+  }
+}
+
+TEST(GeometryTest, CanPerformAlgebraicPointOps) {
+  {
+    IPoint p1(1, 2);
+    IPoint p2 = p1 + IPoint(1, 2);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 4u);
+  }
+
+  {
+    IPoint p1(3, 6);
+    IPoint p2 = p1 - IPoint(1, 2);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 4u);
+  }
+
+  {
+    IPoint p1(1, 2);
+    IPoint p2 = p1 * IPoint(2, 3);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 6u);
+  }
+
+  {
+    IPoint p1(2, 6);
+    IPoint p2 = p1 / IPoint(2, 3);
+    ASSERT_EQ(p2.x, 1u);
+    ASSERT_EQ(p2.y, 2u);
+  }
+}
+
+TEST(GeometryTest, PointIntegerCoercesToFloat) {
+  // Integer on LHS, float on RHS
+  {
+    IPoint p1(1, 2);
+    Point p2 = p1 + Point(1, 2);
+    ASSERT_FLOAT_EQ(p2.x, 2u);
+    ASSERT_FLOAT_EQ(p2.y, 4u);
+  }
+
+  {
+    IPoint p1(3, 6);
+    Point p2 = p1 - Point(1, 2);
+    ASSERT_FLOAT_EQ(p2.x, 2u);
+    ASSERT_FLOAT_EQ(p2.y, 4u);
+  }
+
+  {
+    IPoint p1(1, 2);
+    Point p2 = p1 * Point(2, 3);
+    ASSERT_FLOAT_EQ(p2.x, 2u);
+    ASSERT_FLOAT_EQ(p2.y, 6u);
+  }
+
+  {
+    IPoint p1(2, 6);
+    Point p2 = p1 / Point(2, 3);
+    ASSERT_FLOAT_EQ(p2.x, 1u);
+    ASSERT_FLOAT_EQ(p2.y, 2u);
+  }
+
+  // Float on LHS, integer on RHS
+  {
+    Point p1(1, 2);
+    Point p2 = p1 + IPoint(1, 2);
+    ASSERT_FLOAT_EQ(p2.x, 2u);
+    ASSERT_FLOAT_EQ(p2.y, 4u);
+  }
+
+  {
+    Point p1(3, 6);
+    Point p2 = p1 - IPoint(1, 2);
+    ASSERT_FLOAT_EQ(p2.x, 2u);
+    ASSERT_FLOAT_EQ(p2.y, 4u);
+  }
+
+  {
+    Point p1(1, 2);
+    Point p2 = p1 * IPoint(2, 3);
+    ASSERT_FLOAT_EQ(p2.x, 2u);
+    ASSERT_FLOAT_EQ(p2.y, 6u);
+  }
+
+  {
+    Point p1(2, 6);
+    Point p2 = p1 / IPoint(2, 3);
+    ASSERT_FLOAT_EQ(p2.x, 1u);
+    ASSERT_FLOAT_EQ(p2.y, 2u);
+  }
+}
+
+TEST(GeometryTest, SizeCoercesToPoint) {
+  // Point on LHS, Size on RHS
+  {
+    IPoint p1(1, 2);
+    IPoint p2 = p1 + ISize(1, 2);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 4u);
+  }
+
+  {
+    IPoint p1(3, 6);
+    IPoint p2 = p1 - ISize(1, 2);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 4u);
+  }
+
+  {
+    IPoint p1(1, 2);
+    IPoint p2 = p1 * ISize(2, 3);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 6u);
+  }
+
+  {
+    IPoint p1(2, 6);
+    IPoint p2 = p1 / ISize(2, 3);
+    ASSERT_EQ(p2.x, 1u);
+    ASSERT_EQ(p2.y, 2u);
+  }
+
+  // Size on LHS, Point on RHS
+  {
+    ISize p1(1, 2);
+    IPoint p2 = p1 + IPoint(1, 2);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 4u);
+  }
+
+  {
+    ISize p1(3, 6);
+    IPoint p2 = p1 - IPoint(1, 2);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 4u);
+  }
+
+  {
+    ISize p1(1, 2);
+    IPoint p2 = p1 * IPoint(2, 3);
+    ASSERT_EQ(p2.x, 2u);
+    ASSERT_EQ(p2.y, 6u);
+  }
+
+  {
+    ISize p1(2, 6);
+    IPoint p2 = p1 / IPoint(2, 3);
+    ASSERT_EQ(p2.x, 1u);
+    ASSERT_EQ(p2.y, 2u);
   }
 }
 
