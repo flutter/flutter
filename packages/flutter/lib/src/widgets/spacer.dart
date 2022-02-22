@@ -38,29 +38,17 @@ import 'framework.dart';
 ///  * [Row] and [Column], which are the most common containers to use a Spacer
 ///    in.
 ///  * [SizedBox], to create a box with a specific size and an optional child.
-class Spacer extends StatelessWidget {
+class Spacer extends Expanded {
   /// Creates a flexible space to insert into a [Flexible] widget.
   ///
   /// The [flex] parameter may not be null or less than one.
-  const Spacer({Key? key, this.flex = 1})
+  const Spacer({Key? key, int flex = 1})
     : assert(flex != null),
       assert(flex > 0),
-      super(key: key);
+      super(
+        flex: flex,
+        child: const SizedBox.shrink(),
+        key: key,
+      );
 
-  /// The flex factor to use in determining how much space to take up.
-  ///
-  /// The amount of space the [Spacer] can occupy in the main axis is determined
-  /// by dividing the free space proportionately, after placing the inflexible
-  /// children, according to the flex factors of the flexible children.
-  ///
-  /// Defaults to one.
-  final int flex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: const SizedBox.shrink(),
-    );
-  }
 }
