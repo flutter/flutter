@@ -1671,6 +1671,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
+    _clipboardStatus?.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -1691,6 +1692,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
     }
+    _clipboardStatus?.update();
   }
 
   /// Paste text from [Clipboard].
@@ -1746,6 +1748,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       vsync: this,
       duration: _fadeDuration,
     )..addListener(_onCursorColorTick);
+    _clipboardStatus?.update();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -3014,7 +3017,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && copyEnabled
         && _hasFocus
         && (controls?.canCopy(this) ?? false)
-      ? () => controls!.handleCopy(this, _clipboardStatus)
+      ? () => controls!.handleCopy(this)
       : null;
   }
 
@@ -3023,7 +3026,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && cutEnabled
         && _hasFocus
         && (controls?.canCut(this) ?? false)
-      ? () => controls!.handleCut(this, _clipboardStatus)
+      ? () => controls!.handleCut(this)
       : null;
   }
 
