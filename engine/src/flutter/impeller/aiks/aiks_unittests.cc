@@ -59,7 +59,7 @@ TEST_F(AiksTest, CanRenderImage) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, DISABLED_CanRenderImageRect) {
+TEST_F(AiksTest, CanRenderImageRect) {
   Canvas canvas;
   Paint paint;
   auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
