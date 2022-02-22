@@ -10,28 +10,22 @@ void main() {
   runApp(const CounterApp());
 }
 
-/// This class holds the counter value and the text color.
-class Counter extends ChangeNotifier {
-  int _counter;
-  Color _textColor;
-
-  /// Creates a [Counter] class and, by default, sets [value] to `0` and
-  /// [textColor] to [Colors.black].
-  Counter({
+class AppState extends ChangeNotifier {
+  AppState({
     int value = 0,
     Color textColor = Colors.black,
   }) : _counter = value, _textColor = textColor;
 
-  /// The counter value.
-  int get value => _counter;
-  set value(int value) {
+  int _counter;
+  int get counter => _counter;
+  set counter(int value) {
     if (_counter != value) {
       _counter = value;
       notifyListeners();
     }
   }
 
-  /// The text color.
+  Color _textColor;
   Color get textColor => _textColor;
   set textColor(Color colorValue) {
     if (_textColor != colorValue) {
@@ -41,76 +35,49 @@ class Counter extends ChangeNotifier {
   }
 }
 
-/// An [InheritedWidget] that exposes a [Counter] class to the subtree.
-class CounterWidget extends InheritedWidget {
-  /// Requires a [Counter] and a [child].
-  const CounterWidget({
-    Key? key,
-    required this.counter,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  /// The [Counter] class holding the state of the counter app.
-  final Counter counter;
-
-  /// Returns the closest [CounterWidget] up in the tree.
-  static CounterWidget of(BuildContext context) {
-    final CounterWidget? result = context.dependOnInheritedWidgetOfExactType<CounterWidget>();
-    assert(result != null, 'No CounterWidget found in context');
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(CounterWidget oldWidget) {
-    return counter.value != oldWidget.counter.value ||
-        counter.textColor != oldWidget.counter.textColor;
-  }
-}
-
-/// The counter app page.
 class CounterApp extends StatelessWidget {
-  /// Creates an instance of the [CounterApp] widget.
   const CounterApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: CounterWidget(
-        counter: Counter(),
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('ChangeNotifier demo'),
-          ),
-          body: const CounterBody(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('ChangeNotifier demo'),
         ),
+        body: const CounterBody(),
       ),
     );
   }
 }
 
-/// The actual body of the counter app, containing a button to change the
-/// counter value and another one to swap colors.
-class CounterBody extends StatelessWidget {
-  /// Creates an instance of the [CounterBody] widget.
+class CounterBody extends StatefulWidget {
   const CounterBody({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final Counter counter = CounterWidget.of(context).counter;
+  State<CounterBody> createState() => _CounterBodyState();
+}
 
+class _CounterBodyState extends State<CounterBody> {
+  // This variable could have been exposed by an InheritedWidget and moved
+  // outside of this widget for example.
+  final AppState counterNotifier = AppState();
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: <Widget>[
           // The counter
           AnimatedBuilder(
-            animation: counter,
-            builder: (context, _) {
+            animation: counterNotifier,
+            builder: (BuildContext context, _) {
               return Text(
-                '${counter.value}',
+                '${counterNotifier.counter}',
                 style: TextStyle(
                   fontSize: 18,
-                  color: counter.textColor,
+                  color: counterNotifier.textColor,
                 ),
               );
             },
@@ -124,22 +91,22 @@ class CounterBody extends StatelessWidget {
           // Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+            children: <Widget>[
               TextButton(
-                onPressed: () => counter.value++,
+                onPressed: () => counterNotifier.counter++,
                 child: const Text('Increase'),
               ),
               AnimatedBuilder(
-                animation: counter,
-                builder: (context, _) {
-                 if (counter.textColor == Colors.black) {
+                animation: counterNotifier,
+                builder: (BuildContext context, _) {
+                 if (counterNotifier.textColor == Colors.black) {
                    return TextButton(
-                     onPressed: () => counter.textColor = Colors.green,
+                     onPressed: () => counterNotifier.textColor = Colors.green,
                      child: const Text('Green text color'),
                    );
                  } else {
                    return TextButton(
-                     onPressed: () => counter.textColor = Colors.black,
+                     onPressed: () => counterNotifier.textColor = Colors.black,
                      child: const Text('Black text color'),
                    );
                  }

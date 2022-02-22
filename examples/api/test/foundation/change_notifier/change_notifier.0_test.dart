@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/foundation/change_notifier/change_notifier.0.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,37 +11,37 @@ void main() {
     Color currentColor = Colors.black;
     int currentCount = 0;
 
-    final Counter counter = Counter();
-    counter.addListener(() {
-      if (counter.value != currentCount) {
-        currentCount = counter.value;
+    final AppState counterNotifier = AppState();
+    counterNotifier.addListener(() {
+      if (counterNotifier.counter != currentCount) {
+        currentCount = counterNotifier.counter;
       }
 
-      if (counter.textColor != currentColor) {
-        currentColor = counter.textColor;
+      if (counterNotifier.textColor != currentColor) {
+        currentColor = counterNotifier.textColor;
       }
     });
 
     // Initial values
-    expect(counter.value, isZero);
+    expect(counterNotifier.counter, isZero);
     expect(currentCount, isZero);
-    expect(counter.textColor, equals(Colors.black));
+    expect(counterNotifier.textColor, equals(Colors.black));
     expect(currentColor, equals(Colors.black));
 
     // Changing value
-    counter.value++;
+    counterNotifier.counter++;
 
-    expect(counter.value, equals(1));
+    expect(counterNotifier.counter, equals(1));
     expect(currentCount, equals(1));
-    expect(counter.textColor, equals(Colors.black));
+    expect(counterNotifier.textColor, equals(Colors.black));
     expect(currentColor, equals(Colors.black));
 
     // Changing color
-    counter.textColor = Colors.green;
+    counterNotifier.textColor = Colors.green;
 
-    expect(counter.value, equals(1));
+    expect(counterNotifier.counter, equals(1));
     expect(currentCount, equals(1));
-    expect(counter.textColor, equals(Colors.green));
+    expect(counterNotifier.textColor, equals(Colors.green));
     expect(currentColor, equals(Colors.green));
   });
 
