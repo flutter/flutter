@@ -39,14 +39,17 @@ import 'framework.dart';
 ///    in.
 ///  * [SizedBox], to create a box with a specific size and an optional child.
 class Spacer extends Flexible {
+  /// Creates a flexible space to insert into a [Flexible] widget.
+  ///
+  /// The [flex] parameter may not be null or less than one.
   const Spacer({
     Key? key,
     int flex = 1,
-  })  : assert(flex > 0),
-        super(
-          key: key,
-          flex: flex,
-          fit: FlexFit.tight,
-          child: const SizedBox.shrink(),
-        );
+  }) : assert(flex > 0),
+       super(
+         key: key,
+         flex: flex,
+         fit: FlexFit.tight,
+         child: const SizedBox.shrink(),
+       );
 }
