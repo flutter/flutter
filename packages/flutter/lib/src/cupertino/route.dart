@@ -999,10 +999,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// The `routeSettings` argument is used to provide [RouteSettings] to the
 /// created Route.
 ///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// See also:
 ///
@@ -1139,10 +1136,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
 /// update dynamically.
 ///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
@@ -1242,10 +1236,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
@@ -1331,10 +1322,7 @@ Future<T?> showCupertinoDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// See also:
 ///

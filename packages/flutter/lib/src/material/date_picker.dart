@@ -102,10 +102,7 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
 ///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// ### State Restoration
 ///
@@ -907,10 +904,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// ### State Restoration
 ///

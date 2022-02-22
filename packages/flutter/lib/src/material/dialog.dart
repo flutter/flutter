@@ -1007,15 +1007,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
 ///
-/// The `screen` argument is used to determine which screen to use when showing
-/// this dialog on devices with multiple screens, e.g. a dual-screen device. If
-/// `screen` value exceeds the number of screens available, the last screen is
-/// used.
-///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
@@ -1127,15 +1119,7 @@ Future<T?> showDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
-/// The `screen` argument is used to determine which screen to use when showing
-/// this dialog on devices with multiple screens, e.g. a dual-screen device. If
-/// `screen` value exceeds the number of screens available, the last screen is
-/// used.
-///
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// See also:
 ///
