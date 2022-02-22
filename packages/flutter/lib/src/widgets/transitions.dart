@@ -1006,15 +1006,13 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// [ChangeNotifier] and [ValueNotifier] are subtypes of [Listenable].
 ///
 /// Since a [ChangeNotifier] is a subtype of [Listenable], it can be used in
-/// an [AnimatedBuilder] to listen for changes. For example, to keep track
-/// of the state of a simple counter, a [ChangeNotifier] can be created and
-/// exposed to the widgets below using an [InheritedWidget].
+/// an [AnimatedBuilder] to listen for changes.
 ///
 /// {@tool dartpad}
-/// This is an example that shows how an [InheritedWidget] can expose a
-/// [ChangeNotifier] to a widget and its children. Whenever one of the two
-/// button is pressed, only the widgets inside the [AnimatedBuilder] are
-/// rebuilt while the `CounterPage` widget and its children are untouched.
+/// This is an example that shows how a [ChangeNotifier] can be used to manage
+/// the state of a widget. Whenever one of the two button is pressed, only
+/// the widgets inside the [AnimatedBuilder] are rebuilt while `CounterBody`
+/// itself and its children are untouched.
 ///
 /// With this approach, only those widgets that really need to be updated are
 /// rebuilt. With [State.setState] instead, the entire widget and the children
