@@ -1524,25 +1524,7 @@ mixin BaseSliderTrackShape {
 ///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Creates a slider track that draws 2 rectangles.
-  const RectangularSliderTrackShape({
-    @Deprecated(
-      'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    this.disabledThumbGapWidth = 2.0,
-  });
-
-  /// Horizontal spacing, or gap, between the disabled thumb and the track.
-  ///
-  /// This is only used when the slider is disabled. There is no gap around
-  /// the thumb and any part of the track when the slider is enabled. The
-  /// Material spec defaults this gap width 2, which is half of the disabled
-  /// thumb radius.
-  @Deprecated(
-    'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-    'This feature was deprecated after v1.26.0-18.0.pre.',
-  )
-  final double disabledThumbGapWidth;
+  const RectangularSliderTrackShape();
 
   @override
   void paint(

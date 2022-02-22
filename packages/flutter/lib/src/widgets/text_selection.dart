@@ -809,8 +809,8 @@ class SelectionOverlay {
       return;
 
     _handles = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => _buildStartHandle(context)),
-      OverlayEntry(builder: (BuildContext context) => _buildEndHandle(context)),
+      OverlayEntry(builder: _buildStartHandle),
+      OverlayEntry(builder: _buildEndHandle),
     ];
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
