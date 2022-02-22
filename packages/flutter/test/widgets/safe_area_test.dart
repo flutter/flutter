@@ -147,8 +147,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets('SafeArea alone - partial ViewInsets consume Padding',
-          (WidgetTester tester) async {
+      testWidgets('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
         final Widget child = boilerplate(SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -219,9 +218,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets(
-          'SafeArea with nested Scaffold  - partial ViewInsets consume Padding',
-          (WidgetTester tester) async {
+      testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
         final Widget child = boilerplate(SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
