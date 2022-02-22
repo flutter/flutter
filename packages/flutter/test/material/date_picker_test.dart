@@ -26,6 +26,7 @@ void main() {
   String? fieldHintText;
   String? fieldLabelText;
   String? helpText;
+  TextInputType? keyboardType;
 
   final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
   final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
@@ -52,6 +53,7 @@ void main() {
     fieldHintText = null;
     fieldLabelText = null;
     helpText = null;
+    keyboardType = null;
   });
 
   Future<void> prepareDatePicker(
@@ -94,6 +96,7 @@ void main() {
       fieldHintText: fieldHintText,
       fieldLabelText: fieldLabelText,
       helpText: helpText,
+      keyboardType: keyboardType,
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
@@ -698,6 +701,14 @@ void main() {
         expect(find.text(fieldHintText!), findsOneWidget);
         expect(find.text(fieldLabelText!), findsOneWidget);
         expect(find.text(helpText!), findsOneWidget);
+      });
+    });
+
+    testWidgets('KeyboardType is used', (WidgetTester tester) async {
+      keyboardType = TextInputType.text;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        final TextField field = textField(tester);
+        expect(field.keyboardType, TextInputType.text);
       });
     });
 
