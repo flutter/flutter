@@ -53,7 +53,7 @@ void main() {
     painter.layout();
     final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
-  });
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter null text test', () {
     final TextPainter painter = TextPainter()
