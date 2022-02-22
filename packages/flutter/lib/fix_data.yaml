@@ -17,6 +17,7 @@
 
 version: 1
 transforms:
+<<<<<<< HEAD
   # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
     date: 2022-01-05
@@ -229,6 +230,8 @@ transforms:
         oldName: 'isAlwaysShown'
         newName: 'thumbVisibility'
 
+=======
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
   # Changes made in https://github.com/flutter/flutter/pull/96115
   - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
     date: 2022-01-04

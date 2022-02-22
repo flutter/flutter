@@ -4137,7 +4137,10 @@ targets:
       subshard: "5_6"
       tags: >
         ["framework","hostonly","shard"]
+<<<<<<< HEAD
       test_timeout_secs: "2700"
+=======
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
     scheduler: luci
     runIf:
       - dev/**
@@ -4152,7 +4155,11 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
+<<<<<<< HEAD
           {"dependency": "android_sdk", "version": "version:31v8"},
+=======
+          {"dependency": "android_sdk", "version": "version:29.0"},
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},

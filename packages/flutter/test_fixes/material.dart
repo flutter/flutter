@@ -521,6 +521,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outlined;
+<<<<<<< HEAD
 
   // Changes made in https://github.com/flutter/flutter/pull/96957
   Scrollbar scrollbar = Scrollbar(isAlwaysShown: true);
@@ -551,4 +552,6 @@ void main() {
   rawChip = RawChip(useDeleteButtonTooltip: true);
   rawChip = RawChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
   rawChip.useDeleteButtonTooltip;
+=======
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
 }

@@ -7795,6 +7795,32 @@ void main() {
           scrollController: scrollController1,
         ),
       ),
+<<<<<<< HEAD
+=======
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    // TextInput.show should be after TextInput.setEditingState.
+    // On Android setEditingState triggers an IME restart which may prevent
+    // the keyboard from showing if the show keyboard request comes before the
+    // restart.
+    // See: https://github.com/flutter/flutter/issues/68571.
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.requestAutofill',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.setCaretRect',
+    ];
+    expect(
+      tester.testTextInput.log.map((MethodCall m) => m.method),
+      logOrder,
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
     );
 
     expect(scrollController1.attached, isTrue);
@@ -7830,8 +7856,31 @@ void main() {
       ),
     );
 
+<<<<<<< HEAD
     expect(scrollController1.attached, isFalse);
     expect(scrollController2.attached, isFalse);
+=======
+      // Send TextInput.show after TextInput.setEditingState. Otherwise
+      // some Android keyboards ignore the "show keyboard" request, as the
+      // Android text input plugin restarts the input method when setEditingState
+      // is sent by the framework.
+      final List<String> logOrder = <String>[
+        'TextInput.clearClient',
+        'TextInput.setClient',
+        'TextInput.setEditableSizeAndTransform',
+        'TextInput.setMarkedTextRect',
+        'TextInput.setStyle',
+        'TextInput.setEditingState',
+        'TextInput.show',
+        'TextInput.requestAutofill',
+        'TextInput.setCaretRect',
+      ];
+      expect(
+        tester.testTextInput.log.map((MethodCall m) => m.method),
+        logOrder,
+      );
+  });
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
 
     // Change scrollController to back controller 2.
     await tester.pumpWidget(
@@ -7875,6 +7924,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+<<<<<<< HEAD
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -7904,6 +7954,28 @@ void main() {
       },
       throwsAssertionError,
     );
+=======
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.requestAutofill',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.setCaretRect',
+      'TextInput.show',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (final MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState!['text'], 'flutter is the best!');
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
   });
 
   group('batch editing', () {
@@ -7930,8 +8002,24 @@ void main() {
     testWidgets('batch editing works', (WidgetTester tester) async {
       await tester.pumpWidget(widget);
 
+<<<<<<< HEAD
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
+=======
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setMarkedTextRect',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.requestAutofill',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.setCaretRect',
+      'TextInput.setEditingState',
+    ];
+>>>>>>> 097d3313d8e2c7f901932d63e537c1acefb87800
 
       final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
       state.updateEditingValue(const TextEditingValue(text: 'remote value'));
@@ -11515,6 +11603,53 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     expect(receivedIntent, isFalse);
+  });
+
+  testWidgets('Autofill enabled by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          autofocus: true,
+          controller: TextEditingController(text: 'A'),
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+        ),
+      ),
+    );
+
+    assert(focusNode.hasFocus);
+    expect(
+      tester.testTextInput.log,
+      contains(matchesMethodCall('TextInput.requestAutofill')),
+    );
+  });
+
+  testWidgets('Autofill can be disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          autofocus: true,
+          controller: TextEditingController(text: 'A'),
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+          autofillHints: null,
+        ),
+      ),
+    );
+
+    assert(focusNode.hasFocus);
+    expect(
+      tester.testTextInput.log,
+      isNot(contains(matchesMethodCall('TextInput.requestAutofill'))),
+    );
   });
 }
 
