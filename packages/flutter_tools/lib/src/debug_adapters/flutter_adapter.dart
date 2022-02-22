@@ -90,7 +90,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// not have requested to run in Profile or Release mode. Profile/Release
   /// modes will always disable debugging.
   ///
-  /// This is always `true` enabled for attach requests.
+  /// This is always `true` for attach requests.
   ///
   /// When not debugging, we will not connect to the VM Service so some
   /// functionality (breakpoints, evaluation, etc.) will not be available.
