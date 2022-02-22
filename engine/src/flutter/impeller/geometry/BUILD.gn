@@ -29,6 +29,8 @@ impeller_component("geometry") {
     "shear.h",
     "size.cc",
     "size.h",
+    "type_traits.cc",
+    "type_traits.h",
     "vector.cc",
     "vector.h",
   ]
