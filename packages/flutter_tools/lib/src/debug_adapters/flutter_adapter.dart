@@ -36,7 +36,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           logger: logger,
         );
 
-  @override
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
