@@ -447,7 +447,7 @@ class StdoutLogger extends Logger {
       shouldWrap: wrap ?? _outputPreferences.wrapText,
       columnWidth: _outputPreferences.wrapColumn,
     );
-    if (emphasis == true) {
+    if (emphasis ?? false) {
       message = terminal.bolden(message);
     }
     message = terminal.color(message, color ?? TerminalColor.red);
@@ -475,7 +475,7 @@ class StdoutLogger extends Logger {
       shouldWrap: wrap ?? _outputPreferences.wrapText,
       columnWidth: _outputPreferences.wrapColumn,
     );
-    if (emphasis == true) {
+    if (emphasis ?? false) {
       message = terminal.bolden(message);
     }
     message = terminal.color(message, color ?? TerminalColor.cyan);
@@ -500,13 +500,13 @@ class StdoutLogger extends Logger {
       shouldWrap: wrap ?? _outputPreferences.wrapText,
       columnWidth: _outputPreferences.wrapColumn,
     );
-    if (emphasis == true) {
+    if (emphasis ?? false) {
       message = terminal.bolden(message);
     }
     if (color != null) {
       message = terminal.color(message, color);
     }
-    if (newline != false) {
+    if (newline ?? true) {
       message = '$message\n';
     }
     writeToStdOut(message);
@@ -812,7 +812,7 @@ class BufferLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    if (newline != false) {
+    if (newline ?? true) {
       _status.writeln(wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
