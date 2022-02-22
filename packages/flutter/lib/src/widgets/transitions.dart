@@ -1017,7 +1017,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// With this approach, only those widgets that really need to be updated are
 /// rebuilt. With [State.setState] instead, the entire widget and the children
 /// would have been rebuilt regardless.
-/// 
+///
 /// ** See code in examples/api/lib/foundation/change_notifier/change_notifier.0.dart **
 /// {@end-tool}
 /// {@endtemplate}
