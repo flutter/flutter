@@ -229,11 +229,15 @@ bool TextureContents::Render(const ContentContext& renderer,
     const auto tess_result =
         Tessellator{entity.GetPath().GetFillType()}.Tessellate(
             entity.GetPath().CreatePolyline(),
-            [&vertex_builder, &coverage_rect](Point vtx) {
+            [this, &vertex_builder, &coverage_rect, &texture_size](Point vtx) {
               VS::PerVertexData data;
               data.vertices = vtx;
+              auto coverage_coords =
+                  (vtx - coverage_rect->origin) / coverage_rect->size;
               data.texture_coords =
-                  ((vtx - coverage_rect->origin) / coverage_rect->size);
+                  (source_rect_.origin +
+                   source_rect_.size * coverage_coords) /
+                  texture_size;
               vertex_builder.AppendVertex(data);
             });
     if (!tess_result) {
