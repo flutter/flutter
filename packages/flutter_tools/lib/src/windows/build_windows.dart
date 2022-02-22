@@ -74,7 +74,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
     );
-    if (visualStudio.displayVersion?.startsWith('17.1.') == true) {
+    if (visualStudio.displayVersion?.startsWith('17.1.') ?? false) {
       _fixBrokenCmakeGeneration(buildDirectory);
     }
     await _runBuild(cmakePath, buildDirectory, buildModeName);
