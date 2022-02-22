@@ -16,13 +16,6 @@ import 'theme.dart';
 
 /// A list whose items the user can interactively reorder by dragging.
 ///
-/// This class is appropriate for views with a small number of
-/// children because constructing the [List] requires doing work for every
-/// child that could possibly be displayed in the list view instead of just
-/// those children that are actually visible.
-///
-/// All list items must have a key.
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
 /// This sample shows by dragging the user can reorder the items of the list.
@@ -34,18 +27,34 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.0.dart **
 /// {@end-tool}
 ///
-/// This example demonstrates using the [proxyDecorator] callback to customize the appearance of
-/// a list item while it's being dragged.
+/// By default, on [TargetPlatformVariant.desktop] platforms each item will
+/// have a drag handle added on top it that will allow the user to grab it
+/// to move the item. On [TargetPlatformVariant.mobile], no drag handle will be
+/// added, but when the user long presses anywhere on the item it will start
+/// moving the item. Displaying drag handles can be controlled with
+/// [ReorderableListView.buildDefaultDragHandles].
+///
+/// All list items must have a key.
+///
+/// This example demonstrates using the [proxyDecorator] callback to customize
+/// the appearance of a list item while it's being dragged.
 /// {@tool snippet}
 ///
-/// While a drag is underway, the widget returned by the [proxyDecorator] serves as a "proxy" (a substitute)
-/// for the item in the list. The proxy is created with the original list item as its child. The [proxyDecorator]
-/// in this example is similar to the default one except that it changes the proxy item's background color.
+/// While a drag is underway, the widget returned by the [proxyDecorator]
+/// serves as a "proxy" (a substitute) for the item in the list. The proxy is
+/// created with the original list item as its child. The [proxyDecorator]
+/// in this example is similar to the default one except that it changes the
+/// proxy item's background color.
 ///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.1.dart **
 /// {@end-tool}
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
+  ///
+  /// This constructor is appropriate for lists with a small number of
+  /// children because constructing the [List] requires doing work for every
+  /// child that could possibly be displayed in the list view instead of just
+  /// those children that are actually visible.
   ///
   /// See also:
   ///
@@ -110,7 +119,6 @@ class ReorderableListView extends StatefulWidget {
   /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
   /// list items are built lazily on demand.
   /// {@tool dartpad}
-  ///
   ///
   /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.reorderable_list_view_builder.0.dart **
   /// {@end-tool}
