@@ -14,8 +14,77 @@ import 'mocks.dart';
 void main() {
   group('flutter adapter', () {
     setUpAll(() {
-    Cache.flutterRoot = '/fake/flutter';
-  });
+      Cache.flutterRoot = '/fake/flutter';
+    });
+
+    group('--start-paused', () {
+      test('is passed for debug mode', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.processArgs, contains('--start-paused'));
+      });
+
+      test('is not passed for noDebug mode', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+          noDebug: true,
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.processArgs, isNot(contains('--start-paused')));
+      });
+
+      test('is not passed if toolArgs contains --profile', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+          toolArgs: <String>['--profile'],
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.processArgs, isNot(contains('--start-paused')));
+      });
+
+      test('is not passed if toolArgs contains --release', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+          toolArgs: <String>['--release'],
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.processArgs, isNot(contains('--start-paused')));
+      });
+    });
 
     test('includes toolArgs', () async {
       final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
