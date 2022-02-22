@@ -20,7 +20,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_1_width_0'),
+      matchesGoldenFile('slider_start_text_scale_1_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -32,7 +32,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_1_width_0'),
+      matchesGoldenFile('slider_middle_text_scale_1_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -44,7 +44,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_1_width_0'),
+      matchesGoldenFile('slider_end_text_scale_1_width_0.png'),
     );
   });
 
@@ -59,7 +59,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_1_width_5'),
+      matchesGoldenFile('slider_start_text_scale_1_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -72,7 +72,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_1_width_5'),
+      matchesGoldenFile('slider_middle_text_scale_1_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -85,7 +85,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_1_width_5'),
+      matchesGoldenFile('slider_end_text_scale_1_width_5.png'),
     );
   });
 
@@ -100,7 +100,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_4_width_0'),
+      matchesGoldenFile('slider_start_text_scale_4_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -113,7 +113,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_4_width_0'),
+      matchesGoldenFile('slider_middle_text_scale_4_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -126,7 +126,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_4_width_0'),
+      matchesGoldenFile('slider_end_text_scale_4_width_0.png'),
     );
   });
 
@@ -143,7 +143,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_4_width_5'),
+      matchesGoldenFile('slider_start_text_scale_4_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -157,7 +157,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_4_width_5'),
+      matchesGoldenFile('slider_middle_text_scale_4_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -171,7 +171,7 @@ void main() {
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_4_width_5'),
+      matchesGoldenFile('slider_end_text_scale_4_width_5.png'),
     );
   });
 }
