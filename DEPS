@@ -107,7 +107,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '79643299bd052c53631b8b200bb582e8badb2708',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'e4cee118fc80c7cd3b8f8959aa02747a67c38a63',
 
   'src/flutter/impeller':
   Var('github_git') + '/flutter/impeller' + '@' + '2793516e27224b16e572138cb7cb18cc6b22adc7',
@@ -472,6 +472,9 @@ deps = {
 
   'src/third_party/pkg/vector_math':
   Var('github_git') + '/google/vector_math.dart.git' + '@' + 'v2.1.0',
+
+  'src/third_party/imgui':
+  Var('github_git') + '/ocornut/imgui.git' + '@' + '29d462ebce0275345a6ce4621d8fff0ded57c9e5',
 
   'src/gradle': {
     'packages': [
