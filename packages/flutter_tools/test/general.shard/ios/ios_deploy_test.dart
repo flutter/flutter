@@ -128,6 +128,31 @@ void main () {
         ]);
       });
 
+      testWithoutContext('handle processing logging after process exit', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        // Make sure we don't hit a race where logging processed after the process exits
+        // causes listeners to receive logging on the closed logLines stream.
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: 'stdout: "(lldb)     run\r\nsuccess\r\n',
+            stdin: IOSink(stdin.sink),
+            outputFollowsExit: true,
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isFalse);
+        await logLines.toList();
+        expect(receivedLogLines, isEmpty);
+      });
+
       testWithoutContext('app exit', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
