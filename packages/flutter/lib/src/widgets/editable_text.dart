@@ -1748,7 +1748,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       vsync: this,
       duration: _fadeDuration,
     )..addListener(_onCursorColorTick);
-    _clipboardStatus?.update();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -2906,7 +2905,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
-
+    _clipboardStatus?.update();
     _selectionOverlay!.showToolbar();
     return true;
   }
