@@ -1,4 +1,4 @@
-Signature: e81df4860f632b2ba29eb8a3f68e7052
+Signature: 4a611d7cf242840db914150a8b9cac97
 
 UNUSED LICENSES:
 
@@ -666,6 +666,7 @@ FILE: ../../../third_party/skia/bazel/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/cc_binary_with_flags.bzl
 FILE: ../../../third_party/skia/bazel/common_config_settings/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/defs.bzl
+FILE: ../../../third_party/skia/bazel/karma_test.bzl
 FILE: ../../../third_party/skia/bazel/macros.bzl
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
@@ -1082,6 +1083,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/preamble.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/radialgradient.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/util.js
 FILE: ../../../third_party/skia/modules/canvaskit/interface.js
+FILE: ../../../third_party/skia/modules/canvaskit/karma.bazel.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.google3.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/matrix.js
@@ -1183,6 +1185,8 @@ FILE: ../../../third_party/skia/modules/skunicode/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/svg/include/BUILD.bazel
 FILE: ../../../third_party/skia/modules/svg/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/svg/utils/BUILD.bazel
+FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/package.json
 FILE: ../../../third_party/skia/public.bzl
 FILE: ../../../third_party/skia/site/_index.html
 FILE: ../../../third_party/skia/site/about/_index.html
