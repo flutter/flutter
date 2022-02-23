@@ -26,6 +26,18 @@ import org.robolectric.RuntimeEnvironment;
 @RunWith(AndroidJUnit4.class)
 public class PlatformViewWrapperTest {
   @Test
+  public void invalidateChildInParent_callsInvalidate() {
+    final Context ctx = ApplicationProvider.getApplicationContext();
+    final PlatformViewWrapper wrapper = spy(new PlatformViewWrapper(ctx));
+
+    // Mock Android framework calls.
+    wrapper.invalidateChildInParent(null, null);
+
+    // Verify.
+    verify(wrapper, times(1)).invalidate();
+  }
+
+  @Test
   public void setTexture_writesToBuffer() {
     final Surface surface = mock(Surface.class);
     final Context ctx = ApplicationProvider.getApplicationContext();

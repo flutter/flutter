@@ -11,11 +11,13 @@ import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
@@ -175,10 +177,18 @@ class PlatformViewWrapper extends FrameLayout {
     return true;
   }
 
+  /** Used on Android O+, {@link invalidateChildInParent} used for previous versions. */
+  @SuppressLint("NewApi")
   @Override
   public void onDescendantInvalidated(@NonNull View child, @NonNull View target) {
     super.onDescendantInvalidated(child, target);
     invalidate();
+  }
+
+  @Override
+  public ViewParent invalidateChildInParent(int[] location, Rect dirty) {
+    invalidate();
+    return super.invalidateChildInParent(location, dirty);
   }
 
   @Override
