@@ -3051,6 +3051,8 @@ targets:
       subshard: web
       tags: >
         ["framework","hostonly","shard"]
+      os: Mac-10.15  # Override OS and Xcode for https://github.com/flutter/flutter/issues/98278
+      xcode: 12c33
     scheduler: luci
     runIf:
       - dev/**
