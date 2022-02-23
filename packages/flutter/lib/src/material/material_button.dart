@@ -31,7 +31,7 @@ import 'theme_data.dart';
 /// instance can maintain the look and feel of the app without individual
 /// configuration.
 ///
-/// To create and configure a Material button directly, without inheriting any
+/// To create and configure a Material button individually, without inheriting any
 /// theme defaults, use [RawMaterialButton].
 ///
 /// The button's size will expand to fit the [child] widget, if necessary.
@@ -453,4 +453,5 @@ class MaterialButton extends StatelessWidget {
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
+// TODO(Piinks): Should this be deprecated?
 mixin MaterialButtonWithIconMixin { }
