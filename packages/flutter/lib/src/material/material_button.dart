@@ -19,18 +19,20 @@ import 'theme_data.dart';
 /// A utility class for building custom Material buttons that depend on the
 /// ambient [ButtonTheme] and [Theme].
 ///
-/// This is in contrast to Material Design buttons [TextButton],
-/// [OutlinedButton], and [ElevatedButton], which each use their own respective
-/// themes [TextButtonTheme], [OutlinedButtonTheme], and [ElevatedButtonTheme].
-/// These buttons are preconfigured to match Material Design standards.
+/// This is in contrast to already styled Material Design buttons [TextButton],
+/// [OutlinedButton], and [ElevatedButton]. Each of which use their own respective
+/// themes: [TextButtonTheme], [OutlinedButtonTheme], and [ElevatedButtonTheme].
+/// These buttons are preconfigured to match Material Design's standard set of
+/// basic buttons.
 ///
-/// Using this button directly supports working within the Material Design
-/// language, while affording complete control in customizing the appearance of
-/// the button. By further supporting theming, each button instance can maintain
-/// the look and feel of the app without individual configuration.
+/// Using this [MaterialButton] directly will support working within the
+/// Material Design language, while affording complete control in customizing
+/// the appearance of the button. By further supporting theming, each button
+/// instance can maintain the look and feel of the app without individual
+/// configuration.
 ///
-/// To create a button directly, without inheriting any theme defaults, use
-/// [RawMaterialButton].
+/// To create and configure a Material button directly, without inheriting any
+/// theme defaults, use [RawMaterialButton].
 ///
 /// The button's size will expand to fit the [child] widget, if necessary.
 ///
@@ -42,10 +44,10 @@ import 'theme_data.dart';
 ///  * [IconButton], to create buttons that contain icons rather than text in
 ///    conjunction with theming.
 class MaterialButton extends StatelessWidget {
-  /// Creates a material button.
+  /// Creates a material button that incorporates inherited [Theme] and
+  /// [ButtonTheme].
   ///
-  /// Rather than creating a material button directly, consider using
-  /// [FlatButton] or [RaisedButton]. To create a custom Material button
+  /// To create a custom Material button, without theming,
   /// consider using [RawMaterialButton].
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
@@ -230,7 +232,6 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [FlatButton], a button with no elevation or fill color.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
   ///    button.
