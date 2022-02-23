@@ -35,15 +35,19 @@ DisplayListMetalComplexityCalculator::MetalHelper::BatchedComplexity() {
     // saveLayer seems to have two trends; if the count is < 200,
     // then the individual cost of a saveLayer is higher than if
     // the count is > 200.
-    if (save_layer_count_ > 200) {
-      // m = 1/5
-      // c = 1
-      save_layer_complexity = (save_layer_count_ + 5) * 40000;
-    } else {
-      // m = 1/2
-      // c = 1
-      save_layer_complexity = (save_layer_count_ + 2) * 100000;
-    }
+    //
+    // However, the trend is strange and we should gather more data to
+    // get a better idea of how to represent the trend. That being said, it's
+    // very unlikely we'll ever hit a DisplayList with 200+ saveLayer calls
+    // in it, so we will calculate based on the more reasonably anticipated
+    // range of less than 200, with the trend line more weighted towards the
+    // lower end of that range (as the data itself doesn't present as a straight
+    // line). Further, we will easily hit our cache thresholds with such a
+    // large number of saveLayer calls.
+    //
+    // m = 1/2
+    // c = 1
+    save_layer_complexity = (save_layer_count_ + 2) * 100000;
   }
 
   unsigned int draw_text_blob_complexity;
