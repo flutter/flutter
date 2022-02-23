@@ -181,6 +181,38 @@ void main() {
     ), throwsToolExit(message: 'Engine start event is missing in the timeline'));
   });
 
+  testWithoutContext('throws tool exit if first frame never renders', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': vm_service.EventKind.kExtension,
+        }
+      ),
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[
+            <String, Object?>{
+            'id': '1',
+            // No isolate, no views.
+            'isolate': null,
+            }
+          ],
+        },
+      ),
+    ]);
+
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
+      output: fileSystem.currentDirectory,
+      logger: logger,
+      firstFrameTimeout: const Duration(milliseconds: 50),
+    ), throwsToolExit(message: 'Timeout waiting for first frame'));
+    expect(logger.traceText, contains('id: 1 isolate: null'));
+  });
+
   testWithoutContext('throws tool exit if first frame events are missing', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
