@@ -106,13 +106,20 @@ for platform in "${platforms[@]}"; do
   yes "y" | $sdkmanager_path --licenses --sdk_root=$sdk_root
   cp -r "$sdk_root/licenses" "$upload_dir/sdk"
 
-  # Mac uses a different sdkmanager name than the platform name used in gn.
-  cipd_name="$platform-amd64"
+  archs=("amd64")
   if [[ $platform == "macosx" ]]; then
-    cipd_name="mac-amd64"
+    # Upload an arm64 version for M1 macs
+    archs=("amd64" "arm64")
   fi
-  echo "Uploading $cipd_name to CIPD"
-  cipd create -in $upload_dir -name "flutter/android/sdk/all/$cipd_name" -install-mode copy -tag version:$version_tag
+  for arch in "${archs[@]}"; do
+    # Mac uses a different sdkmanager name than the platform name used in gn.
+    cipd_name="$platform-$arch"
+    if [[ $platform == "macosx" ]]; then
+      cipd_name="mac-$arch"
+    fi
+    echo "Uploading $cipd_name to CIPD"
+    cipd create -in $upload_dir -name "flutter/android/sdk/all/$cipd_name" -install-mode copy -tag version:$version_tag
+  done
 
   rm -rf $sdk_root
   rm -rf $upload_dir
