@@ -1,0 +1,25 @@
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_shaders("imgui_shaders") {
+  name = "imgui_shaders"
+  shaders = [
+    "imgui_raster.vert",
+    "imgui_raster.frag",
+  ]
+}
+
+source_set("imgui_impeller_backend") {
+  testonly = true
+
+  public_deps = [
+    ":imgui_shaders",
+    "//third_party/imgui",
+  ]
+
+  deps = [ "//flutter/impeller/renderer" ]
+
+  sources = [
+    "imgui_impl_impeller.cc",
+    "imgui_impl_impeller.h",
+  ]
+}

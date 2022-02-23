@@ -17,8 +17,10 @@ impeller_component("playground") {
     "../entity:entity_shaders",
     "../fixtures:shader_fixtures",
     "../renderer",
+    "imgui:imgui_impeller_backend",
     "//flutter/testing",
     "//third_party/glfw",
+    "//third_party/imgui:imgui_glfw",
   ]
 
   public_configs = [ ":playground_config" ]
