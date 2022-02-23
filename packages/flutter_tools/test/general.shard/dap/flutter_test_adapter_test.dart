@@ -13,9 +13,15 @@ import 'mocks.dart';
 
 void main() {
   group('flutter test adapter', () {
+    final String expectedFlutterExecutable = globals.platform.isWindows
+        ? r'C:\fake\flutter\bin\flutter.bat'
+        : '/fake/flutter/bin/flutter';
+
     setUpAll(() {
-    Cache.flutterRoot = '/fake/flutter';
-  });
+      Cache.flutterRoot = globals.platform.isWindows
+          ? r'C:\fake\flutter'
+          : '/fake/flutter';
+    });
 
     test('includes toolArgs', () async {
       final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
@@ -35,7 +41,7 @@ void main() {
       await adapter.launchRequest(request, args, responseCompleter.complete);
       await responseCompleter.future;
 
-      expect(adapter.executable, equals('/fake/flutter/bin/flutter'));
+      expect(adapter.executable, equals(expectedFlutterExecutable));
       expect(adapter.processArgs, contains('tool_arg'));
     });
 
