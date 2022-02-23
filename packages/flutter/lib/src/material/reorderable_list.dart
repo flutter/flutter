@@ -64,6 +64,8 @@ class ReorderableListView extends StatefulWidget {
     Key? key,
     required List<Widget> children,
     required this.onReorder,
+    this.onReorderStart,
+    this.onReorderEnd,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -131,6 +133,8 @@ class ReorderableListView extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.onReorderStart,
+    this.onReorderEnd,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -167,6 +171,12 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderStart}
+  final void Function(int index)? onReorderStart;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
+  final void Function(int index)? onReorderEnd;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -479,6 +489,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            onReorderStart: widget.onReorderStart,
+            onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
           ),
         ),
