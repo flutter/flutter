@@ -910,7 +910,7 @@ void main() {
       MaterialApp(
         home: RefreshIndicator(
           onRefresh: refresh,
-          isRefreshing: true,
+          manuallyRefreshing: true,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -946,7 +946,7 @@ void main() {
               setState = setter;
               return RefreshIndicator(
                 onRefresh: refresh,
-                isRefreshing: _isRefreshing,
+                manuallyRefreshing: _isRefreshing,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -996,7 +996,7 @@ void main() {
               setState = setter;
               return RefreshIndicator(
                 onRefresh: refresh,
-                isRefreshing: _isRefreshing,
+                manuallyRefreshing: _isRefreshing,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -1045,7 +1045,7 @@ void main() {
               setState = setter;
               return RefreshIndicator(
                 onRefresh: refresh,
-                isRefreshing: _isRefreshing,
+                manuallyRefreshing: _isRefreshing,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
