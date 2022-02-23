@@ -504,6 +504,440 @@ void main() {
 
     // test add command
     testUsingContext(
+      'custom-devices add command correctly adds ssh device config on linux',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y'
+          ),
+          fileSystem: fs,
+          processManager: FakeProcessManager.any(),
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            CustomDeviceConfig(
+              id: 'testid',
+              label: 'testlabel',
+              sdkNameAndVersion: 'testsdknameandversion',
+              enabled: true,
+              pingCommand: const <String>[
+                'ping',
+                '-c', '1',
+                '-w', '1',
+                'testhostname'
+              ],
+              postBuildCommand: const <String>[],
+              installCommand: const <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                r'${localPath}',
+                r'testuser@testhostname:/tmp/${appName}'
+              ],
+              uninstallCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrundebug'
+              ],
+              forwardPortCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-o', 'ExitOnForwardFailure=yes',
+                '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
+                'testuser@testhostname'
+              ],
+              forwardPortSuccessRegex: RegExp('Linux'),
+              screenshotCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testscreenshot'
+              ],
+            )
+          )
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices add command correctly adds ipv4 ssh device config',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: '192.168.178.1',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
+          processManager: FakeProcessManager.any(),
+          fileSystem: fs,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            CustomDeviceConfig(
+              id: 'testid',
+              label: 'testlabel',
+              sdkNameAndVersion: 'testsdknameandversion',
+              enabled: true,
+              pingCommand: const <String>[
+                'ping',
+                '-c', '1',
+                '-w', '1',
+                '192.168.178.1'
+              ],
+              postBuildCommand: const <String>[],
+              installCommand: const <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                r'${localPath}',
+                r'testuser@192.168.178.1:/tmp/${appName}'
+              ],
+              uninstallCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@192.168.178.1',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@192.168.178.1',
+                'testrundebug'
+              ],
+              forwardPortCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-o', 'ExitOnForwardFailure=yes',
+                '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
+                'testuser@192.168.178.1'
+              ],
+              forwardPortSuccessRegex: RegExp('Linux'),
+              screenshotCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@192.168.178.1',
+                'testscreenshot'
+              ]
+            )
+          )
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices add command correctly adds ipv6 ssh device config',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: '::1',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
+          fileSystem: fs,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            CustomDeviceConfig(
+              id: 'testid',
+              label: 'testlabel',
+              sdkNameAndVersion: 'testsdknameandversion',
+              enabled: true,
+              pingCommand: const <String>[
+                'ping',
+                '-6',
+                '-c', '1',
+                '-w', '1',
+                '::1'
+              ],
+              postBuildCommand: const <String>[],
+              installCommand: const <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                '-6',
+                r'${localPath}',
+                r'testuser@[::1]:/tmp/${appName}'
+              ],
+              uninstallCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-6',
+                'testuser@[::1]',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-6',
+                'testuser@[::1]',
+                'testrundebug'
+              ],
+              forwardPortCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-o', 'ExitOnForwardFailure=yes',
+                '-6',
+                '-L', r'[::1]:${hostPort}:[::1]:${devicePort}',
+                'testuser@[::1]'
+              ],
+              forwardPortSuccessRegex: RegExp('Linux'),
+              screenshotCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-6',
+                'testuser@[::1]',
+                'testscreenshot'
+              ]
+            )
+          )
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices add command correctly adds non-forwarding ssh device config',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'n',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
+          fileSystem: fs,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            const CustomDeviceConfig(
+              id: 'testid',
+              label: 'testlabel',
+              sdkNameAndVersion: 'testsdknameandversion',
+              enabled: true,
+              pingCommand: <String>[
+                'ping',
+                '-c', '1',
+                '-w', '1',
+                'testhostname'
+              ],
+              postBuildCommand: <String>[],
+              installCommand: <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                r'${localPath}',
+                r'testuser@testhostname:/tmp/${appName}'
+              ],
+              uninstallCommand: <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrundebug'
+              ],
+              screenshotCommand: <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testscreenshot'
+              ]
+            )
+          )
+        );
+      }
+    );
+
+    testUsingContext(
+      'custom-devices add command correctly adds non-screenshotting ssh device config',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: '',
+            apply: 'y',
+          ),
+          fileSystem: fs,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            CustomDeviceConfig(
+              id: 'testid',
+              label: 'testlabel',
+              sdkNameAndVersion: 'testsdknameandversion',
+              enabled: true,
+              pingCommand: const <String>[
+                'ping',
+                '-c', '1',
+                '-w', '1',
+                'testhostname'
+              ],
+              postBuildCommand: const <String>[],
+              installCommand: const <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                r'${localPath}',
+                r'testuser@testhostname:/tmp/${appName}'
+              ],
+              uninstallCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrundebug'
+              ],
+              forwardPortCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-o', 'ExitOnForwardFailure=yes',
+                '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
+                'testuser@testhostname'
+              ],
+              forwardPortSuccessRegex: RegExp('Linux'),
+            )
+          )
+        );
+      }
+    );
+
+    testUsingContext(
       'custom-devices delete command deletes device and creates backup',
       () async {
         final MemoryFileSystem fs = MemoryFileSystem.test();
@@ -735,6 +1169,102 @@ void main() {
           anyOf(equals(defaultConfigLinux1), equals(defaultConfigLinux2))
         );
       }
+    );
+  });
+
+  group('windows', () {
+    setUp(() {
+      Cache.flutterRoot = windowsFlutterRoot;
+    });
+
+    testUsingContext(
+      'custom-devices add command correctly adds ssh device config on windows',
+      () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
+          fileSystem: fs,
+          platform: windowsPlatform,
+          featureEnabled: true
+        );
+
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'add', '--no-check']),
+          completes
+        );
+
+        final CustomDevicesConfig config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: BufferLogger.test()
+        );
+
+        expect(
+          config.devices,
+          contains(
+            CustomDeviceConfig(
+              id: 'testid',
+              label: 'testlabel',
+              sdkNameAndVersion: 'testsdknameandversion',
+              enabled: true,
+              pingCommand: const <String>[
+                'ping',
+                '-n', '1',
+                '-w', '500',
+                'testhostname'
+              ],
+              pingSuccessRegex: RegExp(r'[<=]\d+ms'),
+              postBuildCommand: const <String>[],
+              installCommand: const <String>[
+                'scp',
+                '-r',
+                '-o', 'BatchMode=yes',
+                r'${localPath}',
+                r'testuser@testhostname:/tmp/${appName}'
+              ],
+              uninstallCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                r'rm -rf "/tmp/${appName}"'
+              ],
+              runDebugCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testrundebug'
+              ],
+              forwardPortCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                '-o', 'ExitOnForwardFailure=yes',
+                '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
+                'testuser@testhostname'
+              ],
+              forwardPortSuccessRegex: RegExp('Linux'),
+              screenshotCommand: const <String>[
+                'ssh',
+                '-o', 'BatchMode=yes',
+                'testuser@testhostname',
+                'testscreenshot'
+              ]
+            )
+          )
+        );
+      },
     );
   });
 }
