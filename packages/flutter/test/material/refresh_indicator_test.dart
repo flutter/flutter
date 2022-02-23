@@ -903,7 +903,7 @@ void main() {
     expect(refreshCalled, true);
   });
 
-  testWidgets('RefreshIndicator shows on inital state if isRefreshing', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator shows on inital state if manuallyRefreshing', (WidgetTester tester) async {
     refreshCalled = false;
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -934,9 +934,9 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('RefreshIndicator shows and hides on isRefreshing', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator shows and hides on manuallyRefreshing', (WidgetTester tester) async {
     refreshCalled = false;
-    bool _isRefreshing = false;
+    bool manuallyRefreshing = false;
     late StateSetter setState;
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -946,7 +946,7 @@ void main() {
               setState = setter;
               return RefreshIndicator(
                 onRefresh: refresh,
-                manuallyRefreshing: _isRefreshing,
+                manuallyRefreshing: manuallyRefreshing,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -966,7 +966,7 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), findsNothing);
 
     setState(() {
-      _isRefreshing = true;
+      manuallyRefreshing = true;
     });
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -976,7 +976,7 @@ void main() {
     ));
 
     setState(() {
-      _isRefreshing = false;
+      manuallyRefreshing = false;
     });
     await tester.pumpAndSettle();
     expect(find.byType(RefreshProgressIndicator), findsNothing);
@@ -984,9 +984,9 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('RefreshIndicator hides on isRefreshing - fast switching', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator hides on manuallyRefreshing - fast switching', (WidgetTester tester) async {
     refreshCalled = false;
-    bool _isRefreshing = false;
+    bool manuallyRefreshing = false;
     late StateSetter setState;
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -996,7 +996,7 @@ void main() {
               setState = setter;
               return RefreshIndicator(
                 onRefresh: refresh,
-                manuallyRefreshing: _isRefreshing,
+                manuallyRefreshing: manuallyRefreshing,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -1016,11 +1016,11 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), findsNothing);
 
     setState(() {
-      _isRefreshing = true;
+      manuallyRefreshing = true;
     });
     await tester.pump();
     setState(() {
-      _isRefreshing = false;
+      manuallyRefreshing = false;
     });
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
@@ -1033,9 +1033,9 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('RefreshIndicator shows on isRefreshing - fast switching', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator shows on manuallyRefreshing - fast switching', (WidgetTester tester) async {
     refreshCalled = false;
-    bool _isRefreshing = true;
+    bool manuallyRefreshing = true;
     late StateSetter setState;
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -1045,7 +1045,7 @@ void main() {
               setState = setter;
               return RefreshIndicator(
                 onRefresh: refresh,
-                manuallyRefreshing: _isRefreshing,
+                manuallyRefreshing: manuallyRefreshing,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
@@ -1069,12 +1069,12 @@ void main() {
     ));
 
     setState(() {
-      _isRefreshing = false;
+      manuallyRefreshing = false;
     });
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     setState(() {
-      _isRefreshing = true;
+      manuallyRefreshing = true;
     });
     await tester.pump();
     await tester.pump(const Duration(seconds: 3));
