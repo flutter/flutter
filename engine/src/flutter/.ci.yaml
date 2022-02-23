@@ -295,7 +295,7 @@ targets:
     scheduler: luci
 
   - name: Mac Web Engine
-    recipe: web_engine
+    recipe: engine/web_engine
     properties:
       add_recipes_cq: "true"
       gcs_goldens_bucket: flutter_logs
