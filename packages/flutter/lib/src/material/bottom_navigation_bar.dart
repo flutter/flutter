@@ -893,7 +893,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
-    return (iconTheme ?? const IconThemeData()).copyWith(color: itemColor);
+    iconTheme ??= const IconThemeData();
+    // Prefer the font size on textStyle if present.
+    return itemColor != null && iconTheme == null ? iconTheme.copyWith(color: itemColor) : iconTheme;
   }
 
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
