@@ -145,6 +145,9 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If set, [IconThemeData]s take precedence over [iconSize],
   /// [selectedItemColor] and [unselectedItemColor].
+  /// 
+  /// If set, [IconThemeData]s take precedence over [TextStyle.color],
+  /// for the icons only
   ///
   /// If both [selectedLabelStyle].fontSize and [selectedFontSize] are set,
   /// [selectedLabelStyle].fontSize will be used.
@@ -892,10 +895,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
-  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
-    iconTheme ??= const IconThemeData();
-    // Prefer the font size on textStyle if present.
-    return itemColor != null && iconTheme == null ? iconTheme.copyWith(color: itemColor) : iconTheme;
+  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor, TextStyle? textStyle) {
+    final IconThemeData effectiveIconTheme = iconTheme ?? const IconThemeData();
+    // Prefer the iconTheme over itemColor and textStyle color if present.
+    // If iconTheme is not set, prefer textStyle color over itemColor
+    return iconTheme == null ? effectiveIconTheme.copyWith(color: textStyle?.color ?? itemColor) : effectiveIconTheme;
   }
 
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
@@ -920,12 +924,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _effectiveIconTheme(
         widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
         widget.selectedItemColor,
+        widget.selectedLabelStyle,
       );
 
     final IconThemeData effectiveUnselectedIconTheme =
       _effectiveIconTheme(
         widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
         widget.unselectedItemColor,
+        widget.unselectedLabelStyle,
       );
 
     final Color themeColor;

@@ -691,8 +691,6 @@ void main() {
   testWidgets('iconTheme color should override label style color for BottomNavigationBarType.shifted', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
-    const Color selectedColor = Color(0xFF0004FF);
-    const Color unselectedColor = Color(0xFFE5FF00);
     const Color selectedLabelColor = Color(0xFFFF9900);
     const Color unselectedLabelColor = Color(0xFF92F74E);
     const Color selectedIconThemeColor = Color(0xFF1E7723);
@@ -713,6 +711,91 @@ void main() {
             type: BottomNavigationBarType.shifting,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedIconThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
+  });
+
+  testWidgets('iconTheme color should override itemColor color for BottomNavigationBarType.fixed', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedIconThemeColor = Color(0xFF1E7723);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedIconThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
+  });
+
+  testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
+    const Color selectedIconThemeColor = Color(0xFF1E7723);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
             selectedIconTheme: selectedIconTheme,
             unselectedIconTheme: unselectedIconTheme,
             selectedItemColor: selectedColor,
