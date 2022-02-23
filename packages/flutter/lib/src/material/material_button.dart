@@ -16,41 +16,31 @@ import 'material.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A utility class for building Material buttons that depend on the
+/// A utility class for building custom Material buttons that depend on the
 /// ambient [ButtonTheme] and [Theme].
 ///
-/// ### This class is obsolete.
+/// This is in contrast to Material Design buttons [TextButton],
+/// [OutlinedButton], and [ElevatedButton], which each use their own respective
+/// themes [TextButtonTheme], [OutlinedButtonTheme], and [ElevatedButtonTheme].
+/// These buttons are preconfigured to match Material Design standards.
 ///
-/// FlatButton, RaisedButton, and OutlineButton have been replaced by
-/// TextButton, ElevatedButton, and OutlinedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme,
-/// ElevatedButtonTheme, and OutlinedButtonTheme. The appearance of the
-/// new widgets can be customized by specifying a [ButtonStyle]
-/// or by creating a one-off style using a `styleFrom` method like
-/// [TextButton.styleFrom]. The original button classes
-/// have been deprecated, please migrate code that uses them.
-/// There's a detailed migration guide for the new button and button
-/// theme classes in
-/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+/// Using this button directly supports working within the Material Design
+/// language, while affording complete control in customizing the appearance of
+/// the button. By further supporting theming, each button instance can maintain
+/// the look and feel of the app without individual configuration.
 ///
-/// The button's size will expand to fit the child widget, if necessary.
-///
-/// MaterialButtons whose [onPressed] and [onLongPress] callbacks are null will be disabled. To have
-/// an enabled button, make sure to pass a non-null value for [onPressed] or [onLongPress].
-///
-/// Rather than using this class directly, consider using [FlatButton],
-/// [OutlineButton], or [RaisedButton], which configure this class with
-/// appropriate defaults that match the material design specification.
-///
-/// To create a button directly, without inheriting theme defaults, use
+/// To create a button directly, without inheriting any theme defaults, use
 /// [RawMaterialButton].
+///
+/// The button's size will expand to fit the [child] widget, if necessary.
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
 /// See also:
 ///
-///  * [IconButton], to create buttons that contain icons rather than text.
+///  * [IconButton], to create buttons that contain icons rather than text in
+///    conjunction with theming.
 class MaterialButton extends StatelessWidget {
   /// Creates a material button.
   ///
