@@ -472,7 +472,7 @@ class CustomDeviceConfig {
       _kEnabled: enabled,
       _kPingCommand: pingCommand,
       _kPingSuccessRegex: pingSuccessRegex?.pattern,
-      _kPostBuildCommand: postBuildCommand,
+      _kPostBuildCommand: (postBuildCommand?.length ?? 0) > 0 ? postBuildCommand : null,
       _kInstallCommand: installCommand,
       _kUninstallCommand: uninstallCommand,
       _kRunDebugCommand: runDebugCommand,

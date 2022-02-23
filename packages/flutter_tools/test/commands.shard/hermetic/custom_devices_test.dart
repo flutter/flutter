@@ -552,7 +552,6 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -641,7 +640,6 @@ void main() {
                 '-w', '1',
                 '192.168.178.1'
               ],
-              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -730,7 +728,6 @@ void main() {
                 '-w', '1',
                 '::1'
               ],
-              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -823,7 +820,6 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: <String>[],
               installCommand: <String>[
                 'scp',
                 '-r',
@@ -903,7 +899,6 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -1227,7 +1222,6 @@ void main() {
                 'testhostname'
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
-              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
