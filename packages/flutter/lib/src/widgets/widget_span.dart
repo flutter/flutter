@@ -140,7 +140,7 @@ class WidgetSpan extends PlaceholderSpan {
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
     offset.increment(1);
-    return PlaceholderSpan.placeholderCodeUnit.codeUnitAt(0);
+    return PlaceholderSpan.placeholderCodeUnit;
   }
 
   @override
