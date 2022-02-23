@@ -13,8 +13,14 @@ import 'mocks.dart';
 
 void main() {
   group('flutter adapter', () {
+    final String expectedFlutterExecutable = globals.platform.isWindows
+        ? r'C:\fake\flutter\bin\flutter.bat'
+        : '/fake/flutter/bin/flutter';
+
     setUpAll(() {
-      Cache.flutterRoot = '/fake/flutter';
+      Cache.flutterRoot = globals.platform.isWindows
+          ? r'C:\fake\flutter'
+          : '/fake/flutter';
     });
 
     group('--start-paused', () {
@@ -101,7 +107,7 @@ void main() {
       await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
       await responseCompleter.future;
 
-      expect(adapter.executable, equals('/fake/flutter/bin/flutter'));
+      expect(adapter.executable, equals(expectedFlutterExecutable));
       expect(adapter.processArgs, contains('tool_arg'));
     });
 
