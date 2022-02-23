@@ -100,7 +100,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
     final Offset resolvedAnchorPoint = _capOffset(anchorPoint ?? _fallbackAnchorPoint(context), parentSize);
-    final Iterable<Rect> subScreens = _subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
+    final Iterable<Rect> subScreens = subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
     final Rect closestSubScreen = _closestToAnchorPoint(subScreens, resolvedAnchorPoint);
 
     return Padding(
@@ -189,7 +189,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   /// Returns sub-screens resulted by dividing [wantedBounds] along items of
   /// [avoidBounds] that are at least as high or as wide.
-  static Iterable<Rect> _subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
+  static Iterable<Rect> subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
       final List<Rect> newSubScreens = <Rect>[];
