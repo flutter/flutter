@@ -12,7 +12,7 @@ const String gsutilBinary = 'gsutil.py';
 const String kFrameworkDefaultBranch = 'master';
 const String kForceFlag = 'force';
 
-const List<String> kBaseReleaseChannels = <String>['stable', 'beta', 'dev'];
+const List<String> kBaseReleaseChannels = <String>['stable', 'beta'];
 
 const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, FrameworkRepository.defaultBranch];
 
