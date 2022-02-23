@@ -403,8 +403,55 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNoSurfaceIsSet) {
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
+                                                  /*device_pixel_ratio=*/2.0f);
+    bool result = pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result);
     auto no_discard = [](LayerTree&) { return false; };
     rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenPipelineIsEmpty) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
+                             ThreadHost::Type::IO | ThreadHost::Type::UI);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  MockDelegate delegate;
+  EXPECT_CALL(delegate, GetTaskRunners())
+      .WillRepeatedly(ReturnRef(task_runners));
+
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+  auto surface = std::make_unique<MockSurface>();
+  EXPECT_CALL(*surface, MakeRenderContextCurrent())
+      .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
+
+  std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
+      std::make_shared<MockExternalViewEmbedder>();
+  rasterizer->SetExternalViewEmbedder(external_view_embedder);
+  rasterizer->Setup(std::move(surface));
+
+  EXPECT_CALL(
+      *external_view_embedder,
+      EndFrame(/*should_resubmit_frame=*/false,
+               /*raster_thread_merger=*/fml::RefPtr<fml::RasterThreadMerger>(
+                   nullptr)))
+      .Times(0);
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    auto no_discard = [](LayerTree&) { return false; };
+    RasterStatus status =
+        rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    EXPECT_EQ(status, RasterStatus::kFailed);
     latch.Signal();
   });
   latch.Wait();
