@@ -19,6 +19,8 @@ void main() {
 
     group('--start-paused', () {
       test('is passed for debug mode', () async {
+        // Temporary failure for ensuring bots are running this test
+        expect(1, 2);
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
         final Completer<void> responseCompleter = Completer<void>();
 
