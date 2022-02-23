@@ -993,7 +993,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// ** See code in examples/api/lib/widgets/transitions/animated_builder.0.dart **
 /// {@end-tool}
 ///
-/// {@template flutter.flutter.changenotifier.rebuild}
+/// {@template flutter.flutter.animatedbuilder_changenotifier.rebuild}
 /// ## Granular rebuilds with AnimatedBuilder and ChangeNotifier
 ///
 /// A [State.setState] method call requires Flutter to entirely rebuild the

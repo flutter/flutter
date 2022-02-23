@@ -69,7 +69,6 @@ class _CounterBodyState extends State<CounterBody> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          // The counter
           AnimatedBuilder(
             animation: counterNotifier,
             builder: (BuildContext context, _) {
@@ -83,12 +82,10 @@ class _CounterBodyState extends State<CounterBody> {
             },
           ),
 
-          // Some spacing
           const SizedBox(
             height: 30,
           ),
 
-          // Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
