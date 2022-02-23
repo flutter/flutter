@@ -2592,7 +2592,7 @@ void main() {
   });
 
   testWidgets('Can change menu position', (WidgetTester tester) async {
-    PopupMenuButton<int> buildMenuButton({MenuPosition? position}) {
+    PopupMenuButton<int> buildMenuButton({required MenuPosition position}) {
       return PopupMenuButton<int>(
         position: position,
         itemBuilder: (BuildContext context) {
