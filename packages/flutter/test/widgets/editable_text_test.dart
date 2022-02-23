@@ -11607,7 +11607,7 @@ void main() {
       expect(find.text('Paste'), findsOneWidget);
       return tester.tap(find.text('Paste'));
     });
-  });
+  }, skip: kIsWeb); // [intended]
 
   // Regression test for https://github.com/flutter/flutter/issues/98322.
   testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
