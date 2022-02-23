@@ -2569,6 +2569,84 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
   });
+
+  testWidgets('PopupMenuButton fails when given both offset and position', (WidgetTester tester) async {
+    expect(() {
+      PopupMenuButton<int>(
+          offset: const Offset(50.0, 50.0),
+          position: MenuPosition.under,
+          itemBuilder: (BuildContext context) {
+            return <PopupMenuItem<int>>[
+              PopupMenuItem<int>(
+                value: 1,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return const Text('AAA');
+                  },
+                ),
+              ),
+            ];
+          },
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('Can change menu position', (WidgetTester tester) async {
+    PopupMenuButton<int> buildMenuButton({MenuPosition? position}) {
+      return PopupMenuButton<int>(
+        position: position,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
+            ),
+          ];
+        },
+      );
+    }
+
+    // Popup menu with `MenuPosition.over`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: MenuPosition.over),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: MenuPosition.under),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 40.0));
+  });
 }
 
 class TestApp extends StatefulWidget {
