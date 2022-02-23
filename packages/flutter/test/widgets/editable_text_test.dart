@@ -11474,6 +11474,48 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/98322.
+  testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
+    bool receivedIntent = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Actions(
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+              receivedIntent = true;
+              return;
+            }),
+            ButtonActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+              receivedIntent = true;
+              return;
+            }),
+          },
+          child: EditableText(
+            autofocus: true,
+            backgroundCursorColor: Colors.blue,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    // ActivateIntent, which is triggered by space and enter in WidgetsApp, is
+    // consumed by EditableText so that the space/enter reach the IME.
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    expect(receivedIntent, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(receivedIntent, isFalse);
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -11525,7 +11567,7 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ValueListenable<ClipboardStatus>? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
     return Container();
   }
 
@@ -11553,7 +11595,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int copyCount = 0;
 
   @override
-  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCopy(TextSelectionDelegate delegate) {
     copyCount += 1;
   }
 
@@ -11563,7 +11605,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCut(TextSelectionDelegate delegate) {
     cutCount += 1;
   }
 
