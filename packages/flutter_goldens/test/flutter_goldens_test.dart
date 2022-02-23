@@ -482,20 +482,20 @@ void main() {
       });
 
       test('asserts .png format', () async {
-        expect(fakeSkiaClient.initCalls, 0);
-        try {
-          await comparator.compare(
-            Uint8List.fromList(_kTestPngBytes),
-            Uri.parse('flutter.golden_test.1'),
-          );
-          fail('Expected assertion was not triggered.');
-        } on AssertionError catch (error) {
-          expect(
-            error.message,
-            'Golden files in the Flutter framework must end with the file '
-            'extension .png.',
-          );
-        }
+        expectLater(
+          () async {
+            await comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              'Golden files in the Flutter framework must end with the file extension .png.',
+            ),
+          ),
+        );
       });
 
       test('calls init during compare', () {
@@ -597,20 +597,20 @@ void main() {
       });
 
       test('asserts .png format', () async {
-        expect(fakeSkiaClient.initCalls, 0);
-        try {
-          await comparator.compare(
-            Uint8List.fromList(_kTestPngBytes),
-            Uri.parse('flutter.golden_test.1'),
-          );
-          fail('Expected assertion was not triggered.');
-        } on AssertionError catch (error) {
-          expect(
-            error.message,
-            'Golden files in the Flutter framework must end with the file '
-            'extension .png.',
-          );
-        }
+        expectLater(
+          () async {
+            await comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              'Golden files in the Flutter framework must end with the file extension .png.',
+            ),
+          ),
+        );
       });
 
       test('calls init during compare', () {
@@ -780,20 +780,20 @@ void main() {
       });
 
       test('asserts .png format', () async {
-        expect(fakeSkiaClient.initCalls, 0);
-        try {
-          await comparator.compare(
-            Uint8List.fromList(_kTestPngBytes),
-            Uri.parse('flutter.golden_test.1'),
-          );
-          fail('Expected assertion was not triggered.');
-        } on AssertionError catch (error) {
-          expect(
-            error.message,
-            'Golden files in the Flutter framework must end with the file '
-            'extension .png.',
-          );
-        }
+        expectLater(
+          () async {
+            await comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              'Golden files in the Flutter framework must end with the file extension .png.',
+            ),
+          ),
+        );
       });
 
       test('passes when bytes match', () async {
