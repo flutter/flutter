@@ -19,8 +19,8 @@ import 'theme_data.dart';
 /// A utility class for building custom Material buttons that depend on the
 /// ambient [ButtonTheme] and [Theme].
 ///
-/// This is in contrast to already styled Material Design buttons [TextButton],
-/// [OutlinedButton], and [ElevatedButton]. Each of which use their own respective
+/// This is in contrast to already-styled Material Design buttons [TextButton],
+/// [OutlinedButton], and [ElevatedButton], each of which use their own respective
 /// themes: [TextButtonTheme], [OutlinedButtonTheme], and [ElevatedButtonTheme].
 /// These buttons are preconfigured to match Material Design's standard set of
 /// basic buttons.
