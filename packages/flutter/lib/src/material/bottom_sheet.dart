@@ -652,6 +652,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///

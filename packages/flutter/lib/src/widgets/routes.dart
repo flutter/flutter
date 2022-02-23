@@ -1868,9 +1868,9 @@ abstract class RouteAware {
 /// {@template flutter.widgets.RawDialogRoute}
 /// [DisplayFeatureSubScreen] is used for displaying this route on only one
 /// sub-screen.
+/// {@endtemplate}
 ///
 /// {@macro flutter.widgets.DisplayFeatureSubScreen}
-/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -1995,6 +1995,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// See [RouteSettings] for more details.
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.

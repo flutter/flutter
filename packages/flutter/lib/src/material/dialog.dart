@@ -1009,6 +1009,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1120,6 +1122,8 @@ Future<T?> showDialog<T>({
 /// [RouteSettings] for details.
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// See also:
 ///

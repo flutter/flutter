@@ -2367,6 +2367,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// By default, the time picker gets its colors from the overall theme's
 /// [ColorScheme]. The time picker can be further customized by providing a
 /// [TimePickerThemeData] to the overall theme.

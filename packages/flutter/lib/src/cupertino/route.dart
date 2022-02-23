@@ -1001,6 +1001,8 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// See also:
 ///
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
@@ -1138,6 +1140,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
 ///
@@ -1238,6 +1242,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1323,6 +1329,8 @@ Future<T?> showCupertinoDialog<T>({
 /// [RouteSettings] for details.
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// See also:
 ///

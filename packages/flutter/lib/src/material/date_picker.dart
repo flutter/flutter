@@ -104,6 +104,8 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date picker.
@@ -905,6 +907,8 @@ class _DatePickerHeader extends StatelessWidget {
 /// to add inherited widgets like [Theme].
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// ### State Restoration
 ///
