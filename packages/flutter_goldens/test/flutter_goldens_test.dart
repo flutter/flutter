@@ -492,7 +492,10 @@ void main() {
           throwsA(
             isA<AssertionError>().having((AssertionError error) => error.toString(),
               'description',
-              'Golden files in the Flutter framework must end with the file extension .png.',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
             ),
           ),
         );
@@ -607,7 +610,10 @@ void main() {
           throwsA(
             isA<AssertionError>().having((AssertionError error) => error.toString(),
               'description',
-              'Golden files in the Flutter framework must end with the file extension .png.',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
             ),
           ),
         );
@@ -790,7 +796,10 @@ void main() {
           throwsA(
             isA<AssertionError>().having((AssertionError error) => error.toString(),
               'description',
-              'Golden files in the Flutter framework must end with the file extension .png.',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
             ),
           ),
         );
