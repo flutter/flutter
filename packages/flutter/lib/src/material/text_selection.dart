@@ -36,7 +36,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus> clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -144,7 +144,7 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   }) : super(key: key);
 
-  final ValueListenable<ClipboardStatus> clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
@@ -169,22 +169,22 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
   @override
   void initState() {
     super.initState();
-    widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(_TextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-      widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-      oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
@@ -197,7 +197,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     // If the paste button is desired, don't render anything until the state of
     // the clipboard is known, since it's used to determine if paste is shown.
     if (widget.handlePaste != null
-        && widget.clipboardStatus.value == ClipboardStatus.unknown) {
+        && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
     }
 
@@ -233,7 +233,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
           onPressed: widget.handleCopy!,
         ),
       if (widget.handlePaste != null
-          && widget.clipboardStatus.value == ClipboardStatus.pasteable)
+          && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
         _TextSelectionToolbarItemData(
           label: localizations.pasteButtonLabel,
           onPressed: widget.handlePaste!,

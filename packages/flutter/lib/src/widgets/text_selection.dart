@@ -142,7 +142,7 @@ abstract class TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus> clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
 
@@ -1078,7 +1078,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
               widget.midpoint,
               widget.selectionEndpoints,
               widget.selectionDelegate!,
-              widget.clipboardStatus!,
+              widget.clipboardStatus,
               widget.toolbarLocation,
             );
           },
