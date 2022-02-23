@@ -2908,11 +2908,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return true;
   }
 
-  /// Hides the text selection toolbar.
-  ///
-  /// By default, hideHandles is true, and the toolbar is hidden along with its
-  /// handles. If hideHandles is set to false, then the toolbar will be hidden
-  /// but the handles will remain.
+  @override
   void hideToolbar([bool hideHandles = true]) {
     if (hideHandles) {
       // Hide the handles and the toolbar.

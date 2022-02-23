@@ -990,6 +990,13 @@ mixin TextSelectionDelegate {
   ///   updating the text editing state.
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
+  /// Hides the text selection toolbar.
+  ///
+  /// By default, hideHandles is true, and the toolbar is hidden along with its
+  /// handles. If hideHandles is set to false, then the toolbar will be hidden
+  /// but the handles will remain.
+  void hideToolbar([bool hideHandles = true]);
+
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
