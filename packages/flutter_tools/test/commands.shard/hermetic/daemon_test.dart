@@ -681,7 +681,7 @@ void main() {
       bufferLogger.clear();
     });
 
-    testUsingContext('outputs trace messages in verbose mode', () async {    
+    testUsingContext('outputs trace messages in verbose mode', () async {
       final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
       logger.printTrace('test');
       expect(bufferLogger.errorText, contains('test'));
