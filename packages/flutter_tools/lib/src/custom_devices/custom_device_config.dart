@@ -264,8 +264,9 @@ class CustomDeviceConfig {
       '-o', 'ExitOnForwardFailure=yes',
       '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
       'pi@raspberrypi',
+      "echo 'Port forwarding success'; read",
     ],
-    forwardPortSuccessRegex: RegExp('Linux'),
+    forwardPortSuccessRegex: RegExp('Port forwarding success'),
     screenshotCommand: const <String>[
       'ssh',
       '-o', 'BatchMode=yes',

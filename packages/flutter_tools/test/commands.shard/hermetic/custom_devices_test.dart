@@ -82,9 +82,10 @@ const String defaultConfigLinux1 = r'''
         "ExitOnForwardFailure=yes",
         "-L",
         "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
-        "pi@raspberrypi"
+        "pi@raspberrypi",
+        "echo 'Port forwarding success'; read"
       ],
-      "forwardPortSuccessRegex": "Linux",
+      "forwardPortSuccessRegex": "Port forwarding success",
       "screenshot": [
         "ssh",
         "-o",
@@ -145,9 +146,10 @@ const String defaultConfigLinux2 = r'''
         "ExitOnForwardFailure=yes",
         "-L",
         "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
-        "pi@raspberrypi"
+        "pi@raspberrypi",
+        "echo 'Port forwarding success'; read"
       ],
-      "forwardPortSuccessRegex": "Linux",
+      "forwardPortSuccessRegex": "Port forwarding success",
       "screenshot": [
         "ssh",
         "-o",
@@ -576,9 +578,10 @@ void main() {
                 '-o', 'BatchMode=yes',
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
-                'testuser@testhostname'
+                'testuser@testhostname',
+                "echo 'Port forwarding success'; read"
               ],
-              forwardPortSuccessRegex: RegExp('Linux'),
+              forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -664,9 +667,10 @@ void main() {
                 '-o', 'BatchMode=yes',
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
-                'testuser@192.168.178.1'
+                'testuser@192.168.178.1',
+                "echo 'Port forwarding success'; read"
               ],
-              forwardPortSuccessRegex: RegExp('Linux'),
+              forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -756,9 +760,10 @@ void main() {
                 '-o', 'ExitOnForwardFailure=yes',
                 '-6',
                 '-L', r'[::1]:${hostPort}:[::1]:${devicePort}',
-                'testuser@[::1]'
+                'testuser@[::1]',
+                "echo 'Port forwarding success'; read"
               ],
-              forwardPortSuccessRegex: RegExp('Linux'),
+              forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
@@ -923,9 +928,10 @@ void main() {
                 '-o', 'BatchMode=yes',
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
-                'testuser@testhostname'
+                'testuser@testhostname',
+                "echo 'Port forwarding success'; read"
               ],
-              forwardPortSuccessRegex: RegExp('Linux'),
+              forwardPortSuccessRegex: RegExp('Port forwarding success'),
             )
           )
         );
@@ -1246,9 +1252,10 @@ void main() {
                 '-o', 'BatchMode=yes',
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
-                'testuser@testhostname'
+                'testuser@testhostname',
+                "echo 'Port forwarding success'; read"
               ],
-              forwardPortSuccessRegex: RegExp('Linux'),
+              forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
