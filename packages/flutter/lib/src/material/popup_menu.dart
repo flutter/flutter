@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show DisplayFeature;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -637,7 +635,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     this.selectedItemIndex,
     this.textDirection,
     this.padding,
-    this.avoidBounds,
   );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -656,9 +653,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // The padding of unsafe area.
   EdgeInsets padding;
-
-  // List of rectangles that we should avoid overlapping. Unusable screen area.
-  final Set<Rect> avoidBounds;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -710,96 +704,20 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
           break;
       }
     }
-    final Offset wantedPosition = Offset(x,y);
-    final Offset originCenter = position.toRect(Offset.zero & size).center;
-    final Iterable<Rect> subScreens = _subScreensInBounds(Offset.zero & size, avoidBounds);
-    final Rect subScreen = _closestScreen(subScreens, originCenter);
-    return _fitInsideScreen(subScreen, childSize, wantedPosition);
-  }
 
-  Rect _closestScreen(Iterable<Rect> screens, Offset point) {
-    Rect closest = screens.first;
-    for (final Rect screen in screens) {
-      if ((screen.center - point).distance < (closest.center - point).distance) {
-        closest = screen;
-      }
-    }
-    return closest;
-  }
-
-  Offset _fitInsideScreen(Rect screen, Size childSize, Offset wantedPosition){
-    double x = wantedPosition.dx;
-    double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < screen.left + _kMenuScreenPadding + padding.left)
-      x = screen.left + _kMenuScreenPadding + padding.left;
-    else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right)
-      x = screen.right - childSize.width - _kMenuScreenPadding - padding.right;
-    if (y < screen.top + _kMenuScreenPadding + padding.top)
+    if (x < _kMenuScreenPadding + padding.left)
+      x = _kMenuScreenPadding + padding.left;
+    else if (x + childSize.width > size.width - _kMenuScreenPadding - padding.right)
+      x = size.width - childSize.width - _kMenuScreenPadding - padding.right  ;
+    if (y < _kMenuScreenPadding + padding.top)
       y = _kMenuScreenPadding + padding.top;
-    else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom)
-      y = screen.bottom - childSize.height - _kMenuScreenPadding - padding.bottom;
+    else if (y + childSize.height > size.height - _kMenuScreenPadding - padding.bottom)
+      y = size.height - padding.bottom - _kMenuScreenPadding - childSize.height ;
 
-    return Offset(x,y);
+    return Offset(x, y);
   }
-
-  /// Returns sub-screens resulted by dividing [wantedBounds] along items of
-  /// [avoidBounds] that are at least as high or as wide.
-  static Iterable<Rect> _subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
-    Iterable<Rect> subScreens = <Rect>[wantedBounds];
-    for (final Rect bounds in avoidBounds) {
-      final List<Rect> newSubScreens = <Rect>[];
-      for (final Rect screen in subScreens) {
-        if (screen.top >= bounds.top && screen.bottom <= bounds.bottom) {
-          // Display feature splits the screen vertically
-          if (screen.left < bounds.left) {
-            // There is a smaller sub-screen, left of the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              screen.left,
-              screen.top,
-              bounds.left - screen.left,
-              screen.height,
-            ));
-          }
-          if (screen.right > bounds.right) {
-            // There is a smaller sub-screen, right of the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              bounds.right,
-              screen.top,
-              screen.right - bounds.right,
-              screen.height,
-            ));
-          }
-        } else if (screen.left >= bounds.left && screen.right <= bounds.right) {
-          // Display feature splits the sub-screen horizontally
-          if (screen.top < bounds.top) {
-            // There is a smaller sub-screen, above the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              screen.left,
-              screen.top,
-              screen.width,
-              bounds.top - screen.top,
-            ));
-          }
-          if (screen.bottom > bounds.bottom) {
-            // There is a smaller sub-screen, below the display feature
-            newSubScreens.add(Rect.fromLTWH(
-              screen.left,
-              bounds.bottom,
-              screen.width,
-              screen.bottom - bounds.bottom,
-            ));
-          }
-        } else {
-          newSubScreens.add(screen);
-        }
-      }
-      subScreens = newSubScreens;
-    }
-    return subScreens;
-  }
-
 
   @override
   bool shouldRelayout(_PopupMenuRouteLayout oldDelegate) {
@@ -812,8 +730,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       || selectedItemIndex != oldDelegate.selectedItemIndex
       || textDirection != oldDelegate.textDirection
       || !listEquals(itemSizes, oldDelegate.itemSizes)
-      || padding != oldDelegate.padding
-      || !setEquals(avoidBounds, oldDelegate.avoidBounds);
+      || padding != oldDelegate.padding;
   }
 }
 
@@ -895,19 +812,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
               selectedItemIndex,
               Directionality.of(context),
               mediaQuery.padding,
-              _avoidBounds(mediaQuery),
             ),
             child: capturedThemes.wrap(menu),
           );
         },
       ),
     );
-  }
-
-  Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
-    return mediaQuery.displayFeatures
-        .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds)
-        .toSet();
   }
 }
 
