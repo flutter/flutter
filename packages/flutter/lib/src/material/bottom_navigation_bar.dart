@@ -145,7 +145,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If set, [IconThemeData]s take precedence over [iconSize],
   /// [selectedItemColor] and [unselectedItemColor].
-  /// 
+  ///
   /// If set, [IconThemeData]s take precedence over [TextStyle.color],
   /// for the icons only
   ///
