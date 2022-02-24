@@ -339,7 +339,6 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
 std::vector<Point> CubicPathComponent::CreatePolyline(
     const SmoothingApproximation& approximation) const {
   std::vector<Point> points;
-  points.emplace_back(p1);
   CubicPathSmoothenRecursive(approximation, points, p1, cp1, cp2, p2, 0);
   points.emplace_back(p2);
   return points;

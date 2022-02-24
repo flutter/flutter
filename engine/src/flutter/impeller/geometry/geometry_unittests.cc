@@ -6,6 +6,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/path_component.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
@@ -522,6 +523,16 @@ TEST(GeometryTest, RectContainsRect) {
     Rect b(0, 0, 300, 300);
     ASSERT_FALSE(a.Contains(b));
   }
+}
+
+TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
+  CubicPathComponent component({10, 10}, {20,35}, {35, 20}, {40, 40});
+  SmoothingApproximation approximation;
+  auto polyline = component.CreatePolyline(approximation);
+  ASSERT_NE(polyline.front().x, 10);
+  ASSERT_NE(polyline.front().y, 10);
+  ASSERT_EQ(polyline.back().x, 40);
+  ASSERT_EQ(polyline.back().y, 40);
 }
 
 }  // namespace testing
