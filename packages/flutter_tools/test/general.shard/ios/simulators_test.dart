@@ -995,6 +995,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => xcode,
     });
+
     testUsingContext('startApp using route', () async {
       final IOSSimulator device = IOSSimulator(
         'x',
