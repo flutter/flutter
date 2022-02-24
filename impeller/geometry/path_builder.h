@@ -33,19 +33,19 @@ class PathBuilder {
 
   PathBuilder& VerticalLineTo(Scalar y, bool relative = false);
 
-  PathBuilder& QuadraticCurveTo(Point point,
-                                Point controlPoint,
+  PathBuilder& QuadraticCurveTo(Point controlPoint,
+                                Point point,
                                 bool relative = false);
 
   PathBuilder& SmoothQuadraticCurveTo(Point point, bool relative = false);
 
-  PathBuilder& CubicCurveTo(Point point,
-                            Point controlPoint1,
+  PathBuilder& CubicCurveTo(Point controlPoint1,
                             Point controlPoint2,
+                            Point point,
                             bool relative = false);
 
-  PathBuilder& SmoothCubicCurveTo(Point point,
-                                  Point controlPoint2,
+  PathBuilder& SmoothCubicCurveTo(Point controlPoint2,
+                                  Point point,
                                   bool relative = false);
 
   PathBuilder& AddRect(Rect rect);
