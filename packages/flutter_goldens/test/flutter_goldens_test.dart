@@ -481,6 +481,26 @@ void main() {
         );
       });
 
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
+      });
+
       test('calls init during compare', () {
         expect(fakeSkiaClient.initCalls, 0);
         comparator.compare(
@@ -576,6 +596,26 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+        );
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
         );
       });
 
@@ -743,6 +783,26 @@ void main() {
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
         fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
         fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
       });
 
       test('passes when bytes match', () async {
