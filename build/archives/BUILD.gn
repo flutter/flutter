@@ -79,7 +79,7 @@ if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   copy("dart_sdk_archive") {
     sources = [ prebuilt_dart_sdk_archive ]
     outputs =
-        [ "$root_out_dir/zip_archives/dart-sdk-$prebuilt_dart_sdk_config" ]
+        [ "$root_out_dir/zip_archives/dart-sdk-$prebuilt_dart_sdk_config.zip" ]
   }
 }
 
