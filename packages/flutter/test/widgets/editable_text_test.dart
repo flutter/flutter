@@ -49,6 +49,8 @@ enum HandlePositionInViewport {
   leftEdge, rightEdge, within,
 }
 
+typedef _VoidFutureCallback = Future<void> Function();
+
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
   TestWidgetsFlutterBinding.ensureInitialized()
@@ -11518,6 +11520,140 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
+
+  testWidgets('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
+    Future<void> testPasteSelection(WidgetTester tester, _VoidFutureCallback paste) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(controller.text, '');
+
+      await tester.enterText(find.byType(EditableText), '12345');
+      expect(controller.value, const TextEditingValue(
+        text: '12345',
+        selection: TextSelection.collapsed(offset: 5),
+      ));
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowLeft,
+        ],
+        shift: true,
+        targetPlatform: defaultTargetPlatform,
+      );
+
+      expect(controller.value, const TextEditingValue(
+        text: '12345',
+        selection: TextSelection(baseOffset: 5, extentOffset: 0),
+      ));
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyC,
+        ],
+        shortcutModifier: true,
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(controller.value, const TextEditingValue(
+        text: '12345',
+        selection: TextSelection(baseOffset: 5, extentOffset: 0),
+      ));
+
+      // Pasting content of equal length, reversed selection.
+      await paste();
+      expect(controller.value, const TextEditingValue(
+        text: '12345',
+        selection: TextSelection.collapsed(offset: 5),
+      ));
+
+      // Pasting content of longer length, forward selection.
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.arrowLeft,
+        ],
+        targetPlatform: defaultTargetPlatform,
+      );
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.arrowRight,
+        ],
+        shift: true,
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(controller.value, const TextEditingValue(
+        text: '12345',
+        selection: TextSelection(baseOffset: 4, extentOffset: 5),
+      ));
+      await paste();
+      expect(controller.value, const TextEditingValue(
+        text: '123412345',
+        selection: TextSelection.collapsed(offset: 9),
+      ));
+
+      // Pasting content of shorter length, forward selection.
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyA,
+        ],
+        shortcutModifier: true,
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(controller.value, const TextEditingValue(
+        text: '123412345',
+        selection: TextSelection(baseOffset: 0, extentOffset: 9),
+      ));
+      await paste();
+      // Pump to allow postFrameCallbacks to finish before dispose.
+      await tester.pump();
+      expect(controller.value, const TextEditingValue(
+        text: '12345',
+        selection: TextSelection.collapsed(offset: 5),
+      ));
+    }
+
+    // Test pasting with the keyboard.
+    await testPasteSelection(tester, () {
+      return sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyV,
+        ],
+        shortcutModifier: true,
+        targetPlatform: defaultTargetPlatform,
+      );
+    });
+
+    // Test pasting with the toolbar.
+    await testPasteSelection(tester, () async {
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsOneWidget);
+      return tester.tap(find.text('Paste'));
+    });
+  }, skip: kIsWeb); // [intended]
 
   // Regression test for https://github.com/flutter/flutter/issues/98322.
   testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
