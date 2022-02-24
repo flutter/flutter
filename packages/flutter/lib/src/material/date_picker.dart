@@ -151,6 +151,7 @@ Future<DateTime?> showDatePicker({
   String? errorInvalidText,
   String? fieldHintText,
   String? fieldLabelText,
+  TextInputType? keyboardType,
 }) async {
   assert(context != null);
   assert(initialDate != null);
@@ -195,6 +196,7 @@ Future<DateTime?> showDatePicker({
     errorInvalidText: errorInvalidText,
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
+    keyboardType: keyboardType,
   );
 
   if (textDirection != null) {
@@ -249,6 +251,7 @@ class DatePickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.keyboardType,
     this.restorationId,
   }) : assert(initialDate != null),
        assert(firstDate != null),
@@ -333,6 +336,11 @@ class DatePickerDialog extends StatefulWidget {
   /// If this is null, it will default to the words representing the date format
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
+
+  /// The keyboard type of the [TextField].
+  ///
+  /// If this is null, it will default to [TextInputType.datetime]
+  final TextInputType? keyboardType;
 
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
   ///
@@ -512,6 +520,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   errorInvalidText: widget.errorInvalidText,
                   fieldHintText: widget.fieldHintText,
                   fieldLabelText: widget.fieldLabelText,
+                  keyboardType: widget.keyboardType,
                   autofocus: true,
                 ),
                 const Spacer(),
