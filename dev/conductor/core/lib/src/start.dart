@@ -14,7 +14,7 @@ import 'context.dart';
 import 'git.dart';
 import 'globals.dart';
 import 'proto/conductor_state.pb.dart' as pb;
-import 'proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'proto/conductor_state.pbenum.dart';
 import 'repository.dart';
 import 'state.dart' as state_import;
 import 'stdio.dart';
@@ -267,19 +267,40 @@ class StartContext extends Context {
   final EngineRepository engine;
   final FrameworkRepository framework;
 
-  late final String incrementLetter = computeIncrementLetter();
-
   /// Determine which part of the version to increment in the next release.
+  ///
+  /// 1. if the tip of the candidate branch is also on master, that means this
+  ///   is the first release on the branch; compute the version from the
+  ///   candidate branch (this would fail if the candidate branch was named
+  ///   wrong) and tag the branch point, then increment the n for the actual
+  ///   release
+  /// 2. else if the channel is stable, the increment should be z (the tool
+  ///   already has logic to "increment" to 0 if this is the first stable
+  ///   release)
+  /// 3. else (i.e. channel is beta), increment the n
+
   @visibleForTesting
-  String computeIncrementLetter() {
-    switch (releaseChannel) {
-      case 'stable':
-        return 'z';
-      case 'beta':
-        return 'n';
-      default:
-        throw ConductorException('Unknown channel "$releaseChannel"');
+  ReleaseType computeReleaseType(Version lastVersion) {
+    if (releaseChannel == 'stable') {
+      if (lastVersion.type == VersionType.stable) {
+        return ReleaseType.STABLE_HOTFIX;
+      } else {
+        return ReleaseType.STABLE_INITIAL;
+      }
     }
+    if (releaseChannel != 'beta') {
+      throw ConductorException('Unknown release channel $releaseChannel');
+    }
+
+    throw 'whoops';
+    //switch (releaseChannel) {
+    //  case 'stable':
+    //    return 'z';
+    //  case 'beta':
+    //    return 'n';
+    //  default:
+    //    throw ConductorException('Unknown channel "$releaseChannel"');
+    //}
   }
 
   Future<void> run() async {
@@ -300,7 +321,6 @@ class StartContext extends Context {
     state.releaseChannel = releaseChannel;
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
-    state.incrementLevel = incrementLetter;
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
@@ -378,15 +398,17 @@ class StartContext extends Context {
       candidateBranch,
       exact: false,
     ));
+    final ReleaseType releaseType = computeReleaseType(lastVersion);
+    state.releaseType = releaseType;
 
     try {
-      lastVersion.ensureValid(candidateBranch, incrementLetter);
+      lastVersion.ensureValid(candidateBranch, releaseType);
     } on ConductorException catch (e) {
       // Let the user know, but resume execution
       stdio.printError(e.message);
     }
 
-    Version nextVersion = calculateNextVersion(lastVersion);
+    Version nextVersion = calculateNextVersion(lastVersion, releaseType);
     if (!force) {
       nextVersion = await ensureBranchPointTagged(nextVersion, framework);
     }
@@ -417,23 +439,23 @@ class StartContext extends Context {
   }
 
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
-  Version calculateNextVersion(Version lastVersion) {
-    if (incrementLetter == 'm') {
-      return Version.fromCandidateBranch(candidateBranch);
+  Version calculateNextVersion(Version lastVersion, ReleaseType releaseType) {
+    switch (releaseType) {
+      case ReleaseType.STABLE_INITIAL:
+        return Version(
+            x: lastVersion.x,
+            y: lastVersion.y,
+            z: 0,
+            type: VersionType.stable,
+        );
+      case ReleaseType.STABLE_HOTFIX:
+        return Version.increment(lastVersion, 'z');
+      case ReleaseType.BETA_INITIAL:
+        return Version.fromCandidateBranch(candidateBranch);
+      case ReleaseType.BETA_HOTFIX:
+        return Version.increment(lastVersion, 'n');
     }
-    if (incrementLetter == 'z') {
-      if (lastVersion.type == VersionType.stable) {
-        return Version.increment(lastVersion, incrementLetter);
-      }
-      // This is the first stable release, so hardcode the z as 0
-      return Version(
-        x: lastVersion.x,
-        y: lastVersion.y,
-        z: 0,
-        type: VersionType.stable,
-      );
-    }
-    return Version.increment(lastVersion, incrementLetter);
+    throw 'unreachable';
   }
 
   /// Ensures the branch point [candidateBranch] and `master` has a version tag.

@@ -7,7 +7,7 @@ import 'dart:convert' show jsonDecode;
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
-import 'package:conductor_core/src/proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'package:conductor_core/src/proto/conductor_state.pbenum.dart';
 import 'package:conductor_core/src/repository.dart';
 import 'package:conductor_core/src/start.dart';
 import 'package:conductor_core/src/state.dart';
@@ -298,7 +298,7 @@ void main() {
       expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
-      expect(state.incrementLevel, 'n');
+      expect(state.releaseType, ReleaseType.STABLE_HOTFIX);
     });
 
     test('creates state file if provided correct inputs', () async {
@@ -312,7 +312,6 @@ void main() {
       const String branchPointTag = '1.2.0-3.0.pre';
       // This is what this release will be
       const String nextVersion = '1.2.0-3.1.pre';
-      const String incrementLevel = 'm';
 
       final Directory engine = fileSystem
           .directory(checkoutsParentDirectory)
@@ -496,7 +495,7 @@ void main() {
       expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
-      expect(state.incrementLevel, incrementLevel);
+      expect(state.releaseType, ReleaseType.STABLE_HOTFIX);
       expect(stdio.stdout, contains('Applying the tag $branchPointTag at the branch point $branchPointRevision'));
       expect(stdio.stdout, contains('The actual release will be version $nextVersion'));
       expect(branchPointTag != nextVersion, true);
@@ -887,7 +886,7 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
-      expect(state.incrementLevel, 'z');
+      expect(state.releaseType, ReleaseType.STABLE_INITIAL);
     });
 
     test('StartContext gets engine and framework checkout directories after run', () async {
@@ -1088,6 +1087,7 @@ void main() {
 
       expect((await startContext.engine.checkoutDirectory).path, equals(engine.path));
       expect((await startContext.framework.checkoutDirectory).path, equals(framework.path));
+      expect(processManager, hasNoRemainingExpectations);
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
