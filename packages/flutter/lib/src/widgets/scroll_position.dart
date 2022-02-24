@@ -690,6 +690,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   ///  * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
   ///    applied, and the way the given `object` is aligned.
+  ///  * [FocusNode.scrollRevealPadding] which specifies the [padding] used when
+  ///    a widget is focused via focus traversal.
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
