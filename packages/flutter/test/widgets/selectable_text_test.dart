@@ -195,7 +195,7 @@ void main() {
     expect(selectableText.showCursor, false);
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
-    expect(selectableText.cursorWidth, 2.0);
+    expect(selectableText.cursorWidth, 0);
     expect(selectableText.cursorHeight, isNull);
     expect(selectableText.enableInteractiveSelection, true);
   });
@@ -240,7 +240,7 @@ void main() {
     expect(selectableText.showCursor, false);
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
-    expect(selectableText.cursorWidth, 2.0);
+    expect(selectableText.cursorWidth, 0);
     expect(selectableText.cursorHeight, isNull);
     expect(selectableText.enableInteractiveSelection, true);
   });
