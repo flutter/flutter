@@ -6,113 +6,60 @@
 
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const CounterApp());
-}
+class CounterBody extends StatelessWidget {
+  const CounterBody({Key? key, required this.counterValueNotifier}) : super(key: key);
 
-class AppState extends ChangeNotifier {
-  AppState({
-    int value = 0,
-    Color textColor = Colors.black,
-  }) : _counter = value, _textColor = textColor;
-
-  int _counter;
-  int get counter => _counter;
-  set counter(int value) {
-    if (_counter != value) {
-      _counter = value;
-      notifyListeners();
-    }
-  }
-
-  Color _textColor;
-  Color get textColor => _textColor;
-  set textColor(Color colorValue) {
-    if (_textColor != colorValue) {
-      _textColor = colorValue;
-      notifyListeners();
-    }
-  }
-}
-
-class CounterApp extends StatelessWidget {
-  const CounterApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('ChangeNotifier demo'),
-        ),
-        body: const CounterBody(),
-      ),
-    );
-  }
-}
-
-class CounterBody extends StatefulWidget {
-  const CounterBody({Key? key}) : super(key: key);
-
-  @override
-  State<CounterBody> createState() => _CounterBodyState();
-}
-
-class _CounterBodyState extends State<CounterBody> {
-  // This variable could have been exposed by an InheritedWidget and moved
-  // outside of this widget for example.
-  final AppState counterNotifier = AppState();
+  final ValueNotifier<int> counterValueNotifier;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          const Text('Current counter value:'),
+          // Thanks to the [AnimatedBuilder], only the widget displaying the
+          // current count is rebuilt when `counterValueNotifier` notifies its
+          // listeners. The [Text] widget above and [CounterBody] itself aren't
+          // rebuilt.
           AnimatedBuilder(
-            animation: counterNotifier,
-            builder: (BuildContext context, _) {
-              return Text(
-                '${counterNotifier.counter}',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: counterNotifier.textColor,
-                ),
-              );
+            // [AnimatedBuilder] accepts any [Listenable] subtype.
+            animation: counterValueNotifier,
+            builder: (BuildContext context, Widget? child) {
+              return Text('${counterValueNotifier.value}');
             },
-          ),
-
-          const SizedBox(
-            height: 30,
-          ),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              TextButton(
-                onPressed: () => counterNotifier.counter++,
-                child: const Text('Increase'),
-              ),
-              AnimatedBuilder(
-                animation: counterNotifier,
-                builder: (BuildContext context, _) {
-                 if (counterNotifier.textColor == Colors.black) {
-                   return TextButton(
-                     onPressed: () => counterNotifier.textColor = Colors.green,
-                     child: const Text('Green text color'),
-                   );
-                 } else {
-                   return TextButton(
-                     onPressed: () => counterNotifier.textColor = Colors.black,
-                     child: const Text('Black text color'),
-                   );
-                 }
-                },
-              ),
-            ],
           ),
         ],
       ),
     );
   }
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final ValueNotifier<int> _counter = ValueNotifier<int>(0);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('AnimatedBuilder example')),
+        body: CounterBody(counterValueNotifier: _counter),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _counter.value++,
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}
+
+void main() {
+  runApp(const MyApp());
 }

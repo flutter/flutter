@@ -994,29 +994,19 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// {@end-tool}
 ///
 /// {@template flutter.flutter.animatedbuilder_changenotifier.rebuild}
-/// ## Granular rebuilds with AnimatedBuilder and ChangeNotifier
+/// ## Improve rebuilds performance using AnimatedBuilder
 ///
-/// A [State.setState] method call requires Flutter to entirely rebuild the
-/// current widget plus a variable portion of the subtree, depending on the
-/// depth and the structure.
-///
-/// To avoid unnecessary work, the [AnimatedBuilder] class can be used along
-/// with a [Listenable] to only rebuild certain portions a widget,
-/// leaving other parts and the subtree untouched. For example,
-/// [ChangeNotifier] and [ValueNotifier] are subtypes of [Listenable].
-///
-/// Since a [ChangeNotifier] is a subtype of [Listenable], it can be used in
-/// an [AnimatedBuilder] to listen for changes.
+/// Despite the name, [AnimatedBuilder] is not limited to [Animation]s. Any subtype
+/// of [Listenable] (such as [ChangeNotifier] and [ValueNotifier]) can be used with
+/// an [AnimatedBuilder] to rebuild only certain parts of a widget when the
+/// [Listenable] notifies its listeners. This technique is a performance improvement
+/// that allows rebuilding only specific widgets leaving others untouched.
 ///
 /// {@tool dartpad}
-/// This is an example that shows how a [ChangeNotifier] can be used to manage
-/// the state of a widget. Whenever one of the two button is pressed, only
-/// the widgets inside the [AnimatedBuilder] are rebuilt while `CounterBody`
-/// itself and its children are untouched.
-///
-/// With this approach, only those widgets that really need to be updated are
-/// rebuilt. With [State.setState] instead, the entire widget and the children
-/// would have been rebuilt regardless.
+/// The following example implements a simple counter that utilizes an
+/// [AnimatedBuilder] to limit rebuilds to only the [Text] widget. The current count
+/// is stored in a [ValueNotifier], which rebuilds the [AnimatedBuilder]'s contents
+/// when its value is changed.
 ///
 /// ** See code in examples/api/lib/foundation/change_notifier/change_notifier.0.dart **
 /// {@end-tool}
