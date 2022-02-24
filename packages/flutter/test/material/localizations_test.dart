@@ -131,7 +131,7 @@ void main() {
     expect(localizations.keyboardKeySelect, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
     expect(localizations.keyboardKeyZenkaku, isNotNull);
-    expect(localizations.keyboardKeyZenkakuHankaku, isNotNull);    
+    expect(localizations.keyboardKeyZenkakuHankaku, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
