@@ -45,6 +45,62 @@ struct TPoint {
     return p.x != x || p.y != y;
   }
 
+  template <class U>
+  inline TPoint operator+=(const TPoint<U>& p) {
+    x += static_cast<Type>(p.x);
+    y += static_cast<Type>(p.y);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator+=(const TSize<U>& s) {
+    x += static_cast<Type>(s.width);
+    y += static_cast<Type>(s.height);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator-=(const TPoint<U>& p) {
+    x -= static_cast<Type>(p.x);
+    y -= static_cast<Type>(p.y);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator-=(const TSize<U>& s) {
+    x -= static_cast<Type>(s.width);
+    y -= static_cast<Type>(s.height);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator*=(const TPoint<U>& p) {
+    x *= static_cast<Type>(p.x);
+    y *= static_cast<Type>(p.y);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator*=(const TSize<U>& s) {
+    x *= static_cast<Type>(s.width);
+    y *= static_cast<Type>(s.height);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator/=(const TPoint<U>& p) {
+    x /= static_cast<Type>(p.x);
+    y /= static_cast<Type>(p.y);
+    return *this;
+  }
+
+  template <class U>
+  inline TPoint operator/=(const TSize<U>& s) {
+    x /= static_cast<Type>(s.width);
+    y /= static_cast<Type>(s.height);
+    return *this;
+  }
+
   constexpr TPoint operator-() const { return {-x, -y}; }
 
   constexpr TPoint operator+(const TPoint& p) const {
