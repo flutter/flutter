@@ -307,7 +307,7 @@ void main() {
     RenderBox findSelectableTextBox() => tester.renderObject(find.byType(SelectableText));
 
     final RenderBox textBox = findSelectableTextBox();
-    expect(textBox.size, const Size(17.0, 14.0));
+    expect(textBox.size, const Size(15.0, 14.0));
 
     await tester.pumpWidget(
         boilerplate(
@@ -365,7 +365,7 @@ void main() {
       ),
     );
     textBox = findTextBox();
-    expect(textBox.size, const Size(633.0, 28.0));
+    expect(textBox.size, const Size(631.0, 28.0));
   });
 
   testWidgets('can switch between textHeightBehavior', (WidgetTester tester) async {
@@ -1077,7 +1077,7 @@ void main() {
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
     final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
 
-    expect(firstPos.dx, 24.5);
+    expect(firstPos.dx, 25.5);
     expect(secondPos.dx, 24.5);
     expect(thirdPos.dx, 24.5);
     expect(middleStringPos.dx, 58.5);
@@ -1285,7 +1285,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(399.0));
+    expect(topLeft.dx, equals(400.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -1309,7 +1309,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(399.0));
+    expect(topLeft.dx, equals(400.0));
   });
 
   testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
@@ -3856,7 +3856,7 @@ void main() {
         tester.getSize(find.byType(SelectableText)),
         // Strut should inherit the TextStyle.fontSize by default and produce the
         // same height as if it were disabled.
-        const Size(183.0, 20.0),
+        const Size(181.0, 20.0),
       );
 
       await tester.pumpWidget(
@@ -3901,7 +3901,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(SelectableText)),
-        const Size(129.0, 84.0),
+        const Size(127.0, 84.0),
       );
     },
   );
@@ -3933,7 +3933,7 @@ void main() {
         // When the strut's height is smaller than TextStyle's and forceStrutHeight
         // is disabled, then the TextStyle takes precedence. Should be the same height
         // as 'strut basic multi line'.
-        const Size(129.0, 84.0),
+        const Size(127.0, 84.0),
       );
     },
   );
@@ -3962,7 +3962,7 @@ void main() {
         tester.getSize(find.byType(SelectableText)),
         // When the strut's height is larger than TextStyle's and forceStrutHeight
         // is disabled, then the StrutStyle takes precedence.
-        const Size(129.0, 150.0),
+        const Size(127.0, 150.0),
       );
     },
   );
@@ -3991,7 +3991,7 @@ void main() {
       expect(
         tester.getSize(find.byType(SelectableText)),
         // The smaller font size of strut make the field shorter than normal.
-        const Size(129.0, 24.0),
+        const Size(127.0, 24.0),
       );
     },
   );
@@ -4022,7 +4022,7 @@ void main() {
         tester.getSize(find.byType(SelectableText)),
         // When the strut fontSize is larger than a provided TextStyle, the
         // strut's height takes precedence.
-        const Size(93.0, 54.0),
+        const Size(91.0, 54.0),
       );
     },
   );
@@ -4045,7 +4045,7 @@ void main() {
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
     );
-    expect(topLeft.dx, equals(427));
+    expect(topLeft.dx, equals(428));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
@@ -4081,7 +4081,7 @@ void main() {
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 7)).topLeft,
     );
-    expect(topLeft.dx, equals(469));
+    expect(topLeft.dx, equals(470));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 8)).topLeft,
