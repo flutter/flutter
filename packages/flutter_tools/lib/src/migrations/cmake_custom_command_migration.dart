@@ -62,7 +62,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
       //   Manually-specified variables were not used by the project:
       //    FLUTTER_TARGET_PLATFORM
       // ------------------------------
-      if (addCustomCommandOriginal?.contains('linux-x64') == true) {
+      if (addCustomCommandOriginal?.contains('linux-x64') ?? false) {
         newProjectContents = newProjectContents.replaceAll('linux-x64', r'${FLUTTER_TARGET_PLATFORM}');
       }
     }

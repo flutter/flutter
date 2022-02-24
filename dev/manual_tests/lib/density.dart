@@ -322,14 +322,14 @@ class _OptionsState extends State<Options> {
                   LabeledCheckbox(
                     label: 'Enabled',
                     onChanged: (bool? checked) {
-                      widget.model.enable = checked == true;
+                      widget.model.enable = checked ?? false;
                     },
                     value: widget.model.enable,
                   ),
                   LabeledCheckbox(
                     label: 'Slow',
                     onChanged: (bool? checked) {
-                      widget.model.slowAnimations = checked == true;
+                      widget.model.slowAnimations = checked ?? false;
                       Future<void>.delayed(const Duration(milliseconds: 150)).then((_) {
                         if (widget.model.slowAnimations) {
                           timeDilation = 20.0;
@@ -343,7 +343,7 @@ class _OptionsState extends State<Options> {
                   LabeledCheckbox(
                     label: 'RTL',
                     onChanged: (bool? checked) {
-                      widget.model.rtl = checked == true;
+                      widget.model.rtl = checked ?? false;
                     },
                     value: widget.model.rtl,
                   ),
@@ -566,7 +566,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: _model.enable
                   ? (bool? value) {
                       setState(() {
-                        checkboxValues[index] = value == true;
+                        checkboxValues[index] = value ?? false;
                       });
                     }
                   : null,

@@ -4697,6 +4697,75 @@ void main() {
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
+  testWidgets('text selection toolbar visibility', (WidgetTester tester) async {
+    const String testText = 'hello \n world \n this \n is \n text';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Container(
+          height: 50,
+          color: Colors.white,
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            selectionColor: Colors.lightBlueAccent,
+            maxLines: 3,
+          ),
+        ),
+      ),
+    ));
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+
+    // Select the first word. And show the toolbar.
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+
+    // Find the toolbar fade transition while the toolbar is still visible.
+    final List<FadeTransition> transitionsBefore = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+
+    expect(transitionsBefore.length, 1);
+
+    final FadeTransition toolbarBefore = transitionsBefore[0];
+
+    expect(toolbarBefore.opacity.value, 1.0);
+
+    // Scroll until the selection is no longer within view.
+    scrollable.controller!.jumpTo(50.0);
+    await tester.pumpAndSettle();
+
+    // Find the toolbar fade transition after the toolbar has been hidden.
+    final List<FadeTransition> transitionsAfter = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+
+    expect(transitionsAfter.length, 1);
+
+    final FadeTransition toolbarAfter = transitionsAfter[0];
+
+    expect(toolbarAfter.opacity.value, 0.0);
+
+    // On web, we don't show the Flutter toolbar and instead rely on the browser
+    // toolbar. Until we change that, this test should remain skipped.
+  }, skip: kIsWeb); // [intended]
+
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
@@ -10879,12 +10948,12 @@ void main() {
 
     // Paste
     await resetSelectionAndScrollOffset();
-    textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
+    await textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
     await tester.pump();
     expect(scrollController.offset, maxScrollExtent);
 
     await resetSelectionAndScrollOffset();
-    textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
+    await textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
     await tester.pump();
     expect(scrollController.offset.roundToDouble(), 0.0);
 
@@ -10909,6 +10978,50 @@ void main() {
     textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
     await tester.pump();
     expect(scrollController.offset.roundToDouble(), 0.0);
+  });
+
+  testWidgets('Should not scroll on paste if caret already visible', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96658.
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController(
+      text: 'Lorem ipsum please paste here: \n${".\n" * 50}',
+    );
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            height: 600.0,
+            width: 600.0,
+            child: EditableText(
+              controller: controller,
+              scrollController: scrollController,
+              focusNode: focusNode,
+              maxLines: null,
+              style: const TextStyle(fontSize: 36.0),
+              backgroundCursorColor: Colors.grey,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      )
+    );
+
+    await Clipboard.setData(const ClipboardData(text: 'Fairly long text to be pasted'));
+    focusNode.requestFocus();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(scrollController.offset, 0.0);
+
+    controller.selection = const TextSelection.collapsed(offset: 31);
+    await state.pasteText(SelectionChangedCause.toolbar);
+    await tester.pumpAndSettle();
+
+    // No scroll should happen as the caret is in the viewport all the time.
+    expect(scrollController.offset, 0.0);
   });
 
   testWidgets('Autofill enabled by default', (WidgetTester tester) async {
@@ -11405,6 +11518,48 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/98322.
+  testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
+    bool receivedIntent = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Actions(
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+              receivedIntent = true;
+              return;
+            }),
+            ButtonActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+              receivedIntent = true;
+              return;
+            }),
+          },
+          child: EditableText(
+            autofocus: true,
+            backgroundCursorColor: Colors.blue,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    // ActivateIntent, which is triggered by space and enter in WidgetsApp, is
+    // consumed by EditableText so that the space/enter reach the IME.
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    expect(receivedIntent, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(receivedIntent, isFalse);
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -11456,7 +11611,7 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ValueListenable<ClipboardStatus>? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
     return Container();
   }
 
@@ -11484,7 +11639,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int copyCount = 0;
 
   @override
-  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCopy(TextSelectionDelegate delegate) {
     copyCount += 1;
   }
 
@@ -11494,7 +11649,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCut(TextSelectionDelegate delegate) {
     cutCount += 1;
   }
 

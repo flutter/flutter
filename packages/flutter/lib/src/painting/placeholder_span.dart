@@ -41,6 +41,9 @@ abstract class PlaceholderSpan extends InlineSpan {
     TextStyle? style,
   }) : super(style: style);
 
+  /// The unicode character to represent a placeholder.
+  static const int placeholderCodeUnit = 0xFFFC;
+
   /// How the placeholder aligns vertically with the text.
   ///
   /// See [ui.PlaceholderAlignment] for details on each mode.
@@ -57,7 +60,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.write('\uFFFC');
+      buffer.writeCharCode(placeholderCodeUnit);
     }
   }
 
