@@ -1770,6 +1770,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(_updateSelectionOverlayForScroll);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
+      print(describeIdentity(_scrollController.position));
     });
     _cursorVisibilityNotifier.value = widget.showCursor;
   }
@@ -1840,8 +1841,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
       _scrollController.addListener(_updateSelectionOverlayForScroll);
       // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        (oldWidget.scrollController ?? _internalScrollController)?.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
-        _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
+      //   (oldWidget.scrollController ?? _internalScrollController)?.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
+      //   _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
       // });
     }
 
@@ -1878,7 +1879,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
-    (widget.scrollController ?? _internalScrollController)?.dispose();
+    _internalScrollController?.dispose();
     // (widget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
     // (widget.scrollController ?? _internalScrollController)?.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
     _currentAutofillScope?.unregister(autofillId);
@@ -2410,17 +2411,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Android: While we are scrolling text the selection handles should be visible
     // until the selected text has left the viewport.
     // iOS: While we are scrolling text the selection handles should be hidden.
-    if (_selectionOverlay!.toolbarIsVisible) {
+    if (_selectionOverlay?.toolbarIsVisible ?? false) {
       _selectionOverlay!.hideToolbar();
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         _selectionOverlay!.hideHandles();
       }
     }
+    print(describeIdentity(_scrollController.position));
     _selectionOverlay?.updateForScroll();
   }
 
   void _updateSelectionOverlayForScrollStop() {
     if (!_scrollController.position.isScrollingNotifier.value) {
+      print('scroll has ended -- editable text');
       if (!_value.selection.isCollapsed && (renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value)) {
         showToolbar();
         if (defaultTargetPlatform == TargetPlatform.iOS) {
