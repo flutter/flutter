@@ -41,7 +41,7 @@ generated_file("_font-subset-license") {
 }
 
 zip_bundle("font-subset") {
-  output = "font-subset.zip"
+  output = "${full_platform_name}/font-subset.zip"
 
   font_subset_bin = "font-subset"
   if (is_win) {

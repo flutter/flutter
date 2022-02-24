@@ -68,14 +68,14 @@ if (is_ios || is_mac) {
 
 # A combo of host os name and cpu is used in several locations to
 # generate the names of the archived artifacts.
-_host_os_name = host_os
-if (_host_os_name == "mac") {
-  _host_os_name = "macos"
-} else if (_host_os_name == "win" || _host_os_name == "winuwp") {
-  _host_os_name = "windows"
+_platform_name = host_os
+if (_platform_name == "mac") {
+  _platform_name = "darwin"
+} else if (_platform_name == "win" || _platform_name == "winuwp") {
+  _platform_name = "windows"
 }
 
-host_os_cpu_name = "$_host_os_name-$host_cpu"
+full_platform_name = "$_platform_name-$host_cpu"
 
 # Prebuilt Dart SDK location
 
@@ -87,8 +87,15 @@ if (flutter_prebuilt_dart_sdk) {
     _target_os_name = "windows"
   }
 
+  _host_os_name = host_os
+  if (_host_os_name == "mac") {
+    _host_os_name = "macos"
+  } else if (_host_os_name == "win" || _host_os_name == "winuwp") {
+    _host_os_name = "windows"
+  }
+
   _target_prebuilt_dart_sdk_config = "$_target_os_name-$target_cpu"
-  _host_prebuilt_dart_sdk_config = "$host_os_cpu_name"
+  _host_prebuilt_dart_sdk_config = "$_host_os_name-$host_cpu"
   _target_prebuilt_dart_sdk_archive = "//flutter/prebuilts/dartsdk-$_target_prebuilt_dart_sdk_config-release.zip"
   _host_prebuilt_dart_sdk_archive =
       "//flutter/prebuilts/dartsdk-$_host_prebuilt_dart_sdk_config-release.zip"
