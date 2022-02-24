@@ -28,8 +28,10 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for macOS, based on the information in the key
 /// data structure given to it.
 class MacOSCodeGenerator extends PlatformCodeGenerator {
-  MacOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+  MacOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData, this.verbatimPhysicalToLogical)
     : super(keyData, logicalData);
+
+  final Map<String, String> verbatimPhysicalToLogical;
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
@@ -50,6 +52,18 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
             '  @${toHex(macOSValue)} : @${toHex(entry.value, digits: 11)},  // $macOSName -> ${entry.constantName}');
       });
     }
+    return lines.sortedJoin().trimRight();
+  }
+
+  String get _verbatimPhysicalToLogicalMap {
+    final OutputLines<int> lines = OutputLines<int>('macOS verbatim');
+    verbatimPhysicalToLogical.forEach((String physicalName, String logicalName) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(physicalName);
+      final LogicalKeyEntry logicalEntry = logicalData.entryByName(logicalName);
+      lines.add(physicalEntry.usbHidCode,
+          '  @${toHex(physicalEntry.usbHidCode)} : @${toHex(logicalEntry.value)},'
+          '    // ${physicalEntry.name} -> ${logicalEntry.name}');
+    });
     return lines.sortedJoin().trimRight();
   }
 
@@ -112,6 +126,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
     return <String, String>{
       'MACOS_SCAN_CODE_MAP': _scanCodeMap,
       'MACOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
+      'VERBATIM_PHYSICAL_TO_LOGICAL_MAP': _verbatimPhysicalToLogicalMap,
       'MASK_CONSTANTS': _maskConstants,
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,

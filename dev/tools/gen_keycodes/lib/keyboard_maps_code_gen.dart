@@ -37,8 +37,10 @@ bool _isDigit(String? char) {
 /// Generates the keyboard_maps.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
-  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData, this.verbatimPhysicalToLogical)
     : super(keyData, logicalData);
+
+  final Map<String, String> verbatimPhysicalToLogical;
 
   List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.entries.where((PhysicalKeyEntry entry) {
@@ -57,6 +59,17 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return logicalData.entries.where((LogicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.name);
     }).toList();
+  }
+
+  String get _verbatimPhysicalToLogicalMap {
+    final OutputLines<int> lines = OutputLines<int>('verbatim');
+    verbatimPhysicalToLogical.forEach((String physicalName, String logicalName) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(physicalName);
+      final LogicalKeyEntry logicalEntry = logicalData.entryByName(logicalName);
+      lines.add(physicalEntry.usbHidCode,
+          '  ${toHex(physicalEntry.usbHidCode)}: LogicalKeyboardKey.${logicalEntry.constantName},');
+    });
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of GLFW number pad key codes to logical keys.
@@ -344,6 +357,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   @override
   Map<String, String> mappings() {
     return <String, String>{
+      'VERBATIM_PHYSICAL_TO_LOGICAL_MAP': _verbatimPhysicalToLogicalMap,
       'ANDROID_SCAN_CODE_MAP': _androidScanCodeMap,
       'ANDROID_KEY_CODE_MAP': _androidKeyCodeMap,
       'ANDROID_NUMPAD_MAP': _androidNumpadMap,

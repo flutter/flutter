@@ -153,6 +153,9 @@ Future<void> main(List<String> rawArguments) async {
 
   PlatformCodeGenerator.engineRoot = parsedArguments['engine-root'] as String;
 
+  final Map<String, String> verbatimMap = parseMapOfString(
+      readDataFile('verbatim_physical_to_logical.json'));
+
   PhysicalKeyData physicalData;
   LogicalKeyData logicalData;
   if (parsedArguments['collect'] as bool) {
@@ -218,14 +221,14 @@ Future<void> main(List<String> rawArguments) async {
     mapsFile.createSync(recursive: true);
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
-  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
+  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData, verbatimMap).generate());
 
   final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'));
   if (!mapsFile.existsSync()) {
     mapsFile.createSync(recursive: true);
   }
-  print('Writing ${'engine key codes'.padRight(15)}${mapsFile.absolute}');
+  print('Writing ${'test values'.padRight(15)}${keyCodesFile.absolute}');
   await keyCodesFile.writeAsString(KeyCodesCcGenerator(physicalData, logicalData).generate());
 
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
@@ -236,6 +239,7 @@ Future<void> main(List<String> rawArguments) async {
     'macos': MacOSCodeGenerator(
       physicalData,
       logicalData,
+      verbatimMap,
     ),
     'ios': IOSCodeGenerator(
       physicalData,
