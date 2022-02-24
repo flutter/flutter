@@ -1689,7 +1689,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
+      // Schedule a call to bringIntoView() after renderEditable updates.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        bringIntoView(textEditingValue.selection.extent);
+      });
       hideToolbar();
     }
     _clipboardStatus?.update();
@@ -1715,7 +1718,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _replaceText(ReplaceTextIntent(textEditingValue, data.text!, selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
+      // Schedule a call to bringIntoView() after renderEditable updates.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        bringIntoView(textEditingValue.selection.extent);
+      });
       hideToolbar();
     }
   }
@@ -3095,10 +3101,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _replaceText(ReplaceTextIntent intent) {
-    userUpdateTextEditingValue(
-      intent.currentTextEditingValue.replaced(intent.replacementRange, intent.replacementText),
-      intent.cause,
+    final TextEditingValue oldValue = _value;
+    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
+      intent.replacementRange,
+      intent.replacementText,
     );
+    userUpdateTextEditingValue(newValue, intent.cause);
+
+    // If there's no change in text and selection (e.g. when selecting and
+    // pasting identical text), the widget won't be rebuilt on value update.
+    // Handle this by calling _didChangeTextEditingValue() so caret and scroll
+    // updates can happen.
+    if (newValue == oldValue) {
+      _didChangeTextEditingValue();
+    }
   }
   late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
 
