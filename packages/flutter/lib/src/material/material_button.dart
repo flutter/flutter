@@ -457,9 +457,13 @@ class MaterialButton extends StatelessWidget {
   }
 }
 
-/// The type of [MaterialButton]s created with [RaisedButton.icon], [FlatButton.icon],
-/// and [OutlineButton.icon].
+/// The type of [MaterialButton]s created with RaisedButton.icon, FlatButton.icon,
+/// and OutlineButton.icon.
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
+@Deprecated(
+  'This is no longer used by the framework aside from deprecated API. '
+  'This feature was deprecated after v2.11.0-0.0.pre.',
+)
 mixin MaterialButtonWithIconMixin { }
