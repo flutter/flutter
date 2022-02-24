@@ -44,8 +44,8 @@ class MigrateConfig {
     }
     final YamlMap map = yamlRoot as YamlMap;
     platform = map['platform']!;
-    createRevision = map['createRevision']!;
-    baseRevision = map['baseRevision']!;
+    createRevision = map['createRevision'];
+    baseRevision = map['baseRevision'];
     if (map['unmanagedFiles'] != null) {
       unmanagedFiles = List<String>.from(map['unmanagedFiles']);
     } else {
@@ -64,6 +64,9 @@ class MigrateConfig {
   List<String> unmanagedFiles;
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
+  ///
+  /// We write the file manually instead of with a template because this
+  /// needs to be able to write the .migrate_config file into legacy apps.
   void writeFile({Directory? projectDirectory}) {
     File file = getFileFromPlatform(platform, projectDirectory: projectDirectory);
     file.createSync(recursive: true);
@@ -154,30 +157,33 @@ $unmanagedFilesString
   }
 
   /// Returns a list of platform names that are supported by the project.
-  static List<String> getSupportedPlatforms({bool includeRoot = false}) {
+  static List<String> getSupportedPlatforms({bool includeRoot = false, FlutterProject? flutterProject}) {
     final List<String> platforms = includeRoot ? <String>['root'] : <String>[];
-    if (FlutterProject.current().android.existsSync()) {
+    if (flutterProject == null) {
+      flutterProject = FlutterProject.current();
+    }
+    if (flutterProject.android.existsSync()) {
       platforms.add('android');
     }
-    if (FlutterProject.current().ios.existsSync()) {
+    if (flutterProject.ios.existsSync()) {
       platforms.add('ios');
     }
-    if (FlutterProject.current().web.existsSync()) {
+    if (flutterProject.web.existsSync()) {
       platforms.add('web');
     }
-    if (FlutterProject.current().macos.existsSync()) {
+    if (flutterProject.macos.existsSync()) {
       platforms.add('macos');
     }
-    if (FlutterProject.current().linux.existsSync()) {
+    if (flutterProject.linux.existsSync()) {
       platforms.add('linux');
     }
-    if (FlutterProject.current().windows.existsSync()) {
+    if (flutterProject.windows.existsSync()) {
       platforms.add('windows');
     }
-    if (FlutterProject.current().windowsUwp.existsSync()) {
+    if (flutterProject.windowsUwp.existsSync()) {
       platforms.add('windowsUwp');
     }
-    if (FlutterProject.current().fuchsia.existsSync()) {
+    if (flutterProject.fuchsia.existsSync()) {
       platforms.add('fuchsia');
     }
     return platforms;
@@ -187,8 +193,9 @@ $unmanagedFilesString
   /// initialized with default values.
   static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, String? currentRevision, String? createRevision, bool create = true}) async {
     if (platforms == null) {
-      platforms = getSupportedPlatforms(includeRoot: true);
+      platforms = getSupportedPlatforms(includeRoot: true, flutterProject: projectDirectory == null ? null : FlutterProject.fromDirectory(projectDirectory));
     }
+    print(platforms);
 
     List<MigrateConfig> configs = <MigrateConfig>[];
     for (String platform in platforms) {

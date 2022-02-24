@@ -63,19 +63,12 @@ class MigrateProject extends Project {
         file.path,
       ], workingDirectory: dir.path);
     }
-
-    result = await processManager.run(<String>[
-      'ls',
-      '-al',
-      dir.path,
-    ], workingDirectory: dir.path);
-    print(result.stdout);
-    print(dir.path);
     if (!vanilla) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), libMain);
       writeFile(fileSystem.path.join(dir.path, 'lib', 'other.dart'), libOther);
       writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspecCustom);
     }
+    tryToDelete(tempDir);
   }
 
   final String version;
