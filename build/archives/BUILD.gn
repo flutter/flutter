@@ -1,7 +1,7 @@
 import("//flutter/build/zip_bundle.gni")
 
 zip_bundle("artifacts") {
-  output = "$host_os_cpu_name/artifacts.zip"
+  output = "$full_platform_name/artifacts.zip"
   deps = [
     "//flutter/flutter_frontend_server:frontend_server",
     "//flutter/lib/snapshot:generate_snapshot_bin",
