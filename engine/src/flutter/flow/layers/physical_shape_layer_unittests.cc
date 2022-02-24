@@ -66,7 +66,62 @@ TEST_F(PhysicalShapeLayerTest, NonEmptyLayer) {
                 0, MockCanvas::DrawPathData{layer_path, layer_paint}}}));
 }
 
-TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPath) {
+TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPathClip) {
+  SkPath layer_path;
+  layer_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  SkPath child1_path;
+  child1_path.addRect(4, 0, 12, 12).close();
+  SkPath child2_path;
+  child2_path.addRect(3, 2, 5, 15).close();
+  auto child1 = std::make_shared<PhysicalShapeLayer>(SK_ColorRED, SK_ColorBLACK,
+                                                     0.0f,  // elevation
+                                                     child1_path, Clip::none);
+  auto child2 =
+      std::make_shared<PhysicalShapeLayer>(SK_ColorBLUE, SK_ColorBLACK,
+                                           0.0f,  // elevation
+                                           child2_path, Clip::none);
+  auto layer =
+      std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
+                                           0.0f,  // elevation
+                                           layer_path, Clip::hardEdge);
+  layer->Add(child1);
+  layer->Add(child2);
+
+  SkRect child_paint_bounds = SkRect::MakeEmpty();
+  layer->Preroll(preroll_context(), SkMatrix());
+  child_paint_bounds.join(child1->paint_bounds());
+  child_paint_bounds.join(child2->paint_bounds());
+  EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
+  EXPECT_NE(layer->paint_bounds(), child_paint_bounds);
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
+
+  SkPaint layer_paint;
+  layer_paint.setColor(SK_ColorGREEN);
+  layer_paint.setAntiAlias(true);
+  SkPaint child1_paint;
+  child1_paint.setColor(SK_ColorRED);
+  child1_paint.setAntiAlias(true);
+  SkPaint child2_paint;
+  child2_paint.setColor(SK_ColorBLUE);
+  child2_paint.setAntiAlias(true);
+  layer->Paint(paint_context());
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector({
+                MockCanvas::DrawCall{
+                    0, MockCanvas::DrawPathData{layer_path, layer_paint}},
+                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::ClipRectData{layer_path.getBounds(),
+                                                SkClipOp::kIntersect}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::DrawPathData{child1_path, child1_paint}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::DrawPathData{child2_path, child2_paint}},
+                MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+            }));
+}
+
+TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPathNoClip) {
   SkPath layer_path;
   layer_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkPath child1_path;
@@ -87,12 +142,13 @@ TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPath) {
   layer->Add(child1);
   layer->Add(child2);
 
-  SkRect child_paint_bounds;
+  SkRect total_bounds = SkRect::MakeEmpty();
   layer->Preroll(preroll_context(), SkMatrix());
-  child_paint_bounds.join(child1->paint_bounds());
-  child_paint_bounds.join(child2->paint_bounds());
-  EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
-  EXPECT_NE(layer->paint_bounds(), child_paint_bounds);
+  total_bounds.join(child1->paint_bounds());
+  total_bounds.join(child2->paint_bounds());
+  total_bounds.join(layer_path.getBounds());
+  EXPECT_NE(layer->paint_bounds(), layer_path.getBounds());
+  EXPECT_EQ(layer->paint_bounds(), total_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   SkPaint layer_paint;
@@ -174,10 +230,14 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
     // On Fuchsia, the system compositor handles all elevated
     // PhysicalShapeLayers and their shadows , so we do not do any painting
     // there.
-    EXPECT_EQ(layers[i]->paint_bounds(),
-              (DisplayListCanvasDispatcher::ComputeShadowBounds(
-                  layer_path, initial_elevations[i], 1.0f /* pixel_ratio */,
-                  SkMatrix())));
+    SkRect paint_bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
+        layer_path, initial_elevations[i], 1.0f /* pixel_ratio */, SkMatrix());
+
+    // Without clipping the children will be painted as well
+    for (auto layer : layers[i]->layers()) {
+      paint_bounds.join(layer->paint_bounds());
+    }
+    EXPECT_EQ(layers[i]->paint_bounds(), paint_bounds);
     EXPECT_TRUE(layers[i]->needs_painting(paint_context()));
   }
 
