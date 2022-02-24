@@ -2555,6 +2555,7 @@ targets:
 
   - name: Mac entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       caches: >-
