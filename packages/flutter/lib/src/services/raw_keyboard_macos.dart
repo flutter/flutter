@@ -9,13 +9,17 @@ import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
 /// Convert a UTF32 rune to its lower case.
-int runeToLowerCase(int rune) {
+int _runeToLowerCase(int rune) {
   // Assume only Basic Multilingual Plane runes have lower and upper cases.
   // For other characters, return them as is.
   const int utf16BmpUpperBound = 0xD7FF;
   if (rune > utf16BmpUpperBound)
     return rune;
   return String.fromCharCode(rune).toLowerCase().codeUnitAt(0);
+}
+
+bool _isEasciiCharacter(int character) {
+  return character != null && character < 256;
 }
 
 /// Platform-specific key event data for macOS.
@@ -107,10 +111,22 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
           // only tests BMP, it is fine to test keyLabel instead.
           !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
           !_isUnprintableKey(keyLabel)) {
-        character = runeToLowerCase(codePoints[0]);
+        character = _runeToLowerCase(codePoints[0]);
       }
     }
+
+    // Derive the logical key from a printable character.
     if (character != null) {
+      // If character is non-EASCII, use the printable physical key as logical
+      // key instead. This allows non-latin languages (such as Russian) to
+      // produce latin logical keys so that shortcuts work correctly.
+      if (!_isEasciiCharacter(character)) {
+        final LogicalKeyboardKey? result = kVerbatimPhysicalToLogicalKey[physicalKey.usbHidUsage];
+        if (result != null) {
+          return result;
+        }
+      }
+
       final int keyId = LogicalKeyboardKey.unicodePlane | (character & LogicalKeyboardKey.valueMask);
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
     }
