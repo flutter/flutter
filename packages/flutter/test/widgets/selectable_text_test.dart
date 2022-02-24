@@ -316,7 +316,7 @@ void main() {
     );
 
     final RenderBox longtextBox = findSelectableTextBox();
-    expect(longtextBox.size, const Size(199.0, 14.0));
+    expect(longtextBox.size, const Size(197.0, 14.0));
   });
 
   testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
@@ -1078,7 +1078,7 @@ void main() {
     final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
 
     expect(firstPos.dx, 25.5);
-    expect(secondPos.dx, 24.5);
+    expect(secondPos.dx, 25.5);
     expect(thirdPos.dx, 24.5);
     expect(middleStringPos.dx, 58.5);
     expect(firstPos.dx, secondPos.dx);
@@ -3830,7 +3830,7 @@ void main() {
         tester.getSize(find.byType(SelectableText)),
         // This is the height of the decoration (24) plus the metrics from the default
         // TextStyle of the theme (16).
-        const Size(129.0, 14.0),
+        const Size(127.0, 14.0),
       );
     },
   );
@@ -3877,7 +3877,7 @@ void main() {
       expect(
         tester.getSize(find.byType(SelectableText)),
         // The height here should match the previous version with strut enabled.
-        const Size(183.0, 20.0),
+        const Size(181.0, 20.0),
       );
     },
   );
@@ -4050,7 +4050,7 @@ void main() {
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
     );
-    expect(topLeft.dx, equals(413));
+    expect(topLeft.dx, equals(414));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
@@ -4086,7 +4086,7 @@ void main() {
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 8)).topLeft,
     );
-    expect(topLeft.dx, equals(483));
+    expect(topLeft.dx, equals(484));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
