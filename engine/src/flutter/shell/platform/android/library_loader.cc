@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/message_loop_android.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
@@ -30,6 +31,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
   // Register AndroidImageDecoder.
   result = flutter::AndroidImageGenerator::Register(env);
+  FML_CHECK(result);
+
+  // Register MessageLoopAndroid.
+  result = fml::MessageLoopAndroid::Register(env);
   FML_CHECK(result);
 
   return JNI_VERSION_1_4;
