@@ -13,6 +13,31 @@ namespace fml {
 
 static constexpr int kClockType = CLOCK_MONOTONIC;
 
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_looper_class = nullptr;
+static jmethodID g_looper_prepare_method_ = nullptr;
+static jmethodID g_looper_loop_method_ = nullptr;
+static jmethodID g_looper_my_looper_method_ = nullptr;
+static jmethodID g_looper_quit_method_ = nullptr;
+
+static void LooperPrepare() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  env->CallStaticVoidMethod(g_looper_class->obj(), g_looper_prepare_method_);
+}
+
+static void LooperLoop() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  env->CallStaticVoidMethod(g_looper_class->obj(), g_looper_loop_method_);
+}
+
+static void LooperQuit() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto my_looper = env->CallStaticObjectMethod(g_looper_class->obj(),
+                                               g_looper_my_looper_method_);
+  if (my_looper != nullptr) {
+    env->CallVoidMethod(my_looper, g_looper_quit_method_);
+  }
+}
+
 static ALooper* AcquireLooperForThread() {
   ALooper* looper = ALooper_forThread();
 
@@ -63,23 +88,15 @@ void MessageLoopAndroid::Run() {
   FML_DCHECK(looper_.get() == ALooper_forThread());
 
   running_ = true;
-
-  while (running_) {
-    int result = ::ALooper_pollOnce(-1,       // infinite timeout
-                                    nullptr,  // out fd,
-                                    nullptr,  // out events,
-                                    nullptr   // out data
-    );
-    if (result == ALOOPER_POLL_TIMEOUT || result == ALOOPER_POLL_ERROR) {
-      // This handles the case where the loop is terminated using ALooper APIs.
-      running_ = false;
-    }
-  }
+  // Initialize the current thread as a looper.
+  LooperPrepare();
+  // Run the message queue in this thread.
+  LooperLoop();
 }
 
 void MessageLoopAndroid::Terminate() {
   running_ = false;
-  ALooper_wake(looper_.get());
+  LooperQuit();
 }
 
 void MessageLoopAndroid::WakeUp(fml::TimePoint time_point) {
@@ -91,6 +108,32 @@ void MessageLoopAndroid::OnEventFired() {
   if (TimerDrain(timer_fd_.get())) {
     RunExpiredTasksNow();
   }
+}
+
+bool MessageLoopAndroid::Register(JNIEnv* env) {
+  jclass clazz = env->FindClass("android/os/Looper");
+  FML_CHECK(clazz != nullptr);
+
+  g_looper_class = new fml::jni::ScopedJavaGlobalRef<jclass>(env, clazz);
+  FML_CHECK(!g_looper_class->is_null());
+
+  g_looper_prepare_method_ =
+      env->GetStaticMethodID(g_looper_class->obj(), "prepare", "()V");
+  FML_CHECK(g_looper_prepare_method_ != nullptr);
+
+  g_looper_loop_method_ =
+      env->GetStaticMethodID(g_looper_class->obj(), "loop", "()V");
+  FML_CHECK(g_looper_loop_method_ != nullptr);
+
+  g_looper_my_looper_method_ = env->GetStaticMethodID(
+      g_looper_class->obj(), "myLooper", "()Landroid/os/Looper;");
+  FML_CHECK(g_looper_my_looper_method_ != nullptr);
+
+  g_looper_quit_method_ =
+      env->GetMethodID(g_looper_class->obj(), "quit", "()V");
+  FML_CHECK(g_looper_quit_method_ != nullptr);
+
+  return true;
 }
 
 }  // namespace fml
