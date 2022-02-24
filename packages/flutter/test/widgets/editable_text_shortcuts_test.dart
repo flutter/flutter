@@ -119,7 +119,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: -1), reason: activator.toString());
       }
     },
-    skip: kIsWeb, // [intended]
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),
   );
 
@@ -1628,7 +1628,7 @@ void main() {
         });
       });
     },
-    skip: kIsWeb, // [intended]
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
   );
 
   group('macOS shortcuts', () {
@@ -1797,5 +1797,5 @@ void main() {
         affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
-  }, skip: kIsWeb); // [intended]
+  }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
 }
