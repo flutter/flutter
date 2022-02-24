@@ -1470,6 +1470,82 @@ void main() {
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
 
+  testWidgets('ReorderableListView calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(8, (int index) => index);
+    int? startIndex, endIndex;
+    final Finder item0 = find.textContaining('item 0');
+
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: ReorderableListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            key: ValueKey<int>(items[index]),
+            height: 100,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('item ${items[index]}'),
+                ],
+              ),
+            ),
+          );
+        },
+        itemCount: items.length,
+        onReorder: handleReorder,
+        onReorderStart: (int index) {
+          startIndex = index;
+        },
+        onReorderEnd: (int index) {
+          endIndex = index;
+        },
+      ),
+    ));
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(0));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 0 to index 3
+    await drag.moveBy(const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(3));
+
+    startIndex = null;
+    endIndex = null;
+
+    drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(2));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 2 to index 0
+    await drag.moveBy(const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(0));
+  });
+
   testWidgets('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {
     final Widget reorderableListView = ReorderableListView.builder(
       itemBuilder: (BuildContext context, int index) {

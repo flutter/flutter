@@ -232,7 +232,7 @@ class _Element extends _Entry {
 
   _Attribute? firstAttribute(String name) {
     for (final _Attribute child in children.whereType<_Attribute>()) {
-      if (child.key?.startsWith(name) == true) {
+      if (child.key?.startsWith(name) ?? false) {
         return child;
       }
     }
@@ -241,7 +241,7 @@ class _Element extends _Entry {
 
   _Element? firstElement(String name) {
     for (final _Element child in children.whereType<_Element>()) {
-      if (child.name?.startsWith(name) == true) {
+      if (child.name?.startsWith(name) ?? false) {
         return child;
       }
     }
@@ -249,7 +249,7 @@ class _Element extends _Entry {
   }
 
   Iterable<_Element> allElements(String name) {
-    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) == true);
+    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) ?? false);
   }
 }
 
@@ -332,7 +332,7 @@ class ApkManifestData {
       final _Attribute? enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
       final bool isEnabledByDefault = enabled == null;
-      final bool isExplicitlyEnabled = enabled != null && enabled.value?.contains('0xffffffff') == true;
+      final bool isExplicitlyEnabled = enabled != null && (enabled.value?.contains('0xffffffff') ?? false);
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
       }
