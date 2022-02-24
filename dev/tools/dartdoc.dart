@@ -173,6 +173,7 @@ Future<void> main(List<String> arguments) async {
       'analyzer',
       'args',
       'barback',
+      'cli_util',
       'csslib',
       'flutter_goldens',
       'flutter_goldens_client',
