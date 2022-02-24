@@ -63,10 +63,10 @@ platform_properties:
         ]
       dependencies: >-
         []
-      os: Mac-10.15
+      os: Mac-12
       device_type: none
       mac_model: Macmini8,1
-      xcode: 12c33
+      xcode: 13a233
   mac_android:
     properties:
       caches: >-
@@ -85,7 +85,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
-      os: Mac-12.0
+      os: Mac-12
       device_os: N
   mac_ios:
     properties:
@@ -106,7 +106,7 @@ platform_properties:
           {"dependency": "gems"},
           {"dependency": "ios_signing"}
         ]
-      os: Mac-12.0
+      os: Mac-12
       device_os: iOS-15.1
       xcode: 13a233
   windows:
@@ -2841,8 +2841,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_lint_mac
-      os: Mac-12  # Override OS and Xcode for https://github.com/flutter/flutter/issues/97303
-      xcode: 13a233
     scheduler: luci
     runIf:
       - dev/**
@@ -3076,6 +3074,8 @@ targets:
       subshard: web
       tags: >
         ["framework","hostonly","shard"]
+      os: Mac-10.15  # Override OS and Xcode for https://github.com/flutter/flutter/issues/98278
+      xcode: 12c33
     scheduler: luci
     runIf:
       - dev/**
