@@ -17,14 +17,29 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
     return true;
   }
 
-  ContentContext context_context(GetContext());
-  if (!context_context.IsValid()) {
+  ContentContext content_context(GetContext());
+  if (!content_context.IsValid()) {
     return false;
   }
   Renderer::RenderCallback callback = [&](RenderPass& pass) -> bool {
-    return entity.Render(context_context, pass);
+    return entity.Render(content_context, pass);
   };
   return Playground::OpenPlaygroundHere(callback);
+}
+
+bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
+  if (!Playground::is_enabled()) {
+    return true;
+  }
+
+  ContentContext content_context(GetContext());
+  if (!content_context.IsValid()) {
+    return false;
+  }
+  Renderer::RenderCallback render_callback = [&](RenderPass& pass) -> bool {
+    return callback(content_context, pass);
+  };
+  return Playground::OpenPlaygroundHere(render_callback);
 }
 
 }  // namespace impeller
