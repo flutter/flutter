@@ -1,4 +1,4 @@
-Signature: 3955df3f2104ff5663d173b25964419a
+Signature: 45eae895e1b84e4db4f5761a62de7889
 
 UNUSED LICENSES:
 
@@ -9871,6 +9871,7 @@ FILE: ../../../third_party/dart/benchmarks/StringPool/dart/version2.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool100.dart
 FILE: ../../../third_party/dart/runtime/bin/abstract_socket_test.cc
+FILE: ../../../third_party/dart/runtime/bin/analyze_snapshot.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.mm
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils_test.cc
@@ -9879,6 +9880,8 @@ FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_posix.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_win.cc
+FILE: ../../../third_party/dart/runtime/include/analyze_snapshot_api.h
+FILE: ../../../third_party/dart/runtime/vm/analyze_snapshot_api_impl.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_riscv.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_riscv_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_riscv.cc
