@@ -11624,6 +11624,8 @@ void main() {
         selection: TextSelection(baseOffset: 0, extentOffset: 9),
       ));
       await paste();
+      // Pump to allow postFrameCallbacks to finish before dispose.
+      await tester.pump();
       expect(controller.value, const TextEditingValue(
         text: '12345',
         selection: TextSelection.collapsed(offset: 5),
