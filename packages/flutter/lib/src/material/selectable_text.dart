@@ -189,7 +189,7 @@ class SelectableText extends StatefulWidget {
     ToolbarOptions? toolbarOptions,
     this.minLines,
     this.maxLines,
-    this.cursorWidth = 2.0,
+    this.cursorWidth = 0,
     this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
@@ -247,7 +247,7 @@ class SelectableText extends StatefulWidget {
     ToolbarOptions? toolbarOptions,
     this.minLines,
     this.maxLines,
-    this.cursorWidth = 2.0,
+    this.cursorWidth = 0,
     this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
@@ -442,7 +442,7 @@ class SelectableText extends StatefulWidget {
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
