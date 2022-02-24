@@ -87,11 +87,11 @@ void DisplayListDispatcher::setColorFilter(
     return;
   }
   switch (filter->type()) {
-    case flutter::DlColorFilter::kBlend:
-    case flutter::DlColorFilter::kMatrix:
-    case flutter::DlColorFilter::kSrgbToLinearGamma:
-    case flutter::DlColorFilter::kLinearToSrgbGamma:
-    case flutter::DlColorFilter::kUnknown:
+    case flutter::DlColorFilterType::kBlend:
+    case flutter::DlColorFilterType::kMatrix:
+    case flutter::DlColorFilterType::kSrgbToLinearGamma:
+    case flutter::DlColorFilterType::kLinearToSrgbGamma:
+    case flutter::DlColorFilterType::kUnknown:
       UNIMPLEMENTED;
       break;
   }
@@ -127,8 +127,8 @@ void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
     return;
   }
   switch (filter->type()) {
-    case flutter::DlMaskFilter::kBlur:
-    case flutter::DlMaskFilter::kUnknown:
+    case flutter::DlMaskFilterType::kBlur:
+    case flutter::DlMaskFilterType::kUnknown:
       UNIMPLEMENTED;
       break;
   }
