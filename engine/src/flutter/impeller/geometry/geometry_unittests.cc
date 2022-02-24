@@ -393,6 +393,66 @@ TEST(GeometryTest, SizeCoercesToPoint) {
   }
 }
 
+TEST(GeometryTest, CanUsePointAssignmentOperators) {
+  // Point on RHS
+  {
+    IPoint p(1, 2);
+    p += IPoint(1, 2);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 4u);
+  }
+
+  {
+    IPoint p(3, 6);
+    p -= IPoint(1, 2);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 4u);
+  }
+
+  {
+    IPoint p(1, 2);
+    p *= IPoint(2, 3);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 6u);
+  }
+
+  {
+    IPoint p(2, 6);
+    p /= IPoint(2, 3);
+    ASSERT_EQ(p.x, 1u);
+    ASSERT_EQ(p.y, 2u);
+  }
+
+  // Size on RHS
+  {
+    IPoint p(1, 2);
+    p += ISize(1, 2);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 4u);
+  }
+
+  {
+    IPoint p(3, 6);
+    p -= ISize(1, 2);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 4u);
+  }
+
+  {
+    IPoint p(1, 2);
+    p *= ISize(2, 3);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 6u);
+  }
+
+  {
+    IPoint p(2, 6);
+    p /= ISize(2, 3);
+    ASSERT_EQ(p.x, 1u);
+    ASSERT_EQ(p.y, 2u);
+  }
+}
+
 TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
   {
     auto deg = Degrees{90.0};
