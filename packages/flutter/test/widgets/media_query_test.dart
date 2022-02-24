@@ -915,7 +915,7 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
-  testWidgets('MediaQuery.enableDeviceGestureSettings allows disabling gesture settings', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
     tester.binding.window.viewConfigurationTestValue = const ViewConfiguration(
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );

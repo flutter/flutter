@@ -3504,8 +3504,8 @@ void main() {
       ),
     );
 
-    // Tap at the delete icon of the chip, which is at the right
-    // side of the chip
+    // Tap at the delete icon of the chip, which is at the right side of the
+    // chip
     final Offset topRightOfInkwell = tester.getTopLeft(find.byType(InkWell).first);
     final Offset tapLocationOfDeleteButton = topRightOfInkwell + const Offset(8, 8);
     final TestGesture tapGesture = await tester.startGesture(tapLocationOfDeleteButton);
@@ -3515,7 +3515,7 @@ void main() {
     // Wait for some more time while pressing and holding the delete button
     await tester.pumpAndSettle();
 
-    // There should be no tooltip
+    // There should be no delete button tooltip
     expect(findTooltipContainer('Delete'), findsNothing);
 
     await tapGesture.up();
@@ -3557,8 +3557,7 @@ void main() {
       ),
     );
 
-    // Tap at the delete icon of the chip, which is at the right
-    // side of the chip
+    // Hover over the delete icon of the chip
     final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
     final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await hoverGesture.moveTo(centerOfDeleteButton);
@@ -3566,10 +3565,10 @@ void main() {
 
     await tester.pump();
 
-    // Wait for some more time while pressing and holding the delete button
+    // Wait for some more time while hovering over the delete button
     await tester.pumpAndSettle();
 
-    // There should be no delete tooltip
+    // There should be no delete button tooltip
     expect(findTooltipContainer(''), findsNothing);
     // There should be a chip tooltip, however.
     expect(findTooltipContainer('Chip Tooltip'), findsOneWidget);
@@ -3585,8 +3584,7 @@ void main() {
       ),
     );
 
-    // Hover over the delete icon of the chip, which is at the right side of the
-    // chip
+    // Hover over the delete icon of the chip
     final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
     final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await hoverGesture.moveTo(centerOfDeleteButton);
@@ -3594,12 +3592,12 @@ void main() {
 
     await tester.pump();
 
-    // Wait for some more time while pressing and holding the delete button
+    // Wait for some more time while hovering over the delete button
     await tester.pumpAndSettle();
 
     // There should not be a chip tooltip
     expect(findTooltipContainer('Chip Tooltip'), findsNothing);
-    // There should be a delete tooltip
+    // There should be a delete button tooltip
     expect(findTooltipContainer('Delete'), findsOneWidget);
   });
 
