@@ -1718,7 +1718,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selection: TextSelection.collapsed(offset: lastSelectionIndex),
     );
 
-    _replaceText(ReplaceTextIntent(collapsedTextEditingValue, data.text!, selection, cause));
+    userUpdateTextEditingValue(
+      collapsedTextEditingValue.replaced(selection, data.text!),
+      cause,
+    );
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
