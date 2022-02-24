@@ -1,4 +1,4 @@
-Signature: ca3781e4eb01ec80c922f2b03b1f0604
+Signature: e74d48763f01b8d2ae423f58f38b624c
 
 UNUSED LICENSES:
 
@@ -6522,6 +6522,9 @@ ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
+FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
+FILE: ../../../third_party/skia/src/utils/SkBlitterTraceCommon.h
+FILE: ../../../third_party/skia/src/utils/SkCycles.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google Inc.
 
