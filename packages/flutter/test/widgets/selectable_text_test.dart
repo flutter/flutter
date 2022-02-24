@@ -1079,8 +1079,8 @@ void main() {
 
     expect(firstPos.dx, 25.5);
     expect(secondPos.dx, 25.5);
-    expect(thirdPos.dx, 24.5);
-    expect(middleStringPos.dx, 58.5);
+    expect(thirdPos.dx, 25.5);
+    expect(middleStringPos.dx, 59.5);
     expect(firstPos.dx, secondPos.dx);
     expect(firstPos.dx, thirdPos.dx);
     expect(firstPos.dy, lessThan(secondPos.dy));
@@ -4055,12 +4055,12 @@ void main() {
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
-    expect(topLeft.dx, equals(399));
+    expect(topLeft.dx, equals(400));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
     );
-    expect(topLeft.dx, equals(385));
+    expect(topLeft.dx, equals(386));
   });
 
   testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
@@ -4091,22 +4091,22 @@ void main() {
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
     );
-    expect(topLeft.dx, equals(427));
+    expect(topLeft.dx, equals(428));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
     );
-    expect(topLeft.dx, equals(413));
+    expect(topLeft.dx, equals(414));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
-    expect(topLeft.dx, equals(399));
+    expect(topLeft.dx, equals(400));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
     );
-    expect(topLeft.dx, equals(385));
+    expect(topLeft.dx, equals(386));
   });
 
   testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
