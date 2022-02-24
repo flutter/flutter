@@ -482,9 +482,9 @@ void main() {
       });
 
       test('asserts .png format', () async {
-        expectLater(
+        await expectLater(
           () async {
-            await comparator.compare(
+            return comparator.compare(
               Uint8List.fromList(_kTestPngBytes),
               Uri.parse('flutter.golden_test.1'),
             );
@@ -600,9 +600,9 @@ void main() {
       });
 
       test('asserts .png format', () async {
-        expectLater(
+        await expectLater(
           () async {
-            await comparator.compare(
+            return comparator.compare(
               Uint8List.fromList(_kTestPngBytes),
               Uri.parse('flutter.golden_test.1'),
             );
@@ -786,9 +786,9 @@ void main() {
       });
 
       test('asserts .png format', () async {
-        expectLater(
+        await expectLater(
           () async {
-            await comparator.compare(
+            return comparator.compare(
               Uint8List.fromList(_kTestPngBytes),
               Uri.parse('flutter.golden_test.1'),
             );
