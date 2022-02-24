@@ -58,8 +58,8 @@ PathBuilder& PathBuilder::VerticalLineTo(Scalar y, bool relative) {
   return *this;
 }
 
-PathBuilder& PathBuilder::QuadraticCurveTo(Point point,
-                                           Point controlPoint,
+PathBuilder& PathBuilder::QuadraticCurveTo(Point controlPoint,
+                                           Point point,
                                            bool relative) {
   point = relative ? current_ + point : point;
   controlPoint = relative ? current_ + controlPoint : controlPoint;
@@ -100,9 +100,9 @@ PathBuilder& PathBuilder::SmoothQuadraticCurveTo(Point point, bool relative) {
   return *this;
 }
 
-PathBuilder& PathBuilder::CubicCurveTo(Point point,
-                                       Point controlPoint1,
+PathBuilder& PathBuilder::CubicCurveTo(Point controlPoint1,
                                        Point controlPoint2,
+                                       Point point,
                                        bool relative) {
   controlPoint1 = relative ? current_ + controlPoint1 : controlPoint1;
   controlPoint2 = relative ? current_ + controlPoint2 : controlPoint2;
@@ -135,8 +135,8 @@ Point PathBuilder::ReflectedCubicControlPoint1() const {
   return (current_ * 2.0) - cubic.cp2;
 }
 
-PathBuilder& PathBuilder::SmoothCubicCurveTo(Point point,
-                                             Point controlPoint2,
+PathBuilder& PathBuilder::SmoothCubicCurveTo(Point controlPoint2,
+                                             Point point,
                                              bool relative) {
   auto controlPoint1 = ReflectedCubicControlPoint1();
   controlPoint2 = relative ? current_ + controlPoint2 : controlPoint2;
