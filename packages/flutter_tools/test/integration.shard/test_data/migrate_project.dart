@@ -25,9 +25,18 @@ class MigrateProject extends Project {
       writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
     final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
+    final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 
     await processManager.run(<String>[
-      'cipd',
+      'git',
+      'clone',
+      'https://chromium.googlesource.com/chromium/tools/depot_tools',
+      depotToolsDir.path,
+    ], workingDirectory: dir.path);
+
+    final File cipdFile = depotToolsDir.childFile(globals.platform.isWindows ? 'cipd.bat' : 'cipd');
+    await processManager.run(<String>[
+      cipdFile.path,
       'install',
       'flutter/test/full_app_fixtures/vanilla',
       version,
