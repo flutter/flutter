@@ -301,11 +301,17 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
-    if (!event.synthesized
-        && (event is PointerDownEvent || event is PointerMoveEvent || event is PointerPanZoomUpdateEvent)) {
+    if (!event.synthesized &&
+        (event is PointerDownEvent ||
+         event is PointerMoveEvent ||
+         event is PointerPanZoomStartEvent ||
+         event is PointerPanZoomUpdateEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       assert(tracker != null);
-      if (event is PointerPanZoomUpdateEvent) {
+      if (event is PointerPanZoomStartEvent) {
+        tracker.addPosition(event.timeStamp, Offset.zero);
+      }
+      else if (event is PointerPanZoomUpdateEvent) {
         tracker.addPosition(event.timeStamp, event.pan);
       }
       else {
