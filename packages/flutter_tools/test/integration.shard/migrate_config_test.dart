@@ -5,11 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_config.dart';
-import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -21,12 +17,10 @@ import 'test_utils.dart';
 void main() {
   Directory tempDir;
   FlutterRunTestDriver flutter;
-  BufferLogger logger;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
     flutter = FlutterRunTestDriver(tempDir);
-    logger = BufferLogger.test();
   });
 
   tearDown(() async {
@@ -38,12 +32,8 @@ void main() {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
-
-    File configFile = tempDir.childFile('.migrate_config');
+    final File configFile = tempDir.childFile('.migrate_config');
     configFile.createSync(recursive: true);
     configFile.writeAsStringSync('''
 # Generated section.
@@ -96,15 +86,9 @@ unmanagedFiles:
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
-    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
 
     MigrateConfig config = MigrateConfig(
       platform: 'root',
-      createRevision: null,
-      baseRevision: null,
       unmanagedFiles: <String>[],
     );
     config.writeFile(projectDirectory: tempDir);
@@ -156,10 +140,6 @@ unmanagedFiles:
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
-    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
 
     File configFile = tempDir.childFile('.migrate_config');
     configFile.createSync(recursive: true);
@@ -197,7 +177,7 @@ unmanagedFiles:
 
 ''', flush: true);
 
-    final String currentRevision = 'newlygenerated';
+    const String currentRevision = 'newlygenerated';
     final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(projectDirectory: tempDir, currentRevision: currentRevision);
 
     expect(configs.length, equals(3));

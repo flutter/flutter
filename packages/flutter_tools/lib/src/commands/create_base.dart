@@ -553,14 +553,28 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
-    List<String> platformsForMigrateConfig = <String>['root'];
-    if (templateContext['android'] == true) platformsForMigrateConfig.add('android');
-    if (templateContext['ios'] == true) platformsForMigrateConfig.add('ios');
-    if (templateContext['linux'] == true) platformsForMigrateConfig.add('linux');
-    if (templateContext['macos'] == true) platformsForMigrateConfig.add('macos');
-    if (templateContext['windows'] == true) platformsForMigrateConfig.add('windows');
-    if (templateContext['winuwp'] == true) platformsForMigrateConfig.add('windowsUwp');
-    if (templateContext['fuchsia'] == true) platformsForMigrateConfig.add('fuchisa');
+    final List<String> platformsForMigrateConfig = <String>['root'];
+    if (templateContext['android'] == true) {
+      platformsForMigrateConfig.add('android');
+    }
+    if (templateContext['ios'] == true) {
+      platformsForMigrateConfig.add('ios');
+    }
+    if (templateContext['linux'] == true) {
+      platformsForMigrateConfig.add('linux');
+    }
+    if (templateContext['macos'] == true) {
+      platformsForMigrateConfig.add('macos');
+    }
+    if (templateContext['windows'] == true) {
+      platformsForMigrateConfig.add('windows');
+    }
+    if (templateContext['winuwp'] == true) {
+      platformsForMigrateConfig.add('windowsUwp');
+    }
+    if (templateContext['fuchsia'] == true) {
+      platformsForMigrateConfig.add('fuchisa');
+    }
     await MigrateConfig.parseOrCreateMigrateConfigs(
         platforms: platformsForMigrateConfig,
         projectDirectory: directory,

@@ -5,7 +5,6 @@
 @Timeout(Duration(seconds: 600))
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -25,9 +24,9 @@ class MigrateProject extends Project {
     if (androidLocalProperties != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
-    Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
+    final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
 
-    ProcessResult result = await processManager.run(<String>[
+    await processManager.run(<String>[
       'cipd',
       'install',
       'flutter/test/full_app_fixtures/vanilla',
@@ -38,20 +37,20 @@ class MigrateProject extends Project {
 
     // This cp command changes the symlinks to real files so the tool can edit them.
     if (globals.platform.isWindows) {
-      result = await processManager.run(<String>[
+      await processManager.run(<String>[
         'copy',
         '${tempDir.path}/',
         dir.path,
       ]);
 
-      result = await processManager.run(<String>[
+      await processManager.run(<String>[
         'del',
         '/s',
         '/q',
         '.cipd',
       ], workingDirectory: dir.path);
     } else {
-      result = await processManager.run(<String>[
+      await processManager.run(<String>[
         'cp',
         '-R',
         '-L',
@@ -60,26 +59,25 @@ class MigrateProject extends Project {
         dir.path,
       ]);
 
-      result = await processManager.run(<String>[
+      await processManager.run(<String>[
         'rm',
         '-rf',
         '.cipd',
       ], workingDirectory: dir.path);
 
+      final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
+      for (final FileSystemEntity file in allFiles) {
+        if (file is! File) {
+          continue;
+        }
+        await processManager.run(<String>[
+          'chmod',
+          '+w',
+          file.path,
+        ], workingDirectory: dir.path);
       }
-
-
-    final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
-    for (FileSystemEntity file in allFiles) {
-      if (file is! File) {
-        continue;
-      }
-      result = await processManager.run(<String>[
-        'chmod',
-        '+w',
-        file.path,
-      ], workingDirectory: dir.path);
     }
+
     if (!vanilla) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), libMain);
       writeFile(fileSystem.path.join(dir.path, 'lib', 'other.dart'), libOther);
@@ -90,7 +88,6 @@ class MigrateProject extends Project {
 
   final String version;
   final bool vanilla;
-  late String _ensurePath;
   late String _appPath;
 
   // Maintain the same pubspec as the configured app.
