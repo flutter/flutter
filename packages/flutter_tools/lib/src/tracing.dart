@@ -38,7 +38,6 @@ class Tracing {
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, Object?>> stopTracingAndDownloadTimeline({
     bool awaitFirstFrame = false,
-    Duration firstFrameTimeout = const Duration(minutes: 5),
   }) async {
     if (awaitFirstFrame) {
       final Status status = _logger.startProgress(
@@ -53,11 +52,9 @@ class Tracing {
           // thrown if we're already subscribed.
         }
         final StringBuffer bufferedEvents = StringBuffer();
-        vmService.service.onIsolateEvent.listen((vm_service.Event event) {
-          bufferedEvents.writeln(processVmServiceMessage(event));
-        });
+        void Function(String) handleBufferedEvent = bufferedEvents.writeln;
         vmService.service.onExtensionEvent.listen((vm_service.Event event) {
-          bufferedEvents.writeln(processVmServiceMessage(event));
+          handleBufferedEvent(processVmServiceMessage(event));
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
           }
@@ -75,18 +72,19 @@ class Tracing {
           }
         }
         if (!done) {
-          await whenFirstFrameRendered.future.timeout(
-            firstFrameTimeout,
-            onTimeout: () async {
-              _logger.printTrace('Received VM events:');
-              _logger.printTrace(bufferedEvents.toString());
-              _logger.printTrace('Views:');
-              for (final FlutterView view in views) {
-                _logger.printTrace('id: ${view.id} isolate: ${view.uiIsolate?.id}');
-              }
-              throwToolExit('Timeout waiting for first frame.');
-            },
-          );
+          final Timer timer = Timer(const Duration(seconds: 10), () {
+            _logger.printStatus('First frame is taking longer than expected...');
+            _logger.printTrace('Views:');
+            for (final FlutterView view in views) {
+              _logger.printTrace('id: ${view.id} isolate: ${view.uiIsolate?.id}');
+            }
+            _logger.printTrace('Received VM events:');
+            _logger.printTrace(bufferedEvents.toString());
+            // Swap to just printing new events instead of buffering.
+            handleBufferedEvent = _logger.printTrace;
+          });
+          await whenFirstFrameRendered.future;
+          timer.cancel();
         }
       // The exception is rethrown, so don't catch only Exceptions.
       } catch (exception) { // ignore: avoid_catches_without_on_clauses
@@ -113,7 +111,6 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   required Logger logger,
   required Directory output,
-  Duration firstFrameTimeout = const Duration(minutes: 5),
 }) async {
   final File traceInfoFile = output.childFile('start_up_info.json');
 
@@ -129,7 +126,6 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
 
   final Map<String, Object?> timeline = await tracing.stopTracingAndDownloadTimeline(
     awaitFirstFrame: awaitFirstFrame,
-    firstFrameTimeout: firstFrameTimeout,
   );
 
   final File traceTimelineFile = output.childFile('start_up_timeline.json');

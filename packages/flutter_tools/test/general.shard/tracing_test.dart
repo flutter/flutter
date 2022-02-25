@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -181,36 +184,52 @@ void main() {
     ), throwsToolExit(message: 'Engine start event is missing in the timeline'));
   });
 
-  testWithoutContext('throws tool exit if first frame never renders', () async {
+  testWithoutContext('prints when first frame is taking a long time', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': vm_service.EventKind.kExtension,
-        }
-      ),
-      const FakeVmServiceRequest(
-        method: kListViewsMethod,
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            <String, Object?>{
-            'id': '1',
-            // No isolate, no views.
-            'isolate': null,
-            }
-          ],
-        },
-      ),
-    ]);
-
-    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
-      output: fileSystem.currentDirectory,
-      logger: logger,
-      firstFrameTimeout: const Duration(milliseconds: 50),
-    ), throwsToolExit(message: 'Timeout waiting for first frame'));
+    final Completer<void> completer = Completer<void>();
+    await FakeAsync().run((FakeAsync time) {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': vm_service.EventKind.kExtension,
+          }
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object?>{
+              'id': '1',
+              // No isolate, no views.
+              'isolate': null,
+              }
+            ],
+          },
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            bytes: base64.encode(utf8.encode('error text')),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+      ]);
+      unawaited(downloadStartupTrace(fakeVmServiceHost.vmService,
+        output: fileSystem.currentDirectory,
+        logger: logger,
+      ));
+      time.elapse(const Duration(seconds: 11));
+      time.flushMicrotasks();
+      completer.complete();
+      return completer.future;
+    });
+    expect(logger.statusText, contains('First frame is taking longer than expected'));
     expect(logger.traceText, contains('id: 1 isolate: null'));
+    expect(logger.traceText, contains('error text'));
   });
 
   testWithoutContext('throws tool exit if first frame events are missing', () async {
