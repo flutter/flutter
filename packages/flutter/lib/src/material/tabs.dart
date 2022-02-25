@@ -1417,7 +1417,10 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    _pageController = PageController(initialPage: _currentIndex!, viewportFraction: widget.viewportFraction);
+    _pageController = PageController(
+      initialPage: _currentIndex!,
+      viewportFraction: widget.viewportFraction,
+    );
   }
 
   @override
