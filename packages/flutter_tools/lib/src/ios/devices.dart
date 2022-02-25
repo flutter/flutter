@@ -437,12 +437,12 @@ class IOSDevice extends Device {
       final Uri? localUri = await observatoryDiscovery?.uri;
       timer.cancel();
       if (localUri == null) {
-        iosDeployDebugger?.detach();
+        await iosDeployDebugger?.stopAndDumpBacktrace();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
-      iosDeployDebugger?.detach();
+      await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {

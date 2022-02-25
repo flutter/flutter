@@ -747,7 +747,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
            '"$restorationId" is already registered to another property.',
     );
-    final bool hasSerializedValue = bucket?.contains(restorationId) == true;
+    final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
     final Object? initialValue = hasSerializedValue
         ? property.fromPrimitives(bucket!.read<Object>(restorationId))
         : property.createDefaultValue();
@@ -850,7 +850,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       return false;
     }
     final RestorationBucket? potentialNewParent = RestorationScope.of(context);
-    return potentialNewParent != _currentParent && potentialNewParent?.isReplacing == true;
+    return potentialNewParent != _currentParent && (potentialNewParent?.isReplacing ?? false);
   }
 
   List<RestorableProperty<Object?>>? _debugPropertiesWaitingForReregistration;

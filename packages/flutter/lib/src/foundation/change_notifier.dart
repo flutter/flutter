@@ -104,9 +104,13 @@ abstract class ValueListenable<T> extends Listenable {
 class ChangeNotifier implements Listenable {
   int _count = 0;
   // The _listeners is intentionally set to a fixed-length _GrowableList instead
-  // of const [] for performance reasons.
-  // See https://github.com/flutter/flutter/pull/71947/files#r545722476 for
-  // more details.
+  // of const [].
+  //
+  // The const [] creates an instance of _ImmutableList which would be
+  // different from fixed-length _GrowableList used elsewhere in this class.
+  // keeping runtime type the same during the lifetime of this class lets the
+  // compiler to infer concrete type for this property, and thus improves
+  // performance.
   static final List<VoidCallback?> _emptyListeners = List<VoidCallback?>.filled(0, null);
   List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;

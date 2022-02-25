@@ -56,7 +56,7 @@ class DebugAdapterCommand extends FlutterCommand {
       globals.stdio.stdout.nonBlocking,
       fileSystem: globals.fs,
       platform: globals.platform,
-      ipv6: ipv6 == true,
+      ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),
     );
