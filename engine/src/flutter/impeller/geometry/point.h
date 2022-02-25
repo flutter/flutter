@@ -175,6 +175,12 @@ struct TPoint {
     return {x / length, y / length};
   }
 
+  constexpr Scalar Cross(const TPoint& p) const {
+    return (x * p.y) - (y * p.x);
+  }
+
+  constexpr Scalar Dot(const TPoint& p) const { return (x * p.x) + (y * p.y); }
+
   constexpr bool IsZero() const { return x == 0 && y == 0; }
 };
 
