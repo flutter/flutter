@@ -49,7 +49,8 @@ ShaderLibraryMappingsForPlayground() {
 }
 
 Playground::Playground()
-    : renderer_(ContextMTL::Create(ShaderLibraryMappingsForPlayground())) {}
+    : renderer_(ContextMTL::Create(ShaderLibraryMappingsForPlayground(),
+                                   "Playground Library")) {}
 
 Playground::~Playground() = default;
 

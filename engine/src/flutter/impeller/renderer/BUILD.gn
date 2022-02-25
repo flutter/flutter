@@ -8,7 +8,6 @@ impeller_component("renderer") {
   metal_backend_sources = [
     "backend/metal/allocator_mtl.h",
     "backend/metal/allocator_mtl.mm",
-    "backend/metal/backend_cast.h",
     "backend/metal/command_buffer_mtl.h",
     "backend/metal/command_buffer_mtl.mm",
     "backend/metal/context_mtl.h",

@@ -26,6 +26,9 @@ test_fixtures("file_fixtures") {
     "boston.jpg",
     "embarcadero.jpg",
     "kalimba.jpg",
+    "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
+    "//flutter/third_party/txt/third_party/fonts/NotoColorEmoji.ttf",
+    "//flutter/third_party/txt/third_party/fonts/HomemadeApple.ttf",
   ]
 }
 

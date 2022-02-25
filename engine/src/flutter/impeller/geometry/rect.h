@@ -92,6 +92,22 @@ struct TRect {
 
   constexpr bool IsEmpty() const { return size.IsEmpty(); }
 
+  constexpr auto GetLeft() const {
+    return std::min(origin.x, origin.x + size.width);
+  }
+
+  constexpr auto GetTop() const {
+    return std::min(origin.y, origin.y + size.height);
+  }
+
+  constexpr auto GetRight() const {
+    return std::max(origin.x, origin.x + size.width);
+  }
+
+  constexpr auto GetBottom() const {
+    return std::max(origin.y, origin.y + size.height);
+  }
+
   constexpr std::array<T, 4> GetLTRB() const {
     const auto left = std::min(origin.x, origin.x + size.width);
     const auto top = std::min(origin.y, origin.y + size.height);

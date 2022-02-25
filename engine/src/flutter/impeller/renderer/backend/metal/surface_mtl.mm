@@ -52,7 +52,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     return nullptr;
   }
 
-  msaa_tex->SetLabel("ImpellerOnscreenColor4xMSAA");
+  msaa_tex->SetLabel("ImpellerOnscreenColorMSAA");
 
   TextureDescriptor color0_resolve_tex_desc;
   color0_resolve_tex_desc.format = color_format;

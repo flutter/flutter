@@ -21,6 +21,7 @@ group("impeller") {
     "geometry",
     "image",
     "renderer",
+    "typographer",
   ]
 
   if (is_host) {
@@ -43,5 +44,6 @@ executable("impeller_unittests") {
     "image:image_unittests",
     "playground",
     "renderer:renderer_unittests",
+    "typographer:typographer_unittests",
   ]
 }

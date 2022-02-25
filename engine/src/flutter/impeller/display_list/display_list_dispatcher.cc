@@ -6,6 +6,9 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/typographer/backends/skia/text_frame_skia.h"
+#include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkShader.h"
 
 namespace impeller {
 
@@ -72,8 +75,56 @@ void DisplayListDispatcher::setStrokeJoin(SkPaint::Join join) {
   UNIMPLEMENTED;
 }
 
+static Point ToPoint(const SkPoint& point) {
+  return Point::MakeXY(point.fX, point.fY);
+}
+
+static Color ToColor(const SkColor& color) {
+  return {
+      static_cast<Scalar>(SkColorGetR(color) / 255.0),  //
+      static_cast<Scalar>(SkColorGetG(color) / 255.0),  //
+      static_cast<Scalar>(SkColorGetB(color) / 255.0),  //
+      static_cast<Scalar>(SkColorGetA(color) / 255.0)   //
+  };
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setShader(sk_sp<SkShader> shader) {
+  if (!shader) {
+    return;
+  }
+
+  {
+    SkShader::GradientInfo info = {};
+    constexpr auto kColorsArrayCount = 2u;
+    info.fColorCount = kColorsArrayCount;
+    SkColor sk_colors[kColorsArrayCount];
+    info.fColors = sk_colors;
+    auto gradient_type = shader->asAGradient(&info);
+    switch (gradient_type) {
+      case SkShader::kLinear_GradientType: {
+        auto contents = std::make_shared<LinearGradientContents>();
+        contents->SetEndPoints(ToPoint(info.fPoint[0]),
+                               ToPoint(info.fPoint[1]));
+        std::vector<Color> colors;
+        for (auto i = 0; i < info.fColorCount; i++) {
+          colors.emplace_back(ToColor(sk_colors[i]));
+        }
+        contents->SetColors(std::move(colors));
+        paint_.contents = std::move(contents);
+        return;
+      } break;
+      case SkShader::kNone_GradientType:
+      case SkShader::kColor_GradientType:
+      case SkShader::kRadial_GradientType:
+      case SkShader::kSweep_GradientType:
+      case SkShader::kConical_GradientType:
+      default:
+        UNIMPLEMENTED;
+        break;
+    }
+  }
+
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
@@ -154,9 +205,8 @@ static std::optional<Rect> ToRect(const SkRect* rect) {
 // |flutter::Dispatcher|
 void DisplayListDispatcher::saveLayer(const SkRect* bounds,
                                       const flutter::SaveLayerOptions options) {
-  canvas_.SaveLayer(
-    options.renders_with_attributes() ? paint_ : Paint{},
-    ToRect(bounds));
+  canvas_.SaveLayer(options.renders_with_attributes() ? paint_ : Paint{},
+                    ToRect(bounds));
 }
 
 // |flutter::Dispatcher|
@@ -240,10 +290,6 @@ void DisplayListDispatcher::clipRect(const SkRect& rect,
                                      bool is_aa) {
   auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
   canvas_.ClipPath(std::move(path));
-}
-
-static Point ToPoint(const SkVector& vector) {
-  return {vector.fX, vector.fY};
 }
 
 static PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {

@@ -136,6 +136,7 @@ RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
   if (!buffer_ || !desc_ || !render_target_.IsValid()) {
     return;
   }
+  SetLabel("RenderPass");
   is_valid_ = true;
 }
 
