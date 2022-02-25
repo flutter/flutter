@@ -167,6 +167,12 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Prepends the golden URL with the library name that encloses the current
   /// test.
   Uri _addPrefix(Uri golden) {
+    // Ensure the Uri ends in .png as the SkiaClient expects
+    assert(
+      golden.toString().split('.').last == 'png',
+      'Golden files in the Flutter framework must end with the file extension '
+      '.png.'
+    );
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
     return Uri.parse('$prefix.$golden');
   }

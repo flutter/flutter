@@ -22,6 +22,7 @@ dependencies:
 
 dev_dependencies:
 {{#withFfiPluginHook}}
+  ffi: ^1.1.2
   ffigen: ^4.1.2
 {{/withFfiPluginHook}}
   flutter_test:
@@ -31,7 +32,7 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter.
+# The following section is specific to Flutter packages.
 flutter:
   # This section identifies this Flutter project as a plugin project.
   # The 'pluginClass' specifies the class (in Java, Kotlin, Swift, Objective-C, etc.)
@@ -111,7 +112,7 @@ flutter:
 {{/macos}}
 {{#windows}}
       windows:
-        pluginClass: {{pluginClass}}
+        pluginClass: {{pluginClass}}CApi
 {{/windows}}
 {{#web}}
       web:

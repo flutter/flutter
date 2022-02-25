@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'mouse_tracker_test_utils.dart';
 
-MouseTracker get _mouseTracker => RendererBinding.instance!.mouseTracker;
+MouseTracker get _mouseTracker => RendererBinding.instance.mouseTracker;
 
 typedef SimpleAnnotationFinder = Iterable<TestAnnotationEntry> Function(Offset offset);
 

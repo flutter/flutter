@@ -16,7 +16,7 @@ void main() {
   // Disconnects semantics listener for testing purposes.
   originalSemanticsListener = ui.window.onSemanticsEnabledChanged;
   ui.window.onSemanticsEnabledChanged = null;
-  RendererBinding.instance?.setSemanticsEnabled(false);
+  RendererBinding.instance.setSemanticsEnabled(false);
   // If the test passes, LifeCycleSpy will rewire the semantics listener back.
   runApp(const LifeCycleSpy());
 }
@@ -46,15 +46,15 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _actualLifeCycleSequence =  <AppLifecycleState?>[
-      ServicesBinding.instance?.lifecycleState
+      ServicesBinding.instance.lifecycleState
     ];
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -70,7 +70,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     if (const ListEquality<AppLifecycleState?>().equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
       // Rewires the semantics harness if test passes.
-      RendererBinding.instance?.setSemanticsEnabled(true);
+      RendererBinding.instance.setSemanticsEnabled(true);
       ui.window.onSemanticsEnabledChanged = originalSemanticsListener;
     }
     return const MaterialApp(

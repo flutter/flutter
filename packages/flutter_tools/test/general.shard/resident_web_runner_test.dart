@@ -1225,6 +1225,8 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   @override
   Future<ConnectionResult> connect(bool useDebugExtension) async {
     if (exception != null) {
+      assert(exception is Exception || exception is Error);
+      // ignore: only_throw_errors, exception is either Error or Exception here.
       throw exception;
     }
     return result;
@@ -1299,7 +1301,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     success: true,
     invalidatedSourcesCount: 1,
   );
-  Object reportError;
+  Exception reportError;
 
   @override
   ResidentCompiler generator;

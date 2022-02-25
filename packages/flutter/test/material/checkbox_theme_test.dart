@@ -145,7 +145,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     await _pointGestureToCheckbox(tester);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getCheckboxMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Checkbox with focus.
@@ -244,7 +244,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     await _pointGestureToCheckbox(tester);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getCheckboxMaterial(tester), paints..circle(color: hoverColor));
 
     // Checkbox with focus.
@@ -350,6 +350,41 @@ void main() {
         ),
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
+  });
+
+  testWidgets('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {
+    const Color globalThemeFillColor = Color(0xfffffff1);
+    const Color globalThemeCheckColor = Color(0xff000000);
+    const Color localThemeFillColor = Color(0xffff0000);
+    const Color localThemeCheckColor = Color(0xffffffff);
+
+    Widget buildCheckbox({required bool active}) {
+      return MaterialApp(
+        theme: ThemeData(
+          checkboxTheme: CheckboxThemeData(
+            checkColor: MaterialStateProperty.all<Color>(globalThemeCheckColor),
+            fillColor: MaterialStateProperty.all<Color>(globalThemeFillColor),
+          ),
+        ),
+        home: Scaffold(
+          body: CheckboxTheme(
+            data: CheckboxThemeData(
+              fillColor: MaterialStateProperty.all<Color>(localThemeFillColor),
+              checkColor: MaterialStateProperty.all<Color>(localThemeCheckColor),
+            ),
+            child: Checkbox(
+              value: active,
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCheckbox(active: true));
+    await tester.pumpAndSettle();
+    expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor)..path(color: localThemeCheckColor));
   });
 }
 

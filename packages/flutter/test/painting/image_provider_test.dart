@@ -18,7 +18,7 @@ import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  TestRenderingFlutterBinding();
+  TestRenderingFlutterBinding.ensureInitialized();
 
   FlutterExceptionHandler? oldError;
   setUp(() {
@@ -27,8 +27,8 @@ void main() {
 
   tearDown(() {
     FlutterError.onError = oldError;
-    PaintingBinding.instance!.imageCache!.clear();
-    PaintingBinding.instance!.imageCache!.clearLiveImages();
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   test('obtainKey errors will be caught', () async {
@@ -115,17 +115,17 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(imageCache!.statusForKey(provider).untracked, true);
-    expect(imageCache!.pendingImageCount, 0);
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
 
     provider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache!.statusForKey(provider).pending, true);
-    expect(imageCache!.pendingImageCount, 1);
+    expect(imageCache.statusForKey(provider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
 
     expect(await error.future, isStateError);
-    expect(imageCache!.statusForKey(provider).untracked, true);
-    expect(imageCache!.pendingImageCount, 0);
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
   });
 
   test('File image with empty file throws expected error (load)', () async {

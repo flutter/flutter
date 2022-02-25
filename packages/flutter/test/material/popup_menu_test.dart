@@ -1983,7 +1983,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -2006,7 +2006,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -2030,7 +2030,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
@@ -2535,6 +2535,39 @@ void main() {
     await buildFrameWithChild(splashRadius: testSplashRadius);
     expect(tester.widget<InkWell>(find.byType(InkWell)).radius,
         testSplashRadius);
+  });
+
+  testWidgets('Can override menu size constraints', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              constraints: const BoxConstraints(
+                minWidth: 500,
+              ),
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
   });
 }
 

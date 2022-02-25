@@ -1063,7 +1063,7 @@ void main() {
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
       'windows'
-    ], pluginClass: 'FlutterProjectPlugin',
+    ], pluginClass: 'FlutterProjectPluginCApi',
     unexpectedPlatforms: <String>['some_platform']);
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
@@ -2479,7 +2479,7 @@ void main() {
     expect(env['flutter'].allows(Version(2, 4, 9)), false);
   });
 
-  testUsingContext('default app uses flutter default versions', () async {
+  testUsingContext('default app uses local properties or flutter default versions', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2493,7 +2493,8 @@ void main() {
 
     expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
-    expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
+    expect(buildContent.contains('minSdkVersion flutterMinSdkVersion'), true);
+    expect(buildContent.contains('targetSdkVersion flutterTargetSdkVersion'), true);
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
@@ -2539,21 +2540,33 @@ void main() {
     final Directory platformDir = projectDir.childDirectory('windows');
 
     const String classFilenameBase = 'foo_bar_baz_plugin';
-    const String headerName = '$classFilenameBase.h';
-    final File headerFile = platformDir
+    const String cApiHeaderName = '${classFilenameBase}_c_api.h';
+    const String pluginClassHeaderName = '$classFilenameBase.h';
+    final File cApiHeaderFile = platformDir
         .childDirectory('include')
         .childDirectory(projectName)
-        .childFile(headerName);
-    final File implFile = platformDir.childFile('$classFilenameBase.cpp');
+        .childFile(cApiHeaderName);
+    final File cApiImplFile = platformDir.childFile('${classFilenameBase}_c_api.cpp');
+    final File pluginClassHeaderFile = platformDir.childFile(pluginClassHeaderName);
+    final File pluginClassImplFile = platformDir.childFile('$classFilenameBase.cpp');
     // Ensure that the files have the right names.
-    expect(headerFile, exists);
-    expect(implFile, exists);
-    // Ensure that the include is correct.
-    expect(implFile.readAsStringSync(), contains(headerName));
+    expect(cApiHeaderFile, exists);
+    expect(cApiImplFile, exists);
+    expect(pluginClassHeaderFile, exists);
+    expect(pluginClassImplFile, exists);
+    // Ensure that the includes are correct.
+    expect(cApiImplFile.readAsLinesSync(), containsAllInOrder(<Matcher>[
+      contains('#include "include/$projectName/$cApiHeaderName"'),
+      contains('#include "$pluginClassHeaderName"'),
+    ]));
+    expect(pluginClassImplFile.readAsLinesSync(), contains('#include "$pluginClassHeaderName"'));
     // Ensure that the plugin target name matches the post-processed version.
     // Ensure that the CMake file has the right target and source values.
     final String cmakeContents = platformDir.childFile('CMakeLists.txt').readAsStringSync();
     expect(cmakeContents, contains('"$classFilenameBase.cpp"'));
+    expect(cmakeContents, contains('"$classFilenameBase.h"'));
+    expect(cmakeContents, contains('"${classFilenameBase}_c_api.cpp"'));
+    expect(cmakeContents, contains('"include/$projectName/${classFilenameBase}_c_api.h"'));
     expect(cmakeContents, contains('set(PLUGIN_NAME "foo_BarBaz_plugin")'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -2608,17 +2621,26 @@ void main() {
 
     // If the project already ends in _plugin, it shouldn't be added again.
     const String classFilenameBase = projectName;
-    const String headerName = '$classFilenameBase.h';
-    final File headerFile = platformDir
+    const String cApiHeaderName = '${classFilenameBase}_c_api.h';
+    const String pluginClassHeaderName = '$classFilenameBase.h';
+    final File cApiHeaderFile = platformDir
         .childDirectory('include')
         .childDirectory(projectName)
-        .childFile(headerName);
-    final File implFile = platformDir.childFile('$classFilenameBase.cpp');
+        .childFile(cApiHeaderName);
+    final File cApiImplFile = platformDir.childFile('${classFilenameBase}_c_api.cpp');
+    final File pluginClassHeaderFile = platformDir.childFile(pluginClassHeaderName);
+    final File pluginClassImplFile = platformDir.childFile('$classFilenameBase.cpp');
     // Ensure that the files have the right names.
-    expect(headerFile, exists);
-    expect(implFile, exists);
-    // Ensure that the include is correct.
-    expect(implFile.readAsStringSync(), contains(headerName));
+    expect(cApiHeaderFile, exists);
+    expect(cApiImplFile, exists);
+    expect(pluginClassHeaderFile, exists);
+    expect(pluginClassImplFile, exists);
+    // Ensure that the includes are correct.
+    expect(cApiImplFile.readAsLinesSync(), containsAllInOrder(<Matcher>[
+      contains('#include "include/$projectName/$cApiHeaderName"'),
+      contains('#include "$pluginClassHeaderName"'),
+    ]));
+    expect(pluginClassImplFile.readAsLinesSync(), contains('#include "$pluginClassHeaderName"'));
     // Ensure that the CMake file has the right target and source values.
     final String cmakeContents = platformDir.childFile('CMakeLists.txt').readAsStringSync();
     expect(cmakeContents, contains('"$classFilenameBase.cpp"'));

@@ -209,13 +209,13 @@ void main() {
         },
       ),
     );
-    ServicesBinding.instance!.keyboard.addHandler((KeyEvent event) {
+    ServicesBinding.instance.keyboard.addHandler((KeyEvent event) {
       logs.add(2);
       return false;
     });
 
     // Dispatch a solitary synthesized event.
-    expect(ServicesBinding.instance!.keyEventManager.handleKeyData(ui.KeyData(
+    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
       timeStamp: Duration.zero,
       type: ui.KeyEventType.down,
       logical: LogicalKeyboardKey.keyA.keyId,
@@ -249,7 +249,7 @@ void main() {
     );
 
     // On macOS, a CapsLock tap yields a down event and a synthesized up event.
-    expect(ServicesBinding.instance!.keyEventManager.handleKeyData(ui.KeyData(
+    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
       timeStamp: Duration.zero,
       type: ui.KeyEventType.down,
       logical: LogicalKeyboardKey.capsLock.keyId,
@@ -257,7 +257,7 @@ void main() {
       character: null,
       synthesized: false,
     )), false);
-    expect(ServicesBinding.instance!.keyEventManager.handleKeyData(ui.KeyData(
+    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
       timeStamp: Duration.zero,
       type: ui.KeyEventType.up,
       logical: LogicalKeyboardKey.capsLock.keyId,
@@ -265,7 +265,7 @@ void main() {
       character: null,
       synthesized: true,
     )), false);
-    expect(await ServicesBinding.instance!.keyEventManager.handleRawKeyMessage(<String, dynamic>{
+    expect(await ServicesBinding.instance.keyEventManager.handleRawKeyMessage(<String, dynamic>{
       'type': 'keydown',
       'keymap': 'macos',
       'keyCode': 0x00000039,

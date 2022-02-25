@@ -381,7 +381,7 @@ class MockCrashReportSender extends MockClient {
 }
 
 class CrashingCrashReportSender extends MockClient {
-  CrashingCrashReportSender(Object exception) : super((Request request) async {
+  CrashingCrashReportSender(Exception exception) : super((Request request) async {
     throw exception;
   });
 }

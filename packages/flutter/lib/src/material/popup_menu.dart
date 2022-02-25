@@ -529,10 +529,12 @@ class _PopupMenu<T> extends StatelessWidget {
     Key? key,
     required this.route,
     required this.semanticLabel,
+    this.constraints,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
+  final BoxConstraints? constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -572,7 +574,7 @@ class _PopupMenu<T> extends StatelessWidget {
     final CurveTween height = CurveTween(curve: Interval(0.0, unit * route.items.length));
 
     final Widget child = ConstrainedBox(
-      constraints: const BoxConstraints(
+      constraints: constraints ?? const BoxConstraints(
         minWidth: _kMenuMinWidth,
         maxWidth: _kMenuMaxWidth,
       ),
@@ -735,6 +737,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.shape,
     this.color,
     required this.capturedThemes,
+    this.constraints,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -746,6 +749,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final ShapeBorder? shape;
   final Color? color;
   final CapturedThemes capturedThemes;
+  final BoxConstraints? constraints;
 
   @override
   Animation<double> createAnimation() {
@@ -779,7 +783,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
+    final Widget menu = _PopupMenu<T>(
+      route: this,
+      semanticLabel: semanticLabel,
+      constraints: constraints,
+    );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
       context: context,
@@ -870,6 +878,7 @@ Future<T?> showMenu<T>({
   ShapeBorder? shape,
   Color? color,
   bool useRootNavigator = false,
+  BoxConstraints? constraints,
 }) {
   assert(context != null);
   assert(position != null);
@@ -899,6 +908,7 @@ Future<T?> showMenu<T>({
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+    constraints: constraints,
   ));
 }
 
@@ -931,8 +941,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This example shows a menu with four items, selecting between an enum's
 /// values and setting a `_selectedMenu` field based on the selection
 ///
@@ -967,6 +976,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.shape,
     this.color,
     this.enableFeedback,
+    this.constraints,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1073,6 +1083,22 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this property is null, the default size is 24.0 pixels.
   final double? iconSize;
 
+  /// Optional size constraints for the menu.
+  ///
+  /// When unspecified, defaults to:
+  /// ```dart
+  /// const BoxConstraints(
+  ///   minWidth: 2.0 * 56.0,
+  ///   maxWidth: 5.0 * 56.0,
+  /// )
+  /// ```
+  ///
+  /// The default constraints ensure that the menu width matches maximum width
+  /// recommended by the material design guidelines.
+  /// Specifying this parameter enables creation of menu wider than
+  /// the default maximum width.
+  final BoxConstraints? constraints;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1112,6 +1138,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
+        constraints: widget.constraints,
       )
       .then<void>((T? newValue) {
         if (!mounted)

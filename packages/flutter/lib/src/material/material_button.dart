@@ -131,6 +131,8 @@ class MaterialButton extends StatelessWidget {
   final ValueChanged<bool>? onHighlightChanged;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
