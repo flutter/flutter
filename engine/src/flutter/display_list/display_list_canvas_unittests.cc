@@ -843,7 +843,7 @@ class CanvasCompareTester {
                        "saveLayer ColorFilter, no bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setColorFilter(filter.sk_filter());
+                         save_p.setColorFilter(filter.skia_object());
                          cv->saveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        },
@@ -861,7 +861,7 @@ class CanvasCompareTester {
                        "saveLayer ColorFilter and bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setColorFilter(filter.sk_filter());
+                         save_p.setColorFilter(filter.skia_object());
                          cv->saveLayer(RenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        },
@@ -1149,7 +1149,7 @@ class CanvasCompareTester {
                        "ColorFilter == RotateRGB",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setColor(SK_ColorYELLOW);
-                         p.setColorFilter(filter.sk_filter());
+                         p.setColorFilter(filter.skia_object());
                        },
                        [=](DisplayListBuilder& b) {
                          b.setColor(SK_ColorYELLOW);
@@ -1165,7 +1165,7 @@ class CanvasCompareTester {
                        "ColorFilter == Invert",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setColor(SK_ColorYELLOW);
-                         p.setColorFilter(filter.sk_filter());
+                         p.setColorFilter(filter.skia_object());
                        },
                        [=](DisplayListBuilder& b) {
                          b.setColor(SK_ColorYELLOW);
@@ -1246,7 +1246,7 @@ class CanvasCompareTester {
                        "MaskFilter == Blur 5",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setStrokeWidth(5.0);
-                         p.setMaskFilter(filter.sk_filter());
+                         p.setMaskFilter(filter.skia_object());
                        },
                        [=](DisplayListBuilder& b) {
                          b.setStrokeWidth(5.0);
