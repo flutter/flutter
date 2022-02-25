@@ -38,6 +38,14 @@ class MigrateProject extends Project {
     final File cipdFile = depotToolsDir.childFile(globals.platform.isWindows ? 'cipd.bat' : 'cipd');
     ProcessResult result = await processManager.run(<String>[
       cipdFile.path,
+      'init',
+      tempDir.path,
+    ], workingDirectory: dir.path);
+
+    print('CIPD init out:\n${result.stdout}\nERROR:\n${result.stderr}\n');
+
+    result = await processManager.run(<String>[
+      cipdFile.path,
       'install',
       'flutter/test/full_app_fixtures/vanilla',
       version,
@@ -45,7 +53,7 @@ class MigrateProject extends Project {
       tempDir.path,
     ], workingDirectory: dir.path);
 
-    print('CIPD out:\n${result.stdout}\nERROR\n${result.stderr}\n');
+    print('CIPD install out:\n${result.stdout}\nERROR:\n${result.stderr}\n');
 
     // This cp command changes the symlinks to real files so the tool can edit them.
     if (globals.platform.isWindows) {
