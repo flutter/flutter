@@ -98,8 +98,7 @@ platform_properties:
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
             {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk","path":"osx_sdk"},
-            {"name":"xcode_runtime_ios-15-0","path":"xcode_runtime_ios-15-0"}
+            {"name":"osx_sdk","path":"osx_sdk"}
           ]
       dependencies: >-
         [
@@ -110,6 +109,7 @@ platform_properties:
       os: Mac-12
       device_os: iOS-15.1
       xcode: 13a233
+      runtime_versions: ["ios-15-0"]
   windows:
     properties:
       caches: >-
