@@ -21,6 +21,7 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
   texture_pipelines_[{}] = std::make_unique<TexturePipeline>(*context_);
   solid_stroke_pipelines_[{}] =
       std::make_unique<SolidStrokePipeline>(*context_);
+  glyph_atlas_pipelines_[{}] = std::make_unique<GlyphAtlasPipeline>(*context_);
 
   // Pipelines that are variants of the base pipelines with custom descriptors.
   // TODO(98684): Rework this API to allow fetching the descriptor without

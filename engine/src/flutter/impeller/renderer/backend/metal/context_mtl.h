@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
-#include "impeller/renderer/backend/metal/backend_cast.h"
 #include "impeller/renderer/backend/metal/command_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 #include "impeller/renderer/backend/metal/shader_library_mtl.h"
@@ -27,7 +27,8 @@ class ContextMTL final : public Context,
       const std::vector<std::string>& shader_library_paths);
 
   static std::shared_ptr<Context> Create(
-      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data);
+      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
+      const std::string& label);
 
   // |Context|
   ~ContextMTL() override;

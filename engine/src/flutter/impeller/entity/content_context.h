@@ -9,6 +9,8 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/entity/glyph_atlas.frag.h"
+#include "flutter/impeller/entity/glyph_atlas.vert.h"
 #include "flutter/impeller/entity/gradient_fill.frag.h"
 #include "flutter/impeller/entity/gradient_fill.vert.h"
 #include "flutter/impeller/entity/solid_fill.frag.h"
@@ -29,6 +31,8 @@ using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
 using SolidStrokePipeline =
     PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
+using GlyphAtlasPipeline =
+    PipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
 // Instead of requiring new shaders for clips,  the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
@@ -81,6 +85,10 @@ class ContentContext {
     return GetPipeline(clip_restoration_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline> GetGlyphAtlasPipeline(Options opts) const {
+    return GetPipeline(glyph_atlas_pipelines_, opts);
+  }
+
   std::shared_ptr<Context> GetContext() const;
 
  private:
@@ -99,6 +107,7 @@ class ContentContext {
   mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<ClipPipeline> clip_restoration_pipelines_;
+  mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
 
   static void ApplyOptionsToDescriptor(PipelineDescriptor& desc,
                                        const Options& options) {

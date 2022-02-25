@@ -21,6 +21,8 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
   SamplerAddressMode height_address_mode = SamplerAddressMode::kClampToEdge;
   SamplerAddressMode depth_address_mode = SamplerAddressMode::kClampToEdge;
 
+  std::string label = "NN Clamp Sampler";
+
   // Comparable<SamplerDescriptor>
   std::size_t GetHash() const override {
     return fml::HashCombine(min_filter, mag_filter, width_address_mode,

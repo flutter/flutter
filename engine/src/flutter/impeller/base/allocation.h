@@ -25,6 +25,8 @@ class Allocation {
 
   [[nodiscard]] bool Truncate(size_t length, bool npot = true);
 
+  static uint32_t NextPowerOfTwoSize(uint32_t x);
+
  private:
   uint8_t* buffer_ = nullptr;
   size_t length_ = 0;

@@ -7,6 +7,10 @@
 namespace impeller {
 
 std::shared_ptr<Contents> Paint::CreateContentsForEntity() const {
+  if (contents) {
+    return contents;
+  }
+
   switch (style) {
     case Style::kFill: {
       auto solid_color = std::make_shared<SolidColorContents>();

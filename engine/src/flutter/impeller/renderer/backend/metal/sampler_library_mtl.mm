@@ -28,6 +28,11 @@ std::shared_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
   desc.sAddressMode = MTLSamplerAddressMode(descriptor.width_address_mode);
   desc.rAddressMode = MTLSamplerAddressMode(descriptor.depth_address_mode);
   desc.tAddressMode = MTLSamplerAddressMode(descriptor.height_address_mode);
+
+  if (!descriptor.label.empty()) {
+    desc.label = @(descriptor.label.c_str());
+  }
+
   auto mtl_sampler = [device_ newSamplerStateWithDescriptor:desc];
   if (!mtl_sampler) {
     return nullptr;

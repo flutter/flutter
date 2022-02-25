@@ -21,6 +21,7 @@ struct Paint {
   Color color = Color::Black();
   Scalar stroke_width = 0.0;
   Style style = Style::kFill;
+  std::shared_ptr<Contents> contents;
 
   std::shared_ptr<Contents> CreateContentsForEntity() const;
 };

@@ -10,7 +10,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/backend/metal/backend_cast.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/comparable.h"
 #include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"

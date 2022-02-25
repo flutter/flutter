@@ -38,7 +38,7 @@ bool Allocation::Truncate(size_t length, bool npot) {
   return true;
 }
 
-static uint32_t NextPowerOfTwoSize(uint32_t x) {
+uint32_t Allocation::NextPowerOfTwoSize(uint32_t x) {
   if (x == 0) {
     return 1;
   }

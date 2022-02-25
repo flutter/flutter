@@ -8,6 +8,9 @@
 #include "impeller/aiks/image.h"
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/typographer/backends/skia/text_frame_skia.h"
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "third_party/skia/include/core/SkData.h"
 
 namespace impeller {
 namespace testing {
@@ -280,6 +283,115 @@ TEST_F(AiksTest, CanRenderDifferencePaths) {
       Paint{});
   canvas.DrawPath(std::move(path), paint);
 
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
+  auto mapping = flutter::testing::OpenFixtureAsMapping(fixture_name);
+  if (!mapping) {
+    return nullptr;
+  }
+  return SkData::MakeWithProc(
+      mapping->GetMapping(), mapping->GetSize(),
+      [](const void* ptr, void* context) {
+        delete reinterpret_cast<fml::Mapping*>(context);
+      },
+      mapping.release());
+}
+
+TEST_F(AiksTest, CanRenderTextFrame) {
+  Canvas canvas;
+
+  Scalar baseline = 200.0;
+  Point text_position = {100, baseline};
+
+  // Draw the baseline.
+  canvas.DrawRect({50, baseline, 900, 10},
+                  Paint{.color = Color::Aqua().WithAlpha(0.25)});
+
+  // Mark the point at which the text is drawn.
+  canvas.DrawCircle(text_position, 5.0,
+                    Paint{.color = Color::Red().WithAlpha(0.25)});
+
+  // Construct the text blob.
+  auto mapping = OpenFixtureAsSkData("Roboto-Regular.ttf");
+  ASSERT_TRUE(mapping);
+  SkFont sk_font(SkTypeface::MakeFromData(mapping), 50.0);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog!.?", sk_font);
+  ASSERT_TRUE(blob);
+
+  // Create the Impeller text frame and draw it at the designated baseline.
+  auto frame = TextFrameFromTextBlob(blob);
+  TextRenderContextSkia text_context(GetContext());
+  ASSERT_TRUE(text_context.IsValid());
+  auto atlas = text_context.CreateGlyphAtlas(frame);
+  ASSERT_NE(atlas, nullptr);
+  canvas.DrawTextFrame(std::move(frame), std::move(atlas), text_position);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderItalicizedText) {
+  Canvas canvas;
+
+  Scalar baseline = 200.0;
+  Point text_position = {100, baseline};
+
+  // Draw the baseline.
+  canvas.DrawRect({50, baseline, 900, 10},
+                  Paint{.color = Color::Aqua().WithAlpha(0.25)});
+
+  // Mark the point at which the text is drawn.
+  canvas.DrawCircle(text_position, 5.0,
+                    Paint{.color = Color::Red().WithAlpha(0.25)});
+
+  // Construct the text blob.
+  auto mapping = OpenFixtureAsSkData("HomemadeApple.ttf");
+  ASSERT_TRUE(mapping);
+  SkFont sk_font(SkTypeface::MakeFromData(mapping), 50.0);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog!.?", sk_font);
+  ASSERT_TRUE(blob);
+
+  // Create the Impeller text frame and draw it at the designated baseline.
+  auto frame = TextFrameFromTextBlob(blob);
+  TextRenderContextSkia text_context(GetContext());
+  ASSERT_TRUE(text_context.IsValid());
+  auto atlas = text_context.CreateGlyphAtlas(frame);
+  ASSERT_NE(atlas, nullptr);
+  canvas.DrawTextFrame(std::move(frame), std::move(atlas), text_position);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderEmojiTextFrame) {
+  Canvas canvas;
+
+  Scalar baseline = 200.0;
+  Point text_position = {100, baseline};
+
+  // Draw the baseline.
+  canvas.DrawRect({50, baseline, 900, 10},
+                  Paint{.color = Color::Aqua().WithAlpha(0.25)});
+
+  // Mark the point at which the text is drawn.
+  canvas.DrawCircle(text_position, 5.0,
+                    Paint{.color = Color::Red().WithAlpha(0.25)});
+
+  // Construct the text blob.
+  auto mapping = OpenFixtureAsSkData("NotoColorEmoji.ttf");
+  ASSERT_TRUE(mapping);
+  SkFont sk_font(SkTypeface::MakeFromData(mapping), 50.0);
+  auto blob = SkTextBlob::MakeFromString(
+      "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊", sk_font);
+  ASSERT_TRUE(blob);
+
+  // Create the Impeller text frame and draw it at the designated baseline.
+  auto frame = TextFrameFromTextBlob(blob);
+  TextRenderContextSkia text_context(GetContext());
+  ASSERT_TRUE(text_context.IsValid());
+  auto atlas = text_context.CreateGlyphAtlas(frame);
+  ASSERT_NE(atlas, nullptr);
+  canvas.DrawTextFrame(std::move(frame), std::move(atlas), text_position);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

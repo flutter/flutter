@@ -8,6 +8,7 @@ impeller_component("base") {
   sources = [
     "allocation.cc",
     "allocation.h",
+    "backend_cast.h",
     "base.h",
     "config.h",
     "promise.cc",

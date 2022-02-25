@@ -12,6 +12,8 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/texture.h"
+#include "impeller/typographer/glyph_atlas.h"
+#include "impeller/typographer/text_frame.h"
 
 namespace impeller {
 
@@ -187,6 +189,8 @@ class ClipRestoreContents final : public Contents {
 
   ~ClipRestoreContents();
 
+  void SetGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas);
+
   // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -194,6 +198,28 @@ class ClipRestoreContents final : public Contents {
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(ClipRestoreContents);
+};
+
+class TextContents final : public Contents {
+ public:
+  TextContents();
+
+  ~TextContents();
+
+  void SetTextFrame(TextFrame frame);
+
+  void SetGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas);
+
+  // |Contents|
+  bool Render(const ContentContext& renderer,
+              const Entity& entity,
+              RenderPass& pass) const override;
+
+ private:
+  TextFrame frame_;
+  std::shared_ptr<GlyphAtlas> atlas_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TextContents);
 };
 
 }  // namespace impeller
