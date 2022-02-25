@@ -189,6 +189,10 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
+      final Map<String, String> extensionData = <String, String>{
+        'test': 'data',
+        'renderedErrorText': 'error text',
+      };
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: 'streamListen',
@@ -213,7 +217,7 @@ void main() {
           event: vm_service.Event(
             timestamp: 0,
             extensionKind: 'Flutter.Error',
-            bytes: base64.encode(utf8.encode('error text')),
+            extensionData: vm_service.ExtensionData.parse(extensionData),
             kind: vm_service.EventStreams.kExtension,
           ),
         ),
@@ -229,7 +233,7 @@ void main() {
     });
     expect(logger.statusText, contains('First frame is taking longer than expected'));
     expect(logger.traceText, contains('id: 1 isolate: null'));
-    expect(logger.traceText, contains('error text'));
+    expect(logger.traceText, contains('Flutter.Error: [ExtensionData {test: data, renderedErrorText: error text}]'));
   });
 
   testWithoutContext('throws tool exit if first frame events are missing', () async {

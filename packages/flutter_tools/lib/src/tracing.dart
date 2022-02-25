@@ -54,7 +54,7 @@ class Tracing {
         final StringBuffer bufferedEvents = StringBuffer();
         void Function(String) handleBufferedEvent = bufferedEvents.writeln;
         vmService.service.onExtensionEvent.listen((vm_service.Event event) {
-          handleBufferedEvent(processVmServiceMessage(event));
+          handleBufferedEvent('${event.extensionKind}: ${event.extensionData}');
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
           }
