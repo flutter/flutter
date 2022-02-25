@@ -91,6 +91,7 @@ abstract class MaterialInkController {
 /// 1. Clipping: If [clipBehavior] is not [Clip.none], Material clips its widget
 ///    sub-tree to the shape specified by [shape], [type], and [borderRadius].
 ///    By default, [clipBehavior] is [Clip.none] for performance considerations.
+///    See [Ink] for an example of how this affects clipping [Ink] widgets.
 /// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
 ///    [elevation] pixels, and draws the appropriate shadow.
 /// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s
@@ -350,7 +351,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         case MaterialType.card:
           color = theme.cardColor;
           break;
-        default:
+        case MaterialType.button:
+        case MaterialType.circle:
+        case MaterialType.transparency:
           break;
       }
     }
@@ -405,7 +408,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         duration: widget.animationDuration,
         shape: BoxShape.rectangle,
         clipBehavior: widget.clipBehavior,
-        borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation),
         shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
@@ -448,9 +450,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shape: shape,
       child: contents,
     );
-    if (clipBehavior == Clip.none) {
-      return child;
-    }
     return ClipPath(
       clipper: ShapeBorderClipper(
         shape: shape,

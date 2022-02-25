@@ -216,7 +216,6 @@ void main() {
   testWidgets('Null dialog shape', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
-      shape: null,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -1185,6 +1184,40 @@ void main() {
     expect(buttonOneRect.bottom, buttonTwoRect.top - 10.0);
   });
 
+  testWidgets('Dialogs can set the alignment of the OverflowBar', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        ElevatedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('Loooooooooog button 1'),
+        ),
+        ElevatedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('Loooooooooooooonger button 2'),
+        ),
+      ],
+      actionsOverflowAlignment: OverflowBarAlignment.center,
+    );
+
+    await tester.pumpWidget(
+      _buildAppWithDialog(dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Rect buttonOneRect = tester.getRect(find.byKey(key1));
+    final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
+    expect(buttonOneRect.center.dx, buttonTwoRect.center.dx);
+  });
+
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext routeContext;
@@ -1257,9 +1290,7 @@ void main() {
     );
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           child: Placeholder(),
         ),
@@ -1283,9 +1314,7 @@ void main() {
     // Test with no padding
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           insetPadding: null,
           child: Placeholder(),
@@ -1298,9 +1327,7 @@ void main() {
     // Test with an insetPadding
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
           child: Placeholder(),
@@ -1317,54 +1344,6 @@ void main() {
         screenRect.bottom - 40.0,
       ),
     );
-  });
-
-  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-
-    expect(semantics, includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    ));
-
-    semantics.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/78229.
@@ -1400,7 +1379,6 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                           label: 'title',
                           textDirection: TextDirection.ltr,
                         ),
@@ -1569,7 +1547,6 @@ void main() {
                         // node 4.
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                           label: 'title',
                           textDirection: TextDirection.ltr,
                         ),
@@ -1608,13 +1585,13 @@ void main() {
   });
 
   testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 
     // Dismiss is confirmed IFF confirmDismiss() returns true.
     Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
       return showDialog<bool>(
-        context: _scaffoldKey.currentContext!,
+        context: scaffoldKey.currentContext!,
         barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
         builder: (BuildContext context) {
           return AlertDialog(
@@ -1659,7 +1636,7 @@ void main() {
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
-              key: _scaffoldKey,
+              key: scaffoldKey,
               body: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ListView(

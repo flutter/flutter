@@ -125,13 +125,13 @@ void main() {
 
   test('BorderTween nullable test', () {
     BorderTween tween = BorderTween();
-    expect(tween.lerp(0.0),  null);
-    expect(tween.lerp(1.0),  null);
+    expect(tween.lerp(0.0), null);
+    expect(tween.lerp(1.0), null);
 
-    tween = BorderTween(begin: null, end: const Border(top: BorderSide()));
-    expect(tween.lerp(0.0),  const Border());
-    expect(tween.lerp(0.5),  const Border(top: BorderSide(width: 0.5)));
-    expect(tween.lerp(1.0),  const Border(top: BorderSide()));
+    tween = BorderTween(end: const Border(top: BorderSide()));
+    expect(tween.lerp(0.0), const Border());
+    expect(tween.lerp(0.5), const Border(top: BorderSide(width: 0.5)));
+    expect(tween.lerp(1.0), const Border(top: BorderSide()));
   });
 
   test('SizeTween', () {
@@ -156,13 +156,13 @@ void main() {
 
   test('Matrix4Tween', () {
     final Matrix4 a = Matrix4.identity();
-    final Matrix4 b = a.clone()..translate(6.0, -8.0, 0.0)..scale(0.5, 1.0, 5.0);
+    final Matrix4 b = a.clone()..translate(6.0, -8.0)..scale(0.5, 1.0, 5.0);
     final Matrix4Tween tween = Matrix4Tween(begin: a, end: b);
     expect(tween.lerp(0.0), equals(a));
     expect(tween.lerp(1.0), equals(b));
     expect(
       tween.lerp(0.5),
-      equals(a.clone()..translate(3.0, -4.0, 0.0)..scale(0.75, 1.0, 3.0)),
+      equals(a.clone()..translate(3.0, -4.0)..scale(0.75, 1.0, 3.0)),
     );
     final Matrix4 c = a.clone()..rotateZ(1.0);
     final Matrix4Tween rotationTween = Matrix4Tween(begin: a, end: c);
@@ -214,7 +214,7 @@ void main() {
   });
 
   test('BorderRadiusTween nullable test', () {
-    final BorderRadiusTween tween = BorderRadiusTween(begin: null, end: null);
+    final BorderRadiusTween tween = BorderRadiusTween();
     expect(tween.transform(0.0), null);
     expect(tween.transform(1.0), null);
     expect(tween.lerp(0.0), null);

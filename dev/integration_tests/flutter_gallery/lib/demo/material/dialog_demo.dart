@@ -33,8 +33,6 @@ class DialogDemoItem extends StatelessWidget {
     return SimpleDialogOption(
       onPressed: onPressed,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Icon(icon, size: 36.0, color: color),
           Padding(

@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:macrobenchmarks/src/web/recorder.dart';
+import 'recorder.dart';
 
 /// Measure the performance of paint bounds estimation by recording a picture
 /// without actually rendering it.

@@ -287,7 +287,6 @@ library funstuff;
     final Package package = Package(
       'foo',
       Uri.parse('file://foo/'),
-      languageVersion: null,
     );
 
     expect(determineLanguageVersion(file, package, flutterRoot), testCurrentLanguageVersion);

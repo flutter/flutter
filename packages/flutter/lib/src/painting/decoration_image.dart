@@ -557,7 +557,7 @@ void paintImage({
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
       // It's ok to use this instead of a MediaQuery because if this changes,
       // whatever is aware of the MediaQuery will be repainting the image anyway.
-      displaySize: outputSize * PaintingBinding.instance!.window.devicePixelRatio,
+      displaySize: outputSize * PaintingBinding.instance.window.devicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&
@@ -602,7 +602,7 @@ void paintImage({
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
       debugOnPaintImage?.call(sizeInfo);
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {
           return;
@@ -657,7 +657,7 @@ void paintImage({
   }
 }
 
-Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {
+Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
   int startX = 0;
   int startY = 0;
   int stopX = 0;
@@ -675,10 +675,11 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
     stopY = ((outputRect.bottom - fundamentalRect.bottom) / strideY).ceil();
   }
 
-  for (int i = startX; i <= stopX; ++i) {
-    for (int j = startY; j <= stopY; ++j)
-      yield fundamentalRect.shift(Offset(i * strideX, j * strideY));
-  }
+  return <Rect>[
+    for (int i = startX; i <= stopX; ++i)
+      for (int j = startY; j <= stopY; ++j)
+        fundamentalRect.shift(Offset(i * strideX, j * strideY)),
+  ];
 }
 
 Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);

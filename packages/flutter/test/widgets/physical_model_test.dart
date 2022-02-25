@@ -48,7 +48,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: PhysicalModel(
-          shape: BoxShape.rectangle,
           color: Colors.grey,
           shadowColor: Colors.red,
           elevation: 1.0,
@@ -73,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         key: key,
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Padding(

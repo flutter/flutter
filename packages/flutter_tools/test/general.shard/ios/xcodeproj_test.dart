@@ -73,7 +73,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: null,
+      usage: TestUsage(),
     );
   });
 
@@ -278,6 +278,8 @@ void main() {
           '/',
           '-scheme',
           'Free',
+          '-destination',
+          'id=123',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
@@ -286,7 +288,7 @@ void main() {
     ]);
 
     expect(
-        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(deviceId: '123', scheme: 'Free')),
         const <String, String>{});
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
@@ -308,6 +310,8 @@ void main() {
           '/',
           '-sdk',
           'iphonesimulator',
+          '-destination',
+          'generic/platform=iOS Simulator',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
@@ -340,6 +344,8 @@ void main() {
           'xcodebuild',
           '-project',
           '/',
+          '-destination',
+          'generic/platform=iOS',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
@@ -371,6 +377,8 @@ void main() {
           fileSystem.path.separator,
           '-scheme',
           'Free',
+          '-destination',
+          'generic/platform=iOS',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
           'CODE_SIGN_STYLE=Manual',
@@ -695,6 +703,7 @@ Information about project "Runner":
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
+        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
@@ -710,6 +719,8 @@ Information about project "Runner":
               '-project',
               podXcodeProject.path,
               '-showBuildSettings',
+              'BUILD_DIR=$buildDirectory',
+              'OBJROOT=$buildDirectory',
             ],
             stdout: '''
 Build settings for action build and target plugin1:
@@ -748,6 +759,7 @@ Build settings for action build and target plugin2:
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
+        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
@@ -763,6 +775,8 @@ Build settings for action build and target plugin2:
                 '-project',
                 podXcodeProject.path,
                 '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
               ],
               exitCode: 1,
           ),
@@ -789,6 +803,7 @@ Build settings for action build and target plugin2:
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
+        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
@@ -804,6 +819,8 @@ Build settings for action build and target plugin2:
                 '-project',
                 podXcodeProject.path,
                 '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
               ],
               stdout: '''
 Build settings for action build and target plugin1:

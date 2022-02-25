@@ -401,7 +401,6 @@ Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
         'directory in the system temp folder. If a temp_dir is not '
         'specified, then by default a generated temporary directory will be '
@@ -431,7 +430,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'confirm',
-    defaultsTo: false,
     help: 'If set, will actually remove the archive from Google Cloud Storage '
         'upon successful execution of this script. Published archives will be '
         'removed from this directory: $baseUrl$releaseFolder.  This option '
@@ -440,7 +438,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );

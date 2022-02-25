@@ -19,7 +19,9 @@ import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
 import 'src/multi_widget_construction.dart';
+import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
+import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -46,6 +48,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
+        kPictureCacheComplexityScoringRouteName: (BuildContext context) => const PictureCacheComplexityScoringPage(),
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
@@ -60,6 +63,8 @@ class MacrobenchmarksApp extends StatelessWidget {
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
         kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
         kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
+        kOpacityPeepholeRouteName: (BuildContext context) => const OpacityPeepholePage(),
+        ...opacityPeepholeRoutes,
       },
     );
   }
@@ -117,6 +122,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Picture Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kPictureCacheRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kPictureCacheComplexityScoringRouteName),
+            child: const Text('Picture Cache Complexity Scoring'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheComplexityScoringRouteName);
             },
           ),
           ElevatedButton(
@@ -208,6 +220,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animated Image'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedImageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kOpacityPeepholeRouteName),
+            child: const Text('Opacity Peephole tests'),
+            onPressed: () {
+              Navigator.pushNamed(context, kOpacityPeepholeRouteName);
             },
           ),
         ],

@@ -117,7 +117,7 @@ void checkBackgroundBoxHeight(WidgetTester tester, double height) {
 
 void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   expect(
-    tester.renderObject<RenderAnimatedOpacity>(
+    tester.firstRenderObject<RenderAnimatedOpacity>(
       find.ancestor(
         of: finder,
         matching: find.byType(FadeTransition),

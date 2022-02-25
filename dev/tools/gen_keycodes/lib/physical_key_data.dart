@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:gen_keycodes/utils.dart';
+import 'utils.dart';
 
 /// The data structure used to manage keyboard key entries.
 ///

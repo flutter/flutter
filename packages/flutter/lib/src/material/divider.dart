@@ -23,7 +23,7 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to display a Divider between an orange and blue box
 /// inside a column. The Divider is 20 logical pixels in height and contains a
 /// vertically centered black line that is 5 logical pixels thick. The black
@@ -33,10 +33,12 @@ import 'theme.dart';
 ///
 /// ** See code in examples/api/lib/material/divider/divider.0.dart **
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
 ///  * [ListTile.divideTiles], another approach to dividing widgets in a list.
+///  * [VerticalDivider], which is the vertical analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
@@ -185,17 +187,19 @@ class Divider extends StatelessWidget {
 /// The box's total width is controlled by [width]. The appropriate
 /// padding is automatically computed from the width.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-/// This sample shows how to display a [VerticalDivider] between an purple and orange box
+/// {@tool dartpad}
+/// This sample shows how to display a [VerticalDivider] between a purple and orange box
 /// inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
 /// horizontally centered black line that is 1 logical pixels thick. The grey
 /// line is indented by 20 logical pixels.
 ///
 /// ** See code in examples/api/lib/material/divider/vertical_divider.0.dart **
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListView.separated], which can be used to generate vertical dividers.
+///  * [Divider], which is the horizontal analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
   /// Creates a material design vertical divider.

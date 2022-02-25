@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -937,6 +938,170 @@ void main() {
     );
   });
 
+  group('Cupertino page transitions', () {
+    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog}) {
+      return CupertinoPageRoute<void>(
+        fullscreenDialog: fullscreenDialog,
+        builder: (_) => const SizedBox(),
+      );
+    }
+
+    testWidgets('when route is not fullscreenDialog, it has a barrierColor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, const Color(0x18000000));
+    });
+
+    testWidgets('when route is a fullscreenDialog, it has no barrierColor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, isNull);
+    });
+
+    testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+      PaintPattern paintsShadowRect({required double dx, required Color color}) {
+        return paints..everything((Symbol methodName, List<dynamic> arguments) {
+          if (methodName != #drawRect)
+            return true;
+          final Rect rect = arguments[0] as Rect;
+          final Color paintColor = (arguments[1] as Paint).color;
+          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
+            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+            // differently colored 1px-wide rects. Skip rects that aren't being
+            // drawn by the _CupertinoEdgeShadowDecoration.
+            return true;
+          if ((rect.left - dx).abs() >= 1)
+            // Skip calls for rects until the one with the given position offset
+            return true;
+          if (paintColor.value == color.value)
+            return true;
+          throw '''
+  For a rect with an expected left-side position: $dx (drawn at ${rect.left}):
+              Expected a rect with color: $color,
+              And drew a rect with color: $paintColor.
+          ''';
+        });
+      }
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: false),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+
+      // Animation starts with effectively no shadow
+      expect(box, paintsShadowRect(dx: 795, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 785, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 775, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 765, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 755, color: const Color(0x00000000)));
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Part-way through the transition, the shadow is approaching the full gradient
+      expect(box, paintsShadowRect(dx: 296, color: const Color(0x03000000)));
+      expect(box, paintsShadowRect(dx: 286, color: const Color(0x02000000)));
+      expect(box, paintsShadowRect(dx: 276, color: const Color(0x01000000)));
+      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
+
+      await tester.pumpAndSettle();
+
+      // At the end of the transition, the shadow is a gradient between
+      // 0x04000000 and 0x00000000 and is now offscreen
+      expect(box, paintsShadowRect(dx: -1, color: const Color(0x04000000)));
+      expect(box, paintsShadowRect(dx: -10, color: const Color(0x03000000)));
+      expect(box, paintsShadowRect(dx: -20, color: const Color(0x02000000)));
+      expect(box, paintsShadowRect(dx: -30, color: const Color(0x01000000)));
+      expect(box, paintsShadowRect(dx: -40, color: const Color(0x00000000)));
+
+      // Start animation in reverse
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(box, paintsShadowRect(dx: 498, color: const Color(0x04000000)));
+      expect(box, paintsShadowRect(dx: 488, color: const Color(0x03000000)));
+      expect(box, paintsShadowRect(dx: 478, color: const Color(0x02000000)));
+      expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
+      expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
+
+      await tester.pump(const Duration(milliseconds: 250));
+
+      // At the end of the animation, the shadow approaches full transparency
+      expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
+      expect(box, paintsShadowRect(dx: 784, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 774, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 764, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
+    });
+
+    testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+      PaintPattern paintsNoShadows() {
+        return paints..everything((Symbol methodName, List<dynamic> arguments) {
+          if (methodName != #drawRect)
+            return true;
+          final Rect rect = arguments[0] as Rect;
+          // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+          // differently colored 1px rects. Skip all rects not drawn by a
+          // _CupertinoEdgeShadowDecoration.
+          if (rect.width != 1.0)
+            return true;
+          throw '''
+    Expected: no rects with a width of 1px.
+          Found: $rect.
+          ''';
+        });
+      }
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: true),
+      );
+
+      await tester.pumpAndSettle();
+      expect(box, paintsNoShadows());
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+
+      await tester.pumpAndSettle();
+      expect(box, paintsNoShadows());
+    });
+  });
+
   testWidgets('ModalPopup overlay dark mode', (WidgetTester tester) async {
     late StateSetter stateSetter;
     Brightness brightness = Brightness.light;
@@ -1378,7 +1543,7 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color _kTransparentColor = Color(0x00000000);
+    const Color kTransparentColor = Color(0x00000000);
 
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
@@ -1388,7 +1553,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: _kTransparentColor,
+                barrierColor: kTransparentColor,
               );
             },
             child: const Text('tap'),
@@ -1595,7 +1760,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      CupertinoPage<void>(key: pageKeyOne, child: const Text('first')),
       CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 
@@ -1670,7 +1835,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
+    await gesture.down(const Offset(3, 300));
 
     // Need 2 events to form a valid drag
     await tester.pump(const Duration(milliseconds: 100));
@@ -1809,7 +1974,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

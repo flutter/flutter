@@ -75,6 +75,119 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
+  testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      wrap(
+          child: IconTheme(
+            data: const IconThemeData(),
+            child: IconButton(
+              focusNode: focusNode,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    final RenderBox icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(24.0, 24.0));
+  });
+
+  testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
+    RenderBox icon;
+
+    await tester.pumpWidget(
+      wrap(
+        child: IconTheme(
+          data: const IconThemeData(size: 10),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
+        )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 10),
+            ),
+            child: IconButton(
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 20),
+            ),
+            child: IconTheme(
+              data: const IconThemeData(size: 10),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: IconTheme(
+            data: const IconThemeData(size: 20),
+            child: Theme(
+              data: ThemeData(
+                iconTheme: const IconThemeData(size: 10),
+              ),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+  });
+
+  testWidgets('when non-null, iconSize precedes IconTheme.of(context).size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+          child: IconTheme(
+            data: const IconThemeData(size: 30.0),
+            child: IconButton(
+              iconSize: 10.0,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    final RenderBox icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+  });
+
   testWidgets('Small icons with non-null constraints can be <48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
@@ -570,7 +683,6 @@ void main() {
           child: Center(
             child: IconButton(
               onPressed: () {},
-              enableFeedback: true,
               icon: const Icon(Icons.link),
             ),
           ),
@@ -661,7 +773,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
 
     // Test default is click
     await tester.pumpWidget(
@@ -678,10 +790,10 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgets('disabled IconButton has forbidden mouse cursor', (WidgetTester tester) async {
+  testWidgets('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
         child: Directionality(
@@ -702,7 +814,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('IconButton.mouseCursor overrides implicit setting of mouse cursor', (WidgetTester tester) async {
@@ -727,7 +839,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
 
     await tester.pumpWidget(
       Material(
@@ -744,7 +856,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 }
 

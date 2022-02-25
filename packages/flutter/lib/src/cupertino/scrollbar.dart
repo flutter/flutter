@@ -32,13 +32,15 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
+///
 /// {@macro flutter.widgets.Scrollbar}
 ///
 /// When dragging a [CupertinoScrollbar] thumb, the thickness and radius will
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and
 /// [radiusWhileDragging], respectively.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [CupertinoScrollbar] that fades in and out of view as scrolling occurs.
 /// The scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
 /// The `thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
@@ -48,10 +50,11 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-/// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without the
+/// {@tool dartpad}
+/// When [thumbVisibility] is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
-/// or that the [PrimaryScrollController] is available.
+/// or that the [PrimaryScrollController] is available. [isAlwaysShown] is
+/// deprecated in favor of `thumbVisibility`.
 ///
 /// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
@@ -72,24 +75,34 @@ class CupertinoScrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool isAlwaysShown = false,
+    bool? thumbVisibility,
     double thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     Radius radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     ScrollbarOrientation? scrollbarOrientation,
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    bool? isAlwaysShown,
   }) : assert(thickness != null),
        assert(thickness < double.infinity),
        assert(thicknessWhileDragging != null),
        assert(thicknessWhileDragging < double.infinity),
        assert(radius != null),
        assert(radiusWhileDragging != null),
+       assert(
+         isAlwaysShown == null || thumbVisibility == null,
+         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+         'isAlwaysShown is deprecated.'
+       ),
        super(
          key: key,
          child: child,
          controller: controller,
-         isAlwaysShown: isAlwaysShown,
+         thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
          thickness: thickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,

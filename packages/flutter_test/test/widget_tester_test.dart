@@ -162,7 +162,7 @@ void main() {
 
       final Widget target = _AlwaysAnimating(
         onPaint: () {
-          final int current = SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds;
+          final int current = SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
           initial ??= current;
           logPaints.add(current - initial!);
         },
@@ -508,11 +508,9 @@ void main() {
           // Typically PointerAddedEvent is not used in testers, but for records
           // captured on a device it is usually what start a gesture.
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
@@ -754,7 +752,7 @@ void main() {
         flutterErrorDetails = details;
       };
 
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runTest(() async {
         final Timer timer = Timer(const Duration(seconds: 1), () {});
         expect(timer.isActive, true);
@@ -811,11 +809,9 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 
 class _AlwaysAnimating extends StatefulWidget {
   const _AlwaysAnimating({
-    this.child,
     required this.onPaint,
   });
 
-  final Widget? child;
   final VoidCallback onPaint;
 
   @override
@@ -848,7 +844,6 @@ class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerPro
       builder: (BuildContext context, Widget? child) {
         return CustomPaint(
           painter: _AlwaysRepaint(widget.onPaint),
-          child: widget.child,
         );
       },
     );

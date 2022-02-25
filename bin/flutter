@@ -13,6 +13,11 @@
 
 set -e
 
+# To debug the tool, you can uncomment the following lines to enable debug
+# mode and set an observatory port:
+# FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
+# FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
+
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
 

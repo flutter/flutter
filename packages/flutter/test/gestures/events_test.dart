@@ -10,7 +10,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('toString control tests', (GestureTester tester) {
     expect(const PointerDownEvent(), hasOneLineDescription);
@@ -496,7 +496,6 @@ void main() {
 
     const PointerScrollEvent scroll = PointerScrollEvent(
       timeStamp: Duration(seconds: 2),
-      kind: PointerDeviceKind.mouse,
       device: 1,
       position: Offset(20, 30),
     );

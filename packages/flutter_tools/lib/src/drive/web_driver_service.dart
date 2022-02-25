@@ -13,12 +13,13 @@ import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
@@ -91,7 +92,6 @@ class WebDriverService extends DriverService {
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final Future<int> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
-      enableDevTools: false,
       route: route,
     );
 
@@ -127,9 +127,9 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, PackageConfig packageConfig, {
-    bool headless,
+    @required bool headless,
     String chromeBinary,
-    String browserName,
+    @required String browserName,
     bool androidEmulator,
     int driverPort,
     List<String> browserDimension,
@@ -143,14 +143,13 @@ class WebDriverService extends DriverService {
         desired: getDesiredCapabilities(browser, headless, chromeBinary),
         spec: async_io.WebDriverSpec.Auto
       );
-    } on Exception catch (ex) {
+    } on SocketException catch (error) {
+      _logger.printTrace('$error');
       throwToolExit(
-        'Unable to start WebDriver Session for Flutter for Web testing.\n'
-        'Make sure you have the correct WebDriver Server running at $driverPort.\n'
-        'Make sure the WebDriver Server matches option --browser-name.\n'
-        'For more information see: '
+        'Unable to start a WebDriver session for web testing.\n'
+        'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
+        'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
-        '$ex'
       );
     }
 
@@ -318,9 +317,8 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
           'args': <String>['--disable-fullscreen']
         },
       };
-    default:
-      throw UnsupportedError('Browser $browser not supported.');
   }
+  throw UnsupportedError('Browser $browser not supported.'); // dead code; remove with null safety migration
 }
 
 /// Converts [browserName] string to [Browser]

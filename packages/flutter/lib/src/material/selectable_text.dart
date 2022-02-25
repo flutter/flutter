@@ -123,6 +123,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
+/// {@macro flutter.material.textfield.wantKeepAlive}
+///
 /// {@tool snippet}
 ///
 /// ```dart
@@ -198,6 +200,7 @@ class SelectableText extends StatefulWidget {
     this.selectionControls,
     this.onTap,
     this.scrollPhysics,
+    this.semanticsLabel,
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
@@ -255,6 +258,7 @@ class SelectableText extends StatefulWidget {
     this.selectionControls,
     this.onTap,
     this.scrollPhysics,
+    this.semanticsLabel,
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
@@ -409,7 +413,10 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics? scrollPhysics;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro flutter.widgets.Text.semanticsLabel}
+  final String? semanticsLabel;
+
+  /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -425,6 +432,7 @@ class SelectableText extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
+    properties.add(DiagnosticsProperty<String>('semanticsLabel', semanticsLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -445,7 +453,7 @@ class SelectableText extends StatefulWidget {
   }
 }
 
-class _SelectableTextState extends State<SelectableText> with AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
+class _SelectableTextState extends State<SelectableText> implements TextSelectionGestureDetectorBuilderDelegate {
   EditableTextState? get _editableText => editableTextKey.currentState;
 
   late _TextSpanEditingController _controller;
@@ -574,14 +582,12 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   }
 
   @override
-  bool get wantKeepAlive => true;
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context); // See AutomaticKeepAliveClientMixin.
-    assert(() {
-      return _controller._textSpan.visitChildren((InlineSpan span) => span.runtimeType == TextSpan);
-    }(), 'SelectableText only supports TextSpan; Other type of InlineSpan is not allowed');
+    // TODO(garyq): Assert to block WidgetSpans from being used here are removed,
+    // but we still do not yet have nice handling of things like carets, clipboard,
+    // and other features. We should add proper support. Currently, caret handling
+    // is blocked on SkParagraph switch and https://github.com/flutter/engine/pull/27010
+    // should be landed in SkParagraph after the switch is complete.
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(
@@ -697,6 +703,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     );
 
     return Semantics(
+      label: widget.semanticsLabel,
+      excludeSemantics: widget.semanticsLabel != null,
       onLongPress: () {
         _effectiveFocusNode.requestFocus();
       },

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
+import 'product.dart';
 
 List<Product> loadProducts(Category category) {
   const List<Product> allProducts = <Product>[

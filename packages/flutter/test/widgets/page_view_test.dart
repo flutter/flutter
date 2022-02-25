@@ -7,13 +7,96 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
 
-const Duration _frameDuration = Duration(milliseconds: 100);
-
 void main() {
+  testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/88956
+    final PageController controller = PageController(
+      initialPage: 1,
+    );
+
+    Widget build(Size size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: PageView(
+              controller: controller,
+              onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The pageView have a zero viewport, so nothing display.
+    await tester.pumpWidget(build(Size.zero));
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
+
+    // Resize from zero viewport to non-zero, the controller's initialPage 1 will display.
+    await tester.pumpWidget(build(const Size(200.0, 200.0)));
+    expect(find.text('Alaska'), findsOneWidget);
+
+    // Jump to page 'Iowa'.
+    controller.jumpToPage(kStates.indexOf('Iowa'));
+    await tester.pump();
+    expect(find.text('Iowa'), findsOneWidget);
+
+    // Resize to zero viewport again, nothing display.
+    await tester.pumpWidget(build(Size.zero));
+    expect(find.text('Iowa'), findsNothing);
+
+    // Resize from zero to non-zero, the pageView should not lose state, so the page 'Iowa' show again.
+    await tester.pumpWidget(build(const Size(200.0, 200.0)));
+    expect(find.text('Iowa'), findsOneWidget);
+  });
+
+  testWidgets('Change the page through the controller when zero-size viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/88956
+    final PageController controller = PageController(
+      initialPage: 1,
+    );
+
+    Widget build(Size size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: PageView(
+              controller: controller,
+              onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The pageView have a zero viewport, so nothing display.
+    await tester.pumpWidget(build(Size.zero));
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
+
+    // Change the page through the page controller when zero viewport
+    controller.animateToPage(kStates.indexOf('Iowa'), duration: kTabScrollDuration, curve: Curves.ease);
+    expect(controller.page, kStates.indexOf('Iowa'));
+
+    controller.jumpToPage(kStates.indexOf('Illinois'));
+    expect(controller.page, kStates.indexOf('Illinois'));
+
+    // Resize from zero viewport to non-zero, the latest state should not lost.
+    await tester.pumpWidget(build(const Size(200.0, 200.0)));
+    expect(controller.page, kStates.indexOf('Illinois'));
+    expect(find.text('Illinois'), findsOneWidget);
+  });
+
   testWidgets('PageController cannot return page while unattached',
       (WidgetTester tester) async {
     final PageController controller = PageController();
@@ -56,13 +139,13 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
 
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsNothing);
 
     await tester.drag(find.byType(PageView), const Offset(-401.0, 0.0));
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -73,14 +156,14 @@ void main() {
     log.clear();
 
     await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
 
     await tester.fling(find.byType(PageView), const Offset(200.0, 0.0), 1000.0);
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -140,7 +223,7 @@ void main() {
     expect(find.text('California'), findsOneWidget);
 
     controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Colorado'), findsOneWidget);
 
@@ -161,7 +244,7 @@ void main() {
     expect(find.text('Colorado'), findsOneWidget);
 
     controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('California'), findsOneWidget);
   });
@@ -183,7 +266,7 @@ void main() {
     expect(find.text('Alabama'), findsOneWidget);
 
     await tester.drag(find.byType(PageView), const Offset(-1250.0, 0.0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Arizona'), findsOneWidget);
 
@@ -647,7 +730,7 @@ void main() {
     'All visible pages are able to receive touch events',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
-      final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+      final PageController controller = PageController(viewportFraction: 1/4);
       late int tappedIndex;
 
       Widget build() {
@@ -998,9 +1081,7 @@ void main() {
     // PageView() defaults to true.
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: PageView(
-        children: const <Widget>[],
-      ),
+      child: PageView(),
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);
@@ -1010,10 +1091,36 @@ void main() {
       textDirection: TextDirection.ltr,
       child: PageView(
         padEnds: false,
-        children: const <Widget>[],
       ),
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
+  });
+
+  testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95101
+
+    final PageController controller = PageController(initialPage: 152);
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 392.72727272727275,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: PageView.builder(
+              controller: controller,
+              itemCount: 366,
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    controller.jumpToPage(365);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }

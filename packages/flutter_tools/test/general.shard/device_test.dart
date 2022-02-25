@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -11,10 +9,11 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -182,6 +181,7 @@ void main() {
     final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
     final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
     final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
+    final FakeDevice unsupportedForProject = FakeDevice('unsupportedForProject', 'unsupportedForProject', isSupportedForProject: false);
     final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
@@ -193,6 +193,7 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
         unsupported,
+        unsupportedForProject,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(
@@ -330,9 +331,29 @@ void main() {
       );
     });
 
-    testWithoutContext('Removes a single unsupported device', () async {
+    testWithoutContext('Unsupported devices listed in all connected devices', () async {
       final List<Device> devices = <Device>[
         unsupported,
+        unsupportedForProject,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+      );
+      final List<Device> filtered = await deviceManager.getAllConnectedDevices();
+
+      expect(filtered, <Device>[
+        unsupported,
+        unsupportedForProject,
+      ]);
+    });
+
+    testWithoutContext('Removes a unsupported devices', () async {
+      final List<Device> devices = <Device>[
+        unsupported,
+        unsupportedForProject,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(
@@ -345,9 +366,10 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('Does not remove an unsupported device if FlutterProject is null', () async {
+    testWithoutContext('Retains devices unsupported by the project if FlutterProject is null', () async {
       final List<Device> devices = <Device>[
         unsupported,
+        unsupportedForProject,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(
@@ -357,7 +379,7 @@ void main() {
       );
       final List<Device> filtered = await deviceManager.findTargetDevices(null);
 
-      expect(filtered, <Device>[unsupported]);
+      expect(filtered, <Device>[unsupportedForProject]);
     });
 
     testWithoutContext('Removes web and fuchsia from --all', () async {
@@ -377,11 +399,12 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('Removes unsupported devices from --all', () async {
+    testWithoutContext('Removes devices unsupported by the project from --all', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
         unsupported,
+        unsupportedForProject,
       ];
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -401,18 +424,19 @@ void main() {
     testWithoutContext('uses DeviceManager.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
       final List<Device> devices = <Device>[
         unsupported,
+        unsupportedForProject,
       ];
       final TestDeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
       );
-      deviceManager.isAlwaysSupportedOverride = true;
+      deviceManager.isAlwaysSupportedForProjectOverride = true;
 
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        unsupported,
+        unsupportedForProject,
       ]);
     });
 
@@ -481,47 +505,70 @@ void main() {
   });
 
   testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags and null_assertions', () {
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: null)), '');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug)), '');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')), '--foo');
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '', nullAssertions: true)), '--null_assertions');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)), '--null_assertions');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
+  });
+
+  group('JSON encode DebuggingOptions', () {
+    testWithoutContext('can preserve the original options', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        enableDds: false,
+        dartEntrypointArgs: <String>['a', 'b'],
+        dartFlags: 'c',
+        deviceVmServicePort: 1234,
+      );
+      final String jsonString = json.encode(original.toJson());
+      final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
+      expect(deserialized.startPaused, original.startPaused);
+      expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
+      expect(deserialized.enableDds, original.enableDds);
+      expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
+      expect(deserialized.dartFlags, original.dartFlags);
+      expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
+    });
   });
 }
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager(
     List<Device> allDevices, {
-    List<DeviceDiscovery> deviceDiscoveryOverrides,
-    @required Logger logger,
-    @required Terminal terminal,
-    String wellKnownId,
-  }) : super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
-    _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
+    List<DeviceDiscovery>? deviceDiscoveryOverrides,
+    required Logger logger,
+    required Terminal terminal,
+    String? wellKnownId,
+  }) : _fakeDeviceDiscoverer = FakePollingDeviceDiscovery(),
+       _deviceDiscoverers = <DeviceDiscovery>[],
+       super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
     if (wellKnownId != null) {
       _fakeDeviceDiscoverer.wellKnownIds.add(wellKnownId);
     }
-    _deviceDiscoverers = <DeviceDiscovery>[
-      _fakeDeviceDiscoverer,
-      if (deviceDiscoveryOverrides != null)
-        ...deviceDiscoveryOverrides
-    ];
+    _deviceDiscoverers.add(_fakeDeviceDiscoverer);
+    if (deviceDiscoveryOverrides != null) {
+      _deviceDiscoverers.addAll(deviceDiscoveryOverrides);
+    }
     resetDevices(allDevices);
   }
   @override
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
-  List<DeviceDiscovery> _deviceDiscoverers;
-  FakePollingDeviceDiscovery _fakeDeviceDiscoverer;
+  final List<DeviceDiscovery> _deviceDiscoverers;
+  final FakePollingDeviceDiscovery _fakeDeviceDiscoverer;
 
   void resetDevices(List<Device> allDevices) {
     _fakeDeviceDiscoverer.setDevices(allDevices);
   }
 
-  bool isAlwaysSupportedOverride;
+  bool? isAlwaysSupportedForProjectOverride;
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
-    if (isAlwaysSupportedOverride != null) {
-      return isAlwaysSupportedOverride;
+  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
+    if (isAlwaysSupportedForProjectOverride != null) {
+      return isAlwaysSupportedForProjectOverride!;
     }
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
@@ -543,7 +590,7 @@ class MockDeviceDiscovery extends Fake implements DeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> discoverDevices({Duration timeout}) async {
+  Future<List<Device>> discoverDevices({Duration? timeout}) async {
     discoverDevicesCalled += 1;
     return deviceValues;
   }
@@ -560,18 +607,18 @@ class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final Completer<List<Device>> _completer = Completer<List<Device>>();
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     return _completer.future;
   }
 
   @override
   Future<void> stopPolling() async {
-    _completer.complete();
+    _completer.complete(<Device>[]);
   }
 
   @override
   Future<void> dispose() async {
-    _completer.complete();
+    _completer.complete(<Device>[]);
   }
 
   @override
@@ -588,7 +635,7 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
   ThrowingPollingDeviceDiscovery() : super('throw');
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     throw const ProcessException('fake-discovery', <String>[]);
   }
 
@@ -614,15 +661,15 @@ class FakeTerminal extends Fake implements Terminal {
     _nextResult = result;
   }
 
-  List<String> _nextPrompt;
-  String _nextResult;
+  List<String>? _nextPrompt;
+  late String _nextResult;
 
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    Logger? logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) async {
     expect(acceptedCharacters, _nextPrompt);

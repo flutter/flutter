@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/process.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 import 'fuchsia_device.dart';
 
@@ -23,7 +21,7 @@ class FuchsiaTilesCtl {
   /// found.
   static Future<int> findAppKey(FuchsiaDevice device, String appName) async {
     final FuchsiaTilesCtl tilesCtl = fuchsiaDeviceTools.tilesCtl;
-    final Map<int, String> runningApps = await tilesCtl.list(device);
+    final Map<int, String>? runningApps = await tilesCtl.list(device);
     if (runningApps == null) {
       globals.printTrace('tiles_ctl is not running');
       return -1;
@@ -39,7 +37,7 @@ class FuchsiaTilesCtl {
   /// Ensures that tiles is running on the device.
   static Future<bool> ensureStarted(FuchsiaDevice device) async {
     final FuchsiaTilesCtl tilesCtl = fuchsiaDeviceTools.tilesCtl;
-    final Map<int, String> runningApps = await tilesCtl.list(device);
+    final Map<int, String>? runningApps = await tilesCtl.list(device);
     if (runningApps == null) {
       return tilesCtl.start(device);
     }
@@ -58,7 +56,7 @@ class FuchsiaTilesCtl {
   ///
   /// Returns an empty mapping if tiles_ctl is running but no apps are running.
   /// Returns null if tiles_ctl is not running.
-  Future<Map<int, String>> list(FuchsiaDevice device) async {
+  Future<Map<int, String>?> list(FuchsiaDevice device) async {
     // Output of tiles_ctl list has the format:
     // Found 1 tiles:
     // Tile key 1 url fuchsia-pkg://fuchsia.com/stocks#meta/stocks.cmx ...
@@ -75,9 +73,11 @@ class FuchsiaTilesCtl {
     for (final String line in result.stdout.split('\n')) {
       final List<String> words = line.split(' ');
       if (words.isNotEmpty && words[0] == 'Tile') {
-        final int key = int.tryParse(words[2]);
-        final String url = words[4];
-        tiles[key] = url;
+        final int? key = int.tryParse(words[2]);
+        if (key != null) {
+          final String url = words[4];
+          tiles[key] = url;
+        }
       }
     }
     return tiles;

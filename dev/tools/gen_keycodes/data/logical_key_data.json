@@ -3075,6 +3075,9 @@
       "gtk": [
         "3270_PrintScreen"
       ],
+      "windows": [
+        "SNAPSHOT"
+      ],
       "android": [
         "SYSRQ"
       ],
@@ -3085,6 +3088,9 @@
     "values": {
       "gtk": [
         64797
+      ],
+      "windows": [
+        44
       ],
       "android": [
         120

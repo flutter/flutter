@@ -3,13 +3,48 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
+import 'host_agent.dart';
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
 
 Future<String> fileType(String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
+}
+
+Future<String?> minPhoneOSVersion(String pathToBinary) async {
+  final String loadCommands = await eval('otool', <String>[
+    '-l',
+    '-arch',
+    'arm64',
+    pathToBinary,
+  ]);
+  if (!loadCommands.contains('LC_VERSION_MIN_IPHONEOS')) {
+    return null;
+  }
+
+  String? minVersion;
+  // Load command 7
+  // cmd LC_VERSION_MIN_IPHONEOS
+  // cmdsize 16
+  // version 9.0
+  // sdk 15.2
+  //  ...
+  final List<String> lines = LineSplitter.split(loadCommands).toList();
+  lines.asMap().forEach((int index, String line) {
+    if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
+      final String versionLine = lines
+          .skip(index - 1)
+          .take(4).last;
+      final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
+      minVersion = versionRegex.firstMatch(versionLine)?.group(1);
+    }
+  });
+  return minVersion;
 }
 
 Future<bool> containsBitcode(String pathToBinary) async {
@@ -112,14 +147,14 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String deviceId) async {
+Future<void> removeIOSimulator(String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
       <String>[
         'simctl',
         'shutdown',
-        deviceId
+        deviceId,
       ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
@@ -129,9 +164,82 @@ Future<void> removeIOSimulator(String deviceId) async {
       <String>[
         'simctl',
         'delete',
-        deviceId],
+        deviceId,
+      ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
     );
   }
+}
+
+Future<bool> runXcodeTests({
+  required String platformDirectory,
+  required String destination,
+  required String testName,
+  bool skipCodesign = false,
+}) async {
+  final Map<String, String> environment = Platform.environment;
+  String? developmentTeam;
+  String? codeSignStyle;
+  String? provisioningProfile;
+  if (!skipCodesign) {
+    // If not running on CI, inject the Flutter team code signing properties.
+    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+  }
+  final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
+  final String resultBundlePath = path.join(resultBundleTemp, 'result');
+  final int testResultExit = await exec(
+    'xcodebuild',
+    <String>[
+      '-workspace',
+      'Runner.xcworkspace',
+      '-scheme',
+      'Runner',
+      '-configuration',
+      'Release',
+      '-destination',
+      destination,
+      '-resultBundlePath',
+      resultBundlePath,
+      'test',
+      'COMPILER_INDEX_STORE_ENABLE=NO',
+      if (developmentTeam != null)
+        'DEVELOPMENT_TEAM=$developmentTeam',
+      if (codeSignStyle != null)
+        'CODE_SIGN_STYLE=$codeSignStyle',
+      if (provisioningProfile != null)
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+    ],
+    workingDirectory: platformDirectory,
+    canFail: true,
+  );
+
+  if (testResultExit != 0) {
+    final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
+    if (dumpDirectory != null) {
+      if (xcresultBundle.existsSync()) {
+        // Zip the test results to the artifacts directory for upload.
+        final String zipPath = path.join(dumpDirectory.path,
+            '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
+        await exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            zipPath,
+            path.basename(xcresultBundle.path),
+          ],
+          workingDirectory: resultBundleTemp,
+          canFail: true, // Best effort to get the logs.
+        );
+      } else {
+        print('xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
+      }
+    }
+    return false;
+  }
+  return true;
 }

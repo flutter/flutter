@@ -426,8 +426,8 @@ class RenderFlow extends RenderBox
       final bool absorbed = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? position) {
-          return child.hitTest(result, position: position!);
+        hitTest: (BoxHitTestResult result, Offset position) {
+          return child.hitTest(result, position: position);
         },
       );
       if (absorbed)

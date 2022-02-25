@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
-import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -339,9 +338,7 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FakeFlutterVersion(
-      engineRevision: 'abcdefghijklmnopqrstuvwxyz',
-    )
+    FlutterVersion: () => FakeFlutterVersion()
   });
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
@@ -456,26 +453,6 @@ void main() {
     );
     await driverService.stop();
   });
-
-  testWithoutContext('WebDriver error message includes link to documentation', () async {
-    const String link = 'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser';
-    final DriverService driverService = WebDriverService(
-      logger: BufferLogger.test(),
-      dartSdkPath: 'dart',
-      processUtils: ProcessUtils(
-        processManager: FakeProcessManager.empty(),
-        logger: BufferLogger.test(),
-      ),
-    );
-
-    expect(() => driverService.startTest(
-      'foo.test',
-      <String>[],
-      <String, String>{},
-      PackageConfig(<Package>[Package('test', Uri.base)]),
-      browserName: 'chrome',
-    ), throwsToolExit(message: RegExp('\nFor more information see: $link\n')));
-  });
 }
 
 FlutterDriverService setUpDriverService({
@@ -531,6 +508,9 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});
 

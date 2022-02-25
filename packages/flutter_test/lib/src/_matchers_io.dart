@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
@@ -82,14 +81,14 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
       imageFuture = captureImage(elements.single);
     } else {
-      throw 'must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>';
+      throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {
-        throw 'Future<Image> completed to null';
+        throw AssertionError('Future<Image> completed to null');
       }
       final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)

@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -153,6 +154,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -226,6 +228,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
+        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -248,7 +251,9 @@ class RunCommand extends RunCommandBase {
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
-    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
+    addPublishPort(verboseHelp: verboseHelp);
+    addMultidexOption();
+    addIgnoreDeprecationOption();
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -341,7 +346,14 @@ class RunCommand extends RunCommandBase {
   final String name = 'run';
 
   @override
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : _deviceDeprecationBehavior;
+  DeprecationBehavior _deviceDeprecationBehavior = DeprecationBehavior.none;
+
+  @override
   final String description = 'Run your Flutter app on an attached device.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   List<Device> devices;
   bool webMode = false;
@@ -470,6 +482,10 @@ class RunCommand extends RunCommandBase {
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
     }
+
+    if (devices.any((Device device) => device is AndroidDevice)) {
+      _deviceDeprecationBehavior = DeprecationBehavior.exit;
+    }
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     webMode = featureFlags.isWebEnabled &&
@@ -497,6 +513,7 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6,
+        multidexEnabled: boolArg('multidex'),
       );
     } else if (webMode) {
       return webRunnerFactory.createWebRunner(
@@ -524,6 +541,7 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6,
       stayResident: stayResident,
+      multidexEnabled: boolArg('multidex'),
     );
   }
 
@@ -540,8 +558,10 @@ class RunCommand extends RunCommandBase {
         throwToolExit('"--machine" does not support "-d all".');
       }
       final Daemon daemon = Daemon(
-        stdinCommandStream,
-        stdoutCommandResponse,
+        DaemonConnection(
+          daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
+          logger: globals.logger,
+        ),
         notifyingLogger: (globals.logger is NotifyingLogger)
           ? globals.logger as NotifyingLogger
           : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
@@ -560,7 +580,6 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
-          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
@@ -582,7 +601,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${toTitleCase(getFriendlyModeName(buildMode))} '
+          '${sentenceCase(getFriendlyModeName(buildMode))} '
           'mode is not supported by ${device.name}.',
         );
       }

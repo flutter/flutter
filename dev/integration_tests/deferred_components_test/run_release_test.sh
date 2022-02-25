@@ -27,19 +27,30 @@ rm -f build/app/outputs/bundle/release/run_logcat.log
 
 flutter build appbundle
 
-java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing
+java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --ks android/testing-keystore.jks --ks-key-alias testing_key --ks-pass pass:012345
 java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/release/app-release.apks
 
 $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
-sleep 12
 exit
 "
-$adb_path logcat -d -t "$script_start_time" -s "flutter" > build/app/outputs/bundle/release/run_logcat.log
-echo ""
-if cat build/app/outputs/bundle/release/run_logcat.log | grep -q "Running deferred code"; then
-  echo "All tests passed."
-  exit 0
-fi
+run_start_time_seconds=$(date +%s)
+while read LOGLINE
+do
+    if [[ "${LOGLINE}" == *"Running deferred code"* ]]; then
+        echo "Found ${LOGLINE}"
+        echo "All tests passed."
+        pkill -P $$
+        exit 0
+    fi
+    # Timeout if expected log not found
+    current_time=$(date +%s)
+    if [[ $((current_time - run_start_time_seconds)) -ge 300 ]]; then
+        echo "Failure: Timed out, deferred component did not load."
+        pkill -P $$
+        exit 1
+    fi
+done < <($adb_path logcat -T "$script_start_time")
+
 echo "Failure: Deferred component did not load."
 exit 1

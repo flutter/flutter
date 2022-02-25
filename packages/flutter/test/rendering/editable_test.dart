@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
@@ -42,7 +41,7 @@ class _FakeEditableTextState with TextSelectionDelegate {
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) {
-    return Future<void>.value(null);
+    return Future<void>.value();
   }
 
   @override
@@ -85,6 +84,8 @@ void testVariants(
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderEditable respects clipBehavior', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
@@ -132,7 +133,6 @@ void main() {
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
       offset: ViewportOffset.zero(),
@@ -184,7 +184,6 @@ void main() {
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.fixed(10.0),
@@ -284,7 +283,6 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
 
     final RenderEditable editable = RenderEditable(
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
@@ -783,7 +781,7 @@ void main() {
     expect(updatedSelection!.baseOffset, 3);
     expect(updatedSelection!.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61028
+  });
 
   test('promptRect disappears when promptRectColor is set to null', () {
     const Color promptRectColor = Color(0x12345678);
@@ -795,7 +793,6 @@ void main() {
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.fixed(10.0),
@@ -833,7 +830,6 @@ void main() {
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.zero(),
@@ -889,7 +885,9 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  });
+    // TODO(yjbanov): This test is failing in the Dart HHH-web bot and
+    //                needs additional investigation before it can be reenabled.
+  }, skip: const bool.fromEnvironment('DART_HHH_BOT')); // https://github.com/flutter/flutter/issues/93691
 
   test('getEndpointsForSelection handles empty characters', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
@@ -897,7 +895,6 @@ void main() {
       // This is a Unicode left-to-right mark character that will not render
       // any glyphs.
       text: const TextSpan(text: '\u200e'),
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
@@ -916,7 +913,6 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       maxLines: null,
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
@@ -962,7 +958,7 @@ void main() {
       // Since the range covers an entire line, the Rect should also be almost
       // as wide as the entire paragraph (give or take 1 character).
       expect(composingRect.width, greaterThan(200 - 10));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
+    });
   });
 
   group('custom painters', () {
@@ -1109,7 +1105,7 @@ void main() {
       editable.painter = painter;
       editable.foregroundPainter = painter;
       pumpFrame(phase: EnginePhase.paint, onErrors: () {
-        errorDetails = renderer.takeFlutterErrorDetails();
+        errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
       });
       expect(errorDetails, isNull);
 
@@ -1282,7 +1278,6 @@ void main() {
           textDirection: TextDirection.ltr,
           // Given maxLines of 1 and an offset of 5, the editable will be
           // scrolled by 5 pixels to the left.
-          maxLines: 1,
           offset: ViewportOffset.fixed(5.0),
           textSelectionDelegate: delegate,
           selection: const TextSelection.collapsed(
@@ -1697,10 +1692,8 @@ void main() {
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
-      forceLine: true,
       offset: ViewportOffset.fixed(10.0),
       textSelectionDelegate: delegate,
       selection: const TextSelection.collapsed(offset: 0),

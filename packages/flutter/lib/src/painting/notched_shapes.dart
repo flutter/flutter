@@ -85,7 +85,7 @@ class CircularNotchedRectangle extends NotchedShape {
     final double p2yA = math.sqrt(r * r - p2xA * p2xA);
     final double p2yB = math.sqrt(r * r - p2xB * p2xB);
 
-    final List<Offset?> p = List<Offset?>.filled(6, null, growable: false);
+    final List<Offset?> p = List<Offset?>.filled(6, null);
 
     // p0, p1, and p2 are the control points for segment A.
     p[0] = Offset(a - s1, b);

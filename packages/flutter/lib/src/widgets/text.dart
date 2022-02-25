@@ -150,7 +150,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
@@ -241,7 +241,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
         assert(child != null),
         super(key: key, child: child);
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
@@ -494,6 +494,7 @@ class Text extends StatelessWidget {
   /// widget directly to entirely override the [DefaultTextStyle].
   final int? maxLines;
 
+  /// {@template flutter.widgets.Text.semanticsLabel}
   /// An alternative semantics label for this text.
   ///
   /// If present, the semantics of this widget will contain this value instead
@@ -506,12 +507,13 @@ class Text extends StatelessWidget {
   /// ```dart
   /// Text(r'$$', semanticsLabel: 'Double dollars')
   /// ```
+  /// {@endtemplate}
   final String? semanticsLabel;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis? textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override

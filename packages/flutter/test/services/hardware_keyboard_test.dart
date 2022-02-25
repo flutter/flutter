@@ -75,6 +75,7 @@ void main() {
       return false;
     });
     // While ShiftLeft is held (the event of which was skipped), press keyA.
+    // ignore: prefer_const_declarations
     final Map<String, dynamic> rawMessage = kIsWeb ? (
       KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
@@ -194,6 +195,89 @@ void main() {
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final List<int> logs = <int>[];
+
+    await tester.pumpWidget(
+      KeyboardListener(
+        autofocus: true,
+        focusNode: focusNode,
+        child: Container(),
+        onKeyEvent: (KeyEvent event) {
+          logs.add(1);
+        },
+      ),
+    );
+    ServicesBinding.instance.keyboard.addHandler((KeyEvent event) {
+      logs.add(2);
+      return false;
+    });
+
+    // Dispatch a solitary synthesized event.
+    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
+      timeStamp: Duration.zero,
+      type: ui.KeyEventType.down,
+      logical: LogicalKeyboardKey.keyA.keyId,
+      physical: PhysicalKeyboardKey.keyA.usbHidUsage,
+      character: null,
+      synthesized: true,
+    )), false);
+    expect(logs, <int>[2, 1]);
+    logs.clear();
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
+  testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final List<String> logs = <String>[];
+
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: (RawKeyEvent event) {
+          logs.add('${event.runtimeType}');
+        },
+        child: KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {
+            logs.add('${event.runtimeType}');
+          },
+        ),
+      ),
+    );
+
+    // On macOS, a CapsLock tap yields a down event and a synthesized up event.
+    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
+      timeStamp: Duration.zero,
+      type: ui.KeyEventType.down,
+      logical: LogicalKeyboardKey.capsLock.keyId,
+      physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
+      character: null,
+      synthesized: false,
+    )), false);
+    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
+      timeStamp: Duration.zero,
+      type: ui.KeyEventType.up,
+      logical: LogicalKeyboardKey.capsLock.keyId,
+      physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
+      character: null,
+      synthesized: true,
+    )), false);
+    expect(await ServicesBinding.instance.keyEventManager.handleRawKeyMessage(<String, dynamic>{
+      'type': 'keydown',
+      'keymap': 'macos',
+      'keyCode': 0x00000039,
+      'characters': '',
+      'charactersIgnoringModifiers': '',
+      'modifiers': 0x10000,
+    }), equals(<String, dynamic>{'handled': false}));
+
+    expect(logs, <String>['RawKeyDownEvent', 'KeyDownEvent', 'KeyUpEvent']);
+    logs.clear();
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
   // The first key data received from the engine might be an empty key data.
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
@@ -249,4 +333,107 @@ void main() {
     expect(events.length, 1);
     expect(rawEvents.length, 2);
   });
+
+  testWidgets('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
+    final KeyMessageHandler? oldKeyMessageHandler = tester.binding.keyEventManager.keyMessageHandler;
+    addTearDown(() {
+      tester.binding.keyEventManager.keyMessageHandler = oldKeyMessageHandler;
+    });
+
+    // When keyMessageHandler throws an error...
+    tester.binding.keyEventManager.keyMessageHandler = (KeyMessage message) {
+      throw 1;
+    };
+
+    // Simulate a key down event.
+    FlutterErrorDetails? record;
+    await _runWhileOverridingOnError(
+      () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+
+    // ... the error should be caught.
+    expect(record, isNotNull);
+    expect(record!.exception, 1);
+    final Map<String, DiagnosticsNode> infos = _groupDiagnosticsByName(record!.informationCollector!());
+    expect(infos['KeyMessage'], isA<DiagnosticsProperty<KeyMessage>>());
+
+    // But the exception should not interrupt recording the state.
+    // Now the keyMessageHandler no longer throws an error.
+    tester.binding.keyEventManager.keyMessageHandler = null;
+    record = null;
+
+    // Simulate a key up event.
+    await _runWhileOverridingOnError(
+      () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+    // If the previous state (key down) wasn't recorded, this key up event will
+    // trigger assertions.
+    expect(record, isNull);
+  });
+
+  testWidgets('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
+    bool throwingCallback(KeyEvent event) {
+      throw 1;
+    }
+
+    // When the handler throws an error...
+    HardwareKeyboard.instance.addHandler(throwingCallback);
+
+    // Simulate a key down event.
+    FlutterErrorDetails? record;
+    await _runWhileOverridingOnError(
+      () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+
+    // ... the error should be caught.
+    expect(record, isNotNull);
+    expect(record!.exception, 1);
+    final Map<String, DiagnosticsNode> infos = _groupDiagnosticsByName(record!.informationCollector!());
+    expect(infos['Event'], isA<DiagnosticsProperty<KeyEvent>>());
+
+    // But the exception should not interrupt recording the state.
+    // Now the key handler no longer throws an error.
+    HardwareKeyboard.instance.removeHandler(throwingCallback);
+    record = null;
+
+    // Simulate a key up event.
+    await _runWhileOverridingOnError(
+      () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+    // If the previous state (key down) wasn't recorded, this key up event will
+    // trigger assertions.
+    expect(record, isNull);
+  }, variant: KeySimulatorTransitModeVariant.all());
+}
+
+
+
+Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
+  final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
+  FlutterError.onError = onError;
+
+  try {
+    await body();
+  } finally {
+    FlutterError.onError = oldFlutterErrorOnError;
+  }
+}
+
+Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
+  return Map<String, DiagnosticsNode>.fromIterable(
+    infos,
+    key: (dynamic node) => (node as DiagnosticsNode).name ?? '',
+  );
 }

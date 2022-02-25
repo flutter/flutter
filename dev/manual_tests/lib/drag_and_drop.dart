@@ -16,9 +16,9 @@ class ExampleDragTarget extends StatefulWidget {
 class ExampleDragTargetState extends State<ExampleDragTarget> {
   Color _color = Colors.grey;
 
-  void _handleAccept(Color data) {
+  void _handleAccept(Color? data) {
     setState(() {
-      _color = data;
+      _color = data!;
     });
   }
 
@@ -132,18 +132,18 @@ class ExampleDragSource extends StatelessWidget {
     if (heavy) {
       return LongPressDraggable<Color>(
         data: color,
-        child: contents,
         feedback: feedback,
         feedbackOffset: feedbackOffset,
         dragAnchorStrategy: dragAnchorStrategy,
+        child: contents,
       );
     } else {
       return Draggable<Color>(
         data: color,
-        child: contents,
         feedback: feedback,
         feedbackOffset: feedbackOffset,
         dragAnchorStrategy: dragAnchorStrategy,
+        child: contents,
       );
     }
   }
@@ -208,14 +208,14 @@ class MovableBall extends StatelessWidget {
     if (position == ballPosition) {
       return Draggable<bool>(
         data: true,
-        child: ball,
         childWhenDragging: dashedBall,
         feedback: ball,
         maxSimultaneousDrags: 1,
+        child: ball,
       );
     } else {
       return DragTarget<bool>(
-        onAccept: (bool data) { callback(position); },
+        onAccept: (bool? data) { callback(position); },
         builder: (BuildContext context, List<bool?> accepted, List<dynamic> rejected) {
           return dashedBall;
         },
@@ -248,13 +248,10 @@ class DragAndDropAppState extends State<DragAndDropApp> {
         children: <Widget>[
           Expanded(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 ExampleDragSource(
                   color: Colors.yellow.shade300,
-                  under: true,
-                  heavy: false,
                   child: const Text('under'),
                 ),
                 ExampleDragSource(
@@ -266,7 +263,6 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                 ExampleDragSource(
                   color: Colors.indigo.shade300,
                   under: false,
-                  heavy: false,
                   child: const Text('above'),
                 ),
               ],

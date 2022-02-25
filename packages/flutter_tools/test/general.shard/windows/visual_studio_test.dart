@@ -39,6 +39,20 @@ const Map<String, dynamic> _defaultResponse = <String, dynamic>{
   },
 };
 
+// A minimum version of a response where a VS 2022 installation was found.
+const Map<String, dynamic> _vs2022Response = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2022',
+  'installationVersion': '17.0.31903.59',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{
+    'productDisplayVersion': '17.0.0',
+  },
+};
+
 // A minimum version of a response where a Build Tools installation was found.
 const Map<String, dynamic> _defaultBuildToolsResponse = <String, dynamic>{
   'installationPath': visualStudioPath,
@@ -732,6 +746,7 @@ void main() {
       expect(visualStudio.isAtLeastMinimumVersion, true);
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
     });
 
     testWithoutContext('Everything returns good values when Build Tools is present with all components', () {
@@ -753,6 +768,23 @@ void main() {
       expect(visualStudio.isAtLeastMinimumVersion, true);
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
+    });
+
+    testWithoutContext('properties return the right value for Visual Studio 2022', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+
+      setMockCompatibleVisualStudioInstallation(
+        _vs2022Response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 17 2022'));
     });
 
     testWithoutContext('Metadata is for compatible version when latest is missing components', () {

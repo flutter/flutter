@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file implements debugPrint in terms of print, so avoiding
+// calling "print" is sort of a non-starter here...
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -109,11 +113,11 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 /// and so forth. It is only intended for formatting error messages.
 ///
 /// The default [debugPrint] implementation uses this for its line wrapping.
-Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) sync* {
+Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) {
   if (message.length < width || message.trimLeft()[0] == '#') {
-    yield message;
-    return;
+    return <String>[message];
   }
+  final List<String> wrapped = <String>[];
   final Match prefixMatch = _indentPattern.matchAsPrefix(message)!;
   final String prefix = wrapIndent + ' ' * prefixMatch.group(0)!.length;
   int start = 0;
@@ -145,13 +149,13 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
             lastWordEnd = index;
           }
           if (addPrefix) {
-            yield prefix + message.substring(start, lastWordEnd);
+            wrapped.add(prefix + message.substring(start, lastWordEnd));
           } else {
-            yield message.substring(start, lastWordEnd);
+            wrapped.add(message.substring(start, lastWordEnd));
             addPrefix = true;
           }
           if (lastWordEnd >= message.length)
-            return;
+            return wrapped;
           // just yielded a line
           if (lastWordEnd == index) {
             // we broke at current position

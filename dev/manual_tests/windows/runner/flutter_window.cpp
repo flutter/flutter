@@ -1,12 +1,15 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "flutter_window.h"
 
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
 
-FlutterWindow::FlutterWindow(RunLoop* run_loop,
-                             const flutter::DartProject& project)
-    : run_loop_(run_loop), project_(project) {}
+FlutterWindow::FlutterWindow(const flutter::DartProject& project)
+    : project_(project) {}
 
 FlutterWindow::~FlutterWindow() {}
 
@@ -26,14 +29,12 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
-  run_loop_->RegisterFlutterInstance(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   return true;
 }
 
 void FlutterWindow::OnDestroy() {
   if (flutter_controller_) {
-    run_loop_->UnregisterFlutterInstance(flutter_controller_->engine());
     flutter_controller_ = nullptr;
   }
 

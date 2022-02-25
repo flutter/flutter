@@ -11,33 +11,17 @@ void main() {
   testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
-
     expect(theme.builders, isNotNull);
-    if (kIsWeb) {
-      // There aren't any default transitions defined for web
-      expect(theme.builders, isEmpty);
-    } else {
-      // There should only be builders for the mobile platforms.
-      for (final TargetPlatform platform in TargetPlatform.values) {
-        switch (platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.iOS:
-          case TargetPlatform.fuchsia:
-            expect(theme.builders[platform], isNotNull,
-                reason: 'theme builder for $platform is null');
-            break;
-          case TargetPlatform.linux:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            expect(theme.builders[platform], isNull,
-                reason: 'theme builder for $platform is not null');
-            break;
-        }
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      if (platform == TargetPlatform.fuchsia) {
+        // No builder on Fuchsia.
+        continue;
       }
+      expect(theme.builders[platform], isNotNull, reason: 'theme builder for $platform is null');
     }
   });
 
-  testWidgets('Default PageTransitionsTheme builds a CupertinoPageTransition', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -61,10 +45,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    skip: kIsWeb, // [intended] no default transitions on the web.
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -97,10 +78,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
-  },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb, // [intended] no default transitions on the web.
-  );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -140,10 +118,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
-  },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb, // [intended] no default transitions on the web.
-  );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('PageTransitionsTheme override builds a _ZoomPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -183,10 +158,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findZoomPageTransition(), findsOneWidget);
-  },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb, // [intended] no default transitions on the web.
-  );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('_ZoomPageTransition only cause child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345
@@ -232,8 +204,5 @@ void main() {
     await tester.tap(find.text('pop'));
     await tester.pumpAndSettle();
     expect(builtCount, 1);
-  },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb, // [intended] no default transitions on the web.
-  );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }

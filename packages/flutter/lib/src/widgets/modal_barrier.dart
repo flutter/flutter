@@ -34,6 +34,7 @@ class ModalBarrier extends StatelessWidget {
     Key? key,
     this.color,
     this.dismissible = true,
+    this.onDismiss,
     this.semanticsLabel,
     this.barrierSemanticsDismissible = true,
   }) : super(key: key);
@@ -46,13 +47,29 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final Color? color;
 
-  /// Whether touching the barrier will pop the current route off the [Navigator].
+  /// Specifies if the barrier will be dismissed when the user taps or
+  /// performs a scroll gesture on it.
+  ///
+  /// If true, and [onDismiss] is non-null, [onDismiss] will be called,
+  /// otherwise the current route will be popped from the ambient [Navigator].
+  ///
+  /// If false, tapping on the barrier will do nothing.
   ///
   /// See also:
   ///
   ///  * [ModalRoute.barrierDismissible], which controls this property for the
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
+
+  /// Called when the barrier is being dismissed.
+  ///
+  /// If non-null [onDismiss] will be called in place of popping the current
+  /// route. It is up to the callback to handle dismissing the barrier.
+  ///
+  /// If null, the ambient [Navigator]'s current route will be popped.
+  ///
+  /// This field is ignored if [dismissible] is false.
+  final VoidCallback? onDismiss;
 
   /// Whether the modal barrier semantics are included in the semantics tree.
   ///
@@ -94,7 +111,15 @@ class ModalBarrier extends StatelessWidget {
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
 
     void handleDismiss() {
-      Navigator.maybePop(context);
+      if (dismissible) {
+        if (onDismiss != null) {
+          onDismiss!();
+        } else {
+          Navigator.maybePop(context);
+        }
+      } else {
+        SystemSound.play(SystemSoundType.alert);
+      }
     }
 
     return BlockSemantics(
@@ -103,19 +128,13 @@ class ModalBarrier extends StatelessWidget {
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: _ModalBarrierGestureDetector(
-          onDismiss: () {
-            if (dismissible)
-              handleDismiss();
-            else
-              SystemSound.play(SystemSoundType.alert);
-          },
+          onDismiss: handleDismiss,
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             onDismiss: semanticsDismissible ? handleDismiss : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
             child: MouseRegion(
               cursor: SystemMouseCursors.basic,
-              opaque: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
                 child: color == null ? null : ColoredBox(
@@ -210,12 +229,14 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
     : super(debugOwner: debugOwner);
 
   VoidCallback? onAnyTapUp;
+  VoidCallback? onAnyTapCancel;
 
   @protected
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (onAnyTapUp == null)
+    if (onAnyTapUp == null && onAnyTapCancel == null) {
       return false;
+    }
     return super.isPointerAllowed(event);
   }
 
@@ -234,7 +255,7 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapCancel({PointerDownEvent? down, PointerCancelEvent? cancel, String? reason}) {
-    // Do nothing.
+    onAnyTapCancel?.call();
   }
 
   @override
@@ -254,9 +275,10 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
 
 
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
-  const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
+  const _AnyTapGestureRecognizerFactory({this.onAnyTapUp, this.onAnyTapCancel});
 
   final VoidCallback? onAnyTapUp;
+  final VoidCallback? onAnyTapCancel;
 
   @override
   _AnyTapGestureRecognizer constructor() => _AnyTapGestureRecognizer();
@@ -264,6 +286,7 @@ class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGe
   @override
   void initializer(_AnyTapGestureRecognizer instance) {
     instance.onAnyTapUp = onAnyTapUp;
+    instance.onAnyTapCancel = onAnyTapCancel;
   }
 }
 
@@ -289,7 +312,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
-      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
+      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss, onAnyTapCancel: onDismiss),
     };
 
     return RawGestureDetector(

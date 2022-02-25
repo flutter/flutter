@@ -169,8 +169,6 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
                 return Tab(icon: Icon(page.icon));
               case TabsDemoStyle.textOnly:
                 return Tab(text: page.text);
-              default:
-                return Tab();
             }
           }).toList()
         ),

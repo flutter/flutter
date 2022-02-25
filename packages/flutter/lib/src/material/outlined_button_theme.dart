@@ -107,7 +107,7 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OutlinedButtonTheme theme = OutlinedButtonTheme.of(context);
+  /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
   static OutlinedButtonThemeData of(BuildContext context) {
     final OutlinedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();

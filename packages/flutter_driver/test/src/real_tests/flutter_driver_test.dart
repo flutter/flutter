@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210721"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -17,10 +11,8 @@ import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
-import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' as vms;
 
 import '../../common.dart';
@@ -41,18 +33,15 @@ void main() {
   group('VMServiceFlutterDriver with logCommunicationToFile', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
     late File logFile;
-    int driverId = -1;
 
     setUp(() {
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
-      driverId += 1;
-      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
     tearDown(() {
@@ -64,6 +53,7 @@ void main() {
     group('logCommunicationToFile', () {
       test('logCommunicationToFile = true', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
+        logFile = File(driver.logFilePathName);
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
@@ -80,11 +70,21 @@ void main() {
 
       test('logCommunicationToFile = false', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: false);
-
+        logFile = File(driver.logFilePathName);
+        // clear log file if left in filetree from previous run
+        if (logFile.existsSync()) {
+          logFile.deleteSync();
+        }
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
         final bool exists = logFile.existsSync();
         expect(exists, false, reason: 'because ${logFile.path} exists');
+      });
+
+      test('logFilePathName was set when a new driver was created', () {
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
+        logFile = File(driver.logFilePathName);
+        expect(logFile.path, endsWith('.log'));
       });
     });
   });
@@ -92,12 +92,12 @@ void main() {
   group('VMServiceFlutterDriver with printCommunication', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() async {
       log.clear();
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: false);
+      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[]);
     });
@@ -122,7 +122,7 @@ void main() {
   group('VMServiceFlutterDriver.connect', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
 
     void expectLogContains(String message) {
       expect(log, anyElement(contains(message)));
@@ -130,7 +130,7 @@ void main() {
 
     setUp(() {
       log.clear();
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       vmServiceConnectFunction = (String url, Map<String, dynamic>? headers) async {
@@ -190,7 +190,7 @@ void main() {
 
     test('Connects to isolate number', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
-      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number));
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number!));
       expect(driver, isNotNull);
       expect(
         fakeClient.connectionLog,
@@ -269,7 +269,7 @@ void main() {
     test('connects to unpaused when onExtensionAdded does not contain the '
       'driver extension', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kResume, timestamp: 0);
-      fakeIsolate.extensionRPCs.add('ext.flutter.driver');
+      fakeIsolate.extensionRPCs!.add('ext.flutter.driver');
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -280,11 +280,11 @@ void main() {
   group('VMServiceFlutterDriver', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
@@ -688,11 +688,11 @@ void main() {
   group('VMServiceFlutterDriver with custom timeout', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
@@ -720,14 +720,11 @@ void main() {
     late FakeFlutterWebConnection fakeConnection;
     late WebFlutterDriver driver;
     late File logFile;
-    int driverId = -1;
 
     setUp(() {
       fakeConnection = FakeFlutterWebConnection();
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
-      driverId += 1;
-      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
     tearDown(() {
@@ -738,6 +735,7 @@ void main() {
 
     test('logCommunicationToFile = true', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection);
+      logFile = File(driver.logFilePathName);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
 
       final bool exists = logFile.existsSync();
@@ -747,12 +745,17 @@ void main() {
       const String waitForCommandLog = '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
       const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
-      expect(commandLog.contains(waitForCommandLog), true, reason: '$commandLog not contains $waitForCommandLog');
-      expect(commandLog.contains(responseLog), true, reason: '$commandLog not contains $responseLog');
+      expect(commandLog, contains(waitForCommandLog), reason: '$commandLog not contains $waitForCommandLog');
+      expect(commandLog, contains(responseLog), reason: '$commandLog not contains $responseLog');
     });
 
     test('logCommunicationToFile = false', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
+      logFile = File(driver.logFilePathName);
+      // clear log file if left in filetree from previous run
+      if (logFile.existsSync()) {
+        logFile.deleteSync();
+      }
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
       final bool exists = logFile.existsSync();
       expect(exists, false, reason: 'because ${logFile.path} exists');
@@ -780,7 +783,7 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: false);
+      driver = WebFlutterDriver.connectedTo(fakeConnection);
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
       expect(log, <String>[]);
     });
@@ -1214,16 +1217,19 @@ class FakeVM extends Fake implements vms.VM {
   }
 }
 
-class FakeIsolate extends Fake implements vms.Isolate {
-  @override
-  String get number => '123';
-
-  @override
-  String get id => number;
-
-  @override
-  vms.Event? pauseEvent;
-
-  @override
-  List<String> get extensionRPCs => <String>[];
-}
+vms.Isolate createFakeIsolate() => vms.Isolate(
+  id: '123',
+  number: '123',
+  name: null,
+  isSystemIsolate: null,
+  isolateFlags: null,
+  startTime: null,
+  runnable: null,
+  livePorts: null,
+  pauseOnExit: null,
+  pauseEvent: null,
+  libraries: null,
+  breakpoints: null,
+  exceptionPauseMode: null,
+  extensionRPCs: <String>[],
+);

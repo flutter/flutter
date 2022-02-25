@@ -41,7 +41,7 @@ void main() {
       return MaterialApp(
         restorationScopeId: 'app',
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -99,7 +99,7 @@ void main() {
       return MaterialApp(
         restorationScopeId: 'app',
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -231,7 +231,6 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   Widget build(BuildContext context) {
     return Material(
       child: Align(
-        alignment: Alignment.center,
         child: SizedBox(
           width: 50,
           child: TextFormField(

@@ -28,7 +28,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// widgets with the appropriate type parameters that are ancestors of the given
 /// [BuildContext].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows a [NotificationListener] widget
 /// that listens for [ScrollNotification] notifications. When a scroll
 /// event occurs in the [NestedScrollView],
@@ -62,7 +62,7 @@ abstract class Notification {
   @mustCallSuper
   bool visitAncestor(Element element) {
     if (element is StatelessElement) {
-      final StatelessWidget widget = element.widget;
+      final Widget widget = element.widget;
       if (widget is NotificationListener<Notification>) {
         if (widget._dispatch(this, element)) // that function checks the type dynamically
           return false;

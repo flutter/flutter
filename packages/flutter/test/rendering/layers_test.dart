@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
@@ -153,7 +155,7 @@ void main() {
     }
   });
 
-  test('leader and follower layers are always dirty', () {
+  test('follower layers are always dirty', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
     final FollowerLayer followerLayer = FollowerLayer(link: link);
@@ -161,8 +163,115 @@ void main() {
     followerLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     followerLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
+  });
+
+  test('switching layer link of an attached leader layer should not crash', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    leaderLayer.attach(view);
+    final LayerLink link2 = LayerLink();
+    leaderLayer.link = link2;
+    // This should not crash.
+    leaderLayer.detach();
+    expect(leaderLayer.link, link2);
+  });
+
+  test('layer link attach/detach order should not crash app.', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
+    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    leaderLayer1.attach(view);
+    leaderLayer2.attach(view);
+    leaderLayer2.detach();
+    leaderLayer1.detach();
+    expect(link.leader, isNull);
+  });
+
+  test('leader layers not dirty when connected to follower layer', () {
+    final ContainerLayer root = ContainerLayer()..attach(Object());
+
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final FollowerLayer followerLayer = FollowerLayer(link: link);
+
+    root.append(leaderLayer);
+    root.append(followerLayer);
+
+    leaderLayer.debugMarkClean();
+    followerLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    followerLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+  });
+
+  test('leader layers are not dirty when all followers disconnects', () {
+    final ContainerLayer root = ContainerLayer()..attach(Object());
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    root.append(leaderLayer);
+
+    // Does not need add to scene when nothing is connected to link.
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+
+    // Connecting a follower does not require adding to scene
+    final FollowerLayer follower1 = FollowerLayer(link: link);
+    root.append(follower1);
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+
+    final FollowerLayer follower2 = FollowerLayer(link: link);
+    root.append(follower2);
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+
+    // Disconnecting one follower, still does not needs add to scene.
+    follower2.remove();
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+
+    // Disconnecting all followers goes back to not requiring add to scene.
+    follower1.remove();
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+  });
+
+  test('LeaderLayer.applyTransform can be called after retained rendering', () {
+    void expectTransform(RenderObject leader) {
+      final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
+      final Matrix4 expected = Matrix4.identity()
+        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 transformed = Matrix4.identity();
+      leaderLayer.applyTransform(null, transformed);
+      expect(transformed, expected);
+    }
+
+    final LayerLink link = LayerLink();
+    late RenderLeaderLayer leader;
+    final RenderRepaintBoundary root = RenderRepaintBoundary(
+      child:RenderRepaintBoundary(
+        child: leader = RenderLeaderLayer(link: link),
+      ),
+    );
+    layout(root, phase: EnginePhase.composite);
+
+    expectTransform(leader);
+
+    // Causes a repaint, but the LeaderLayer of RenderLeaderLayer will be added
+    // as retained and LeaderLayer.addChildrenToScene will not be called.
+    root.markNeedsPaint();
+    pumpFrame(phase: EnginePhase.composite);
+
+    // The LeaderLayer.applyTransform call shouldn't crash.
+    expectTransform(leader);
   });
 
   test('depthFirstIterateChildren', () {
@@ -537,6 +646,68 @@ void main() {
 
     expect(() => holder.layer = layer, throwsAssertionError);
   });
+
+  test('OpacityLayer does not push an OffsetLayer if there are no children', () {
+    final OpacityLayer layer = OpacityLayer(alpha: 128);
+    final FakeSceneBuilder builder = FakeSceneBuilder();
+    layer.addToScene(builder);
+    expect(builder.pushedOpacity, false);
+    expect(builder.pushedOffset, false);
+    expect(builder.addedPicture, false);
+    expect(layer.engineLayer, null);
+
+    layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
+
+    builder.reset();
+    layer.addToScene(builder);
+
+    expect(builder.pushedOpacity, true);
+    expect(builder.pushedOffset, false);
+    expect(builder.addedPicture, true);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    builder.reset();
+
+    layer.alpha = 200;
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    layer.alpha = 255;
+    expect(layer.engineLayer, null);
+
+    builder.reset();
+    layer.addToScene(builder);
+
+    expect(builder.pushedOpacity, false);
+    expect(builder.pushedOffset, true);
+    expect(builder.addedPicture, true);
+    expect(layer.engineLayer, isA<FakeOffsetEngineLayer>());
+
+    layer.alpha = 200;
+    expect(layer.engineLayer, null);
+
+    builder.reset();
+    layer.addToScene(builder);
+
+    expect(builder.pushedOpacity, true);
+    expect(builder.pushedOffset, false);
+    expect(builder.addedPicture, true);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+  });
+
+  test('OpacityLayer dispose its engineLayer if there are no children', () {
+    final OpacityLayer layer = OpacityLayer(alpha: 128);
+    final FakeSceneBuilder builder = FakeSceneBuilder();
+    layer.addToScene(builder);
+    expect(layer.engineLayer, null);
+
+    layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
+    layer.addToScene(builder);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    layer.removeAllChildren();
+    layer.addToScene(builder);
+    expect(layer.engineLayer, null);
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
@@ -561,10 +732,45 @@ class FakePicture extends Fake implements Picture {
 
 class ConcreteLayer extends Layer {
   @override
-  void addToScene(SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {}
+  void addToScene(SceneBuilder builder) {}
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {
   @override
   bool get alwaysNeedsAddToScene => true;
 }
+
+class FakeSceneBuilder extends Fake implements SceneBuilder {
+  void reset() {
+    pushedOpacity = false;
+    pushedOffset = false;
+    addedPicture = false;
+  }
+
+  bool pushedOpacity = false;
+  @override
+  OpacityEngineLayer pushOpacity(int alpha, {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
+    pushedOpacity = true;
+    return FakeOpacityEngineLayer();
+  }
+
+  bool pushedOffset = false;
+  @override
+  OffsetEngineLayer pushOffset(double x, double y, {OffsetEngineLayer? oldLayer}) {
+    pushedOffset = true;
+    return FakeOffsetEngineLayer();
+  }
+
+  bool addedPicture = false;
+  @override
+  void addPicture(Offset offset, Picture picture, {bool isComplexHint = false, bool willChangeHint = false}) {
+    addedPicture = true;
+  }
+
+  @override
+  void pop() {}
+}
+
+class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}
+
+class FakeOffsetEngineLayer extends FakeEngineLayer implements OffsetEngineLayer {}

@@ -25,7 +25,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -62,7 +62,6 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
-  Timeout timeout,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
@@ -114,10 +113,7 @@ void testUsingContext(
           HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(
-            terminal: globals.terminal,
-            outputPreferences: globals.outputPreferences,
-          ),
+          Logger: () => BufferLogger.test(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           Usage: () => TestUsage(),
@@ -131,7 +127,7 @@ void testUsingContext(
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
-          return runZoned<Future<dynamic>>(() {
+          return runZonedGuarded<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -152,11 +148,12 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
-            print(error);
-            print(stackTrace);
+          }, (Object error, StackTrace stackTrace) {
+            // When things fail, it's ok to print to the console!
+            print(error); // ignore: avoid_print
+            print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
-            throw error;
+            throw error; //ignore: only_throw_errors
           });
         },
       );
@@ -170,14 +167,19 @@ void testUsingContext(
       // BotDetector implementation in the overrides.
       BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
     });
-  }, testOn: testOn, skip: skip, timeout: timeout);
+  }, testOn: testOn, skip: skip);
+  // We don't support "timeout"; see ../../dart_test.yaml which
+  // configures all tests to have a 15 minute timeout which should
+  // definitely be enough.
 }
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>() as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
-      print(bufferLogger.errorText);
+      // This is where the logger outputting errors is implemented, so it has
+      // to use `print`.
+      print(bufferLogger.errorText); // ignore: avoid_print
     }
     bufferLogger.clear();
   }
@@ -292,10 +294,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 12.0.1';
+  String get versionText => 'Xcode 12.3';
 
   @override
-  Version get version => Version(12, 0, 1);
+  Version get version => Version(12, 3, null);
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -315,9 +317,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
-    return null;
-  }
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
 
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
@@ -348,10 +348,10 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 
   @override
   set currentDirectory(dynamic value) {
-    throw 'globals.fs.currentDirectory should not be set on the local file system during '
+    throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
           'tests as this can cause race conditions with concurrent tests. '
           'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting globals.fs.currentDirectory.';
+          'code to not require setting globals.fs.currentDirectory.');
   }
 }
 

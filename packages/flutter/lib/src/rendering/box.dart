@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -202,9 +203,7 @@ class BoxConstraints extends Constraints {
   BoxConstraints loosen() {
     assert(debugAssertIsValid());
     return BoxConstraints(
-      minWidth: 0.0,
       maxWidth: maxWidth,
-      minHeight: 0.0,
       maxHeight: maxHeight,
     );
   }
@@ -887,16 +886,13 @@ class BoxHitTestResult extends HitTestResult {
 }
 
 /// A hit test entry used by [RenderBox].
-class BoxHitTestEntry extends HitTestEntry {
+class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
   BoxHitTestEntry(RenderBox target, this.localPosition)
     : assert(localPosition != null),
       super(target);
-
-  @override
-  RenderBox get target => super.target as RenderBox;
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -1360,6 +1356,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
+  static int _debugIntrinsicsDepth = 0;
 
   double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double Function(double argument) computer) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
@@ -1372,11 +1369,38 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfileLayoutsEnabled) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        } else {
+          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+        }
+        debugTimelineArguments['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments['intrinsics argument'] = '$argument';
+        return true;
+      }());
+      if (!kReleaseMode) {
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.startSync(
+            '$runtimeType intrinsics',
+            arguments: debugTimelineArguments,
+          );
+        }
+        _debugIntrinsicsDepth += 1;
+      }
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      return _cachedIntrinsicDimensions!.putIfAbsent(
+      final double result = _cachedIntrinsicDimensions!.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
         () => computer(argument),
       );
+      if (!kReleaseMode) {
+        _debugIntrinsicsDepth -= 1;
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.finishSync();
+        }
+      }
+      return result;
     }
     return computer(argument);
   }
@@ -1809,8 +1833,34 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfileLayoutsEnabled) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        } else {
+          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+        }
+        debugTimelineArguments['getDryLayout constraints'] = '$constraints';
+        return true;
+      }());
+      if (!kReleaseMode) {
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.startSync(
+            '$runtimeType.getDryLayout',
+            arguments: debugTimelineArguments,
+          );
+        }
+        _debugIntrinsicsDepth += 1;
+      }
       _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
-      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
+      final Size result = _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
+      if (!kReleaseMode) {
+        _debugIntrinsicsDepth -= 1;
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.finishSync();
+        }
+      }
+      return result;
     }
     return _computeDryLayout(constraints);
   }
@@ -1928,14 +1978,14 @@ abstract class RenderBox extends RenderObject {
   Size get size {
     assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
-      final Size? _size = this._size;
-      if (_size is _DebugSize) {
-        assert(_size._owner == this);
+      final Size? size = _size;
+      if (size is _DebugSize) {
+        assert(size._owner == this);
         if (RenderObject.debugActiveLayout != null &&
             !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
+              (RenderObject.debugActiveLayout == parent && size._canBeUsedByParent),
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '
             'otherwise, the only object that is allowed to read RenderBox.size '
@@ -1944,7 +1994,7 @@ abstract class RenderBox extends RenderObject {
             "that child's layout().",
           );
         }
-        assert(_size == this._size);
+        assert(size == _size);
       }
       return true;
     }());
@@ -2762,16 +2812,16 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // The x, y parameters have the top left of the node's box as the origin.
     ChildType? child = lastChild;
     while (child != null) {
+      // The x, y parameters have the top left of the node's box as the origin.
       final ParentDataType childParentData = child.parentData! as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit)

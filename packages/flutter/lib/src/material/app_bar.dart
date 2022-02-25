@@ -100,7 +100,7 @@ class _PreferredAppBarSize extends Size {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
 ///
@@ -124,7 +124,7 @@ class _PreferredAppBarSize extends Size {
 /// [ColorScheme.primary].  to remedy the problem, override
 /// [TextButton.style]:
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 ///
 ///
 /// ** See code in examples/api/lib/material/app_bar/app_bar.1.dart **
@@ -475,7 +475,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
   /// Determines the brightness of the [SystemUiOverlayStyle]: for
-  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and fo
+  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
   ///
   /// If this value is null then [AppBarTheme.brightness] is used
@@ -1011,7 +1011,6 @@ class _AppBarState extends State<AppBar> {
     if (widget.primary) {
       appBar = SafeArea(
         bottom: false,
-        top: true,
         child: appBar,
       );
     }
@@ -1048,7 +1047,7 @@ class _AppBarState extends State<AppBar> {
       ? _systemOverlayStyleForBrightness(
           widget.brightness
           ?? appBarTheme.brightness
-          ?? theme.primaryColorBrightness,
+          ?? ThemeData.estimateBrightnessForColor(backgroundColor),
         )
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle
@@ -1312,7 +1311,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This sample shows a [SliverAppBar] and it's behavior when using the
 /// [pinned], [snap] and [floating] parameters.
 ///

@@ -59,7 +59,7 @@ const PointerUpEvent up4 = PointerUpEvent(
 );
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Long press', () {
     late LongPressGestureRecognizer gesture;
@@ -527,7 +527,6 @@ void main() {
     const PointerDownEvent touchDown = PointerDownEvent(
       pointer: 5,
       position: Offset(10, 10),
-      kind: PointerDeviceKind.touch,
     );
 
     // Touch events shouldn't be recognized.

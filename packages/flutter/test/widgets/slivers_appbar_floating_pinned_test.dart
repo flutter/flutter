@@ -151,7 +151,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
 
-    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 1950);
+    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 2000);
     await tester.pumpAndSettle();
 
     expectedSemantics = TestSemantics.root(
@@ -391,7 +391,6 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(
-                  pinned: false,
                   floating: true,
                   expandedHeight: 100.0,
                 ),
@@ -426,7 +425,6 @@ void main() {
               slivers: <Widget>[
                 const SliverAppBar(
                   pinned: true,
-                  floating: false,
                   expandedHeight: 100.0,
                 ),
                 SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),

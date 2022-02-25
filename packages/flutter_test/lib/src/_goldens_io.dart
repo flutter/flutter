@@ -10,8 +10,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package show TestFailure;
+import 'package:test_api/expect.dart' show fail;
 
 import 'goldens.dart';
 import 'test_async_utils.dart';
@@ -49,6 +48,8 @@ import 'test_async_utils.dart';
 /// |  testName_testImage.png    | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png)  |
 /// |  testName_isolatedDiff.png | ![An isolated pixel difference.](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png) |
 /// |  testName_maskedDiff.png   | ![A masked pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_maskedDiff.png) |
+///
+/// {@macro flutter.flutter_test.matchesGoldenFile.custom_fonts}
 ///
 /// See also:
 ///
@@ -117,7 +118,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   Future<List<int>> getGoldenBytes(Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
-      throw test_package.TestFailure(
+      fail(
         'Could not be compared against non-existent file: "$golden"'
       );
     }

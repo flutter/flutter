@@ -8,7 +8,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
@@ -41,20 +41,28 @@ class FuchsiaKernelCompiler {
     }
     final String? platformDill = globals.artifacts?.getArtifactPath(
       Artifact.platformKernelDill,
-      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (platformDill == null || !globals.fs.isFileSync(platformDill)) {
       throwToolExit('Fuchsia platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
-      '--target', 'flutter_runner',
-      '--platform', platformDill,
-      '--filesystem-scheme', 'main-root',
-      '--filesystem-root', fsRoot,
-      '--packages', '$multiRootScheme:///$relativePackagesFile',
-      '--output', globals.fs.path.join(outDir, '$appName.dil'),
-      '--component-name', appName,
+      '--no-sound-null-safety',
+      '--target',
+      'flutter_runner',
+      '--platform',
+      platformDill,
+      '--filesystem-scheme',
+      'main-root',
+      '--filesystem-root',
+      fsRoot,
+      '--packages',
+      '$multiRootScheme:///$relativePackagesFile',
+      '--output',
+      globals.fs.path.join(outDir, '$appName.dil'),
+      '--component-name',
+      appName,
       ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
     ];
 

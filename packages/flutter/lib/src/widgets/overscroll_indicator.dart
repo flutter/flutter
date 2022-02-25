@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
@@ -47,7 +48,7 @@ import 'transitions.dart';
 /// [OverscrollIndicatorNotification.paintOffset] to the
 /// notification, or use a [NestedScrollView].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates how to use a [NotificationListener] to manipulate
 /// the placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
@@ -56,7 +57,7 @@ import 'transitions.dart';
 /// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates how to use a [NestedScrollView] to manipulate the
 /// placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
@@ -525,6 +526,11 @@ class _GlowController extends ChangeNotifier {
     canvas.drawCircle(center, radius, paint);
     canvas.restore();
   }
+
+  @override
+  String toString() {
+    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
+  }
 }
 
 class _GlowingOverscrollIndicatorPainter extends CustomPainter {
@@ -593,6 +599,11 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_GlowingOverscrollIndicatorPainter oldDelegate) {
     return oldDelegate.leadingController != leadingController
         || oldDelegate.trailingController != trailingController;
+  }
+
+  @override
+  String toString() {
+    return '_GlowingOverscrollIndicatorPainter($leadingController, $trailingController)';
   }
 }
 
@@ -700,8 +711,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           }
         }
       }
-    } else if (notification is ScrollEndNotification && notification.dragDetails != null
-        || notification is ScrollUpdateNotification && notification.dragDetails != null) {
+    } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
       _stretchController.scrollEnd();
     }
     _lastNotification = notification;
@@ -738,6 +748,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+    double mainAxisSize;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: AnimatedBuilder(
@@ -750,9 +762,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
+              mainAxisSize = size.width;
               break;
             case Axis.vertical:
               y += stretch;
+              mainAxisSize = size.height;
               break;
           }
 
@@ -760,10 +774,21 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             _lastOverscrollNotification?.overscroll ?? 0.0
           );
 
-          return Transform(
+          final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
+
+          final Widget transform = Transform(
             alignment: alignment,
             transform: Matrix4.diagonal3Values(x, y, 1.0),
             child: widget.child,
+          );
+
+          // Only clip if the viewport dimension is smaller than that of the
+          // screen size in the main axis. If the viewport takes up the whole
+          // screen, overflow from transforming the viewport is irrelevant.
+          return ClipRect(
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
+              ? Clip.hardEdge : Clip.none,
+            child: transform,
           );
         },
       ),
@@ -877,6 +902,9 @@ class _StretchController extends ChangeNotifier {
     _stretchController.dispose();
     super.dispose();
   }
+
+  @override
+  String toString() => '_StretchController()';
 }
 
 /// A notification that either a [GlowingOverscrollIndicator] or a

@@ -367,7 +367,7 @@ class TestSemantics {
       buf.writeln("$indent  hint: '$hint',");
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       buf.writeln('$indent  textSelection:\n[${textSelection!.start}, ${textSelection!.end}],');
     if (scrollIndex != null)
       buf.writeln('$indent scrollIndex: $scrollIndex,');
@@ -635,12 +635,9 @@ class SemanticsTester {
     if (nodeData.actions != 0)
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
     if (node.label != null && node.label.isNotEmpty) {
-      final String escapedLabel = node.label.replaceAll('\n', r'\n');
-      if (escapedLabel != node.label) {
-        buf.writeln("  label: r'$escapedLabel',");
-      } else {
-        buf.writeln("  label: '$escapedLabel',");
-      }
+      // Escape newlines and text directionality control characters.
+      final String escapedLabel = node.label.replaceAll('\n', r'\n').replaceAll('\u202a', r'\u202a').replaceAll('\u202c', r'\u202c');
+      buf.writeln("  label: '$escapedLabel',");
     }
     if (node.value != null && node.value.isNotEmpty)
       buf.writeln("  value: '${node.value}',");
@@ -719,7 +716,7 @@ class _HasSemantics extends Matcher {
     Description result = mismatchDescription
       .add('${matchState[TestSemantics]}\n')
       .add('Current SemanticsNode tree:\n')
-      .add(_indent(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder)))
+      .add(_indent(RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder)))
       .add('\n')
       .add('The semantics tree would have matched the following configuration:\n')
       .add(_indent(matchState['would-match'] as String));
@@ -826,7 +823,7 @@ class _IncludesNodeWith extends Matcher {
       if (label != null) 'label "$label"',
       if (value != null) 'value "$value"',
       if (hint != null) 'hint "$hint"',
-      if (textDirection != null) ' (${describeEnum(textDirection!)})',
+      if (textDirection != null) ' (${textDirection!.name})',
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',

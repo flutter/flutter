@@ -146,7 +146,7 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation elements rendered over the
   /// application.
   ///
-  /// Available starting at SDK 16 or Android J. Earlier versions of Android
+  /// Available starting at SDK 29 or Android 10. Earlier versions of Android
   /// will not be affected by this setting.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
@@ -157,8 +157,8 @@ enum SystemUiMode {
   ///
   /// See also:
   ///
-  ///   * [SystemUiOverlayStyle], can be used to set transparent status and
-  ///     navigation bars for an enhanced effect.
+  ///   * [SystemUiOverlayStyle], can be used to configure transparent status and
+  ///     navigation bars with or without a contrast scrim.
   edgeToEdge,
 
   /// Declares manually configured [SystemUiOverlay]s.
@@ -266,8 +266,6 @@ class SystemUiOverlayStyle {
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
@@ -277,8 +275,6 @@ class SystemUiOverlayStyle {
   /// applications with a light background.
   static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
@@ -289,12 +285,12 @@ class SystemUiOverlayStyle {
     return <String, dynamic>{
       'systemNavigationBarColor': systemNavigationBarColor?.value,
       'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
-      'systemStatusBarContrastEnforced' : systemStatusBarContrastEnforced ?? true,
+      'systemStatusBarContrastEnforced': systemStatusBarContrastEnforced,
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
-      'systemNavigationBarContrastEnforced' : systemNavigationBarContrastEnforced ?? true,
+      'systemNavigationBarContrastEnforced': systemNavigationBarContrastEnforced,
     };
   }
 
@@ -502,7 +498,7 @@ class SystemChrome {
   /// [SystemUiMode.leanBack].
   ///
   static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
-    ServicesBinding.instance!.setSystemUiChangeCallback(callback);
+    ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
       await SystemChannels.platform.invokeMethod<void>(
@@ -566,7 +562,7 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool sample}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///

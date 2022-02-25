@@ -159,7 +159,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
 
   void _updateObservers() {
     _navigatorObservers =
-        List<NavigatorObserver>.from(widget.navigatorObservers)
+        List<NavigatorObserver>.of(widget.navigatorObservers)
           ..add(_heroController);
   }
 

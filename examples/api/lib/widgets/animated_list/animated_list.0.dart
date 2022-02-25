@@ -2,33 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for AnimatedList
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This sample application uses an [AnimatedList] to create an effect when
-// items are removed or added to the list.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
-
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 void main() {
   runApp(const AnimatedListSample());
@@ -85,7 +62,6 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
     return CardItem(
       animation: animation,
       item: item,
-      selected: false,
       // No gesture detector here: we don't want removed items to be interactive.
     );
   }
@@ -219,7 +195,6 @@ class CardItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: SizeTransition(
-        axis: Axis.vertical,
         sizeFactor: animation,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -238,6 +213,3 @@ class CardItem extends StatelessWidget {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

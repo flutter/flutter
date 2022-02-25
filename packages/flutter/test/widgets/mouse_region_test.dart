@@ -91,7 +91,7 @@ void main() {
       ),
     ));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, buttons: kPrimaryMouseButton);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
     await gesture.down(Offset.zero); // Press the mouse button.
     addTearDown(gesture.removePointer);
@@ -415,7 +415,7 @@ void main() {
         onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.createGesture();
     await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
     await tester.pump();
@@ -456,7 +456,6 @@ void main() {
     await tester.pumpWidget(
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           MouseRegion(
             onEnter: (PointerEnterEvent details) => enter1.add(details),
@@ -533,7 +532,6 @@ void main() {
     await tester.pumpWidget(
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           MouseRegion(
             key: key1,
@@ -615,13 +613,13 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pump();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await gesture.moveTo(const Offset(5, 5));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     await gesture.moveTo(const Offset(100, 100));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
@@ -1325,7 +1323,6 @@ void main() {
     testWidgets('opaque should default to true', (WidgetTester tester) async {
       final List<String> logs = <String>[];
       await tester.pumpWidget(tripleRegions(
-        opaqueC: null,
         addLog: (String log) => logs.add(log),
       ));
 
@@ -1366,7 +1363,7 @@ void main() {
                 ),
               ),
             ),
-            const MouseRegion(opaque: true),
+            const MouseRegion(),
           ],
         ),
       ),
@@ -1455,19 +1452,16 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    void onHover(PointerHoverEvent _) {}
-    void onPaintChild() { logs.add('paint'); }
+    void _handleHover(PointerHoverEvent _) {}
+    void _handlePaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
-          opaque: true,
-          // Dummy callback so that MouseRegion stays affective after opaque
-          // turns false.
-          onHover: onHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          onHover: _handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1484,8 +1478,10 @@ void main() {
         width: 10,
         child: MouseRegion(
           opaque: false,
-          onHover: onHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          // Dummy callback so that MouseRegion stays affective after opaque
+          // turns false.
+          onHover: _handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1511,7 +1507,6 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           onEnter: (_) { logEnters.add('enter'); },
-          opaque: true,
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
@@ -1519,7 +1514,7 @@ void main() {
     await gesture.moveTo(const Offset(5, 5));
 
     expect(logPaints, <String>['paint']);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     expect(logEnters, <String>['enter']);
     logPaints.clear();
     logEnters.clear();
@@ -1531,14 +1526,13 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.text,
           onEnter: (_) { logEnters.add('enter'); },
-          opaque: true,
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
     ));
 
     expect(logPaints, <String>['paint']);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(logEnters, isEmpty);
     logPaints.clear();
     logEnters.clear();
@@ -1572,7 +1566,7 @@ void main() {
 
     expect(logPaints, <String>['paint']);
     expect(logEnters, <String>['enter']);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     logPaints.clear();
     logEnters.clear();
 
@@ -1583,7 +1577,6 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           child: MouseRegion(
-            cursor: MouseCursor.defer,
             onEnter: (_) { logEnters.add('enter'); },
             child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
           ),
@@ -1593,7 +1586,7 @@ void main() {
 
     expect(logPaints, <String>['paint']);
     expect(logEnters, isEmpty);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     logPaints.clear();
     logEnters.clear();
 
@@ -1605,7 +1598,6 @@ void main() {
           cursor: SystemMouseCursors.forbidden,
           child: MouseRegion(
             cursor: SystemMouseCursors.text,
-            opaque: true,
             child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
           ),
         ),
@@ -1613,7 +1605,7 @@ void main() {
     ));
 
     expect(logPaints, <String>['paint']);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(logEnters, isEmpty);
     logPaints.clear();
     logEnters.clear();
@@ -1629,6 +1621,7 @@ void main() {
     addTearDown(gesture.removePointer);
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (_) async {
       logCursors.add('cursor');
+      return null;
     });
 
     final GlobalKey key = GlobalKey();
@@ -1665,7 +1658,7 @@ void main() {
     expect(logEnters, <String>['enter']);
     expect(logExits, isEmpty);
     expect(logCursors, isNotEmpty);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
     logEnters.clear();
     logExits.clear();
     logCursors.clear();
@@ -1700,7 +1693,7 @@ void main() {
     expect(logEnters, isEmpty);
     expect(logExits, isEmpty);
     expect(logCursors, isEmpty);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
@@ -1874,7 +1867,6 @@ class _ColumnContainer extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),

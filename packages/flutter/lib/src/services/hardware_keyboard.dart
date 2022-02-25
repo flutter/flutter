@@ -387,7 +387,7 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 class HardwareKeyboard {
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
-  static HardwareKeyboard get instance => ServicesBinding.instance!.keyboard;
+  static HardwareKeyboard get instance => ServicesBinding.instance.keyboard;
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
@@ -514,18 +514,19 @@ class HardwareKeyboard {
         final bool thisResult = handler(event);
         handled = handled || thisResult;
       } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<KeyEvent>('Event', event),
+          ];
+          return true;
+        }());
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'services library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<HardwareKeyboard>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
+          context: ErrorDescription('while processing a key handler'),
+          informationCollector: collector,
         ));
       }
     }
@@ -632,13 +633,15 @@ enum KeyDataTransitMode {
 /// platform, every native message might result in multiple [KeyEvent]s. For
 /// example, this might happen in order to synthesize missed modifier key
 /// presses or releases.
+///
 /// A [KeyMessage] bundles all information related to a native key message
 /// together for the convenience of propagation on the [FocusNode] tree.
 ///
 /// When dispatched to handlers or listeners, or propagated through the
 /// [FocusNode] tree, all handlers or listeners belonging to a node are
 /// executed regardless of their [KeyEventResult], and all results are combined
-/// into the result of the node using [combineKeyEventResults].
+/// into the result of the node using [combineKeyEventResults]. Empty [events]
+/// or [rawEvent] should be considered as a result of [KeyEventResult.ignored].
 ///
 /// In very rare cases, a native key message might not result in a [KeyMessage].
 /// For example, key messages for Fn key are ignored on macOS for the
@@ -670,13 +673,16 @@ class KeyMessage {
   /// form as [RawKeyEvent]. Their stream is not as regular as [KeyEvent]'s,
   /// but keeps as much native information and structure as possible.
   ///
-  /// The [rawEvent] will be deprecated in the future.
+  /// The [rawEvent] field might be empty, for example, when the event
+  /// converting system dispatches solitary synthesized events.
+  ///
+  /// The [rawEvent] field will be deprecated in the future.
   ///
   /// See also:
   ///
   ///  * [RawKeyboard.addListener], [RawKeyboardListener], [Focus.onKey],
   ///    where [RawKeyEvent]s are commonly used.
-  final RawKeyEvent rawEvent;
+  final RawKeyEvent? rawEvent;
 
   @override
   String toString() {
@@ -718,15 +724,20 @@ class KeyEventManager {
   /// Key messages received from the platform are first sent to [RawKeyboard]'s
   /// listeners and [HardwareKeyboard]'s handlers, then sent to
   /// [keyMessageHandler], regardless of the results of [HardwareKeyboard]'s
-  /// handlers. The result from the handlers and [keyMessageHandler] are
-  /// combined and returned to the platform. The handler result is explained below.
+  /// handlers. The event results from the handlers and [keyMessageHandler] are
+  /// combined and returned to the platform. The event result is explained
+  /// below.
   ///
-  /// This handler is normally set by the [FocusManager] so that it can control
-  /// the key event propagation to focused widgets. Applications that use the
-  /// focus system (see [Focus] and [FocusManager]) to receive key events
-  /// do not need to set this field.
+  /// For most common applications, which use [WidgetsBinding], this field
+  /// is set by the focus system (see `FocusManger`) on startup and should not
+  /// be change explicitly.
   ///
-  /// ## Handler result
+  /// If you are not using the focus system to manage focus, set this
+  /// attribute to a [KeyMessageHandler] that returns true if the propagation
+  /// on the platform should not be continued. If this field is null, key events
+  /// will be assumed to not have been handled by Flutter.
+  ///
+  /// ## Event result
   ///
   /// Key messages on the platform are given to Flutter to be handled by the
   /// engine. If they are not handled, then the platform will continue to
@@ -738,20 +749,14 @@ class KeyEventManager {
   /// is not handled by other controls either (such as the "bonk" noise on
   /// macOS).
   ///
-  /// If you are not using the [FocusManager] to manage focus, set this
-  /// attribute to a [KeyMessageHandler] that returns true if the propagation
-  /// on the platform should not be continued. Otherwise, key events will be
-  /// assumed to not have been handled by Flutter, and will also be sent to
-  /// other (possibly non-Flutter) controls in the application.
+  /// The result from [keyMessageHandler] and [HardwareKeyboard]'s handlers
+  /// are combined. If any of the handlers claim to handle the event,
+  /// the overall result will be "event handled".
   ///
   /// See also:
   ///
-  ///  * [Focus.onKeyEvent], a [Focus] callback attribute that will be given
-  ///    key events distributed by the [FocusManager] based on the current
-  ///    primary focus.
-  ///  * [HardwareKeyboard.addHandler], which accepts multiple handlers to
-  ///    control the handler result but only accepts [KeyEvent] instead of
-  ///    [KeyMessage].
+  ///  * [HardwareKeyboard.addHandler], which accepts multiple global handlers
+  ///    to process [KeyEvent]s
   KeyMessageHandler? keyMessageHandler;
 
   final HardwareKeyboard _hardwareKeyboard;
@@ -787,17 +792,58 @@ class KeyEventManager {
         assert(false, 'Should never encounter KeyData when transitMode is rawKeyData.');
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
-        assert((data.physical == 0 && data.logical == 0) ||
-               (data.physical != 0 && data.logical != 0));
-        // Postpone key event dispatching until the handleRawKeyMessage.
-        //
-        // Having 0 as the physical or logical ID indicates an empty key data,
-        // transmitted to ensure that the transit mode is correctly inferred.
-        if (data.physical != 0 && data.logical != 0) {
-          _keyEventsSinceLastMessage.add(_eventFromData(data));
+        // Having 0 as the physical and logical ID indicates an empty key data
+        // (the only occassion either field can be 0,) transmitted to ensure
+        // that the transit mode is correctly inferred. These events should be
+        // ignored.
+        if (data.physical == 0 && data.logical == 0) {
+          return false;
+        }
+        assert(data.physical != 0 && data.logical != 0);
+        final KeyEvent event = _eventFromData(data);
+        if (data.synthesized && _keyEventsSinceLastMessage.isEmpty) {
+          // Dispatch the event instantly if both conditions are met:
+          //
+          // - The event is synthesized, therefore the result does not matter.
+          // - The current queue is empty, therefore the order does not matter.
+          //
+          // This allows solitary synthesized `KeyEvent`s to be dispatched,
+          // since they won't be followed by `RawKeyEvent`s.
+          _hardwareKeyboard.handleKeyEvent(event);
+          _dispatchKeyMessage(<KeyEvent>[event], null);
+        } else {
+          // Otherwise, postpone key event dispatching until the next raw
+          // event. Normal key presses always send 0 or more `KeyEvent`s first,
+          // then 1 `RawKeyEvent`.
+          _keyEventsSinceLastMessage.add(event);
         }
         return false;
     }
+  }
+
+  bool _dispatchKeyMessage(List<KeyEvent> keyEvents, RawKeyEvent? rawEvent) {
+    if (keyMessageHandler != null) {
+      final KeyMessage message = KeyMessage(keyEvents, rawEvent);
+      try {
+        return keyMessageHandler!(message);
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<KeyMessage>('KeyMessage', message),
+          ];
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('while processing the key message handler'),
+          informationCollector: collector,
+        ));
+      }
+    }
+    return false;
   }
 
   /// Handles a raw key message.
@@ -826,9 +872,7 @@ class KeyEventManager {
         'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
     }
 
-    if (keyMessageHandler != null) {
-      handled = keyMessageHandler!(KeyMessage(_keyEventsSinceLastMessage, rawEvent)) || handled;
-    }
+    handled = _dispatchKeyMessage(_keyEventsSinceLastMessage, rawEvent) || handled;
     _keyEventsSinceLastMessage.clear();
 
     return <String, dynamic>{ 'handled': handled };
@@ -845,7 +889,7 @@ class KeyEventManager {
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
     final KeyEvent? mainEvent;
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
-    final Duration timeStamp = ServicesBinding.instance!.currentSystemFrameTimeStamp;
+    final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
     final String? character = rawEvent.character == '' ? null : rawEvent.character;
     if (rawEvent is RawKeyDownEvent) {
       if (recordedLogicalMain == null) {

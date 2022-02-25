@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -90,19 +88,19 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameBuiltEventName,
               'ts': 2,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameRasterizedEventName,
               'ts': 3,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -197,11 +195,11 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -232,11 +230,11 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -277,19 +275,19 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameBuiltEventName,
               'ts': 2,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameRasterizedEventName,
               'ts': 3,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -310,25 +308,25 @@ void main() {
       logger: logger,
     );
 
-    final Map<String, dynamic> expectedTimeline = <String, dynamic>{
+    final Map<String, Object> expectedTimeline = <String, Object>{
       'type': 'Timeline',
-      'traceEvents': <dynamic>[
-        <String, dynamic>{
+      'traceEvents': <Object>[
+        <String, Object>{
           'name': 'FlutterEngineMainEnter',
           'ts': 0,
           'type': 'TimelineEvent',
         },
-        <String, dynamic>{
+        <String, Object>{
           'name': 'Framework initialization',
           'ts': 1,
           'type': 'TimelineEvent',
         },
-        <String, dynamic>{
+        <String, Object>{
           'name': 'Widgets built first useful frame',
           'ts': 2,
           'type': 'TimelineEvent',
         },
-        <String, dynamic>{
+        <String, Object>{
           'name': 'Rasterized first useful frame',
           'ts': 3,
           'type': 'TimelineEvent',

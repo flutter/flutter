@@ -9,8 +9,10 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
@@ -30,6 +32,9 @@ void main() {
           minSdkVersion,
           transformInputIssue,
           lockFileDepMissing,
+          multidexErrorHandler,
+          incompatibleKotlinVersionHandler,
+          minCompileSdkVersionHandler,
         ])
       );
     });
@@ -97,8 +102,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -128,8 +132,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -150,8 +153,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -188,8 +190,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -218,8 +219,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -259,8 +259,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -287,8 +286,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -319,8 +317,214 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
+  group('multidex errors', () {
+    testUsingContext('exits if multidex AndroidManifest not detected', () async {
+      const String errorMessage = r'''
+Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
+  at com.android.tools.r8.utils.T0.error(SourceFile:1)
+  at com.android.tools.r8.utils.T0.a(SourceFile:2)
+  at com.android.tools.r8.dex.P.a(SourceFile:740)
+  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
+  at com.android.tools.r8.dex.b.a(SourceFile:14)
+  at com.android.tools.r8.dex.b.b(SourceFile:25)
+  at com.android.tools.r8.D8.d(D8.java:133)
+  at com.android.tools.r8.D8.b(D8.java:1)
+  at com.android.tools.r8.utils.Y.a(SourceFile:36)
+  ... 38 more
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDexDebug'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
+   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
+     The number of method references in a .dex file cannot exceed 64K.
+     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
+
+      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
+
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'Your `android/app/src/main/AndroidManifest.xml` does not contain'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+    testUsingContext('retries if multidex support enabled', () async {
+      const String errorMessage = r'''
+Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
+  at com.android.tools.r8.utils.T0.error(SourceFile:1)
+  at com.android.tools.r8.utils.T0.a(SourceFile:2)
+  at com.android.tools.r8.dex.P.a(SourceFile:740)
+  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
+  at com.android.tools.r8.dex.b.a(SourceFile:14)
+  at com.android.tools.r8.dex.b.b(SourceFile:25)
+  at com.android.tools.r8.D8.d(D8.java:133)
+  at com.android.tools.r8.D8.b(D8.java:1)
+  at com.android.tools.r8.utils.Y.a(SourceFile:36)
+  ... 38 more
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDexDebug'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
+   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
+     The number of method references in a .dex file cannot exceed 64K.
+     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
+
+      final File manifest = globals.fs.currentDirectory
+          .childDirectory('android')
+          .childDirectory('app')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childFile('AndroidManifest.xml');
+      manifest.createSync(recursive: true);
+      manifest.writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.multidexapp">
+   <application
+        android:label="multidextest2"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+</manifest>
+''', flush: true);
+
+      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.retry));
+
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      AnsiTerminal: () => _TestPromptTerminal('y')
+    });
+
+    testUsingContext('exits if multidex support skipped', () async {
+      const String errorMessage = r'''
+Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
+  at com.android.tools.r8.utils.T0.error(SourceFile:1)
+  at com.android.tools.r8.utils.T0.a(SourceFile:2)
+  at com.android.tools.r8.dex.P.a(SourceFile:740)
+  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
+  at com.android.tools.r8.dex.b.a(SourceFile:14)
+  at com.android.tools.r8.dex.b.b(SourceFile:25)
+  at com.android.tools.r8.D8.d(D8.java:133)
+  at com.android.tools.r8.D8.b(D8.java:1)
+  at com.android.tools.r8.utils.Y.a(SourceFile:36)
+  ... 38 more
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDexDebug'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
+   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
+     The number of method references in a .dex file cannot exceed 64K.
+     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
+
+      final File manifest = globals.fs.currentDirectory
+          .childDirectory('android')
+          .childDirectory('app')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childFile('AndroidManifest.xml');
+      manifest.createSync(recursive: true);
+      manifest.writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.multidexapp">
+   <application
+        android:label="multidextest2"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+</manifest>
+''', flush: true);
+
+      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
+
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'Flutter tool can add multidex support. The following file will be added by flutter:'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      AnsiTerminal: () => _TestPromptTerminal('n')
+    });
+
+    testUsingContext('exits if multidex support disabled', () async {
+      const String errorMessage = r'''
+Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
+  at com.android.tools.r8.utils.T0.error(SourceFile:1)
+  at com.android.tools.r8.utils.T0.a(SourceFile:2)
+  at com.android.tools.r8.dex.P.a(SourceFile:740)
+  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
+  at com.android.tools.r8.dex.b.a(SourceFile:14)
+  at com.android.tools.r8.dex.b.b(SourceFile:25)
+  at com.android.tools.r8.D8.d(D8.java:133)
+  at com.android.tools.r8.D8.b(D8.java:1)
+  at com.android.tools.r8.utils.Y.a(SourceFile:36)
+  ... 38 more
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDexDebug'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
+   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
+     The number of method references in a .dex file cannot exceed 64K.
+     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
+
+      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: false), equals(GradleBuildStatus.exit));
+
+      expect(testLogger.statusText,
+        contains(
+          'Flutter multidex handling is disabled.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -345,8 +549,12 @@ Command: /home/android/gradlew assembleRelease
       expect(
         testLogger.statusText,
         contains(
-          'You should change the ownership of the project directory to your user, '
-          'or move the project to a directory with execute permissions.'
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Gradle does not have execution permission.                                                  │\n'
+          '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
+          '│ directory with execute permissions.                                                             │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     });
@@ -371,8 +579,12 @@ Command: /home/android/gradlew assembleRelease
       expect(
         testLogger.statusText,
         contains(
-          'You should change the ownership of the project directory to your user, '
-          'or move the project to a directory with execute permissions.'
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Gradle does not have execution permission.                                                  │\n'
+          '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
+          '│ directory with execute permissions.                                                             │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     });
@@ -397,11 +609,14 @@ Command: /home/android/gradlew assembleRelease
       expect(
         testLogger.statusText,
         contains(
-          'Unable to download needed Android SDK components, as the '
-          'following licenses have not been accepted:\n'
-          'foo, bar\n\n'
-          'To resolve this, please run the following command in a Terminal:\n'
-          'flutter doctor --android-licenses'
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Unable to download needed Android SDK components, as the following licenses have not been │\n'
+          '│ accepted: foo, bar                                                                            │\n'
+          '│                                                                                               │\n'
+          '│ To resolve this, please run the following command in a Terminal:                              │\n'
+          '│ flutter doctor --android-licenses                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     });
@@ -476,9 +691,13 @@ assembleFooTest
       expect(
         testLogger.statusText,
         contains(
-          'The android/app/build.gradle file defines product '
-          'flavors: flavor1, flavor_2 '
-          'You must specify a --flavor option to select one of them.'
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
+          '│                                                                                                 │\n'
+          '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
+          '│ a --flavor option to select one of them.                                                        │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -511,15 +730,13 @@ assembleProfile
       expect(
         testLogger.statusText,
         contains(
-          'Gradle project does not define a task suitable '
-          'for the requested build.'
-        )
-      );
-      expect(
-        testLogger.statusText,
-        contains(
-          'The android/app/build.gradle file does not define any custom product flavors. '
-          'You cannot use the --flavor option.'
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                  │\n'
+          '│                                                                                               │\n'
+          '│ The /android/app/build.gradle file does not define any custom product flavors. You cannot use │\n'
+          '│ the --flavor option.                                                                          │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -551,16 +768,18 @@ assembleProfile
         testLogger.statusText,
         contains(
           '\n'
-          'The plugin webview_flutter requires a higher Android SDK version.\n'
-          'Fix this issue by adding the following to the file /android/app/build.gradle:\n'
-          'android {\n'
-          '  defaultConfig {\n'
-          '    minSdkVersion 19\n'
-          '  }\n'
-          '}\n'
-          '\n'
-          "Note that your app won't be available to users running Android SDKs below 19.\n"
-          'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
+          '│ Fix this issue by adding the following to the file /android/local.properties:                 │\n'
+          '│                                                                                               │\n'
+          '│ flutter.minSdkVersion=19                                                                      │\n'
+          '│                                                                                               │\n'
+          "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
+          '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
+          '│ Android SDK.                                                                                  │\n'
+          '│ For more information, see:                                                                    │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -591,13 +810,15 @@ assembleProfile
         testLogger.statusText,
         contains(
           '\n'
-          'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
-          'Fix this issue by adding the following to the file /android/app/build.gradle:\n'
-          'android {\n'
-          '  lintOptions {\n'
-          '    checkReleaseBuilds false\n'
-          '  }\n'
-          '}\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ This issue appears to be https://github.com/flutter/flutter/issues/58247.     │\n'
+          '│ Fix this issue by adding the following to the file /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   lintOptions {                                                               │\n'
+          '│     checkReleaseBuilds false                                                  │\n'
+          '│   }                                                                           │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -631,10 +852,97 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         testLogger.statusText,
         contains(
           '\n'
-          'You need to update the lockfile, or disable Gradle dependency locking.\n'
-          'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle\n'
-          'To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+          '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
+          '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Incompatible Kotlin version', () {
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleKotlinVersionHandler.test('Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await incompatibleKotlinVersionHandler.handler(
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
           '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
+          '│ Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then │\n'
+          '│ update /android/build.gradle:                                                                │\n'
+          "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
+          '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Required compileSdkVersion', () {
+    const String errorMessage = '''
+Execution failed for task ':app:checkDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+   > One or more issues found when checking AAR metadata values:
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window-java:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/2adc32c5b3f24bed763d33fbfb203338/transformed/jetified-window-java-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/88f7e476ef68cecca729426edff955b5/transformed/jetified-window-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        minCompileSdkVersionHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await minCompileSdkVersionHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
+          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   compileSdkVersion 31                                                        │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -665,5 +973,23 @@ class FakeGradleUtils extends GradleUtils {
   @override
   String getExecutable(FlutterProject project) {
     return 'gradlew';
+  }
+}
+
+/// Simple terminal that returns the specified string when
+/// promptForCharInput is called.
+class _TestPromptTerminal extends AnsiTerminal {
+  _TestPromptTerminal(this.promptResult);
+
+  final String promptResult;
+
+  @override
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {
+    Logger logger,
+    String prompt,
+    int defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) {
+    return Future<String>.value(promptResult);
   }
 }

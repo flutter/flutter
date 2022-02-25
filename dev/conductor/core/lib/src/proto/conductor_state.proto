@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package conductor_state;
+
+// A git remote
+message Remote {
+  string name = 1;
+  string url = 2;
+}
+
+enum ReleasePhase {
+  // Release was started with `conductor start` and repositories cloned.
+  APPLY_ENGINE_CHERRYPICKS = 0;
+  CODESIGN_ENGINE_BINARIES = 1;
+  APPLY_FRAMEWORK_CHERRYPICKS = 2;
+
+  // Git tag applied to framework RC branch HEAD and pushed upstream.
+  PUBLISH_VERSION = 3;
+
+  // RC branch HEAD pushed to upstream release branch.
+  //
+  // For example, flutter-1.2-candidate.3 -> upstream/beta
+  PUBLISH_CHANNEL = 4;
+
+  // Package artifacts verified to exist on cloud storage.
+  VERIFY_RELEASE = 5;
+
+  // There is no further work to be done.
+  RELEASE_COMPLETED = 6;
+}
+
+enum CherrypickState {
+  // The cherrypick has not yet been applied.
+  PENDING = 0;
+
+  // The cherrypick has not been applied and will require manual resolution.
+  PENDING_WITH_CONFLICT = 1;
+
+  // The cherrypick has been successfully applied to the local checkout.
+  //
+  // This state requires Cherrypick.appliedRevision to also be set.
+  COMPLETED = 2;
+
+  // The cherrypick will NOT be applied in this release.
+  ABANDONED = 3;
+}
+
+message Cherrypick {
+  // The revision on trunk to cherrypick.
+  string trunkRevision = 1;
+
+  // Once applied, the actual commit revision of the cherrypick.
+  string appliedRevision = 2;
+
+  CherrypickState state = 3;
+}
+
+message Repository {
+  // The development git branch the release is based on.
+  //
+  // Must be of the form /flutter-(\d+)\.(\d+)-candidate\.(\d+)/
+  string candidateBranch = 1;
+
+  // The commit hash at the tip of the branch before cherrypicks were applied.
+  string startingGitHead = 2;
+
+  // The difference in commits between this and [startingGitHead] is the number
+  // of cherrypicks that have been currently applied.
+  string currentGitHead = 3;
+
+  // Path to the git checkout on local disk.
+  string checkoutPath = 4;
+
+  // The remote commits will be fetched from.
+  Remote upstream = 5;
+
+  // The remote cherrypicks will be pushed to create a Pull Request.
+  //
+  // This should be a mirror owned by the user conducting the release.
+  Remote mirror = 6;
+
+  // Desired cherrypicks.
+  repeated Cherrypick cherrypicks = 7;
+
+  // Only for engine repositories.
+  string dartRevision = 8;
+
+  // Name of local and remote branch for applying cherrypicks.
+  //
+  // When the pull request is merged, all commits here will be squashed to a
+  // single commit on the [candidateBranch].
+  string workingBranch = 9;
+}
+
+message ConductorState {
+  // One of 'stable', 'beta', or 'dev'
+  string releaseChannel = 1;
+
+  // The name of the release.
+  string releaseVersion = 2;
+
+  Repository engine = 4;
+  Repository framework = 5;
+  int64 createdDate = 6;
+  int64 lastUpdatedDate = 7;
+
+  repeated string logs = 8;
+
+  // The current [ReleasePhase] that has yet to be completed.
+  ReleasePhase currentPhase = 9;
+
+  // A string used to validate that the current conductor is the same version
+  // that created the [ConductorState] object.
+  string conductorVersion = 10;
+
+  // One of x, y, z, m, or n.
+  string incrementLevel = 11;
+}

@@ -173,56 +173,12 @@ bool _isInAccessibilityMode(BuildContext context) {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This sample shows how to use a [CupertinoAlertDialog].
 ///	The [CupertinoAlertDialog] shows an alert with a set of two choices
 /// when [CupertinoButton] is pressed.
 ///
-/// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: Center(
-///         child: CupertinoButton(
-///           onPressed: () {
-///             showCupertinoDialog<void>(
-///               context: context,
-///               builder: (BuildContext context) => CupertinoAlertDialog(
-///                 title: const Text('Alert'),
-///                 content: const Text('Proceed with destructive action?'),
-///                 actions: <CupertinoDialogAction>[
-///                   CupertinoDialogAction(
-///                     child: const Text('No'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   ),
-///                   CupertinoDialogAction(
-///                     child: const Text('Yes'),
-///                     isDestructiveAction: true,
-///                     onPressed: () {
-///                       // Do something destructive.
-///                     },
-///                   )
-///                 ],
-///               ),
-///             );
-///           },
-///           child: const Text('CupertinoAlertDialog'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_alert_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -351,7 +307,6 @@ class CupertinoAlertDialog extends StatelessWidget {
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
-        isActionSheet: false,
         children: actions,
       );
     }
@@ -458,7 +413,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(_kCornerRadius),
+      borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
         child: Container(
@@ -495,55 +450,12 @@ class CupertinoPopupSurface extends StatelessWidget {
 /// [showCupertinoModalPopup], which displays the action sheet by sliding it up
 /// from the bottom of the screen.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This sample shows how to use a [CupertinoActionSheet].
 ///	The [CupertinoActionSheet] shows a modal popup that slides in from the
 /// bottom when [CupertinoButton] is pressed.
 ///
-/// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: Center(
-///         child: CupertinoButton(
-///           onPressed: () {
-///             showCupertinoModalPopup<void>(
-///               context: context,
-///               builder: (BuildContext context) => CupertinoActionSheet(
-///                 title: const Text('Title'),
-///                 message: const Text('Message'),
-///                 actions: <CupertinoActionSheetAction>[
-///                   CupertinoActionSheetAction(
-///                     child: const Text('Action One'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   ),
-///                   CupertinoActionSheetAction(
-///                     child: const Text('Action Two'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   )
-///                 ],
-///               ),
-///             );
-///           },
-///           child: const Text('CupertinoActionSheet'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_action_sheet.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -686,7 +598,7 @@ class CupertinoActionSheet extends StatelessWidget {
 
     final List<Widget> children = <Widget>[
       Flexible(child: ClipRRect(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _CupertinoDialogRenderWidget(
@@ -858,7 +770,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
       child: Container(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: BorderRadius.circular(_kCornerRadius),
+          borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
         ),
         child: widget.child,
       ),
@@ -918,9 +830,6 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   Element? _actionsElement;
 
   @override
-  _CupertinoDialogRenderWidget get widget => super.widget as _CupertinoDialogRenderWidget;
-
-  @override
   _RenderCupertinoDialog get renderObject => super.renderObject as _RenderCupertinoDialog;
 
   @override
@@ -936,8 +845,9 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
-    _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
+    final _CupertinoDialogRenderWidget dialogRenderWidget = widget as _CupertinoDialogRenderWidget;
+    _contentElement = updateChild(_contentElement, dialogRenderWidget.contentSection, _AlertDialogSections.contentSection);
+    _actionsElement = updateChild(_actionsElement, dialogRenderWidget.actionsSection, _AlertDialogSections.actionsSection);
   }
 
   @override
@@ -958,8 +868,9 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   @override
   void update(RenderObjectWidget newWidget) {
     super.update(newWidget);
-    _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
-    _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
+    final _CupertinoDialogRenderWidget dialogRenderWidget = widget as _CupertinoDialogRenderWidget;
+    _contentElement = updateChild(_contentElement, dialogRenderWidget.contentSection, _AlertDialogSections.contentSection);
+    _actionsElement = updateChild(_actionsElement, dialogRenderWidget.actionsSection, _AlertDialogSections.actionsSection);
   }
 
   @override
@@ -1517,7 +1428,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
-          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: titleContentGroup,
         ),
@@ -1677,11 +1587,7 @@ class _ActionButtonParentDataWidget
 // ParentData applied to individual action buttons that report whether or not
 // that button is currently pressed by the user.
 class _ActionButtonParentData extends MultiChildLayoutParentData {
-  _ActionButtonParentData({
-    this.isPressed = false,
-  });
-
-  bool isPressed;
+  bool isPressed = false;
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
@@ -2012,6 +1918,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsLayout();
   }
 
+  Color get dialogColor => _buttonBackgroundPaint.color;
   final Paint _buttonBackgroundPaint;
   set dialogColor(Color value) {
     if (value == _buttonBackgroundPaint.color)
@@ -2021,6 +1928,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
+  Color get dialogPressedColor => _pressedButtonBackgroundPaint.color;
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
     if (value == _pressedButtonBackgroundPaint.color)
@@ -2030,6 +1938,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
+  Color get dividerColor => _dividerPaint.color;
   final Paint _dividerPaint;
   set dividerColor(Color value) {
     if (value == _dividerPaint.color)
@@ -2039,8 +1948,8 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  bool _isActionSheet;
   bool get isActionSheet => _isActionSheet;
+  bool _isActionSheet;
   set isActionSheet(bool value) {
     if (value == _isActionSheet)
       return;
@@ -2049,16 +1958,18 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  Iterable<RenderBox> get _pressedButtons sync* {
+  Iterable<RenderBox> get _pressedButtons {
+    final List<RenderBox> boxes = <RenderBox>[];
     RenderBox? currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
       final _ActionButtonParentData parentData = currentChild.parentData! as _ActionButtonParentData;
       if (parentData.isPressed) {
-        yield currentChild;
+        boxes.add(currentChild);
       }
       currentChild = childAfter(currentChild);
     }
+    return boxes;
   }
 
   bool get _isButtonPressed {
@@ -2231,7 +2142,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void performLayout() {
-    size = _performLayout(constraints: constraints, dry: false);
+    size = _performLayout(constraints: constraints);
   }
 
   Size _performLayout({required BoxConstraints constraints, bool dry = false}) {
@@ -2256,8 +2167,6 @@ class _RenderCupertinoDialogActions extends RenderBox
         final BoxConstraints perButtonConstraints = BoxConstraints(
           minWidth: (constraints.minWidth - dividerThickness) / 2.0,
           maxWidth: (constraints.maxWidth - dividerThickness) / 2.0,
-          minHeight: 0.0,
-          maxHeight: double.infinity,
         );
 
         // Layout the 2 buttons.

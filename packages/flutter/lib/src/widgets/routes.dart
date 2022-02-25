@@ -129,7 +129,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   //
   // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
-  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed;
+  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed && !_popFinalized;
+
+  bool _popFinalized = false;
 
   /// The animation that drives the route's transition and the previous route's
   /// forward transition.
@@ -206,6 +208,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         // removing the route and disposing it.
         if (!isActive) {
           navigator!.finalizeRoute(this);
+          _popFinalized = true;
         }
         break;
     }
@@ -632,11 +635,11 @@ mixin LocalHistoryRoute<T> on Route<T> {
     entry._owner = null;
     entry._notifyRemoved();
     if (_localHistory!.isEmpty) {
-      if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
         // elements during finalizeTree. The state is locked at this moment, and
         // we can only notify state has changed in the next frame.
-        SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           changedInternalState();
         });
       } else {
@@ -755,7 +758,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
     ];
     _listenable = Listenable.merge(animations);
-    if (widget.route.isCurrent) {
+    if (widget.route.isCurrent && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -764,7 +767,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   void didUpdateWidget(_ModalScope<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
-    if (widget.route.isCurrent) {
+    if (widget.route.isCurrent && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -792,10 +795,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       (widget.route.navigator?.userGestureInProgress ?? false);
   }
 
+  bool get _shouldRequestFocus {
+    return widget.route.navigator!.widget.requestFocus;
+  }
+
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
+    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
@@ -1143,7 +1150,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   TickerFuture didPush() {
-    if (_scopeKey.currentState != null) {
+    if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
       navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
@@ -1151,7 +1158,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didAdd() {
-    if (_scopeKey.currentState != null) {
+    if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
       navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
@@ -1398,7 +1405,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
+    for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
       if (await callback() != true)
         return RoutePopDisposition.doNotPop;
     }
@@ -1627,9 +1634,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   late OverlayEntry _modalScope;
 
   @override
-  Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier);
-    yield _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
+  Iterable<OverlayEntry> createOverlayEntries() {
+    return <OverlayEntry>[
+      _modalBarrier = OverlayEntry(builder: _buildModalBarrier),
+      _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState),
+    ];
   }
 
   @override
@@ -1981,7 +1990,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -2186,6 +2195,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       }
     }
     if (!hitCurrentFocus)
-      focusNode.unfocus(disposition: UnfocusDisposition.scope);
+      focusNode.unfocus();
   }
 }

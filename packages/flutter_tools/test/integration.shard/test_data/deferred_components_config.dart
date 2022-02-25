@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 
 import '../test_utils.dart';
 
 abstract class DeferredComponentsConfig {
   String get deferredLibrary;
-  String get deferredComponentsGolden;
+  String? get deferredComponentsGolden;
   String get androidSettings;
   String get androidBuild;
   String get androidLocalProperties;
@@ -30,8 +28,9 @@ abstract class DeferredComponentsConfig {
     if (deferredLibrary != null) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'), deferredLibrary);
     }
-    if (deferredComponentsGolden != null) {
-      writeFile(fileSystem.path.join(dir.path, 'deferred_components_loading_units.yaml'), deferredComponentsGolden);
+    final String? golden = deferredComponentsGolden;
+    if (golden != null) {
+      writeFile(fileSystem.path.join(dir.path, 'deferred_components_loading_units.yaml'), golden);
     }
     if (androidSettings != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
@@ -109,7 +108,7 @@ class DeferredComponentModule {
       apply plugin: "com.android.dynamic-feature"
 
       android {
-          compileSdkVersion 30
+          compileSdkVersion 31
 
           sourceSets {
               applicationVariants.all { variant ->
@@ -120,7 +119,7 @@ class DeferredComponentModule {
 
           defaultConfig {
               minSdkVersion 16
-              targetSdkVersion 30
+              targetSdkVersion 31
               versionCode flutterVersionCode.toInteger()
               versionName flutterVersionName
           }

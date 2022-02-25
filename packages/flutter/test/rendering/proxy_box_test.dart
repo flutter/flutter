@@ -14,10 +14,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
     final RenderFittedBox fittedBox = RenderFittedBox(
       child: RenderCustomPaint(
-        preferredSize: Size.zero,
         painter: TestCallbackPainter(onPaint: () {}),
       ),
     );
@@ -274,14 +275,13 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
-  test('RenderOpacity does not composite if it is opaque', () {
+  test('RenderOpacity does composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
-      opacity: 1.0,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
-    expect(renderOpacity.needsCompositing, false);
+    expect(renderOpacity.needsCompositing, true);
   });
 
   test('RenderOpacity reuses its layer', () {
@@ -297,7 +297,6 @@ void main() {
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
-      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -306,19 +305,18 @@ void main() {
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does not composite if it is opaque', () {
+  test('RenderAnimatedOpacity does composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
-      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
-    expect(renderAnimatedOpacity.needsCompositing, false);
+    expect(renderAnimatedOpacity.needsCompositing, true);
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {
@@ -433,7 +431,6 @@ void main() {
 
   void _testFittedBoxWithClipRectLayer() {
     _testLayerReuse<ClipRectLayer>(RenderFittedBox(
-      alignment: Alignment.center,
       fit: BoxFit.cover,
       clipBehavior: Clip.hardEdge,
       // Inject opacity under the clip to force compositing.
@@ -446,7 +443,6 @@ void main() {
 
   void _testFittedBoxWithTransformLayer() {
     _testLayerReuse<TransformLayer>(RenderFittedBox(
-      alignment: Alignment.center,
       fit: BoxFit.fill,
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
@@ -516,7 +512,6 @@ void main() {
   test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is true', () {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: LayerLink(),
-      showWhenUnlinked: true,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
@@ -543,7 +538,6 @@ void main() {
 
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: link,
-      showWhenUnlinked: true,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
