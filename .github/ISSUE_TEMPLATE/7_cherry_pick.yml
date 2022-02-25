@@ -1,0 +1,58 @@
+name: Request a cherry-pick.
+description: As a contributor, you would like to request that a feature be cherry-picked into a release.
+title: '[CP] <title>'
+labels: ['cp: review']
+body:
+  - type: input
+    id: issue_link
+    attributes:
+      label: issue_link
+      description: What is the link to the issue this cherry-pick is addressing?
+      placeholder: https://github.com/flutter/flutter/issues/12345
+    validations:
+      required: true
+  - type: input
+    id: commit_hash
+    attributes:
+      label: Commit Hash
+      description: What is the shortened commit hash that has been merged to master/main?
+      placeholder: fabfeed
+    validations:
+      required: true
+  - type: dropdown
+    id: merge_instructions
+    attributes:
+      label: Merge Instructions
+      description: Does this cherry-pick merge cleanly into the candidate branch?
+      options:
+        - clean merge
+        - merge conflict
+    validations:
+      required: true
+  - type: input
+    id: issue_description
+    attributes:
+      label: Issue Description
+      description: Brief description of the issue this cherry-pick is solving for.
+      placeholder: This makes Flutter even better!
+    validations:
+      required: true
+  - type: textarea
+    id: cherry-pick_reason
+    attributes:
+      label: Cherry-pick reasoning
+      description: Why should this be cherry-picked and not exist as part of a regular release?
+      placeholder: Android apps can not compile without this fix.
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk
+      description: What is the risk level of this cherry-pick?
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
