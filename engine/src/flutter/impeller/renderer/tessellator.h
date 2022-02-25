@@ -38,7 +38,7 @@ class Tessellator {
   ///
   /// @return If tessellation was successful.
   ///
-  bool Tessellate(const std::vector<Point>& polyline,
+  bool Tessellate(const Path::Polyline& polyline,
                   VertexCallback callback) const;
 
  private:
