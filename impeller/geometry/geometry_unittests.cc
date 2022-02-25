@@ -454,6 +454,46 @@ TEST(GeometryTest, CanUsePointAssignmentOperators) {
   }
 }
 
+TEST(GeometryTest, PointDotProduct) {
+  {
+    Point p(1, 0);
+    Scalar s = p.Dot(Point(-1, 0));
+    ASSERT_FLOAT_EQ(s, -1);
+  }
+
+  {
+    Point p(0, -1);
+    Scalar s = p.Dot(Point(-1, 0));
+    ASSERT_FLOAT_EQ(s, 0);
+  }
+
+  {
+    Point p(1, 2);
+    Scalar s = p.Dot(Point(3, -4));
+    ASSERT_FLOAT_EQ(s, -5);
+  }
+}
+
+TEST(GeometryTest, PointCrossProduct) {
+  {
+    Point p(1, 0);
+    Scalar s = p.Cross(Point(-1, 0));
+    ASSERT_FLOAT_EQ(s, 0);
+  }
+
+  {
+    Point p(0, -1);
+    Scalar s = p.Cross(Point(-1, 0));
+    ASSERT_FLOAT_EQ(s, -1);
+  }
+
+  {
+    Point p(1, 2);
+    Scalar s = p.Cross(Point(3, -4));
+    ASSERT_FLOAT_EQ(s, -10);
+  }
+}
+
 TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
   {
     auto deg = Degrees{90.0};
