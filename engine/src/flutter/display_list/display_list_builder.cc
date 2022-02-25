@@ -141,32 +141,32 @@ void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
   } else {
     current_color_filter_ = filter->shared();
     switch (filter->type()) {
-      case DlColorFilter::kBlend: {
+      case DlColorFilterType::kBlend: {
         const DlBlendColorFilter* blend_filter = filter->asBlend();
         FML_DCHECK(blend_filter);
         void* pod = Push<SetColorFilterOp>(blend_filter->size(), 0);
         new (pod) DlBlendColorFilter(blend_filter);
         break;
       }
-      case DlColorFilter::kMatrix: {
+      case DlColorFilterType::kMatrix: {
         const DlMatrixColorFilter* matrix_filter = filter->asMatrix();
         FML_DCHECK(matrix_filter);
         void* pod = Push<SetColorFilterOp>(matrix_filter->size(), 0);
         new (pod) DlMatrixColorFilter(matrix_filter);
         break;
       }
-      case DlColorFilter::kSrgbToLinearGamma: {
+      case DlColorFilterType::kSrgbToLinearGamma: {
         void* pod = Push<SetColorFilterOp>(filter->size(), 0);
         new (pod) DlSrgbToLinearGammaColorFilter();
         break;
       }
-      case DlColorFilter::kLinearToSrgbGamma: {
+      case DlColorFilterType::kLinearToSrgbGamma: {
         void* pod = Push<SetColorFilterOp>(filter->size(), 0);
         new (pod) DlLinearToSrgbGammaColorFilter();
         break;
       }
-      case DlColorFilter::kUnknown: {
-        Push<SetSkColorFilterOp>(0, 0, filter->sk_filter());
+      case DlColorFilterType::kUnknown: {
+        Push<SetSkColorFilterOp>(0, 0, filter->skia_object());
         break;
       }
     }
@@ -185,15 +185,15 @@ void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
   } else {
     current_mask_filter_ = filter->shared();
     switch (filter->type()) {
-      case DlMaskFilter::kBlur: {
+      case DlMaskFilterType::kBlur: {
         const DlBlurMaskFilter* blur_filter = filter->asBlur();
         FML_DCHECK(blur_filter);
         void* pod = Push<SetMaskFilterOp>(blur_filter->size(), 0);
         new (pod) DlBlurMaskFilter(blur_filter);
         break;
       }
-      case DlMaskFilter::kUnknown:
-        Push<SetSkMaskFilterOp>(0, 0, filter->sk_filter());
+      case DlMaskFilterType::kUnknown:
+        Push<SetSkMaskFilterOp>(0, 0, filter->skia_object());
         break;
     }
   }

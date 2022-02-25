@@ -1044,7 +1044,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     SkRTreeFactory rtree_factory;
     SkCanvas* canvas = recorder.beginRecording(build_bounds, &rtree_factory);
     SkPaint p1;
-    p1.setColorFilter(alpha_color_filter.sk_filter());
+    p1.setColorFilter(alpha_color_filter.skia_object());
     canvas->saveLayer(save_bounds, &p1);
     SkPaint p2;
     canvas->drawRect(rect, p2);
@@ -1086,7 +1086,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // generate the same behavior as setting it as a ColorFilter
     DisplayListBuilder builder(build_bounds);
     builder.setImageFilter(
-        SkImageFilters::ColorFilter(base_color_filter.sk_filter(), nullptr));
+        SkImageFilters::ColorFilter(base_color_filter.skia_object(), nullptr));
     builder.saveLayer(&save_bounds, true);
     builder.setImageFilter(nullptr);
     builder.drawRect(rect);
@@ -1100,7 +1100,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // will generate the same behavior as setting it as a ColorFilter
     DisplayListBuilder builder(build_bounds);
     builder.setImageFilter(
-        SkImageFilters::ColorFilter(alpha_color_filter.sk_filter(), nullptr));
+        SkImageFilters::ColorFilter(alpha_color_filter.skia_object(), nullptr));
     builder.saveLayer(&save_bounds, true);
     builder.setImageFilter(nullptr);
     builder.drawRect(rect);
@@ -1113,7 +1113,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // Same as above (ImageFilter hiding ColorFilter) with no save bounds
     DisplayListBuilder builder(build_bounds);
     builder.setImageFilter(
-        SkImageFilters::ColorFilter(alpha_color_filter.sk_filter(), nullptr));
+        SkImageFilters::ColorFilter(alpha_color_filter.skia_object(), nullptr));
     builder.saveLayer(nullptr, true);
     builder.setImageFilter(nullptr);
     builder.drawRect(rect);

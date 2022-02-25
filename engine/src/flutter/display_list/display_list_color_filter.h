@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_COLOR_FILTER_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_COLOR_FILTER_H_
 
+#include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/logging.h"
 
@@ -13,75 +14,25 @@ namespace flutter {
 class DlBlendColorFilter;
 class DlMatrixColorFilter;
 
-// The DisplayList ColorFilter class. This class was designed to be:
-//
-// - Typed:
-//     Even though most references and pointers are passed around as the
-//     base class, a DlColorFilter::Type can be queried using the |type|
-//     method to determine which type of ColorFilter is being used.
-//
-// - Inspectable:
-//     Any parameters required to full specify the filtering operations are
-//     provided on the specific base classes.
-//
-// - Safely Downcast:
-//     For the subclasses that have specific data to query, methods |asBlend|
-//     and |asMatrix| are provided to safely downcast the reference for
-//     inspection.
-//
-// - Skiafiable:
-//     The classes override an |sk_filter| method to easily obtain a Skia
-//     version of the filter on demand.
-//
-// - Immutable:
-//     Neither the base class or any of the subclasses specify any mutation
-//     methods. Instances are often passed around as const as a reminder,
-//     but the classes have no mutation methods anyway.
-//
-// - Flat and Embeddable:
-//     Bulk freed + bulk compared + zero memory fragmentation.
-//
-//     All of these classes are designed to be stored in the DisplayList
-//     buffer allocated in-line with the rest of the data to avoid dangling
-//     pointers that require explicit freeing when the DisplayList goes
-//     away, or that fragment the memory needed to read the operations in
-//     the DisplayList. Furthermore, the data in the classes can be bulk
-//     compared using a |memcmp| when performing a |DisplayList::Equals|.
-//
-// - Passed by Pointer:
-//     The data shared via the |Dispatcher::setColorFilter| call is stored
-//     in the buffer itself and so its lifetime is controlled by the
-//     DisplayList. That memory cannot be shared as by a |shared_ptr|
-//     because the memory may be freed outside the control of the shared
-//     pointer. Creating a shared version of the object would require a
-//     new instantiation which we'd like to avoid on every dispatch call,
-//     so a raw (const) pointer is shared instead with all of the
-//     responsibilities of non-ownership in the called method.
-//
-//     But, for methods that need to keep a copy of the data...
-//
-// - Shared_Ptr-able:
-//     The classes support a method to return a |std::shared_ptr| version of
-//     themselves, safely instantiating a new copy of the object into a
-//     shared_ptr using |std::make_shared|. For those dispatcher objects
-//     that may want to hold on to the contents of the object (typically
-//     in a |current_color_filter_| field), they can obtain a shared_ptr
-//     copy safely and easily using the |shared| method.
+// The DisplayList ColorFilter class. This class implements all of the
+// facilities and adheres to the design goals of the |DlAttribute| base
+// class.
 
-class DlColorFilter {
+// An enumerated type for the recognized ColorFilter operations.
+// If a custom ColorFilter outside of the recognized types is needed
+// then a |kUnknown| type that simply defers to an SkColorFilter is
+// provided as a fallback.
+enum class DlColorFilterType {
+  kBlend,
+  kMatrix,
+  kSrgbToLinearGamma,
+  kLinearToSrgbGamma,
+  kUnknown
+};
+
+class DlColorFilter
+    : public DlAttribute<DlColorFilter, SkColorFilter, DlColorFilterType> {
  public:
-  // An enumerated type for the recognized ColorFilter operations.
-  // If a custom ColorFilter outside of the recognized types is needed
-  // then a |kUnknown| type that simply defers to an SkColorFilter is
-  // provided as a fallback.
-  enum Type {
-    kBlend,
-    kMatrix,
-    kSrgbToLinearGamma,
-    kLinearToSrgbGamma,
-    kUnknown
-  };
-
   // Return a shared_ptr holding a DlColorFilter representing the indicated
   // Skia SkColorFilter pointer.
   //
@@ -98,26 +49,11 @@ class DlColorFilter {
     return From(sk_filter.get());
   }
 
-  // Return the recognized type of the ColorFilter operation.
-  virtual Type type() const = 0;
-
-  // Return the size of the instantiated data (typically used to allocate)
-  // storage in the DisplayList buffer.
-  virtual size_t size() const = 0;
-
   // Return a boolean indicating whether the color filtering operation will
   // modify transparent black. This is typically used to determine if applying
   // the ColorFilter to a temporary saveLayer buffer will turn the surrounding
   // pixels non-transparent and therefore expand the bounds.
   virtual bool modifies_transparent_black() const = 0;
-
-  // Return a shared version of |this| ColorFilter. The |shared_ptr| returned
-  // will reference a copy of this object so that the lifetime of the shared
-  // version is not tied to the storage of this particular instance.
-  virtual std::shared_ptr<DlColorFilter> shared() const = 0;
-
-  // Return an equivalent |SkColorFilter| version of this object.
-  virtual sk_sp<SkColorFilter> sk_filter() const = 0;
 
   // Return a DlBlendColorFilter pointer to this object iff it is a Blend
   // type of ColorFilter, otherwise return nullptr.
@@ -129,22 +65,7 @@ class DlColorFilter {
 
   // asSrgb<->Linear and asUnknown are not needed because they
   // have no properties to query. Their type fully specifies their
-  // operation or can be accessed via the common sk_filter() method.
-
-  // Perform a content aware |==| comparison of the ColorFilter.
-  bool operator==(DlColorFilter const& other) const {
-    return type() == other.type() && equals_(other);
-  }
-  // Perform a content aware |!=| comparison of the ColorFilter.
-  bool operator!=(DlColorFilter const& other) const {
-    return !(*this == other);
-  }
-
-  virtual ~DlColorFilter() = default;
-
- protected:
-  // Virtual comparison method to support |==| and |!=|.
-  virtual bool equals_(DlColorFilter const& other) const = 0;
+  // operation or can be accessed via the common skia_object() method.
 };
 
 // The Blend type of ColorFilter which specifies modifying the
@@ -161,18 +82,19 @@ class DlBlendColorFilter final : public DlColorFilter {
   DlBlendColorFilter(const DlBlendColorFilter* filter)
       : DlBlendColorFilter(filter->color_, filter->mode_) {}
 
-  Type type() const override { return kBlend; }
+  DlColorFilterType type() const override { return DlColorFilterType::kBlend; }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override {
     // Look at blend and color to make a faster determination?
-    return sk_filter()->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
+    return skia_object()->filterColor(SK_ColorTRANSPARENT) !=
+           SK_ColorTRANSPARENT;
   }
 
   std::shared_ptr<DlColorFilter> shared() const override {
     return std::make_shared<DlBlendColorFilter>(this);
   }
 
-  sk_sp<SkColorFilter> sk_filter() const override {
+  sk_sp<SkColorFilter> skia_object() const override {
     return SkColorFilters::Blend(color_, mode_);
   }
 
@@ -183,7 +105,7 @@ class DlBlendColorFilter final : public DlColorFilter {
 
  protected:
   bool equals_(DlColorFilter const& other) const override {
-    FML_DCHECK(other.type() == kBlend);
+    FML_DCHECK(other.type() == DlColorFilterType::kBlend);
     auto that = static_cast<DlBlendColorFilter const&>(other);
     return color_ == that.color_ && mode_ == that.mode_;
   }
@@ -215,19 +137,20 @@ class DlMatrixColorFilter final : public DlColorFilter {
   DlMatrixColorFilter(const DlMatrixColorFilter* filter)
       : DlMatrixColorFilter(filter->matrix_) {}
 
-  Type type() const override { return kMatrix; }
+  DlColorFilterType type() const override { return DlColorFilterType::kMatrix; }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override {
     // Look at the matrix to make a faster determination?
     // Basically, are the translation components all 0?
-    return sk_filter()->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
+    return skia_object()->filterColor(SK_ColorTRANSPARENT) !=
+           SK_ColorTRANSPARENT;
   }
 
   std::shared_ptr<DlColorFilter> shared() const override {
     return std::make_shared<DlMatrixColorFilter>(this);
   }
 
-  sk_sp<SkColorFilter> sk_filter() const override {
+  sk_sp<SkColorFilter> skia_object() const override {
     return SkColorFilters::Matrix(matrix_);
   }
 
@@ -240,7 +163,7 @@ class DlMatrixColorFilter final : public DlColorFilter {
 
  protected:
   bool equals_(const DlColorFilter& other) const override {
-    FML_DCHECK(other.type() == kMatrix);
+    FML_DCHECK(other.type() == DlColorFilterType::kMatrix);
     auto that = static_cast<DlMatrixColorFilter const&>(other);
     return memcmp(matrix_, that.matrix_, sizeof(matrix_)) == 0;
   }
@@ -261,16 +184,18 @@ class DlSrgbToLinearGammaColorFilter final : public DlColorFilter {
   DlSrgbToLinearGammaColorFilter(const DlSrgbToLinearGammaColorFilter* filter)
       : DlSrgbToLinearGammaColorFilter() {}
 
-  Type type() const override { return kSrgbToLinearGamma; }
+  DlColorFilterType type() const override {
+    return DlColorFilterType::kSrgbToLinearGamma;
+  }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override { return false; }
 
   std::shared_ptr<DlColorFilter> shared() const override { return instance; }
-  sk_sp<SkColorFilter> sk_filter() const override { return sk_filter_; }
+  sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
 
  protected:
   bool equals_(const DlColorFilter& other) const override {
-    FML_DCHECK(other.type() == kSrgbToLinearGamma);
+    FML_DCHECK(other.type() == DlColorFilterType::kSrgbToLinearGamma);
     return true;
   }
 
@@ -291,16 +216,18 @@ class DlLinearToSrgbGammaColorFilter final : public DlColorFilter {
   DlLinearToSrgbGammaColorFilter(const DlLinearToSrgbGammaColorFilter* filter)
       : DlLinearToSrgbGammaColorFilter() {}
 
-  Type type() const override { return kLinearToSrgbGamma; }
+  DlColorFilterType type() const override {
+    return DlColorFilterType::kLinearToSrgbGamma;
+  }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override { return false; }
 
   std::shared_ptr<DlColorFilter> shared() const override { return instance; }
-  sk_sp<SkColorFilter> sk_filter() const override { return sk_filter_; }
+  sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
 
  protected:
   bool equals_(const DlColorFilter& other) const override {
-    FML_DCHECK(other.type() == kLinearToSrgbGamma);
+    FML_DCHECK(other.type() == DlColorFilterType::kLinearToSrgbGamma);
     return true;
   }
 
@@ -325,23 +252,25 @@ class DlUnknownColorFilter final : public DlColorFilter {
   DlUnknownColorFilter(const DlUnknownColorFilter* filter)
       : DlUnknownColorFilter(filter->sk_filter_) {}
 
-  Type type() const override { return kUnknown; }
+  DlColorFilterType type() const override {
+    return DlColorFilterType::kUnknown;
+  }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override {
-    return sk_filter()->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
+    return sk_filter_->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
   }
 
   std::shared_ptr<DlColorFilter> shared() const override {
     return std::make_shared<DlUnknownColorFilter>(this);
   }
 
-  sk_sp<SkColorFilter> sk_filter() const override { return sk_filter_; }
+  sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
 
   virtual ~DlUnknownColorFilter() = default;
 
  protected:
   bool equals_(const DlColorFilter& other) const override {
-    FML_DCHECK(other.type() == kUnknown);
+    FML_DCHECK(other.type() == DlColorFilterType::kUnknown);
     auto that = static_cast<DlUnknownColorFilter const&>(other);
     return sk_filter_ == that.sk_filter_;
   }

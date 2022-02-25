@@ -87,17 +87,17 @@ void SkPaintDispatchHelper::setPathEffect(sk_sp<SkPathEffect> effect) {
   paint_.setPathEffect(effect);
 }
 void SkPaintDispatchHelper::setMaskFilter(const DlMaskFilter* filter) {
-  paint_.setMaskFilter(filter ? filter->sk_filter() : nullptr);
+  paint_.setMaskFilter(filter ? filter->skia_object() : nullptr);
 }
 
 sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() const {
   if (!invert_colors_) {
-    return color_filter_ ? color_filter_->sk_filter() : nullptr;
+    return color_filter_ ? color_filter_->skia_object() : nullptr;
   }
   sk_sp<SkColorFilter> invert_filter =
       SkColorFilters::Matrix(invert_color_matrix);
   if (color_filter_) {
-    invert_filter = invert_filter->makeComposed(color_filter_->sk_filter());
+    invert_filter = invert_filter->makeComposed(color_filter_->skia_object());
   }
   return invert_filter;
 }
@@ -597,7 +597,7 @@ bool DisplayListBoundsCalculator::AdjustBoundsForPaint(
         bounds.outset(mask_sigma_pad, mask_sigma_pad);
       } else {
         SkPaint p;
-        p.setMaskFilter(mask_filter_->sk_filter());
+        p.setMaskFilter(mask_filter_->skia_object());
         if (!p.canComputeFastBounds()) {
           return false;
         }

@@ -20,9 +20,9 @@ TEST(DisplayListMaskFilter, FromSkiaBlurFilter) {
   sk_sp<SkMaskFilter> sk_filter =
       SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
   std::shared_ptr<DlMaskFilter> filter = DlMaskFilter::From(sk_filter);
-  ASSERT_EQ(filter->type(), DlMaskFilter::kUnknown);
+  ASSERT_EQ(filter->type(), DlMaskFilterType::kUnknown);
   ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->sk_filter(), sk_filter);
+  ASSERT_EQ(filter->skia_object(), sk_filter);
 }
 
 TEST(DisplayListMaskFilter, BlurConstructor) {
@@ -86,8 +86,8 @@ TEST(DisplayListMaskFilter, UnknownContents) {
   sk_sp<SkMaskFilter> sk_filter =
       SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
   DlUnknownMaskFilter filter(sk_filter);
-  ASSERT_EQ(filter.sk_filter(), sk_filter);
-  ASSERT_EQ(filter.sk_filter().get(), sk_filter.get());
+  ASSERT_EQ(filter.skia_object(), sk_filter);
+  ASSERT_EQ(filter.skia_object().get(), sk_filter.get());
 }
 
 TEST(DisplayListMaskFilter, UnknownEquals) {

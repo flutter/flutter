@@ -92,7 +92,7 @@ void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
 
 void ImageFilter::initColorFilter(ColorFilter* colorFilter) {
   filter_ = SkImageFilters::ColorFilter(
-      colorFilter ? colorFilter->filter()->sk_filter() : nullptr, nullptr);
+      colorFilter ? colorFilter->filter()->skia_object() : nullptr, nullptr);
 }
 
 void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {

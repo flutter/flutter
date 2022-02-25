@@ -105,7 +105,7 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
     if (!Dart_IsNull(color_filter)) {
       ColorFilter* decoded_color_filter =
           tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-      paint.setColorFilter(decoded_color_filter->filter()->sk_filter());
+      paint.setColorFilter(decoded_color_filter->filter()->skia_object());
     }
 
     Dart_Handle image_filter = values[kImageFilterIndex];
