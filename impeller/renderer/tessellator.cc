@@ -61,12 +61,25 @@ bool Tessellator::Tessellate(const Path::Polyline& contours,
   /// Feed contour information to the tessellator.
   ///
   static_assert(sizeof(Point) == 2 * sizeof(float));
-  ::tessAddContour(tessellator.get(),       // the C tessellator
-                   kVertexSize,             //
-                   contours.points.data(),  //
-                   sizeof(Point),           //
-                   contours.points.size()   //
-  );
+  size_t start_point_index = 0;
+  for (size_t end_point_index : contours.breaks) {
+    end_point_index = std::min(end_point_index, contours.points.size());
+    ::tessAddContour(tessellator.get(),  // the C tessellator
+                     kVertexSize,        //
+                     contours.points.data() + start_point_index,  //
+                     sizeof(Point),                               //
+                     end_point_index - start_point_index          //
+    );
+    start_point_index = end_point_index;
+  }
+  if (start_point_index < contours.points.size()) {
+    ::tessAddContour(tessellator.get(),  // the C tessellator
+                     kVertexSize,        //
+                     contours.points.data() + start_point_index,  //
+                     sizeof(Point),                               //
+                     contours.points.size() - start_point_index   //
+    );
+  }
 
   //----------------------------------------------------------------------------
   /// Let's tessellate.
