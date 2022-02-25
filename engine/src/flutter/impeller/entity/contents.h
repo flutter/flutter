@@ -113,6 +113,20 @@ class TextureContents final : public Contents {
 
 class SolidStrokeContents final : public Contents {
  public:
+  enum class Cap {
+    kButt,
+    kRound,
+    kSquare,
+    kLast,
+  };
+
+  enum class Join {
+    kMiter,
+    kRound,
+    kBevel,
+    kLast,
+  };
+
   SolidStrokeContents();
 
   ~SolidStrokeContents() override;
@@ -125,6 +139,18 @@ class SolidStrokeContents final : public Contents {
 
   Scalar GetStrokeSize() const;
 
+  void SetStrokeMiter(Scalar miter);
+
+  Scalar GetStrokeMiter(Scalar miter);
+
+  void SetStrokeCap(Cap cap);
+
+  Cap GetStrokeCap();
+
+  void SetStrokeJoin(Join join);
+
+  Join GetStrokeJoin();
+
   // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -133,6 +159,9 @@ class SolidStrokeContents final : public Contents {
  private:
   Color color_;
   Scalar stroke_size_ = 0.0;
+  Scalar miter_ = 0.0;
+  Cap cap_ = Cap::kButt;
+  Join join_ = Join::kMiter;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SolidStrokeContents);
 };

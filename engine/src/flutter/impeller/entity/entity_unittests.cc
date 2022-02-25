@@ -7,6 +7,7 @@
 #include "impeller/entity/entity_playground.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/playground.h"
+#include "impeller/playground/widgets.h"
 
 namespace impeller {
 namespace testing {
@@ -45,25 +46,36 @@ TEST_F(EntityTest, ThreeStrokesInOnePath) {
 }
 
 TEST_F(EntityTest, TriangleInsideASquare) {
-  Path path = PathBuilder{}
-                  .MoveTo({10, 10})
-                  .LineTo({210, 10})
-                  .LineTo({210, 210})
-                  .LineTo({10, 210})
-                  .Close()
-                  .MoveTo({50, 50})
-                  .LineTo({100, 50})
-                  .LineTo({50, 150})
-                  .Close()
-                  .TakePath();
+  auto callback = [&](ContentContext& context, RenderPass& pass) {
+    Point a = IMPELLER_PLAYGROUND_POINT(Point(10, 10), 20, Color::White());
+    Point b = IMPELLER_PLAYGROUND_POINT(Point(210, 10), 20, Color::White());
+    Point c = IMPELLER_PLAYGROUND_POINT(Point(210, 210), 20, Color::White());
+    Point d = IMPELLER_PLAYGROUND_POINT(Point(10, 210), 20, Color::White());
+    Point e = IMPELLER_PLAYGROUND_POINT(Point(50, 50), 20, Color::White());
+    Point f = IMPELLER_PLAYGROUND_POINT(Point(100, 50), 20, Color::White());
+    Point g = IMPELLER_PLAYGROUND_POINT(Point(50, 150), 20, Color::White());
+    Path path = PathBuilder{}
+                    .MoveTo(a)
+                    .LineTo(b)
+                    .LineTo(c)
+                    .LineTo(d)
+                    .Close()
+                    .MoveTo(e)
+                    .LineTo(f)
+                    .LineTo(g)
+                    .Close()
+                    .TakePath();
 
-  Entity entity;
-  entity.SetPath(path);
-  auto contents = std::make_unique<SolidStrokeContents>();
-  contents->SetColor(Color::Red());
-  contents->SetStrokeSize(5.0);
-  entity.SetContents(std::move(contents));
-  ASSERT_TRUE(OpenPlaygroundHere(entity));
+    Entity entity;
+    entity.SetPath(path);
+    auto contents = std::make_unique<SolidStrokeContents>();
+    contents->SetColor(Color::Red());
+    contents->SetStrokeSize(20.0);
+    entity.SetContents(std::move(contents));
+
+    return entity.Render(context, pass);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_F(EntityTest, CubicCurveTest) {
