@@ -377,9 +377,12 @@ class StartContext extends Context {
       candidateBranch,
       exact: false,
     ));
-    // [force] means we know this would fail but need to publish anyway
-    if (!force) {
+
+    try {
       lastVersion.ensureValid(candidateBranch, incrementLetter);
+    } on ConductorException catch (e) {
+      // Let the user know, but resume execution
+      stdio.printError(e.message);
     }
 
     Version nextVersion = calculateNextVersion(lastVersion);
