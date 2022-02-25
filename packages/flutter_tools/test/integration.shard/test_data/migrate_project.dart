@@ -40,6 +40,7 @@ class MigrateProject extends Project {
       cipdFile.path,
       'init',
       tempDir.path,
+      '-force',
     ], workingDirectory: dir.path);
 
     print('CIPD init out:\n${result.stdout}\nERROR:\n${result.stderr}\n');
@@ -62,15 +63,16 @@ class MigrateProject extends Project {
         tempDir.path,
         dir.path,
         '*',
-        '/E'
+        '/E',
+        '/mov',
       ]);
 
-      await processManager.run(<String>[
-        'erase',
-        '/s',
-        '/q',
-        '.cipd',
-      ], workingDirectory: dir.path);
+      // await processManager.run(<String>[
+      //   'erase',
+      //   '/s',
+      //   '/q',
+      //   '.cipd',
+      // ], workingDirectory: dir.path);
     } else {
       await processManager.run(<String>[
         'cp',
