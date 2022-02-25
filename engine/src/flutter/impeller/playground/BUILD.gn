@@ -11,6 +11,8 @@ impeller_component("playground") {
   sources = [
     "playground.h",
     "playground.mm",
+    "widgets.cc",
+    "widgets.h",
   ]
 
   public_deps = [
