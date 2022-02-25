@@ -426,6 +426,10 @@ void main() {
           stdout: '$previousVersion-42-gabc123',
         ),
         const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision3,
+        ),
+        const FakeCommand(
           command: <String>['git', 'merge-base', candidateBranch, 'master'],
           stdout: branchPointRevision,
         ),
@@ -440,10 +444,6 @@ void main() {
         ),
         const FakeCommand(
           command: <String>['git', 'push', FrameworkRepository.defaultUpstream, branchPointTag],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-          stdout: revision3,
         ),
       ];
 

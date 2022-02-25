@@ -179,6 +179,17 @@ class StartCommand extends Command<void> {
     final File stateFile = checkouts.fileSystem.file(
       getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
     );
+    final String? versionOverrideString = getValueFromEnvOrArgs(
+      kVersionOverrideOption,
+      argumentResults,
+      platform.environment,
+      allowNull: true,
+    );
+    Version? versionOverride;
+    if (versionOverrideString != null) {
+      // TODO test bogus override string
+      versionOverride = Version.fromString(versionOverrideString);
+    }
 
     final StartContext context = StartContext(
       candidateBranch: candidateBranch,
@@ -195,6 +206,7 @@ class StartCommand extends Command<void> {
       releaseChannel: releaseChannel,
       stateFile: stateFile,
       force: force,
+      versionOverride: versionOverride,
     );
     return context.run();
   }
@@ -219,6 +231,7 @@ class StartContext extends Context {
     required Checkouts checkouts,
     required File stateFile,
     this.force = false,
+    this.versionOverride,
   }) : git = Git(processManager),
   engine = EngineRepository(
     checkouts,
@@ -260,6 +273,7 @@ class StartContext extends Context {
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
+  final Version? versionOverride;
 
   /// If validations should be overridden.
   final bool force;
@@ -269,18 +283,13 @@ class StartContext extends Context {
 
   /// Determine which part of the version to increment in the next release.
   ///
-  /// 1. if the tip of the candidate branch is also on master, that means this
-  ///   is the first release on the branch; compute the version from the
-  ///   candidate branch (this would fail if the candidate branch was named
-  ///   wrong) and tag the branch point, then increment the n for the actual
-  ///   release
-  /// 2. else if the channel is stable, the increment should be z (the tool
-  ///   already has logic to "increment" to 0 if this is the first stable
-  ///   release)
-  /// 3. else (i.e. channel is beta), increment the n
-
+  /// If [atBranchPoint] is true, then this is a [ReleaseType.BETA_INITIAL].
   @visibleForTesting
-  ReleaseType computeReleaseType(Version lastVersion) {
+  ReleaseType computeReleaseType(Version lastVersion, bool atBranchPoint) {
+    if (atBranchPoint) {
+      return ReleaseType.BETA_INITIAL;
+    }
+
     if (releaseChannel == 'stable') {
       if (lastVersion.type == VersionType.stable) {
         return ReleaseType.STABLE_HOTFIX;
@@ -288,19 +297,8 @@ class StartContext extends Context {
         return ReleaseType.STABLE_INITIAL;
       }
     }
-    if (releaseChannel != 'beta') {
-      throw ConductorException('Unknown release channel $releaseChannel');
-    }
 
-    throw 'whoops';
-    //switch (releaseChannel) {
-    //  case 'stable':
-    //    return 'z';
-    //  case 'beta':
-    //    return 'n';
-    //  default:
-    //    throw ConductorException('Unknown channel "$releaseChannel"');
-    //}
+    return ReleaseType.BETA_HOTFIX;
   }
 
   Future<void> run() async {
@@ -398,7 +396,12 @@ class StartContext extends Context {
       candidateBranch,
       exact: false,
     ));
-    final ReleaseType releaseType = computeReleaseType(lastVersion);
+
+    final String frameworkHead = await framework.reverseParse('HEAD');
+    final String branchPoint = await framework.branchPoint(candidateBranch, FrameworkRepository.defaultBranch);
+    final bool atBranchPoint = branchPoint == frameworkHead;
+
+    final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
     state.releaseType = releaseType;
 
     try {
@@ -410,12 +413,15 @@ class StartContext extends Context {
 
     Version nextVersion = calculateNextVersion(lastVersion, releaseType);
     if (!force) {
-      nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+      nextVersion = await ensureBranchPointTagged(
+        branchPoint: branchPoint,
+        requestedVersion: nextVersion,
+        framework: framework,
+      );
     }
 
     state.releaseVersion = nextVersion.toString();
 
-    final String frameworkHead = await framework.reverseParse('HEAD');
     state.framework = pb.Repository(
       candidateBranch: candidateBranch,
       workingBranch: workingBranchName,
@@ -462,14 +468,11 @@ class StartContext extends Context {
   ///
   /// This is necessary for version reporting for users on the `master` channel
   /// to be correct.
-  Future<Version> ensureBranchPointTagged(
-    Version requestedVersion,
-    FrameworkRepository framework,
-  ) async {
-    final String branchPoint = await framework.branchPoint(
-      candidateBranch,
-      FrameworkRepository.defaultBranch,
-    );
+  Future<Version> ensureBranchPointTagged({
+    required Version requestedVersion,
+    required String branchPoint,
+    required FrameworkRepository framework,
+  }) async {
     if (await framework.isCommitTagged(branchPoint)) {
       // The branch point is tagged, no work to be done
       return requestedVersion;
