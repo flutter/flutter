@@ -554,6 +554,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
+              postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -643,6 +644,7 @@ void main() {
                 '-w', '1',
                 '192.168.178.1'
               ],
+              postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -732,6 +734,7 @@ void main() {
                 '-w', '1',
                 '::1'
               ],
+              postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -825,6 +828,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
+              postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: <String>[
                 'scp',
                 '-r',
@@ -904,6 +908,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
+              postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -1228,6 +1233,7 @@ void main() {
                 'testhostname'
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
+              postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
                 'scp',
                 '-r',
