@@ -366,7 +366,7 @@ public interface PluginRegistry {
      *     attached to Intent "extras").
      * @return true if the result has been handled.
      */
-    boolean onActivityResult(int requestCode, int resultCode, @NonNull Intent data);
+    boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
   }
 
   /**
