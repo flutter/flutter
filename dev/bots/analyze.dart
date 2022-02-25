@@ -1578,7 +1578,7 @@ Future<void> _checkConsumerDependencies() async {
   // Parse the output of pub deps --json to determine all of the
   // current packages used by the core set of flutter packages.
   for (final String package in kCorePackages) {
-    final ProcessResult result = await Process.run(dart, <String>[
+    final ProcessResult result = await Process.run(flutter, <String>[
       'pub',
       'deps',
       '--json',
