@@ -43,8 +43,8 @@ class MigrateConfig {
     platform = map['platform'] as String;
     createRevision = map['createRevision'] as String;
     baseRevision = map['baseRevision'] as String;
-    if (map['unmanagedFiles'] != null) {
-      unmanagedFiles = List<String>.from(map['unmanagedFiles'] as Iterable<String>);
+    if (map['unmanagedFiles'] != null && (map['unmanagedFiles'] as YamlList).isNotEmpty) {
+      unmanagedFiles = List<String>.from((map['unmanagedFiles'] as YamlList).value.cast<String>());
     } else {
       unmanagedFiles = <String>[];
     }
@@ -69,13 +69,13 @@ class MigrateConfig {
     file.createSync(recursive: true);
     String unmanagedFilesString = '';
     for (final String path in unmanagedFiles) {
-      unmanagedFilesString += '  - $path\n';
+      unmanagedFilesString += "  - '$path'\n";
     }
     file.writeAsStringSync('''
 # Generated section.
-platform: $platform
-createRevision: $createRevision
-baseRevision: $baseRevision
+platform: '$platform'
+createRevision: ${createRevision == null ? 'null' : "'$createRevision'"}
+baseRevision: ${baseRevision == null ? 'null' : "'$baseRevision'"}
 
 # User provided section
 
@@ -160,7 +160,7 @@ $unmanagedFilesString
     if (flutterProject.android.existsSync()) {
       platforms.add('android');
     }
-    if (flutterProject.ios.existsSync()) {
+    if (flutterProject.ios.exists) {
       platforms.add('ios');
     }
     if (flutterProject.web.existsSync()) {

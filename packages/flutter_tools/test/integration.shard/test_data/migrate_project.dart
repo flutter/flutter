@@ -38,13 +38,15 @@ class MigrateProject extends Project {
     // This cp command changes the symlinks to real files so the tool can edit them.
     if (globals.platform.isWindows) {
       await processManager.run(<String>[
-        'copy',
-        '${tempDir.path}/',
+        'robocopy',
+        tempDir.path,
         dir.path,
+        '*',
+        '/E'
       ]);
 
       await processManager.run(<String>[
-        'del',
+        'erase',
         '/s',
         '/q',
         '.cipd',
@@ -64,6 +66,11 @@ class MigrateProject extends Project {
         '-rf',
         '.cipd',
       ], workingDirectory: dir.path);
+
+      print((await processManager.run(<String>[
+        'ls',
+        '-R',
+      ], workingDirectory: dir.path)).stdout);
 
       final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
       for (final FileSystemEntity file in allFiles) {

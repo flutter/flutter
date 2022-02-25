@@ -37,9 +37,9 @@ void main() {
     configFile.createSync(recursive: true);
     configFile.writeAsStringSync('''
 # Generated section.
-platform: root
-createRevision: abcdefg1234567
-baseRevision: abcdefg1234567base
+platform: 'root'
+createRevision: 'abcdefg1234567'
+baseRevision: 'abcdefg1234567base'
 
 # User provided section
 
@@ -48,7 +48,7 @@ baseRevision: abcdefg1234567base
 #
 # Files that are not part of the templates will be ignored by default.
 unmanagedFiles:
-  - lib/main.dart
+  - 'lib/main.dart'
 
 ''', flush: true);
     MigrateConfig config = MigrateConfig.fromFile(configFile);
@@ -60,7 +60,7 @@ unmanagedFiles:
 
     configFile.writeAsStringSync('''
 # Generated section.
-platform: root
+platform: 'root'
 createRevision: null
 baseRevision: null
 
@@ -95,7 +95,7 @@ unmanagedFiles:
     File configFile = tempDir.childFile('.migrate_config');
     expect(configFile.readAsStringSync(), equals('''
 # Generated section.
-platform: root
+platform: 'root'
 createRevision: null
 baseRevision: null
 
@@ -119,9 +119,9 @@ unmanagedFiles:
     configFile = tempDir.childDirectory('android').childFile('.migrate_config');
     expect(configFile.readAsStringSync(), equals('''
 # Generated section.
-platform: android
-createRevision: abcd
-baseRevision: 1234
+platform: 'android'
+createRevision: 'abcd'
+baseRevision: '1234'
 
 # User provided section
 
@@ -130,8 +130,8 @@ baseRevision: 1234
 #
 # Files that are not part of the templates will be ignored by default.
 unmanagedFiles:
-  - test1/test.dart
-  - file/two.txt
+  - 'test1/test.dart'
+  - 'file/two.txt'
 
 '''));
   });
@@ -145,9 +145,9 @@ unmanagedFiles:
     configFile.createSync(recursive: true);
     configFile.writeAsStringSync('''
 # Generated section.
-platform: root
-createRevision: abcdefg1234567
-baseRevision: abcdefg1234567base
+platform: 'root'
+createRevision: 'abcdefg1234567'
+baseRevision: 'abcdefg1234567base'
 
 # User provided section
 
@@ -156,16 +156,16 @@ baseRevision: abcdefg1234567base
 #
 # Files that are not part of the templates will be ignored by default.
 unmanagedFiles:
-  - lib/main.dart
+  - 'lib/main.dart'
 
 ''', flush: true);
 
     configFile = tempDir.childDirectory('android').childFile('.migrate_config');
     configFile.writeAsStringSync('''
 # Generated section.
-platform: android
-createRevision: abcdefg1234567
-baseRevision: abcdefg1234567
+platform: 'android'
+createRevision: 'abcdefg1234567'
+baseRevision: 'abcdefg1234567'
 
 # User provided section
 
