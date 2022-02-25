@@ -1811,6 +1811,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _cursorTimer = null;
       }
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _scrollController.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
+      _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
+    });
   }
 
   @override
@@ -1840,10 +1845,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.scrollController != oldWidget.scrollController) {
       (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
       _scrollController.addListener(_updateSelectionOverlayForScroll);
-      // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      //   (oldWidget.scrollController ?? _internalScrollController)?.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
-      //   _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
-      // });
     }
 
     if (!_shouldCreateInputConnection) {
