@@ -81,9 +81,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               ),
             );
           },
-          onAccept: (int data) {
+          onAccept: (int? data) {
             setState(() {
-              acceptedData += data;
+              acceptedData += data!;
             });
           },
         ),

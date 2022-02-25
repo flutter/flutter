@@ -319,6 +319,17 @@ void main() {
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
+
+    testWithoutContext('PubDependencies should be registered as web based', () async {
+      final BufferLogger logger = BufferLogger.test();
+      final PubDependencies pubDependencies = PubDependencies(
+        flutterRoot: () => '',
+        logger: logger,
+        pub: () => FakePub(),
+      );
+
+      expect(pubDependencies.developmentArtifact, DevelopmentArtifact.web);
+    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
@@ -1071,19 +1082,6 @@ class FakeSimpleArtifact extends CachedArtifact {
     cache,
     DevelopmentArtifact.universal,
   );
-
-  @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
-}
-
-class FakeDownloadedArtifact extends CachedArtifact {
-  FakeDownloadedArtifact(this.downloadedFile, Cache cache) : super(
-    'fake',
-    cache,
-    DevelopmentArtifact.universal,
-  );
-
-  final File downloadedFile;
 
   @override
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }

@@ -88,6 +88,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
+
   print('$clock No sync*/async*');
   await verifyNoSyncAsyncStar(flutterPackages);
   await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
@@ -196,6 +199,53 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+/// Verify tool test files end in `_test.dart`.
+///
+/// The test runner will only recognize files ending in `_test.dart` as tests to
+/// be run: https://github.com/dart-lang/test/tree/master/pkgs/test#running-tests
+Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
+  final String toolsTestPath = path.join(
+    workingDirectory,
+    'packages',
+    'flutter_tools',
+    'test',
+  );
+  final List<String> violations = <String>[];
+
+  // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
+  final RegExp callsTestFunctionPattern = RegExp(r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))');
+
+  await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
+    final bool isValidTestFile = file.path.endsWith('_test.dart');
+    if (isValidTestFile) {
+      continue;
+    }
+
+    final bool isTestData = file.path.contains(r'test_data');
+    if (isTestData) {
+      continue;
+    }
+
+    final bool isInTestShard = file.path.contains(r'.shard/');
+    if (!isInTestShard) {
+      continue;
+    }
+
+    final bool callsTestFunction = file.readAsStringSync().contains(callsTestFunctionPattern);
+    if (!callsTestFunction) {
+      continue;
+    }
+
+    violations.add(file.path);
+  }
+  if (violations.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
+      ...violations,
+    ]);
+  }
+}
 
 Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
   final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
@@ -1515,24 +1565,50 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
-  final ProcessResult result = await Process.run(flutter, <String>[
-    'update-packages',
-    '--transitive-closure',
-    '--consumer-only',
-  ]);
-  if (result.exitCode != 0) {
-    print(result.stdout as Object);
-    print(result.stderr as Object);
-    exit(result.exitCode);
-  }
+  const List<String> kCorePackages = <String>[
+    'flutter',
+    'flutter_test',
+    'flutter_driver',
+    'flutter_localizations',
+    'integration_test',
+    'fuchsia_remote_debug_protocol',
+  ];
   final Set<String> dependencies = <String>{};
-  for (final String line in result.stdout.toString().split('\n')) {
-    if (!line.contains('->')) {
-      continue;
+
+  // Parse the output of pub deps --json to determine all of the
+  // current packages used by the core set of flutter packages.
+  for (final String package in kCorePackages) {
+    final ProcessResult result = await Process.run(dart, <String>[
+      'pub',
+      'deps',
+      '--json',
+      '--directory=${path.join(flutterRoot, 'packages', package)}'
+    ]);
+    if (result.exitCode != 0) {
+      print(result.stdout as Object);
+      print(result.stderr as Object);
+      exit(result.exitCode);
     }
-    final List<String> parts = line.split('->');
-    final String name = parts[0].trim();
-    dependencies.add(name);
+    final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
+    final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
+      for (final Map<String, Object?> package in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())
+        package['name']! as String : package,
+    };
+    final List<Map<String, Object?>> workset = <Map<String, Object?>>[];
+    workset.add(dependencyTree[package]!);
+
+    while (workset.isNotEmpty) {
+      final Map<String, Object?> currentPackage = workset.removeLast();
+      if (currentPackage['kind'] == 'dev') {
+        continue;
+      }
+      dependencies.add(currentPackage['name']! as String);
+
+      final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
+      for (final String dependency in currentDependencies) {
+        workset.add(dependencyTree[dependency]!);
+      }
+    }
   }
 
   final Set<String> removed = kCorePackageAllowList.difference(dependencies);
