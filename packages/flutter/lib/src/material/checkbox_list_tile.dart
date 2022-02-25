@@ -342,27 +342,25 @@ class CheckboxListTile extends StatelessWidget {
       ?? checkboxTheme.overlayColor?.resolve(states)
       ?? theme.toggleableActiveColor;
     return MergeSemantics(
-      child: ListTileTheme.merge(
+      child: ListTile(
         selectedColor: effectiveActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? _handleValueChange : null,
-          selected: selected,
-          autofocus: autofocus,
-          contentPadding: contentPadding,
-          shape: shape,
-          selectedTileColor: selectedTileColor,
-          tileColor: tileColor,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-        ),
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        enabled: onChanged != null,
+        onTap: onChanged != null ? _handleValueChange : null,
+        selected: selected,
+        autofocus: autofocus,
+        contentPadding: contentPadding,
+        shape: shape,
+        selectedTileColor: selectedTileColor,
+        tileColor: tileColor,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        enableFeedback: enableFeedback,
       ),
     );
   }
