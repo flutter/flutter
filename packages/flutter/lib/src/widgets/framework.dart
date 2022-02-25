@@ -3137,7 +3137,7 @@ class _NotificationNode {
   _NotificationNode? parent;
 
   void dispatchNotification(Notification notification) {
-    if (current?.onNotification(notification) == true) {
+    if (current?.onNotification(notification) ?? true) {
       return;
     }
     parent?.dispatchNotification(notification);

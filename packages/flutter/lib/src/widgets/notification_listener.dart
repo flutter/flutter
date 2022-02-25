@@ -58,10 +58,31 @@ abstract class Notification {
   /// Subclasses can override this to apply additional filtering or to update
   /// the notification as it is bubbled (for example, increasing a `depth` field
   /// for each ancestor of a particular type).
+  ///
+  /// This functionality was deprecated after v1.11.0 because of poor performance.
+  /// If you have a Notification subtype that overrides this method, you can instead
+  /// manually implement the old-style notification dispatch with the following
+  /// snippet:
+  ///
+  /// ```dart
+  ///  void dispatchNotificationSlowly<T extends Notification>(T notification, BuildContext context) {
+  ///    context.visitAncestorElements((Element element) {
+  ///       // Perform visit ancestor logic.
+  ///       notification.myAncestorLogic(element);
+  ///       if (element is ProxyElement) {
+  ///         final Widget widget = element.widget;
+  ///         if (widget is NotificationListener<T>) {
+  ///           return widget.onNotification?.call(notification) ?? true;
+  ///         }
+  ///       }
+  ///       return true;
+  ///    });
+  ///  }
+  /// ```
   @protected
   @mustCallSuper
   @Deprecated(
-    'Element traversal for notifications has poor performance compared to BuildContext.dispatchNotification. '
+    'Element traversal for notifications has poor performance. '
     'This feature was deprecated after v1.11.0.'
   )
   bool visitAncestor(Element element) {
@@ -77,10 +98,6 @@ abstract class Notification {
   /// with the appropriate type parameters that are ancestors of the given
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
-  @Deprecated(
-    'Notification.dispatch has poor performance. Use BuildContext.dispatchNotification instead. '
-    'This feature was deprecated after v1.11.0.'
-  )
   void dispatch(BuildContext? target) {
     target?.dispatchNotification(this);
   }
