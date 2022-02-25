@@ -66,7 +66,7 @@ TEST_F(EntityTest, TriangleInsideASquare) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, DISABLED_BadCubicCurveTest) {
+TEST_F(EntityTest, CubicCurveTest) {
   // Compare with https://fiddle.skia.org/c/b3625f26122c9de7afe7794fcf25ead3
   Path path =
       PathBuilder{}
@@ -88,7 +88,7 @@ TEST_F(EntityTest, DISABLED_BadCubicCurveTest) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, DISABLED_BadCubicCurveAndOverlapTest) {
+TEST_F(EntityTest, CubicCurveAndOverlapTest) {
   // Compare with https://fiddle.skia.org/c/7a05a3e186c65a8dfb732f68020aae06
   Path path =
       PathBuilder{}
