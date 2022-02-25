@@ -636,5 +636,24 @@ TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
   ASSERT_EQ(polyline.back().y, 40);
 }
 
+TEST(GeometryTest, PathCreatePolyLineDoesNotDuplicatePoints) {
+  Path path;
+  path.AddMoveComponent({10, 10});
+  path.AddLinearComponent({10, 10}, {20, 20});
+  path.AddLinearComponent({20, 20}, {30, 30});
+  path.AddMoveComponent({40, 40});
+  path.AddLinearComponent({40, 40}, {50, 50});
+
+  auto polyline = path.CreatePolyline();
+
+  ASSERT_EQ(polyline.breaks.size(), 2u);
+  ASSERT_EQ(polyline.points.size(), 5u);
+  ASSERT_EQ(polyline.points[0].x, 10);
+  ASSERT_EQ(polyline.points[1].x, 20);
+  ASSERT_EQ(polyline.points[2].x, 30);
+  ASSERT_EQ(polyline.points[3].x, 40);
+  ASSERT_EQ(polyline.points[4].x, 50);
+}
+
 }  // namespace testing
 }  // namespace impeller
