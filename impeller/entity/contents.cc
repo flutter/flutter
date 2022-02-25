@@ -293,6 +293,30 @@ const Color& SolidStrokeContents::GetColor() const {
   return color_;
 }
 
+static void CreateCap(
+    VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
+    const Point& position,
+    const Point& normal) {}
+
+static void CreateJoin(
+    VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
+    const Point& position,
+    const Point& start_normal,
+    const Point& end_normal) {
+  SolidStrokeVertexShader::PerVertexData vtx;
+  vtx.vertex_position = position;
+  vtx.pen_down = 1.0;
+  vtx.vertex_normal = {};
+  vtx_builder.AppendVertex(vtx);
+
+  // A simple bevel join to start with.
+  Scalar dir = start_normal.Cross(end_normal) > 0 ? -1 : 1;
+  vtx.vertex_normal = start_normal * dir;
+  vtx_builder.AppendVertex(vtx);
+  vtx.vertex_normal = end_normal * dir;
+  vtx_builder.AppendVertex(vtx);
+}
+
 static VertexBuffer CreateSolidStrokeVertices(const Path& path,
                                               HostBuffer& buffer) {
   using VS = SolidStrokeVertexShader;
@@ -300,43 +324,89 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   auto polyline = path.CreatePolyline();
 
-  for (size_t i = 0, polyline_size = polyline.points.size(); i < polyline_size;
-       i++) {
-    const auto is_last_point = i == polyline_size - 1;
+  size_t point_i = 0;
+  if (polyline.points.size() < 2) {
+    return {};  // Nothing to render.
+  }
 
-    const auto& p1 = polyline.points[i];
-    const auto& p2 =
-        is_last_point ? polyline.points[i - 1] : polyline.points[i + 1];
+  VS::PerVertexData vtx;
 
-    const auto diff = p2 - p1;
+  // Cursor state.
+  Point direction;
+  Point normal;
+  Point previous_normal;  // Used for computing joins.
+  auto compute_normals = [&](size_t point_i) {
+    previous_normal = normal;
+    direction =
+        (polyline.points[point_i] - polyline.points[point_i - 1]).Normalize();
+    normal = {-direction.y, direction.x};
+  };
+  compute_normals(1);
 
-    const Scalar direction = is_last_point ? -1.0 : 1.0;
+  // Break state.
+  auto breaks_it = polyline.breaks.begin();
+  size_t break_end =
+      breaks_it != polyline.breaks.end() ? *breaks_it : polyline.points.size();
 
-    const auto normal =
-        Point{-diff.y * direction, diff.x * direction}.Normalize();
+  while (point_i < polyline.points.size()) {
+    if (point_i > 0) {
+      compute_normals(point_i);
 
-    VS::PerVertexData vtx;
-    vtx.vertex_position = p1;
-    auto pen_down =
-        polyline.breaks.find(i) == polyline.breaks.end() ? 1.0 : 0.0;
-
-    vtx.vertex_normal = normal;
-    vtx.pen_down = pen_down;
-    vtx_builder.AppendVertex(vtx);
-
-    vtx.vertex_normal = -normal;
-    vtx.pen_down = pen_down;
-    vtx_builder.AppendVertex(vtx);
-
-    // Put the pen down again for the next contour.
-    if (!pen_down) {
-      vtx.vertex_normal = normal;
-      vtx.pen_down = 1.0;
+      // This branch only executes when we've just finished drawing a contour
+      // and are switching to a new one.
+      // We're drawing a triangle strip, so we need to "pick up the pen" by
+      // appending transparent vertices between the end of the previous contour
+      // and the beginning of the new contour.
+      vtx.vertex_position = polyline.points[point_i - 1];
+      vtx.vertex_normal = {};
+      vtx.pen_down = 0.0;
       vtx_builder.AppendVertex(vtx);
-
-      vtx.vertex_normal = -normal;
-      vtx.pen_down = 1.0;
+      vtx.vertex_position = polyline.points[point_i];
       vtx_builder.AppendVertex(vtx);
+    }
+
+    // Generate start cap.
+    CreateCap(vtx_builder, polyline.points[point_i], -direction);
+
+    // Generate contour geometry.
+    size_t contour_point_i = 0;
+    while (point_i < break_end) {
+      if (contour_point_i > 0) {
+        if (contour_point_i > 1) {
+          // Generate join from the previous line to the current line.
+          CreateJoin(vtx_builder, polyline.points[point_i - 1], previous_normal,
+                     normal);
+        } else {
+          compute_normals(point_i);
+        }
+
+        // Generate line rect.
+        vtx.vertex_position = polyline.points[point_i - 1];
+        vtx.pen_down = 1.0;
+        vtx.vertex_normal = normal;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_normal = -normal;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_position = polyline.points[point_i];
+        vtx.vertex_normal = normal;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_normal = -normal;
+        vtx_builder.AppendVertex(vtx);
+
+        compute_normals(point_i + 1);
+      }
+
+      ++contour_point_i;
+      ++point_i;
+    }
+
+    // Generate end cap.
+    CreateCap(vtx_builder, polyline.points[point_i - 1], -direction);
+
+    if (break_end < polyline.points.size()) {
+      ++breaks_it;
+      break_end = breaks_it != polyline.breaks.end() ? *breaks_it
+                                                     : polyline.points.size();
     }
   }
 
@@ -382,6 +452,30 @@ void SolidStrokeContents::SetStrokeSize(Scalar size) {
 
 Scalar SolidStrokeContents::GetStrokeSize() const {
   return stroke_size_;
+}
+
+void SolidStrokeContents::SetStrokeMiter(Scalar miter) {
+  miter_ = miter;
+}
+
+Scalar SolidStrokeContents::GetStrokeMiter(Scalar miter) {
+  return miter_;
+}
+
+void SolidStrokeContents::SetStrokeCap(Cap cap) {
+  cap_ = cap;
+}
+
+SolidStrokeContents::Cap SolidStrokeContents::GetStrokeCap() {
+  return cap_;
+}
+
+void SolidStrokeContents::SetStrokeJoin(Join join) {
+  join_ = join;
+}
+
+SolidStrokeContents::Join SolidStrokeContents::GetStrokeJoin() {
+  return join_;
 }
 
 /*******************************************************************************
