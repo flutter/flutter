@@ -384,11 +384,11 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+  testWidgets('Cancel an InkRipple that was disposed before its animation started', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
 
-    // Regression test for https://github.com/flutter/flutter/issues/14391
+    // Regression test for https://github.com/flutter/flutter/issues/17778
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -493,5 +493,37 @@ void main() {
     await testGesture.up();
     await tester.pumpAndSettle();
     expectTest(false);
+  });
+
+  // Test the case where an ReorderableListView contains an item of Ink ->
+  // InkWell.
+  //
+  // This is a regression test to an issue where Ink does not rebuild its ink
+  // feature when rebuilt/re-activated, leaving its ink feature with unmatched
+  // controller and reference box.
+  testWidgets('Reparenting Material->Ink->InkWell does not cause crash', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ReorderableListView(
+            children: <Widget>[
+              Ink(
+                key: const Key('0'),
+                child: InkWell(
+                  onTap: () {},
+                  child: const Text('test'),
+                ),
+              ),
+            ],
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.startGesture(tester.getCenter(find.byKey(const Key('0'))));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    // If it passes it works.
   });
 }

@@ -638,7 +638,18 @@ abstract class InkFeature {
   /// [State.deactivate] and [State.activate].
   bool visible = true;
 
+  /// Whether or not visual reaction is activated.
+  ///
+  /// Change this field will affect whether this InkFeature is render in next
+  /// frame.
+  ///
+  /// For this InkFeature to render properly, it should usually be change in
+  /// [State.deactivate] and [State.activate].
+  bool visible = true;
+
   /// Free up the resources associated with this ink feature.
+  ///
+  /// This method can only be called once per [InkFeature] instance.
   @mustCallSuper
   void dispose() {
     assert(!_disposed);
