@@ -36,6 +36,7 @@ FILE: ../../../flutter/common/task_runners.cc
 FILE: ../../../flutter/common/task_runners.h
 FILE: ../../../flutter/display_list/display_list.cc
 FILE: ../../../flutter/display_list/display_list.h
+FILE: ../../../flutter/display_list/display_list_attributes.h
 FILE: ../../../flutter/display_list/display_list_benchmarks.cc
 FILE: ../../../flutter/display_list/display_list_benchmarks.h
 FILE: ../../../flutter/display_list/display_list_benchmarks_canvas_provider.h

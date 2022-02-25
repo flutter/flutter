@@ -8,6 +8,7 @@ source_set("display_list") {
   sources = [
     "display_list.cc",
     "display_list.h",
+    "display_list_attributes.h",
     "display_list_builder.cc",
     "display_list_builder.h",
     "display_list_canvas_dispatcher.cc",
