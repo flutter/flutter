@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/tessellator.h"
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/libtess2/Include/tesselator.h"
 
@@ -35,7 +36,7 @@ static void DestroyTessellator(TESStesselator* tessellator) {
   }
 }
 
-bool Tessellator::Tessellate(const std::vector<Point>& contours,
+bool Tessellator::Tessellate(const Path::Polyline& contours,
                              VertexCallback callback) const {
   TRACE_EVENT0("impeller", "Tessellator::Tessellate");
   if (!callback) {
@@ -60,11 +61,11 @@ bool Tessellator::Tessellate(const std::vector<Point>& contours,
   /// Feed contour information to the tessellator.
   ///
   static_assert(sizeof(Point) == 2 * sizeof(float));
-  ::tessAddContour(tessellator.get(),  // the C tessellator
-                   kVertexSize,        //
-                   contours.data(),    //
-                   sizeof(Point),      //
-                   contours.size()     //
+  ::tessAddContour(tessellator.get(),       // the C tessellator
+                   kVertexSize,             //
+                   contours.points.data(),  //
+                   sizeof(Point),           //
+                   contours.points.size()   //
   );
 
   //----------------------------------------------------------------------------

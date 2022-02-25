@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/scalar.h"
 
@@ -103,6 +104,18 @@ struct CubicPathComponent {
   bool operator==(const CubicPathComponent& other) const {
     return p1 == other.p1 && cp1 == other.cp1 && cp2 == other.cp2 &&
            p2 == other.p2;
+  }
+};
+
+struct MovePathComponent {
+  Point destination;
+
+  MovePathComponent() {}
+
+  MovePathComponent(Point p) : destination(p) {}
+
+  bool operator==(const MovePathComponent& other) const {
+    return destination == other.destination;
   }
 };
 

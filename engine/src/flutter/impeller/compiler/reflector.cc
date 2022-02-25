@@ -611,6 +611,14 @@ static VertexType VertexTypeFromInputResource(
              type.columns == 1u && type.vecsize == 3u &&
              type.width == sizeof(float) * 8u) {
     result.type_name = "Vector3";
+  } else if (type.basetype == spirv_cross::SPIRType::BaseType::Float &&
+             type.columns == 1u && type.vecsize == 1u &&
+             type.width == sizeof(float) * 8u) {
+    result.type_name = "Scalar";
+  } else if (type.basetype == spirv_cross::SPIRType::BaseType::Int &&
+             type.columns == 1u && type.vecsize == 1u &&
+             type.width == sizeof(int32_t) * 8u) {
+    result.type_name = "int32_t";
   } else {
     // Catch all unknown padding.
     result.type_name = TypeNameWithPaddingOfSize(total_size);
