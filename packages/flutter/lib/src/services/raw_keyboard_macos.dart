@@ -19,7 +19,7 @@ int _runeToLowerCase(int rune) {
 }
 
 bool _isEasciiCharacter(int character) {
-  return character != null && character < 256;
+  return character > 0 && character < 256;
 }
 
 /// Platform-specific key event data for macOS.

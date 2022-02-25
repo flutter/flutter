@@ -17,8 +17,11 @@ class WebCodeGenerator extends PlatformCodeGenerator {
     PhysicalKeyData keyData,
     LogicalKeyData logicalData,
     String logicalLocationMap,
+    this.verbatimPhysicalToLogical,
   ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap),
       super(keyData, logicalData);
+
+  final Map<String, String> verbatimPhysicalToLogical;
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
@@ -62,6 +65,17 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   }
   final Map<String, List<String?>> _logicalLocationMap;
 
+  String get _verbatimPhysicalToLogicalMap {
+    final OutputLines<int> lines = OutputLines<int>('Web verbatim');
+    verbatimPhysicalToLogical.forEach((String physicalName, String logicalName) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(physicalName);
+      final LogicalKeyEntry logicalEntry = logicalData.entryByName(logicalName);
+      lines.add(physicalEntry.usbHidCode, "  ${toHex(physicalEntry.usbHidCode)}: ${toHex(logicalEntry.value)},"
+          '    // ${physicalEntry.name} -> ${logicalEntry.name}');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'web_key_map_dart.tmpl');
 
@@ -75,6 +89,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
       'WEB_LOGICAL_KEY_CODE_MAP': _webLogicalKeyCodeMap,
       'WEB_PHYSICAL_KEY_CODE_MAP': _webPhysicalKeyCodeMap,
       'WEB_LOGICAL_LOCATION_MAP': _webLogicalLocationMap,
+      'VERBATIM_PHYSICAL_TO_LOGICAL_MAP': _verbatimPhysicalToLogicalMap,
     };
   }
 }

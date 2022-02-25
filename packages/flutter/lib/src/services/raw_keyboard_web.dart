@@ -15,6 +15,26 @@ String? _unicodeChar(String key) {
   return null;
 }
 
+bool _isEasciiCharacter(int character) {
+  return character != null && character < 256;
+}
+
+// Out of `character`, check if it only contains one UTF-32 character, and
+// return the character if so, or null otherwise.
+int? _getSingleUtf32Character(String character) {
+  final RuneIterator runes = Runes(character).iterator;
+  // Invalid if there are no characters.
+  if (!runes.moveNext()) {
+    return null;
+  }
+  final int result = runes.current;
+  // Invalid if there are more than one characters.
+  if (runes.moveNext()) {
+    return null;
+  }
+  return result;
+}
+
 /// Platform-specific key event data for Web.
 ///
 /// See also:
@@ -107,9 +127,21 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return newKey;
     }
 
-    final bool isPrintable = key.length == 1;
-    if (isPrintable)
-      return LogicalKeyboardKey(key.toLowerCase().codeUnitAt(0));
+    final int? character = _getSingleUtf32Character(key.toLowerCase());
+    if (character != null) {
+      // If character is non-EASCII, use the printable physical key as logical
+      // key instead. This allows non-latin languages (such as Russian) to
+      // produce latin logical keys so that shortcuts work correctly.
+      if (!_isEasciiCharacter(character)) {
+        final LogicalKeyboardKey? result = kVerbatimPhysicalToLogicalKey[physicalKey.usbHidUsage];
+        if (result != null) {
+          return result;
+        }
+      }
+
+      // Otherwise, use the character directly as the logical key.
+      return LogicalKeyboardKey(character);
+    }
 
     // This is a non-printable key that we don't know about, so we mint a new
     // key from `code`. Don't mint with `key`, because the `key` will always be

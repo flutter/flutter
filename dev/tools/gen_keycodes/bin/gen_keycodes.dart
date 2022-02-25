@@ -260,6 +260,7 @@ Future<void> main(List<String> rawArguments) async {
       physicalData,
       logicalData,
       readDataFile('web_logical_location_mapping.json'),
+      verbatimMap,
     ),
   };
   await Future.wait(platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
