@@ -404,28 +404,26 @@ class SwitchListTile extends StatelessWidget {
       ?? switchTheme.overlayColor?.resolve(states)
       ?? theme.toggleableActiveColor;
     return MergeSemantics(
-      child: ListTileTheme.merge(
+      child: ListTile(
         selectedColor: effectiveActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          contentPadding: contentPadding,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged!(!value); } : null,
-          selected: selected,
-          selectedTileColor: selectedTileColor,
-          autofocus: autofocus,
-          shape: shape,
-          tileColor: tileColor,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-          hoverColor: hoverColor,
-        ),
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        contentPadding: contentPadding,
+        enabled: onChanged != null,
+        onTap: onChanged != null ? () { onChanged!(!value); } : null,
+        selected: selected,
+        selectedTileColor: selectedTileColor,
+        autofocus: autofocus,
+        shape: shape,
+        tileColor: tileColor,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        enableFeedback: enableFeedback,
+        hoverColor: hoverColor,
       ),
     );
   }
