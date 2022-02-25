@@ -85,28 +85,53 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   /// Whether or not the user requested debugging be enabled.
   ///
-  /// debug/noDebug here refers to the DAP "debug" mode and not the Flutter
-  /// debug mode (vs Profile/Release). It is provided by the client editor based
-  /// on whether a user chooses to "Run" or "Debug" their app.
+  /// For debugging to be enabled, the user must have chosen "Debug" (and not
+  /// "Run") in the editor (which maps to the DAP `noDebug` field) _and_ must
+  /// not have requested to run in Profile or Release mode. Profile/Release
+  /// modes will always disable debugging.
   ///
-  /// This is always enabled for attach requests, but can be disabled for launch
-  /// requests via DAP's `noDebug` flag. If `noDebug` is not provided, will
-  /// default to debugging.
+  /// This is always `true` for attach requests.
   ///
   /// When not debugging, we will not connect to the VM Service so some
   /// functionality (breakpoints, evaluation, etc.) will not be available.
   /// Functionality provided via the daemon (hot reload/restart) will still be
   /// available.
-  bool get debug {
+  bool get enableDebugger {
     final DartCommonLaunchAttachRequestArguments args = this.args;
     if (args is FlutterLaunchRequestArguments) {
       // Invert DAP's noDebug flag, treating it as false (so _do_ debug) if not
       // provided.
-      return !(args.noDebug ?? false);
+      return !(args.noDebug ?? false) && !profileMode && !releaseMode;
     }
 
     // Otherwise (attach), always debug.
     return true;
+  }
+
+  /// Whether the launch configuration arguments specify `--profile`.
+  ///
+  /// Always `false` for attach requests.
+  bool get profileMode {
+    final DartCommonLaunchAttachRequestArguments args = this.args;
+    if (args is FlutterLaunchRequestArguments) {
+      return args.toolArgs?.contains('--profile') ?? false;
+    }
+
+    // Otherwise (attach), always false.
+    return false;
+  }
+
+  /// Whether the launch configuration arguments specify `--release`.
+  ///
+  /// Always `false` for attach requests.
+  bool get releaseMode {
+    final DartCommonLaunchAttachRequestArguments args = this.args;
+    if (args is FlutterLaunchRequestArguments) {
+      return args.toolArgs?.contains('--release') ?? false;
+    }
+
+    // Otherwise (attach), always false.
+    return false;
   }
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
@@ -214,7 +239,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     final List<String> toolArgs = <String>[
       'run',
       '--machine',
-      if (debug) '--start-paused',
+      if (enableDebugger) '--start-paused',
     ];
 
     await _startProcess(
@@ -258,7 +283,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     // Delay responding until the app is launched and (optionally) the debugger
     // is connected.
     await appStartedCompleter.future;
-    if (debug) {
+    if (enableDebugger) {
       await debuggerInitialized;
     }
   }
@@ -363,7 +388,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   void _handleDebugPort(Map<String, Object?> params) {
     // When running in noDebug mode, Flutter may still provide us a VM Service
     // URI, but we will not connect it because we don't want to do any debugging.
-    if (!debug) {
+    if (!enableDebugger) {
       return;
     }
 
@@ -494,7 +519,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       await sendFlutterRequest('app.restart', <String, Object?>{
         'appId': _appId,
         'fullRestart': fullRestart,
-        'pause': debug,
+        'pause': enableDebugger,
         'reason': reason,
         'debounce': true,
       });
