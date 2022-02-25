@@ -7,7 +7,7 @@
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/backend/metal/backend_cast.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {

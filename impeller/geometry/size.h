@@ -29,6 +29,10 @@ struct TSize {
       : TSize(static_cast<Type>(other.width), static_cast<Type>(other.height)) {
   }
 
+  static constexpr TSize MakeWH(Type width, Type height) {
+    return TSize{width, height};
+  }
+
   static constexpr TSize Infinite() {
     return TSize{std::numeric_limits<Type>::max(),
                  std::numeric_limits<Type>::max()};

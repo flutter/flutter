@@ -18,6 +18,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
+#include "impeller/typographer/text_frame.h"
 
 namespace impeller {
 
@@ -73,6 +74,10 @@ class Canvas {
   void DrawShadow(Path path, Color color, Scalar elevation);
 
   void DrawPicture(Picture picture);
+
+  void DrawTextFrame(TextFrame text_frame,
+                     std::shared_ptr<GlyphAtlas> atlas,
+                     Point position);
 
   Picture EndRecordingAsPicture();
 

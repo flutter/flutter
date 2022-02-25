@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <ostream>
 
 #include "impeller/geometry/scalar.h"
 
@@ -683,3 +684,13 @@ struct ColorHSB {
 static_assert(sizeof(Color) == 4 * sizeof(Scalar));
 
 }  // namespace impeller
+
+namespace std {
+
+inline std::ostream& operator<<(std::ostream& out, const impeller::Color& c) {
+  out << "(" << c.red << ", " << c.green << ", " << c.blue << ", " << c.alpha
+      << ")";
+  return out;
+}
+
+}  // namespace std

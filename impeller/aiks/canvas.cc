@@ -252,4 +252,25 @@ void Canvas::Save(bool create_subpass) {
   xformation_stack_.emplace_back(std::move(entry));
 }
 
+void Canvas::DrawTextFrame(TextFrame text_frame,
+                           std::shared_ptr<GlyphAtlas> atlas,
+                           Point position) {
+  if (!atlas || !atlas->IsValid()) {
+    return;
+  }
+
+  auto text_contents = std::make_shared<TextContents>();
+  text_contents->SetTextFrame(std::move(text_frame));
+  text_contents->SetGlyphAtlas(std::move(atlas));
+
+  Entity entity;
+  entity.SetTransformation(GetCurrentTransformation() *
+                           Matrix::MakeTranslation(position));
+  entity.SetPath({});
+  entity.SetStencilDepth(GetStencilDepth());
+  entity.SetContents(std::move(text_contents));
+
+  GetCurrentPass().AddEntity(std::move(entity));
+}
+
 }  // namespace impeller

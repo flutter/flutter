@@ -105,7 +105,8 @@ static NSArray<id<MTLLibrary>>* MTLShaderLibraryFromFilePaths(
 
 static NSArray<id<MTLLibrary>>* MTLShaderLibraryFromFileData(
     id<MTLDevice> device,
-    const std::vector<std::shared_ptr<fml::Mapping>>& libraries_data) {
+    const std::vector<std::shared_ptr<fml::Mapping>>& libraries_data,
+    const std::string& label) {
   NSMutableArray<id<MTLLibrary>>* found_libraries = [NSMutableArray array];
   for (const auto& library_data : libraries_data) {
     if (library_data == nullptr) {
@@ -159,10 +160,12 @@ std::shared_ptr<Context> ContextMTL::Create(
 }
 
 std::shared_ptr<Context> ContextMTL::Create(
-    const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data) {
+    const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
+    const std::string& label) {
   auto device = CreateMetalDevice();
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, MTLShaderLibraryFromFileData(device, shader_libraries_data)));
+      device,
+      MTLShaderLibraryFromFileData(device, shader_libraries_data, label)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;

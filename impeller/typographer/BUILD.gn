@@ -1,0 +1,50 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("typographer") {
+  sources = [
+    "backends/skia/text_frame_skia.cc",
+    "backends/skia/text_frame_skia.h",
+    "backends/skia/text_render_context_skia.cc",
+    "backends/skia/text_render_context_skia.h",
+    "backends/skia/typeface_skia.cc",
+    "backends/skia/typeface_skia.h",
+    "font.cc",
+    "font.h",
+    "font_glyph_pair.cc",
+    "font_glyph_pair.h",
+    "glyph.cc",
+    "glyph.h",
+    "glyph_atlas.cc",
+    "glyph_atlas.h",
+    "text_frame.cc",
+    "text_frame.h",
+    "text_render_context.cc",
+    "text_render_context.h",
+    "text_run.cc",
+    "text_run.h",
+    "typeface.cc",
+    "typeface.h",
+  ]
+
+  public_deps = [
+    "../base",
+    "../geometry",
+    "../renderer",
+    "//third_party/skia",
+  ]
+}
+
+impeller_component("typographer_unittests") {
+  testonly = true
+
+  sources = [ "typographer_unittests.cc" ]
+
+  deps = [
+    ":typographer",
+    "../playground",
+  ]
+}
