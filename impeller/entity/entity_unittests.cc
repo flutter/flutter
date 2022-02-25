@@ -25,6 +25,47 @@ TEST_F(EntityTest, CanDrawRect) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
+TEST_F(EntityTest, ThreeStrokesInOnePath) {
+  Path path = PathBuilder{}
+                  .MoveTo({100, 100})
+                  .LineTo({100, 200})
+                  .MoveTo({100, 300})
+                  .LineTo({100, 400})
+                  .MoveTo({100, 500})
+                  .LineTo({100, 600})
+                  .TakePath();
+
+  Entity entity;
+  entity.SetPath(path);
+  auto contents = std::make_unique<SolidStrokeContents>();
+  contents->SetColor(Color::Red());
+  contents->SetStrokeSize(5.0);
+  entity.SetContents(std::move(contents));
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
+TEST_F(EntityTest, TriangleInsideASquare) {
+  Path path = PathBuilder{}
+                  .MoveTo({10, 10})
+                  .LineTo({210, 10})
+                  .LineTo({210, 210})
+                  .LineTo({10, 210})
+                  .Close()
+                  .MoveTo({50, 50})
+                  .LineTo({100, 50})
+                  .LineTo({50, 150})
+                  .Close()
+                  .TakePath();
+
+  Entity entity;
+  entity.SetPath(path);
+  auto contents = std::make_unique<SolidStrokeContents>();
+  contents->SetColor(Color::Red());
+  contents->SetStrokeSize(5.0);
+  entity.SetContents(std::move(contents));
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
 TEST_F(EntityTest, DISABLED_BadCubicCurveTest) {
   // Compare with https://fiddle.skia.org/c/b3625f26122c9de7afe7794fcf25ead3
   Path path =
@@ -45,7 +86,6 @@ TEST_F(EntityTest, DISABLED_BadCubicCurveTest) {
   entity.SetPath(path);
   entity.SetContents(SolidColorContents::Make(Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
-
 }
 
 TEST_F(EntityTest, DISABLED_BadCubicCurveAndOverlapTest) {

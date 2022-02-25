@@ -42,10 +42,16 @@ Path& Path::AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2) {
   return *this;
 }
 
-void Path::EnumerateComponents(
-    Applier<LinearPathComponent> linear_applier,
-    Applier<QuadraticPathComponent> quad_applier,
-    Applier<CubicPathComponent> cubic_applier) const {
+Path& Path::AddMoveComponent(Point destination) {
+  moves_.emplace_back(destination);
+  components_.emplace_back(ComponentType::kMove, moves_.size() - 1);
+  return *this;
+}
+
+void Path::EnumerateComponents(Applier<LinearPathComponent> linear_applier,
+                               Applier<QuadraticPathComponent> quad_applier,
+                               Applier<CubicPathComponent> cubic_applier,
+                               Applier<MovePathComponent> move_applier) const {
   size_t currentIndex = 0;
   for (const auto& component : components_) {
     switch (component.type) {
@@ -62,6 +68,11 @@ void Path::EnumerateComponents(
       case ComponentType::kCubic:
         if (cubic_applier) {
           cubic_applier(currentIndex, cubics_[component.index]);
+        }
+        break;
+      case ComponentType::kMove:
+        if (move_applier) {
+          move_applier(currentIndex, moves_[component.index]);
         }
         break;
     }
@@ -112,6 +123,20 @@ bool Path::GetCubicComponentAtIndex(size_t index,
   return true;
 }
 
+bool Path::GetMoveComponentAtIndex(size_t index,
+                                   MovePathComponent& move) const {
+  if (index >= components_.size()) {
+    return false;
+  }
+
+  if (components_[index].type != ComponentType::kMove) {
+    return false;
+  }
+
+  move = moves_[components_[index].index];
+  return true;
+}
+
 bool Path::UpdateLinearComponentAtIndex(size_t index,
                                         const LinearPathComponent& linear) {
   if (index >= components_.size()) {
@@ -155,12 +180,27 @@ bool Path::UpdateCubicComponentAtIndex(size_t index,
   return true;
 }
 
-std::vector<Point> Path::CreatePolyline(
+bool Path::UpdateMoveComponentAtIndex(size_t index,
+                                      const MovePathComponent& move) {
+  if (index >= components_.size()) {
+    return false;
+  }
+
+  if (components_[index].type != ComponentType::kMove) {
+    return false;
+  }
+
+  moves_[components_[index].index] = move;
+  return true;
+}
+
+Path::Polyline Path::CreatePolyline(
     const SmoothingApproximation& approximation) const {
-  std::vector<Point> points;
-  auto collect_points = [&points](const std::vector<Point>& collection) {
-    points.reserve(points.size() + collection.size());
-    points.insert(points.end(), collection.begin(), collection.end());
+  Polyline polyline;
+  auto collect_points = [&polyline](const std::vector<Point>& collection) {
+    polyline.points.reserve(polyline.points.size() + collection.size());
+    polyline.points.insert(polyline.points.end(), collection.begin(),
+                           collection.end());
   };
   for (const auto& component : components_) {
     switch (component.type) {
@@ -173,9 +213,12 @@ std::vector<Point> Path::CreatePolyline(
       case ComponentType::kCubic:
         collect_points(cubics_[component.index].CreatePolyline(approximation));
         break;
+      case ComponentType::kMove:
+        polyline.breaks.insert(polyline.points.size());
+        break;
     }
   }
-  return points;
+  return polyline;
 }
 
 std::optional<Rect> Path::GetBoundingBox() const {

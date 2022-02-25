@@ -178,7 +178,8 @@ TEST(GeometryTest, SimplePath) {
         ASSERT_EQ(cubic.cp1, cp1);
         ASSERT_EQ(cubic.cp2, cp2);
         ASSERT_EQ(cubic.p2, p2);
-      });
+      },
+      [](size_t index, const MovePathComponent& move) { ASSERT_TRUE(false); });
 }
 
 TEST(GeometryTest, BoundingBoxCubic) {
@@ -586,7 +587,7 @@ TEST(GeometryTest, RectContainsRect) {
 }
 
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
-  CubicPathComponent component({10, 10}, {20,35}, {35, 20}, {40, 40});
+  CubicPathComponent component({10, 10}, {20, 35}, {35, 20}, {40, 40});
   SmoothingApproximation approximation;
   auto polyline = component.CreatePolyline(approximation);
   ASSERT_NE(polyline.front().x, 10);

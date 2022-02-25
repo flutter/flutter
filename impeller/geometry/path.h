@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <optional>
+#include <set>
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
@@ -22,7 +23,9 @@ enum class FillType {
 
 //------------------------------------------------------------------------------
 /// @brief      Paths are lightweight objects that describe a collection of
-///             linear, quadratic, or cubic segments.
+///             linear, quadratic, or cubic segments. These segments may be
+///             be broken up by move commands, which are effectively linear
+///             commands that pick up the pen rather than continuing to draw.
 ///
 ///             All shapes supported by Impeller are paths either directly or
 ///             via approximation (in the case of circles).
@@ -36,6 +39,17 @@ class Path {
     kLinear,
     kQuadratic,
     kCubic,
+    kMove,
+  };
+
+  /// One or more contours represented as a series of points and indices in
+  /// the point vector representing the start of a new contour.
+  struct Polyline {
+    /// Points in the polyline, which may represent multiple contours specified
+    /// by indices in |breaks|.
+    std::vector<Point> points;
+    /// Indices of points that end a subcontour.
+    std::set<size_t> breaks;
   };
 
   Path();
@@ -54,11 +68,14 @@ class Path {
 
   Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
 
+  Path& AddMoveComponent(Point destination);
+
   template <class T>
   using Applier = std::function<void(size_t index, const T& component)>;
   void EnumerateComponents(Applier<LinearPathComponent> linearApplier,
                            Applier<QuadraticPathComponent> quadApplier,
-                           Applier<CubicPathComponent> cubicApplier) const;
+                           Applier<CubicPathComponent> cubicApplier,
+                           Applier<MovePathComponent> moveApplier) const;
 
   bool GetLinearComponentAtIndex(size_t index,
                                  LinearPathComponent& linear) const;
@@ -68,6 +85,8 @@ class Path {
 
   bool GetCubicComponentAtIndex(size_t index, CubicPathComponent& cubic) const;
 
+  bool GetMoveComponentAtIndex(size_t index, MovePathComponent& move) const;
+
   bool UpdateLinearComponentAtIndex(size_t index,
                                     const LinearPathComponent& linear);
 
@@ -76,7 +95,9 @@ class Path {
 
   bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
 
-  std::vector<Point> CreatePolyline(
+  bool UpdateMoveComponentAtIndex(size_t index, const MovePathComponent& move);
+
+  Polyline CreatePolyline(
       const SmoothingApproximation& approximation = {}) const;
 
   std::optional<Rect> GetBoundingBox() const;
@@ -99,6 +120,7 @@ class Path {
   std::vector<LinearPathComponent> linears_;
   std::vector<QuadraticPathComponent> quads_;
   std::vector<CubicPathComponent> cubics_;
+  std::vector<MovePathComponent> moves_;
 };
 
 }  // namespace impeller

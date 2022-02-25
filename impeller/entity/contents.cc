@@ -235,8 +235,7 @@ bool TextureContents::Render(const ContentContext& renderer,
               auto coverage_coords =
                   (vtx - coverage_rect->origin) / coverage_rect->size;
               data.texture_coords =
-                  (source_rect_.origin +
-                   source_rect_.size * coverage_coords) /
+                  (source_rect_.origin + source_rect_.size * coverage_coords) /
                   texture_size;
               vertex_builder.AppendVertex(data);
             });
@@ -301,11 +300,13 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   auto polyline = path.CreatePolyline();
 
-  for (size_t i = 0, polyline_size = polyline.size(); i < polyline_size; i++) {
+  for (size_t i = 0, polyline_size = polyline.points.size(); i < polyline_size;
+       i++) {
     const auto is_last_point = i == polyline_size - 1;
 
-    const auto& p1 = polyline[i];
-    const auto& p2 = is_last_point ? polyline[i - 1] : polyline[i + 1];
+    const auto& p1 = polyline.points[i];
+    const auto& p2 =
+        is_last_point ? polyline.points[i - 1] : polyline.points[i + 1];
 
     const auto diff = p2 - p1;
 
@@ -316,18 +317,27 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
 
     VS::PerVertexData vtx;
     vtx.vertex_position = p1;
-
-    if (i == 0) {
-      vtx.vertex_normal = -normal;
-      vtx_builder.AppendVertex(vtx);
-      vtx.vertex_normal = normal;
-      vtx_builder.AppendVertex(vtx);
-    }
+    auto pen_down =
+        polyline.breaks.find(i) == polyline.breaks.end() ? 1.0 : 0.0;
 
     vtx.vertex_normal = normal;
+    vtx.pen_down = pen_down;
     vtx_builder.AppendVertex(vtx);
+
     vtx.vertex_normal = -normal;
+    vtx.pen_down = pen_down;
     vtx_builder.AppendVertex(vtx);
+
+    // Put the pen down again for the next contour.
+    if (!pen_down) {
+      vtx.vertex_normal = normal;
+      vtx.pen_down = 1.0;
+      vtx_builder.AppendVertex(vtx);
+
+      vtx.vertex_normal = -normal;
+      vtx.pen_down = 1.0;
+      vtx_builder.AppendVertex(vtx);
+    }
   }
 
   return vtx_builder.CreateVertexBuffer(buffer);
