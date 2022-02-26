@@ -128,10 +128,9 @@ void main() {
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
-      // This is a git tag applied to the branch point, not an actual release
-      const String branchPointTag = '1.2.0-3.0.pre';
       // This is what this release will be
-      const String nextVersion = '1.2.0-3.1.pre';
+      const String nextVersion = '1.2.0-1.1.pre';
+      const String candidateBranch = 'flutter-1.2-candidate.1';
 
       final Directory engine = fileSystem
           .directory(checkoutsParentDirectory)
@@ -253,17 +252,9 @@ void main() {
           command: <String>['git', 'merge-base', candidateBranch, 'master'],
           stdout: branchPointRevision,
         ),
-        // check if commit is tagged
+        // check if commit is tagged, zero exit code means it is tagged
         const FakeCommand(
           command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
-          // non-zero exit means commit is not tagged
-          exitCode: 128,
-        ),
-        const FakeCommand(
-          command: <String>['git', 'tag', branchPointTag, branchPointRevision],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'push', FrameworkRepository.defaultUpstream, branchPointTag],
         ),
       ];
 
@@ -302,7 +293,9 @@ void main() {
         jsonDecode(stateFile.readAsStringSync()),
       );
 
-      expect(processManager.hasRemainingExpectations, false);
+      expect(state.releaseType, ReleaseType.BETA_HOTFIX);
+      expect(stdio.error, isNot(contains('Tried to tag the branch point, however the target version')));
+      expect(processManager, hasNoRemainingExpectations);
       expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
       expect(state.releaseVersion, nextVersion);
@@ -315,10 +308,6 @@ void main() {
       expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
-      expect(state.releaseType, ReleaseType.STABLE_HOTFIX);
-      expect(stdio.stdout, contains('Applying the tag $branchPointTag at the branch point $branchPointRevision'));
-      expect(stdio.stdout, contains('The actual release will be version $nextVersion'));
-      expect(branchPointTag != nextVersion, true);
     });
 
     test('logs to STDERR but does not fail on an unexpected candidate branch', () async {
