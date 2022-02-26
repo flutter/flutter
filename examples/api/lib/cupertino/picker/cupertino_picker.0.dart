@@ -8,12 +8,12 @@ import 'package:flutter/cupertino.dart';
 
 const double _kItemExtent = 32.0;
 const List<String> _fruitNames = <String>[
-  '🍎 Apple',
-  '🥭 Mango',
-  '🍌 Banana',
-  '🍊 Orange',
-  '🍍 Pineapple',
-  '🍓 Strawberry',
+  'Apple',
+  'Mango',
+  'Banana',
+  'Orange',
+  'Pineapple',
+  'Strawberry',
 ];
 
 void main() => runApp(const MyApp());

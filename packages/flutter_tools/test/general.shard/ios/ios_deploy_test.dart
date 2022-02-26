@@ -75,8 +75,9 @@ void main () {
         interfaceType: IOSDeviceConnectionInterface.network,
       );
 
+      expect(iosDeployDebugger.logLines, emits('Did finish launching.'));
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-      expect(await iosDeployDebugger.logLines.toList(), <String>['Did finish launching.']);
+      await iosDeployDebugger.logLines.drain();
       expect(processManager, hasNoRemainingExpectations);
       expect(appDeltaDirectory, exists);
     });
@@ -90,11 +91,13 @@ void main () {
         logger = BufferLogger.test();
       });
 
-      testWithoutContext('debugger attached', () async {
+      testWithoutContext('debugger attached and stopped', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['ios-deploy'],
-            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process exit',
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: "(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process stop\r\nthread backtrace all\r\n* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP",
+            stdin: IOSink(stdin.sink),
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
@@ -105,16 +108,47 @@ void main () {
         final Stream<String> logLines = iosDeployDebugger.logLines
           ..listen(receivedLogLines.add);
 
-        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await logLines.toList();
-        expect(receivedLogLines, <String>[
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
           'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
           'Log on attach1',
           'Log on attach2',
           '',
           '',
-          'Log after process exit',
+          'Log after process stop'
+        ]));
+        expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
+          'thread backtrace all',
+          '\n',
+          'process detach',
+        ]));
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.drain();
+
+        expect(logger.traceText, contains('PROCESS_STOPPED'));
+        expect(logger.traceText, contains('thread backtrace all'));
+        expect(logger.traceText, contains('* thread #1'));
+      });
+
+      testWithoutContext('handle processing logging after process exit', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        // Make sure we don't hit a race where logging processed after the process exits
+        // causes listeners to receive logging on the closed logLines stream.
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: 'stdout: "(lldb)     run\r\nsuccess\r\n',
+            stdin: IOSink(stdin.sink),
+            outputFollowsExit: true,
+          ),
         ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+
+        expect(iosDeployDebugger.logLines, emitsDone);
+        expect(await iosDeployDebugger.launchAndAttach(), isFalse);
+        await iosDeployDebugger.logLines.drain();
       });
 
       testWithoutContext('app exit', () async {
@@ -128,40 +162,47 @@ void main () {
           processManager: processManager,
           logger: logger,
         );
-        final List<String> receivedLogLines = <String>[];
-        final Stream<String> logLines = iosDeployDebugger.logLines
-          ..listen(receivedLogLines.add);
-
-        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await logLines.toList();
-        expect(receivedLogLines, <String>[
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
           'Log on attach',
           'Log after process exit',
-        ]);
+        ]));
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await iosDeployDebugger.logLines.drain();
       });
 
       testWithoutContext('app crash', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['ios-deploy'],
+          FakeCommand(
+            command: const <String>['ios-deploy'],
             stdout:
-                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:',
+                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:\r\nthread backtrace all\r\n* thread #1, stop reason = Assertion failed:',
+            stdin: IOSink(stdin.sink),
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
           processManager: processManager,
           logger: logger,
         );
-        final List<String> receivedLogLines = <String>[];
-        final Stream<String> logLines = iosDeployDebugger.logLines
-          ..listen(receivedLogLines.add);
 
-        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await logLines.toList();
-        expect(receivedLogLines, <String>[
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
           'Log on attach',
           '* thread #1, stop reason = Assertion failed:',
-        ]);
+        ]));
+
+        expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
+          'thread backtrace all',
+          '\n',
+          'process detach',
+        ]));
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await iosDeployDebugger.logLines.drain();
+
+        expect(logger.traceText, contains('Process 6156 stopped'));
+        expect(logger.traceText, contains('thread backtrace all'));
+        expect(logger.traceText, contains('* thread #1'));
       });
 
       testWithoutContext('attach failed', () async {
@@ -176,15 +217,12 @@ void main () {
           processManager: processManager,
           logger: logger,
         );
-        final List<String> receivedLogLines = <String>[];
-        final Stream<String> logLines = iosDeployDebugger.logLines
-          ..listen(receivedLogLines.add);
-
-        expect(await iosDeployDebugger.launchAndAttach(), isFalse);
-        await logLines.toList();
         // Debugger lines are double spaced, separated by an extra \r\n. Skip the extra lines.
         // Still include empty lines other than the extra added newlines.
-        expect(receivedLogLines, isEmpty);
+        expect(iosDeployDebugger.logLines, emitsDone);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isFalse);
+        await iosDeployDebugger.logLines.drain();
       });
 
       testWithoutContext('no provisioning profile 1, stdout', () async {
@@ -251,7 +289,6 @@ void main () {
 
     testWithoutContext('detach', () async {
       final StreamController<List<int>> stdin = StreamController<List<int>>();
-      final Stream<String> stdinStream = stdin.stream.transform<String>(const Utf8Decoder());
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
@@ -264,9 +301,34 @@ void main () {
       final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
         processManager: processManager,
       );
+      expect(stdin.stream.transform<String>(const Utf8Decoder()), emits('process detach'));
       await iosDeployDebugger.launchAndAttach();
       iosDeployDebugger.detach();
-      expect(await stdinStream.first, 'process detach');
+    });
+
+    testWithoutContext('stop with backtrace', () async {
+      final StreamController<List<int>> stdin = StreamController<List<int>>();
+      final Stream<String> stdinStream = stdin.stream.transform<String>(const Utf8Decoder());
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'ios-deploy',
+          ],
+          stdout:
+          '(lldb)     run\nsuccess\nLog on attach\n(lldb) Process 6156 stopped\n* thread #1, stop reason = Assertion failed:\n(lldb) Process 6156 detached',
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+      final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+        processManager: processManager,
+      );
+      await iosDeployDebugger.launchAndAttach();
+      await iosDeployDebugger.stopAndDumpBacktrace();
+      expect(await stdinStream.take(3).toList(), <String>[
+        'thread backtrace all',
+        '\n',
+        'process detach',
+      ]);
     });
   });
 

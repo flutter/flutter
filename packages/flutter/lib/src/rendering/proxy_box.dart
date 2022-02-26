@@ -2701,7 +2701,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    if (size.isEmpty || child?.size.isEmpty == true)
+    if (size.isEmpty || (child?.size.isEmpty ?? false))
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -4751,11 +4751,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     assert(
-      (scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      ((scopesRoute ?? false) && explicitChildNodes) || !(scopesRoute ?? false),
       'explicitChildNodes must be set to true if scopes route is true',
     );
     assert(
-      !(toggled == true && checked == true),
+      !((toggled ?? false) && (checked ?? false)),
       'A semantics node cannot be toggled and checked at the same time',
     );
 

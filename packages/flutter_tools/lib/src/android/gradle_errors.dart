@@ -226,8 +226,8 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required bool multidexEnabled,
   }) async {
     globals.printError(
-      '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
-      'Retrying to download...'
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
     );
     try {
       final String? homeDir = globals.platform.environment['HOME'];
@@ -390,27 +390,24 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final File gradleFile = project.directory
+    final File localPropertiesFile = project.directory
         .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
+        .childFile('local.properties');
 
     final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
     assert(minSdkVersionMatch?.groupCount == 3);
 
     final String textInBold = globals.logger.terminal.bolden(
-      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
-      'android {\n'
-      '  defaultConfig {\n'
-      '    minSdkVersion ${minSdkVersionMatch?.group(2)}\n'
-      '  }\n'
-      '}\n'
+      'Fix this issue by adding the following to the file ${localPropertiesFile.path}:\n'
+      '\n'
+      'flutter.minSdkVersion=${minSdkVersionMatch?.group(2)}\n'
     );
     globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
       '$textInBold\n'
       "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.',
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -518,8 +515,8 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final Match? minSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-    assert(minSdkVersionMatch?.groupCount == 1);
+    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    assert(minCompileSdkVersionMatch?.groupCount == 1);
 
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -529,7 +526,7 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
       '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
       'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
       'android {\n'
-      '  compileSdkVersion ${minSdkVersionMatch?.group(1)}\n'
+      '  compileSdkVersion ${minCompileSdkVersionMatch?.group(1)}\n'
       '}',
       title: _boxTitle,
     );

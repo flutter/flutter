@@ -102,8 +102,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -133,8 +132,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -155,8 +153,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -193,8 +190,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -223,8 +219,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -264,8 +259,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -292,8 +286,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -324,8 +317,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -778,16 +770,15 @@ assembleProfile
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
           '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
-          '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
-          '│ android {                                                                                     │\n'
-          '│   defaultConfig {                                                                             │\n'
-          '│     minSdkVersion 19                                                                          │\n'
-          '│   }                                                                                           │\n'
-          '│ }                                                                                             │\n'
+          '│ Fix this issue by adding the following to the file /android/local.properties:                 │\n'
+          '│                                                                                               │\n'
+          '│ flutter.minSdkVersion=19                                                                      │\n'
           '│                                                                                               │\n'
           "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
+          '│ For more information, see:                                                                    │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
