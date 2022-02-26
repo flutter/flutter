@@ -37,7 +37,7 @@ class HttpHostValidator extends DoctorValidator {
   HttpHostValidator({
     required Platform platform,
     required FeatureFlags featureFlags,
-    required HttpClient httpClient
+    required HttpClient httpClient,
   }) : _platform = platform,
       _featureFlags = featureFlags,
       _httpClient = httpClient,
@@ -80,8 +80,8 @@ class HttpHostValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-
-    final List<_HostValidationResult> availabilityResults = await Future.wait(_requiredHosts.map(_checkHostAvailability));
+    final Iterable<Future<_HostValidationResult>> availabilityResultFutures = _requiredHosts.map(_checkHostAvailability);
+    final List<_HostValidationResult> availabilityResults = await Future.wait(availabilityResultFutures);
 
     if (availabilityResults.every((_HostValidationResult result) => result.available)) {
       return ValidationResult(
