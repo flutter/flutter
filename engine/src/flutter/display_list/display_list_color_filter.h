@@ -86,8 +86,9 @@ class DlBlendColorFilter final : public DlColorFilter {
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override {
     // Look at blend and color to make a faster determination?
-    return skia_object()->filterColor(SK_ColorTRANSPARENT) !=
-           SK_ColorTRANSPARENT;
+    sk_sp<SkColorFilter> sk_filter = skia_object();
+    return sk_filter &&
+           sk_filter->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
   }
 
   std::shared_ptr<DlColorFilter> shared() const override {
@@ -142,8 +143,9 @@ class DlMatrixColorFilter final : public DlColorFilter {
   bool modifies_transparent_black() const override {
     // Look at the matrix to make a faster determination?
     // Basically, are the translation components all 0?
-    return skia_object()->filterColor(SK_ColorTRANSPARENT) !=
-           SK_ColorTRANSPARENT;
+    sk_sp<SkColorFilter> sk_filter = skia_object();
+    return sk_filter &&
+           sk_filter->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
   }
 
   std::shared_ptr<DlColorFilter> shared() const override {
