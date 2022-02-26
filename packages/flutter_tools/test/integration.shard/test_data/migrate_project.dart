@@ -72,7 +72,7 @@ class MigrateProject extends Project {
         '-R',
         '-L',
         '-f',
-        '${tempDir.path}/',
+        '${tempDir.path}/*',
         '${dir.path}/',
       ]);
 
