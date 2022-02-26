@@ -11600,7 +11600,7 @@ class Icons {
   /// <i class="material-icons-round md-36">insert_chart</i> &#x2014; material icon named "insert chart" (round).
   static const IconData insert_chart_rounded = IconData(0xf819, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">insert_chart</i> &#x2014; material icon named "insert chart" (outlined).
+  /// <i class="material-icons md-36">insert_chart</i> &#x2014; material icon named "insert chart".
   static const IconData insert_chart_outlined = IconData(0xf12a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined" (sharp).
@@ -16969,9 +16969,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">pie_chart</i> &#x2014; material icon named "pie chart" (round).
   static const IconData pie_chart_rounded = IconData(0xf009a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pie_chart</i> &#x2014; material icon named "pie chart" (outlined).
-  static const IconData pie_chart_outlined = IconData(0xf2a8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline".
   static const IconData pie_chart_outline = IconData(0xe4c5, fontFamily: 'MaterialIcons');
