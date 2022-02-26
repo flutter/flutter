@@ -5,7 +5,6 @@
 import 'dart:convert' show jsonDecode;
 
 import 'package:args/command_runner.dart';
-import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
 import 'package:conductor_core/src/proto/conductor_state.pbenum.dart';
 import 'package:conductor_core/src/repository.dart';
@@ -831,9 +830,10 @@ void main() {
           ],
           stdout: '$previousVersion-42-gabc123',
         ),
+        // HEAD and branch point are same
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
-          stdout: revision3,
+          stdout: branchPointRevision,
         ),
         const FakeCommand(
           command: <String>['git', 'merge-base', candidateBranch, 'master'],
@@ -903,9 +903,14 @@ void main() {
 
       await startContext.run();
 
+      final pb.ConductorState state = pb.ConductorState();
+      state.mergeFromProto3Json(
+        jsonDecode(stateFile.readAsStringSync()),
+      );
+
       expect((await startContext.engine.checkoutDirectory).path, equals(engine.path));
       expect((await startContext.framework.checkoutDirectory).path, equals(framework.path));
-      expect(stdio.error, isEmpty);
+      expect(state.releaseType, ReleaseType.BETA_INITIAL);
       expect(processManager, hasNoRemainingExpectations);
     });
   }, onPlatform: <String, dynamic>{

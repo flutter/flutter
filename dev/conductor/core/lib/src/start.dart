@@ -411,14 +411,11 @@ class StartContext extends Context {
       stdio.printError(e.message);
     }
 
-    Version nextVersion = calculateNextVersion(lastVersion, releaseType);
-    if (!force) {
-      nextVersion = await ensureBranchPointTagged(
-        branchPoint: branchPoint,
-        requestedVersion: nextVersion,
-        framework: framework,
-      );
-    }
+    final Version nextVersion = await ensureBranchPointTagged(
+      branchPoint: branchPoint,
+      requestedVersion: calculateNextVersion(lastVersion, releaseType),
+      framework: framework,
+    );
 
     state.releaseVersion = nextVersion.toString();
 
