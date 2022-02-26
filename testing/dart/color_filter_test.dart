@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
 
+const Color transparent = Color(0x00000000);
 const Color red = Color(0xFFAA0000);
 const Color green = Color(0xFF00AA00);
 
@@ -26,6 +27,12 @@ const List<double> greyscaleColorMatrix = <double>[
   0.2126, 0.7152, 0.0722, 0, 0, //
   0.2126, 0.7152, 0.0722, 0, 0, //
   0,      0,      0,      1, 0, //
+];
+const List<double> identityColorMatrix = <double>[
+  1, 0, 0, 0, 0,
+  0, 1, 0, 0, 0,
+  0, 0, 1, 0, 0,
+  0, 0, 0, 1, 0,
 ];
 
 void main() {
@@ -54,6 +61,25 @@ void main() {
     expect(bytes[0], greenRedColorBlendInverted);
   });
 
+  test('ColorFilter - NOP mode does not crash', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Paint paint = Paint()
+      ..color = green
+      ..colorFilter = const ColorFilter.mode(transparent, BlendMode.srcOver);
+    canvas.saveLayer(const Rect.fromLTRB(-100, -100, 200, 200), paint);
+    canvas.drawRect(const Rect.fromLTRB(0, 0, 100, 100), Paint());
+    canvas.restore();
+    final Picture picture = recorder.endRecording();
+
+    final SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset.zero, picture);
+
+    final Scene scene = builder.build();
+    expect(scene != null, true);
+    await scene.toImage(100, 100);
+  });
+
   test('ColorFilter - matrix', () async {
     final Paint paint = Paint()
       ..color = green
@@ -65,6 +91,25 @@ void main() {
     paint.invertColors = true;
     bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenInvertedGreyscaled);
+  });
+
+  test('ColorFilter - NOP matrix does not crash', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Paint paint = Paint()
+      ..color = const Color(0xff00AA00)
+      ..colorFilter = const ColorFilter.matrix(identityColorMatrix);
+    canvas.saveLayer(const Rect.fromLTRB(-100, -100, 200, 200), paint);
+    canvas.drawRect(const Rect.fromLTRB(0, 0, 100, 100), Paint());
+    canvas.restore();
+    final Picture picture = recorder.endRecording();
+
+    final SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset.zero, picture);
+
+    final Scene scene = builder.build();
+    expect(scene != null, true);
+    await scene.toImage(100, 100);
   });
 
   test('ColorFilter - linearToSrgbGamma', () async {
