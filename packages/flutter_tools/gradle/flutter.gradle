@@ -139,11 +139,6 @@ class FlutterPlugin implements Plugin<Project> {
     private Properties localProperties
     private String engineVersion
 
-    /**
-     * Flutter Docs Website references URLs for help messages.
-     */
-    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration'
-
     @Override
     void apply(Project project) {
         this.project = project
@@ -305,7 +300,7 @@ class FlutterPlugin implements Plugin<Project> {
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
         }
-        project.android.buildTypes.all this.&addFlutterDependencies        
+        project.android.buildTypes.all this.&addFlutterDependencies
     }
 
     private static Boolean shouldShrinkResources(Project project) {
@@ -414,33 +409,9 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
-            Boolean showBuildConfigurationMessage = false
-            
-            // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
                 project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
-                showBuildConfigurationMessage = true
             }
-
-            // Checks if there is a mismatch between the plugin minSdkVersion and the project minSdkVersion.
-            if(pluginProject.android.defaultConfig?.minSdkVersion?.apiLevel > project.android.defaultConfig?.minSdkVersion?.apiLevel) {
-                project.logger.quiet("Warning: The plugin ${pluginName} requires minSdkVersion ${pluginProject.android.defaultConfig?.minSdkVersion?.apiLevel}.")
-                showBuildConfigurationMessage = true
-                
-                if (!resolveProperty("flutter.minSdkVersion", null)) {
-                    project.logger.quiet("flutter.minSdkVersion not found on ${project.projectDir.parentFile}${File.separator}local.properties, consider adding it. Using ${project.android.defaultConfig.minSdkVersion.apiLevel} as default.")
-                }
-
-                // Additionally checks if the targetSdkVersion was set.
-                if (!resolveProperty("flutter.targetSdkVersion", null)) {
-                    project.logger.quiet("flutter.targetSdkVersion not found on ${project.projectDir.parentFile}${File.separator}local.properties, consider adding it. Using ${project.android.defaultConfig.targetSdkVersion.apiLevel} as default.")
-                }
-            }
-            
-            if (showBuildConfigurationMessage) {
-                project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
-            }
-
             project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
     }

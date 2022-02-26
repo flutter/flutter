@@ -2479,7 +2479,7 @@ void main() {
     expect(env['flutter'].allows(Version(2, 4, 9)), false);
   });
 
-  testUsingContext('default app uses local properties or flutter default versions', () async {
+  testUsingContext('default app uses flutter default versions', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2493,8 +2493,7 @@ void main() {
 
     expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
-    expect(buildContent.contains('minSdkVersion flutterMinSdkVersion'), true);
-    expect(buildContent.contains('targetSdkVersion flutterTargetSdkVersion'), true);
+    expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
