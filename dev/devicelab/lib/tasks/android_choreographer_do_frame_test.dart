@@ -20,7 +20,7 @@ const List<String> kSentinelStr = <String>[
 
 // Regression test for https://github.com/flutter/flutter/issues/98973
 // This test ensures that Choreographer#doFrame finishes during application startup.
-// This test failes if the application hangs during this period.
+// This test fails if the application hangs during this period.
 // https://ui.perfetto.dev/#!/?s=da6628c3a92456ae8fa3f345d0186e781da77e90fc8a64d073e9fee11d1e65
 TaskFunction androidChoreographerDoFrameTest({
   String? deviceIdOverride,
