@@ -6,7 +6,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/base/io.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart';
@@ -36,16 +35,14 @@ class MigrateProject extends Project {
     ], workingDirectory: dir.path);
 
     final File cipdFile = depotToolsDir.childFile(globals.platform.isWindows ? 'cipd.bat' : 'cipd');
-    ProcessResult result = await processManager.run(<String>[
+    await processManager.run(<String>[
       cipdFile.path,
       'init',
       tempDir.path,
       '-force',
     ], workingDirectory: dir.path);
 
-    print('CIPD init out:\n${result.stdout}\nERROR:\n${result.stderr}\n');
-
-    result = await processManager.run(<String>[
+    await processManager.run(<String>[
       cipdFile.path,
       'install',
       'flutter/test/full_app_fixtures/vanilla',
@@ -53,8 +50,6 @@ class MigrateProject extends Project {
       '-root',
       tempDir.path,
     ], workingDirectory: dir.path);
-
-    print('CIPD install out:\n${result.stdout}\nERROR:\n${result.stderr}\n');
 
     // This cp command changes the symlinks to real files so the tool can edit them.
     if (globals.platform.isWindows) {
@@ -73,7 +68,7 @@ class MigrateProject extends Project {
         '-L',
         '-f',
         '${tempDir.path}/.',
-        '${dir.path}',
+        dir.path,
       ]);
 
       await processManager.run(<String>[
@@ -81,11 +76,6 @@ class MigrateProject extends Project {
         '-rf',
         '.cipd',
       ], workingDirectory: dir.path);
-
-      print((await processManager.run(<String>[
-        'ls',
-        '-R',
-      ], workingDirectory: dir.path)).stdout);
 
       final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
       for (final FileSystemEntity file in allFiles) {
