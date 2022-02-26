@@ -114,6 +114,8 @@ class ReorderableList extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.onReorderStart,
+    this.onReorderEnd,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -165,6 +167,34 @@ class ReorderableList extends StatefulWidget {
   /// of the items.
   /// {@endtemplate}
   final ReorderCallback onReorder;
+
+  /// {@template flutter.widgets.reorderable_list.onReorderStart}
+  /// A callback that is called when an item drag has started.
+  ///
+  /// The index parameter of the callback is the index of the selected item.
+  ///
+  /// See also:
+  ///
+  ///   * [onReorderEnd], which is a called when the dragged item is dropped.
+  ///   * [onReorder], which reports that a list item has been dragged to a new
+  ///     location.
+  /// {@endtemplate}
+  final void Function(int index)? onReorderStart;
+
+  /// {@template flutter.widgets.reorderable_list.onReorderEnd}
+  /// A callback that is called when the dragged item is dropped.
+  ///
+  /// The index parameter of the callback is the index where the item is
+  /// dropped. Unlike [onReorder], this is called even when the list item is
+  /// dropped in the same location.
+  ///
+  /// See also:
+  ///
+  ///   * [onReorderStart], which is a called when an item drag has started.
+  ///   * [onReorder], which reports that a list item has been dragged to a new
+  ///     location.
+  /// {@endtemplate}
+  final void Function(int index)? onReorderEnd;
 
   /// {@template flutter.widgets.reorderable_list.proxyDecorator}
   /// A callback that allows the app to add an animated decoration around
@@ -360,6 +390,8 @@ class ReorderableListState extends State<ReorderableList> {
             itemBuilder: widget.itemBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            onReorderStart: widget.onReorderStart,
+            onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
           ),
         ),
@@ -400,6 +432,8 @@ class SliverReorderableList extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.onReorderStart,
+    this.onReorderEnd,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -418,6 +452,12 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderStart}
+  final void Function(int)? onReorderStart;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
+  final void Function(int)? onReorderEnd;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -640,6 +680,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     assert(_dragInfo == null);
     final _ReorderableItemState item = _items[_dragIndex!]!;
     item.dragging = true;
+    widget.onReorderStart?.call(_dragIndex!);
     item.rebuild();
     _dragStartTransitionComplete = false;
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
@@ -702,6 +743,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         }
       }
     });
+    widget.onReorderEnd?.call(_insertIndex!);
   }
 
   void _dropCompleted() {
