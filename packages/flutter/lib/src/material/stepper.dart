@@ -885,13 +885,20 @@ class _TrianglePainter extends CustomPainter {
 }
 
 
+/// designing connector lines
 class ConnectorStyle {
+
+  /// The line color when step is completed.
   final Color? activeColor;
+
+  /// The line color when step is uncompleted.
   final Color? inactiveColor;
 
+  /// The height of lines on horizontal type.
   /// This will apply only if [StepperType == StepperType.horizontal]
   final double? height;
 
+  /// The width of lines on vertical type.
   /// This will apply only if [StepperType == StepperType.vertical]
   final double? width;
 
