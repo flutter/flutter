@@ -96,6 +96,7 @@ class MigrateProject extends Project {
       writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspecCustom);
     }
     tryToDelete(tempDir);
+    tryToDelete(depotToolsDir);
   }
 
   final String version;

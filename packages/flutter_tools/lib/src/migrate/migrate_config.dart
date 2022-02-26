@@ -31,10 +31,10 @@ class MigrateConfig {
     required this.unmanagedFiles,
   });
 
-  /// Creates a MigrateConfig by parsing an existing migrate config yaml file.
+  /// Creates a MigrateConfig by parsing an existing .migrate_config yaml file.
   MigrateConfig.fromFile(File file) : unmanagedFiles = <String>[] {
     final dynamic yamlRoot = loadYaml(file.readAsStringSync());
-    if (!validate(yamlRoot)) {
+    if (!_validate(yamlRoot)) {
       // Error
       globals.logger.printError('Invalid migrate config yaml file found at ${file.path}');
       return;
@@ -49,16 +49,49 @@ class MigrateConfig {
       unmanagedFiles = <String>[];
     }
   }
+
+  /// The name of the config file.
   static const String kFileName = '.migrate_config';
-  static const Map<String, List<String>> kIosDefaultUnmanagedFiles = <String, List<String>>{
+
+  /// A mapping of the files that are unmanaged by deafult for each platform.
+  static const Map<String, List<String>> _kDefaultUnmanagedFiles = <String, List<String>>{
     'root': <String>['lib/main.dart'],
     'ios': <String>['Runner.xcodeproj/project.pbxproj'],
   };
 
+  /// The platform this config file is describing.
   String? platform;
+
+  /// The git revision this platform was initially created with.
+  ///
+  /// Null if the initial create git revision is unknown.
   String? createRevision;
+
+  /// The git revision this platform was last successfully migrated with.
+  ///
+  /// Null if the project was never migrated or the revision is unknown.
   String? baseRevision;
+
+  /// A list of paths relative to this file the migrate tool should ignore.
+  ///
+  /// These files are typically user-owned files that should not be changed.
   List<String> unmanagedFiles;
+
+  /// Verifies the expected yaml keys are present in the file.
+  bool _validate(dynamic yamlRoot) {
+    if (yamlRoot is! YamlMap) {
+      return false;
+    }
+    final YamlMap map = yamlRoot;
+    return map.keys.contains('platform') &&
+    (map['platform'] is String || map['platform'] == null) &&
+    map.keys.contains('createRevision') &&
+    (map['createRevision'] is String || map['createRevision'] == null) &&
+    map.keys.contains('baseRevision') &&
+    (map['baseRevision'] is String || map['baseRevision'] == null) &&
+    map.keys.contains('unmanagedFiles') &&
+    (map['unmanagedFiles'] is YamlList || map['unmanagedFiles'] == null);
+  }
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
   ///
@@ -87,6 +120,41 @@ unmanagedFiles:
 $unmanagedFilesString
 ''',
     flush: true);
+  }
+
+  /// Returns the absolute path of the platform directory this config belongs to.
+  ///
+  /// For example, if the config is the android config with a project directory of `/project`,
+  /// the base path returned would be `/project/android`.
+  String getBasePath(Directory? projectDirectory) {
+    return getFileFromPlatform(platform, projectDirectory: projectDirectory).parent.absolute.path;
+  }
+
+  /// Searches the flutter project for all .migrate_config files.
+  ///
+  /// Optionally, missing files can be initialized with default values.
+  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, String? currentRevision, String? createRevision, bool create = true}) async {
+    platforms ??= getSupportedPlatforms(includeRoot: true, flutterProject: projectDirectory == null ? null : FlutterProject.fromDirectory(projectDirectory));
+    final List<MigrateConfig> configs = <MigrateConfig>[];
+    for (final String platform in platforms) {
+      if (MigrateConfig.getFileFromPlatform(platform, projectDirectory: projectDirectory).existsSync()) {
+        // Existing config. Parsing.
+        configs.add(MigrateConfig.fromFile(getFileFromPlatform(platform, projectDirectory: projectDirectory)));
+      } else {
+        // No config found, creating empty config.
+        final MigrateConfig newConfig = MigrateConfig(
+          platform: platform,
+          createRevision: createRevision,
+          baseRevision: currentRevision,
+          unmanagedFiles: _kDefaultUnmanagedFiles[platform] != null ? _kDefaultUnmanagedFiles[platform]! : <String>[],
+        );
+        if (create) {
+          newConfig.writeFile(projectDirectory: projectDirectory);
+        }
+        configs.add(newConfig);
+      }
+    }
+    return configs;
   }
 
   /// Returns the File that the migrate config belongs given a platform and a project directory.
@@ -137,22 +205,6 @@ $unmanagedFilesString
     return platformDir.childFile(kFileName);
   }
 
-  String getBasePath(Directory? projectDirectory) {
-    return getFileFromPlatform(platform, projectDirectory: projectDirectory).parent.absolute.path;
-  }
-
-  /// Verifies the expected yaml keys are present in the file.
-  bool validate(dynamic yamlRoot) {
-    if (yamlRoot is! YamlMap) {
-      return false;
-    }
-    final YamlMap map = yamlRoot;
-    return map.keys.contains('platform') &&
-    map.keys.contains('createRevision') &&
-    map.keys.contains('baseRevision') &&
-    map.keys.contains('unmanagedFiles');
-  }
-
   /// Returns a list of platform names that are supported by the project.
   static List<String> getSupportedPlatforms({bool includeRoot = false, FlutterProject? flutterProject}) {
     final List<String> platforms = includeRoot ? <String>['root'] : <String>[];
@@ -184,32 +236,6 @@ $unmanagedFilesString
     return platforms;
   }
 
-  /// Searches the flutter project for all .migrate_config files. Optionally, missing files can be
-  /// initialized with default values.
-  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, String? currentRevision, String? createRevision, bool create = true}) async {
-    platforms ??= getSupportedPlatforms(includeRoot: true, flutterProject: projectDirectory == null ? null : FlutterProject.fromDirectory(projectDirectory));
-    final List<MigrateConfig> configs = <MigrateConfig>[];
-    for (final String platform in platforms) {
-      if (MigrateConfig.getFileFromPlatform(platform, projectDirectory: projectDirectory).existsSync()) {
-        // Existing config. Parsing.
-        configs.add(MigrateConfig.fromFile(getFileFromPlatform(platform, projectDirectory: projectDirectory)));
-      } else {
-        // No config found, creating empty config.
-        final MigrateConfig newConfig = MigrateConfig(
-          platform: platform,
-          createRevision: createRevision,
-          baseRevision: currentRevision,
-          unmanagedFiles: kIosDefaultUnmanagedFiles[platform] != null ? kIosDefaultUnmanagedFiles[platform]! : <String>[],
-        );
-        if (create) {
-          newConfig.writeFile(projectDirectory: projectDirectory);
-        }
-        configs.add(newConfig);
-      }
-    }
-    return configs;
-  }
-
   /// Finds the fallback revision to use when no base revision is found in the .migrate_config.
   static Future<String> getFallbackBaseRevision() async {
     // Use the .metadata file if it exists.
@@ -220,10 +246,10 @@ $unmanagedFilesString
         return metadata.versionRevision!;
       }
     }
-    return getGitHash(Cache.flutterRoot!);
+    return _getGitHash(Cache.flutterRoot!);
   }
 
-  static Future<String> getGitHash(String projectPath, [String tag = 'HEAD']) async {
+  static Future<String> _getGitHash(String projectPath, [String tag = 'HEAD']) async {
     final List<String> cmdArgs = <String>['rev-parse', tag];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: projectPath);
     return result.stdout as String;
