@@ -339,13 +339,17 @@ void _writeGeneratedFlutterConfig(
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, environment);
 }
 
-// Works around the Visual Studio CMake bug described in
+// Works around the Visual Studio 17.1.0 CMake bug described in
 // https://github.com/flutter/flutter/issues/97086
 //
 // Rather than attempt to remove all the duplicate entries within the
 // <CustomBuild> element, which would require a more complicated parser, this
 // just fixes the incorrect duplicates to have the correct `$<CONFIG>` value,
 // making the duplication harmless.
+//
+// TODO(stuartmorgan): Remove this workaround either once 17.1.0 is
+// sufficiently old that we no longer need to support it, or when
+// dropping VS 2022 support.
 void _fixBrokenCmakeGeneration(Directory buildDirectory) {
   final File assembleProject = buildDirectory
     .childDirectory('flutter')
