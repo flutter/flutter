@@ -44,7 +44,7 @@ void main() {
     expect(selectAllFinder, findsNothing);
     expect(crossIconFinder, findsNothing);
   });
-  
+
   testWidgets('tapping ListTile or checkBox should toggle ListTile state',
       (WidgetTester tester) async {
     await tester.pumpWidget(
