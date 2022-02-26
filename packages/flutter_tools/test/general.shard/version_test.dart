@@ -341,8 +341,6 @@ void main() {
         return VersionUpstreamValidator(
           version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
           platform: testPlatform,
-          flutterGitSshUrl: flutterStandardSshUrlDotGit,
-          flutterGitUrl: testPlatform.environment['FLUTTER_GIT_URL'] ?? flutterStandardUrlDotGit,
         );
       }
 
