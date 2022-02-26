@@ -65,6 +65,7 @@ Future<void> main() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   print('${kSentinelStr[1]}');
+  // If the Android UI thread is blocked, then this Future won't resolve.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   print('${kSentinelStr[2]}');
