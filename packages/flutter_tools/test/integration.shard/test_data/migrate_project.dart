@@ -72,8 +72,8 @@ class MigrateProject extends Project {
         '-R',
         '-L',
         '-f',
-        '${tempDir.path}/*',
-        '${dir.path}/',
+        '${tempDir.path}/.',
+        '${dir.path}',
       ]);
 
       await processManager.run(<String>[
