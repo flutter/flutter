@@ -165,7 +165,8 @@ Future<void> main() async {
         if (nextCompleterIdx == sentinelCompleters.values.length) {
           return TaskResult.success(null);
         }
-        return TaskResult.failure('Expected sentinel `${sentinelCompleters.keys.elementAt(nextCompleterIdx)}` in mode $mode');
+        final String nextSentinel = sentinelCompleters.keys.elementAt(nextCompleterIdx);
+        return TaskResult.failure('Expected sentinel `$nextSentinel` in mode $mode');
       }
 
       final TaskResult debugResult = await runTestFor('debug');
