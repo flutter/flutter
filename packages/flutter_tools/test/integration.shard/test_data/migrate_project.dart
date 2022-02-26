@@ -66,13 +66,6 @@ class MigrateProject extends Project {
         '/E',
         '/mov',
       ]);
-
-      // await processManager.run(<String>[
-      //   'erase',
-      //   '/s',
-      //   '/q',
-      //   '.cipd',
-      // ], workingDirectory: dir.path);
     } else {
       await processManager.run(<String>[
         'cp',
@@ -80,7 +73,7 @@ class MigrateProject extends Project {
         '-L',
         '-f',
         '${tempDir.path}/',
-        dir.path,
+        '${dir.path}/',
       ]);
 
       await processManager.run(<String>[
