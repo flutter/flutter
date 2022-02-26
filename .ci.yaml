@@ -4323,3 +4323,14 @@ targets:
     properties:
       tags: >
           ["framework","hostonly","shard"]
+
+  - name: Mac_android android_surface_recreation
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","mac"]
+      task_name: android_surface_recreation
+    scheduler: luci
