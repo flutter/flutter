@@ -124,6 +124,11 @@ TEST(DisplayListColorFilter, BlendNotEquals) {
   ASSERT_NE(filter3, filter1);
 }
 
+TEST(DisplayListColorFilter, NopBlendShouldNotCrash) {
+  DlBlendColorFilter filter(SK_ColorTRANSPARENT, SkBlendMode::kSrcOver);
+  ASSERT_FALSE(filter.modifies_transparent_black());
+}
+
 TEST(DisplayListColorFilter, MatrixConstructor) {
   DlMatrixColorFilter filter(matrix);
 }
@@ -176,6 +181,17 @@ TEST(DisplayListColorFilter, MatrixNotEquals) {
   matrix_[4] += 101;
   DlMatrixColorFilter filter2(matrix_);
   ASSERT_NE(filter1, filter2);
+}
+
+TEST(DisplayListColorFilter, NopMatrixShouldNotCrash) {
+  float matrix[20] = {
+      1, 0, 0, 0, 0,  //
+      0, 1, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0,  //
+  };
+  DlMatrixColorFilter filter(matrix);
+  ASSERT_FALSE(filter.modifies_transparent_black());
 }
 
 TEST(DisplayListColorFilter, SrgbToLinearConstructor) {

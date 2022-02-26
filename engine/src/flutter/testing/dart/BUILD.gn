@@ -28,6 +28,7 @@ tests = [
   "isolate_test.dart",
   "lerp_test.dart",
   "locale_test.dart",
+  "mask_filter_test.dart",
   "paragraph_builder_test.dart",
   "paragraph_test.dart",
   "path_test.dart",

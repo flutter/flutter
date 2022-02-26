@@ -234,7 +234,7 @@ bool Paint::sync_to(DisplayListBuilder* builder,
       } else {
         ColorFilter* decoded_color_filter =
             tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-        builder->setColorFilter(decoded_color_filter->filter().get());
+        builder->setColorFilter(decoded_color_filter->dl_filter());
       }
     }
 
@@ -302,7 +302,11 @@ bool Paint::sync_to(DisplayListBuilder* builder,
             static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
         double sigma = float_data[kMaskFilterSigmaIndex];
         DlBlurMaskFilter dl_filter(blur_style, sigma);
-        builder->setMaskFilter(&dl_filter);
+        if (dl_filter.skia_object()) {
+          builder->setMaskFilter(&dl_filter);
+        } else {
+          builder->setMaskFilter(nullptr);
+        }
         break;
     }
   }
