@@ -27,6 +27,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -1320,6 +1321,8 @@ class EmulatorDomain extends Domain {
 class ProxyDomain extends Domain {
   ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
+    registerHandler('calculateFileHashes', calculateFileHashes);
+    registerHandlerWithBinary('updateFile', updateFile);
     registerHandler('connect', connect);
     registerHandler('disconnect', disconnect);
     registerHandlerWithBinary('write', write);
@@ -1334,6 +1337,29 @@ class ProxyDomain extends Domain {
     final File file = tempDirectory.childFile(path);
     await file.parent.create(recursive: true);
     await file.openWrite().addStream(binary);
+  }
+
+  /// Calculate rolling hashes for a file in the local temporary directory.
+  Future<Map<String, dynamic>> calculateFileHashes(Map<String, dynamic> args) async {
+    final String path = _getStringArg(args, 'path', required: true);
+    final File file = tempDirectory.childFile(path);
+    if (!await file.exists()) {
+      return null;
+    }
+    final BlockHashes result = await FileTransfer().calculateBlockHashesOfFile(file);
+    return result.toJson();
+  }
+
+  Future<bool> updateFile(Map<String, dynamic> args, Stream<List<int>> binary) async {
+    final String path = _getStringArg(args, 'path', required: true);
+    final File file = tempDirectory.childFile(path);
+    if (!await file.exists()) {
+      return null;
+    }
+    final List<Map<String, dynamic>> deltaJson = (args['delta'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<FileDeltaBlock> delta = FileDeltaBlock.fromJsonList(deltaJson);
+    final bool result = await FileTransfer().rebuildFile(file, delta, binary);
+    return result;
   }
 
   /// Opens a connection to a local port, and returns the connection id.
@@ -1404,12 +1430,13 @@ class ProxyDomain extends Domain {
     for (final Socket connection in _forwardedConnections.values) {
       connection.destroy();
     }
-    await _tempDirectory?.delete(recursive: true);
+    // We deliberately not clean up the tempDirectory here. The application package files that
+    // are transferred into this directory through ProxiedDevices are left in the directory
+    // to be reused on any subsequent runs.
   }
 
-
   Directory _tempDirectory;
-  Directory get tempDirectory => _tempDirectory ??= globals.fs.systemTempDirectory.createTempSync('flutter_tool_daemon.');
+  Directory get tempDirectory => _tempDirectory ??= globals.fs.systemTempDirectory.childDirectory('flutter_tool_daemon')..createSync();
 }
 
 /// A [Logger] which sends log messages to a listening daemon client.

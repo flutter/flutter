@@ -100,7 +100,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
-       assert(!(controller != null && primary == true),
+       assert(!(controller != null && (primary ?? false)),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.',
        ),
@@ -109,7 +109,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(semanticChildCount == null || semanticChildCount >= 0),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
-       physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
+       physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}

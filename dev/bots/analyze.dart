@@ -1565,24 +1565,50 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
-  final ProcessResult result = await Process.run(flutter, <String>[
-    'update-packages',
-    '--transitive-closure',
-    '--consumer-only',
-  ]);
-  if (result.exitCode != 0) {
-    print(result.stdout as Object);
-    print(result.stderr as Object);
-    exit(result.exitCode);
-  }
+  const List<String> kCorePackages = <String>[
+    'flutter',
+    'flutter_test',
+    'flutter_driver',
+    'flutter_localizations',
+    'integration_test',
+    'fuchsia_remote_debug_protocol',
+  ];
   final Set<String> dependencies = <String>{};
-  for (final String line in result.stdout.toString().split('\n')) {
-    if (!line.contains('->')) {
-      continue;
+
+  // Parse the output of pub deps --json to determine all of the
+  // current packages used by the core set of flutter packages.
+  for (final String package in kCorePackages) {
+    final ProcessResult result = await Process.run(flutter, <String>[
+      'pub',
+      'deps',
+      '--json',
+      '--directory=${path.join(flutterRoot, 'packages', package)}'
+    ]);
+    if (result.exitCode != 0) {
+      print(result.stdout as Object);
+      print(result.stderr as Object);
+      exit(result.exitCode);
     }
-    final List<String> parts = line.split('->');
-    final String name = parts[0].trim();
-    dependencies.add(name);
+    final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
+    final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
+      for (final Map<String, Object?> package in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())
+        package['name']! as String : package,
+    };
+    final List<Map<String, Object?>> workset = <Map<String, Object?>>[];
+    workset.add(dependencyTree[package]!);
+
+    while (workset.isNotEmpty) {
+      final Map<String, Object?> currentPackage = workset.removeLast();
+      if (currentPackage['kind'] == 'dev') {
+        continue;
+      }
+      dependencies.add(currentPackage['name']! as String);
+
+      final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
+      for (final String dependency in currentDependencies) {
+        workset.add(dependencyTree[dependency]!);
+      }
+    }
   }
 
   final Set<String> removed = kCorePackageAllowList.difference(dependencies);

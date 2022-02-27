@@ -4340,7 +4340,7 @@ void main() {
   testWidgets('Change the TabController should make both TabBar and TabBarView return to the initial index.', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/93237
 
-    Widget buildFrame(TabController controller, bool showLast) {
+    Widget buildFrame(TabController controller, {required bool showLast}) {
       return boilerplate(
         child: Column(
           children: <Widget>[
@@ -4382,23 +4382,22 @@ void main() {
       length: 3,
     );
 
-    await tester.pumpWidget(buildFrame(controller1, true));
+    await tester.pumpWidget(buildFrame(controller1, showLast: true));
     final PageView pageView = tester.widget(find.byType(PageView));
     final PageController pageController = pageView.controller;
-
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
     expect(controller1.index, 2);
     expect(pageController.page, 2);
 
     // Change TabController from 3 items to 2.
-    await tester.pumpWidget(buildFrame(controller2, false));
+    await tester.pumpWidget(buildFrame(controller2, showLast: false));
     await tester.pumpAndSettle();
     expect(controller2.index, 0);
     expect(pageController.page, 0);
 
     // Change TabController from 2 items to 3.
-    await tester.pumpWidget(buildFrame(controller3, true));
+    await tester.pumpWidget(buildFrame(controller3, showLast: true));
     await tester.pumpAndSettle();
     expect(controller3.index, 0);
     expect(pageController.page, 0);
@@ -4407,6 +4406,71 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller3.index, 2);
+    expect(pageController.page, 2);
+  });
+
+  testWidgets('Do not crash when the new TabController.index is longer than the old length.', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/97441
+
+    Widget buildFrame(TabController controller, {required bool showLast}) {
+      return boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              controller: controller,
+              tabs: <Tab>[
+                const Tab(text: 'one'),
+                const Tab(text: 'two'),
+                if (showLast) const Tab(text: 'three'),
+              ],
+            ),
+            Flexible(
+              child: TabBarView(
+                controller: controller,
+                children: <Widget>[
+                  const Text('PAGE1'),
+                  const Text('PAGE2'),
+                  if (showLast) const Text('PAGE3'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final TabController controller1 = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    final TabController controller2 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    await tester.pumpWidget(buildFrame(controller1, showLast: true));
+    PageView pageView = tester.widget(find.byType(PageView));
+    PageController pageController = pageView.controller;
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+    expect(controller1.index, 2);
+    expect(pageController.page, 2);
+
+    // Change TabController from controller1 to controller2.
+    await tester.pumpWidget(buildFrame(controller2, showLast: false));
+    await tester.pumpAndSettle();
+    pageView = tester.widget(find.byType(PageView));
+    pageController = pageView.controller;
+    expect(controller2.index, 0);
+    expect(pageController.page, 0);
+
+    // Change TabController back to 'controller1' whose index is 2.
+    await tester.pumpWidget(buildFrame(controller1, showLast: true));
+    await tester.pumpAndSettle();
+    pageView = tester.widget(find.byType(PageView));
+    pageController = pageView.controller;
+    expect(controller1.index, 2);
     expect(pageController.page, 2);
   });
 
