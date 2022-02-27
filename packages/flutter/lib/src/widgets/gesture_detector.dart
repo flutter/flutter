@@ -171,6 +171,8 @@ class GestureDetector extends StatelessWidget {
   /// because a combination of a horizontal and vertical drag is a pan. Simply
   /// use the pan callbacks instead.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
+  ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
   GestureDetector({
