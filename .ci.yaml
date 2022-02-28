@@ -2378,6 +2378,17 @@ targets:
       benchmark: "true"
     scheduler: luci
 
+  - name: Linux_android android_choreographer_do_frame_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_choreographer_do_frame_test
+    scheduler: luci
+
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
