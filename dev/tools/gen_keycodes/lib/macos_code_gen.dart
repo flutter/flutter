@@ -62,7 +62,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(logicalName);
       lines.add(physicalEntry.usbHidCode,
           '  @${toHex(physicalEntry.usbHidCode)} : @${toHex(logicalEntry.value)},'
-          '    // ${physicalEntry.name} -> ${logicalEntry.name}');
+          '  // ${physicalEntry.name} -> ${logicalEntry.name}');
     });
     return lines.sortedJoin().trimRight();
   }

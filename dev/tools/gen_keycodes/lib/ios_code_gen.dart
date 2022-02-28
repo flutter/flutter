@@ -91,7 +91,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
       final String line ='    {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
-      modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
+      modifierKeyMap.writeln('${line.padRight(46)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -101,7 +101,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
       final String line ='    {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
-      modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
+      modifierKeyMap.writeln('${line.padRight(46)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
   }
