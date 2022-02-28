@@ -6,11 +6,27 @@
 
 #include <optional>
 
+#include "flutter/fml/logging.h"
+#include "impeller/geometry/path_component.h"
+
 namespace impeller {
 
-Path::Path() = default;
+Path::Path() {
+  AddContourComponent({});
+};
 
 Path::~Path() = default;
+
+std::tuple<size_t, size_t> Path::Polyline::GetContourPointBounds(
+    size_t contour_index) const {
+  FML_DCHECK(contour_index < contours.size());
+
+  const size_t start_index = contours[contour_index].start_index;
+  const size_t end_index = (contour_index >= contours.size() - 1)
+                               ? points.size()
+                               : contours[contour_index + 1].start_index;
+  return std::make_tuple(start_index, end_index);
+}
 
 size_t Path::GetComponentCount() const {
   return components_.size();
@@ -42,16 +58,27 @@ Path& Path::AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2) {
   return *this;
 }
 
-Path& Path::AddMoveComponent(Point destination) {
-  moves_.emplace_back(destination);
-  components_.emplace_back(ComponentType::kMove, moves_.size() - 1);
+Path& Path::AddContourComponent(Point destination, bool is_closed) {
+  if (components_.size() > 0 &&
+      components_.back().type == ComponentType::kContour) {
+    // Never insert contiguous contours.
+    contours_.back() = ContourComponent(destination, is_closed);
+  } else {
+    contours_.emplace_back(ContourComponent(destination, is_closed));
+    components_.emplace_back(ComponentType::kContour, contours_.size() - 1);
+  }
   return *this;
 }
 
-void Path::EnumerateComponents(Applier<LinearPathComponent> linear_applier,
-                               Applier<QuadraticPathComponent> quad_applier,
-                               Applier<CubicPathComponent> cubic_applier,
-                               Applier<MovePathComponent> move_applier) const {
+void Path::SetContourClosed(bool is_closed) {
+  contours_.back().is_closed = is_closed;
+}
+
+void Path::EnumerateComponents(
+    Applier<LinearPathComponent> linear_applier,
+    Applier<QuadraticPathComponent> quad_applier,
+    Applier<CubicPathComponent> cubic_applier,
+    Applier<ContourComponent> contour_applier) const {
   size_t currentIndex = 0;
   for (const auto& component : components_) {
     switch (component.type) {
@@ -70,9 +97,9 @@ void Path::EnumerateComponents(Applier<LinearPathComponent> linear_applier,
           cubic_applier(currentIndex, cubics_[component.index]);
         }
         break;
-      case ComponentType::kMove:
-        if (move_applier) {
-          move_applier(currentIndex, moves_[component.index]);
+      case ComponentType::kContour:
+        if (contour_applier) {
+          contour_applier(currentIndex, contours_[component.index]);
         }
         break;
     }
@@ -123,17 +150,17 @@ bool Path::GetCubicComponentAtIndex(size_t index,
   return true;
 }
 
-bool Path::GetMoveComponentAtIndex(size_t index,
-                                   MovePathComponent& move) const {
+bool Path::GetContourComponentAtIndex(size_t index,
+                                      ContourComponent& move) const {
   if (index >= components_.size()) {
     return false;
   }
 
-  if (components_[index].type != ComponentType::kMove) {
+  if (components_[index].type != ComponentType::kContour) {
     return false;
   }
 
-  move = moves_[components_[index].index];
+  move = contours_[components_[index].index];
   return true;
 }
 
@@ -180,38 +207,32 @@ bool Path::UpdateCubicComponentAtIndex(size_t index,
   return true;
 }
 
-bool Path::UpdateMoveComponentAtIndex(size_t index,
-                                      const MovePathComponent& move) {
+bool Path::UpdateContourComponentAtIndex(size_t index,
+                                         const ContourComponent& move) {
   if (index >= components_.size()) {
     return false;
   }
 
-  if (components_[index].type != ComponentType::kMove) {
+  if (components_[index].type != ComponentType::kContour) {
     return false;
   }
 
-  moves_[components_[index].index] = move;
+  contours_[components_[index].index] = move;
   return true;
 }
 
 Path::Polyline Path::CreatePolyline(
     const SmoothingApproximation& approximation) const {
   Polyline polyline;
-  // TODO(99177): Refactor this to have component polyline creation always
-  //              exclude the first point, and append the destination point for
-  //              move components. See issue for details.
-  bool new_contour = true;
-  auto collect_points = [&polyline,
-                         &new_contour](const std::vector<Point>& collection) {
-    size_t offset = new_contour ? 0 : 1;
-    new_contour = false;
-
-    polyline.points.reserve(polyline.points.size() + collection.size() -
-                            offset);
-    polyline.points.insert(polyline.points.end(), collection.begin() + offset,
+  auto collect_points = [&polyline](const std::vector<Point>& collection) {
+    polyline.points.reserve(polyline.points.size() + collection.size());
+    polyline.points.insert(polyline.points.end(), collection.begin(),
                            collection.end());
   };
-  for (const auto& component : components_) {
+  // for (const auto& component : components_) {
+  for (size_t component_i = 0; component_i < components_.size();
+       component_i++) {
+    const auto& component = components_[component_i];
     switch (component.type) {
       case ComponentType::kLinear:
         collect_points(linears_[component.index].CreatePolyline());
@@ -222,9 +243,16 @@ Path::Polyline Path::CreatePolyline(
       case ComponentType::kCubic:
         collect_points(cubics_[component.index].CreatePolyline(approximation));
         break;
-      case ComponentType::kMove:
-        polyline.breaks.insert(polyline.points.size());
-        new_contour = true;
+      case ComponentType::kContour:
+        if (component_i == components_.size() - 1) {
+          // If the last component is a contour, that means it's an empty
+          // contour, so skip it.
+          continue;
+        }
+        const auto& contour = contours_[component.index];
+        polyline.contours.push_back({.start_index = polyline.points.size(),
+                                     .is_closed = contour.is_closed});
+        collect_points({contour.destination});
         break;
     }
   }
