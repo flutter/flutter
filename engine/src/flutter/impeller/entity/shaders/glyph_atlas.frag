@@ -8,6 +8,7 @@ in vec2 v_unit_vertex;
 in vec2 v_atlas_position;
 in vec2 v_atlas_glyph_size;
 in vec2 v_atlas_size;
+in vec4 v_text_color;
 
 out vec4 frag_color;
 
@@ -18,5 +19,5 @@ void main() {
   frag_color = texture(
     glyph_atlas_sampler,
     v_unit_vertex * scale_perspective + offset
-  );
+  ) * v_text_color;
 }

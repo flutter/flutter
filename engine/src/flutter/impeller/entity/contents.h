@@ -210,6 +210,8 @@ class TextContents final : public Contents {
 
   void SetGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas);
 
+  void SetColor(Color color);
+
   // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -217,6 +219,7 @@ class TextContents final : public Contents {
 
  private:
   TextFrame frame_;
+  Color color_;
   std::shared_ptr<GlyphAtlas> atlas_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextContents);
