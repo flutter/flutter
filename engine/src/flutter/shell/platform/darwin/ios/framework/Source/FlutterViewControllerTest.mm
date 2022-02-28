@@ -168,16 +168,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
   self.messageSent = nil;
 }
 
-- (void)testFlutterViewControllerViewOpaue {
-  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
-  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  // The FlutterViewController's FlutterViewLayer Opaque default is NO
-  XCTAssertFalse(viewController.isViewOpaque);
-}
-
 - (void)testkeyboardWillChangeFrameWillStartKeyboardAnimation {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
