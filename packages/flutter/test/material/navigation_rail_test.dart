@@ -2011,6 +2011,61 @@ void main() {
     expect(_labelOpacity(tester, 'Ghi'), equals(1.0));
   });
 
+  testWidgets('Changing destinations animate for selectedIndex=null', (WidgetTester tester) async {
+    int? selectedIndex = 0;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    destinations: _destinations(),
+                    selectedIndex: selectedIndex,
+                    labelType: NavigationRailLabelType.selected,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Unset the selected index.
+    stateSetter(() {
+      selectedIndex = null;
+    });
+
+    // The first destination animates out.
+    expect(_labelOpacity(tester, 'Abc'), equals(1.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(_labelOpacity(tester, 'Abc'), equals(0.5));
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Abc'), equals(0.0));
+
+    // Set the selected index to the first destination.
+    stateSetter(() {
+      selectedIndex = 0;
+    });
+
+    // The first destination animates in.
+    expect(_labelOpacity(tester, 'Abc'), equals(0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(_labelOpacity(tester, 'Abc'), equals(0.5));
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Abc'), equals(1.0));
+  });
+
   testWidgets('Semantics - labelType=[none]', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
