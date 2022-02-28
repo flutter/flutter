@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -503,6 +505,43 @@ public class PlatformPluginTest {
 
     verify(fakeWindowInsetsController).show(WindowInsetsCompat.Type.statusBars());
     verify(fakeWindowInsetsController).show(WindowInsetsCompat.Type.navigationBars());
+  }
+
+  @Config(sdk = 30)
+  @Test
+  public void verifyUpdateSystemUiOverlaysAppliesCurrentTheme() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    Activity fakeActivity = mock(Activity.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+    WindowInsetsController fakeWindowInsetsController = mock(WindowInsetsController.class);
+    when(fakeWindow.getInsetsController()).thenReturn(fakeWindowInsetsController);
+
+    // Style that requires usage of all system bar APIs used in PlatformPlugin to update overlay
+    // style
+    SystemChromeStyle testStyle =
+        new SystemChromeStyle(
+            0XFF000000, Brightness.LIGHT, true, 0XFFC70039, Brightness.LIGHT, 0XFF006DB3, true);
+
+    platformPlugin.updateSystemUiOverlays();
+
+    verify(fakeWindow, never()).setStatusBarColor(anyInt());
+    verify(fakeWindow, never()).setNavigationBarColor(anyInt());
+    verify(fakeWindow, never()).setNavigationBarDividerColor(anyInt());
+    verify(fakeWindow, never()).setStatusBarContrastEnforced(anyBoolean());
+    verify(fakeWindow, never()).setNavigationBarContrastEnforced(anyBoolean());
+
+    platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(testStyle);
+    platformPlugin.updateSystemUiOverlays();
+
+    verify(fakeWindow, times(2)).setStatusBarColor(0xFF000000);
+    verify(fakeWindow, times(2)).setNavigationBarColor(0XFFC70039);
+    verify(fakeWindow, times(2)).setNavigationBarDividerColor(0XFF006DB3);
+    verify(fakeWindow, times(2)).setStatusBarContrastEnforced(true);
+    verify(fakeWindow, times(2)).setNavigationBarContrastEnforced(true);
   }
 
   @Config(sdk = 28)
