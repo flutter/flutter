@@ -44,10 +44,34 @@ class Font : public Comparable<Font> {
     /// yields larger numbers.
     ///
     Scalar descent = 0.0f;
+    //--------------------------------------------------------------------------
+    /// The minimum glyph extents relative to the origin. Typically negative in
+    /// an upper-left-origin coordinate system.
+    ///
+    Point min_extent;
+    //--------------------------------------------------------------------------
+    /// The maximum glyph extents relative to the origin. Typically positive in
+    /// an upper-left-origin coordinate system.
+    ///
+    Point max_extent;
+
+    //--------------------------------------------------------------------------
+    /// @brief      The union of the bounding boxes of all the glyphs.
+    ///
+    /// @return     The bounding box.
+    ///
+    constexpr Rect GetBoundingBox() const {
+      return Rect::MakeLTRB(min_extent.x,  //
+                            min_extent.y,  //
+                            max_extent.x,  //
+                            max_extent.y   //
+      );
+    }
 
     constexpr bool operator==(const Metrics& o) const {
       return point_size == o.point_size && ascent == o.ascent &&
-             descent == o.descent;
+             descent == o.descent && min_extent == o.min_extent &&
+             max_extent == o.max_extent;
     }
   };
 
@@ -63,14 +87,6 @@ class Font : public Comparable<Font> {
   /// @return     The typeface.
   ///
   const std::shared_ptr<Typeface>& GetTypeface() const;
-
-  //----------------------------------------------------------------------------
-  /// @brief      A conservatively large scaled bounding box of all glyphs in
-  ///             this font.
-  ///
-  /// @return     The scaled glyph size.
-  ///
-  std::optional<ISize> GetGlyphSize() const;
 
   const Metrics& GetMetrics() const;
 

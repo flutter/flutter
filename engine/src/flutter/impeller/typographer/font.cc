@@ -34,13 +34,6 @@ bool Font::IsEqual(const Font& other) const {
          is_valid_ == other.is_valid_ && metrics_ == other.metrics_;
 }
 
-std::optional<ISize> Font::GetGlyphSize() const {
-  if (!IsValid()) {
-    return std::nullopt;
-  }
-  return ISize::Ceil(typeface_->GetBoundingBox().size * metrics_.point_size);
-}
-
 const Font::Metrics& Font::GetMetrics() const {
   return metrics_;
 }
