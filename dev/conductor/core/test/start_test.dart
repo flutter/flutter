@@ -345,8 +345,6 @@ void main() {
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
-      // This is what this release will be
-      const String nextVersion = '1.2.0-1.1.pre';
       const String candidateBranch = 'flutter-1.2-candidate.1';
       const String versionOverride = '42.0.0-42.0.pre';
 
@@ -469,10 +467,6 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'merge-base', candidateBranch, 'master'],
           stdout: branchPointRevision,
-        ),
-        // check if commit is tagged, zero exit code means it is tagged
-        const FakeCommand(
-          command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
         ),
       ];
 
