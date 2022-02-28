@@ -15,13 +15,13 @@ bool Allocator::RequiresExplicitHostSynchronization(StorageMode mode) {
     return false;
   }
 
-#if OS_IOS
+#if FML_OS_IOS
   // StorageMode::kHostVisible is MTLStorageModeShared already.
   return false;
-#else   // OS_IOS
+#else   // FML_OS_IOS
   // StorageMode::kHostVisible is MTLResourceStorageModeManaged.
   return true;
-#endif  // OS_IOS
+#endif  // FML_OS_IOS
 }
 
 }  // namespace impeller
