@@ -158,4 +158,24 @@ if (enable_unittests) {
       "//flutter/testing:fixture_test",
     ]
   }
+
+  test_fixtures("plugin_registrant") {
+    dart_main = "fixtures/dart_tool/flutter_build/dart_plugin_registrant.dart"
+    use_target_as_artifact_prefix = true
+  }
+
+  executable("dart_plugin_registrant_unittests") {
+    testonly = true
+
+    sources = [ "dart_plugin_registrant_unittests.cc" ]
+
+    public_configs = [ "//flutter:export_dynamic_symbols" ]
+
+    public_deps = [
+      ":plugin_registrant",
+      "//flutter/fml",
+      "//flutter/testing",
+      "//flutter/testing:fixture_test",
+    ]
+  }
 }
