@@ -84,9 +84,8 @@ class HttpHostValidator extends DoctorValidator {
           return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) could not be parsed as a valid url');
         }
         return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) could not be parsed as a valid url');
-      } else {
-        return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
       }
+      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on ArgumentError catch (e) {
       final String exceptionMessage = e.message.toString();
       if (exceptionMessage.contains('No host specified')) {
@@ -96,9 +95,8 @@ class HttpHostValidator extends DoctorValidator {
           return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) is not a valid host');
         }
         return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) is not a valid host');
-      } else {
-        return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: $exceptionMessage');
       }
+      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: $exceptionMessage');
     }
   }
 
