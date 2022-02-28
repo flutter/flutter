@@ -11,7 +11,10 @@
 
 import 'keyboard_key.dart';
 
-/// TODO
+/// Maps physical keys to logical keys of the same name.
+///
+/// This is equivalent to US-en layout, and is used as fallback for non-latin
+/// layouts.
 const Map<int, LogicalKeyboardKey> kVerbatimPhysicalToLogicalKey = <int, LogicalKeyboardKey>{
   0x00070004: LogicalKeyboardKey.keyA,
   0x00070005: LogicalKeyboardKey.keyB,

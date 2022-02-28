@@ -43,6 +43,55 @@ void main() {
       }
     });
 
+    testWidgets('Non-latin keys produce US-en logical keys (macOS)', (WidgetTester tester) async {
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = <String, dynamic>{
+        'keymap': 'macos',
+        'type': 'keydown',
+        'keyCode': 0x00,  // KeyA
+        'characters': 'ф',
+        'charactersIgnoringModifiers': 'ф',
+        'modifiers': 0x0, // No modifiers down
+      };
+      // dispatch the modified data.
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData? data) {},
+      );
+      expect(events.length, 1);
+      expect(events[0].physicalKey, PhysicalKeyboardKey.keyA);
+      expect(events[0].logicalKey, LogicalKeyboardKey.keyA);
+      expect(events[0].character, 'ф');
+    });
+
+    testWidgets('Non-latin keys produce US-en logical keys (web)', (WidgetTester tester) async {
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = <String, dynamic>{
+        'keymap': 'web',
+        'type': 'keydown',
+        'code': 'KeyA',
+        'key': 'ф',
+        'metaState': 0x0,
+      };
+      // dispatch the modified data.
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData? data) {},
+      );
+      expect(events.length, 1);
+      expect(events[0].physicalKey, PhysicalKeyboardKey.keyA);
+      expect(events[0].logicalKey, LogicalKeyboardKey.keyA);
+      expect(events[0].character, 'ф');
+    });
+
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         RawKeyboard.instance.clearKeysPressed();

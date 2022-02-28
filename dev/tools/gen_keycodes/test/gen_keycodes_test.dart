@@ -28,6 +28,9 @@ final LogicalKeyData logicalData = LogicalKeyData.fromJson(
     json.decode(readDataFile('logical_key_data.json')) as Map<String, dynamic>);
 
 void main() {
+  final Map<String, String> verbatimMap = parseMapOfString(
+      readDataFile('verbatim_physical_to_logical.json'));
+
   setUp(() {
     testDataRoot = path.canonicalize(path.join(Directory.current.absolute.path, 'data'));
   });
@@ -65,6 +68,7 @@ void main() {
     final PlatformCodeGenerator codeGenerator = MacOSCodeGenerator(
       physicalData,
       logicalData,
+      verbatimMap,
     );
     final String output = codeGenerator.generate();
 
@@ -133,6 +137,7 @@ void main() {
       physicalData,
       logicalData,
       readDataFile(path.join(dataRoot, 'web_logical_location_mapping.json')),
+      verbatimMap,
     );
     final String output = codeGenerator.generate();
 
