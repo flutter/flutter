@@ -64,7 +64,7 @@ Point LinearPathComponent::Solve(Scalar time) const {
 }
 
 std::vector<Point> LinearPathComponent::CreatePolyline() const {
-  return {p1, p2};
+  return {p2};
 }
 
 std::vector<Point> LinearPathComponent::Extrema() const {

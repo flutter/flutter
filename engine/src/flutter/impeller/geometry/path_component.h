@@ -107,15 +107,17 @@ struct CubicPathComponent {
   }
 };
 
-struct MovePathComponent {
+struct ContourComponent {
   Point destination;
+  bool is_closed;
 
-  MovePathComponent() {}
+  ContourComponent() {}
 
-  MovePathComponent(Point p) : destination(p) {}
+  ContourComponent(Point p, bool is_closed = false)
+      : destination(p), is_closed(is_closed) {}
 
-  bool operator==(const MovePathComponent& other) const {
-    return destination == other.destination;
+  bool operator==(const ContourComponent& other) const {
+    return destination == other.destination && is_closed == other.is_closed;
   }
 };
 

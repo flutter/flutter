@@ -7,6 +7,7 @@
 #include <functional>
 #include <optional>
 #include <set>
+#include <tuple>
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
@@ -39,7 +40,15 @@ class Path {
     kLinear,
     kQuadratic,
     kCubic,
-    kMove,
+    kContour,
+  };
+
+  struct PolylineContour {
+    /// Index that denotes the first point of this contour.
+    size_t start_index;
+    /// Denotes whether the last point of this contour is connected to the first
+    /// point of this contour or not.
+    bool is_closed;
   };
 
   /// One or more contours represented as a series of points and indices in
@@ -48,8 +57,12 @@ class Path {
     /// Points in the polyline, which may represent multiple contours specified
     /// by indices in |breaks|.
     std::vector<Point> points;
-    /// Indices of points that end a subcontour.
-    std::set<size_t> breaks;
+    std::vector<PolylineContour> contours;
+
+    /// Convenience method to compute the start (inclusive) and end (exclusive)
+    /// point of the given contour index.
+    std::tuple<size_t, size_t> GetContourPointBounds(
+        size_t contour_index) const;
   };
 
   Path();
@@ -68,14 +81,16 @@ class Path {
 
   Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
 
-  Path& AddMoveComponent(Point destination);
+  Path& AddContourComponent(Point destination, bool is_closed = false);
+
+  void SetContourClosed(bool is_closed);
 
   template <class T>
   using Applier = std::function<void(size_t index, const T& component)>;
-  void EnumerateComponents(Applier<LinearPathComponent> linearApplier,
-                           Applier<QuadraticPathComponent> quadApplier,
-                           Applier<CubicPathComponent> cubicApplier,
-                           Applier<MovePathComponent> moveApplier) const;
+  void EnumerateComponents(Applier<LinearPathComponent> linear_applier,
+                           Applier<QuadraticPathComponent> quad_applier,
+                           Applier<CubicPathComponent> cubic_applier,
+                           Applier<ContourComponent> contour_applier) const;
 
   bool GetLinearComponentAtIndex(size_t index,
                                  LinearPathComponent& linear) const;
@@ -85,7 +100,8 @@ class Path {
 
   bool GetCubicComponentAtIndex(size_t index, CubicPathComponent& cubic) const;
 
-  bool GetMoveComponentAtIndex(size_t index, MovePathComponent& move) const;
+  bool GetContourComponentAtIndex(size_t index,
+                                  ContourComponent& contour) const;
 
   bool UpdateLinearComponentAtIndex(size_t index,
                                     const LinearPathComponent& linear);
@@ -95,7 +111,8 @@ class Path {
 
   bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
 
-  bool UpdateMoveComponentAtIndex(size_t index, const MovePathComponent& move);
+  bool UpdateContourComponentAtIndex(size_t index,
+                                     const ContourComponent& contour);
 
   Polyline CreatePolyline(
       const SmoothingApproximation& approximation = {}) const;
@@ -111,8 +128,8 @@ class Path {
 
     ComponentIndexPair() {}
 
-    ComponentIndexPair(ComponentType aType, size_t aIndex)
-        : type(aType), index(aIndex) {}
+    ComponentIndexPair(ComponentType a_type, size_t a_index)
+        : type(a_type), index(a_index) {}
   };
 
   FillType fill_ = FillType::kNonZero;
@@ -120,7 +137,7 @@ class Path {
   std::vector<LinearPathComponent> linears_;
   std::vector<QuadraticPathComponent> quads_;
   std::vector<CubicPathComponent> cubics_;
-  std::vector<MovePathComponent> moves_;
+  std::vector<ContourComponent> contours_;
 };
 
 }  // namespace impeller

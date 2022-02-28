@@ -149,13 +149,13 @@ TEST(GeometryTest, SimplePath) {
       .AddQuadraticComponent({100, 100}, {200, 200}, {300, 300})
       .AddCubicComponent({300, 300}, {400, 400}, {500, 500}, {600, 600});
 
-  ASSERT_EQ(path.GetComponentCount(), 3u);
+  ASSERT_EQ(path.GetComponentCount(), 4u);
 
   path.EnumerateComponents(
       [](size_t index, const LinearPathComponent& linear) {
         Point p1(0, 0);
         Point p2(100, 100);
-        ASSERT_EQ(index, 0u);
+        ASSERT_EQ(index, 1u);
         ASSERT_EQ(linear.p1, p1);
         ASSERT_EQ(linear.p2, p2);
       },
@@ -163,7 +163,7 @@ TEST(GeometryTest, SimplePath) {
         Point p1(100, 100);
         Point cp(200, 200);
         Point p2(300, 300);
-        ASSERT_EQ(index, 1u);
+        ASSERT_EQ(index, 2u);
         ASSERT_EQ(quad.p1, p1);
         ASSERT_EQ(quad.cp, cp);
         ASSERT_EQ(quad.p2, p2);
@@ -173,13 +173,18 @@ TEST(GeometryTest, SimplePath) {
         Point cp1(400, 400);
         Point cp2(500, 500);
         Point p2(600, 600);
-        ASSERT_EQ(index, 2u);
+        ASSERT_EQ(index, 3u);
         ASSERT_EQ(cubic.p1, p1);
         ASSERT_EQ(cubic.cp1, cp1);
         ASSERT_EQ(cubic.cp2, cp2);
         ASSERT_EQ(cubic.p2, p2);
       },
-      [](size_t index, const MovePathComponent& move) { ASSERT_TRUE(false); });
+      [](size_t index, const ContourComponent& contour) {
+        Point p1(0, 0);
+        ASSERT_EQ(index, 0u);
+        ASSERT_EQ(contour.destination, p1);
+        ASSERT_FALSE(contour.is_closed);
+      });
 }
 
 TEST(GeometryTest, BoundingBoxCubic) {
@@ -638,21 +643,123 @@ TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
 
 TEST(GeometryTest, PathCreatePolyLineDoesNotDuplicatePoints) {
   Path path;
-  path.AddMoveComponent({10, 10});
+  path.AddContourComponent({10, 10});
   path.AddLinearComponent({10, 10}, {20, 20});
   path.AddLinearComponent({20, 20}, {30, 30});
-  path.AddMoveComponent({40, 40});
+  path.AddContourComponent({40, 40});
   path.AddLinearComponent({40, 40}, {50, 50});
 
   auto polyline = path.CreatePolyline();
 
-  ASSERT_EQ(polyline.breaks.size(), 2u);
+  ASSERT_EQ(polyline.contours.size(), 2u);
   ASSERT_EQ(polyline.points.size(), 5u);
   ASSERT_EQ(polyline.points[0].x, 10);
   ASSERT_EQ(polyline.points[1].x, 20);
   ASSERT_EQ(polyline.points[2].x, 30);
   ASSERT_EQ(polyline.points[3].x, 40);
   ASSERT_EQ(polyline.points[4].x, 50);
+}
+
+TEST(GeometryTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
+  // Closed shapes.
+  {
+    Path path = PathBuilder{}.AddCircle({100, 100}, 50).TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(100, 50));
+    ASSERT_TRUE(contour.is_closed);
+  }
+
+  {
+    Path path = PathBuilder{}.AddOval(Rect(100, 100, 100, 100)).TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(150, 100));
+    ASSERT_TRUE(contour.is_closed);
+  }
+
+  {
+    Path path = PathBuilder{}.AddRect(Rect(100, 100, 100, 100)).TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(100, 100));
+    ASSERT_TRUE(contour.is_closed);
+  }
+
+  {
+    Path path =
+        PathBuilder{}.AddRoundedRect(Rect(100, 100, 100, 100), 10).TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(110, 100));
+    ASSERT_TRUE(contour.is_closed);
+  }
+
+  // Open shapes.
+  {
+    Point p(100, 100);
+    Path path = PathBuilder{}.AddLine(p, {200, 100}).TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, p);
+    ASSERT_FALSE(contour.is_closed);
+  }
+
+  {
+    Path path =
+        PathBuilder{}
+            .AddCubicCurve({100, 100}, {100, 50}, {100, 150}, {200, 100})
+            .TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(100, 100));
+    ASSERT_FALSE(contour.is_closed);
+  }
+
+  {
+    Path path = PathBuilder{}
+                    .AddQuadraticCurve({100, 100}, {100, 50}, {200, 100})
+                    .TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(100, 100));
+    ASSERT_FALSE(contour.is_closed);
+  }
+}
+
+TEST(GeometryTest, PathCreatePolylineGeneratesCorrectContourData) {
+  Path::Polyline polyline = PathBuilder{}
+                                .AddLine({100, 100}, {200, 100})
+                                .MoveTo({100, 200})
+                                .LineTo({150, 250})
+                                .LineTo({200, 200})
+                                .Close()
+                                .TakePath()
+                                .CreatePolyline();
+  ASSERT_EQ(polyline.points.size(), 6u);
+  ASSERT_EQ(polyline.contours.size(), 2u);
+  ASSERT_EQ(polyline.contours[0].is_closed, false);
+  ASSERT_EQ(polyline.contours[0].start_index, 0u);
+  ASSERT_EQ(polyline.contours[1].is_closed, true);
+  ASSERT_EQ(polyline.contours[1].start_index, 2u);
+}
+
+TEST(GeometryTest, PolylineGetContourPointBoundsReturnsCorrectRanges) {
+  Path::Polyline polyline = PathBuilder{}
+                                .AddLine({100, 100}, {200, 100})
+                                .MoveTo({100, 200})
+                                .LineTo({150, 250})
+                                .LineTo({200, 200})
+                                .Close()
+                                .TakePath()
+                                .CreatePolyline();
+  size_t a1, a2, b1, b2;
+  std::tie(a1, a2) = polyline.GetContourPointBounds(0);
+  std::tie(b1, b2) = polyline.GetContourPointBounds(1);
+  ASSERT_EQ(a1, 0u);
+  ASSERT_EQ(a2, 2u);
+  ASSERT_EQ(b1, 2u);
+  ASSERT_EQ(b2, 6u);
 }
 
 }  // namespace testing
