@@ -8,26 +8,124 @@ import 'package:flutter/widgets.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
-/// Provides logic for displaying spell check suggestions for Android.
-class MaterialSpellCheckerControls extends SpellCheckerControls{
-    /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
-    /// This toolbar will allow for tap and replace of suggestions for misspelled 
-    /// words.
-    Widget buildSpellCheckerSuggestionsToolbar(
-        TextSelectionDelegate delegate, List<TextSelectionPoint> endpoints, 
-        Rect globalEditableRegion, Offset selectionMidpoint, double textLineHeight, 
-        List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans) {
-            return _SpellCheckerSuggestionsToolbar(
-            delegate: delegate,
-            endpoints: endpoints,
-            globalEditableRegion: globalEditableRegion,
-            selectionMidpoint: selectionMidpoint,
-            textLineHeight: textLineHeight,
-            spellCheckerSuggestionSpans: spellCheckerSuggestionSpans,
-          );
-    }
+class MaterialSpellCheckService implements SpellCheckService {
+  @override
+  void fetchSpellCheckSuggestions(TextInputConnection? textInputConnection, Locale locale, String text) {
+    textInputConnection!.initiateSpellChecking(locale, text);
+  }
+
+  @override
+  void updateSpellCheckSuggestions(List<SpellCheckSuggestionSpan>? suggestions) {
+    this.spellCheckSuggestionsHandler!.spellCheckSuggestions = suggestions;
+  }
+
+  @override
+  SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler => MaterialSpellCheckSuggestionsHandler();
 }
 
+class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
+  List<SpellCheckSuggestionSpan>? set spellCheckSuggestions;
+  List<SpellCheckSuggestionSpan>? get spellCheckSuggestions;
+
+  /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
+  /// This toolbar will allow for tap and replace of suggestions for misspelled 
+  /// words.
+  Toolbar buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
+      List<TextSelectionPoint> endpoints, Rect globalEditableRegion, 
+      Offset selectionMidpoint, double textLineHeight) {
+          return _SpellCheckerSuggestionsToolbar(
+          delegate: delegate,
+          endpoints: endpoints,
+          globalEditableRegion: globalEditableRegion,
+          selectionMidpoint: selectionMidpoint,
+          textLineHeight: textLineHeight,
+          spellCheckerSuggestionSpans: spellCheckerSuggestionSpans,
+        );
+      }
+
+  TextSpan buildTextSpanWithSpellCheckSuggestions(
+      TextEditingValue value, TextStyle? style, bool ignoreComposing) {
+      scssSpans_consumed_index = 0;
+      text_consumed_index = 0;
+      if (ignoreComposing) {
+          return TextSpan(
+              style: style,
+              children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.text, style)
+          );
+      } else {
+          return TextSpan(
+              style: style,
+              children: <TextSpan>[
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textBefore(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
+                      ))),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textAfter(value.text), style)),
+              ],
+          );
+      }
+    }
+
+    /// Helper method for building TextSpan trees.
+    List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, String text, TextStyle? style) {
+      List<TextSpan> tsTreeChildren = <TextSpan>[];
+      int text_pointer = 0;
+
+      if (scssSpans_consumed_index < spellCheckerSuggestionSpans.length) {
+          int scss_pointer = scssSpans_consumed_index;
+          SpellCheckerSuggestionSpan currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
+          int span_pointer = currScssSpan.start;
+
+          while (text_pointer < text.length && scss_pointer < spellCheckerSuggestionSpans.length && (currScssSpan.start-text_consumed_index) < text.length) {
+              int end_index;
+              currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
+
+              if ((currScssSpan.start-text_consumed_index) > text_pointer) {
+                  end_index = (currScssSpan.start-text_consumed_index) < text.length ? (currScssSpan.start-text_consumed_index) : text.length;
+                  tsTreeChildren.add(TextSpan(style: style,
+                                              text: text.substring(text_pointer, end_index)));
+                  text_pointer = end_index;
+              }
+              else {
+                  end_index = (currScssSpan.end - text_consumed_index + 1) < text.length ? (currScssSpan.end - text_consumed_index + 1) : text.length;
+                  tsTreeChildren.add(TextSpan(style: overrideTextSpanStyle(style),
+                                              text: text.substring((currScssSpan.start-text_consumed_index), end_index)));
+
+                  text_pointer = end_index;
+                  scss_pointer += 1;
+              }
+          }
+
+          text_consumed_index = text_pointer + text_consumed_index;
+
+          // Add remaining text if there is any
+          if (text_pointer < text.length) {
+              tsTreeChildren.add(TextSpan(style: style, text: text.substring(text_pointer, text.length)));
+              text_consumed_index = text.length + text_consumed_index;
+          }
+          scssSpans_consumed_index = scss_pointer;
+          return tsTreeChildren;
+      } else {
+          text_consumed_index = text.length;
+          return <TextSpan>[TextSpan(text: text, style: style)];
+      }
+  }
+
+  /// Responsible for defining the behavior of overriding/merging
+  /// the TestStyle specified for a particular TextSpan with the style used to
+  /// indicate misspelled words (straight red underline for Android).
+  /// Will be used in buildWithMisspelledWordsIndicated(...) method above.
+  TextStyle overrideTextSpanStyle(TextStyle? currentTextStyle) {
+      TextStyle misspelledStyle = TextStyle(decoration: TextDecoration.underline,
+                              decorationColor: Colors.red,
+                              decorationStyle: TextDecorationStyle.wavy);
+      return currentTextStyle?.merge(misspelledStyle)
+          ?? misspelledStyle;
+  }
+}
+
+
+/****************************** Toolbar logic ******************************/
+//TODO(camillesimon): Either remove implementation or replace with dropdown menu.
 class _SpellCheckerSuggestionsToolbarItemData {
   const _SpellCheckerSuggestionsToolbarItemData({
     required this.label,
@@ -93,7 +191,6 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
 
   @override
   Widget build(BuildContext context) {
-
     if (widget.spellCheckerSuggestionSpans == null || widget.spellCheckerSuggestionSpans!.length == 0) {
         return const SizedBox.shrink();
     }
@@ -153,92 +250,4 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
       }).toList(),
     );
   }
-}
-
-/// Provides logic for indicating misspelled words for Android.
-class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
-    //TODO(camillesimon): add comments, clean up code
-    int scssSpans_consumed_index = 0;
-    int text_consumed_index = 0;
-
-    /// Responsible for rebuilding the TextSpan with the TextStyle changed for all 
-    /// of the misspelled words.
-    /// See call in EditableTextState [editable_text.dart]
-    TextSpan buildWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, 
-        TextEditingValue value, TextStyle? style, bool ignoreComposing) {
-        scssSpans_consumed_index = 0;
-        text_consumed_index = 0;
-        if (ignoreComposing) {
-            return TextSpan(
-                style: style,
-                children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.text, style)
-            );
-        } else {
-            return TextSpan(
-                style: style,
-                children: <TextSpan>[
-                    TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textBefore(value.text), style)),
-                    TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
-                        ))),
-                    TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textAfter(value.text), style)),
-                ],
-            );
-        }
-    }
-
-    List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, String text, TextStyle? style) {
-        List<TextSpan> tsTreeChildren = <TextSpan>[];
-        int text_pointer = 0;
-
-        if (scssSpans_consumed_index < spellCheckerSuggestionSpans.length) {
-            int scss_pointer = scssSpans_consumed_index;
-            SpellCheckerSuggestionSpan currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
-            int span_pointer = currScssSpan.start;
-
-            while (text_pointer < text.length && scss_pointer < spellCheckerSuggestionSpans.length && (currScssSpan.start-text_consumed_index) < text.length) {
-                int end_index;
-                currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
-
-                if ((currScssSpan.start-text_consumed_index) > text_pointer) {
-                    end_index = (currScssSpan.start-text_consumed_index) < text.length ? (currScssSpan.start-text_consumed_index) : text.length;
-                    tsTreeChildren.add(TextSpan(style: style,
-                                                text: text.substring(text_pointer, end_index)));
-                    text_pointer = end_index;
-                }
-                else {
-                    end_index = (currScssSpan.end - text_consumed_index + 1) < text.length ? (currScssSpan.end - text_consumed_index + 1) : text.length;
-                    tsTreeChildren.add(TextSpan(style: overrideTextSpanStyle(style),
-                                                text: text.substring((currScssSpan.start-text_consumed_index), end_index)));
-
-                    text_pointer = end_index;
-                    scss_pointer += 1;
-                }
-            }
-
-            text_consumed_index = text_pointer + text_consumed_index;
-
-            // Add remaining text if there is any
-            if (text_pointer < text.length) {
-                tsTreeChildren.add(TextSpan(style: style, text: text.substring(text_pointer, text.length)));
-                text_consumed_index = text.length + text_consumed_index;
-            }
-            scssSpans_consumed_index = scss_pointer;
-            return tsTreeChildren;
-        } else {
-            text_consumed_index = text.length;
-            return <TextSpan>[TextSpan(text: text, style: style)];
-        }
-    }
-
-    /// Responsible for defining the behavior of overriding/merging
-    /// the TestStyle specified for a particular TextSpan with the style used to
-    /// indicate misspelled words (straight red underline for Android).
-    /// Will be used in buildWithMisspelledWordsIndicated(...) method above.
-    TextStyle overrideTextSpanStyle(TextStyle? currentTextStyle) {
-        TextStyle misspelledStyle = TextStyle(decoration: TextDecoration.underline,
-                                decorationColor: Colors.red,
-                                decorationStyle: TextDecorationStyle.wavy);
-        return currentTextStyle?.merge(misspelledStyle)
-            ?? misspelledStyle;
-    }
 }

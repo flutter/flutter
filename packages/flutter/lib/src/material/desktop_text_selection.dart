@@ -38,7 +38,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
-    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
+    SpellCheckSuggestionsHandler? spellCheckerSuggestionsHandler,
   ) {
     return _DesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,

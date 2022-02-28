@@ -233,7 +233,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
-    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
+    SpellCheckSuggestionsHandler? spellCheckerSuggestionsHandler,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,

@@ -151,7 +151,7 @@ abstract class TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
-    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
   );
 
   /// Returns the size of the selection handle.
@@ -435,11 +435,10 @@ class TextSelectionOverlay {
   ToolbarType? visibleToolbarType;
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
-  void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
-    spellCheckerSuggestionSpans) {
+  void showToolbar(ToolbarType toolbarType, SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler) {
     assert(_toolbar == null);
     visibleToolbarType = toolbarType;
-    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckerSuggestionSpans));
+    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckSuggestionsHandler));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
   }
@@ -547,7 +546,7 @@ class TextSelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context, ToolbarType toolbarType,
-    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans) {
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler) {
     if (selectionControls == null)
       return Container();
 
@@ -595,7 +594,7 @@ class TextSelectionOverlay {
                 clipboardStatus!,
                 renderObject.lastSecondaryTapDownPosition,
                 toolbarType,
-                spellCheckerSuggestionSpans,
+                spellCheckSuggestionsHandler,
               );
             },
           ),
@@ -1143,8 +1142,6 @@ class TextSelectionGestureDetectorBuilder {
       _isShiftTapping = false;
       return;
     }
-
-    // editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
 
     if (delegate.selectionEnabled) {
       switch (defaultTargetPlatform) {

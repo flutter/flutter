@@ -41,7 +41,7 @@ class MaterialTextSelectionControls extends TextSelectionControls with MaterialS
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
-    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
     ) {
       switch(toolbarType) {
         case ToolbarType.copyPasteControls:
@@ -58,7 +58,7 @@ class MaterialTextSelectionControls extends TextSelectionControls with MaterialS
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
       case ToolbarType.spellCheckerSuggestionsControls:
-          return buildSpellCheckerSuggestionsToolbar(delegate, endpoints, globalEditableRegion, selectionMidpoint, textLineHeight, spellCheckerSuggestionSpans);
+          return spellCheckSuggestionsHandler.buildSpellCheckerSuggestionsToolbar(delegate, endpoints, globalEditableRegion, selectionMidpoint, textLineHeight);
     }
   }
 

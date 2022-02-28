@@ -451,7 +451,6 @@ enum TextCapitalization {
 ///
 ///  * [TextInput.attach]
 ///  * [TextInputAction]
-@immutable
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
@@ -470,6 +469,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
+    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
   }) : assert(inputType != null),
@@ -509,6 +509,12 @@ class TextInputConfiguration {
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
   final AutofillConfiguration autofillConfiguration;
+
+
+  /// The configuration to use for spell check.
+  ///
+  /// Defaults to disabled, in which case no spell check will be performed.
+  final SpellCheckConfiguration spellCheckConfiguration;
 
   /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -628,6 +634,7 @@ class TextInputConfiguration {
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
     AutofillConfiguration? autofillConfiguration,
+    SpellCheckConfiguration? spellCheckConfiguration,
     bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
@@ -643,6 +650,7 @@ class TextInputConfiguration {
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      spellCheckConfiguration: spellCheckConfiguration ?? this.spellCheckConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
   }
@@ -675,6 +683,7 @@ class TextInputConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
+    //TODO(camillesimon): add JSON representation of spellCheckConfiguration
     return <String, dynamic>{
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
@@ -1782,6 +1791,7 @@ class TextInput {
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
         break;
+      //TODO(camillesimon): Rename all spellcheckER names to spellcheck
       case 'TextInputClient.updateSpellCheckerResults':
         List<String> results = args[1].cast<String>();
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
@@ -1789,8 +1799,8 @@ class TextInput {
           List<String> resultParsed = result.split(".");
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
-        // TODO(camillesimon): Passing text for testing purposes. Eventually solve issue.
-        _currentConnection!._client.updateSpellCheckerResults(spellCheckerSuggestionSpans);
+        // TODO(camillesimon): Remove support for passing text (and remove from engine).
+        _currentConnection!._client.textInputConfiguration.spellCheckConfiguration.spellCheckSuggestionsHandler.spellCheckSuggestions = spellCheckerSuggestionSpans;
         break;
       default:
         throw MissingPluginException();

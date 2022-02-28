@@ -164,7 +164,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -178,8 +178,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckerSuggestionSpans != null && spellCheckerSuggestionSpans.length > 0) {
-      return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style, false);
+    if (spellCheckSuggestionsHandler.spellCheckSuggestions != null && spellCheckSuggestionsHandler.spellCheckSuggestions.length > 0) {
+      return spellCheckSuggestionsHandler.buildWithMisspelledWordsIndicated(value, style, false);
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -2571,6 +2571,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) ?? value;
 
         if (value.text.length > 0) {
+          //TODO(camillesimon): Check if spell check is enabled
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           _textInputConnection!.initiateSpellChecking(localeForSpellChecking as Locale, value.text);
         }
@@ -2920,7 +2921,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
 
-    _selectionOverlay!.showToolbar(toolbarType, _spellCheckerResults);
+    //TODO(camillesimon): Clean up messy logic.
+    if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
+      if (!_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckEnabled) {
+        return false;
+      }
+      return _selectionOverlay!.showToolbar(toolbarType, 
+      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService.spellCheckSuggestionsHandler);
+    }
+
+    _selectionOverlay!.showToolbar(toolbarType, null;
     return true;
   }
 
@@ -2975,19 +2985,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  // Tracks spell check results for the current text input.
-  List<SpellCheckerSuggestionSpan>? _spellCheckerResults;
-
-  //TODO(camillesimon): Passing text for testing. Eventually solve issue.
-  String? _spellCheckedText;
-
-  @override
-  void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults) {
-    if (spellCheckerResults.length > 0) {
-      _spellCheckerResults = spellCheckerResults;
-    }
-  }
-
   @override
   String get autofillId => 'EditableText-$hashCode';
 
@@ -3001,7 +2998,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           currentEditingValue: currentTextEditingValue,
         )
       : AutofillConfiguration.disabled;
-
+    
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
@@ -3318,12 +3315,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Read only mode should not paint text composing.
-    return widget.controller.buildTextSpan(
-      context: context,
-      style: widget.style,
-      withComposing: !widget.readOnly && _hasFocus,
-      spellCheckerSuggestionSpans: _spellCheckerResults,
-    );
+    //TODO(camillesimon): Clean up messy logic.
+    if (_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckEnabled) {
+      return widget.controller.buildTextSpan(
+        context: context,
+        style: widget.style,
+        withComposing: !widget.readOnly && _hasFocus,
+        spellCheckHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService.spellCheckSuggestionsHandler,
+      );
+    }
+    else {
+      return widget.controller.buildTextSpan(
+        context: context,
+        style: widget.style,
+        withComposing: !widget.readOnly && _hasFocus,
+      );
+    }
   }
 }
 

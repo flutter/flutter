@@ -34,7 +34,7 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing, 
-    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans}) {
+    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler}) {
     // This does not care about composing.
     return TextSpan(
       style: style,
