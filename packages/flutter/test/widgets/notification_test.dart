@@ -32,7 +32,7 @@ void main() {
     ));
     expect(log, isEmpty);
     final Notification notification = MyNotification();
-    expect(() { key.currentContext?.dispatchNotification(notification); }, isNot(throwsException));
+    expect(() { notification.dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <dynamic>['b', notification, 'a', notification]);
   });
 
@@ -56,7 +56,7 @@ void main() {
     ));
     expect(log, isEmpty);
     final Notification notification = MyNotification();
-    expect(() { key.currentContext?.dispatchNotification(notification); }, isNot(throwsException));
+    expect(() { notification.dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <dynamic>['b', notification]);
   });
 
@@ -73,7 +73,7 @@ void main() {
         child: Container(key: key),
       ),
     ));
-    expect(() { key.currentContext?.dispatchNotification(MyNotification()); }, isNot(throwsException));
+    expect(() { MyNotification().dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <Type>[MyNotification]);
   });
 }

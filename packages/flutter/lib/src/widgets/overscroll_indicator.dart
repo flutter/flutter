@@ -233,7 +233,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       final bool isLeading = controller == _leadingController;
       if (_lastNotificationType is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
-        context.dispatchNotification(confirmationNotification);
+        confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
         if (_accepted[isLeading]!) {
           controller!._paintOffset = confirmationNotification.paintOffset;
@@ -695,7 +695,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       _lastOverscrollNotification = notification;
       if (_lastNotification.runtimeType is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
-        context.dispatchNotification(confirmationNotification);
+        confirmationNotification.dispatch(context);
         _accepted = confirmationNotification._accepted;
       }
 

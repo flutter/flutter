@@ -17,7 +17,7 @@ class NotifyMaterial extends StatelessWidget {
   const NotifyMaterial({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    context.dispatchNotification(const LayoutChangedNotification());
+    const LayoutChangedNotification().dispatch(context);
     return Container();
   }
 }

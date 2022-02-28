@@ -50,48 +50,6 @@ abstract class Notification {
   /// const constructors so that they can be used in const expressions.
   const Notification();
 
-  /// Applied to each ancestor of the [dispatch] target.
-  ///
-  /// The [Notification] class implementation of this method dispatches the
-  /// given [Notification] to each ancestor [NotificationListener] widget.
-  ///
-  /// Subclasses can override this to apply additional filtering or to update
-  /// the notification as it is bubbled (for example, increasing a `depth` field
-  /// for each ancestor of a particular type).
-  ///
-  /// This functionality was deprecated after v1.11.0 because of poor performance.
-  /// If you have a Notification subtype that overrides this method, you can instead
-  /// manually implement the old-style notification dispatch with the following
-  /// snippet:
-  ///
-  /// ```dart
-  ///  void dispatchNotificationSlowly<T extends Notification>(T notification, BuildContext context) {
-  ///    context.visitAncestorElements((Element element) {
-  ///       // Perform visit ancestor logic.
-  ///       notification.myAncestorLogic(element);
-  ///       if (element is ProxyElement) {
-  ///         final Widget widget = element.widget;
-  ///         if (widget is NotificationListener<T>) {
-  ///           return widget.onNotification?.call(notification) ?? true;
-  ///         }
-  ///       }
-  ///       return true;
-  ///    });
-  ///  }
-  /// ```
-  @protected
-  @mustCallSuper
-  @Deprecated(
-    'Element traversal for notifications has poor performance. '
-    'This feature was deprecated after v1.11.0.'
-  )
-  bool visitAncestor(Element element) {
-    if (element is _NotificationElement<Notification> && element.onNotification(this)) {
-      return false;
-    }
-    return true;
-  }
-
   /// Start bubbling this notification at the given build context.
   ///
   /// The notification will be delivered to any [NotificationListener] widgets
