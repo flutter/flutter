@@ -187,7 +187,6 @@ class StartCommand extends Command<void> {
     );
     Version? versionOverride;
     if (versionOverrideString != null) {
-      // TODO test bogus override string
       versionOverride = Version.fromString(versionOverrideString);
     }
 

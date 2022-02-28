@@ -121,6 +121,34 @@ void main() {
       );
     });
 
+    test('throws if provided an invalid --$kVersionOverrideOption', () async {
+      final CommandRunner<void> runner = createRunner();
+
+      final String stateFilePath = fileSystem.path.join(
+        platform.environment['HOME']!,
+        kStateFileName,
+      );
+
+      await expectLater(
+        () async => runner.run(<String>[
+          'start',
+          '--$kFrameworkMirrorOption',
+          frameworkMirror,
+          '--$kEngineMirrorOption',
+          engineMirror,
+          '--$kCandidateOption',
+          candidateBranch,
+          '--$kReleaseOption',
+          releaseChannel,
+          '--$kStateOption',
+          stateFilePath,
+          '--$kVersionOverrideOption',
+          'an invalid version string',
+        ]),
+        throwsExceptionWith('an invalid version string cannot be parsed'),
+      );
+    });
+
     test('creates state file if provided correct inputs', () async {
       stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
       const String revision2 = 'def789';
