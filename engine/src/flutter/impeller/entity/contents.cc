@@ -635,11 +635,7 @@ bool TextContents::Render(const ContentContext& renderer,
   // Iterate through all the runs in the blob.
   for (const auto& run : frame_.GetRuns()) {
     auto font = run.GetFont();
-    auto glyph_size = font.GetGlyphSize();
-    if (!glyph_size.has_value()) {
-      VALIDATION_LOG << "Glyph has no size.";
-      return false;
-    }
+    auto glyph_size = ISize::Ceil(font.GetMetrics().GetBoundingBox().size);
     // Draw each glyph individually. This should probably be batched.
     for (const auto& glyph_position : run.GetGlyphPositions()) {
       FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
@@ -651,9 +647,9 @@ bool TextContents::Render(const ContentContext& renderer,
 
       VS::GlyphInfo glyph_info;
       glyph_info.position = glyph_position.position.Translate(
-          {0.0, font.GetMetrics().ascent, 0.0});
-      glyph_info.glyph_size = {static_cast<Scalar>(glyph_size->width),
-                               static_cast<Scalar>(glyph_size->height)};
+          {font.GetMetrics().min_extent.x, font.GetMetrics().ascent, 0.0});
+      glyph_info.glyph_size = {static_cast<Scalar>(glyph_size.width),
+                               static_cast<Scalar>(glyph_size.height)};
       glyph_info.atlas_position = atlas_glyph_pos->origin;
       glyph_info.atlas_glyph_size = {atlas_glyph_pos->size.width,
                                      atlas_glyph_pos->size.height};

@@ -62,21 +62,19 @@ static bool PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
   glyph_positions.reserve(pairs.size());
 
   for (const auto& pair : pairs) {
-    auto glyph_size = pair.font.GetGlyphSize();
-    if (!glyph_size.has_value()) {
-      continue;
-    }
+    const auto glyph_size =
+        ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size);
     SkIPoint16 location_in_atlas;
-    if (!rect_packer->addRect(glyph_size->width,   //
-                              glyph_size->height,  //
-                              &location_in_atlas   //
+    if (!rect_packer->addRect(glyph_size.width,   //
+                              glyph_size.height,  //
+                              &location_in_atlas  //
                               )) {
       return false;
     }
     glyph_positions.emplace_back(Rect::MakeXYWH(location_in_atlas.x(),  //
                                                 location_in_atlas.y(),  //
-                                                glyph_size->width,      //
-                                                glyph_size->height      //
+                                                glyph_size.width,       //
+                                                glyph_size.height       //
                                                 ));
   }
 
@@ -122,22 +120,46 @@ static std::optional<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
                                const Rect& location) -> bool {
     const auto position = SkPoint::Make(location.origin.x, location.origin.y);
     SkGlyphID glyph_id = font_glyph.glyph.index;
-    SkFont font(
+
+    SkFont sk_font(
         TypefaceSkia::Cast(*font_glyph.font.GetTypeface()).GetSkiaTypeface(),
         font_glyph.font.GetMetrics().point_size);
 
-    SkFontMetrics metrics;
-    font.getMetrics(&metrics);
+    const auto& metrics = font_glyph.font.GetMetrics();
+
+    auto glyph_color = SK_ColorWHITE;
+
+#if 0
+    {
+      glyph_color = SkColorSetARGB(255,                //
+                                   std::rand() % 255,  //
+                                   std::rand() % 255,  //
+                                   std::rand() % 255   //
+      );
+      SkPaint debug_paint;
+      debug_paint.setARGB(255 / 4,            //
+                          std::rand() % 255,  //
+                          std::rand() % 255,  //
+                          std::rand() % 255   //
+      );
+      canvas->drawRect(SkRect::MakeXYWH(location.origin.x,    //
+                                        location.origin.y,    //
+                                        location.size.width,  //
+                                        location.size.height  //
+                                        ),
+                       debug_paint);
+    }
+#endif
 
     SkPaint glyph_paint;
-    glyph_paint.setColor(SK_ColorWHITE);
+    glyph_paint.setColor(glyph_color);
     canvas->drawGlyphs(1u,         // count
                        &glyph_id,  // glyphs
                        &position,  // positions
-                       SkPoint::Make(0.0,
-                                     -metrics.fAscent),  // origin
-                       font,                             // font
-                       glyph_paint                       // paint
+                       SkPoint::Make(-metrics.min_extent.x,
+                                     -metrics.ascent),  // origin
+                       sk_font,                         // font
+                       glyph_paint                      // paint
     );
     return true;
   });

@@ -22,6 +22,8 @@ static Font ToFont(const SkFont& font) {
   metrics.point_size = font.getSize();
   metrics.ascent = sk_metrics.fAscent;
   metrics.descent = sk_metrics.fDescent;
+  metrics.min_extent = {sk_metrics.fXMin, sk_metrics.fTop};
+  metrics.max_extent = {sk_metrics.fXMax, sk_metrics.fBottom};
 
   return Font{std::move(typeface), std::move(metrics)};
 }
