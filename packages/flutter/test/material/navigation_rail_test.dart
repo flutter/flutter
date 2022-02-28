@@ -65,7 +65,7 @@ void main() {
     );
 
     final Iterable<Semantics> semantics = tester.widgetList<Semantics>(find.byType(Semantics));
-    expect(semantics.where((Semantics s) => s.properties.selected == true), isEmpty);
+    expect(semantics.where((Semantics s) => s.properties.selected ?? false), isEmpty);
   });
 
   testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
