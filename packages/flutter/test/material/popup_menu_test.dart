@@ -2570,28 +2570,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
   });
 
-  testWidgets('PopupMenuButton fails when given both offset and position', (WidgetTester tester) async {
-    expect(() {
-      PopupMenuButton<int>(
-          offset: const Offset(50.0, 50.0),
-          position: MenuPosition.under,
-          itemBuilder: (BuildContext context) {
-            return <PopupMenuItem<int>>[
-              PopupMenuItem<int>(
-                value: 1,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return const Text('AAA');
-                  },
-                ),
-              ),
-            ];
-          },
-      );
-    }, throwsAssertionError);
-  });
-
-  testWidgets('Can change menu position', (WidgetTester tester) async {
+  testWidgets('Can change menu position and offset', (WidgetTester tester) async {
     PopupMenuButton<int> buildMenuButton({required MenuPosition position}) {
       return PopupMenuButton<int>(
         position: position,
@@ -2610,7 +2589,7 @@ void main() {
       );
     }
 
-    // Popup menu with `MenuPosition.over`.
+    // Popup menu with `MenuPosition.over (default) with default offset`.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2627,10 +2606,11 @@ void main() {
 
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
 
+    // Close the popup menu.
     await tester.tapAt(Offset.zero);
     await tester.pump();
 
-    // Popup menu with `MenuPosition.under`.
+    // Popup menu with `MenuPosition.under`(custom) with default offset`.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2646,6 +2626,77 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 40.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.over (default) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 50.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under (custom) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              position: MenuPosition.under,
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
   });
 }
 

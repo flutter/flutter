@@ -985,13 +985,9 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.color,
     this.enableFeedback,
     this.constraints,
-    this.position,
+    this.position = MenuPosition.over,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
-       assert(
-         !(offset != Offset.zero && position != null),
-         'You can only pass [offset] or [position], not both.',
-       ),
        assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1115,7 +1111,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// When not set, the popup menu will be positioned directly over
   /// the button that was used to create it.
-  final MenuPosition? position;
+  final MenuPosition position;
 
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
@@ -1138,12 +1134,16 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final Offset offset = widget.offset == Offset.zero
-      && widget.position == MenuPosition.over
-      ? Offset.zero
-      : (widget.position == MenuPosition.under
-          ? Offset(0.0, button.size.height - (widget.padding.vertical / 2))
-          : widget.offset);
+    final Offset offset;
+    if (widget.position == MenuPosition.over && widget.offset != Offset.zero) {
+      offset = widget.offset;
+    } else if (widget.position == MenuPosition.under && widget.offset == Offset.zero) {
+      offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2));
+    } else if (widget.position == MenuPosition.under && widget.offset != Offset.zero) {
+      offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+    } else {
+      offset = Offset.zero;
+    }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(offset, ancestor: overlay),
