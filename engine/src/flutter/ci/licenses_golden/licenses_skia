@@ -1,4 +1,4 @@
-Signature: 609a280e1a2d8b7648ab6198d7fe01fe
+Signature: fd2ab43b2006ad97ddb7868bde84d138
 
 UNUSED LICENSES:
 
@@ -1067,6 +1067,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/externs.js
 FILE: ../../../third_party/skia/modules/canvaskit/font.js
 FILE: ../../../third_party/skia/modules/canvaskit/fonts/NotoMono-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/gm.js
+FILE: ../../../third_party/skia/modules/canvaskit/go/gold_test_env/BUILD.bazel
 FILE: ../../../third_party/skia/modules/canvaskit/gpu.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/_namedcolors.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/canvas2dcontext.js
@@ -1341,6 +1342,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bazel/gcs_mirror/gcs_mirror.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/codesize.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/codesize_test.go
+FILE: ../../../third_party/skia/modules/canvaskit/go/gold_test_env/gold_test_env.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 The Chromium Authors. All rights reserved.
 
