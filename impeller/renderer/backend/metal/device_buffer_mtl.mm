@@ -79,7 +79,7 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
 // Making this call is never necessary on iOS because there is no
 // MTLResourceStorageModeManaged mode. Only the MTLStorageModeShared mode is
 // available.
-#if !OS_IOS
+#if !FML_OS_IOS
   if (Allocator::RequiresExplicitHostSynchronization(mode_)) {
     [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
   }
