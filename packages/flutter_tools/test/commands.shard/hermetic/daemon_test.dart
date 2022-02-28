@@ -4,12 +4,6 @@
 
 // @dart = 2.8
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -79,12 +73,12 @@ class FakeDaemonStreams implements DaemonStreams {
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
-  BufferLogger bufferLogger;
 
   group('daemon', () {
     FakeDaemonStreams daemonStreams;
     DaemonConnection daemonConnection;
     setUp(() {
+      BufferLogger bufferLogger;
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
       daemonStreams = FakeDaemonStreams();
@@ -677,37 +671,46 @@ void main() {
     });
   });
 
-  testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
+  group('notifyingLogger', () {
+    BufferLogger bufferLogger;
+    setUp(() {
+      bufferLogger = BufferLogger.test();
+    });
 
-    logger.printTrace('test');
+    tearDown(() {
+      bufferLogger.clear();
+    });
 
-    expect(bufferLogger.errorText, contains('test'));
-  });
+    testUsingContext('outputs trace messages in verbose mode', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
+      logger.printTrace('test');
+      expect(bufferLogger.errorText, contains('test'));
+    });
 
-  testUsingContext('notifyingLogger ignores trace messages in non-verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+    testUsingContext('ignores trace messages in non-verbose mode', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
-    final Future<LogMessage> messageResult = logger.onMessage.first;
-    logger.printTrace('test');
-    logger.printStatus('hello');
+      final Future<LogMessage> messageResult = logger.onMessage.first;
+      logger.printTrace('test');
+      logger.printStatus('hello');
 
-    final LogMessage message = await messageResult;
+      final LogMessage message = await messageResult;
 
-    expect(message.level, 'status');
-    expect(message.message, 'hello');
-    expect(bufferLogger.errorText, contains('test'));
-  });
+      expect(message.level, 'status');
+      expect(message.message, 'hello');
+      expect(bufferLogger.errorText, isEmpty);
+    });
 
-  testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+    testUsingContext('buffers messages sent before a subscription', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
-    logger.printStatus('hello');
+      logger.printStatus('hello');
 
-    final LogMessage message = await logger.onMessage.first;
+      final LogMessage message = await logger.onMessage.first;
 
-    expect(message.level, 'status');
-    expect(message.message, 'hello');
+      expect(message.level, 'status');
+      expect(message.message, 'hello');
+    });
   });
 
   group('daemon queue', () {

@@ -377,13 +377,18 @@ class StartContext extends Context {
       candidateBranch,
       exact: false,
     ));
-    // [force] means we know this would fail but need to publish anyway
-    if (!force) {
+
+    try {
       lastVersion.ensureValid(candidateBranch, incrementLetter);
+    } on ConductorException catch (e) {
+      // Let the user know, but resume execution
+      stdio.printError(e.message);
     }
 
     Version nextVersion = calculateNextVersion(lastVersion);
-    nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+    if (!force) {
+      nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+    }
 
     state.releaseVersion = nextVersion.toString();
 
@@ -438,15 +443,22 @@ class StartContext extends Context {
     Version requestedVersion,
     FrameworkRepository framework,
   ) async {
-    if (incrementLetter != 'm') {
-      // in this case, there must have been a previous tagged release, so skip
-      // tagging the branch point
-      return requestedVersion;
-    }
     final String branchPoint = await framework.branchPoint(
       candidateBranch,
       FrameworkRepository.defaultBranch,
     );
+    if (await framework.isCommitTagged(branchPoint)) {
+      // The branch point is tagged, no work to be done
+      return requestedVersion;
+    }
+    if (requestedVersion.n != 0) {
+      stdio.printError(
+        'Tried to tag the branch point, however the target version is '
+        '$requestedVersion, which does not have n == 0!',
+      );
+      return requestedVersion;
+    }
+
     final bool response = await prompt(
       'About to tag the release candidate branch branchpoint of $branchPoint '
       'as $requestedVersion and push it to ${framework.upstreamRemote.url}. '

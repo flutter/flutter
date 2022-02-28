@@ -56,7 +56,6 @@ export 'src/material/data_table_source.dart';
 export 'src/material/data_table_theme.dart';
 export 'src/material/date.dart';
 export 'src/material/date_picker.dart';
-export 'src/material/date_picker_deprecated.dart';
 export 'src/material/debug.dart';
 export 'src/material/desktop_text_selection.dart';
 export 'src/material/dialog.dart';
