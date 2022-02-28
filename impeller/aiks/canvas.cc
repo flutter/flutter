@@ -254,7 +254,8 @@ void Canvas::Save(bool create_subpass) {
 
 void Canvas::DrawTextFrame(TextFrame text_frame,
                            std::shared_ptr<GlyphAtlas> atlas,
-                           Point position) {
+                           Point position,
+                           Paint paint) {
   if (!atlas || !atlas->IsValid()) {
     return;
   }
@@ -262,6 +263,7 @@ void Canvas::DrawTextFrame(TextFrame text_frame,
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(std::move(text_frame));
   text_contents->SetGlyphAtlas(std::move(atlas));
+  text_contents->SetColor(paint.color);
 
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation() *
