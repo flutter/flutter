@@ -467,17 +467,6 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
                                  (isBelowBottomOfLine && isFartherToRight))));
 }
 
-// Checks whether Scribble features are possibly available – meaning this is an iPad running iOS
-// 14 or higher.
-static BOOL IsScribbleAvailable() {
-  if (@available(iOS 14.0, *)) {
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-      return YES;
-    }
-  }
-  return NO;
-}
-
 #pragma mark - FlutterTextPosition
 
 @implementation FlutterTextPosition
@@ -1013,6 +1002,17 @@ static BOOL IsScribbleAvailable() {
 
 #pragma mark UIScribbleInteractionDelegate
 
+// Checks whether Scribble features are possibly available – meaning this is an iPad running iOS
+// 14 or higher.
+- (BOOL)isScribbleAvailable {
+  if (@available(iOS 14.0, *)) {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (void)scribbleInteractionWillBeginWriting:(UIScribbleInteraction*)interaction
     API_AVAILABLE(ios(14.0)) {
   _scribbleInteractionStatus = FlutterScribbleInteractionStatusStarted;
@@ -1048,7 +1048,7 @@ static BOOL IsScribbleAvailable() {
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
   // When scribble is available, the FlutterTextInputView will display the native toolbar unless
   // these text editing actions are disabled.
-  if (IsScribbleAvailable()) {
+  if ([self isScribbleAvailable] && sender == NULL) {
     return NO;
   }
   if (action == @selector(paste:)) {
@@ -2077,7 +2077,7 @@ static BOOL IsScribbleAvailable() {
 
 - (void)setEditableSizeAndTransform:(NSDictionary*)dictionary {
   [_activeView setEditableTransform:dictionary[@"transform"]];
-  if (IsScribbleAvailable()) {
+  if ([_activeView isScribbleAvailable]) {
     // This is necessary to set up where the scribble interactable element will be.
     int leftIndex = 12;
     int topIndex = 13;
