@@ -36,7 +36,7 @@ static void DestroyTessellator(TESStesselator* tessellator) {
   }
 }
 
-bool Tessellator::Tessellate(const Path::Polyline& contours,
+bool Tessellator::Tessellate(const Path::Polyline& polyline,
                              VertexCallback callback) const {
   TRACE_EVENT0("impeller", "Tessellator::Tessellate");
   if (!callback) {
@@ -61,23 +61,17 @@ bool Tessellator::Tessellate(const Path::Polyline& contours,
   /// Feed contour information to the tessellator.
   ///
   static_assert(sizeof(Point) == 2 * sizeof(float));
-  size_t start_point_index = 0;
-  for (size_t end_point_index : contours.breaks) {
-    end_point_index = std::min(end_point_index, contours.points.size());
+  for (size_t contour_i = 0; contour_i < polyline.contours.size();
+       contour_i++) {
+    size_t start_point_index, end_point_index;
+    std::tie(start_point_index, end_point_index) =
+        polyline.GetContourPointBounds(contour_i);
+
     ::tessAddContour(tessellator.get(),  // the C tessellator
                      kVertexSize,        //
-                     contours.points.data() + start_point_index,  //
+                     polyline.points.data() + start_point_index,  //
                      sizeof(Point),                               //
                      end_point_index - start_point_index          //
-    );
-    start_point_index = end_point_index;
-  }
-  if (start_point_index < contours.points.size()) {
-    ::tessAddContour(tessellator.get(),  // the C tessellator
-                     kVertexSize,        //
-                     contours.points.data() + start_point_index,  //
-                     sizeof(Point),                               //
-                     contours.points.size() - start_point_index   //
     );
   }
 

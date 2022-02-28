@@ -27,12 +27,14 @@ Path PathBuilder::TakePath(FillType fill) {
 PathBuilder& PathBuilder::MoveTo(Point point, bool relative) {
   current_ = relative ? current_ + point : point;
   subpath_start_ = current_;
-  prototype_.AddMoveComponent(current_);
+  prototype_.AddContourComponent(current_);
   return *this;
 }
 
 PathBuilder& PathBuilder::Close() {
   LineTo(subpath_start_);
+  prototype_.SetContourClosed(true);
+  prototype_.AddContourComponent(current_);
   return *this;
 }
 
@@ -152,6 +154,7 @@ PathBuilder& PathBuilder::SmoothCubicCurveTo(Point controlPoint2,
 }
 
 PathBuilder& PathBuilder::AddQuadraticCurve(Point p1, Point cp, Point p2) {
+  MoveTo(p1);
   prototype_.AddQuadraticComponent(p1, cp, p2);
   return *this;
 }
@@ -160,6 +163,7 @@ PathBuilder& PathBuilder::AddCubicCurve(Point p1,
                                         Point cp1,
                                         Point cp2,
                                         Point p2) {
+  MoveTo(p1);
   prototype_.AddCubicComponent(p1, cp1, cp2, p2);
   return *this;
 }
@@ -172,10 +176,12 @@ PathBuilder& PathBuilder::AddRect(Rect rect) {
   auto br = rect.origin + Point{rect.size.width, rect.size.height};
   auto tr = rect.origin + Point{rect.size.width, 0.0};
 
+  MoveTo(tl);
   prototype_.AddLinearComponent(tl, tr)
       .AddLinearComponent(tr, br)
       .AddLinearComponent(br, bl)
       .AddLinearComponent(bl, tl);
+  Close();
 
   return *this;
 }
@@ -200,6 +206,8 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   const auto magic_bottom_right = radii.bottom_right * kArcApproximationMagic;
   const auto magic_bottom_left = radii.bottom_left * kArcApproximationMagic;
   const auto magic_top_left = radii.top_left * kArcApproximationMagic;
+
+  MoveTo({rect.origin.x + radii.top_left.x, rect.origin.y});
 
   //----------------------------------------------------------------------------
   // Top line.
@@ -277,6 +285,8 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
       {rect.origin.x + radii.top_left.x - magic_top_left.x, rect.origin.y},
       {rect.origin.x + radii.top_left.x, rect.origin.y});
 
+  Close();
+
   return *this;
 }
 
@@ -285,6 +295,8 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
   const Point c = {container.origin.x + (container.size.width * 0.5f),
                    container.origin.y + (container.size.height * 0.5f)};
   const Point m = {kArcApproximationMagic * r.x, kArcApproximationMagic * r.y};
+
+  MoveTo({c.x, c.y - r.y});
 
   //----------------------------------------------------------------------------
   // Top right arc.
@@ -322,10 +334,13 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
                                {c.x, c.y - r.y}         // p2
   );
 
+  Close();
+
   return *this;
 }
 
 PathBuilder& PathBuilder::AddLine(const Point& p1, const Point& p2) {
+  MoveTo(p1);
   prototype_.AddLinearComponent(p1, p2);
   return *this;
 }
@@ -344,8 +359,8 @@ PathBuilder& PathBuilder::AddPath(const Path& path) {
   auto cubic = [&](size_t index, const CubicPathComponent& c) {
     prototype_.AddCubicComponent(c.p1, c.cp1, c.cp2, c.p2);
   };
-  auto move = [&](size_t index, const MovePathComponent& m) {
-    prototype_.AddMoveComponent(m.destination);
+  auto move = [&](size_t index, const ContourComponent& m) {
+    prototype_.AddContourComponent(m.destination);
   };
   path.EnumerateComponents(linear, quadratic, cubic, move);
   return *this;
