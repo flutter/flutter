@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "entity/contents.h"
 #include "flutter/testing/testing.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
@@ -326,6 +327,14 @@ TEST_F(EntityTest, CubicCurveAndOverlapTest) {
   entity.SetPath(path);
   entity.SetContents(SolidColorContents::Make(Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
+TEST_F(EntityTest, SolidStrokeContentsSetStrokeDefaults) {
+  SolidStrokeContents stroke;
+  ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kButt);
+  ASSERT_EQ(stroke.GetStrokeJoin(), SolidStrokeContents::Join::kBevel);
+  // TODO(99089): Test that SetStroke[Cap|Join] works once there are multiple
+  // caps and joins.
 }
 
 }  // namespace testing
