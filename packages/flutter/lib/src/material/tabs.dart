@@ -1359,9 +1359,7 @@ class TabBarView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// The fraction of the viewport that each tabView should occupy.
-  ///
-  /// Defaults to 1.0, which means each tab fills the viewport in the scrolling direction.
+  /// {@macro flutter.widgets.pageview.viewportFraction}
   final double viewportFraction;
 
   @override
