@@ -120,7 +120,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
   NSAssert(engine != nil, @"Engine is required");
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
-    _viewOpaque = NO;
+    _viewOpaque = YES;
     if (engine.viewController) {
       FML_LOG(ERROR) << "The supplied FlutterEngine " << [[engine description] UTF8String]
                      << " is already used with FlutterViewController instance "
@@ -203,7 +203,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
     return;
   }
 
-  _viewOpaque = NO;
+  _viewOpaque = YES;
   _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
   _engine = std::move(engine);
   _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
