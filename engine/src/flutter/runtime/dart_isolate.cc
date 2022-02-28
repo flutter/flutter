@@ -709,6 +709,34 @@ static void InvokeDartPluginRegistrantIfAvailable(Dart_Handle library_handle) {
   tonic::LogIfError(tonic::DartInvokeField(plugin_registrant, "register", {}));
 }
 
+namespace {
+bool EndsWith(const std::string& str, const std::string& ending) {
+  if (str.size() >= ending.size()) {
+    return (0 ==
+            str.compare(str.size() - ending.size(), ending.size(), ending));
+  } else {
+    return false;
+  }
+}
+
+Dart_Handle FindDartPluginRegistrantLibrary() {
+  // TODO(): Instead of finding this, it could be passed down from the tool.
+  Dart_Handle libraries = Dart_GetLoadedLibraries();
+  intptr_t length = 0;
+  Dart_ListLength(libraries, &length);
+  for (intptr_t i = 0; i < length; ++i) {
+    Dart_Handle library = Dart_ListGetAt(libraries, i);
+    std::string library_name =
+        tonic::DartConverter<std::string>::FromDart(Dart_ToString(library));
+    if (EndsWith(library_name,
+                 "dart_tool/flutter_build/dart_plugin_registrant.dart'")) {
+      return library;
+    }
+  }
+  return Dart_Null();
+}
+}  // namespace
+
 bool DartIsolate::RunFromLibrary(std::optional<std::string> library_name,
                                  std::optional<std::string> entrypoint,
                                  const std::vector<std::string>& args) {
@@ -727,7 +755,12 @@ bool DartIsolate::RunFromLibrary(std::optional<std::string> library_name,
                                ? tonic::ToDart(entrypoint.value().c_str())
                                : tonic::ToDart("main");
 
-  InvokeDartPluginRegistrantIfAvailable(library_handle);
+  auto dart_plugin_registrant_library = FindDartPluginRegistrantLibrary();
+  if (!Dart_IsNull(dart_plugin_registrant_library)) {
+    InvokeDartPluginRegistrantIfAvailable(dart_plugin_registrant_library);
+  } else {
+    InvokeDartPluginRegistrantIfAvailable(library_handle);
+  }
 
   auto user_entrypoint_function =
       ::Dart_GetField(library_handle, entrypoint_handle);

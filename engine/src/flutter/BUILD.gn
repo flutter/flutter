@@ -145,6 +145,7 @@ group("flutter") {
       "//flutter/lib/spirv/test/supported_glsl_op_shaders:spirv_compile_supported_glsl_shaders",
       "//flutter/lib/spirv/test/supported_op_shaders:spirv_compile_supported_op_shaders",
       "//flutter/lib/ui:ui_unittests",
+      "//flutter/runtime:dart_plugin_registrant_unittests",
       "//flutter/runtime:no_dart_plugin_registrant_unittests",
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
