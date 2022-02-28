@@ -39,7 +39,7 @@ struct Matrix {
   };
 
   //----------------------------------------------------------------------------
-  /// Construts a default identity matrix.
+  /// Constructs a default identity matrix.
   ///
   constexpr Matrix()
       // clang-format off

@@ -32,7 +32,7 @@ bool AllocatorMTL::IsValid() const {
 static MTLResourceOptions ToMTLResourceOptions(StorageMode type) {
   switch (type) {
     case StorageMode::kHostVisible:
-#if OS_IOS
+#if FML_OS_IOS
       return MTLResourceStorageModeShared;
 #else
       return MTLResourceStorageModeManaged;
@@ -40,7 +40,7 @@ static MTLResourceOptions ToMTLResourceOptions(StorageMode type) {
     case StorageMode::kDevicePrivate:
       return MTLResourceStorageModePrivate;
     case StorageMode::kDeviceTransient:
-#if OS_IOS
+#if FML_OS_IOS
       if (@available(iOS 10.0, *)) {
         return MTLResourceStorageModeMemoryless;
       } else {
@@ -57,7 +57,7 @@ static MTLResourceOptions ToMTLResourceOptions(StorageMode type) {
 static MTLStorageMode ToMTLStorageMode(StorageMode mode) {
   switch (mode) {
     case StorageMode::kHostVisible:
-#if OS_IOS
+#if FML_OS_IOS
       return MTLStorageModeShared;
 #else
       return MTLStorageModeManaged;
@@ -65,7 +65,7 @@ static MTLStorageMode ToMTLStorageMode(StorageMode mode) {
     case StorageMode::kDevicePrivate:
       return MTLStorageModePrivate;
     case StorageMode::kDeviceTransient:
-#if OS_IOS
+#if FML_OS_IOS
       if (@available(iOS 10.0, *)) {
         return MTLStorageModeMemoryless;
       } else {
