@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/entity/solid_stroke.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
@@ -119,15 +121,23 @@ class SolidStrokeContents final : public Contents {
     kButt,
     kRound,
     kSquare,
-    kLast,
   };
 
   enum class Join {
     kMiter,
     kRound,
     kBevel,
-    kLast,
   };
+
+  using CapProc = std::function<void(
+      VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
+      const Point& position,
+      const Point& normal)>;
+  using JoinProc = std::function<void(
+      VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
+      const Point& position,
+      const Point& start_normal,
+      const Point& end_normal)>;
 
   SolidStrokeContents();
 
@@ -162,8 +172,12 @@ class SolidStrokeContents final : public Contents {
   Color color_;
   Scalar stroke_size_ = 0.0;
   Scalar miter_ = 0.0;
-  Cap cap_ = Cap::kButt;
-  Join join_ = Join::kMiter;
+
+  Cap cap_;
+  CapProc cap_proc_;
+
+  Join join_;
+  JoinProc join_proc_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SolidStrokeContents);
 };

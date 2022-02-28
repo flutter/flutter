@@ -282,7 +282,11 @@ const IRect& TextureContents::GetSourceRect() const {
  ******* SolidStrokeContents
  ******************************************************************************/
 
-SolidStrokeContents::SolidStrokeContents() = default;
+SolidStrokeContents::SolidStrokeContents() {
+  SetStrokeCap(Cap::kButt);
+  // TODO(99089): Change this to kMiter once implemented.
+  SetStrokeJoin(Join::kBevel);
+}
 
 SolidStrokeContents::~SolidStrokeContents() = default;
 
@@ -294,32 +298,11 @@ const Color& SolidStrokeContents::GetColor() const {
   return color_;
 }
 
-static void CreateCap(
-    VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
-    const Point& position,
-    const Point& normal) {}
-
-static void CreateJoin(
-    VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
-    const Point& position,
-    const Point& start_normal,
-    const Point& end_normal) {
-  SolidStrokeVertexShader::PerVertexData vtx;
-  vtx.vertex_position = position;
-  vtx.pen_down = 1.0;
-  vtx.vertex_normal = {};
-  vtx_builder.AppendVertex(vtx);
-
-  // A simple bevel join to start with.
-  Scalar dir = start_normal.Cross(end_normal) > 0 ? -1 : 1;
-  vtx.vertex_normal = start_normal * dir;
-  vtx_builder.AppendVertex(vtx);
-  vtx.vertex_normal = end_normal * dir;
-  vtx_builder.AppendVertex(vtx);
-}
-
-static VertexBuffer CreateSolidStrokeVertices(const Path& path,
-                                              HostBuffer& buffer) {
+static VertexBuffer CreateSolidStrokeVertices(
+    const Path& path,
+    HostBuffer& buffer,
+    const SolidStrokeContents::CapProc& cap_proc,
+    const SolidStrokeContents::JoinProc& join_proc) {
   using VS = SolidStrokeVertexShader;
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
@@ -372,7 +355,7 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
 
     // Generate start cap.
     if (!polyline.contours[contour_i].is_closed) {
-      CreateCap(vtx_builder, polyline.points[contour_start_point_i], -normal);
+      cap_proc(vtx_builder, polyline.points[contour_start_point_i], -normal);
     }
 
     // Generate contour geometry.
@@ -396,18 +379,18 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
           compute_normal(point_i + 1);
 
           // Generate join from the current line to the next line.
-          CreateJoin(vtx_builder, polyline.points[point_i], previous_normal,
-                     normal);
+          join_proc(vtx_builder, polyline.points[point_i], previous_normal,
+                    normal);
         }
       }
     }
 
     // Generate end cap or join.
     if (!polyline.contours[contour_i].is_closed) {
-      CreateCap(vtx_builder, polyline.points[contour_end_point_i - 1], normal);
+      cap_proc(vtx_builder, polyline.points[contour_end_point_i - 1], normal);
     } else {
-      CreateJoin(vtx_builder, polyline.points[contour_start_point_i], normal,
-                 contour_first_normal);
+      join_proc(vtx_builder, polyline.points[contour_start_point_i], normal,
+                contour_first_normal);
     }
   }
 
@@ -436,8 +419,8 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   cmd.label = "SolidStroke";
   cmd.pipeline = renderer.GetSolidStrokePipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(
-      CreateSolidStrokeVertices(entity.GetPath(), pass.GetTransientsBuffer()));
+  cmd.BindVertices(CreateSolidStrokeVertices(
+      entity.GetPath(), pass.GetTransientsBuffer(), cap_proc_, join_proc_));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   VS::BindStrokeInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(stroke_info));
@@ -465,6 +448,20 @@ Scalar SolidStrokeContents::GetStrokeMiter(Scalar miter) {
 
 void SolidStrokeContents::SetStrokeCap(Cap cap) {
   cap_ = cap;
+
+  using VS = SolidStrokeVertexShader;
+  switch (cap) {
+    case Cap::kButt:
+      cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                     const Point& position, const Point& normal) {};
+      break;
+    case Cap::kRound:
+      FML_DLOG(ERROR) << "Unimplemented.";
+      break;
+    case Cap::kSquare:
+      FML_DLOG(ERROR) << "Unimplemented.";
+      break;
+  }
 }
 
 SolidStrokeContents::Cap SolidStrokeContents::GetStrokeCap() {
@@ -473,6 +470,33 @@ SolidStrokeContents::Cap SolidStrokeContents::GetStrokeCap() {
 
 void SolidStrokeContents::SetStrokeJoin(Join join) {
   join_ = join;
+
+  using VS = SolidStrokeVertexShader;
+  switch (join) {
+    case Join::kBevel:
+      join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                      const Point& position, const Point& start_normal,
+                      const Point& end_normal) {
+        SolidStrokeVertexShader::PerVertexData vtx;
+        vtx.vertex_position = position;
+        vtx.pen_down = 1.0;
+        vtx.vertex_normal = {};
+        vtx_builder.AppendVertex(vtx);
+
+        Scalar dir = start_normal.Cross(end_normal) > 0 ? -1 : 1;
+        vtx.vertex_normal = start_normal * dir;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_normal = end_normal * dir;
+        vtx_builder.AppendVertex(vtx);
+      };
+      break;
+    case Join::kMiter:
+      FML_DLOG(ERROR) << "Unimplemented.";
+      break;
+    case Join::kRound:
+      FML_DLOG(ERROR) << "Unimplemented.";
+      break;
+  }
 }
 
 SolidStrokeContents::Join SolidStrokeContents::GetStrokeJoin() {
