@@ -94,4 +94,8 @@ struct Padding {
   uint8_t pad_[Size];
 };
 
+inline constexpr Vector4 ToVector(Color color) {
+  return {color.red, color.green, color.blue, color.alpha};
+}
+
 }  // namespace impeller
