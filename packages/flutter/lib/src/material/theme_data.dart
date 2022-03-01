@@ -1936,18 +1936,19 @@ class ThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Map<Object, ThemeExtension<Object>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
-    // Lerp in place.
-    a.extensions.map((Object id, ThemeExtension<Object> extensionA) {
+    // Lerp [a].
+    final Map<Object, ThemeExtension<Object>> newExtensions = a.extensions.map((Object id, ThemeExtension<Object> extensionA) {
         final ThemeExtension<Object>? extensionB = b.extensions[id];
         return MapEntry<Object, ThemeExtension<Object>>(id, extensionA.lerp(extensionB, t));
       });
     // Add [b]-only extensions.
-    final Set<Object> bOnlyExtensions = b.extensions.keys.toSet().difference(a.extensions.keys.toSet());
-    for (final Object bOnlyExtension in bOnlyExtensions) {
-      a.extensions[bOnlyExtension] = b.extensions[bOnlyExtension]!;
+    for (final MapEntry<Object, ThemeExtension<Object>> entry in b.extensions.entries) {
+      if (!newExtensions.containsKey(entry.key)) {
+        newExtensions[entry.key] = entry.value;
+      }
     }
 
-    return a.extensions;
+    return newExtensions;
   }
 
   /// Linearly interpolate between two themes.
