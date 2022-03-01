@@ -174,10 +174,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckSuggestionsHandler != null && spellCheckSuggestionsHandler!.spellCheckSuggestions != null) {
-      // if (spellCheckSuggestionsHandler!.spellCheckSuggestions!.length > 0) {
+    if (spellCheckSuggestionsHandler != null && spellCheckSuggestionsHandler.spellCheckSuggestions != null && spellCheckSuggestionsHandler.spellCheckSuggestions!.length > 0) {
         return spellCheckSuggestionsHandler.buildTextSpanWithSpellCheckSuggestions(value, style, false);
-      // }
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
