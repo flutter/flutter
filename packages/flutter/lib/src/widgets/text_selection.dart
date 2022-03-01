@@ -142,7 +142,7 @@ abstract class TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
 
@@ -199,18 +199,16 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCut(TextSelectionDelegate delegate) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
-    clipboardStatus?.update();
   }
 
   /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
-  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCopy(TextSelectionDelegate delegate) {
     delegate.copySelection(SelectionChangedCause.toolbar);
-    clipboardStatus?.update();
   }
 
   /// Call [TextSelectionDelegate.pasteText] to paste text.
@@ -809,8 +807,8 @@ class SelectionOverlay {
       return;
 
     _handles = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => _buildStartHandle(context)),
-      OverlayEntry(builder: (BuildContext context) => _buildEndHandle(context)),
+      OverlayEntry(builder: _buildStartHandle),
+      OverlayEntry(builder: _buildEndHandle),
     ];
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
@@ -1056,7 +1054,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
   }
 
   void _toolbarVisibilityChanged() {
-    if (widget.visibility?.value != false) {
+    if (widget.visibility?.value ?? true) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -1080,7 +1078,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
               widget.midpoint,
               widget.selectionEndpoints,
               widget.selectionDelegate!,
-              widget.clipboardStatus!,
+              widget.clipboardStatus,
               widget.toolbarLocation,
             );
           },
@@ -1139,7 +1137,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   }
 
   void _handleVisibilityChanged() {
-    if (widget.visibility?.value != false) {
+    if (widget.visibility?.value ?? true) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -2131,8 +2129,6 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   }) : super(value);
 
   bool _disposed = false;
-  /// True if this instance has been disposed.
-  bool get disposed => _disposed;
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
@@ -2183,7 +2179,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners) {
+    if (!_disposed && !hasListeners) {
       WidgetsBinding.instance.removeObserver(this);
     }
   }
@@ -2203,9 +2199,9 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   @override
   void dispose() {
-    super.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _disposed = true;
+    super.dispose();
   }
 }
 

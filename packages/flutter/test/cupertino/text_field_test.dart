@@ -43,7 +43,7 @@ class MockTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     throw UnimplementedError();
@@ -84,7 +84,7 @@ class PathBoundsMatcher extends Matcher {
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
     for(int idx = 0; idx < matchers.length; idx++) {
-      if (!(matchers[idx]?.matches(values[idx], matchState) != false)) {
+      if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
         failedMatcher[matchers[idx]!] = values[idx];
       }
     }

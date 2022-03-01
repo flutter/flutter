@@ -395,11 +395,11 @@ class IOSDeployDebugger {
         _monitorIOSDeployFailure(line, _logger);
         _logger.printTrace(line);
       });
-      unawaited(_iosDeployProcess!.exitCode.then((int status) {
+      unawaited(_iosDeployProcess!.exitCode.then((int status) async {
         _logger.printTrace('ios-deploy exited with code $exitCode');
         _debuggerState = _IOSDeployDebuggerState.detached;
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
+        await stdoutSubscription.cancel();
+        await stderrSubscription.cancel();
       }).whenComplete(() async {
         if (_debuggerOutput.hasListener) {
           // Tell listeners the process died.

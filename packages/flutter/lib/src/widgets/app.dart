@@ -1333,7 +1333,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   bool get _usesRouter => widget.routerDelegate != null;
-  bool get _usesNavigator => widget.home != null || widget.routes?.isNotEmpty == true || widget.onGenerateRoute != null || widget.onUnknownRoute != null;
+  bool get _usesNavigator => widget.home != null
+      || (widget.routes?.isNotEmpty ?? false)
+      || widget.onGenerateRoute != null
+      || widget.onUnknownRoute != null;
 
   // ROUTER
 

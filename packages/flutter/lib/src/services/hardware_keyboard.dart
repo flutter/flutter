@@ -887,6 +887,7 @@ class KeyEventManager {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
     final LogicalKeyboardKey logicalKey = rawEvent.logicalKey;
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
+    final List<KeyEvent> eventAfterwards = <KeyEvent>[];
     final KeyEvent? mainEvent;
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
     final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
@@ -923,12 +924,24 @@ class KeyEventManager {
       }
     }
     for (final PhysicalKeyboardKey key in physicalKeysPressed.difference(_rawKeyboard.physicalKeysPressed)) {
-      _keyEventsSinceLastMessage.add(KeyUpEvent(
-        physicalKey: key,
-        logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
-        timeStamp: timeStamp,
-        synthesized: true,
-      ));
+      if (key == physicalKey) {
+        // Somehow, a down event is dispatched but the key is absent from
+        // keysPressed. Synthesize a up event for the key, but this event must
+        // be added after the main key down event.
+        eventAfterwards.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: logicalKey,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      } else {
+        _keyEventsSinceLastMessage.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      }
     }
     for (final PhysicalKeyboardKey key in _rawKeyboard.physicalKeysPressed.difference(physicalKeysPressed)) {
       _keyEventsSinceLastMessage.add(KeyDownEvent(
@@ -938,8 +951,10 @@ class KeyEventManager {
         synthesized: true,
       ));
     }
-    if (mainEvent != null)
+    if (mainEvent != null) {
       _keyEventsSinceLastMessage.add(mainEvent);
+    }
+    _keyEventsSinceLastMessage.addAll(eventAfterwards);
   }
 
   /// Reset the inferred platform transit mode and related states.

@@ -136,7 +136,7 @@ Future<void> main() async {
     final List<double> scrollOffset = <double>[];
     final List<Duration> delays = <Duration>[];
     binding.addPersistentFrameCallback((Duration timeStamp) {
-      if (controller?.hasClients == true) {
+      if (controller?.hasClients ?? false) {
         // This if is necessary because by the end of the test the widget tree
         // is destroyed.
         frameTimestamp.add(timeStamp.inMicroseconds);
