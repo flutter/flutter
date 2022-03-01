@@ -33,47 +33,19 @@ import 'tooltip.dart';
 /// This widget holds a collection of destinations (usually
 /// [NavigationDestination]s).
 ///
-/// Usage:
-/// ```dart
-/// Scaffold(
-///   bottomNavigationBar: NavigationBar(
-///     onDestinationSelected: (int index) {
-///       setState(() { _currentPageIndex = index; }),
-///     },
-///     selectedIndex: _currentPageIndex,
-///     destinations: [
-///       NavigationDestination(
-///         icon: Icon(Icons.explore),
-///         label: 'Explore',
-///       ),
-///       NavigationDestination(
-///         icon: Icon(Icons.commute),
-///         label: 'Commute',
-///       ),
-///       NavigationDestination(
-///         selectedIcon: Icon(Icons.bookmark),
-///         icon: Icon(Icons.bookmark_border),
-///         label: 'Saved',
-///       ),
-///     ],
-///   ),
-/// ),
-/// ```
-///
 /// {@tool dartpad}
-/// This example has a [NavigationBar] where each destination has its
-/// own Navigator, Scaffold, and Appbar. That means that each
-/// destination has an independent route history and (app bar) back
-/// button. A [Stack] is used to display one destination at a time and
-/// destination changes are handled by cross fade transitions. Destinations
-/// that have been completely faded out are [Offstage].
+/// This example shows a [NavigationBar] as it is used within a [Scaffold]
+/// widget. The [NavigationBar] has three [NavigationDestination] widgets
+/// and the [selectedIndex] is set to index 0. The `onDestinationSelected` callback
+/// changes the selected item's index and displays a corresponding widget in the body of the [Scaffold].
 ///
-/// One can see that the appearance of each destination's dialogs, bottom sheet,
-/// list scrolling state, and text field state, persist when another destination
-/// is selected.
-///
-/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.0.dart **
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.dart **
 /// {@end-tool}
+/// See also:
+///
+///  * [NavigationDestination]
+///  * [BottomNavigationBar]
+///  * <https://api.flutter.dev/flutter/material/NavigationDestination-class.html>
 class NavigationBar extends StatelessWidget {
   /// Creates a Material 3 Navigation Bar component.
   ///
