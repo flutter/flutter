@@ -385,7 +385,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   FlutterSkippingFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient,
-    this.reason,{
+    this.reason, {
     String? namePrefix,
   }) : super(basedir, skiaClient, namePrefix: namePrefix);
 
