@@ -18,7 +18,7 @@ class MyColors implements ThemeExtension<MyColors> {
 
   @override
   Object get id => MyColors;
-  
+
   @override
   MyColors copyWith({Color? red, Color? blue}) {
     return MyColors(

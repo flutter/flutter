@@ -1077,31 +1077,31 @@ class ThemeData with Diagnosticable {
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
 
   /// A map containing arbitrary additions to this theme.
-  /// 
+  ///
   /// Each entry represents a different [ThemeExtension] subclass, where the key
   /// consists of the subclass' type. For example:
-  /// 
+  ///
   /// ```dart
   /// extensions: { 
   ///   MyColors: ThemeExtension<MyColors> ... ,
   ///   MyTextStyles: ThemeExtension<MyTextStyles> ... ,
   /// }
   /// ```
-  /// 
+  ///
   /// {@tool dartpad}
   /// This sample shows how to create and use a subclass of [ThemeExtension] that
   /// defines two colors.
   ///
   /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
   /// {@end-tool}
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   /// * [extension], a convenience function for obtaining a specific extension.
   final Map<Object, ThemeExtension<Object>> extensions;
 
   /// Used to obtain a particular [ThemeExtension] from [extensions].
-  /// 
+  ///
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T;
 
@@ -1931,7 +1931,7 @@ class ThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two [extensions].
-  /// 
+  ///
   /// Includes all theme extensions in [a] and [b].
   ///
   /// {@macro dart.ui.shadow.lerp}
