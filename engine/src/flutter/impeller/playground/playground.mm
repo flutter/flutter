@@ -195,14 +195,18 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name) const {
-  CompressedImage compressed_image(
+  auto compressed_image = CompressedImage::Create(
       flutter::testing::OpenFixtureAsMapping(fixture_name));
+  if (!compressed_image) {
+    VALIDATION_LOG << "Could not create compressed image.";
+    return nullptr;
+  }
   // The decoded image is immediately converted into RGBA as that format is
   // known to be supported everywhere. For image sources that don't need 32
   // bit pixel strides, this is overkill. Since this is a test fixture we
   // aren't necessarily trying to eke out memory savings here and instead
   // favor simplicity.
-  auto image = compressed_image.Decode().ConvertToRGBA();
+  auto image = compressed_image->Decode().ConvertToRGBA();
   if (!image.IsValid()) {
     VALIDATION_LOG << "Could not find fixture named " << fixture_name;
     return nullptr;

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/geometry/size.h"
@@ -15,16 +17,19 @@ class ImageSource;
 
 class CompressedImage {
  public:
-  CompressedImage(std::shared_ptr<const fml::Mapping> sourceAllocation);
+  static std::shared_ptr<CompressedImage> Create(
+      std::shared_ptr<const fml::Mapping> allocation);
 
-  ~CompressedImage();
+  virtual ~CompressedImage();
 
-  [[nodiscard]] DecompressedImage Decode() const;
+  [[nodiscard]] virtual DecompressedImage Decode() const = 0;
 
   bool IsValid() const;
 
- private:
-  std::shared_ptr<const fml::Mapping> source_;
+ protected:
+  const std::shared_ptr<const fml::Mapping> source_;
+
+  CompressedImage(std::shared_ptr<const fml::Mapping> allocation);
 };
 
 }  // namespace impeller
