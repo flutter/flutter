@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -395,7 +396,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop web', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -437,7 +438,7 @@ void main() {
     await down2.up();
     await down2.removePointer();
 
-    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeA.hasFocus, !kIsWeb);
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
@@ -491,7 +492,7 @@ void main() {
     expect(focusNodeA.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop web after tab navigation', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -534,7 +535,7 @@ void main() {
     await down2.up();
     await down2.removePointer();
 
-    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeA.hasFocus, !kIsWeb);
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
