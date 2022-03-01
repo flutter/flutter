@@ -48,7 +48,7 @@ platform_properties:
         ]
       os: Linux
       device_os: "N"
-  linux_samsung:
+  linux_samsung_s10:
     properties:
       caches: >-
         [
@@ -1475,7 +1475,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung backdrop_filter_perf__timeline_summary
+  - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -1625,7 +1625,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung complex_layout_scroll_perf__timeline_summary
+  - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -1728,7 +1728,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung cubic_bezier_perf__timeline_summary
+  - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -1762,7 +1762,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung cull_opacity_perf__timeline_summary
+  - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -2086,7 +2086,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung imagefiltered_transform_animation_perf__timeline_summary
+  - name: Linux_samsung_s10 imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -2204,7 +2204,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung new_gallery__transition_perf
+  - name: Linux_samsung_s10 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -2238,7 +2238,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung picture_cache_perf__timeline_summary
+  - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -2302,7 +2302,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung platform_views_scroll_perf__timeline_summary
+  - name: Linux_samsung_s10 platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
@@ -2366,7 +2366,7 @@ targets:
       benchmark: "true"
     scheduler: luci
 
-  - name: Linux_samsung textfield_perf__timeline_summary
+  - name: Linux_samsung_s10 textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
