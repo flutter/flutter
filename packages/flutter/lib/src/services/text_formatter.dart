@@ -408,69 +408,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 }
 
-/// Old name for [FilteringTextInputFormatter.deny].
-@Deprecated(
-  'Use FilteringTextInputFormatter.deny instead. '
-  'This feature was deprecated after v1.20.0-1.0.pre.',
-)
-class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
-  /// Old name for [FilteringTextInputFormatter.deny].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.deny instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  BlacklistingTextInputFormatter(
-    Pattern blacklistedPattern, {
-    String replacementString = '',
-  }) : super.deny(blacklistedPattern, replacementString: replacementString);
-
-  /// Old name for [filterPattern].
-  @Deprecated(
-    'Use filterPattern instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  Pattern get blacklistedPattern => filterPattern;
-
-  /// Old name for [FilteringTextInputFormatter.singleLineFormatter].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.singleLineFormatter instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  static final BlacklistingTextInputFormatter singleLineFormatter
-      = BlacklistingTextInputFormatter(RegExp(r'\n'));
-}
-
-/// Old name for [FilteringTextInputFormatter.allow].
-@Deprecated(
-  'Use FilteringTextInputFormatter.allow instead. '
-  'This feature was deprecated after v1.20.0-1.0.pre.',
-)
-class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
-  /// Old name for [FilteringTextInputFormatter.allow].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.allow instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  WhitelistingTextInputFormatter(Pattern whitelistedPattern)
-    : assert(whitelistedPattern != null),
-      super.allow(whitelistedPattern);
-
-  /// Old name for [filterPattern].
-  @Deprecated(
-    'Use filterPattern instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  Pattern get whitelistedPattern => filterPattern;
-
-  /// Old name for [FilteringTextInputFormatter.digitsOnly].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.digitsOnly instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  static final WhitelistingTextInputFormatter digitsOnly
-      = WhitelistingTextInputFormatter(RegExp(r'\d+'));
-}
-
 /// A [TextInputFormatter] that prevents the insertion of more characters
 /// than allowed.
 ///

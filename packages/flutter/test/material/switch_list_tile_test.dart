@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,7 +73,6 @@ void main() {
         TestSemantics.rootChild(
           id: 1,
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          transform: null,
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
@@ -198,10 +198,10 @@ void main() {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       expect(find.byType(CupertinoSwitch), findsOneWidget);
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      expect(value, isFalse, reason: 'on ${platform.name}');
 
       await tester.tap(find.byType(SwitchListTile));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+      expect(value, isTrue, reason: 'on ${platform.name}');
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
@@ -210,19 +210,16 @@ void main() {
       await tester.pumpAndSettle(); // Finish the theme change animation.
 
       expect(find.byType(CupertinoSwitch), findsNothing);
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      expect(value, isFalse, reason: 'on ${platform.name}');
       await tester.tap(find.byType(SwitchListTile));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+      expect(value, isTrue, reason: 'on ${platform.name}');
     }
   });
 
   testWidgets('SwitchListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
@@ -518,5 +515,46 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
     });
+  });
+
+  testWidgets('SwitchListTile respects hoverColor', (WidgetTester tester) async {
+    const Key key = Key('test');
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              width: 100,
+              height: 100,
+              color: Colors.white,
+              child: SwitchListTile(
+                value: false,
+                key: key,
+                hoverColor: Colors.orange[500],
+                title: const Text('A'),
+                onChanged: (bool? value) {},
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(key)));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(key))),
+      paints
+        ..rect(
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
+    );
   });
 }

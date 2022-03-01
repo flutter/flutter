@@ -18,7 +18,7 @@ import 'theme.dart';
 /// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
 /// a [ScrollView] to the enclosing [PrimaryScrollController].
 ///
-/// {@tool dartpad --template=stateful_widget_cupertino}
+/// {@tool dartpad}
 /// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
 /// The [CupertinoButton] is connected to a callback that increments a counter.
 /// The [backgroundColor] can be changed.
@@ -91,10 +91,10 @@ class CupertinoPageScaffold extends StatefulWidget {
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
   void _handleStatusBarTap() {
-    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
+    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
     // Only act on the scroll controller if it has any attached scroll positions.
-    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
-      _primaryScrollController.animateTo(
+    if (primaryScrollController != null && primaryScrollController.hasClients) {
+      primaryScrollController.animateTo(
         0.0,
         // Eyeballed from iOS.
         duration: const Duration(milliseconds: 500),

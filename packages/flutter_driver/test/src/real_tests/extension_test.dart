@@ -61,7 +61,7 @@ void main() {
     });
 
     testWidgets('waits until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -122,7 +122,7 @@ void main() {
     });
 
     testWidgets('waiting for NoTransientCallbacks returns until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -164,7 +164,7 @@ void main() {
     });
 
     testWidgets('waiting for NoPendingFrame returns until no pending scheduled frame', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
 
       driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
@@ -207,8 +207,8 @@ void main() {
 
     testWidgets(
         'waiting for combined conditions returns until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -236,8 +236,8 @@ void main() {
 
     testWidgets(
         'waiting for combined conditions returns until no pending scheduled frame', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -472,7 +472,7 @@ void main() {
     });
 
     testWidgets('works when semantics are enabled', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance!.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
@@ -496,7 +496,7 @@ void main() {
     }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance!.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -848,7 +848,7 @@ void main() {
     );
 
     // Widget
-    Map<String, dynamic> result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0);
+    Map<String, dynamic> result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'));
     expect(result['children'], isNull); // depth: 0
     expect(result['widgetRuntimeType'], 'Text');
 
@@ -857,7 +857,7 @@ void main() {
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
 
-    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0, properties: false);
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), properties: false);
     expect(result['widgetRuntimeType'], 'Text');
     expect(result['properties'], isNull); // properties: false
 
@@ -870,12 +870,12 @@ void main() {
     expect(children.single['children'], isEmpty);
 
     // RenderObject
-    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0);
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'));
     expect(result['children'], isNull); // depth: 0
     expect(result['properties'], isNotNull);
     expect(result['description'], startsWith('RenderParagraph'));
 
-    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0, properties: false);
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), properties: false);
     expect(result['properties'], isNull); // properties: false
     expect(result['description'], startsWith('RenderParagraph'));
 
@@ -1199,7 +1199,7 @@ void main() {
 
     testWidgets(
         'waits until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -1225,7 +1225,7 @@ void main() {
 
     testWidgets(
         'waits until no pending scheduled frame', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
 
       driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {

@@ -500,7 +500,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @override
   String get version {
-    return _version ??= _plistParser.getValueFromFile(
+    return _version ??= _plistParser.getStringValueFromFile(
         plistFile,
         PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
@@ -514,7 +514,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     final String? altLocation = _plistParser
-      .getValueFromFile(plistFile, 'JetBrainsToolboxApp');
+      .getStringValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
       _pluginsPath = '$altLocation.plugins';

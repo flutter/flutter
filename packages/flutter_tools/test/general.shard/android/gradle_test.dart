@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -206,7 +206,7 @@ void main() {
     void testUsingAndroidContext(String description, dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localEngineArtifacts,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
@@ -274,7 +274,6 @@ flutter:
         manifest: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: null,
       );
     });
 
@@ -377,9 +376,7 @@ flutter:
 ''';
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null, treeShakeIcons: false),
-        expectedBuildName: null,
-        expectedBuildNumber: null,
+        buildInfo: const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       );
       await checkBuildVersion(
         manifest: manifest,
@@ -396,16 +393,13 @@ flutter:
       // Values don't get unset.
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: null,
         expectedBuildName: '1.0.3',
         expectedBuildNumber: '4',
       );
       // Values get unset.
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null, treeShakeIcons: false),
-        expectedBuildName: null,
-        expectedBuildNumber: null,
+        buildInfo: const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       );
     });
   });

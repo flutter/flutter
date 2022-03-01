@@ -21,16 +21,15 @@ void main() {
   // we timeout on a port
   testWithoutContext('IOSDevicePortForwarder.forward will kill iproxy processes before invoking a second', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      // iproxy does not exit with 0 when it cannot forward;
+      // the FakeCommands below expect an exitCode of 0.
       const FakeCommand(
         command: <String>['iproxy', '12345:456', '--udid', '1234'],
-        // iproxy does not exit with 0 when it cannot forward.
-        exitCode: 0,
         stdout: null, // no stdout indicates failure.
         environment: kDyLdLibEntry,
       ),
       const FakeCommand(
         command: <String>['iproxy', '12346:456', '--udid', '1234'],
-        exitCode: 0,
         stdout: 'not empty',
         environment: kDyLdLibEntry,
       ),

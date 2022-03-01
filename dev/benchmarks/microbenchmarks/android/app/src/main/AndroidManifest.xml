@@ -7,8 +7,8 @@ found in the LICENSE file. -->
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:name="io.flutter.app.FlutterApplication" android:label="microbenchmarks" android:icon="@mipmap/ic_launcher">
-        <activity android:name="io.flutter.app.FlutterActivity"
+    <application android:name="${applicationName}" android:label="microbenchmarks" android:icon="@mipmap/ic_launcher">
+        <activity android:name="io.flutter.embedding.android.FlutterActivity"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -19,5 +19,10 @@ found in the LICENSE file. -->
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
     </application>
 </manifest>

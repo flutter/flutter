@@ -30,7 +30,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -88,7 +88,7 @@ void main() {
 
     testUsingContext('No IDE Validator includes expected installation messages', () async {
       final ValidationResult result = await NoIdeValidator().validate();
-      expect(result.type, ValidationType.missing);
+      expect(result.type, ValidationType.notAvailable);
 
       expect(
         result.messages.map((ValidationMessage vm) => vm.message),
@@ -313,6 +313,14 @@ void main() {
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
+
+    testUsingContext('sending events can be skipped', () async {
+      await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
+
+      expect(testUsage.events, isEmpty);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
   });
 
   group('doctor with fake validators', () {
@@ -338,7 +346,7 @@ void main() {
               '[☠] Crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
@@ -347,7 +355,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
-      expect(await FakeCrashingDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeCrashingDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
@@ -370,7 +378,7 @@ void main() {
               '[☠] Async crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
@@ -428,7 +436,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format', () async {
-      expect(await FakeDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -455,6 +463,78 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    });
+
+    testUsingContext('validate PII can be hidden', () async {
+      expect(await FakePiiDoctor(logger).diagnose(showPii: false), isTrue);
+      expect(logger.statusText, equals(
+        '[✓] PII Validator\n'
+        '    • Does not contain PII\n'
+        '\n'
+        '• No issues found!\n'
+      ));
+      logger.clear();
+      // PII shown.
+      expect(await FakePiiDoctor(logger).diagnose(), isTrue);
+      expect(logger.statusText, equals(
+          '[✓] PII Validator\n'
+              '    • Contains PII path/to/username\n'
+              '\n'
+              '• No issues found!\n'
+      ));
+    });
+  });
+
+  group('doctor diagnosis wrapper', () {
+    TestUsage testUsage;
+    BufferLogger logger;
+
+    setUp(() {
+      testUsage = TestUsage();
+      logger = BufferLogger.test();
+    });
+
+    testUsingContext('PII separated, events only sent once', () async {
+      final Doctor fakeDoctor = FakePiiDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      const String expectedPiiText = '[✓] PII Validator\n'
+          '    • Contains PII path/to/username\n'
+          '\n'
+          '• No issues found!\n';
+      const String expectedPiiStrippedText =
+          '[✓] PII Validator\n'
+          '    • Does not contain PII\n'
+          '\n'
+          '• No issues found!\n';
+
+      // Run each multiple times to make sure the logger buffer is being cleared,
+      // and that events are only sent once.
+      expect(await doctorText.text, expectedPiiText);
+      expect(await doctorText.text, expectedPiiText);
+
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+
+      // Only one event sent.
+      expect(testUsage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'doctor-result',
+          'PiiValidator',
+          label: 'installed',
+        ),
+      ]);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
+    testUsingContext('without PII has same text and PII-stripped text', () async {
+      final Doctor fakeDoctor = FakePassingDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final String piiText = await doctorText.text;
+      expect(piiText, isNotEmpty);
+      expect(piiText, await doctorText.piiStrippedText);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
     });
   });
 
@@ -495,7 +575,7 @@ void main() {
     final BufferLogger wrapLogger = BufferLogger.test(
       outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
     );
-    expect(await FakeDoctor(wrapLogger).diagnose(verbose: true), isFalse);
+    expect(await FakeDoctor(wrapLogger).diagnose(), isFalse);
     expect(wrapLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'
@@ -534,7 +614,6 @@ void main() {
         '  categories.\n'
     ));
   });
-
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
@@ -666,13 +745,16 @@ class NoOpDoctor implements Doctor {
     bool verbose = true,
     bool showColor = true,
     AndroidLicenseValidator androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask> startedValidatorTasks,
+    bool sendEvent = true,
   }) async => true;
 
   @override
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
 
   @override
-  Future<void> summary() => null;
+  Future<void> summary() async { }
 
   @override
   List<DoctorValidator> get validators => <DoctorValidator>[];
@@ -691,6 +773,18 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
     return const ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+  }
+}
+
+class PiiValidator extends DoctorValidator {
+  PiiValidator() : super('PII Validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    const List<ValidationMessage> messages = <ValidationMessage>[
+      ValidationMessage('Contains PII path/to/username', piiStrippedMessage: 'Does not contain PII'),
+    ];
+    return const ValidationResult(ValidationType.installed, messages);
   }
 }
 
@@ -754,7 +848,7 @@ class CrashingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    throw 'fatal error';
+    throw StateError('fatal error');
   }
 }
 
@@ -768,7 +862,7 @@ class AsyncCrashingValidator extends DoctorValidator {
     const Duration delay = Duration(seconds: 1);
     final Future<ValidationResult> result = Future<ValidationResult>.delayed(delay)
       .then((_) {
-        throw 'fatal error';
+        throw StateError('fatal error');
       });
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();
@@ -836,6 +930,19 @@ class FakeQuietDoctor extends Doctor {
       PassingValidator('Another Passing Validator'),
       PassingValidator('Validators are fun'),
       PassingValidator('Four score and seven validators ago'),
+    ];
+  }
+}
+
+/// A doctor that passes and contains PII that can be hidden.
+class FakePiiDoctor extends Doctor {
+  FakePiiDoctor(Logger logger) : super(logger: logger);
+
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    return _validators ??= <DoctorValidator>[
+      PiiValidator(),
     ];
   }
 }
@@ -1021,6 +1128,9 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   String get name => 'name';

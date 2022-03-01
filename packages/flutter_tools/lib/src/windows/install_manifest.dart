@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -16,19 +12,18 @@ import '../cmake_project.dart';
 
 /// Generate an install manifest that is required for CMAKE on UWP projects.
 Future<void> createManifest({
-  @required Logger logger,
-  @required FileSystem fileSystem,
-  @required Platform platform,
-  @required WindowsUwpProject project,
-  @required BuildInfo buildInfo,
-  @required Directory buildDirectory,
+  required Logger logger,
+  required FileSystem fileSystem,
+  required Platform platform,
+  required WindowsUwpProject project,
+  required BuildInfo buildInfo,
+  required Directory buildDirectory,
 }) async {
   final List<File> outputs = <File>[];
   final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
     logger: logger,
     fileSystem: fileSystem,
     platform: platform,
-    splitDeferredAssets: false,
   ).createBundle();
   final int resultCode = await assetBundle.build(
     packagesPath: buildInfo.packagesPath,

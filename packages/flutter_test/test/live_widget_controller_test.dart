@@ -68,9 +68,9 @@ void main() {
   test('Test pump on LiveWidgetController', () async {
     runApp(const MaterialApp(home: Center(child: CountButton())));
 
-    await SchedulerBinding.instance!.endOfFrame;
+    await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance!);
+        LiveWidgetController(WidgetsBinding.instance);
     await controller.tap(find.text('Counter 0'));
     expect(find.text('Counter 0'), findsOneWidget);
     expect(find.text('Counter 1'), findsNothing);
@@ -81,9 +81,9 @@ void main() {
 
   test('Test pumpAndSettle on LiveWidgetController', () async {
     runApp(const MaterialApp(home: Center(child: AnimateSample())));
-    await SchedulerBinding.instance!.endOfFrame;
+    await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance!);
+        LiveWidgetController(WidgetsBinding.instance);
     expect(find.text('Value: 1.0'), findsNothing);
     await controller.pumpAndSettle();
     expect(find.text('Value: 1.0'), findsOneWidget);
@@ -101,9 +101,9 @@ void main() {
         ),
       ),
     );
-    await SchedulerBinding.instance!.endOfFrame;
+    await SchedulerBinding.instance.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance!);
+        LiveWidgetController(WidgetsBinding.instance);
 
     final Offset location = controller.getCenter(find.text('test'));
     final List<PointerEventRecord> records = <PointerEventRecord>[
@@ -111,11 +111,9 @@ void main() {
         // Typically PointerAddedEvent is not used in testers, but for records
         // captured on a device it is usually what start a gesture.
         PointerAddedEvent(
-          timeStamp: Duration.zero,
           position: location,
         ),
         PointerDownEvent(
-          timeStamp: Duration.zero,
           position: location,
           buttons: kSecondaryMouseButton,
           pointer: 1,
@@ -123,8 +121,8 @@ void main() {
       ]),
       ...<PointerEventRecord>[
         for (Duration t = const Duration(milliseconds: 5);
-            t < const Duration(milliseconds: 80);
-            t += const Duration(milliseconds: 16))
+             t < const Duration(milliseconds: 80);
+             t += const Duration(milliseconds: 16))
           PointerEventRecord(t, <PointerEvent>[
             PointerMoveEvent(
               timeStamp: t - const Duration(milliseconds: 1),
@@ -149,7 +147,7 @@ void main() {
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
-      assert(diff.inMilliseconds > -1);
+      assert(diff.inMilliseconds > -1, 'timeDiffs were: $timeDiffs (offending time was ${diff.inMilliseconds}ms)');
     }
 
     const String b = '$kSecondaryMouseButton';

@@ -148,7 +148,7 @@ class ImageConfiguration {
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('platform: ${describeEnum(platform!)}');
+      result.write('platform: ${platform!.name}');
       hasArguments = true;
     }
     result.write(')');
@@ -186,7 +186,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
 ///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The following image formats are supported: {@macro dart.ui.imageFormats}
 ///
 /// ## Lifecycle of resolving an image
 ///
@@ -336,11 +336,11 @@ abstract class ImageProvider<T extends Object> {
         await null; // wait an event turn in case a listener has been added to the image stream.
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-            yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+            DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+          ];
           return true;
         }());
         if (stream.completer == null) {
@@ -387,7 +387,7 @@ abstract class ImageProvider<T extends Object> {
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
-        completer.complete(PaintingBinding.instance!.imageCache!.statusForKey(key));
+        completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
       },
       (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
@@ -395,11 +395,11 @@ abstract class ImageProvider<T extends Object> {
         } else {
           InformationCollector? collector;
           assert(() {
-            collector = () sync* {
-              yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-              yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-              yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
-            };
+            collector = () => <DiagnosticsNode>[
+              DiagnosticsProperty<ImageProvider>('Image provider', this),
+              DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+              DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+            ];
             return true;
           }());
           FlutterError.reportError(FlutterErrorDetails(
@@ -492,7 +492,7 @@ abstract class ImageProvider<T extends Object> {
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
-      final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -500,9 +500,9 @@ abstract class ImageProvider<T extends Object> {
       assert(identical(completer, stream.completer));
       return;
     }
-    final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
-      () => load(key, PaintingBinding.instance!.instantiateImageCodec),
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
       onError: handleError,
     );
     if (completer != null) {
@@ -557,7 +557,7 @@ abstract class ImageProvider<T extends Object> {
   Future<bool> evict({ ImageCache? cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
-    return cache!.evict(key);
+    return cache.evict(key);
   }
 
   /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
@@ -648,10 +648,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     InformationCollector? collector;
     assert(() {
-      collector = () sync* {
-        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-        yield DiagnosticsProperty<AssetBundleImageKey>('Image key', key);
-      };
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -674,11 +674,11 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     try {
       data = await key.bundle.load(key.name);
     } on FlutterError {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       rethrow;
     }
     if (data == null) {
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('Unable to read data');
     }
     return decode(data.buffer.asUint8List());
@@ -878,9 +878,9 @@ class FileImage extends ImageProvider<FileImage> {
       codec: _loadAsync(key, decode),
       scale: key.scale,
       debugLabel: key.file.path,
-      informationCollector: () sync* {
-        yield ErrorDescription('Path: ${file.path}');
-      },
+      informationCollector: () => <DiagnosticsNode>[
+        ErrorDescription('Path: ${file.path}'),
+      ],
     );
   }
 
@@ -891,7 +891,7 @@ class FileImage extends ImageProvider<FileImage> {
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance!.imageCache!.evict(key);
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
@@ -938,7 +938,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   /// The bytes to decode into an image.
   ///
   /// The bytes represent encoded image bytes and can be encoded in any of the
-  /// following supported image formats: {@macro flutter.dart:ui.imageFormats}
+  /// following supported image formats: {@macro dart.ui.imageFormats}
   ///
   /// See also:
   ///

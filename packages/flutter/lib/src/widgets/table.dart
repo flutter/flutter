@@ -81,7 +81,7 @@ class _TableElementRow {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a `Table` with borders, multiple types of column widths and different vertical cell alignments.
 ///
 /// ** See code in examples/api/lib/widgets/table/table.0.dart **
@@ -118,7 +118,7 @@ class Table extends RenderObjectWidget {
     Key? key,
     this.children = const <TableRow>[],
     this.columnWidths,
-    this.defaultColumnWidth = const FlexColumnWidth(1.0),
+    this.defaultColumnWidth = const FlexColumnWidth(),
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
@@ -285,9 +285,6 @@ class _TableElement extends RenderObjectElement {
   _TableElement(Table widget) : super(widget);
 
   @override
-  Table get widget => super.widget as Table;
-
-  @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
   List<_TableElementRow> _children = const<_TableElementRow>[];
@@ -300,7 +297,7 @@ class _TableElement extends RenderObjectElement {
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
     int rowIndex = -1;
-    _children = widget.children.map<_TableElementRow>((TableRow row) {
+    _children = (widget as Table).children.map<_TableElementRow>((TableRow row) {
       int columnIndex = 0;
       rowIndex += 1;
       return _TableElementRow(

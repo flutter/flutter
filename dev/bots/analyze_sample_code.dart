@@ -19,7 +19,7 @@ import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
 // If you update this version, also update it in dev/bots/docs.sh
-const String _snippetsActivateVersion = '0.2.3';
+const String _snippetsActivateVersion = '0.2.5';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
@@ -30,14 +30,12 @@ Future<void> main(List<String> arguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
           'directory in the system temp folder. If specified, will not be '
           'automatically removed at the end of execution.',
   );
   argParser.addFlag(
     'verbose',
-    defaultsTo: false,
     negatable: false,
     help: 'Print verbose output for the analysis process.',
   );
@@ -52,12 +50,10 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag(
     'include-dart-ui',
     defaultsTo: true,
-    negatable: true,
     help: 'Includes the dart:ui code supplied by the engine in the analysis.',
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -69,7 +65,6 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag(
     'global-activate-snippets',
     defaultsTo: true,
-    negatable: true,
     help: 'Whether or not to "pub global activate" the snippets package. If set, will '
           'activate version $_snippetsActivateVersion',
   );
@@ -121,7 +116,7 @@ Future<void> main(List<String> arguments) async {
 
   if (parsedArguments['global-activate-snippets']! as bool) {
     try {
-      Process.runSync(
+      final ProcessResult activateResult = Process.runSync(
         Platform.resolvedExecutable,
         <String>[
           'pub',
@@ -132,6 +127,9 @@ Future<void> main(List<String> arguments) async {
         ],
         workingDirectory: _flutterRoot,
       );
+      if (activateResult.exitCode != 0) {
+        exit(activateResult.exitCode);
+      }
     } on ProcessException catch (e) {
       stderr.writeln('Unable to global activate snippets package at version $_snippetsActivateVersion: $e');
       exit(1);
@@ -171,8 +169,8 @@ class _TaskQueueItem<T> {
   Future<void> run() async {
     try {
       _completer.complete(await _closure());
-    } catch (e) {
-      _completer.completeError(e);
+    } catch (e, st) {
+      _completer.completeError(e, st);
     } finally {
       onComplete?.call();
     }
@@ -473,7 +471,6 @@ class SampleChecker {
         if (!Platform.environment.containsKey('FLUTTER_ROOT')) 'FLUTTER_ROOT': _flutterRoot,
         if (_flutterVersion!.isNotEmpty) 'FLUTTER_VERSION': _flutterVersion!,
       },
-      includeParentEnvironment: true,
     );
   }
 
@@ -1152,7 +1149,7 @@ class Sample {
     final StringBuffer buf = StringBuffer('sample ${args.join(' ')}\n');
     int count = start.line;
     for (final String line in input) {
-      buf.writeln(' ${count.toString().padLeft(4, ' ')}: $line');
+      buf.writeln(' ${count.toString().padLeft(4)}: $line');
       count++;
     }
     return buf.toString();

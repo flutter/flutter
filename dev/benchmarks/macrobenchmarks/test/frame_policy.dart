@@ -10,8 +10,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:macrobenchmarks/src/simple_scroll.dart';
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
     'Frame Counter and Input Delay for benchmarkLive',
     (WidgetTester tester) async {
@@ -31,11 +30,9 @@ void main() {
       final List<PointerEventRecord> records = <PointerEventRecord>[
         PointerEventRecord(Duration.zero, <PointerEvent>[
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             pointer: 1,
           ),

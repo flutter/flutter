@@ -12,7 +12,7 @@
 
 # Last manual update 2021-09-24 (changing this comment will re-build image)
 
-FROM debian:bullseye
+FROM debian@sha256:4c25ffa6ef572cf0d57da8c634769a08ae94529f7de5be5587ec8ce7b9b50f9c
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
 RUN apt-get update -y && \
@@ -98,32 +98,10 @@ RUN touch ~/.android/repositories.cfg
 
 # Add npm to path.
 ENV PATH="/usr/bin:${PATH}"
-RUN dpkg-query -L nodejs
-# Install Firebase
-# This is why we need nodejs installed.
-RUN /usr/bin/npm --verbose install -g firebase-tools
-
-# Install golang more recent than in repo (necessary for dashing to build)
-RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz
-ENV GOBINARY=/go/bin/go
-
-# Install dashing
-RUN mkdir -p /opt/gopath/bin
-ENV GOPATH=/opt/gopath
-ENV PATH="${GOPATH}/bin:${PATH}"
-RUN $GOBINARY get -u github.com/technosophos/dashing
 
 # Set locale to en_US
 RUN locale-gen en_US "en_US.UTF-8" && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
-
-# Install fastlane via pinned Gemfile & Gemfile.lock
-# Skip all the documentation (-N) since it's just on CI.
-RUN gem install bundler -N
-
-# Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
-COPY ci/docker_linux/Gemfile /Gemfile
-COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 # Install dependencies for desktop flutter run
 RUN apt-get install -y --no-install-recommends \
@@ -137,6 +115,3 @@ RUN apt-get install -y --no-install-recommends \
 	xvfb && \
   apt-get upgrade -y --no-install-recommends && \
   apt-get clean
-
-RUN bundle config set system 'true' && \
-  bundle install --system

@@ -34,7 +34,7 @@ import 'scrollable.dart';
 /// When you have a list of children and do not require cross-axis
 /// shrink-wrapping behavior, for example a scrolling list that is always the
 /// width of the screen, consider [ListView], which is vastly more efficient
-/// that a [SingleChildScrollView] containing a [ListBody] or [Column] with
+/// than a [SingleChildScrollView] containing a [ListBody] or [Column] with
 /// many children.
 ///
 /// ## Sample code: Using [SingleChildScrollView] with a [Column]
@@ -85,7 +85,7 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// In this example, the children are spaced out equally, unless there's no more
 /// room, in which case they stack vertically and scroll.
 ///
@@ -122,7 +122,7 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
 ///
@@ -153,7 +153,7 @@ class SingleChildScrollView extends StatelessWidget {
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
-       assert(!(controller != null && primary == true),
+       assert(!(controller != null && (primary ?? false)),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
        ),

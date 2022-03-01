@@ -184,20 +184,22 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void chmod(FileSystemEntity entity, String mode) {
+    // Errors here are silently ignored (except when tracing).
     try {
       final ProcessResult result = _processManager.runSync(
         <String>['chmod', mode, entity.path],
       );
       if (result.exitCode != 0) {
         _logger.printTrace(
-          'Error trying to run chmod on ${entity.absolute.path}'
-          '\nstdout: ${result.stdout}'
-          '\nstderr: ${result.stderr}',
+          'Error trying to run "chmod $mode ${entity.path}":\n'
+          '  exit code: ${result.exitCode}\n'
+          '  stdout: ${result.stdout.toString().trimRight()}\n'
+          '  stderr: ${result.stderr.toString().trimRight()}'
         );
       }
     } on ProcessException catch (error) {
       _logger.printTrace(
-        'Error trying to run chmod on ${entity.absolute.path}: $error',
+        'Error trying to run "chmod $mode ${entity.path}": $error',
       );
     }
   }
@@ -268,20 +270,22 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck =
-          _processUtils.runSync(<String>['uname', '-m']);
+      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
       // On x64 stdout is "uname -m: x86_64"
       // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
       if (hostPlatformCheck.exitCode != 0) {
-        _logger.printError(
-          'Error trying to run uname -m'
-          '\nstdout: ${hostPlatformCheck.stdout}'
-          '\nstderr: ${hostPlatformCheck.stderr}',
-        );
         _hostPlatform = HostPlatform.linux_x64;
+        _logger.printError(
+          'Encountered an error trying to run "uname -m":\n'
+          '  exit code: ${hostPlatformCheck.exitCode}\n'
+          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
+          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
+          'Assuming host platform is ${getNameForHostPlatform(_hostPlatform!)}.',
+        );
       } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
         _hostPlatform = HostPlatform.linux_x64;
       } else {
+        // We default to ARM if it's not x86_64 and we did not get an error.
         _hostPlatform = HostPlatform.linux_arm64;
       }
     }
@@ -447,8 +451,9 @@ class _MacOSUtils extends _PosixUtils {
         );
         for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
           // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
           _processUtils.runSync(
-            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
             throwOnError: true,
             verboseExceptions: true,
           );
@@ -534,10 +539,32 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
 
-      final File destFile = _fileSystem.file(_fileSystem.path.join(
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.canonicalize(
+          _fileSystem.path.join(
+            targetDirectory.path,
+            archiveFile.name,
+          ),
+        ),
+      );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
+        destFile.path,
+      );
+      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
         targetDirectory.path,
-        archiveFile.name,
-      ));
+      );
+      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+        throw StateError(
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
+        );
+      }
+
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }

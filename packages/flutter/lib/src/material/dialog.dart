@@ -227,7 +227,7 @@ class Dialog extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
@@ -261,6 +261,7 @@ class AlertDialog extends StatelessWidget {
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
     this.actionsAlignment,
+    this.actionsOverflowAlignment,
     this.actionsOverflowDirection,
     this.actionsOverflowButtonSpacing,
     this.buttonPadding,
@@ -375,6 +376,21 @@ class AlertDialog extends StatelessWidget {
   /// is used.
   final MainAxisAlignment? actionsAlignment;
 
+  /// The horizontal alignment of [actions] within the vertical
+  /// "overflow" layout.
+  ///
+  /// If the dialog's [actions] do not fit into a single row, then they
+  /// are arranged in a column. This parameter controls the horizontal
+  /// alignment of widgets in the case of an overflow.
+  ///
+  /// If this parameter is null (the default) then [OverflowBarAlignment.end]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [OverflowBar], which [actions] configures to lay itself out.
+  final OverflowBarAlignment? actionsOverflowAlignment;
+
   /// The vertical direction of [actions] if the children overflow
   /// horizontally.
   ///
@@ -448,7 +464,7 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder? shape;
 
-  /// {@macro flutter.material.dialog.shape}
+  /// {@macro flutter.material.dialog.alignment}
   final AlignmentGeometry? alignment;
 
   /// Determines whether the [title] and [content] widgets are wrapped in a
@@ -535,7 +551,7 @@ class AlertDialog extends StatelessWidget {
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
-          overflowAlignment: OverflowBarAlignment.end,
+          overflowAlignment: actionsOverflowAlignment ?? OverflowBarAlignment.end,
           overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
           overflowSpacing: actionsOverflowButtonSpacing ?? 0,
           children: actions!,
@@ -995,7 +1011,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to

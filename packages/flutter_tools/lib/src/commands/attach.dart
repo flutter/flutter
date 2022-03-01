@@ -18,10 +18,11 @@ import '../base/io.dart';
 import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
+import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -144,6 +145,9 @@ If the app or module is already running and the specific observatory port is
 known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`''';
 
+  @override
+  final String category = FlutterCommandCategory.tools;
+
   int get debugPort {
     if (argResults['debug-port'] == null) {
       return null;
@@ -232,8 +236,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final Daemon daemon = boolArg('machine')
       ? Daemon(
-          stdinCommandStream,
-          stdoutCommandResponse,
+          DaemonConnection(
+            daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
+            logger: globals.logger,
+          ),
           notifyingLogger: (globals.logger is NotifyingLogger)
             ? globals.logger as NotifyingLogger
             : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),

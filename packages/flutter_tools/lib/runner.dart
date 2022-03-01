@@ -39,7 +39,7 @@ Future<int> run(
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) => option == '-v' || option == '--verbose');
+    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {
@@ -70,12 +70,11 @@ Future<int> run(
         // We already hit some error, so don't return success.  The error path
         // (which should be in progress) is responsible for calling _exit().
         return 1;
-      // This catches all exceptions to send to crash logging, etc.
-      } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
+        // This catches all exceptions to send to crash logging, etc.
         firstError = error;
         firstStackTrace = stackTrace;
-        return _handleToolError(
-            error, stackTrace, verbose, args, reportCrashes, getVersion);
+        return _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
     }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
@@ -150,11 +149,18 @@ Future<int> _handleToolError(
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
+      final BufferLogger logger = BufferLogger(
+        terminal: globals.terminal,
+        outputPreferences: globals.outputPreferences,
+      );
+
+      final DoctorText doctorText = DoctorText(logger);
+
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace,
-        doctorText: await _doctorText(),
+        doctorText: doctorText,
       );
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter.informUser(details, file);
@@ -164,7 +170,8 @@ Future<int> _handleToolError(
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
-        '${globals.userMessages.flutterToolBugInstructions}\n');
+        '${globals.userMessages.flutterToolBugInstructions}\n',
+      );
       // Any exception thrown here (including one thrown by `_exit()`) will
       // get caught by our zone's `onError` handler. In order to avoid an
       // infinite error loop, we throw an error that is recognized above
@@ -199,7 +206,7 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   buffer.writeln('```\n${details.stackTrace}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n${details.doctorText}```');
+  buffer.writeln('```\n${await details.doctorText.text}```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
@@ -219,22 +226,6 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   }
 
   return crashFile;
-}
-
-Future<String> _doctorText() async {
-  try {
-    final BufferLogger logger = BufferLogger(
-      terminal: globals.terminal,
-      outputPreferences: globals.outputPreferences,
-    );
-
-    final Doctor doctor = Doctor(logger: logger);
-    await doctor.diagnose(verbose: true, showColor: false);
-
-    return logger.statusText;
-  } on Exception catch (error, trace) {
-    return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
-  }
 }
 
 Future<int> _exit(int code) async {

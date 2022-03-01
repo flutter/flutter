@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -19,11 +20,10 @@ import '../../src/fakes.dart';
 void main() {
   testWithoutContext('No web devices listed if feature is disabled', () async {
     final WebDevices webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: false),
+      featureFlags: TestFeatureFlags(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager:  FakeProcessManager.any(),
@@ -33,11 +33,13 @@ void main() {
   });
 
   testWithoutContext('GoogleChromeDevice defaults', () async {
+    final TestChromiumLauncher launcher = TestChromiumLauncher();
+
     final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
-      chromiumLauncher: null,
+      chromiumLauncher: launcher,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       processManager: FakeProcessManager.any(),
     );
 
@@ -51,7 +53,7 @@ void main() {
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(await chromeDevice.portForwarder.forward(1), 1);
+    expect(await chromeDevice.portForwarder!.forward(1), 1);
 
     expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
     expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
@@ -60,8 +62,10 @@ void main() {
   });
 
   testWithoutContext('MicrosoftEdge defaults', () async {
+    final TestChromiumLauncher launcher = TestChromiumLauncher();
+
     final MicrosoftEdgeDevice chromeDevice = MicrosoftEdgeDevice(
-      chromiumLauncher: null,
+      chromiumLauncher: launcher,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -77,7 +81,7 @@ void main() {
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(await chromeDevice.portForwarder.forward(1), 1);
+    expect(await chromeDevice.portForwarder!.forward(1), 1);
 
     expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
     expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
@@ -100,7 +104,7 @@ void main() {
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(await device.portForwarder.forward(1), 1);
+    expect(await device.portForwarder!.forward(1), 1);
 
     expect(device.supportsRuntimeMode(BuildMode.debug), true);
     expect(device.supportsRuntimeMode(BuildMode.profile), true);
@@ -114,7 +118,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager:  FakeProcessManager.any(),
@@ -130,7 +133,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager:  FakeProcessManager.any(),
@@ -147,7 +149,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: processManager,
@@ -164,7 +165,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: FakeProcessManager.any(),
@@ -181,7 +181,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: FakeProcessManager.any(),
@@ -206,7 +205,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: processManager,
@@ -280,7 +278,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
       processManager: processManager,
-      operatingSystemUtils: null,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
@@ -339,7 +337,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: FakeProcessManager.empty(),
@@ -360,4 +357,39 @@ void main() {
 
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
+}
+
+/// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
+class TestChromiumLauncher implements ChromiumLauncher {
+  TestChromiumLauncher();
+
+  bool _hasInstance = false;
+  void setInstance(Chromium chromium) {
+    _hasInstance = true;
+    currentCompleter.complete(chromium);
+  }
+
+  @override
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
+
+  @override
+  bool canFindExecutable() {
+    return true;
+  }
+
+  @override
+  Future<Chromium> get connectedInstance => currentCompleter.future;
+
+  @override
+  String findExecutable() {
+    return 'chrome';
+  }
+
+  @override
+  bool get hasChromeInstance => _hasInstance;
+
+  @override
+  Future<Chromium> launch(String url, {bool headless = false, int? debugPort, bool skipCheck = false, Directory? cacheDir}) async {
+    return currentCompleter.future;
+  }
 }

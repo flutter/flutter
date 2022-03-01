@@ -176,7 +176,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         rect: markerRect,
         label: 'TOP OVERFLOWED BY ${_formatPixels(overflow.top)} PIXELS',
         labelOffset: markerRect.topCenter + const Offset(0.0, _indicatorLabelPaddingPixels),
-        rotation: 0.0,
         side: _OverflowSide.top,
       ));
     }
@@ -192,7 +191,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         label: 'BOTTOM OVERFLOWED BY ${_formatPixels(overflow.bottom)} PIXELS',
         labelOffset: markerRect.bottomCenter -
             const Offset(0.0, _indicatorFontSizePixels + _indicatorLabelPaddingPixels),
-        rotation: 0.0,
         side: _OverflowSide.bottom,
       ));
     }
@@ -243,16 +241,18 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
-        informationCollector: () sync* {
-          if (debugCreator != null)
-            yield DiagnosticsDebugCreator(debugCreator!);
-          yield* overflowHints!;
-          yield describeForError('The specific $runtimeType in question is');
+        informationCollector: () => <DiagnosticsNode>[
+          // debugCreator should only be set in DebugMode, but we want the
+          // treeshaker to know that.
+          if (kDebugMode && debugCreator != null)
+            DiagnosticsDebugCreator(debugCreator!),
+          ...overflowHints!,
+          describeForError('The specific $runtimeType in question is'),
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
           // future.
-          yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
-        },
+          DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false),
+        ],
       ),
     );
   }

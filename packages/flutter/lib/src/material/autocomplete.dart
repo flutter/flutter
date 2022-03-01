@@ -12,14 +12,14 @@ import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create an Autocomplete widget with a custom type.
 /// Try searching with text from the name or email field.
 ///
@@ -171,7 +171,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                   builder: (BuildContext context) {
                     final bool highlight = AutocompleteHighlightedOption.of(context) == index;
                     if (highlight) {
-                      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+                      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
                         Scrollable.ensureVisible(context, alignment: 0.5);
                       });
                     }

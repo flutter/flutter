@@ -113,7 +113,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=stateful_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material date picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -151,6 +151,7 @@ Future<DateTime?> showDatePicker({
   String? errorInvalidText,
   String? fieldHintText,
   String? fieldLabelText,
+  TextInputType? keyboardType,
 }) async {
   assert(context != null);
   assert(initialDate != null);
@@ -195,6 +196,7 @@ Future<DateTime?> showDatePicker({
     errorInvalidText: errorInvalidText,
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
+    keyboardType: keyboardType,
   );
 
   if (textDirection != null) {
@@ -249,6 +251,7 @@ class DatePickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.keyboardType,
     this.restorationId,
   }) : assert(initialDate != null),
        assert(firstDate != null),
@@ -334,6 +337,11 @@ class DatePickerDialog extends StatefulWidget {
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
 
+  /// The keyboard type of the [TextField].
+  ///
+  /// If this is null, it will default to [TextInputType.datetime]
+  final TextInputType? keyboardType;
+
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
   ///
   /// If it is non-null, the date picker will persist and restore the
@@ -355,7 +363,7 @@ class DatePickerDialog extends StatefulWidget {
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
   late final RestorableDateTime _selectedDate = RestorableDateTime(widget.initialDate);
   late final _RestorableDatePickerEntryMode _entryMode = _RestorableDatePickerEntryMode(widget.initialEntryMode);
-  final RestorableBool _autoValidate = RestorableBool(false);
+  final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
 
   @override
   String? get restorationId => widget.restorationId;
@@ -363,7 +371,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_selectedDate, 'selected_date');
-    registerForRestoration(_autoValidate, 'autovalidate');
+    registerForRestoration(_autovalidateMode, 'autovalidateMode');
     registerForRestoration(_entryMode, 'calendar_entry_mode');
   }
 
@@ -374,7 +382,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     if (_entryMode.value == DatePickerEntryMode.input || _entryMode.value == DatePickerEntryMode.inputOnly) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
-        setState(() => _autoValidate.value = true);
+        setState(() => _autovalidateMode.value = AutovalidateMode.always);
         return;
       }
       form.save();
@@ -390,7 +398,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     setState(() {
       switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
-          _autoValidate.value = false;
+          _autovalidateMode.value = AutovalidateMode.disabled;
           _entryMode.value = DatePickerEntryMode.input;
           break;
         case DatePickerEntryMode.input:
@@ -492,7 +500,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     Form inputDatePicker() {
       return Form(
         key: _formKey,
-        autovalidate: _autoValidate.value,
+        autovalidateMode: _autovalidateMode.value,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
@@ -512,6 +520,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   errorInvalidText: widget.errorInvalidText,
                   fieldHintText: widget.fieldHintText,
                   fieldLabelText: widget.fieldLabelText,
+                  keyboardType: widget.keyboardType,
                   autofocus: true,
                 ),
                 const Spacer(),
@@ -637,6 +646,32 @@ class _RestorableDatePickerEntryMode extends RestorableValue<DatePickerEntryMode
 
   @override
   DatePickerEntryMode fromPrimitives(Object? data) => DatePickerEntryMode.values[data! as int];
+
+  @override
+  Object? toPrimitives() => value.index;
+}
+
+// A restorable [AutovalidateMode] value.
+//
+// This serializes each entry as a unique `int` value.
+class _RestorableAutovalidateMode extends RestorableValue<AutovalidateMode> {
+  _RestorableAutovalidateMode(
+      AutovalidateMode defaultValue,
+      ) : _defaultValue = defaultValue;
+
+  final AutovalidateMode _defaultValue;
+
+  @override
+  AutovalidateMode createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(AutovalidateMode? oldValue) {
+    assert(debugIsSerializableForRestoration(value.index));
+    notifyListeners();
+  }
+
+  @override
+  AutovalidateMode fromPrimitives(Object? data) => AutovalidateMode.values[data! as int];
 
   @override
   Object? toPrimitives() => value.index;
@@ -874,7 +909,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=stateful_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material date range picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1310,7 +1345,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
-        shape = const RoundedRectangleBorder(borderRadius: BorderRadius.zero);
+        shape = const RoundedRectangleBorder();
         elevation = 0;
         break;
 
@@ -1654,7 +1689,10 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
       case TargetPlatform.fuchsia:
         HapticFeedback.vibrate();
         break;
-      default:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
   }
@@ -2271,7 +2309,7 @@ class _MonthItemState extends State<_MonthItem> {
       // border.
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.primary);
       decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary, width: 1),
+        border: Border.all(color: colorScheme.primary),
         shape: BoxShape.circle,
       );
     }

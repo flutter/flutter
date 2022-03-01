@@ -74,14 +74,14 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsOneWidget);
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 16));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -97,6 +97,94 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
+
+  testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              readOnly: true,
+              obscureText: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    const TextSelection invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
+    expect(controller.selection, invalidSelection);
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+
+    // Right clicking shows the menu.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, invalidSelection);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.byType(CupertinoButton), findsNothing);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
+
+  testWidgets('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              obscureText: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    const TextSelection invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
+    expect(controller.selection, invalidSelection);
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+
+    // Right clicking shows the menu.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Paste'), findsOneWidget);
   },
     variant: TargetPlatformVariant.desktop(),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
@@ -255,14 +343,14 @@ void main() {
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
-    bool _called = false;
+    bool called = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
-              onFieldSubmitted: (String value) { _called = true; },
+              onFieldSubmitted: (String value) { called = true; },
             ),
           ),
         ),
@@ -272,19 +360,19 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(_called, true);
+    expect(called, true);
   });
 
   testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
-    late String _value;
+    late String value;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
-              onChanged: (String value) {
-                _value = value;
+              onChanged: (String v) {
+                value = v;
               },
             ),
           ),
@@ -294,11 +382,11 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
     await tester.pump();
-    expect(_value, 'Soup');
+    expect(value, 'Soup');
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -307,7 +395,7 @@ void main() {
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -316,14 +404,14 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -333,7 +421,7 @@ void main() {
               enabled: true,
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) {
-                _validateCalled += 1;
+                validateCalled += 1;
                 return null;
               },
             ),
@@ -342,10 +430,10 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
   });
 
 
@@ -517,9 +605,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: TextFormField(
-              initialValue: null,
-            ),
+            child: TextFormField(),
           ),
         ),
       ),
@@ -542,9 +628,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: TextFormField(
-              initialValue: null,
-            ),
+            child: TextFormField(),
           ),
         ),
       ),
@@ -585,7 +669,7 @@ void main() {
   });
 
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
-    bool _called = false;
+    bool called = false;
 
     late FormFieldState<String> state;
 
@@ -595,7 +679,7 @@ void main() {
           child: Center(
             child: TextFormField(
               onChanged: (String value) {
-                _called = true;
+                called = true;
                 expect(value, state.value);
               },
             ),
@@ -608,7 +692,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
 
-    expect(_called, true);
+    expect(called, true);
   });
 
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
@@ -629,7 +713,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -638,7 +722,7 @@ void main() {
             body: TextFormField(
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -647,27 +731,10 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 0);
+    expect(validateCalled, 0);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 1);
-  });
-
-  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
-    expect(() async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Scaffold(
-              body: TextFormField(
-                autovalidate: true,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-              ),
-            ),
-          ),
-        ),
-      );
-      }, throwsAssertionError);
+    expect(validateCalled, 1);
   });
 
   testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {

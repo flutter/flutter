@@ -443,7 +443,7 @@ void main() {
         top: BorderSide(style: BorderStyle.none),
         start: BorderSide(style: BorderStyle.none),
         end: BorderSide(style: BorderStyle.none),
-        bottom: BorderSide(style: BorderStyle.solid, width: 0.0),
+        bottom: BorderSide(width: 0.0),
       ).isUniform,
       false,
     );
@@ -452,17 +452,11 @@ void main() {
         top: BorderSide(style: BorderStyle.none),
         start: BorderSide(style: BorderStyle.none),
         end: BorderSide(style: BorderStyle.none),
-        bottom: BorderSide.none,
       ).isUniform,
       false,
     );
     expect(
-      const BorderDirectional(
-        top: BorderSide.none,
-        start: BorderSide.none,
-        end: BorderSide.none,
-        bottom: BorderSide.none,
-      ).isUniform,
+      const BorderDirectional().isUniform,
       true,
     );
     expect(

@@ -236,7 +236,7 @@ void _movingInsertionSort<T>(
   int Function(T, T) compare,
   int start,
   int end,
-  List<T?> target,
+  List<T> target,
   int targetOffset,
 ) {
   final int length = end - start;
@@ -250,7 +250,7 @@ void _movingInsertionSort<T>(
     int max = targetOffset + i;
     while (min < max) {
       final int mid = min + ((max - min) >> 1);
-      if (compare(element, target[mid] as T) < 0) {
+      if (compare(element, target[mid]) < 0) {
         max = mid;
       } else {
         min = mid + 1;

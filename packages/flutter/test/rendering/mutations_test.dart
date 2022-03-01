@@ -31,6 +31,8 @@ class RenderLayoutTestBox extends RenderProxyBox {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('moving children', () {
     RenderBox child1, child2;
     bool movedChild1 = false;

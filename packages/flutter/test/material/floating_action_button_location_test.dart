@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Basic floating action button locations', () {
     testWidgets('still animates motion when the floating action button is null', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame(fab: null, location: null));
+      await tester.pumpWidget(_buildFrame(fab: null));
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, 0);
@@ -641,7 +641,6 @@ void main() {
                   label: '1',
                 ),
               ],
-              currentIndex: 0,
             ) : null,
             floatingActionButtonLocation: location,
             floatingActionButton: Builder(

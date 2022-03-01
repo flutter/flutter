@@ -11,7 +11,7 @@ import 'ticker_provider.dart';
 /// Animated widget that automatically transitions its size over a given
 /// duration whenever the given child's size changes.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad}
 /// This example makes a [Container] react to being touched, causing the child
 /// of the [AnimatedSize] widget, here a [FlutterLogo], to animate.
 ///

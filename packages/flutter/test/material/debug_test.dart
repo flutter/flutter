@@ -195,8 +195,6 @@ void main() {
       '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
       '     _ActionsMarker\n'
-      '     DefaultTextEditingActions\n'
-      '     _ActionsMarker\n'
       '     Actions\n'
       '     _ShortcutsMarker\n'
       '     Semantics\n'
@@ -208,6 +206,8 @@ void main() {
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
+      '     _SharedAppModel\n'
+      '     SharedAppData\n'
       '     UnmanagedRestorationScope\n'
       '     RestorationScope\n'
       '     UnmanagedRestorationScope\n'
@@ -226,8 +226,8 @@ void main() {
   });
 
   testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-    final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
       content: const Text('Snack'),
       action: SnackBarAction(label: 'Test', onPressed: () {}),
@@ -237,11 +237,11 @@ void main() {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: ScaffoldMessenger(
-          key: _scaffoldMessengerKey,
+          key: scaffoldMessengerKey,
           child: Builder(
             builder: (BuildContext context) {
               return Scaffold(
-                key: _scaffoldKey,
+                key: scaffoldKey,
                 body: Container(),
               );
             },
@@ -255,7 +255,7 @@ void main() {
       exceptions.add(details.exception);
     };
     // ScaffoldMessenger shows SnackBar.
-    _scaffoldMessengerKey.currentState!.showSnackBar(snackBar);
+    scaffoldMessengerKey.currentState!.showSnackBar(snackBar);
     await tester.pumpAndSettle();
 
     // Pump widget to rebuild without ScaffoldMessenger
@@ -264,7 +264,7 @@ void main() {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: Scaffold(
-          key: _scaffoldKey,
+          key: scaffoldKey,
           body: Container(),
         ),
       ),

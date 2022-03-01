@@ -54,13 +54,13 @@ enum MaterialBannerClosedReason {
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// Banners placed directly into the widget tree are static.
 ///
 /// ** See code in examples/api/lib/material/banner/material_banner.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// MaterialBanner's can also be presented through a [ScaffoldMessenger].
 /// Here is an example where ScaffoldMessengerState.showMaterialBanner() is used to show the MaterialBanner.
 ///
@@ -230,11 +230,11 @@ class _MaterialBannerState extends State<MaterialBanner> {
 
   @override
   void didUpdateWidget(MaterialBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
       widget.animation?.addStatusListener(_onAnimationStatusChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -337,7 +337,6 @@ class _MaterialBannerState extends State<MaterialBanner> {
       return materialBanner;
 
     materialBanner = SafeArea(
-      top: true,
       child: materialBanner,
     );
 
@@ -382,8 +381,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
     }
 
     return Hero(
-      child: ClipRect(child: materialBannerTransition),
       tag: '<MaterialBanner Hero tag - ${widget.content}>',
+      child: ClipRect(child: materialBannerTransition),
     );
   }
 }

@@ -1833,7 +1833,7 @@ void pathOps78() {
 
 void pathOps79() {
   final Path path79 = Path();
-  path79.addRRect(RRect.fromRectAndCorners(const Rect.fromLTRB(0, 0, 64, 56), topLeft: Radius.zero, topRight: Radius.zero, bottomLeft: const Radius.circular(10), bottomRight: Radius.zero, ));
+  path79.addRRect(RRect.fromRectAndCorners(const Rect.fromLTRB(0, 0, 64, 56), bottomLeft: const Radius.circular(10), ));
   gFillType = path79.fillType;
   path80 = path79.shift(const Offset(906, 136));
   gFillType = path79.fillType;
@@ -5828,7 +5828,7 @@ void pathOps576() {
   path576.moveTo(0, 0);
   path576.lineTo(220.60000000000002, 0);
   path576.quadraticBezierTo(235.60000000000002, 0, 237.569696969697, 7.817946907441011);
-  path576.arcToPoint(const Offset(299.630303030303, 7.817946907441011), radius: const Radius.circular(32), rotation: 0, largeArc: false, clockwise: false);
+  path576.arcToPoint(const Offset(299.630303030303, 7.817946907441011), radius: const Radius.circular(32), clockwise: false);
   path576.quadraticBezierTo(301.6, 0, 316.6, 0);
   path576.lineTo(312.6, 0);
   path576.lineTo(312.6, 48);

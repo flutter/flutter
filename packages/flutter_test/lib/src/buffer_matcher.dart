@@ -29,7 +29,7 @@ class _BufferGoldenMatcher extends AsyncMatcher {
     } else if (item is Future<List<int>>) {
       buffer = Uint8List.fromList(await item);
     } else {
-      throw 'Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}';
+      throw AssertionError('Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}');
     }
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
     if (autoUpdateGoldenFiles) {

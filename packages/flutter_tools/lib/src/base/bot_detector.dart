@@ -37,14 +37,15 @@ class BotDetector {
       // When set, GA logs to a local file (normally for tests) so we don't need to filter.
       || _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
-      return _persistentToolState.runningOnBot = false;
+      _persistentToolState.setIsRunningOnBot(false);
+      return false;
     }
 
     if (_persistentToolState.isRunningOnBot != null) {
       return _persistentToolState.isRunningOnBot!;
     }
 
-    return _persistentToolState.runningOnBot = _platform.environment['BOT'] == 'true'
+    final bool result = _platform.environment['BOT'] == 'true'
 
       // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
       || _platform.environment['TRAVIS'] == 'true'
@@ -77,6 +78,9 @@ class BotDetector {
 
       // Property when running on Azure.
       || await _azureDetector.isRunningOnAzure;
+
+    _persistentToolState.setIsRunningOnBot(result);
+    return result;
   }
 }
 

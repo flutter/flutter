@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -67,9 +68,8 @@ class AnnotationResult<T> {
   /// tree.
   ///
   /// It is similar to [entries] but does not contain other information.
-  Iterable<T> get annotations sync* {
-    for (final AnnotationEntry<T> entry in _entries)
-      yield entry.annotation;
+  Iterable<T> get annotations {
+    return _entries.map((AnnotationEntry<T> entry) => entry.annotation);
   }
 }
 
@@ -527,7 +527,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Return the engine layer for retained rendering. When there's no
   /// corresponding engine layer, null is returned.
   @protected
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
+  void addToScene(ui.SceneBuilder builder);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
     // There can't be a loop by adding a retained layer subtree whose
@@ -709,9 +709,9 @@ class PictureLayer extends Layer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(picture != null);
-    builder.addPicture(layerOffset, picture!, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
+    builder.addPicture(Offset.zero, picture!, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
 
   @override
@@ -788,13 +788,12 @@ class TextureLayer extends Layer {
   final ui.FilterQuality filterQuality;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
+  void addToScene(ui.SceneBuilder builder) {
     builder.addTexture(
       textureId,
-      offset: shiftedRect.topLeft,
-      width: shiftedRect.width,
-      height: shiftedRect.height,
+      offset: rect.topLeft,
+      width: rect.width,
+      height: rect.height,
       freeze: freeze,
       filterQuality: filterQuality,
     );
@@ -827,13 +826,12 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
+  void addToScene(ui.SceneBuilder builder) {
     builder.addPlatformView(
       viewId,
-      offset: shiftedRect.topLeft,
-      width: shiftedRect.width,
-      height: shiftedRect.height,
+      offset: rect.topLeft,
+      width: rect.width,
+      height: rect.height,
     );
   }
 }
@@ -898,10 +896,9 @@ class PerformanceOverlayLayer extends Layer {
   final bool checkerboardOffscreenLayers;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(optionsMask != null);
-    final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
-    builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
+    builder.addPerformanceOverlay(optionsMask, overlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
@@ -1092,8 +1089,8 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    addChildrenToScene(builder, layerOffset);
+  void addToScene(ui.SceneBuilder builder) {
+    addChildrenToScene(builder);
   }
 
   /// Uploads all of this layer's children to the engine.
@@ -1103,14 +1100,10 @@ class ContainerLayer extends Layer {
   /// to apply effects to the scene using the [SceneBuilder] API, then insert
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
-  void addChildrenToScene(ui.SceneBuilder builder, [ Offset childOffset = Offset.zero ]) {
+  void addChildrenToScene(ui.SceneBuilder builder) {
     Layer? child = firstChild;
     while (child != null) {
-      if (childOffset == Offset.zero) {
-        child._addToSceneWithRetainedRendering(builder);
-      } else {
-        child.addToScene(builder, childOffset);
-      }
+      child._addToSceneWithRetainedRendering(builder);
       child = child.nextSibling;
     }
   }
@@ -1233,15 +1226,15 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     // Skia has a fast path for concatenating scale/translation only matrices.
     // Hence pushing a translation-only transform layer should be fast. For
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
     engineLayer = builder.pushOffset(
-      layerOffset.dx + offset.dx,
-      layerOffset.dy + offset.dy,
+      offset.dx,
+      offset.dy,
       oldLayer: _engineLayer as ui.OffsetEngineLayer?,
     );
     addChildrenToScene(builder);
@@ -1355,7 +1348,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(clipRect != null);
     assert(clipBehavior != null);
     bool enabled = true;
@@ -1364,16 +1357,15 @@ class ClipRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled) {
-      final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect! : clipRect!.shift(layerOffset);
       engineLayer = builder.pushClipRect(
-        shiftedClipRect,
+        clipRect!,
         clipBehavior: clipBehavior,
         oldLayer: _engineLayer as ui.ClipRectEngineLayer?,
       );
     } else {
       engineLayer = null;
     }
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     if (enabled)
       builder.pop();
   }
@@ -1439,7 +1431,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(clipRRect != null);
     assert(clipBehavior != null);
     bool enabled = true;
@@ -1448,16 +1440,15 @@ class ClipRRectLayer extends ContainerLayer {
       return true;
     }());
     if (enabled) {
-      final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect! : clipRRect!.shift(layerOffset);
       engineLayer = builder.pushClipRRect(
-        shiftedClipRRect,
+        clipRRect!,
         clipBehavior: clipBehavior,
         oldLayer: _engineLayer as ui.ClipRRectEngineLayer?,
       );
     } else {
       engineLayer = null;
     }
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     if (enabled)
       builder.pop();
   }
@@ -1523,7 +1514,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(clipPath != null);
     assert(clipBehavior != null);
     bool enabled = true;
@@ -1532,16 +1523,15 @@ class ClipPathLayer extends ContainerLayer {
       return true;
     }());
     if (enabled) {
-      final Path shiftedPath = layerOffset == Offset.zero ? clipPath! : clipPath!.shift(layerOffset);
       engineLayer = builder.pushClipPath(
-        shiftedPath,
+        clipPath!,
         clipBehavior: clipBehavior,
         oldLayer: _engineLayer as ui.ClipPathEngineLayer?,
       );
     } else {
       engineLayer = null;
     }
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     if (enabled)
       builder.pop();
   }
@@ -1578,13 +1568,13 @@ class ColorFilterLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(colorFilter != null);
     engineLayer = builder.pushColorFilter(
       colorFilter!,
       oldLayer: _engineLayer as ui.ColorFilterEngineLayer?,
     );
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     builder.pop();
   }
 
@@ -1620,13 +1610,13 @@ class ImageFilterLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
       oldLayer: _engineLayer as ui.ImageFilterEngineLayer?,
     );
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     builder.pop();
   }
 
@@ -1677,12 +1667,11 @@ class TransformLayer extends OffsetLayer {
   bool _inverseDirty = true;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(transform != null);
     _lastEffectiveTransform = transform;
-    final Offset totalOffset = offset + layerOffset;
-    if (totalOffset != Offset.zero) {
-      _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
+    if (offset != Offset.zero) {
+      _lastEffectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
         ..multiply(_lastEffectiveTransform!);
     }
     engineLayer = builder.pushTransform(
@@ -1773,13 +1762,18 @@ class OpacityLayer extends OffsetLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
-    bool enabled = firstChild != null;  // don't add this layer if there's no child
+
+    // Don't add this layer if there's no child.
+    bool enabled = firstChild != null;
     if (!enabled) {
+      // Ensure the engineLayer is disposed.
+      engineLayer = null;
       // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
       return;
     }
+
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
@@ -1792,14 +1786,14 @@ class OpacityLayer extends OffsetLayer {
       assert(_engineLayer is ui.OpacityEngineLayer?);
       engineLayer = builder.pushOpacity(
         realizedAlpha,
-        offset: offset + layerOffset,
+        offset: offset,
         oldLayer: _engineLayer as ui.OpacityEngineLayer?,
       );
     } else {
       assert(_engineLayer is ui.OffsetEngineLayer?);
       engineLayer = builder.pushOffset(
-        layerOffset.dx + offset.dx,
-        layerOffset.dy + offset.dy,
+        offset.dx,
+        offset.dy,
         oldLayer: _engineLayer as ui.OffsetEngineLayer?,
       );
     }
@@ -1884,19 +1878,17 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(shader != null);
     assert(maskRect != null);
     assert(blendMode != null);
-    assert(layerOffset != null);
-    final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect! : maskRect!.shift(layerOffset);
     engineLayer = builder.pushShaderMask(
       shader!,
-      shiftedMaskRect,
+      maskRect! ,
       blendMode!,
       oldLayer: _engineLayer as ui.ShaderMaskEngineLayer?,
     );
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     builder.pop();
   }
 
@@ -1954,14 +1946,14 @@ class BackdropFilterLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(filter != null);
     engineLayer = builder.pushBackdropFilter(
       filter!,
       blendMode: blendMode,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
     );
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     builder.pop();
   }
 }
@@ -2067,7 +2059,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(clipPath != null);
     assert(clipBehavior != null);
     assert(elevation != null);
@@ -2081,7 +2073,7 @@ class PhysicalModelLayer extends ContainerLayer {
     }());
     if (enabled) {
       engineLayer = builder.pushPhysicalShape(
-        path: layerOffset == Offset.zero ? clipPath! : clipPath!.shift(layerOffset),
+        path: clipPath!,
         elevation: elevation!,
         color: color!,
         shadowColor: shadowColor,
@@ -2091,7 +2083,7 @@ class PhysicalModelLayer extends ContainerLayer {
     } else {
       engineLayer = null;
     }
-    addChildrenToScene(builder, layerOffset);
+    addChildrenToScene(builder);
     if (enabled)
       builder.pop();
   }
@@ -2117,14 +2109,59 @@ class PhysicalModelLayer extends ContainerLayer {
 ///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
 ///    render objects.
 class LayerLink {
-  /// The currently-registered [LeaderLayer], if any.
+  /// The [LeaderLayer] connected to this link.
   LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
-  /// The total size of [leader]'s contents.
+  void _registerLeader(LeaderLayer leader) {
+    assert(_leader != leader);
+    assert((){
+      if (_leader != null) {
+        _debugPreviousLeaders ??= <LeaderLayer>{};
+        _debugScheduleLeadersCleanUpCheck();
+        return _debugPreviousLeaders!.add(_leader!);
+      }
+      return true;
+    }());
+    _leader = leader;
+  }
+
+  void _unregisterLeader(LeaderLayer leader) {
+    if (_leader == leader) {
+      _leader = null;
+    } else {
+      assert(_debugPreviousLeaders!.remove(leader));
+    }
+  }
+
+  /// Stores the previous leaders that were replaced by the current [_leader]
+  /// in the current frame.
+  ///
+  /// These leaders need to give up their leaderships of this link by the end of
+  /// the current frame.
+  Set<LeaderLayer>? _debugPreviousLeaders;
+  bool _debugLeaderCheckScheduled = false;
+
+  /// Schedules the check as post frame callback to make sure the
+  /// [_debugPreviousLeaders] is empty.
+  void _debugScheduleLeadersCleanUpCheck() {
+    assert(_debugPreviousLeaders != null);
+    assert(() {
+      if (_debugLeaderCheckScheduled)
+        return true;
+      _debugLeaderCheckScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _debugLeaderCheckScheduled = false;
+        assert(_debugPreviousLeaders!.isEmpty);
+      });
+      return true;
+    }());
+  }
+
+  /// The total size of the content of the connected [LeaderLayer].
   ///
   /// Generally this should be set by the [RenderObject] that paints on the
-  /// registered [leader] layer (for instance a [RenderLeaderLayer] that shares
+  /// registered [LeaderLayer] (for instance a [RenderLeaderLayer] that shares
   /// this link with its followers). This size may be outdated before and during
   /// layout.
   Size? leaderSize;
@@ -2147,18 +2184,25 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
+  LeaderLayer({ required LayerLink link, Offset offset = Offset.zero }) : assert(link != null), _link = link, _offset = offset;
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
   LayerLink get link => _link;
+  LayerLink _link;
   set link(LayerLink value) {
     assert(value != null);
+    if (_link == value) {
+      return;
+    }
+    if (attached) {
+      _link._unregisterLeader(this);
+      value._registerLeader(this);
+    }
     _link = value;
   }
-  LayerLink _link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -2167,34 +2211,30 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  Offset offset;
-
-  /// {@macro flutter.rendering.FollowerLayer.alwaysNeedsAddToScene}
-  @override
-  bool get alwaysNeedsAddToScene => true;
+  Offset get offset => _offset;
+  Offset _offset;
+  set offset(Offset value) {
+    assert(value != null);
+    if (value == _offset) {
+      return;
+    }
+    _offset = value;
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
+  }
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link.leader == null);
-    _lastOffset = null;
-    link._leader = this;
+    _link._registerLeader(this);
   }
 
   @override
   void detach() {
-    assert(link.leader == this);
-    link._leader = null;
-    _lastOffset = null;
+    _link._unregisterLeader(this);
     super.detach();
   }
-
-  /// The offset the last time this layer was composited.
-  ///
-  /// This is reset to null when the layer is attached or detached, to help
-  /// catch cases where the follower layer ends up before the leader layer, but
-  /// not every case can be detected.
-  Offset? _lastOffset;
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
@@ -2202,16 +2242,15 @@ class LeaderLayer extends ContainerLayer {
   }
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(offset != null);
-    _lastOffset = offset + layerOffset;
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       engineLayer = builder.pushTransform(
-        Matrix4.translationValues(_lastOffset!.dx, _lastOffset!.dy, 0.0).storage,
+        Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       builder.pop();
   }
 
@@ -2224,9 +2263,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    assert(_lastOffset != null);
-    if (_lastOffset != Offset.zero)
-      transform.translate(_lastOffset!.dx, _lastOffset!.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -2334,7 +2372,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (link.leader == null) {
+    if (_link.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
       }
@@ -2409,11 +2447,39 @@ class FollowerLayer extends ContainerLayer {
     return _pathsToCommonAncestor(a.parent, b.parent, ancestorsA, ancestorsB);
   }
 
+  bool _debugCheckLeaderBeforeFollower(
+    List<ContainerLayer> leaderToCommonAncestor,
+    List<ContainerLayer> followerToCommonAncestor,
+  ) {
+    if (followerToCommonAncestor.length <= 1) {
+      // Follower is the common ancestor, ergo the leader must come AFTER the follower.
+      return false;
+    }
+    if (leaderToCommonAncestor.length <= 1) {
+      // Leader is the common ancestor, ergo the leader must come BEFORE the follower.
+      return true;
+    }
+
+    // Common ancestor is neither the leader nor the follower.
+    final ContainerLayer leaderSubtreeBelowAncestor = leaderToCommonAncestor[leaderToCommonAncestor.length - 2];
+    final ContainerLayer followerSubtreeBelowAncestor = followerToCommonAncestor[followerToCommonAncestor.length - 2];
+
+    Layer? sibling = leaderSubtreeBelowAncestor;
+    while (sibling != null) {
+      if (sibling == followerSubtreeBelowAncestor) {
+        return true;
+      }
+      sibling = sibling.nextSibling;
+    }
+    // The follower subtree didn't come after the leader subtree.
+    return false;
+  }
+
   /// Populate [_lastTransform] given the current state of the tree.
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
-    final LeaderLayer? leader = link.leader;
+    final LeaderLayer? leader = _link.leader;
     // Check to see if we are linked.
     if (leader == null)
       return;
@@ -2422,22 +2488,25 @@ class FollowerLayer extends ContainerLayer {
       leader.owner == owner,
       'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.',
     );
-    assert(
-      leader._lastOffset != null,
-      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
-    );
 
     // Stores [leader, ..., commonAncestor] after calling _pathsToCommonAncestor.
-    final List<ContainerLayer?> forwardLayers = <ContainerLayer>[leader];
+    final List<ContainerLayer> forwardLayers = <ContainerLayer>[leader];
     // Stores [this (follower), ..., commonAncestor] after calling
     // _pathsToCommonAncestor.
-    final List<ContainerLayer?> inverseLayers = <ContainerLayer>[this];
+    final List<ContainerLayer> inverseLayers = <ContainerLayer>[this];
 
     final Layer? ancestor = _pathsToCommonAncestor(
       leader, this,
       forwardLayers, inverseLayers,
     );
-    assert(ancestor != null);
+    assert(
+      ancestor != null,
+      'LeaderLayer and FollowerLayer do not have a common ancestor.',
+    );
+    assert(
+      _debugCheckLeaderBeforeFollower(forwardLayers, inverseLayers),
+      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
+    );
 
     final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
     // Further transforms the coordinate system to a hypothetical child (null)
@@ -2472,10 +2541,10 @@ class FollowerLayer extends ContainerLayer {
   bool get alwaysNeedsAddToScene => true;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     assert(link != null);
     assert(showWhenUnlinked != null);
-    if (link.leader == null && !showWhenUnlinked!) {
+    if (_link.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
@@ -2490,7 +2559,7 @@ class FollowerLayer extends ContainerLayer {
       );
       addChildrenToScene(builder);
       builder.pop();
-      _lastOffset = unlinkedOffset! + layerOffset;
+      _lastOffset = unlinkedOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, .0);

@@ -32,9 +32,10 @@ class TestLayout {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   const ViewConfiguration testConfiguration = ViewConfiguration(
     size: Size(800.0, 600.0),
-    devicePixelRatio: 1.0,
   );
 
   test('onscreen layout does not affect offscreen', () {

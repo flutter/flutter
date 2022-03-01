@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
 class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
@@ -381,7 +381,7 @@ void main() {
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
   });
 
@@ -421,7 +421,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            clipBehavior: Clip.hardEdge,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,
@@ -629,7 +628,6 @@ void main() {
     );
     await tester.pumpWidget(
       Stack(
-        alignment: AlignmentDirectional.topStart,
         textDirection: TextDirection.rtl,
       ),
     );

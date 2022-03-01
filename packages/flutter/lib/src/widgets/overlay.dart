@@ -151,8 +151,8 @@ class OverlayEntry extends ChangeNotifier {
       return;
 
     overlay._entries.remove(this);
-    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
       });
     } else {
@@ -437,7 +437,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       return;
     if (listEquals(_entries, newEntriesList))
       return;
-    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
+    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.of(_entries);
     for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }
@@ -579,15 +579,13 @@ class _TheatreElement extends MultiChildRenderObjectElement {
   _TheatreElement(_Theatre widget) : super(widget);
 
   @override
-  _Theatre get widget => super.widget as _Theatre;
-
-  @override
   _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    assert(children.length >= widget.skipCount);
-    children.skip(widget.skipCount).forEach(visitor);
+    final _Theatre theatre = widget as _Theatre;
+    assert(children.length >= theatre.skipCount);
+    children.skip(theatre.skipCount).forEach(visitor);
   }
 }
 

@@ -293,13 +293,11 @@ class CupertinoFormSection extends StatelessWidget {
             ),
           Padding(
             padding: margin,
-            child: clipBehavior == Clip.none
-              ? decoratedChildrenGroup
-              : ClipRRect(
-                  borderRadius: childrenGroupBorderRadius,
-                  clipBehavior: clipBehavior,
-                  child: decoratedChildrenGroup,
-                ),
+            child: ClipRRect(
+              borderRadius: childrenGroupBorderRadius,
+              clipBehavior: clipBehavior,
+              child: decoratedChildrenGroup,
+            ),
           ),
           if (footer != null)
             Align(

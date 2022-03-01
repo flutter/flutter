@@ -56,16 +56,23 @@ abstract class Repository {
     required this.platform,
     required this.fileSystem,
     required this.parentDirectory,
+    required this.requiredLocalBranches,
     this.initialRef,
     this.localUpstream = false,
     this.previousCheckoutLocation,
     this.mirrorRemote,
   })  : git = Git(processManager),
-        assert(localUpstream != null),
         assert(upstreamRemote.url.isNotEmpty);
 
   final String name;
   final Remote upstreamRemote;
+
+  /// Branches that must exist locally in this [Repository].
+  ///
+  /// If this [Repository] is used as a local upstream for another, the
+  /// downstream may try to fetch these branches, and git will fail if they do
+  /// not exist.
+  final List<String> requiredLocalBranches;
 
   /// Remote for user's mirror.
   ///
@@ -117,11 +124,13 @@ abstract class Repository {
           workingDirectory: _checkoutDirectory!.path,
         );
       }
+
       return _checkoutDirectory!;
     }
 
     _checkoutDirectory = parentDirectory.childDirectory(name);
     await lazilyInitialize(_checkoutDirectory!);
+
     return _checkoutDirectory!;
   }
 
@@ -162,7 +171,7 @@ abstract class Repository {
     if (localUpstream) {
       // These branches must exist locally for the repo that depends on it
       // to fetch and push to.
-      for (final String channel in kReleaseChannels) {
+      for (final String channel in requiredLocalBranches) {
         await git.run(
           <String>['checkout', channel, '--'],
           'check out branch $channel locally',
@@ -173,7 +182,7 @@ abstract class Repository {
 
     if (initialRef != null) {
       await git.run(
-        <String>['checkout', '${upstreamRemote.name}/$initialRef'],
+        <String>['checkout', initialRef!],
         'Checking out initialRef $initialRef',
         workingDirectory: checkoutDirectory.path,
       );
@@ -463,8 +472,9 @@ class FrameworkRepository extends Repository {
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     String? previousCheckoutLocation,
-    String? initialRef,
+    String initialRef = FrameworkRepository.defaultBranch,
     Remote? mirrorRemote,
+    List<String>? additionalRequiredLocalBranches,
   }) : super(
           name: name,
           upstreamRemote: upstreamRemote,
@@ -477,6 +487,10 @@ class FrameworkRepository extends Repository {
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
           previousCheckoutLocation: previousCheckoutLocation,
+          requiredLocalBranches: <String>[
+            ...?additionalRequiredLocalBranches,
+            ...kReleaseChannels,
+          ],
         );
 
   /// A [FrameworkRepository] with the host conductor's repo set as upstream.
@@ -487,6 +501,7 @@ class FrameworkRepository extends Repository {
     Checkouts checkouts, {
     String name = 'framework',
     String? previousCheckoutLocation,
+    String initialRef = FrameworkRepository.defaultBranch,
     required String upstreamPath,
   }) {
     return FrameworkRepository(
@@ -496,15 +511,13 @@ class FrameworkRepository extends Repository {
         name: RemoteName.upstream,
         url: 'file://$upstreamPath/',
       ),
-      localUpstream: false,
       previousCheckoutLocation: previousCheckoutLocation,
+      initialRef: initialRef,
     );
   }
 
   final Checkouts checkouts;
-  static const String defaultUpstream =
-      'https://github.com/flutter/flutter.git';
-
+  static const String defaultUpstream = 'git@github.com:flutter/flutter.git';
   static const String defaultBranch = 'master';
 
   Future<CiYaml> get ciYaml async {
@@ -543,7 +556,7 @@ class FrameworkRepository extends Repository {
   }
 
   @override
-  Future<Repository> cloneRepository(String? cloneName) async {
+  Future<FrameworkRepository> cloneRepository(String? cloneName) async {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return FrameworkRepository(
@@ -718,6 +731,7 @@ class EngineRepository extends Repository {
     bool localUpstream = false,
     String? previousCheckoutLocation,
     Remote? mirrorRemote,
+    List<String>? additionalRequiredLocalBranches,
   }) : super(
           name: name,
           upstreamRemote: upstreamRemote,
@@ -730,6 +744,7 @@ class EngineRepository extends Repository {
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
           previousCheckoutLocation: previousCheckoutLocation,
+          requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 
   final Checkouts checkouts;
@@ -739,8 +754,8 @@ class EngineRepository extends Repository {
     return ciYaml;
   }
 
-  static const String defaultUpstream = 'https://github.com/flutter/engine.git';
-  static const String defaultBranch = 'master';
+  static const String defaultUpstream = 'git@github.com:flutter/engine.git';
+  static const String defaultBranch = 'main';
 
   /// Update the `dart_revision` entry in the DEPS file.
   Future<void> updateDartRevision(
@@ -829,46 +844,4 @@ class CiYaml {
   /// This is not cached as the contents can be written to while the conductor
   /// is running.
   YamlMap get contents => loadYaml(stringContents) as YamlMap;
-
-  List<String> get enabledBranches {
-    final YamlList yamlList = contents['enabled_branches'] as YamlList;
-    return yamlList.map<String>((dynamic element) {
-      return element as String;
-    }).toList();
-  }
-
-  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
-
-  /// Update this .ci.yaml file with the given branch name.
-  ///
-  /// The underlying [File] is written to, but not committed to git. This method
-  /// will throw a [ConductorException] if the [branchName] is already present
-  /// in the file or if the file does not have an "enabled_branches:" field.
-  void enableBranch(String branchName) {
-    final List<String> newStrings = <String>[];
-    if (enabledBranches.contains(branchName)) {
-      throw ConductorException('${file.path} already contains the branch $branchName');
-    }
-    if (!_enabledBranchPattern.hasMatch(stringContents)) {
-      throw ConductorException(
-        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
-      );
-    }
-    final List<String> lines = stringContents.split('\n');
-    bool insertedCurrentBranch = false;
-    for (final String line in lines) {
-      // Every existing line should be copied to the new Yaml
-      newStrings.add(line);
-      if (insertedCurrentBranch) {
-        continue;
-      }
-      if (_enabledBranchPattern.hasMatch(line)) {
-        insertedCurrentBranch = true;
-        // Indent two spaces
-        final String indent = ' ' * 2;
-        newStrings.add('$indent- ${branchName.trim()}');
-      }
-    }
-    file.writeAsStringSync(newStrings.join('\n'), flush: true);
-  }
 }

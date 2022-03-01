@@ -14,12 +14,22 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_sdk.dart';
 
-const String _defaultGradleVersion = '6.7';
+// These are the versions used in the project templates.
+//
+// In general, Flutter aims to default to the latest version.
+// However, this currently requires to migrate existing integration tests to the latest supported values.
+//
+// For more information about the latest version, check:
+// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+// https://kotlinlang.org/docs/gradle.html#plugin-and-versions
+const String templateDefaultGradleVersion = '6.7';
+const String templateAndroidGradlePluginVersion = '4.1.0';
+const String templateKotlinGradlePluginVersion = '1.6.10';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
@@ -109,14 +119,14 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    logger.printTrace("$buildFile doesn't exist, assuming AGP version: $_defaultGradleVersion");
-    return _defaultGradleVersion;
+    logger.printTrace("$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
+    return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version, assuming AGP version: $_defaultGradleVersion");
-    return _defaultGradleVersion;
+    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
   logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');

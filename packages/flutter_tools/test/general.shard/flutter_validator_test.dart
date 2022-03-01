@@ -40,11 +40,11 @@ void main() {
     final Artifacts artifacts = Artifacts.test();
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(
-        operatingSystem: 'linux',
         localeName: 'en_US.UTF-8',
         environment: <String, String>{},
       ),
       flutterVersion: () => flutterVersion,
+        devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
@@ -86,6 +86,7 @@ void main() {
         environment: <String, String>{},
       ),
       flutterVersion: () => flutterVersion,
+      devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -107,6 +108,7 @@ void main() {
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeThrowingFlutterVersion(),
+      devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -142,6 +144,7 @@ void main() {
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: platform,
       flutterVersion: () => flutterVersion,
+        devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
@@ -169,6 +172,7 @@ void main() {
         },
       ),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0'),
+      devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -189,6 +193,7 @@ void main() {
       final FlutterValidator flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0'),
+        devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
@@ -211,6 +216,7 @@ void main() {
           frameworkVersion: '1.0.0',
           repositoryUrl: null,
         ),
+        devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),

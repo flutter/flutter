@@ -273,7 +273,7 @@ class FlutterManifest {
   Map<String, Object?>? get supportedPlatforms {
     if (isPlugin) {
       final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
-      if (plugin?.containsKey('platforms') == true) {
+      if (plugin?.containsKey('platforms') ?? false) {
         final YamlMap? platformsMap = plugin!['platforms'] as YamlMap?;
         return platformsMap?.value.cast<String, Object?>();
       }
@@ -339,11 +339,11 @@ class FlutterManifest {
       final YamlList? fontFiles = fontFamily['fonts'] as YamlList?;
       final String? familyName = fontFamily['family'] as String?;
       if (familyName == null) {
-        _logger.printError('Warning: Missing family name for font.', emphasis: true);
+        _logger.printWarning('Warning: Missing family name for font.', emphasis: true);
         continue;
       }
       if (fontFiles == null) {
-        _logger.printError('Warning: No fonts specified for font $familyName', emphasis: true);
+        _logger.printWarning('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
@@ -351,7 +351,7 @@ class FlutterManifest {
       for (final Map<Object?, Object?> fontFile in fontFiles.cast<Map<Object?, Object?>>()) {
         final String? asset = fontFile['asset'] as String?;
         if (asset == null) {
-          _logger.printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
+          _logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 

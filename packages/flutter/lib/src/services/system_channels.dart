@@ -240,7 +240,7 @@ class SystemChannels {
   ///  * [RawKeyboard], which uses this channel to expose key data.
   ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
       'flutter/keyevent',
       JSONMessageCodec(),
   );
@@ -271,7 +271,7 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<dynamic> system = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> system = BasicMessageChannel<Object?>(
       'flutter/system',
       JSONMessageCodec(),
   );
@@ -283,7 +283,7 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> accessibility = BasicMessageChannel<Object?>(
     'flutter/accessibility',
     StandardMessageCodec(),
   );
@@ -295,7 +295,6 @@ class SystemChannels {
   ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for configuring the Skia graphics library.
@@ -312,7 +311,7 @@ class SystemChannels {
 
   /// A [MethodChannel] for configuring mouse cursors.
   ///
-  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// All outgoing methods defined for this channel uses a `Map<String, Object?>`
   /// to contain multiple parameters, including the following methods (invoked
   /// using [OptionalMethodChannel.invokeMethod]):
   ///
@@ -321,7 +320,6 @@ class SystemChannels {
   ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
@@ -352,7 +350,6 @@ class SystemChannels {
   ///    restoration data is used in Flutter.
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for installing and managing deferred components.
@@ -378,7 +375,6 @@ class SystemChannels {
   ///    `installDeferredComponent` or `loadLibrary` is called again.
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
-    StandardMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for localization.

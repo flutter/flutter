@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:flutter/foundation.dart';
@@ -26,7 +25,11 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   }
 
   /// The current [PaintingBinding], if one has been created.
-  static PaintingBinding? get instance => _instance;
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static PaintingBinding get instance => BindingBase.checkInstance(_instance);
   static PaintingBinding? _instance;
 
   /// [ShaderWarmUp] instance to be executed during [initInstances].
@@ -67,8 +70,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ///
   /// The image cache is created during startup by the [createImageCache]
   /// method.
-  ImageCache? get imageCache => _imageCache;
-  ImageCache? _imageCache;
+  ImageCache get imageCache => _imageCache;
+  late ImageCache _imageCache;
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///
@@ -114,14 +117,14 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void evict(String asset) {
     super.evict(asset);
-    imageCache!.clear();
-    imageCache!.clearLiveImages();
+    imageCache.clear();
+    imageCache.clearLiveImages();
   }
 
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    imageCache?.clear();
+    imageCache.clear();
   }
 
   /// Listenable that notifies when the available fonts on the system have
@@ -176,4 +179,4 @@ class _SystemFontsNotifier extends Listenable {
 ///
 /// The image cache is created during startup by the [PaintingBinding]'s
 /// [PaintingBinding.createImageCache] method.
-ImageCache? get imageCache => PaintingBinding.instance!.imageCache;
+ImageCache get imageCache => PaintingBinding.instance.imageCache;

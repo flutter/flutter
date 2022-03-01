@@ -13,9 +13,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
+import 'package:test_api/expect.dart' show fail;
+import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -27,6 +27,7 @@ import 'test_async_utils.dart';
 import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
+import 'window.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -107,8 +108,11 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 
 /// Base class for bindings used by widgets library tests.
 ///
-/// The [ensureInitialized] method creates (if necessary) and returns
-/// an instance of the appropriate subclass.
+/// The [ensureInitialized] method creates (if necessary) and returns an
+/// instance of the appropriate subclass. (If one is already created, it returns
+/// that one, even if it's not the one that it would normally create. This
+/// allows tests to force the use of [LiveTestWidgetsFlutterBinding] even in a
+/// normal unit test environment, e.g. to test that binding.)
 ///
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
@@ -262,6 +266,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// equivalent to [Future.delayed].
   Future<void> delayed(Duration duration);
 
+  /// The current [TestWidgetsFlutterBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this binding. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [testWidgets] or [TestWidgetsFlutterBinding.ensureInitialized].
+  static TestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static TestWidgetsFlutterBinding? _instance;
+
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
@@ -280,13 +292,26 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
   /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
   ///
-  /// The parameter `environment` is exposed to test different environment
-  /// variable values, and should not be used.
-  static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) => binding.ensureInitialized(environment);
+  /// The parameter `environment` is used to test the test framework
+  /// itself by checking how it reacts to different environment
+  /// variable values, and should not be used outside of this context.
+  ///
+  /// If a [TestWidgetsFlutterBinding] subclass was explicitly initialized
+  /// before calling [ensureInitialized], then that version of the binding is
+  /// returned regardless of the logic described above. This allows tests to
+  /// force a specific test binding to be used.
+  ///
+  /// This is called automatically by [testWidgets].
+  static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
+    if (_instance != null)
+      return _instance!;
+    return binding.ensureInitialized(environment);
+  }
 
   @override
   void initInstances() {
     super.initInstances();
+    _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     if (overrideHttpClient) {
       binding.setupHttpOverrides();
@@ -661,19 +686,19 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
-    int _exceptionCount = 0; // number of un-taken exceptions
+    int exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
-        if (_exceptionCount == 0) {
-          _exceptionCount = 2;
+        if (exceptionCount == 0) {
+          exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails!, forceReport: true);
         } else {
-          _exceptionCount += 1;
+          exceptionCount += 1;
         }
         FlutterError.dumpErrorToConsole(details, forceReport: true);
         _pendingExceptionDetails = FlutterErrorDetails(
-          exception: 'Multiple exceptions ($_exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
+          exception: 'Multiple exceptions ($exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
           library: 'Flutter test framework',
         );
       } else {
@@ -742,8 +767,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       DiagnosticsNode treeDump;
       try {
         treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
-        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
-        // Potentially everything is good enough without this case.
+        // We try to stringify the tree dump here (though we immediately discard the result) because
+        // we want to make sure that if it can't be serialised, we replace it with a message that
+        // says the tree could not be serialised. Otherwise, the real exception might get obscured
+        // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {
         treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
@@ -922,12 +949,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
-    assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
+    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
-    RendererBinding.instance!.initMouseTracker();
+    RendererBinding.instance.initMouseTracker();
   }
 }
 
@@ -939,11 +966,39 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 ///
 /// This class assumes it is always run in debug mode (since tests are always
 /// run in debug mode).
+///
+/// See [TestWidgetsFlutterBinding] for a list of mixins that must be
+/// provided by the binding active while the test framework is
+/// running.
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
+    _instance = this;
     binding.mockFlutterAssets();
+  }
+
+  /// The current [AutomatedTestWidgetsFlutterBinding], if one has been created.
+  ///
+  /// The binding must be initialized before using this getter. If you
+  /// need the binding to be constructed before calling [testWidgets],
+  /// you can ensure a binding has been constructed by calling the
+  /// [TestWidgetsFlutterBinding.ensureInitialized] function.
+  static AutomatedTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static AutomatedTestWidgetsFlutterBinding? _instance;
+
+  /// Returns an instance of the binding that implements
+  /// [AutomatedTestWidgetsFlutterBinding]. If no binding has yet been
+  /// initialized, the a new instance is created.
+  ///
+  /// Generally, there is no need to call this method. Use
+  /// [TestWidgetsFlutterBinding.ensureInitialized] instead, as it
+  /// will select the correct test binding implementation
+  /// automatically.
+  static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
+    if (AutomatedTestWidgetsFlutterBinding._instance == null)
+      AutomatedTestWidgetsFlutterBinding();
+    return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest
@@ -1005,11 +1060,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (_pendingAsyncTasks == null)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 
@@ -1173,7 +1228,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
-    _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
+    _clock = fakeAsync.getClock(DateTime.utc(2015));
     late Future<void> testBodyResult;
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
@@ -1368,7 +1423,40 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// [pump]. (There would be no point setting it to a value that
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
+///
+/// See [TestWidgetsFlutterBinding] for a list of mixins that must be
+/// provided by the binding active while the test framework is
+/// running.
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The current [LiveTestWidgetsFlutterBinding], if one has been created.
+  ///
+  /// The binding must be initialized before using this getter. If you
+  /// need the binding to be constructed before calling [testWidgets],
+  /// you can ensure a binding has been constructed by calling the
+  /// [TestWidgetsFlutterBinding.ensureInitialized] function.
+  static LiveTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static LiveTestWidgetsFlutterBinding? _instance;
+
+  /// Returns an instance of the binding that implements
+  /// [LiveTestWidgetsFlutterBinding]. If no binding has yet been
+  /// initialized, the a new instance is created.
+  ///
+  /// Generally, there is no need to call this method. Use
+  /// [TestWidgetsFlutterBinding.ensureInitialized] instead, as it
+  /// will select the correct test binding implementation
+  /// automatically.
+  static LiveTestWidgetsFlutterBinding ensureInitialized() {
+    if (LiveTestWidgetsFlutterBinding._instance == null)
+      LiveTestWidgetsFlutterBinding();
+    return LiveTestWidgetsFlutterBinding.instance;
+  }
+
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
@@ -1388,6 +1476,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   Completer<void>? _pendingFrame;
   bool _expectingFrame = false;
+  bool _expectingFrameToReassemble = false;
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
 
@@ -1423,12 +1512,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     super.scheduleForcedFrame();
   }
 
+  @override
+  Future<void> reassembleApplication() {
+    _expectingFrameToReassemble = true;
+    return super.reassembleApplication();
+  }
+
   bool? _doDrawThisFrame;
 
   @override
   void handleBeginFrame(Duration? rawTimeStamp) {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
+        _expectingFrameToReassemble ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
@@ -1447,6 +1543,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       super.handleDrawFrame();
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
+    _expectingFrameToReassemble = false;
     if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
       _pendingFrame!.complete(); // unlocks the test API
@@ -1573,11 +1670,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (!_runningAsyncTasks)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 

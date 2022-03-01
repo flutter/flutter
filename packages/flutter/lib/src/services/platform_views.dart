@@ -522,8 +522,8 @@ class _AndroidMotionEventConverter {
       <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
 
+  PointTransformer get pointTransformer => _pointTransformer;
   late PointTransformer _pointTransformer;
-
   set pointTransformer(PointTransformer transformer) {
     assert(transformer != null);
     _pointTransformer = transformer;
@@ -653,6 +653,8 @@ class _AndroidMotionEventConverter {
         toolType = AndroidPointerProperties.kToolTypeEraser;
         break;
       case PointerDeviceKind.unknown:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }
@@ -790,13 +792,6 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   int? get textureId;
 
-  /// The unique identifier of the Android view controlled by this controller.
-  @Deprecated(
-    'Call `controller.viewId` instead. '
-    'This feature was deprecated after v1.20.0-2.0.pre.',
-  )
-  int get id => viewId;
-
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
@@ -813,10 +808,12 @@ abstract class AndroidViewController extends PlatformViewController {
     );
   }
 
-  /// Converts a given point from the global coordinate system in logical pixels to the local coordinate system for this box.
+  /// Converts a given point from the global coordinate system in logical pixels
+  /// to the local coordinate system for this box.
   ///
   /// This is required to convert a [PointerEvent] to an [AndroidMotionEvent].
   /// It is typically provided by using [RenderBox.globalToLocal].
+  PointTransformer get pointTransformer => _motionEventConverter._pointTransformer;
   set pointTransformer(PointTransformer transformer) {
     assert(transformer != null);
     _motionEventConverter._pointTransformer = transformer;
@@ -1146,18 +1143,17 @@ class UiKitViewController {
   }
 }
 
-/// An interface for a controlling a single platform view.
+/// An interface for controlling a single platform view.
 ///
 /// Used by [PlatformViewSurface] to interface with the platform view it embeds.
 abstract class PlatformViewController {
-
   /// The viewId associated with this controller.
   ///
-  /// The viewId should always be unique and non-negative. And it must not be null.
+  /// The viewId should always be unique and non-negative.
   ///
   /// See also:
   ///
-  ///  * [PlatformViewsRegistry], which is a helper for managing platform view ids.
+  ///  * [PlatformViewsRegistry], which is a helper for managing platform view IDs.
   int get viewId;
 
   /// Dispatches the `event` to the platform view.

@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../doctor.dart';
 import '../project.dart';
 import 'github_template.dart';
 import 'reporting.dart';
@@ -43,25 +41,25 @@ const String _kStackTraceFilename = 'stacktrace_file';
 
 class CrashDetails {
   CrashDetails({
-    @required this.command,
-    @required this.error,
-    @required this.stackTrace,
-    @required this.doctorText,
+    required this.command,
+    required this.error,
+    required this.stackTrace,
+    required this.doctorText,
   });
 
   final String command;
-  final dynamic error;
+  final Object error;
   final StackTrace stackTrace;
-  final String doctorText;
+  final DoctorText doctorText;
 }
 
 /// Reports information about the crash to the user.
 class CrashReporter {
   CrashReporter({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required FlutterProjectFactory flutterProjectFactory,
-    @required HttpClient client,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required FlutterProjectFactory flutterProjectFactory,
+    required HttpClient client,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _flutterProjectFactory = flutterProjectFactory,
@@ -95,7 +93,7 @@ class CrashReporter {
       details.command,
       details.error,
       details.stackTrace,
-      details.doctorText,
+      await details.doctorText.piiStrippedText,
     );
     _logger.printStatus('$gitHubTemplateURL\n', wrap: false);
   }
@@ -110,11 +108,11 @@ class CrashReporter {
 /// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
   CrashReportSender({
-    http.Client client,
-    @required Usage usage,
-    @required Platform platform,
-    @required Logger logger,
-    @required OperatingSystemUtils operatingSystemUtils,
+    http.Client? client,
+    required Usage usage,
+    required Platform platform,
+    required Logger logger,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _client = client ?? http.Client(),
       _usage = usage,
       _platform = platform,
@@ -130,7 +128,7 @@ class CrashReportSender {
   bool _crashReportSent = false;
 
   Uri get _baseUrl {
-    final String overrideUrl = _platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+    final String? overrideUrl = _platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
 
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
@@ -147,10 +145,10 @@ class CrashReportSender {
   ///
   /// The report is populated from data in [error] and [stackTrace].
   Future<void> sendReport({
-    @required dynamic error,
-    @required StackTrace stackTrace,
-    @required String Function() getFlutterVersion,
-    @required String command,
+    required Object error,
+    required StackTrace stackTrace,
+    required String Function() getFlutterVersion,
+    required String command,
   }) async {
     // Only send one crash report per run.
     if (_crashReportSent) {

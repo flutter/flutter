@@ -57,14 +57,14 @@ void main() {
                   onPressed: () { },
                 ),
                 floatingActionButtonLocation: location,
-                bottomNavigationBar: BottomAppBar(
+                bottomNavigationBar: const BottomAppBar(
                   shape: AutomaticNotchedShape(
-                    BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                    BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(50.0))),
+                    ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30.0))),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
-                  child: const SizedBox(height: 100.0),
+                  child: SizedBox(height: 100.0),
                 ),
               ),
             ),
@@ -172,9 +172,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: BottomAppBar(
-            shape: null,
-          ),
+          bottomNavigationBar: BottomAppBar(),
         ),
       ),
     );
@@ -194,9 +192,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: ShapeListener(BottomAppBar(
-            shape: null,
-          )),
+          bottomNavigationBar: ShapeListener(BottomAppBar()),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             child: Icon(Icons.add),
@@ -354,12 +350,11 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar:
-              BottomAppBar(
-                shape: RectangularNotch(),
-                notchMargin: 0.0,
-                child: SizedBox(height: 100.0),
-              ),
+          bottomNavigationBar: BottomAppBar(
+            shape: RectangularNotch(),
+            notchMargin: 0.0,
+            child: SizedBox(height: 100.0),
+          ),
         ),
       ),
     );

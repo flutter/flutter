@@ -172,6 +172,7 @@ class ToggleButtons extends StatelessWidget {
     required this.isSelected,
     this.onPressed,
     this.mouseCursor,
+    this.tapTargetSize,
     this.textStyle,
     this.constraints,
     this.color,
@@ -229,7 +230,18 @@ class ToggleButtons extends StatelessWidget {
   final void Function(int index)? onPressed;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
+
+  /// Configures the minimum size of the area within which the buttons may
+  /// be pressed.
+  ///
+  /// If the [tapTargetSize] is larger than [constraints], the buttons will
+  /// include a transparent margin that responds to taps.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  final MaterialTapTargetSize? tapTargetSize;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
@@ -686,7 +698,7 @@ class ToggleButtons extends StatelessWidget {
       );
     });
 
-    return direction == Axis.horizontal
+    final Widget result = direction == Axis.horizontal
       ? IntrinsicHeight(
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -702,6 +714,18 @@ class ToggleButtons extends StatelessWidget {
           children: buttons,
         ),
       );
+
+    final MaterialTapTargetSize resolvedTapTargetSize = tapTargetSize ?? theme.materialTapTargetSize;
+    switch (resolvedTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        return _InputPadding(
+          minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+          direction: direction,
+          child: result,
+        );
+      case MaterialTapTargetSize.shrinkWrap:
+        return result;
+    }
   }
 
   @override
@@ -821,6 +845,8 @@ class _ToggleButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The width and color of the button's leading side border.
@@ -1548,5 +1574,143 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           break;
       }
     }
+  }
+}
+
+/// A widget to pad the area around a [ToggleButtons]'s children.
+///
+/// This widget is based on a similar one used in [ButtonStyleButton] but it
+/// only redirects taps along one axis to ensure the correct button is tapped
+/// within the [ToggleButtons].
+///
+/// This ensures that a widget takes up at least as much space as the minSize
+/// parameter to ensure adequate tap target size, while keeping the widget
+/// visually smaller to the user.
+class _InputPadding extends SingleChildRenderObjectWidget {
+  const _InputPadding({
+    Key? key,
+    Widget? child,
+    required this.minSize,
+    required this.direction,
+  }) : super(key: key, child: child);
+
+  final Size minSize;
+  final Axis direction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderInputPadding(minSize, direction);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+    renderObject.minSize = minSize;
+    renderObject.direction = direction;
+  }
+}
+
+class _RenderInputPadding extends RenderShiftedBox {
+  _RenderInputPadding(this._minSize, this._direction, [RenderBox? child]) : super(child);
+
+  Size get minSize => _minSize;
+  Size _minSize;
+  set minSize(Size value) {
+    if (_minSize == value)
+      return;
+    _minSize = value;
+    markNeedsLayout();
+  }
+
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    if (_direction == value)
+      return;
+    _direction = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double height = math.max(childSize.width, minSize.width);
+      final double width = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(height, width));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
+    if (child != null) {
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    // The super.hitTest() method also checks hitTestChildren(). We don't
+    // want that in this case because we've padded around the children per
+    // tapTargetSize.
+    if (!size.contains(position)) {
+      return false;
+    }
+
+    // Only adjust one axis to ensure the correct button is tapped.
+    Offset center;
+    if (direction == Axis.horizontal) {
+      center = Offset(position.dx, child!.size.height / 2);
+    } else {
+      center = Offset(child!.size.width / 2, position.dy);
+    }
+    return result.addWithRawTransform(
+      transform: MatrixUtils.forceToPoint(center),
+      position: center,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        assert(position == center);
+        return child!.hitTest(result, position: center);
+      },
+    );
   }
 }

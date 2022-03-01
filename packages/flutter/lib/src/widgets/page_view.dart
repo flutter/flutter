@@ -359,7 +359,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       duration: duration,
       curve: curve,
       alignmentPolicy: alignmentPolicy,
-      targetRenderObject: null,
     );
   }
 
@@ -596,7 +595,7 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
 /// which scroll horizontally.
 ///

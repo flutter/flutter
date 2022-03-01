@@ -10,6 +10,7 @@ import 'color_scheme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'navigation_bar.dart';
 import 'navigation_rail_theme.dart';
 import 'theme.dart';
 
@@ -35,7 +36,7 @@ import 'theme.dart';
 /// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
@@ -94,6 +95,8 @@ class NavigationRail extends StatefulWidget {
     this.selectedIconTheme,
     this.minWidth,
     this.minExtendedWidth,
+    this.useIndicator,
+    this.indicatorColor,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex != null),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
@@ -279,12 +282,27 @@ class NavigationRail extends StatefulWidget {
   /// The default value is 256.
   final double? minExtendedWidth;
 
+  /// If `true`, adds a rounded [NavigationIndicator] behind the selected
+  /// destination's icon.
+  ///
+  /// The indicator's shape will be circular if [labelType] is
+  /// [NavigationRailLabelType.none], or a [StadiumBorder] if [labelType] is
+  /// [NavigationRailLabelType.all] or [NavigationRailLabelType.selected].
+  ///
+  /// If `null`, defaults to [NavigationRailThemeData.useIndicator]. If that is
+  /// `null`, defaults to [ThemeData.useMaterial3].
+  final bool? useIndicator;
+
+  /// Overrides the default value of [NavigationRail]'s selection indicator color,
+  /// when [useIndicator] is true.
+  final Color? indicatorColor;
+
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
   /// This can be used to synchronize animations in the [leading] or [trailing]
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// This example shows how to use this animation to create a [FloatingActionButton]
   /// that animates itself between the normal and extended states of the
   /// [NavigationRail].
@@ -413,6 +431,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
+                          useIndicator: widget.useIndicator ?? navigationRailTheme.useIndicator ?? theme.useMaterial3,
+                          indicatorColor: widget.indicatorColor ?? navigationRailTheme.indicatorColor,
                           onTap: () {
                             if (widget.onDestinationSelected != null)
                               widget.onDestinationSelected!(i);
@@ -498,6 +518,8 @@ class _RailDestination extends StatelessWidget {
     required this.onTap,
     required this.indexLabel,
     this.padding,
+    required this.useIndicator,
+    this.indicatorColor,
   }) : assert(minWidth != null),
        assert(minExtendedWidth != null),
        assert(icon != null),
@@ -529,11 +551,18 @@ class _RailDestination extends StatelessWidget {
   final VoidCallback onTap;
   final String indexLabel;
   final EdgeInsetsGeometry? padding;
+  final bool useIndicator;
+  final Color? indicatorColor;
 
   final Animation<double> _positionAnimation;
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      useIndicator || indicatorColor == null,
+      '[NavigationRail.indicatorColor] does not have an effect when [NavigationRail.useIndicator] is false',
+    );
+
     final Widget themedIcon = IconTheme(
       data: iconTheme,
       child: icon,
@@ -542,15 +571,22 @@ class _RailDestination extends StatelessWidget {
       style: labelTextStyle,
       child: label,
     );
+
     final Widget content;
+
     switch (labelType) {
       case NavigationRailLabelType.none:
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
-          child: Align(
-            alignment: Alignment.center,
-            child: themedIcon,
+          child: Center(
+            child: _AddIndicator(
+              addIndicator: useIndicator,
+              indicatorColor: indicatorColor,
+              isCircular: true,
+              indicatorAnimation: destinationAnimation,
+              child: themedIcon,
+            ),
           ),
         );
         if (extendedTransitionAnimation.value == 0) {
@@ -607,6 +643,7 @@ class _RailDestination extends StatelessWidget {
         final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue)!;
         final Interval interval = selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = destinationAnimation.drive(CurveTween(curve: interval));
+
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -619,7 +656,13 @@ class _RailDestination extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(height: verticalPadding),
-                themedIcon,
+                _AddIndicator(
+                  addIndicator: useIndicator,
+                  indicatorColor: indicatorColor,
+                  isCircular: false,
+                  indicatorAnimation: destinationAnimation,
+                  child: themedIcon,
+                ),
                 Align(
                   alignment: Alignment.topCenter,
                   heightFactor: appearingAnimationValue,
@@ -646,7 +689,13 @@ class _RailDestination extends StatelessWidget {
           child: Column(
             children: <Widget>[
               const SizedBox(height: _verticalDestinationPaddingWithLabel),
-              themedIcon,
+              _AddIndicator(
+                addIndicator: useIndicator,
+                indicatorColor: indicatorColor,
+                isCircular: false,
+                indicatorAnimation: destinationAnimation,
+                child: themedIcon,
+              ),
               styledLabel,
               const SizedBox(height: _verticalDestinationPaddingWithLabel),
             ],
@@ -663,7 +712,6 @@ class _RailDestination extends StatelessWidget {
         children: <Widget>[
           Material(
             type: MaterialType.transparency,
-            clipBehavior: Clip.none,
             child: InkResponse(
               onTap: onTap,
               onHover: (_) {},
@@ -683,6 +731,62 @@ class _RailDestination extends StatelessWidget {
     );
   }
 }
+
+/// When [addIndicator] is `true`, puts [child] center aligned in a [Stack] with
+/// a [NavigationIndicator] behind it, otherwise returns [child].
+///
+/// When [isCircular] is true, the indicator will be a circle, otherwise the
+/// indicator will be a stadium shape.
+class _AddIndicator extends StatelessWidget {
+  const _AddIndicator({
+    Key? key,
+    required this.addIndicator,
+    required this.isCircular,
+    required this.indicatorColor,
+    required this.indicatorAnimation,
+    required this.child,
+  }) : super(key: key);
+
+  final bool addIndicator;
+  final bool isCircular;
+  final Color? indicatorColor;
+  final Animation<double> indicatorAnimation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!addIndicator) {
+      return child;
+    }
+    late final Widget indicator;
+    if (isCircular) {
+      const double circularIndicatorDiameter = 56;
+      indicator = NavigationIndicator(
+        animation: indicatorAnimation,
+        height: circularIndicatorDiameter,
+        width: circularIndicatorDiameter,
+        borderRadius: BorderRadius.circular(circularIndicatorDiameter / 2),
+        color: indicatorColor,
+      );
+    } else {
+      indicator = NavigationIndicator(
+        animation: indicatorAnimation,
+        width: 56,
+        borderRadius: BorderRadius.circular(16),
+        color: indicatorColor,
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        indicator,
+        child,
+      ],
+    );
+  }
+}
+
 
 /// Defines the behavior of the labels of a [NavigationRail].
 ///

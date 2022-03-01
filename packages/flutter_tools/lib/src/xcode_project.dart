@@ -9,7 +9,8 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
+import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
@@ -117,7 +118,7 @@ class IosProject extends XcodeBasedProject {
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
-  /// Whether the flutter application has an iOS project.
+  /// Whether the Flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
 
   /// Put generated files here.
@@ -179,7 +180,7 @@ class IosProject extends XcodeBasedProject {
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = globals.plistParser.getValueFromFile(
+        fromPlist = globals.plistParser.getStringValueFromFile(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
@@ -215,7 +216,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// The bundle name of the host app, `My App.app`.
-  Future<String?> hostAppBundleName(BuildInfo buildInfo) async {
+  Future<String?> hostAppBundleName(BuildInfo? buildInfo) async {
     if (!existsSync()) {
       return null;
     }
@@ -223,13 +224,13 @@ class IosProject extends XcodeBasedProject {
   }
   String? _hostAppBundleName;
 
-  Future<String> _parseHostAppBundleName(BuildInfo buildInfo) async {
+  Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String? productName;
-    if (globals.xcodeProjectInterpreter?.isInstalled == true) {
+    if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
       final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
         productName = xcodeBuildSettings['FULL_PRODUCT_NAME'];
@@ -244,7 +245,11 @@ class IosProject extends XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>?> buildSettingsForBuildInfo(BuildInfo? buildInfo, { EnvironmentType environmentType = EnvironmentType.physical }) async {
+  Future<Map<String, String>?> buildSettingsForBuildInfo(
+    BuildInfo? buildInfo, {
+    EnvironmentType environmentType = EnvironmentType.physical,
+    String? deviceId,
+  }) async {
     if (!existsSync()) {
       return null;
     }
@@ -262,7 +267,12 @@ class IosProject extends XcodeBasedProject {
       buildInfo,
       scheme,
     );
-    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(environmentType: environmentType, scheme: scheme, configuration: configuration);
+    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+      environmentType: environmentType,
+      scheme: scheme,
+      configuration: configuration,
+      deviceId: deviceId,
+    );
     final Map<String, String>? currentBuildSettings = _buildSettingsByBuildContext[buildContext];
     if (currentBuildSettings == null) {
       final Map<String, String>? calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
@@ -310,7 +320,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
-  Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo) async {
+  Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo, String? deviceId) async {
     final String? bundleIdentifier = await productBundleIdentifier(buildInfo);
     // A bundle identifier is required for a companion app.
     if (bundleIdentifier == null) {
@@ -322,7 +332,7 @@ class IosProject extends XcodeBasedProject {
       // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
       // if it is a watchOS companion app.
       if (infoFile.existsSync()) {
-        final String? fromPlist = globals.plistParser.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
+        final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
         if (bundleIdentifier == fromPlist) {
           return true;
         }
@@ -330,7 +340,7 @@ class IosProject extends XcodeBasedProject {
         // The key WKCompanionAppBundleIdentifier might contain an xcode variable
         // that needs to be substituted before comparing it with bundle id
         if (fromPlist != null && fromPlist.contains(r'$')) {
-          final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
+          final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo, deviceId: deviceId);
           if (allBuildSettings != null) {
             final String substitutedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
             if (substitutedVariable == bundleIdentifier) {
@@ -466,15 +476,31 @@ class IosProject extends XcodeBasedProject {
       templateRenderer: globals.templateRenderer,
     );
     final String iosBundleIdentifier = parent.manifest.iosBundleIdentifier ?? 'com.example.${parent.manifest.appName}';
+
+    final String? iosDevelopmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+      processManager: globals.processManager,
+      platform: globals.platform,
+      logger: globals.logger,
+      config: globals.config,
+      terminal: globals.terminal,
+    );
+
+    final String projectName = parent.manifest.appName;
+
+    // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
+    final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
+
     template.render(
       target,
       <String, Object>{
         'ios': true,
-        'projectName': parent.manifest.appName,
+        'projectName': projectName,
+        'titleCaseProjectName': titleCaseProjectName,
         'iosIdentifier': iosBundleIdentifier,
+        'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
+        'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       },
       printStatusWhenWriting: false,
-      overwriteExisting: true,
     );
   }
 }

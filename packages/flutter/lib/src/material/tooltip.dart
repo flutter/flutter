@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
+import 'tooltip_visibility.dart';
 
 /// A material design tooltip.
 ///
@@ -30,7 +32,7 @@ import 'tooltip_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
@@ -39,7 +41,7 @@ import 'tooltip_theme.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
 /// `height` has been used to set a specific height of the Tooltip.
@@ -55,10 +57,20 @@ import 'tooltip_theme.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows a rich [Tooltip] that specifies the [richMessage]
+/// parameter instead of the [message] parameter (only one of these may be
+/// non-null. Any [InlineSpan] can be specified for the [richMessage] attribute,
+/// including [WidgetSpan].
+///
+/// ** See code in examples/api/lib/material/tooltip/tooltip.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>
 ///  * [TooltipTheme] or [ThemeData.tooltipTheme]
+///  * [TooltipVisibility]
 class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///
@@ -70,9 +82,12 @@ class Tooltip extends StatefulWidget {
   ///
   /// All parameters that are defined in the constructor will
   /// override the default values _and_ the values in [TooltipTheme.of].
+  ///
+  /// Only one of [message] and [richMessage] may be non-null.
   const Tooltip({
     Key? key,
-    required this.message,
+    this.message,
+    this.richMessage,
     this.height,
     this.padding,
     this.margin,
@@ -86,11 +101,24 @@ class Tooltip extends StatefulWidget {
     this.child,
     this.triggerMode,
     this.enableFeedback,
-  }) : assert(message != null),
-       super(key: key);
+  }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
+        assert(
+          richMessage == null || textStyle == null,
+          'If `richMessage` is specified, `textStyle` will have no effect. '
+          'If you wish to provide a `textStyle` for a rich tooltip, add the '
+          '`textStyle` directly to the `richMessage` InlineSpan.',
+        ),
+        super(key: key);
 
   /// The text to display in the tooltip.
-  final String message;
+  ///
+  /// Only one of [message] and [richMessage] may be non-null.
+  final String? message;
+
+  /// The rich text to display in the tooltip.
+  ///
+  /// Only one of [message] and [richMessage] may be non-null.
+  final InlineSpan? richMessage;
 
   /// The height of the tooltip's [child].
   ///
@@ -131,12 +159,13 @@ class Tooltip extends StatefulWidget {
   /// direction.
   final bool? preferBelow;
 
-  /// Whether the tooltip's [message] should be excluded from the semantics
-  /// tree.
+  /// Whether the tooltip's [message] or [richMessage] should be excluded from
+  /// the semantics tree.
   ///
   /// Defaults to false. A tooltip will add a [Semantics] label that is set to
-  /// [Tooltip.message]. Set this property to true if the app is going to
-  /// provide its own custom semantics label.
+  /// [Tooltip.message] if non-null, or the plain text value of
+  /// [Tooltip.richMessage] otherwise. Set this property to true if the app is
+  /// going to provide its own custom semantics label.
   final bool? excludeFromSemantics;
 
   /// The widget below this widget in the tree.
@@ -241,17 +270,28 @@ class Tooltip extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('message', message, showName: false));
+    properties.add(StringProperty(
+      'message',
+      message,
+      showName: message == null,
+      defaultValue: message == null ? null : kNoDefaultValue,
+    ));
+    properties.add(StringProperty(
+      'richMessage',
+      richMessage?.toPlainText(),
+      showName: richMessage == null,
+      defaultValue: richMessage == null ? null : kNoDefaultValue,
+    ));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
-    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
+    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
+    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
   }
 }
 
@@ -289,13 +329,19 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool enableFeedback;
   late bool _isConcealed;
   late bool _forceRemoval;
+  late bool _visible;
+
+  /// The plain text message for this tooltip.
+  ///
+  /// This value will either come from [widget.message] or [widget.richMessage].
+  String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
 
   @override
   void initState() {
     super.initState();
     _isConcealed = false;
     _forceRemoval = false;
-    _mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
     _controller = AnimationController(
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
@@ -303,10 +349,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     )
       ..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
-    RendererBinding.instance!.mouseTracker.addListener(_handleMouseTrackerChange);
+    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _visible = TooltipVisibility.of(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -317,7 +369,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return 24.0;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return 32.0;
     }
   }
@@ -329,7 +383,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return const EdgeInsets.symmetric(horizontal: 8.0);
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return const EdgeInsets.symmetric(horizontal: 16.0);
     }
   }
@@ -341,7 +397,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return 10.0;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return 14.0;
     }
   }
@@ -351,7 +409,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (!mounted) {
       return;
     }
-    final bool mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
+    final bool mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
       setState(() {
         _mouseIsConnected = mouseIsConnected;
@@ -428,14 +486,17 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       )!;
       overlayState.insert(_entry!);
     }
-    SemanticsService.tooltip(widget.message);
+    SemanticsService.tooltip(_tooltipMessage);
     _controller.forward();
   }
 
   /// Shows the tooltip if it is not already visible.
   ///
-  /// Returns `false` when the tooltip was already visible.
+  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
+  /// was already visible.
   bool ensureTooltipVisible() {
+    if (!_visible)
+      return false;
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -461,12 +522,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static final Set<_TooltipState> _mouseIn = <_TooltipState>{};
 
   void _handleMouseEnter() {
-    _showTooltip();
+    if (mounted) {
+      _showTooltip();
+    }
   }
 
   void _handleMouseExit({bool immediately = false}) {
-    // If the tip is currently covered, we can just remove it without waiting.
-    _dismissTooltip(immediately: _isConcealed || immediately);
+    if (mounted) {
+      // If the tip is currently covered, we can just remove it without waiting.
+      _dismissTooltip(immediately: _isConcealed || immediately);
+    }
   }
 
   void _createNewEntry() {
@@ -487,7 +552,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: widget.message,
+        richMessage: widget.richMessage ?? TextSpan(text: widget.message),
         height: height,
         padding: padding,
         margin: margin,
@@ -507,7 +572,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     _isConcealed = false;
     overlayState.insert(_entry!);
-    SemanticsService.tooltip(widget.message);
+    SemanticsService.tooltip(_tooltipMessage);
     if (_mouseIsConnected) {
       // Hovered tooltips shouldn't show more than one at once. For example, a chip with
       // a delete icon shouldn't show both the delete icon tooltip and the chip tooltip
@@ -557,8 +622,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
-    RendererBinding.instance!.mouseTracker.removeListener(_handleMouseTrackerChange);
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
     _removeEntry();
     _controller.dispose();
     super.dispose();
@@ -580,7 +645,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (widget.message.isEmpty) {
+    if (_tooltipMessage.isEmpty) {
       return widget.child ?? const SizedBox();
     }
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
@@ -622,25 +687,31 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
     enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
-    Widget result = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
-      onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
-      excludeFromSemantics: true,
-      child: Semantics(
-        label: excludeFromSemantics ? null : widget.message,
-        child: widget.child,
-      ),
+    Widget result = Semantics(
+      label: excludeFromSemantics
+          ? null
+          : _tooltipMessage,
+      child: widget.child,
     );
 
-    // Only check for hovering if there is a mouse connected.
-    if (_mouseIsConnected) {
-      result = MouseRegion(
-        onEnter: (_) => _handleMouseEnter(),
-        onExit: (_) => _handleMouseExit(),
+    // Only check for gestures if tooltip should be visible.
+    if (_visible) {
+      result = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
+        _handlePress : null,
+        onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
+        excludeFromSemantics: true,
         child: result,
       );
+      // Only check for hovering if there is a mouse connected.
+      if (_mouseIsConnected) {
+        result = MouseRegion(
+          onEnter: (_) => _handleMouseEnter(),
+          onExit: (_) => _handleMouseExit(),
+          child: result,
+        );
+      }
     }
 
     return result;
@@ -700,8 +771,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
     Key? key,
-    required this.message,
     required this.height,
+    required this.richMessage,
     this.padding,
     this.margin,
     this.decoration,
@@ -714,7 +785,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.onExit,
   }) : super(key: key);
 
-  final String message;
+  final InlineSpan richMessage;
   final double height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -743,8 +814,8 @@ class _TooltipOverlay extends StatelessWidget {
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
-                child: Text(
-                  message,
+                child: Text.rich(
+                  richMessage,
                   style: textStyle,
                 ),
               ),

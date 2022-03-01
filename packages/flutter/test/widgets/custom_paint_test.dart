@@ -157,7 +157,7 @@ void main() {
     expect(target.currentContext!.size, const Size(800.0, 100.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, size: Size.zero, child: Container()),
+      child: CustomPaint(key: target, child: Container()),
     ));
     expect(target.currentContext!.size, const Size(800.0, 600.0));
 

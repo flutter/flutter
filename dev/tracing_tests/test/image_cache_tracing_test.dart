@@ -3,51 +3,34 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:developer' as developer;
-import 'dart:isolate' as isolate;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
+
+import 'common.dart';
 
 void main() {
-  late VmService vmService;
-  late String isolateId;
-  setUpAll(() async {
-    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
-
-    if (info.serverUri == null) {
-      fail('This test _must_ be run with --enable-vmservice.');
-    }
-
-    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
-    await vmService.setVMTimelineFlags(<String>['Dart']);
-    isolateId = developer.Service.getIsolateID(isolate.Isolate.current)!;
-
-    // Initialize the image cache.
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
+  initTimelineTests();
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Image cache tracing', () async {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
-    PaintingBinding.instance!.imageCache!.putIfAbsent(
+    PaintingBinding.instance.imageCache.putIfAbsent(
       'Test',
       () => completer1,
     );
-    PaintingBinding.instance!.imageCache!.clear();
+    PaintingBinding.instance.imageCache.clear();
 
     completer2.testSetImage(ImageInfo(image: await createTestImage()));
-    PaintingBinding.instance!.imageCache!.putIfAbsent(
+    PaintingBinding.instance.imageCache.putIfAbsent(
       'Test2',
       () => completer2,
     );
-    PaintingBinding.instance!.imageCache!.evict('Test2');
+    PaintingBinding.instance.imageCache.evict('Test2');
 
-    final Timeline timeline = await vmService.getVMTimeline();
     _expectTimelineEvents(
-      timeline.traceEvents!,
+      await fetchTimelineEvents(),
       <Map<String, dynamic>>[
         <String, dynamic>{
           'name': 'ImageCache.putIfAbsent',

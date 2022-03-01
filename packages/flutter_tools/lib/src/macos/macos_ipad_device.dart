@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
@@ -26,10 +23,10 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
         super(
           'designed-for-ipad',
@@ -58,18 +55,18 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(ApplicationPackage package, BuildMode buildMode) => null;
+  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) => null;
 
   @override
   Future<LaunchResult> startApp(
     IOSApp package, {
-    String mainPath,
-    String route,
-    @required DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');
@@ -78,14 +75,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   Future<bool> stopApp(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<void> buildForDevice(
     covariant IOSApp package, {
-    String mainPath,
-    BuildInfo buildInfo,
+    String? mainPath,
+    required BuildInfo buildInfo,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');
@@ -94,12 +91,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    @required Platform platform,
-    @required IOSWorkflow iosWorkflow,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required IOSWorkflow iosWorkflow,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
   })  : _logger = logger,
         _platform = platform,
         _iosWorkflow = iosWorkflow,
@@ -128,7 +125,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   static bool allowDiscovery = false;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration timeout}) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!canListAnything) {
       return const <Device>[];
     }

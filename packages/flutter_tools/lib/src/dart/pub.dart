@@ -96,14 +96,15 @@ abstract class Pub {
   /// Defaults to true.
   Future<void> get({
     required PubContext context,
-    String directory,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   });
 
   /// Runs pub in 'batch' mode.
@@ -121,11 +122,11 @@ abstract class Pub {
   Future<void> batch(
     List<String> arguments, {
     required PubContext context,
-    String directory,
-    MessageFilter filter,
+    String? directory,
+    MessageFilter? filter,
     String failureMessage = 'pub failed',
     required bool retry,
-    bool showTraceForErrors,
+    bool? showTraceForErrors,
   });
 
   /// Runs pub in 'interactive' mode.
@@ -134,7 +135,7 @@ abstract class Pub {
   /// stdout/stderr stream of pub to the corresponding streams of this process.
   Future<void> interactively(
     List<String> arguments, {
-    String directory,
+    String? directory,
     required io.Stdio stdio,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
@@ -179,6 +180,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
     final File packageConfigFile = _fileSystem.file(
@@ -232,9 +234,9 @@ class _DefaultPub implements Pub {
     }
 
     final String command = upgrade ? 'upgrade' : 'get';
-    final Status status = _logger.startProgress(
+    final Status? status = printProgress ? _logger.startProgress(
       'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
-    );
+    ) : null;
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
       if (verbose)
@@ -257,10 +259,29 @@ class _DefaultPub implements Pub {
         retry: !offline,
         flutterRootOverride: flutterRootOverride,
       );
-      status.stop();
+      status?.stop();
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
-      status.cancel();
+      status?.cancel();
+      if (exception is io.ProcessException) {
+        final StringBuffer buffer = StringBuffer(exception.message);
+        buffer.writeln('Working directory: "$directory"');
+        final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
+        if (env.entries.isNotEmpty) {
+          buffer.writeln('pub env: {');
+          for (final MapEntry<String, String> entry in env.entries) {
+            buffer.writeln('  "${entry.key}": "${entry.value}",');
+          }
+          buffer.writeln('}');
+        }
+
+        throw io.ProcessException(
+          exception.executable,
+          exception.arguments,
+          buffer.toString(),
+          exception.errorCode,
+        );
+      }
       rethrow;
     }
 

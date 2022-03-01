@@ -25,10 +25,7 @@
 // @dart = 2.8
 // This file is ready to transition, just uncomment /*?*/, /*!*/, and /*late*/.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
+// This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
 
 import 'dart:async';
@@ -36,15 +33,21 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem, platform;
+import 'test_utils.dart' show fileSystem;
 
 const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
 final String flutterBin = fileSystem.path.join(flutterRoot, 'bin', 'flutter');
+
+void debugPrint(String message) {
+  // This is called to intentionally print debugging output when a test is
+  // either taking too long or has failed.
+  // ignore: avoid_print
+  print(message);
+}
 
 typedef LineHandler = String/*?*/ Function(String line);
 
@@ -139,7 +142,7 @@ class LogLine {
   String toString() => '$stamp $channel: $message';
 
   void printClearly() {
-    print('$stamp $channel: ${clarify(message)}');
+    debugPrint('$stamp $channel: ${clarify(message)}');
   }
 
   static String clarify(String line) {
@@ -189,7 +192,7 @@ Future<ProcessTestResult> runFlutter(
   List<Transition> transitions, {
   bool debug = false,
   bool logging = true,
-  Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes!
+  Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
 }) async {
   final Stopwatch clock = Stopwatch()..start();
   final Process process = await processManager.start(
@@ -200,9 +203,9 @@ Future<ProcessTestResult> runFlutter(
   int nextTransition = 0;
   void describeStatus() {
     if (transitions.isNotEmpty) {
-      print('Expected state transitions:');
+      debugPrint('Expected state transitions:');
       for (int index = 0; index < transitions.length; index += 1) {
-        print(
+        debugPrint(
           '${index.toString().padLeft(5)} '
           '${index <  nextTransition ? 'ALREADY MATCHED ' :
              index == nextTransition ? 'NOW WAITING FOR>' :
@@ -210,9 +213,9 @@ Future<ProcessTestResult> runFlutter(
       }
     }
     if (logs.isEmpty) {
-      print('So far nothing has been logged${ debug ? "" : "; use debug:true to print all output" }.');
+      debugPrint('So far nothing has been logged${ debug ? "" : "; use debug:true to print all output" }.');
     } else {
-      print('Log${ debug ? "" : " (only contains logged lines; use debug:true to print all output)" }:');
+      debugPrint('Log${ debug ? "" : " (only contains logged lines; use debug:true to print all output)" }:');
       for (final LogLine log in logs) {
         log.printClearly();
       }
@@ -224,12 +227,12 @@ Future<ProcessTestResult> runFlutter(
     if (!streamingLogs) {
       streamingLogs = true;
       if (!debug) {
-        print('Test is taking a long time (${clock.elapsed.inSeconds} seconds so far).');
+        debugPrint('Test is taking a long time (${clock.elapsed.inSeconds} seconds so far).');
       }
       describeStatus();
-      print('(streaming all logs from this point on...)');
+      debugPrint('(streaming all logs from this point on...)');
     } else {
-      print('(taking a long time...)');
+      debugPrint('(taking a long time...)');
     }
   }
   String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5, " ")}s]';
@@ -243,7 +246,7 @@ Future<ProcessTestResult> runFlutter(
     }
     if (nextTransition < transitions.length && transitions[nextTransition].matches(line)) {
       if (streamingLogs) {
-        print('(matched ${transitions[nextTransition]})');
+        debugPrint('(matched ${transitions[nextTransition]})');
       }
       if (transitions[nextTransition].logging != null) {
         if (!logging && transitions[nextTransition].logging/*!*/) {
@@ -252,9 +255,9 @@ Future<ProcessTestResult> runFlutter(
         logging = transitions[nextTransition].logging/*!*/;
         if (streamingLogs) {
           if (logging) {
-            print('(enabled logging)');
+            debugPrint('(enabled logging)');
           } else {
-            print('(disabled logging)');
+            debugPrint('(disabled logging)');
           }
         }
       }
@@ -289,8 +292,8 @@ Future<ProcessTestResult> runFlutter(
   process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(processStdout);
   process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(processStderr);
   unawaited(process.exitCode.timeout(expectedMaxDuration, onTimeout: () { // This is a failure timeout, must not be short.
-    print('${stamp()} (process is not quitting, trying to send a "q" just in case that helps)');
-    print('(a functional test should never reach this point)');
+    debugPrint('${stamp()} (process is not quitting, trying to send a "q" just in case that helps)');
+    debugPrint('(a functional test should never reach this point)');
     final LogLine inLog = LogLine('stdin', stamp(), 'q');
     logs.add(inLog);
     if (streamingLogs) {
@@ -301,24 +304,24 @@ Future<ProcessTestResult> runFlutter(
   }).catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
-    print('${stamp()} (process terminated with exit code $exitCode)');
+    debugPrint('${stamp()} (process terminated with exit code $exitCode)');
   }
   timeout?.cancel();
   if (nextTransition < transitions.length) {
-    print('The subprocess terminated before all the expected transitions had been matched.');
+    debugPrint('The subprocess terminated before all the expected transitions had been matched.');
     if (logs.any((LogLine line) => line.couldBeCrash)) {
-      print('The subprocess may in fact have crashed. Check the stderr logs below.');
+      debugPrint('The subprocess may in fact have crashed. Check the stderr logs below.');
     }
-    print('The transition that we were hoping to see next but that we never saw was:');
-    print('${nextTransition.toString().padLeft(5)} NOW WAITING FOR> ${transitions[nextTransition]}');
+    debugPrint('The transition that we were hoping to see next but that we never saw was:');
+    debugPrint('${nextTransition.toString().padLeft(5)} NOW WAITING FOR> ${transitions[nextTransition]}');
     if (!streamingLogs) {
       describeStatus();
-      print('(process terminated with exit code $exitCode)');
+      debugPrint('(process terminated with exit code $exitCode)');
     }
     throw TestFailure('Missed some expected transitions.');
   }
   if (streamingLogs) {
-    print('${stamp()} (completed execution successfully!)');
+    debugPrint('${stamp()} (completed execution successfully!)');
   }
   return ProcessTestResult(exitCode, logs);
 }
@@ -358,7 +361,9 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/87924
+    // This test is expected to be skipped when Platform.isWindows:
+    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -622,5 +627,5 @@ void main() {
       '',
       'Application finished.',
     ]);
-  }, skip: Platform.isWindows); // TODO(zanderso): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
+  });
 }

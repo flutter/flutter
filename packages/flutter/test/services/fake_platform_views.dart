@@ -59,7 +59,7 @@ class FakeAndroidViewController implements AndroidViewController {
   final int viewId;
 
   @override
-  Offset Function(Offset position)? pointTransformer;
+  late PointTransformer pointTransformer;
 
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
@@ -96,9 +96,6 @@ class FakeAndroidViewController implements AndroidViewController {
   @override
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) =>
       throw UnimplementedError();
-
-  @override
-  int get id => throw UnimplementedError();
 
   @override
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
@@ -150,7 +147,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance!.defaultBinaryMessenger
+    ServicesBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 

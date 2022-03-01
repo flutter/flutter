@@ -24,6 +24,7 @@ class UserMessages {
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
+  String devToolsVersion(String version) => 'DevTools version $version';
   String pubMirrorURL(String url) => 'Pub download mirror $url';
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
@@ -246,8 +247,8 @@ class UserMessages {
   String get flutterNoDevelopmentDevice =>
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
-  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
-      "matching '$deviceId'";
+  String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
+      "matching '$deviceId'.";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>

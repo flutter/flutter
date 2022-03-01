@@ -23,8 +23,6 @@ class SectionCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
             colors: <Color>[
               section.leftColor!,
               section.rightColor!,
@@ -132,7 +130,6 @@ class SectionDetailView extends StatelessWidget {
             package: detail.imageAssetPackage,
           ),
           fit: BoxFit.cover,
-          alignment: Alignment.center,
         ),
       ),
     );

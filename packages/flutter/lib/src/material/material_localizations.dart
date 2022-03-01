@@ -96,10 +96,10 @@ abstract class MaterialLocalizations {
   /// The tooltip for the more button on an overflowing text selection menu.
   String get moreButtonTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "next month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "next month" button.
   String get nextMonthTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "previous month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "previous month" button.
   String get previousMonthTooltip;
 
   /// The tooltip for the [PaginatedDataTable]'s "first page" button.
@@ -636,8 +636,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
       case TimeOfDayFormat.HH_colon_mm:
         return _formatTwoDigitZeroPad(timeOfDay.hour);
-      default:
-        throw AssertionError('$runtimeType does not support $format.');
+      case TimeOfDayFormat.a_space_h_colon_mm:
+      case TimeOfDayFormat.frenchCanadian:
+      case TimeOfDayFormat.H_colon_mm:
+      case TimeOfDayFormat.HH_dot_mm:
+         throw AssertionError('$runtimeType does not support $format.');
     }
   }
 
@@ -762,10 +765,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndLabel => 'End Date';
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) => 'Start date $fullDate';
+  String dateRangeStartDateSemanticLabel(String formattedDate) => 'Start date $formattedDate';
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) => 'End date $fullDate';
+  String dateRangeEndDateSemanticLabel(String formattedDate) => 'End date $formattedDate';
 
   @override
   String get invalidDateFormatLabel => 'Invalid format.';
