@@ -437,7 +437,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final PubspecYaml pubspec in pubspecs) {
       final String package = pubspec.name;
       specialDependencies.add(package);
-      tree._versions[package] = pubspec.version;
+      tree._versions[package] = pubspec.version!;
       assert(!tree._dependencyTree.containsKey(package));
       tree._dependencyTree[package] = <String>{};
       for (final PubspecDependency dependency in pubspec.dependencies) {
@@ -651,7 +651,7 @@ class PubspecYaml {
   final String name;
 
   /// The package version.
-  final String version;
+  final String? version;
 
   final List<PubspecLine> inputData; // Each line of the pubspec.yaml file, parsed(ish).
 
@@ -810,7 +810,7 @@ class PubspecYaml {
         lastDependency = null;
       }
     }
-    return PubspecYaml._(file, packageName!, packageVersion!, result, checksum ?? PubspecChecksum(null, ''));
+    return PubspecYaml._(file, packageName!, packageVersion, result, checksum ?? PubspecChecksum(null, ''));
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
@@ -1582,7 +1582,7 @@ Directory createTemporaryFlutterSdk(
       .childDirectory(flutterPackage)
       .childFile('pubspec.yaml')
       ..createSync(recursive: true);
-    final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage]!;
+    final PubspecYaml? pubspecYaml = pubspecsByName[flutterPackage];
     if (pubspecYaml == null) {
       logger.printWarning(
         "Unexpected package '$flutterPackage' found in packages directory",
