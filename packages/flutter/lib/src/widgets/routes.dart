@@ -883,7 +883,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                               ),
                             ),
                           );
-                          final bool isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+                          final bool isDesktop =
+                              defaultTargetPlatform == TargetPlatform.macOS
+                              || defaultTargetPlatform == TargetPlatform.windows
+                              || defaultTargetPlatform == TargetPlatform.linux;
                           if (kIsWeb && isDesktop) {
                             child = GestureDetector(
                               onTapDown: (TapDownDetails details) {
