@@ -18,7 +18,7 @@ class Pair<T> {
   }
 
   @override
-  int get hashCode => hashValues(first, second);
+  int get hashCode => Object.hash(first, second);
 
   @override
   String toString() => '($first,$second)';

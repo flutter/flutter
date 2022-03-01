@@ -74,9 +74,7 @@ class _HeroTag {
   }
 
   @override
-  int get hashCode {
-    return identityHashCode(navigator);
-  }
+  int get hashCode => identityHashCode(navigator);
 }
 
 // An `AnimatedWidget` that imposes a fixed size on its child widget, and

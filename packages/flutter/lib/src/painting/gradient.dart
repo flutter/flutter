@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -519,7 +518,14 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(begin, end, tileMode, transform, hashList(colors), hashList(stops));
+  int get hashCode => Object.hash(
+    begin,
+    end,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+  );
 
   @override
   String toString() {
@@ -793,7 +799,16 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, radius, tileMode, transform, hashList(colors), hashList(stops), focal, focalRadius);
+  int get hashCode => Object.hash(
+    center,
+    radius,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+    focal,
+    focalRadius,
+  );
 
   @override
   String toString() {
@@ -1051,7 +1066,15 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, transform, hashList(colors), hashList(stops));
+  int get hashCode => Object.hash(
+    center,
+    startAngle,
+    endAngle,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+  );
 
   @override
   String toString() {

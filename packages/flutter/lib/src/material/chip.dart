@@ -2210,20 +2210,18 @@ class _ChipRenderTheme {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      avatar,
-      label,
-      deleteIcon,
-      brightness,
-      padding,
-      labelPadding,
-      showAvatar,
-      showCheckmark,
-      checkmarkColor,
-      canTapBody,
-    );
-  }
+  int get hashCode => Object.hash(
+    avatar,
+    label,
+    deleteIcon,
+    brightness,
+    padding,
+    labelPadding,
+    showAvatar,
+    showCheckmark,
+    checkmarkColor,
+    canTapBody,
+  );
 }
 
 class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {

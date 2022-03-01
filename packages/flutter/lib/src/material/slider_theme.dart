@@ -674,27 +674,27 @@ class SliderThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<Object?>[
-      trackHeight,
-      activeTrackColor,
-      inactiveTrackColor,
-      disabledActiveTrackColor,
-      disabledInactiveTrackColor,
-      activeTickMarkColor,
-      inactiveTickMarkColor,
-      disabledActiveTickMarkColor,
-      disabledInactiveTickMarkColor,
-      thumbColor,
-      overlappingShapeStrokeColor,
-      disabledThumbColor,
-      overlayColor,
-      valueIndicatorColor,
-      overlayShape,
-      tickMarkShape,
-      thumbShape,
-      trackShape,
-      valueIndicatorShape,
+  int get hashCode => Object.hash(
+    trackHeight,
+    activeTrackColor,
+    inactiveTrackColor,
+    disabledActiveTrackColor,
+    disabledInactiveTrackColor,
+    activeTickMarkColor,
+    inactiveTickMarkColor,
+    disabledActiveTickMarkColor,
+    disabledInactiveTickMarkColor,
+    thumbColor,
+    overlappingShapeStrokeColor,
+    disabledThumbColor,
+    overlayColor,
+    valueIndicatorColor,
+    overlayShape,
+    tickMarkShape,
+    thumbShape,
+    trackShape,
+    valueIndicatorShape,
+    Object.hash(
       rangeTickMarkShape,
       rangeThumbShape,
       rangeTrackShape,
@@ -704,8 +704,8 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation,
       thumbSelector,
       mouseCursor,
-    ]);
-  }
+    ),
+  );
 
   @override
   bool operator ==(Object other) {
@@ -3306,7 +3306,7 @@ class RangeValues {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() {
@@ -3346,7 +3346,7 @@ class RangeLabels {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() {
