@@ -1332,7 +1332,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:98"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
