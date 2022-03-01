@@ -1921,8 +1921,6 @@ class ThemeData with Diagnosticable {
   /// Linearly interpolate between two [extensions].
   /// 
   /// Includes all theme extensions in [a] and [b].
-  /// 
-  /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Map<Object, ThemeExtension<Object>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
