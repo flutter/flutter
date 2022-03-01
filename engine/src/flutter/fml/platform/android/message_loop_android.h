@@ -11,7 +11,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
-#include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/unique_fd.h"
 
 namespace fml {
@@ -27,9 +26,6 @@ struct UniqueLooperTraits {
 /// This implemenation wraps usage of Android's \p looper.
 /// \see https://developer.android.com/ndk/reference/group/looper
 class MessageLoopAndroid : public MessageLoopImpl {
- public:
-  static bool Register(JNIEnv* env);
-
  private:
   fml::UniqueObject<ALooper*, UniqueLooperTraits> looper_;
   fml::UniqueFD timer_fd_;
