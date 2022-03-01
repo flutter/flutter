@@ -1231,8 +1231,8 @@ class PubspecDependency extends PubspecLine {
   DependencyKind _kind = DependencyKind.normal;
 
   /// If we're a path or sdk dependency, the path or sdk in question.
-  String get lockTarget => _lockTarget;
-  late String _lockTarget;
+  String? get lockTarget => _lockTarget;
+  String? _lockTarget;
 
   /// If we were a two-line dependency, the second line (see the inherited [line]
   /// for the first).
@@ -1262,7 +1262,8 @@ class PubspecDependency extends PubspecLine {
       return true;
     }
 
-    if (_kind == DependencyKind.path &&
+    final String? lockTarget = _lockTarget;
+    if (_kind == DependencyKind.path && lockTarget != null &&
         !globals.fs.path.isWithin(globals.fs.path.join(Cache.flutterRoot!, 'bin'), lockTarget) &&
         globals.fs.path.isWithin(Cache.flutterRoot!, lockTarget)) {
       return true;
