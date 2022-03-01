@@ -318,6 +318,15 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
       ..offset = offset
       ..clipBehavior = clipBehavior;
   }
+
+  @override
+  SingleChildRenderObjectElement createElement() {
+    return _SingleChildViewportElement(this);
+  }
+}
+
+class _SingleChildViewportElement extends SingleChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
+  _SingleChildViewportElement(_SingleChildViewport widget) : super(widget);
 }
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
