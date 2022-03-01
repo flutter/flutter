@@ -3183,8 +3183,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     bringIntoView(newSelection.extent);
   }
 
-  Object? _hideToolbarIfVisible(DismissIntent intent){
-    if(_selectionOverlay?.toolbarIsVisible ?? false){
+  Object? _hideToolbarIfVisible(DismissIntent intent) {
+    if (_selectionOverlay?.toolbarIsVisible ?? false) {
       hideToolbar(false);
       return null;
     }
