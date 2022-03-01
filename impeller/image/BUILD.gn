@@ -5,14 +5,19 @@
 import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("image") {
-  sources = [
-    "compressed_image.cc",
+  public = [
     "compressed_image.h",
-    "decompressed_image.cc",
     "decompressed_image.h",
   ]
 
-  deps = [ "../third_party/stb" ]
+  sources = [
+    "backends/skia/compressed_image_skia.cc",
+    "backends/skia/compressed_image_skia.h",
+    "compressed_image.cc",
+    "decompressed_image.cc",
+  ]
+
+  deps = [ "//third_party/skia" ]
 
   public_deps = [
     "../base",
