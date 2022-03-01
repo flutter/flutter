@@ -104,16 +104,14 @@ class PopupMenuThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      shape,
-      elevation,
-      textStyle,
-      enableFeedback,
-      mouseCursor,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    shape,
+    elevation,
+    textStyle,
+    enableFeedback,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {

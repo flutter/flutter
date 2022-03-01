@@ -1042,19 +1042,17 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      value,
-      color,
-      darkColor,
-      highContrastColor,
-      elevatedColor,
-      darkElevatedColor,
-      darkHighContrastColor,
-      darkHighContrastElevatedColor,
-      highContrastElevatedColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    value,
+    color,
+    darkColor,
+    highContrastColor,
+    elevatedColor,
+    darkElevatedColor,
+    darkHighContrastColor,
+    darkHighContrastElevatedColor,
+    highContrastElevatedColor,
+  );
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {

@@ -37,7 +37,7 @@ class DeviceGestureSettings {
   double? get panSlop => touchSlop != null ? (touchSlop! * 2) : null;
 
   @override
-  int get hashCode => ui.hashValues(touchSlop, 23);
+  int get hashCode => Object.hash(touchSlop, 23);
 
   @override
   bool operator ==(Object other) {

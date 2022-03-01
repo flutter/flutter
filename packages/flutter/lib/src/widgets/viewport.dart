@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'scroll_notification.dart';
 
 export 'package:flutter/rendering.dart' show
   AxisDirection,
@@ -43,6 +44,8 @@ export 'package:flutter/rendering.dart' show
 ///    sliver context (the opposite of this widget).
 ///  * [ShrinkWrappingViewport], a variant of [Viewport] that shrink-wraps its
 ///    contents along the main axis.
+///  * [ViewportElementMixin], which should be mixed in to the [Element] type used
+///    by viewport-like widgets to correctly handle scroll notifications.
 class Viewport extends MultiChildRenderObjectWidget {
   /// Creates a widget that is bigger on the inside.
   ///
@@ -207,7 +210,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
   /// Creates an element that uses the given widget as its configuration.
   _ViewportElement(Viewport widget) : super(widget);
 
