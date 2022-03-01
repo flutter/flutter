@@ -79,6 +79,51 @@ TEST_F(EntityTest, TriangleInsideASquare) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_F(EntityTest, StrokeCapAndJoinTest) {
+  auto callback = [&](ContentContext& context, RenderPass& pass) {
+    Entity entity;
+
+    auto create_contents = [](SolidStrokeContents::Cap cap) {
+      auto contents = std::make_unique<SolidStrokeContents>();
+      contents->SetColor(Color::Red());
+      contents->SetStrokeSize(20.0);
+      contents->SetStrokeCap(cap);
+      return contents;
+    };
+
+    const Point a_def(100, 100), b_def(100, 150), c_def(200, 100),
+        d_def(200, 50);
+    const Scalar r = 10;
+
+    {
+      Point off(0, 0);
+      Point a, b, c, d;
+      std::tie(a, b) = IMPELLER_PLAYGROUND_LINE(off + a_def, off + b_def, r,
+                                                Color::Black(), Color::White());
+      std::tie(c, d) = IMPELLER_PLAYGROUND_LINE(off + c_def, off + d_def, r,
+                                                Color::Black(), Color::White());
+      entity.SetPath(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath());
+      entity.SetContents(create_contents(SolidStrokeContents::Cap::kButt));
+      entity.Render(context, pass);
+    }
+
+    {
+      Point off(0, 100);
+      Point a, b, c, d;
+      std::tie(a, b) = IMPELLER_PLAYGROUND_LINE(off + a_def, off + b_def, r,
+                                                Color::Black(), Color::White());
+      std::tie(c, d) = IMPELLER_PLAYGROUND_LINE(off + c_def, off + d_def, r,
+                                                Color::Black(), Color::White());
+      entity.SetPath(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath());
+      entity.SetContents(create_contents(SolidStrokeContents::Cap::kSquare));
+      entity.Render(context, pass);
+    }
+
+    return true;
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_F(EntityTest, CubicCurveTest) {
   // Compare with https://fiddle.skia.org/c/b3625f26122c9de7afe7794fcf25ead3
   Path path =
@@ -329,12 +374,25 @@ TEST_F(EntityTest, CubicCurveAndOverlapTest) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, SolidStrokeContentsSetStrokeDefaults) {
-  SolidStrokeContents stroke;
-  ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kButt);
-  ASSERT_EQ(stroke.GetStrokeJoin(), SolidStrokeContents::Join::kBevel);
-  // TODO(99089): Test that SetStroke[Cap|Join] works once there are multiple
-  // caps and joins.
+TEST_F(EntityTest, SolidStrokeContentsSetStrokeCapsAndJoins) {
+  {
+    SolidStrokeContents stroke;
+    // Defaults.
+    ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kButt);
+    ASSERT_EQ(stroke.GetStrokeJoin(), SolidStrokeContents::Join::kBevel);
+  }
+
+  {
+    SolidStrokeContents stroke;
+    stroke.SetStrokeCap(SolidStrokeContents::Cap::kSquare);
+    ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kSquare);
+  }
+
+  {
+    SolidStrokeContents stroke;
+    stroke.SetStrokeCap(SolidStrokeContents::Cap::kRound);
+    ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kRound);
+  }
 }
 
 }  // namespace testing
