@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
-        extensions: const <Object, ThemeExtension<dynamic>>{
+        extensions: const <Object, ThemeExtension<Object>>{
           MyColors: MyColors(
             blue: Color(0xFF1E88E5),
             red: Color(0xFFE53935),
@@ -96,7 +96,7 @@ class _MyAppState extends State<MyApp> {
         },
       ),
       darkTheme: ThemeData.dark().copyWith(
-        extensions: const <Object, ThemeExtension<dynamic>>{
+        extensions: const <Object, ThemeExtension<Object>>{
           MyColors: MyColors(
             blue: Color(0xFF90CAF9),
             red: Color(0xFFEF9A9A),
@@ -124,15 +124,15 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MyColors myColors = Theme.of(context).extensions[MyColors]! as MyColors;
+    final MyColors? myColors = Theme.of(context).extension<MyColors>();
     return Material(
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(width: 100, height: 100, color: myColors.blue),
+            Container(width: 100, height: 100, color: myColors?.blue),
             const SizedBox(width: 10),
-            Container(width: 100, height: 100, color: myColors.red),
+            Container(width: 100, height: 100, color: myColors?.red),
             const SizedBox(width: 50),
             IconButton(
               icon: Icon(isLightTheme ? Icons.nightlight : Icons.wb_sunny),
