@@ -88,7 +88,7 @@ abstract class Notification {
 /// Notifications will trigger the [onNotification] callback only if their
 /// [runtimeType] is a subtype of `T`.
 ///
-/// To dispatch notifications, use the [BuildContext.dispatchNotification] method.
+/// To dispatch notifications, use the [Notification.dispatch] method.
 class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Creates a widget that listens for notifications.
   const NotificationListener({

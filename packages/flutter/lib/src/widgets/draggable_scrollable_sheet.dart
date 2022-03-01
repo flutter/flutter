@@ -526,13 +526,13 @@ class _DraggableSheetExtent {
   void updateSize(double newSize, BuildContext context) {
     assert(newSize != null);
     _currentSize.value = newSize.clamp(minSize, maxSize);
-    context.dispatchNotification(DraggableScrollableNotification(
+    DraggableScrollableNotification(
       minExtent: minSize,
       maxExtent: maxSize,
       extent: currentSize,
       initialExtent: initialSize,
       context: context,
-    ));
+    ).dispatch(context);
   }
 
   double pixelsToSize(double pixels) {
