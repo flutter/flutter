@@ -89,3 +89,41 @@ if (!is_fuchsia) {
     deps = [ "//flutter/web_sdk:flutter_web_sdk_archive" ]
   }
 }
+
+# Archives Flutter Windows Artifacts
+if (host_os == "win") {
+  zip_bundle("windows_flutter") {
+    output = "$full_platform_name-$flutter_runtime_mode/$full_platform_name-flutter.zip"
+    deps = [
+      "//flutter/shell/platform/common:publish_headers",
+      "//flutter/shell/platform/windows:flutter_windows",
+      "//flutter/shell/platform/windows:publish_headers_windows",
+    ]
+    files = [
+      {
+        source = "$root_out_dir/flutter_export.h"
+        destination = "flutter_export.h"
+      },
+      {
+        source = "$root_out_dir/flutter_windows.h"
+        destination = "flutter_windows.h"
+      },
+      {
+        source = "$root_out_dir/flutter_messenger.h"
+        destination = "flutter_messenger.h"
+      },
+      {
+        source = "$root_out_dir/flutter_plugin_registrar.h"
+        destination = "flutter_plugin_registrar.h"
+      },
+      {
+        source = "$root_out_dir/flutter_texture_registrar.h"
+        destination = "flutter_texture_registrar.h"
+      },
+      {
+        source = "$root_out_dir/flutter_windows.dll"
+        destination = "flutter_windows.dll"
+      },
+    ]
+  }
+}

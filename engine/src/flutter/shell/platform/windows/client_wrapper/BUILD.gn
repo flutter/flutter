@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/platform/common/client_wrapper/publish.gni")
 import("//flutter/testing/testing.gni")
 
@@ -96,4 +97,58 @@ executable("client_wrapper_windows_unittests") {
     # https://github.com/flutter/flutter/issues/41414.
     "//third_party/dart/runtime:libdart_jit",
   ]
+}
+
+client_wrapper_file_archive_list = [
+  "core_implementations.cc",
+  "engine_method_result.cc",
+  "plugin_registrar.cc",
+  "README",
+  "standard_codec.cc",
+]
+
+win_client_wrapper_file_archive_list = [
+  "flutter_engine.cc",
+  "flutter_view_controller.cc",
+]
+
+zip_bundle("client_wrapper_archive") {
+  output = "$full_platform_name/flutter-cpp-client-wrapper.zip"
+  deps = [
+    ":client_wrapper_windows",
+    ":publish_wrapper_windows",
+    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+  ]
+  tmp_files = []
+  foreach(source, client_wrapper_file_archive_list) {
+    tmp_files += [
+      {
+        source = "//flutter/shell/platform/common/client_wrapper/$source"
+        destination = "cpp_client_wrapper/$source"
+      },
+    ]
+  }
+
+  # Windows specific source code files
+  foreach(source, win_client_wrapper_file_archive_list) {
+    tmp_files += [
+      {
+        source = "//flutter/shell/platform/windows/client_wrapper/$source"
+        destination = "cpp_client_wrapper/$source"
+      },
+    ]
+  }
+  headers = core_cpp_client_wrapper_includes +
+            core_cpp_client_wrapper_internal_headers
+  foreach(header, headers) {
+    rebased_path =
+        rebase_path(header, "//flutter/shell/platform/common/client_wrapper")
+    tmp_files += [
+      {
+        source = header
+        destination = "cpp_client_wrapper/$rebased_path"
+      },
+    ]
+  }
+  files = tmp_files
 }
