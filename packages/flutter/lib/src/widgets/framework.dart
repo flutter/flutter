@@ -1096,7 +1096,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// ```
   ///
   /// The provided callback is immediately called synchronously. It must not
-  /// return a `Future` (the callback cannot be `async`), since then it would be
+  /// return a [Future] (the callback cannot be `async`), since then it would be
   /// unclear when the state was actually being set.
   ///
   /// Calling [setState] notifies the framework that the internal state of this
@@ -1133,25 +1133,36 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// Calls to [setState] cause a rebuild of the current widget and,
   /// potentially, all of its children. This isn't efficient and generally not
-  /// desiderable. A [setState] call should only be made on widgets with small
-  /// subtrees in order to rebuild the least amount of children.
+  /// desiderable. Generally, [setState] calls should be made on widgets with
+  /// small subtrees in order to rebuild the least amount of children.
   ///
-  /// A better alternative to [setState] is represented by the combined usage
-  /// of a [Listenable] along with an [AnimatedBuilder], which is:
+  /// If [setState] was frequently called by a ticker or a listener for example,
+  /// move the state into a separated widget. In this way, rebuilds would be
+  /// limited to a single widget rather than multiple ones that might not even
+  /// need to be updated. This technique of pushing the state into leaf widgets
+  /// is a good practice.
   ///
-  ///   1. Performant. A [setState] call could entirely rebuild the subtree of
-  ///      a widget. A [Listenable] instead can be used along with
-  ///      [AnimatedBuilder] to only rebuild some pieces of the widget, leaving
-  ///      other parts and its children untouched.
-  ///   2. Predictable. There is no way to know how many widgets will be
-  ///      rebuilt with a [setState] call. With an [AnimatedBuilder] instead,
-  ///      only the widgets inside its `builder` are rebuilt and nothing else.
+  /// In the case where the state cannot be pushed into a leaf widget, there are
+  /// some alternatives:
+  ///
+  ///   1. Using a [ValueNotifier] to hold the state of a single value and a
+  ///      [ValueListenableBuilder] to listen for changes.
+  ///
+  ///   2. Using a [Listenable] (such as [ChangeNotifier] for example) to hold
+  ///      the state and an [AnimatedBuilder] to rebuild the children.
+  ///
+  /// While [setState] could rebuild the entire subtree, builder widgets like
+  /// [AnimatedBuilder] and [ValueListenableBuilder] only rebuild their content
+  /// leaving the enclosing widget and its children untouched. This is efficient
+  /// when the state has to be located up in the tree and only certain widgets
+  /// need to be updated.
   ///
   /// See also:
   ///
-  ///  * [AnimatedBuilder], in the **Improve rebuilds performance using
-  ///    AnimatedBuilder** section to see how to efficiently manage the state
+  ///  * [AnimatedBuilder], in the "Improve rebuilds performance using
+  ///    AnimatedBuilder" section to see how to efficiently manage the state
   ///    using a [Listenable].
+  ///  * [StatefulWidget], in the "Performance considerations" section.
   @protected
   void setState(VoidCallback fn) {
     assert(fn != null);
