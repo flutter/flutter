@@ -202,6 +202,10 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
 
   RunEngineExecutable(build_dir, 'tonic_unittests', filter, shuffle_flags, coverage=coverage)
 
+  RunEngineExecutable(build_dir, 'no_dart_plugin_registrant_unittests', filter, shuffle_flags, coverage=coverage)
+
+  RunEngineExecutable(build_dir, 'dart_plugin_registrant_unittests', filter, shuffle_flags, coverage=coverage)
+
   if not IsWindows():
     # https://github.com/flutter/flutter/issues/36295
     RunEngineExecutable(build_dir, 'shell_unittests', filter, shuffle_flags, coverage=coverage)
