@@ -142,7 +142,9 @@ abstract class TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
+    // TODO(chunhtai): Change to ValueListenable<ClipboardStatus>? once
+    // mirgration is done. https://github.com/flutter/flutter/issues/99360
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
 
@@ -199,7 +201,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
@@ -207,7 +211,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
-  void handleCopy(TextSelectionDelegate delegate) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
   }
 
@@ -2129,6 +2135,10 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   }) : super(value);
 
   bool _disposed = false;
+  // TODO(chunhtai): remove this getter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  /// True if this instance has been disposed.
+  bool get disposed => _disposed;
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
