@@ -51,7 +51,10 @@ class Tracing {
           // It is safe to ignore this error because we expect an error to be
           // thrown if we're already subscribed.
         }
+        final StringBuffer bufferedEvents = StringBuffer();
+        void Function(String) handleBufferedEvent = bufferedEvents.writeln;
         vmService.service.onExtensionEvent.listen((vm_service.Event event) {
+          handleBufferedEvent('${event.extensionKind}: ${event.extensionData}');
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
           }
@@ -69,7 +72,19 @@ class Tracing {
           }
         }
         if (!done) {
+          final Timer timer = Timer(const Duration(seconds: 10), () {
+            _logger.printStatus('First frame is taking longer than expected...');
+            _logger.printTrace('Views:');
+            for (final FlutterView view in views) {
+              _logger.printTrace('id: ${view.id} isolate: ${view.uiIsolate?.id}');
+            }
+            _logger.printTrace('Received VM events:');
+            _logger.printTrace(bufferedEvents.toString());
+            // Swap to just printing new events instead of buffering.
+            handleBufferedEvent = _logger.printTrace;
+          });
           await whenFirstFrameRendered.future;
+          timer.cancel();
         }
       // The exception is rethrown, so don't catch only Exceptions.
       } catch (exception) { // ignore: avoid_catches_without_on_clauses

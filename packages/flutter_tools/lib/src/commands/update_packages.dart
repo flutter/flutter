@@ -29,6 +29,7 @@ import '../runner/flutter_command.dart';
 /// in ways that prevent them from every upgrading Flutter again!
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
+  'archive': '3.1.11', // Breaking changes in 3.2.0, see https://github.com/flutter/flutter/issues/98536
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.0.0', // Must always exactly match flutter_tools template.
   // "shelf" is pinned to avoid the performance regression from a reverted
@@ -498,7 +499,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: intArg('jobs'));
+      // int.tryParse will convert an empty string to null
+      final int/*?*/ maxJobs = int.tryParse(stringArg('jobs') ?? '');
+      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
           final Stopwatch stopwatch = Stopwatch();

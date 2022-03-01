@@ -1184,6 +1184,40 @@ void main() {
     expect(buttonOneRect.bottom, buttonTwoRect.top - 10.0);
   });
 
+  testWidgets('Dialogs can set the alignment of the OverflowBar', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        ElevatedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('Loooooooooog button 1'),
+        ),
+        ElevatedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('Loooooooooooooonger button 2'),
+        ),
+      ],
+      actionsOverflowAlignment: OverflowBarAlignment.center,
+    );
+
+    await tester.pumpWidget(
+      _buildAppWithDialog(dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Rect buttonOneRect = tester.getRect(find.byKey(key1));
+    final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
+    expect(buttonOneRect.center.dx, buttonTwoRect.center.dx);
+  });
+
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext routeContext;

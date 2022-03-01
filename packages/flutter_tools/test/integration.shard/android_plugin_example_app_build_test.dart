@@ -4,6 +4,7 @@
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -35,7 +36,7 @@ void main() {
 
     final String testName = '${template}_test';
 
-    processManager.runSync(<String>[
+    ProcessResult result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
@@ -43,6 +44,9 @@ void main() {
       '--platforms=android',
       testName,
     ], workingDirectory: tempDir.path);
+    if (result.exitCode != 0) {
+      throw Exception('flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    }
 
     final Directory exampleAppDir =
         tempDir.childDirectory(testName).childDirectory('example');
@@ -60,13 +64,16 @@ void main() {
     buildGradleFile.writeAsStringSync(newBuildGradle);
 
     // Run flutter build apk using AGP 4.1.0
-    processManager.runSync(<String>[
+    result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
+    if (result.exitCode != 0) {
+      throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    }
 
     final File exampleApk = fileSystem.file(fileSystem.path.join(
       exampleAppDir.path,

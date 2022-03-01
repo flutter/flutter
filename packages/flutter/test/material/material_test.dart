@@ -420,7 +420,8 @@ void main() {
           ),
       );
 
-      expect(find.byKey(materialKey), hasNoImmediateClip);
+      final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+      expect(renderClip.clipBehavior, equals(Clip.none));
     });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {

@@ -1,5 +1,5 @@
 {
-  "version": "v0_76",
+  "version": "v0_86",
 
   "md.sys.color.background": "md.ref.palette.neutral10",
   "md.sys.color.error": "md.ref.palette.error80",
@@ -25,6 +25,7 @@
   "md.sys.color.secondary-container": "md.ref.palette.secondary30",
   "md.sys.color.shadow": "md.ref.palette.neutral0",
   "md.sys.color.surface": "md.ref.palette.neutral10",
+  "md.sys.color.surface-tint-color": "primary",
   "md.sys.color.surface-variant": "md.ref.palette.neutral-variant30",
   "md.sys.color.tertiary": "md.ref.palette.tertiary80",
   "md.sys.color.tertiary-container": "md.ref.palette.tertiary30"

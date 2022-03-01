@@ -2,8 +2,6 @@ name: Scorecards supply-chain security
 on:
   # Only the default branch is supported.
   branch_protection_rule:
-  schedule:
-    - cron: '16 5 * * 3'
   push:
     branches: [ master ]
 
@@ -28,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: "Run analysis"
-        uses: ossf/scorecard-action@b614d455ee90608b5e36e3299cd50d457eb37d5f
+        uses: ossf/scorecard-action@c1aec4ac820532bab364f02a81873c555a0ba3a1
         with:
           results_file: results.sarif
           results_format: sarif
@@ -51,6 +49,6 @@ jobs:
 
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@2b46439dd5477d8a1659811cdc500d35e601a1cb
+        uses: github/codeql-action/upload-sarif@75f07e7ab2ee63cba88752d8c696324e4df67466
         with:
           sarif_file: results.sarif

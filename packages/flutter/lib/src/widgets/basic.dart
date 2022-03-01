@@ -3132,11 +3132,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   _OffstageElement(Offstage widget) : super(widget);
 
   @override
-  Offstage get widget => super.widget as Offstage;
-
-  @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!widget.offstage)
+    if (!(widget as Offstage).offstage)
       super.debugVisitOnstageChildren(visitor);
   }
 }
@@ -3361,6 +3358,8 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 /// contain the child. If [baseline] is less than the distance from
 /// the top of the child to the baseline of the child, then the child
 /// is top-aligned instead.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=8ZaFk0yvNlI}
 ///
 /// See also:
 ///

@@ -430,6 +430,7 @@ void main() {
       sliderTheme: sliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       tooltipTheme: const TooltipThemeData(height: 100),
+      expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       cardTheme: const CardTheme(color: Colors.black),
       chipTheme: chipTheme,
       platform: TargetPlatform.iOS,
@@ -530,6 +531,7 @@ void main() {
       sliderTheme: otherSliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.white),
       tooltipTheme: const TooltipThemeData(height: 100),
+      expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       cardTheme: const CardTheme(color: Colors.white),
       chipTheme: otherChipTheme,
       platform: TargetPlatform.android,
@@ -843,6 +845,7 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
+      'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'useTextSelectionTheme',
       'textSelectionColor',
