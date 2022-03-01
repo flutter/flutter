@@ -1346,6 +1346,7 @@ void main() {
   });
 
   testWidgets('hit test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/99324
     final ScrollController scrollController = ScrollController();
     bool onTap = false;
     await tester.pumpWidget(
