@@ -3286,10 +3286,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         textWidthBasis: widget.textWidthBasis,
                         obscuringCharacter: widget.obscuringCharacter,
                         obscureText: widget.obscureText,
-                        autocorrect: widget.autocorrect,
-                        smartDashesType: widget.smartDashesType,
-                        smartQuotesType: widget.smartQuotesType,
-                        enableSuggestions: widget.enableSuggestions,
                         offset: offset,
                         onCaretChanged: _handleCaretChanged,
                         rendererIgnoresPointer: widget.rendererIgnoresPointer,
@@ -3392,10 +3388,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
-    required this.autocorrect,
-    required this.smartDashesType,
-    required this.smartQuotesType,
-    required this.enableSuggestions,
     required this.offset,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
@@ -3452,10 +3444,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool obscureText;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
-  final bool autocorrect;
-  final SmartDashesType smartDashesType;
-  final SmartQuotesType smartQuotesType;
-  final bool enableSuggestions;
   final ViewportOffset offset;
   final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
