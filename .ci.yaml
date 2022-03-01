@@ -93,7 +93,7 @@ platform_properties:
           [
             {"name":"builder_mac_devicelab","path":"builder"},
             {"name":"chrome_and_driver","path":"chrome"},
-            {"name":"flutter_sdk","path":"flutter sdk", "version:98"},
+            {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
