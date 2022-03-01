@@ -1,7 +1,5 @@
-import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import '{{projectName}}_platform_interface.dart';
 
@@ -12,8 +10,8 @@ class MethodChannel{{pluginDartClass}} extends {{pluginDartClass}}Platform {
   final methodChannel = const MethodChannel('{{projectName}}');
 
   @override
-  Future<String?> get platformVersion async {
-    final version = await methodChannel.invokeMethod('getPlatformVersion');
+  Future<String?> getPlatformVersion() async {
+    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
   }
 }

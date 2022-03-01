@@ -335,6 +335,7 @@
         "templates/plugin/macos.tmpl/Classes/pluginClass.swift.tmpl",
         "templates/plugin/README.md.tmpl",
         "templates/plugin/test/projectName_test.dart.tmpl",
+        "templates/plugin/test/projectName_method_channel_test.dart.tmpl",
         "templates/plugin/windows.tmpl/CMakeLists.txt.tmpl",
         "templates/plugin/windows.tmpl/include/projectName.tmpl/pluginClassSnakeCase_c_api.h.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase.cpp.tmpl",

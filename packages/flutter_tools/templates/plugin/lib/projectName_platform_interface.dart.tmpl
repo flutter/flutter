@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import '{{projectName}}_method_channel.dart';
 
@@ -23,7 +21,7 @@ abstract class {{pluginDartClass}}Platform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> get platformVersion {
+  Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

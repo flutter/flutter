@@ -151,7 +151,7 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await _{{pluginClassLowerCamelCase}}.platformVersion ?? 'Unknown platform version';
+          await _{{pluginClassLowerCamelCase}}.getPlatformVersion() ?? 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }

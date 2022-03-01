@@ -1,28 +1,16 @@
 {{#no_platforms}}
-// You have generated a new plugin project without
-// specifying the `--platforms` flag. A plugin project supports no platforms is generated.
-// To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-// directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+// You have generated a new plugin project without specifying the `--platforms`
+// flag. A plugin project supports no platforms is generated. To add platforms,
+// run `flutter create -t plugin --platforms <platforms> .` under the same
+// directory. You can also find a detailed instruction on how to add platforms
+// in the `pubspec.yaml` at
+// https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 {{/no_platforms}}
-import 'dart:async';
 
 import '{{projectName}}_platform_interface.dart';
 
 class {{pluginDartClass}} {
-  factory {{pluginDartClass}}() {
-    _singleton ??= {{pluginDartClass}}._();
-    return _singleton!;
-  }
-
-  {{pluginDartClass}}._();
-
-  static {{pluginDartClass}}? _singleton;
-
-  static {{pluginDartClass}}Platform get _platform {
-    return {{pluginDartClass}}Platform.instance;
-  }
-
-  Future<String?> get platformVersion {
-    return _platform.platformVersion;
+  Future<String?> getPlatformVersion() {
+    return {{pluginDartClass}}Platform.instance.getPlatformVersion();
   }
 }

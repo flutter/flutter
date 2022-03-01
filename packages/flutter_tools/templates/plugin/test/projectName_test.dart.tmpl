@@ -8,7 +8,7 @@ class Mock{{pluginDartClass}}Platform
     implements {{pluginDartClass}}Platform {
 
   @override
-  Future<String?> get platformVersion => Future.value('42');
+  Future<String?> getPlatformVersion() => Future.value('42');
 }
 
 void main() {
@@ -22,6 +22,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await {{pluginClassLowerCamelCase}}.platformVersion, '42');
+    expect(await {{pluginClassLowerCamelCase}}.getPlatformVersion(), '42');
   });
 }
