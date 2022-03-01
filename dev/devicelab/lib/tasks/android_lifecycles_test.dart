@@ -180,7 +180,7 @@ void main() {
 
         run.kill();
 
-        section('Stop listening to stdout/stderr (mode: $mode)');
+        section('Stop subscriptions (mode: $mode)');
 
         await lifecycleItr.cancel();
         await lifecyles.close();
