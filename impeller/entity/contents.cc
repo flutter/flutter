@@ -459,7 +459,23 @@ void SolidStrokeContents::SetStrokeCap(Cap cap) {
       FML_DLOG(ERROR) << "Unimplemented.";
       break;
     case Cap::kSquare:
-      FML_DLOG(ERROR) << "Unimplemented.";
+      cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                     const Point& position, const Point& normal) {
+        SolidStrokeVertexShader::PerVertexData vtx;
+        vtx.vertex_position = position;
+        vtx.pen_down = 1.0;
+
+        Point forward(normal.y, -normal.x);
+
+        vtx.vertex_normal = normal;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_normal = -normal;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_normal = normal + forward;
+        vtx_builder.AppendVertex(vtx);
+        vtx.vertex_normal = -normal + forward;
+        vtx_builder.AppendVertex(vtx);
+      };
       break;
   }
 }
