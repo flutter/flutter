@@ -13,31 +13,21 @@ class MaterialSpellCheckService implements SpellCheckService {
   //TODO(camillesimon): Determine whether or not this should be doable.
   //TODO(camillesimon): Determine whether or not to add getter/setter.
   //TODO(camillesimon): Fix messy isSet and setting handler logic.
-  bool isSet = false;
-  set spellCheckSuggestionsHandler(SpellCheckSuggestionsHandler? handler) => spellCheckSuggestionsHandler = MaterialSpellCheckSuggestionsHandler();
+  MaterialSpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = MaterialSpellCheckSuggestionsHandler();
 
   @override
   void fetchSpellCheckSuggestions(TextInputConnection? textInputConnection, Locale locale, String text) {
-    if (!isSet) {
-      spellCheckSuggestionsHandler = null;
-    }
     textInputConnection!.initiateSpellChecking(locale, text);
   }
 
   @override
-  SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler {
-    if (isSet) {
-      return spellCheckSuggestionsHandler;
-    } else {
-      return null;
-    }
+  SpellCheckSuggestionsHandler? getSpellCheckSuggestionsHandler() {
+    return spellCheckSuggestionsHandler;
   }
 
   @override
   //TODO(camillesimon): Determine if I actually need this or not.
   void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions) {
-    print("YOOOOOOOOO");
-    print(suggestions);
     this.spellCheckSuggestionsHandler!.spellCheckSuggestions = suggestions;
   }
 }
@@ -46,9 +36,6 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
   bool isSet = false;
 
   set spellCheckSuggestions(List<SpellCheckerSuggestionSpan>? spellCheckSuggestions) {
-    print(isSet);
-    print("HEY BOO");
-    isSet = true;
     spellCheckSuggestions = spellCheckSuggestions;
   }
 

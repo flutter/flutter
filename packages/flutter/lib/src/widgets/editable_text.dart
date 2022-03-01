@@ -174,11 +174,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    print("OOP@");
-    print(spellCheckSuggestionsHandler!);
-    if (spellCheckSuggestionsHandler!.spellCheckSuggestions != null) {
+    if (spellCheckSuggestionsHandler != null && spellCheckSuggestionsHandler!.spellCheckSuggestions != null) {
       // if (spellCheckSuggestionsHandler!.spellCheckSuggestions!.length > 0) {
-          print("OOPS3");
         return spellCheckSuggestionsHandler.buildTextSpanWithSpellCheckSuggestions(value, style, false);
       // }
     }
@@ -2572,9 +2569,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) ?? value;
 
         if (value.text.length > 0) {
-          //TODO(camillesimon): Check if spell check is enabled
+          //TODO(camillesimon): Check if spell check is enabled. Everywhere frankly.
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          _textInputConnection!.initiateSpellChecking(localeForSpellChecking as Locale, value.text);
+          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.fetchSpellCheckSuggestions(_textInputConnection!, localeForSpellChecking as Locale, value.text);
         }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -2929,7 +2926,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       //TODO(camillesimon): Find platform using a context.
       _selectionOverlay!.showToolbar(toolbarType, 
-      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.getDefaultSpellCheckService(TargetPlatform.android)!.spellCheckSuggestionsHandler);
+      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.getSpellCheckSuggestionsHandler()!);
       return true;
     }
 
@@ -3325,7 +3322,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         style: widget.style,
         withComposing: !widget.readOnly && _hasFocus,
         //TODO(camillesimon): Determine pltform using context.
-        spellCheckSuggestionsHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.getDefaultSpellCheckService(TargetPlatform.android)!.spellCheckSuggestionsHandler,
+        spellCheckSuggestionsHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.getSpellCheckSuggestionsHandler()!,
       );
     }
     else {

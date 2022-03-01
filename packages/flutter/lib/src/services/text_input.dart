@@ -1797,7 +1797,7 @@ class TextInput {
         });
         // TODO(camillesimon): Remove support for passing text (and remove from engine).
         //TODO(camillesimon): Find platform from a context.
-        _currentConfiguration.spellCheckConfiguration.getDefaultSpellCheckService(TargetPlatform.android)!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
+        _currentConfiguration.spellCheckConfiguration.spellCheckService!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
         break;
       default:
         throw MissingPluginException();

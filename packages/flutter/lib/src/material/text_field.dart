@@ -18,6 +18,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'spell_check.dart';
 import 'text_selection.dart';
 import 'text_selection_theme.dart';
 import 'theme.dart';
@@ -1137,7 +1138,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       ? SpellCheckConfiguration(
           platform: TargetPlatform.android, //TODO(camillesimon): Find using a context.
           spellCheckEnabled: true,
-          spellCheckService: widget.spellCheckService,
+          spellCheckService: widget.spellCheckService ?? MaterialSpellCheckService(),
         )
       : SpellCheckConfiguration.disabled;
 

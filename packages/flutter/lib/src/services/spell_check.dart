@@ -66,15 +66,15 @@ class SpellCheckConfiguration {
     /// Determines spell check service to be used by default.
     //TODO(camillesimon): Give developers access to platform?
     //TODO(camillesimon): Factor in possibility that spellCheckService is not null.
-    SpellCheckService? getDefaultSpellCheckService(TargetPlatform platform) {
-        switch(platform) {
-            case TargetPlatform.android:
-                return MaterialSpellCheckService();
-            default:
-                // Null for all cases where a default implementation of spell check has not been provided.
-                return null;
-        }
-    }
+    // SpellCheckService? getDefaultSpellCheckService(TargetPlatform platform) {
+    //     switch(platform) {
+    //         case TargetPlatform.android:
+    //             return MaterialSpellCheckService();
+    //         default:
+    //             // Null for all cases where a default implementation of spell check has not been provided.
+    //             return null;
+    //     }
+    // }
 }
 
 /// Interface that represents the core functionality needed to support spell check on text input.
@@ -89,7 +89,7 @@ abstract class SpellCheckService {
     // Relates service to a handler for the results it provides.
     //TODO(camillesimon): Determine exactly which getters and setters are needed.
     //TODO(camillesimon): Provide default implementation to give developers access?
-    SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler;
+    SpellCheckSuggestionsHandler? getSpellCheckSuggestionsHandler();
 }
 
 /// Interface that represents the core functionality needed to display results of spell check.
