@@ -11747,7 +11747,7 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ValueListenable<ClipboardStatus>? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus, Offset? lastSecondaryTapDownPosition) {
     return Container();
   }
 
@@ -11775,7 +11775,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int copyCount = 0;
 
   @override
-  void handleCopy(TextSelectionDelegate delegate) {
+  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
     copyCount += 1;
   }
 
@@ -11785,7 +11785,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  void handleCut(TextSelectionDelegate delegate) {
+  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
     cutCount += 1;
   }
 
