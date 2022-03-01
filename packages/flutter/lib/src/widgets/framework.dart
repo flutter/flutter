@@ -13,6 +13,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
+import 'notification_listener.dart';
 
 export 'package:flutter/foundation.dart' show
   factory,
@@ -2390,6 +2391,13 @@ abstract class BuildContext {
   /// data down to them.
   void visitChildElements(ElementVisitor visitor);
 
+  /// Start bubbling this notification at the given build context.
+  ///
+  /// The notification will be delivered to any [NotificationListener] widgets
+  /// with the appropriate type parameters that are ancestors of the given
+  /// [BuildContext].
+  void dispatchNotification(Notification notification);
+
   /// Returns a description of the [Element] associated with the current build context.
   ///
   /// The `name` is typically something like "The element being rebuilt was".
@@ -3101,6 +3109,39 @@ class BuildOwner {
   }
 }
 
+/// Mixin this class to allow receiving [Notification] objects dispatched by
+/// child elements.
+///
+/// See also:
+///   * [NotificationListener], for a widget that allows consuming notifications.
+mixin NotifiableElementMixin on Element {
+  /// Called when a notification of the appropriate type arrives at this
+  /// location in the tree.
+  ///
+  /// Return true to cancel the notification bubbling. Return false to
+  /// allow the notification to continue to be dispatched to further ancestors.
+  bool onNotification(Notification notification);
+
+  @override
+  void attachNotificationTree() {
+    _notificationTree = _NotificationNode(_parent?._notificationTree, this);
+  }
+}
+
+class _NotificationNode {
+  _NotificationNode(this.parent, this.current);
+
+  NotifiableElementMixin? current;
+  _NotificationNode? parent;
+
+  void dispatchNotification(Notification notification) {
+    if (current?.onNotification(notification) ?? true) {
+      return;
+    }
+    parent?.dispatchNotification(notification);
+  }
+}
+
 /// An instantiation of a [Widget] at a particular location in the tree.
 ///
 /// Widgets describe how to configure a subtree but the same widget can be used
@@ -3161,6 +3202,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
+  _NotificationNode? _notificationTree;
 
   /// Compare two widgets for equality.
   ///
@@ -3614,6 +3656,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner!._registerGlobalKey(key, this);
     }
     _updateInheritance();
+    attachNotificationTree();
   }
 
   void _debugRemoveGlobalKeyReservation(Element child) {
@@ -3950,6 +3993,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
+    attachNotificationTree();
     if (_dirty)
       owner!.scheduleBuildFor(this);
     if (hadDependencies)
@@ -4231,6 +4275,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor;
   }
 
+  /// Called in [Element.mount] and [Element.activate] to register this element in
+  /// the notification tree.
+  ///
+  /// This method is only exposed so that [NotifiableElementMixin] can be implemented.
+  /// Subclasses of [Element] that wish to respond to notifications should mix that
+  /// in instead.
+  ///
+  /// See also:
+  ///   * [NotificationListener], a widget that allows listening to notifications.
+  @protected
+  void attachNotificationTree() {
+    _notificationTree = _parent?._notificationTree;
+  }
+
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedLookup = _parent?._inheritedLookup;
@@ -4357,6 +4415,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       node = node._parent;
     }
     return chain;
+  }
+
+  @override
+  void dispatchNotification(Notification notification) {
+    _notificationTree?.dispatchNotification(notification);
   }
 
   /// A short, textual description of this element.
