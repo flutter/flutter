@@ -951,6 +951,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     );
   }
 
+  // Service used for spell checking if enabled.
+  SpellCheckService? _spellCheckService;
+
   @override
   void initState() {
     super.initState();
@@ -960,6 +963,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
+    //TODO(camillesimon): Determine default behavior here.
+    _spellCheckService = widget.spellCheckService ?? MaterialSpellCheckService();
   }
 
   bool get _canRequestFocus {
@@ -1138,7 +1143,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       ? SpellCheckConfiguration(
           platform: TargetPlatform.android, //TODO(camillesimon): Find using a context.
           spellCheckEnabled: true,
-          spellCheckService: widget.spellCheckService ?? MaterialSpellCheckService(),
+          spellCheckService: _spellCheckService,
         )
       : SpellCheckConfiguration.disabled;
 

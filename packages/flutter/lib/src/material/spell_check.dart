@@ -33,24 +33,20 @@ class MaterialSpellCheckService implements SpellCheckService {
 }
 
 class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
-  bool isSet = false;
-
+  List<SpellCheckerSuggestionSpan>? _spellCheckSuggestions;
+  @override
   set spellCheckSuggestions(List<SpellCheckerSuggestionSpan>? spellCheckSuggestions) {
-    spellCheckSuggestions = spellCheckSuggestions;
+    _spellCheckSuggestions = spellCheckSuggestions;
   }
 
-  List<SpellCheckerSuggestionSpan>? get spellCheckSuggestions {
-    if (isSet) {
-      return spellCheckSuggestions;
-    } else {
-      return null;
-    }
-  }
+  @override
+  List<SpellCheckerSuggestionSpan>? get spellCheckSuggestions => _spellCheckSuggestions;
 
   /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
   /// This toolbar will allow for tap and replace of suggestions for misspelled 
   /// words.
-  _SpellCheckerSuggestionsToolbar buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
+  @override
+  Widget buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
       List<TextSelectionPoint> endpoints, Rect globalEditableRegion, 
       Offset selectionMidpoint, double textLineHeight) {
           return _SpellCheckerSuggestionsToolbar(
@@ -59,13 +55,14 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
           globalEditableRegion: globalEditableRegion,
           selectionMidpoint: selectionMidpoint,
           textLineHeight: textLineHeight,
-          spellCheckerSuggestionSpans: spellCheckSuggestions,
+          spellCheckerSuggestionSpans: _spellCheckSuggestions,
         );
       }
 
   int scssSpans_consumed_index = 0;
   int text_consumed_index = 0;
 
+  @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
       TextEditingValue value, TextStyle? style, bool ignoreComposing) {
       scssSpans_consumed_index = 0;
@@ -73,16 +70,16 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
       if (ignoreComposing) {
           return TextSpan(
               style: style,
-              children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.text, style)
+              children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.text, style)
           );
       } else {
           return TextSpan(
               style: style,
               children: <TextSpan>[
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textBefore(value.text), style)),
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textBefore(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
                       ))),
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textAfter(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textAfter(value.text), style)),
               ],
           );
       }
