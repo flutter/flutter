@@ -1482,7 +1482,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux","samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: backdrop_filter_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
@@ -1632,7 +1632,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: complex_layout_scroll_perf__timeline_summary
       dependencies: >-
         [
@@ -1735,7 +1735,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: cubic_bezier_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
@@ -1769,7 +1769,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: cull_opacity_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
@@ -2093,7 +2093,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
@@ -2211,7 +2211,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: new_gallery__transition_perf
       benchmark: "true"
     scheduler: luci
@@ -2245,7 +2245,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: picture_cache_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
@@ -2309,7 +2309,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: platform_views_scroll_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
@@ -2373,7 +2373,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux", "samsung"]
+        ["devicelab","android","linux","samsung","s10"]
       task_name: textfield_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
