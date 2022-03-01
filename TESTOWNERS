@@ -10,7 +10,9 @@
 
 ## Linux Android DeviceLab tests
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @blasten @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_lifecycles_test.dart @blasten @flutter/engine
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
@@ -71,7 +73,6 @@
 /dev/devicelab/bin/tasks/opacity_peephole_fade_transition_text_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @blasten @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
