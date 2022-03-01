@@ -17,12 +17,12 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/widgets/text_selection.dart' show ToolbarType;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
-import 'package:flutter/src/widgets/spell_check.dart';
 
 import '../../services.dart' show Clipboard;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
+import 'spell_check.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
@@ -1139,10 +1139,6 @@ abstract class TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
-
-  // Updates spell hcecker results. 
-  //TODO(camillesimon): Passing text for testing. Eventually solve issue.
-  void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults);
 }
 
 /// An interface to receive focus from the engine.
@@ -1800,7 +1796,8 @@ class TextInput {
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
         // TODO(camillesimon): Remove support for passing text (and remove from engine).
-        _currentConnection!._client.textInputConfiguration.spellCheckConfiguration.spellCheckSuggestionsHandler.spellCheckSuggestions = spellCheckerSuggestionSpans;
+        //TODO(camillesimon): Find platform from a context.
+        _currentConfiguration.spellCheckConfiguration.getDefaultSpellCheckService(TargetPlatform.android)!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
         break;
       default:
         throw MissingPluginException();

@@ -12,7 +12,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/spell_check.dart';
+import 'package:flutter/src/services/spell_check.dart';
 
 import 'actions.dart';
 import 'autofill.dart';
@@ -31,7 +31,6 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'spell_check.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -109,7 +108,7 @@ const double _kIPadWidth = 1488.0;
 ///  * [EditableText], which is a raw region of editable text that can be
 ///    controlled with a [TextEditingController].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
-class TextEditingController extends ValueNotifier<TextEditingValue> with MaterialMisspelledWordsHandler {
+class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Creates a controller for an editable text field.
   ///
   /// This constructor treats a null [text] argument as if it were the empty
@@ -172,14 +171,16 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
     // composing.isValid && composing.isNormalized && composing.end <= text.length;
 
     if (!value.isComposingRangeValid || !withComposing) {
-      if (spellCheckerSuggestionSpans != null && spellCheckerSuggestionSpans.length > 0) {
-        return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style, true);
-      }
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckSuggestionsHandler.spellCheckSuggestions != null && spellCheckSuggestionsHandler.spellCheckSuggestions.length > 0) {
-      return spellCheckSuggestionsHandler.buildWithMisspelledWordsIndicated(value, style, false);
+    print("OOP@");
+    print(spellCheckSuggestionsHandler!);
+    if (spellCheckSuggestionsHandler!.spellCheckSuggestions != null) {
+      // if (spellCheckSuggestionsHandler!.spellCheckSuggestions!.length > 0) {
+          print("OOPS3");
+        return spellCheckSuggestionsHandler.buildTextSpanWithSpellCheckSuggestions(value, style, false);
+      // }
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -2926,11 +2927,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckEnabled) {
         return false;
       }
-      return _selectionOverlay!.showToolbar(toolbarType, 
-      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService.spellCheckSuggestionsHandler);
+      //TODO(camillesimon): Find platform using a context.
+      _selectionOverlay!.showToolbar(toolbarType, 
+      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.getDefaultSpellCheckService(TargetPlatform.android)!.spellCheckSuggestionsHandler);
+      return true;
     }
 
-    _selectionOverlay!.showToolbar(toolbarType, null;
+    _selectionOverlay!.showToolbar(toolbarType, null);
     return true;
   }
 
@@ -3321,7 +3324,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         context: context,
         style: widget.style,
         withComposing: !widget.readOnly && _hasFocus,
-        spellCheckHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService.spellCheckSuggestionsHandler,
+        //TODO(camillesimon): Determine pltform using context.
+        spellCheckSuggestionsHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.getDefaultSpellCheckService(TargetPlatform.android)!.spellCheckSuggestionsHandler,
       );
     }
     else {

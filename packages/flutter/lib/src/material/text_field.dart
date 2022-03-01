@@ -332,7 +332,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckEnabled = false.
+    this.spellCheckEnabled = false,
     this.spellCheckService,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -792,10 +792,10 @@ class TextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// Whether or not spell check is enabled
-  bool spellCheckEnabled;
+  final bool spellCheckEnabled;
 
   /// Spell check service used if spell check is enabled.
-  SpellCheckService? spellCheckService,
+  final SpellCheckService? spellCheckService;
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -1134,8 +1134,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       : AutofillConfiguration.disabled;
 
     final SpellCheckConfiguration spellCheckConfiguration = widget.spellCheckEnabled
-      ? (SpellCheckConfiguration(
-          platform: theme.platform,
+      ? SpellCheckConfiguration(
+          platform: TargetPlatform.android, //TODO(camillesimon): Find using a context.
           spellCheckEnabled: true,
           spellCheckService: widget.spellCheckService,
         )

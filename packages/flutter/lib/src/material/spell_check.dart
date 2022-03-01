@@ -1,6 +1,7 @@
 import 'package:flutter/src/painting/text_span.dart';
 import 'package:flutter/src/painting/text_style.dart';
-import 'package:flutter/src/widgets/spell_check.dart';
+import 'package:flutter/src/services/spell_check.dart';
+import 'package:flutter/src/services/text_input.dart' show TextInputConnection;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -9,28 +10,60 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 class MaterialSpellCheckService implements SpellCheckService {
+  //TODO(camillesimon): Determine whether or not this should be doable.
+  //TODO(camillesimon): Determine whether or not to add getter/setter.
+  //TODO(camillesimon): Fix messy isSet and setting handler logic.
+  bool isSet = false;
+  set spellCheckSuggestionsHandler(SpellCheckSuggestionsHandler? handler) => spellCheckSuggestionsHandler = MaterialSpellCheckSuggestionsHandler();
+
   @override
   void fetchSpellCheckSuggestions(TextInputConnection? textInputConnection, Locale locale, String text) {
+    if (!isSet) {
+      spellCheckSuggestionsHandler = null;
+    }
     textInputConnection!.initiateSpellChecking(locale, text);
   }
 
   @override
-  void updateSpellCheckSuggestions(List<SpellCheckSuggestionSpan>? suggestions) {
-    this.spellCheckSuggestionsHandler!.spellCheckSuggestions = suggestions;
+  SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler {
+    if (isSet) {
+      return spellCheckSuggestionsHandler;
+    } else {
+      return null;
+    }
   }
 
   @override
-  SpellCheckSuggestionsHandler? get spellCheckSuggestionsHandler => MaterialSpellCheckSuggestionsHandler();
+  //TODO(camillesimon): Determine if I actually need this or not.
+  void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions) {
+    print("YOOOOOOOOO");
+    print(suggestions);
+    this.spellCheckSuggestionsHandler!.spellCheckSuggestions = suggestions;
+  }
 }
 
 class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
-  List<SpellCheckSuggestionSpan>? set spellCheckSuggestions;
-  List<SpellCheckSuggestionSpan>? get spellCheckSuggestions;
+  bool isSet = false;
+
+  set spellCheckSuggestions(List<SpellCheckerSuggestionSpan>? spellCheckSuggestions) {
+    print(isSet);
+    print("HEY BOO");
+    isSet = true;
+    spellCheckSuggestions = spellCheckSuggestions;
+  }
+
+  List<SpellCheckerSuggestionSpan>? get spellCheckSuggestions {
+    if (isSet) {
+      return spellCheckSuggestions;
+    } else {
+      return null;
+    }
+  }
 
   /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
   /// This toolbar will allow for tap and replace of suggestions for misspelled 
   /// words.
-  Toolbar buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
+  _SpellCheckerSuggestionsToolbar buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
       List<TextSelectionPoint> endpoints, Rect globalEditableRegion, 
       Offset selectionMidpoint, double textLineHeight) {
           return _SpellCheckerSuggestionsToolbar(
@@ -39,9 +72,12 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
           globalEditableRegion: globalEditableRegion,
           selectionMidpoint: selectionMidpoint,
           textLineHeight: textLineHeight,
-          spellCheckerSuggestionSpans: spellCheckerSuggestionSpans,
+          spellCheckerSuggestionSpans: spellCheckSuggestions,
         );
       }
+
+  int scssSpans_consumed_index = 0;
+  int text_consumed_index = 0;
 
   TextSpan buildTextSpanWithSpellCheckSuggestions(
       TextEditingValue value, TextStyle? style, bool ignoreComposing) {
@@ -50,34 +86,34 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
       if (ignoreComposing) {
           return TextSpan(
               style: style,
-              children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.text, style)
+              children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.text, style)
           );
       } else {
           return TextSpan(
               style: style,
               children: <TextSpan>[
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textBefore(value.text), style)),
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textBefore(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
                       ))),
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textAfter(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textAfter(value.text), style)),
               ],
           );
       }
     }
 
     /// Helper method for building TextSpan trees.
-    List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, String text, TextStyle? style) {
+    List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckSuggestions, String text, TextStyle? style) {
       List<TextSpan> tsTreeChildren = <TextSpan>[];
       int text_pointer = 0;
 
-      if (scssSpans_consumed_index < spellCheckerSuggestionSpans.length) {
+      if (scssSpans_consumed_index < spellCheckSuggestions.length) {
           int scss_pointer = scssSpans_consumed_index;
-          SpellCheckerSuggestionSpan currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
+          SpellCheckerSuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
           int span_pointer = currScssSpan.start;
 
-          while (text_pointer < text.length && scss_pointer < spellCheckerSuggestionSpans.length && (currScssSpan.start-text_consumed_index) < text.length) {
+          while (text_pointer < text.length && scss_pointer < spellCheckSuggestions.length && (currScssSpan.start-text_consumed_index) < text.length) {
               int end_index;
-              currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
+              currScssSpan = spellCheckSuggestions[scss_pointer];
 
               if ((currScssSpan.start-text_consumed_index) > text_pointer) {
                   end_index = (currScssSpan.start-text_consumed_index) < text.length ? (currScssSpan.start-text_consumed_index) : text.length;

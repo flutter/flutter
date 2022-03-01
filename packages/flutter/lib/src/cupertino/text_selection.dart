@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/spell_check.dart';
+import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';

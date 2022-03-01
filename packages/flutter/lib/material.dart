@@ -131,6 +131,7 @@ export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/snack_bar_theme.dart';
+export 'src/material/spell_check.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/switch_list_tile.dart';

@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/spell_check.dart';
+import 'package:flutter/src/services/spell_check.dart';
 
 import 'desktop_text_selection.dart';
 import 'feedback.dart';

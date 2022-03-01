@@ -41,6 +41,7 @@ export 'src/services/system_channels.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';
 export 'src/services/system_sound.dart';
+export 'src/services/spell_check.dart';
 export 'src/services/text_editing.dart';
 export 'src/services/text_editing_delta.dart';
 export 'src/services/text_formatter.dart';

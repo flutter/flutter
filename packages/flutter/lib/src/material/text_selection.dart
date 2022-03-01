@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/src/widgets/spell_check.dart';
+import 'package:flutter/src/services/spell_check.dart';
 
 
 import 'debug.dart';
@@ -24,7 +24,7 @@ const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Android Material styled text selection controls.
-class MaterialTextSelectionControls extends TextSelectionControls with MaterialSpellCheckerControls {
+class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
@@ -58,7 +58,7 @@ class MaterialTextSelectionControls extends TextSelectionControls with MaterialS
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
       case ToolbarType.spellCheckerSuggestionsControls:
-          return spellCheckSuggestionsHandler.buildSpellCheckerSuggestionsToolbar(delegate, endpoints, globalEditableRegion, selectionMidpoint, textLineHeight);
+          return spellCheckSuggestionsHandler!.buildSpellCheckSuggestionsToolbar(delegate, endpoints, globalEditableRegion, selectionMidpoint, textLineHeight);
     }
   }
 

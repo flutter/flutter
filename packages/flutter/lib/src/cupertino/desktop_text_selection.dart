@@ -4,7 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/spell_check.dart';
+import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';

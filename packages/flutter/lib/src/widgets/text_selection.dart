@@ -20,7 +20,6 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
-import 'spell_check.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';
