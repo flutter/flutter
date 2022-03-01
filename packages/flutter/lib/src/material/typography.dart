@@ -335,15 +335,13 @@ class Typography with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      black,
-      white,
-      englishLike,
-      dense,
-      tall,
-    );
-  }
+  int get hashCode => Object.hash(
+    black,
+    white,
+    englishLike,
+    dense,
+    tall,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -14,8 +14,6 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
 
-export 'dart:ui' show hashValues, hashList;
-
 export 'package:flutter/foundation.dart' show
   factory,
   immutable,
@@ -98,7 +96,7 @@ class ObjectKey extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, identityHashCode(value));
+  int get hashCode => Object.hash(runtimeType, identityHashCode(value));
 
   @override
   String toString() {
@@ -6530,7 +6528,7 @@ class IndexedSlot<T extends Element?> {
   }
 
   @override
-  int get hashCode => hashValues(index, value);
+  int get hashCode => Object.hash(index, value);
 }
 
 /// Used as a placeholder in [List<Element>] objects when the actual
