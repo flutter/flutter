@@ -42,9 +42,9 @@ zip_bundle("artifacts") {
   }
 }
 
-if (host_os == "linux") {
-  group("linux-embedder") {
-    deps = [ "//flutter/shell/platform/embedder:linux-embedder-archive" ]
+if (host_os == "linux" || host_os == "win") {
+  group("embedder") {
+    deps = [ "//flutter/shell/platform/embedder:embedder-archive" ]
   }
 }
 
