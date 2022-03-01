@@ -1533,5 +1533,5 @@ class _ReorderableItemGlobalKey extends GlobalObjectKey {
   }
 
   @override
-  int get hashCode => hashValues(subKey, index, state);
+  int get hashCode => Object.hash(subKey, index, state);
 }

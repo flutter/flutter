@@ -117,8 +117,8 @@ class KeySet<T extends KeyboardKey> {
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
       return h1 < h2
-        ? hashValues(h1, h2)
-        : hashValues(h2, h1);
+        ? Object.hash(h1, h2)
+        : Object.hash(h2, h1);
     }
 
     // Sort key hash codes and feed to hashList to ensure the aggregate
@@ -135,7 +135,7 @@ class KeySet<T extends KeyboardKey> {
       sortedHashes[3] = iterator.current.hashCode;
     }
     sortedHashes.sort();
-    return hashList(sortedHashes);
+    return Object.hashAll(sortedHashes);
   }
 }
 

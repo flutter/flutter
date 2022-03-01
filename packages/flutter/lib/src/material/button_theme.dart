@@ -852,24 +852,22 @@ class ButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      textTheme,
-      minWidth,
-      height,
-      padding,
-      shape,
-      alignedDropdown,
-      _buttonColor,
-      _disabledColor,
-      _focusColor,
-      _hoverColor,
-      _highlightColor,
-      _splashColor,
-      colorScheme,
-      _materialTapTargetSize,
-    );
-  }
+  int get hashCode => Object.hash(
+    textTheme,
+    minWidth,
+    height,
+    padding,
+    shape,
+    alignedDropdown,
+    _buttonColor,
+    _disabledColor,
+    _focusColor,
+    _hoverColor,
+    _highlightColor,
+    _splashColor,
+    colorScheme,
+    _materialTapTargetSize,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -98,6 +98,8 @@ abstract class ValueListenable<T> extends Listenable {
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
+/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.

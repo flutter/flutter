@@ -640,26 +640,24 @@ class MediaQueryData {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      size,
-      devicePixelRatio,
-      textScaleFactor,
-      platformBrightness,
-      padding,
-      viewPadding,
-      viewInsets,
-      alwaysUse24HourFormat,
-      highContrast,
-      disableAnimations,
-      invertColors,
-      accessibleNavigation,
-      boldText,
-      navigationMode,
-      gestureSettings,
-      hashList(displayFeatures),
-    );
-  }
+  int get hashCode => Object.hash(
+    size,
+    devicePixelRatio,
+    textScaleFactor,
+    platformBrightness,
+    padding,
+    viewPadding,
+    viewInsets,
+    alwaysUse24HourFormat,
+    highContrast,
+    disableAnimations,
+    invertColors,
+    accessibleNavigation,
+    boldText,
+    navigationMode,
+    gestureSettings,
+    Object.hashAll(displayFeatures),
+  );
 
   @override
   String toString() {

@@ -118,7 +118,12 @@ class IconThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(color, opacity, size, hashList(shadows));
+  int get hashCode => Object.hash(
+    color,
+    opacity,
+    size,
+    shadows == null ? null : Object.hashAll(shadows!),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

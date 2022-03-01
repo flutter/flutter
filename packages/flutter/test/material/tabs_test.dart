@@ -1017,6 +1017,93 @@ void main() {
     expect(position.pixels, 800);
   });
 
+  testWidgets('TabBarView viewportFraction sets PageView viewport fraction', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 100);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: tabs.length,
+      animationDuration: animationDuration,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              viewportFraction: 0.8,
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 1);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+
+    // The TabView was initialized with viewportFraction as 0.8
+    // So it's expected the PageView inside would obtain the same viewportFraction
+    expect(pageController.viewportFraction, 0.8);
+  });
+
+  testWidgets('TabBarView viewportFraction is 1 by default', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 100);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: tabs.length,
+      animationDuration: animationDuration,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 1);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+
+    // The TabView was initialized with default viewportFraction
+    // So it's expected the PageView inside would obtain the value 1
+    expect(pageController.viewportFraction, 1);
+  });
+
   testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
 
