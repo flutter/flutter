@@ -70,7 +70,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
     verbatimPhysicalToLogical.forEach((String physicalName, String logicalName) {
       final PhysicalKeyEntry physicalEntry = keyData.entryByName(physicalName);
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(logicalName);
-      lines.add(physicalEntry.usbHidCode, "  ${toHex(physicalEntry.usbHidCode)}: ${toHex(logicalEntry.value)},"
+      lines.add(physicalEntry.usbHidCode, '  ${toHex(physicalEntry.usbHidCode)}: ${toHex(logicalEntry.value)},'
           '    // ${physicalEntry.name} -> ${logicalEntry.name}');
     });
     return lines.sortedJoin().trimRight();
