@@ -64,15 +64,18 @@ export 'package:flutter/services.dart' show Brightness;
 ///
 /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
 /// {@end-tool}
-abstract class ThemeExtension {
-  /// Creates a copy of this color scheme with the given fields
+abstract class ThemeExtension<T> {
+  /// The extension's type.
+  Object get id => T;
+
+  /// Creates a copy of this theme extension scheme with the given fields
   /// replaced by the non-null parameter values.
-  ThemeExtension copyWith();
+  ThemeExtension<T> copyWith();
 
   /// Linearly interpolate with another [ThemeExtension] object.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  ThemeExtension lerp(ThemeExtension? other, double t);
+  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t);
 }
 
 // Deriving these values is black magic. The spec claims that pressed buttons
@@ -266,13 +269,13 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    Map<Object, ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
-    ThemeExtension? themeExtension,
     VisualDensity? visualDensity,
     bool? useMaterial3,
     // COLOR
@@ -413,6 +416,7 @@ class ThemeData with Diagnosticable {
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    extensions ??= <Object, ThemeExtension<dynamic>>{};
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -583,13 +587,13 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
+      extensions: extensions,
       inputDecorationTheme: inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
       platform: platform,
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
-      themeExtension: themeExtension,
       visualDensity: visualDensity,
       useMaterial3: useMaterial3,
       // COLOR
@@ -686,13 +690,13 @@ class ThemeData with Diagnosticable {
     required this.androidOverscrollIndicator,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
+    required this.extensions,
     required this.inputDecorationTheme,
     required this.materialTapTargetSize,
     required this.pageTransitionsTheme,
     required this.platform,
     required this.scrollbarTheme,
     required this.splashFactory,
-    this.themeExtension,
     required this.visualDensity,
     required this.useMaterial3,
     // COLOR
@@ -1066,6 +1070,16 @@ class ThemeData with Diagnosticable {
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
 
+  /// An object containing arbitrary additions to this theme.
+  /// 
+  /// {@tool dartpad}
+  /// This sample shows how to create and use a subclass of [ThemeExtension] that
+  /// defines two colors.
+  ///
+  /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+  /// {@end-tool}
+  final Map<Object, ThemeExtension<dynamic>> extensions;
+
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.
   ///
@@ -1125,16 +1139,6 @@ class ThemeData with Diagnosticable {
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
   ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
-
-  /// An object containing arbitrary additions to this theme.
-  /// 
-  /// {@tool dartpad}
-  /// This sample shows how to create and use a subclass of [ThemeExtension] that
-  /// defines two colors.
-  ///
-  /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
-  /// {@end-tool}
-  final ThemeExtension? themeExtension;
 
   /// The density value for specifying the compactness of various UI components.
   ///
@@ -1594,13 +1598,13 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    Map<Object, ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
-    ThemeExtension? themeExtension,
     VisualDensity? visualDensity,
     bool? useMaterial3,
     // COLOR
@@ -1742,13 +1746,13 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
+      extensions: extensions ?? this.extensions,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       platform: platform ?? this.platform,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
-      themeExtension: themeExtension ?? this.themeExtension,
       visualDensity: visualDensity ?? this.visualDensity,
       useMaterial3: useMaterial3 ?? this.useMaterial3,
       // COLOR
@@ -1912,13 +1916,16 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
+      extensions: a.extensions.map((Object id, ThemeExtension<dynamic> extensionA) {
+        final ThemeExtension<dynamic>? extensionB = b.extensions[id];
+        return MapEntry<Object, ThemeExtension<dynamic>>(id, extensionA.lerp(extensionB, t));
+      }),
       inputDecorationTheme:t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
       materialTapTargetSize:t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme:t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       platform: t < 0.5 ? a.platform : b.platform,
       scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
-      themeExtension: a.themeExtension?.lerp(b.themeExtension, t),
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       // COLOR
@@ -2012,13 +2019,13 @@ class ThemeData with Diagnosticable {
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
+        other.extensions == extensions &&
         other.inputDecorationTheme == inputDecorationTheme &&
         other.materialTapTargetSize == materialTapTargetSize &&
         other.pageTransitionsTheme == pageTransitionsTheme &&
         other.platform == platform &&
         other.scrollbarTheme == scrollbarTheme &&
         other.splashFactory == splashFactory &&
-        other.themeExtension == themeExtension &&
         other.visualDensity == visualDensity &&
         other.useMaterial3 == useMaterial3 &&
         // COLOR
@@ -2109,13 +2116,13 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
+      extensions,
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
       platform,
       scrollbarTheme,
       splashFactory,
-      themeExtension,
       visualDensity,
       useMaterial3,
       // COLOR
@@ -2206,13 +2213,13 @@ class ThemeData with Diagnosticable {
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Map<Object, ThemeExtension<dynamic>>>('extensions', extensions, defaultValue: defaultData.extensions, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<ThemeExtension>('themeExtension', themeExtension, defaultValue: defaultData.themeExtension, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     // COLORS

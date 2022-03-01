@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 
 @immutable
-class MyColors implements ThemeExtension {
+class MyColors implements ThemeExtension<MyColors> {
   const MyColors({
     this.blue,
     this.red,
@@ -17,6 +17,9 @@ class MyColors implements ThemeExtension {
   final Color? red;
 
   @override
+  Object get id => MyColors;
+  
+  @override
   MyColors copyWith({Color? red, Color? blue}) {
     return MyColors(
       blue: blue ?? this.blue,
@@ -25,7 +28,7 @@ class MyColors implements ThemeExtension {
   }
 
   @override
-  MyColors lerp(ThemeExtension? other, double t) {
+  MyColors lerp(ThemeExtension<MyColors>? other, double t) {
     if (other is MyColors) {
       return MyColors(
         blue: Color.lerp(blue, other.blue, t),
@@ -60,10 +63,6 @@ class MyColors implements ThemeExtension {
   }
 }
 
-extension on ThemeData {
-  MyColors get myColors => themeExtension! as MyColors;
-}
-
 void main() {
   runApp(const MyApp());
 }
@@ -89,16 +88,20 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
-        themeExtension: const MyColors(
-          blue: Color(0xFF1E88E5),
-          red: Color(0xFFE53935),
-        ),
+        extensions: const <Object, ThemeExtension<dynamic>>{
+          MyColors: MyColors(
+            blue: Color(0xFF1E88E5),
+            red: Color(0xFFE53935),
+          ),
+        },
       ),
       darkTheme: ThemeData.dark().copyWith(
-        themeExtension: const MyColors(
-          blue: Color(0xFF90CAF9),
-          red: Color(0xFFEF9A9A),
-        ),
+        extensions: const <Object, ThemeExtension<dynamic>>{
+          MyColors: MyColors(
+            blue: Color(0xFF90CAF9),
+            red: Color(0xFFEF9A9A),
+          ),
+        },
       ),
       themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
       home: Home(
@@ -121,14 +124,15 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MyColors myColors = Theme.of(context).extensions[MyColors]! as MyColors;
     return Material(
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(width: 100, height: 100, color: Theme.of(context).myColors.blue),
+            Container(width: 100, height: 100, color: myColors.blue),
             const SizedBox(width: 10),
-            Container(width: 100, height: 100, color: Theme.of(context).myColors.red),
+            Container(width: 100, height: 100, color: myColors.red),
             const SizedBox(width: 50),
             IconButton(
               icon: Icon(isLightTheme ? Icons.nightlight : Icons.wb_sunny),
