@@ -1082,7 +1082,7 @@ class ThemeData with Diagnosticable {
   /// consists of the subclass' type. For example:
   ///
   /// ```dart
-  /// extensions: { 
+  /// extensions: {
   ///   MyColors: ThemeExtension<MyColors> ... ,
   ///   MyTextStyles: ThemeExtension<MyTextStyles> ... ,
   /// }
