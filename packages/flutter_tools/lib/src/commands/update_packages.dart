@@ -311,11 +311,11 @@ class UpdatePackagesCommand extends FlutterCommand {
           // ways, e.g. by saying "sdk: flutter" in one pubspec.yaml and
           // saying "path: ../../..." in another.
           final PubspecDependency previous = allDependencies[dependency.name]!;
-          if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
+          if (dependency.kind != previous.kind || dependency._lockTarget != previous._lockTarget) {
             throwToolExit(
                 'Inconsistent requirements around ${dependency.name}; '
-                    'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
-                    'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
+                    'saw ${dependency.kind} (${dependency._lockTarget}) in "${dependency.sourcePath}" '
+                    'and ${previous.kind} (${previous._lockTarget}) in "${previous.sourcePath}".'
             );
           }
           if (dependency.version != previous.version) {
@@ -341,11 +341,11 @@ class UpdatePackagesCommand extends FlutterCommand {
           // ways, e.g. by saying "sdk: flutter" in one pubspec.yaml and
           // saying "path: ../../..." in another.
           final PubspecDependency previous = explicitDependencies[dependency.name]!;
-          if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
+          if (dependency.kind != previous.kind || dependency._lockTarget != previous._lockTarget) {
             throwToolExit(
                 'Inconsistent requirements around ${dependency.name}; '
-                'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
-                'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
+                'saw ${dependency.kind} (${dependency._lockTarget}) in "${dependency.sourcePath}" '
+                'and ${previous.kind} (${previous._lockTarget}) in "${previous.sourcePath}".'
             );
           }
         }
@@ -1231,7 +1231,6 @@ class PubspecDependency extends PubspecLine {
   DependencyKind _kind = DependencyKind.normal;
 
   /// If we're a path or sdk dependency, the path or sdk in question.
-  String? get lockTarget => _lockTarget;
   String? _lockTarget;
 
   /// If we were a two-line dependency, the second line (see the inherited [line]
@@ -1331,20 +1330,20 @@ class PubspecDependency extends PubspecLine {
         if (lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
-          overrides.writeln('    path: $lockTarget');
+          overrides.writeln('    path: $_lockTarget');
         } else {
           dependencies.writeln('  $name:');
-          dependencies.writeln('    path: $lockTarget');
+          dependencies.writeln('    path: $_lockTarget');
         }
         break;
       case DependencyKind.sdk:
         if (lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
-          overrides.writeln('    sdk: $lockTarget');
+          overrides.writeln('    sdk: $_lockTarget');
         } else {
           dependencies.writeln('  $name:');
-          dependencies.writeln('    sdk: $lockTarget');
+          dependencies.writeln('    sdk: $_lockTarget');
         }
         break;
       case DependencyKind.git:
