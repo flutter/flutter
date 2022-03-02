@@ -35,12 +35,12 @@ class CupertinoNavBarSample extends StatelessWidget {
           const CupertinoSliverNavigationBar(
             leading: Icon(CupertinoIcons.person_2),
             // This title is visible in both collapsed and expanded states.
-            // when `middle` parameter is omitted, it takes the `largeTitle`.
+            // When the "middle" parameter is omitted, it takes the "largeTitle".
             largeTitle: Text('Contacts'),
             trailing: Icon(CupertinoIcons.add_circled),
           ),
           // This widget fills the remaining space in the viewport.
-          // Drag the scrollable area to collapse CupertinoSliverNavigationBar.
+          // Drag the scrollable area to collapse the CupertinoSliverNavigationBar.
           SliverFillRemaining(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -83,7 +83,7 @@ class NextPage extends StatelessWidget {
             ),
             // The middle widget is visible in both collapsed and expanded states.
             middle: const Text('Contacts Group'),
-            // When `middle` parameter is implemented, larget title is only visible
+            // When the "middle" parameter is implemented, the larget title is only visible
             // when the CupertinoSliverNavigationBar is fully expanded.
             largeTitle: const Text('Family'),
           ),
@@ -92,7 +92,7 @@ class NextPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const <Widget>[
                 Text('Drag me up', textAlign: TextAlign.center),
-                // When `leading` parameter is omitted on a route that has a previous page,
+                // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.
                 Text('Tap on the leading button to navigate back', textAlign: TextAlign.center),
               ],
