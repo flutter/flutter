@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ostream>
 #include <string>
+#include <type_traits>
 
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
@@ -121,8 +122,9 @@ struct TPoint {
     return {x - static_cast<Type>(s.width), y - static_cast<Type>(s.height)};
   }
 
-  constexpr TPoint operator*(Scalar scale) const {
-    return {x * scale, y * scale};
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  constexpr TPoint operator*(U scale) const {
+    return {static_cast<Type>(x * scale), static_cast<Type>(y * scale)};
   }
 
   constexpr TPoint operator*(const TPoint& p) const {
@@ -134,7 +136,10 @@ struct TPoint {
     return {x * static_cast<Type>(s.width), y * static_cast<Type>(s.height)};
   }
 
-  constexpr TPoint operator/(Scalar d) const { return {x / d, y / d}; }
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  constexpr TPoint operator/(U d) const {
+    return {static_cast<Type>(x / d), static_cast<Type>(y / d)};
+  }
 
   constexpr TPoint operator/(const TPoint& p) const {
     return {x / p.x, y / p.y};
@@ -175,11 +180,13 @@ struct TPoint {
     return {x / length, y / length};
   }
 
-  constexpr Scalar Cross(const TPoint& p) const {
-    return (x * p.y) - (y * p.x);
-  }
+  constexpr Type Cross(const TPoint& p) const { return (x * p.y) - (y * p.x); }
 
-  constexpr Scalar Dot(const TPoint& p) const { return (x * p.x) + (y * p.y); }
+  constexpr Type Dot(const TPoint& p) const { return (x * p.x) + (y * p.y); }
+
+  constexpr TPoint Reflect(const TPoint& axis) const {
+    return *this - axis * this->Dot(axis) * 2;
+  }
 
   constexpr bool IsZero() const { return x == 0 && y == 0; }
 };
@@ -224,6 +231,18 @@ constexpr TPoint<F> operator/(const TPoint<F>& p1, const TPoint<I>& p2) {
 template <class F, class I, class = MixedOp<F, I>>
 constexpr TPoint<F> operator/(const TPoint<I>& p1, const TPoint<F>& p2) {
   return {static_cast<F>(p1.x) / p2.x, static_cast<F>(p1.y) / p2.y};
+}
+
+// RHS algebraic operations with arithmetic types.
+
+template <class T, class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+constexpr TPoint<T> operator*(U s, const TPoint<T>& p) {
+  return p * s;
+}
+
+template <class T, class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+constexpr TPoint<T> operator/(U s, const TPoint<T>& p) {
+  return {static_cast<T>(s) / p.x, static_cast<T>(s) / p.y};
 }
 
 // RHS algebraic operations with TSize.
