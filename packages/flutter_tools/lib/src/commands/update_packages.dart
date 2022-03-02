@@ -437,7 +437,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final PubspecYaml pubspec in pubspecs) {
       final String package = pubspec.name;
       specialDependencies.add(package);
-      tree._versions[package] = pubspec.version!;
+      tree._versions[package] = pubspec.version;
       assert(!tree._dependencyTree.containsKey(package));
       tree._dependencyTree[package] = <String>{};
       for (final PubspecDependency dependency in pubspec.dependencies) {
@@ -1421,7 +1421,7 @@ String _generateFakePubspec(
 /// It ends up holding the full graph of dependencies, and the version number for
 /// each one.
 class PubDependencyTree {
-  final Map<String, String> _versions = <String, String>{};
+  final Map<String, String?> _versions = <String, String>{};
   final Map<String, Set<String>> _dependencyTree = <String, Set<String>>{};
 
   /// Handles the output from "pub deps --style=compact".
