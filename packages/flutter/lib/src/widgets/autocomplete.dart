@@ -370,11 +370,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateHighlight(_highlightedOptionIndex.value + 1);
   }
 
-  void _hideOptions(DismissIntent intent) {
+  Object? _hideOptions(DismissIntent intent) {
     if (!_userHidOptions) {
       _userHidOptions = true;
       _updateOverlay();
+      return null;
     }
+    return Actions.invoke(context, intent);
   }
 
   void _setActionsEnabled(bool enabled) {
