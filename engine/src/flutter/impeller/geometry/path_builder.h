@@ -13,6 +13,15 @@ namespace impeller {
 
 class PathBuilder {
  public:
+  /// Used for approximating quarter circle arcs with cubic curves. This is the
+  /// control point distance which results in the smallest possible unit circle
+  /// integration for a right angle arc. It can be used to approximate arcs less
+  /// than 90 degrees to great effect by simply reducing it proportionally to
+  /// the angle. However, accuracy rapidly diminishes if magnified for obtuse
+  /// angle arcs, and so multiple cubic curves should be used when approximating
+  /// arcs greater than 90 degrees.
+  constexpr static const Scalar kArcApproximationMagic = 0.551915024494;
+
   PathBuilder();
 
   ~PathBuilder();

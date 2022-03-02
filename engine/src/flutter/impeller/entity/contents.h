@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/solid_stroke.vert.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/path_component.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/texture.h"
@@ -132,13 +133,15 @@ class SolidStrokeContents final : public Contents {
   using CapProc = std::function<void(
       VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
       const Point& position,
-      const Point& normal)>;
+      const Point& normal,
+      const SmoothingApproximation& smoothing)>;
   using JoinProc = std::function<void(
       VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
       const Point& position,
       const Point& start_normal,
       const Point& end_normal,
-      Scalar miter_limit)>;
+      Scalar miter_limit,
+      const SmoothingApproximation& smoothing)>;
 
   SolidStrokeContents();
 
@@ -170,6 +173,8 @@ class SolidStrokeContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
+  SmoothingApproximation arc_smoothing_approximation_;
+
   Color color_;
   Scalar stroke_size_ = 0.0;
   Scalar miter_limit_ = 4.0;
