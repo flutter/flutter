@@ -201,6 +201,23 @@ class _Transpiler {
   TranspileException failure(String why) =>
       TranspileException._(currentOp, why);
 
+  void collectDeps(Set<int> collectedDeps, int id) {
+    if (alias.containsKey(id)) {
+      id = alias[id]!;
+      collectedDeps.add(id);
+    }
+    final _Instruction? result = results[id];
+    if (result == null) {
+      return;
+    }
+    for (final int i in result.deps) {
+      if (!collectedDeps.contains(i)) {
+        collectedDeps.add(i);
+        collectDeps(collectedDeps, i);
+      }
+    }
+  }
+
   void writeFunctionAndDeps(Set<int> visited, int function) {
     if (visited.contains(function)) {
       return;
@@ -210,7 +227,7 @@ class _Transpiler {
     for (final int dep in f.deps) {
       writeFunctionAndDeps(visited, dep);
     }
-    f.write(this, src);
+    f.write(src);
   }
 
   void writeHeader() {
@@ -229,6 +246,13 @@ class _Transpiler {
     }
   }
 
+  int resolveId(int id) {
+    if (alias.containsKey(id)) {
+      return alias[id]!;
+    }
+    return id;
+  }
+
   String resolveName(int id) {
     if (alias.containsKey(id)) {
       return resolveName(alias[id]!);
@@ -239,7 +263,8 @@ class _Transpiler {
       return 'true';
     } else if (constantFalse > 0 && id == constantFalse) {
       return 'false';
-    } if (id == colorOutput) {
+    }
+    if (id == colorOutput) {
       if (target == TargetLanguage.glslES) {
         return _glslESColorName;
       } else {
@@ -323,7 +348,7 @@ class _Transpiler {
     if (inst.isResult) {
       results[inst.id] = inst;
     }
-    currentBlock!.add(inst);
+    currentBlock!._add(inst);
   }
 
   /// Read an instruction word, and handle the operation.
@@ -446,38 +471,80 @@ class _Transpiler {
         opImageSampleImplicitLod();
         break;
       case _opFNegate:
-        opFNegate();
+        parseUnaryOperator(_Operator.subtraction);
         break;
       case _opFAdd:
-        parseOperatorInst('+');
+        parseOperatorInst(_Operator.addition);
         break;
       case _opFSub:
-        parseOperatorInst('-');
+        parseOperatorInst(_Operator.negation);
         break;
       case _opFMul:
-        parseOperatorInst('*');
+        parseOperatorInst(_Operator.multiplication);
         break;
       case _opFDiv:
-        parseOperatorInst('/');
+        parseOperatorInst(_Operator.division);
         break;
       case _opFMod:
         parseBuiltinFunction('mod');
-        break;
-      case _opFUnordNotEqual:
-        parseOperatorInst('!=');
         break;
       case _opVectorTimesScalar:
       case _opMatrixTimesScalar:
       case _opVectorTimesMatrix:
       case _opMatrixTimesVector:
       case _opMatrixTimesMatrix:
-        parseOperatorInst('*');
+        parseOperatorInst(_Operator.multiplication);
         break;
       case _opDot:
         parseBuiltinFunction('dot');
         break;
+      case _opFOrdEqual:
+        parseOperatorInst(_Operator.equality);
+        break;
+      case _opFUnordNotEqual:
+        parseOperatorInst(_Operator.inequality);
+        break;
+      case _opFOrdLessThan:
+        parseOperatorInst(_Operator.lessThan);
+        break;
+      case _opFOrdGreaterThan:
+        parseOperatorInst(_Operator.greaterThan);
+        break;
+      case _opFOrdLessThanEqual:
+        parseOperatorInst(_Operator.lessThanEqual);
+        break;
+      case _opFOrdGreaterThanEqual:
+        parseOperatorInst(_Operator.greaterThanEqual);
+        break;
+      case _opLogicalEqual:
+        parseOperatorInst(_Operator.equality);
+        break;
+      case _opLogicalNotEqual:
+        parseOperatorInst(_Operator.inequality);
+        break;
+      case _opLogicalOr:
+        parseOperatorInst(_Operator.or);
+        break;
+      case _opLogicalAnd:
+        parseOperatorInst(_Operator.and);
+        break;
+      case _opLogicalNot:
+        parseUnaryOperator(_Operator.not);
+        break;
       case _opLabel:
         opLabel();
+        break;
+      case _opBranch:
+        opBranch();
+        break;
+      case _opBranchConditional:
+        opBranchConditional();
+        break;
+      case _opLoopMerge:
+        opLoopMerge();
+        break;
+      case _opSelectionMerge:
+        opSelectionMerge();
         break;
       case _opReturn:
         opReturn();
@@ -712,12 +779,12 @@ class _Transpiler {
   }
 
   void opConstantTrue() {
-    position++;  // Skip type operand.
+    position++; // Skip type operand.
     constantTrue = readWord();
   }
 
   void opConstantFalse() {
-    position++;  // Skip type operand.
+    position++; // Skip type operand.
     constantFalse = readWord();
   }
 
@@ -767,7 +834,7 @@ class _Transpiler {
       throw failure('function $id has return type mismatch');
     }
 
-    final _Function f = _Function(functionType, id);
+    final _Function f = _Function(this, functionType, id);
     functions[id] = f;
     currentFunction = f;
   }
@@ -841,7 +908,9 @@ class _Transpiler {
         }
         return;
       case _storageClassFunction:
-        addToCurrentBlock(_StringInstruction('$type $name'));
+        // function variables are declared the first time a value is
+        // stored to them.
+        currentFunction!.declareVariable(id, typeId);
         return;
       default:
         throw failure('$storageClass is an unsupported Storage Class');
@@ -872,6 +941,31 @@ class _Transpiler {
     final int pointer = readWord();
     final int object = readWord();
     ref(object);
+
+    // Variables belonging to the current function need to be declared if they
+    // haven't been already.
+    final _Variable? v = currentFunction!.variable(pointer);
+    if (v != null && !v.initialized) {
+      addToCurrentBlock(_Store(
+        pointer,
+        object,
+        shouldDeclare: true,
+        declarationType: v.type,
+      ));
+      v.initialized = true;
+      return;
+    }
+
+    // Is this a compound assignment operation? (x += y)
+    final _Instruction? objInstruction = results[object];
+    if (objInstruction is _BinaryOperator &&
+        resolveId(objInstruction.a) == pointer &&
+        _isCompoundAssignment(objInstruction.op)) {
+      addToCurrentBlock(
+          _CompoundAssignment(pointer, objInstruction.op, objInstruction.b));
+      return;
+    }
+
     addToCurrentBlock(_Store(pointer, object));
   }
 
@@ -958,15 +1052,8 @@ class _Transpiler {
     final int sampledImage = readWord();
     final int coordinate = readWord();
     ref(coordinate);
-    addToCurrentBlock(_ImageSampleImplicitLod(type, name, sampledImage, coordinate));
-  }
-
-  void opFNegate() {
-    final int type = readWord();
-    final int name = readWord();
-    final int operand = readWord();
-    ref(operand);
-    addToCurrentBlock(_Negate(type, name, operand));
+    addToCurrentBlock(
+        _ImageSampleImplicitLod(type, name, sampledImage, coordinate));
   }
 
   void opLabel() {
@@ -974,11 +1061,33 @@ class _Transpiler {
     currentBlock = currentFunction!.addBlock(id);
   }
 
+  void opBranch() {
+    currentBlock!.branch = readWord();
+    currentBlock = null;
+  }
+
+  void opBranchConditional() {
+    final _Block b = currentBlock!;
+    b.condition = readWord();
+    b.truthyBlock = readWord();
+    b.falseyBlock = readWord();
+  }
+
+  void opLoopMerge() {
+    final _Block b = currentBlock!;
+    b.mergeBlock = readWord();
+    b.continueBlock = readWord();
+  }
+
+  void opSelectionMerge() {
+    currentBlock!.mergeBlock = readWord();
+  }
+
   void opReturn() {
     if (currentFunction!.name == entryPoint) {
       return;
     } else {
-      addToCurrentBlock(_StringInstruction('return'));
+      addToCurrentBlock(_Return());
     }
   }
 
@@ -988,14 +1097,22 @@ class _Transpiler {
     addToCurrentBlock(_ReturnValue(value));
   }
 
-  void parseOperatorInst(String op) {
+  void parseUnaryOperator(_Operator op) {
+    final int type = readWord();
+    final int name = readWord();
+    final int operand = readWord();
+    ref(operand);
+    addToCurrentBlock(_UnaryOperator(type, name, op, operand));
+  }
+
+  void parseOperatorInst(_Operator op) {
     final int type = readWord();
     final int name = readWord();
     final int a = readWord();
     final int b = readWord();
     ref(a);
     ref(b);
-    addToCurrentBlock(_Operator(type, name, op, a, b));
+    addToCurrentBlock(_BinaryOperator(type, name, op, a, b));
   }
 
   void parseBuiltinFunction(String functionName) {

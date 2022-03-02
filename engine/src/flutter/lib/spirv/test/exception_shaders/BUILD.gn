@@ -10,6 +10,8 @@ if (enable_unittests) {
     tool = "//flutter/lib/spirv/test:spirv_assembler"
 
     sources = [
+      "for_loop_does_not_branch_to_conditional.spvasm",
+      "for_loop_does_not_branch_to_merge.spvasm",
       "image_type_arrayed_must_be_zero.spvasm",
       "image_type_depth_must_be_zero.spvasm",
       "image_type_dimensionality_must_be_2D.spvasm",
@@ -17,6 +19,9 @@ if (enable_unittests) {
       "image_type_must_be_float.spvasm",
       "image_type_previously_declared.spvasm",
       "image_type_sampled_must_be_one.spvasm",
+      "multiple_statements_in_for_loop_continue_block.spvasm",
+      "multiple_variables_in_for_loop_comparison.spvasm",
+      "no_store_in_for_loop_continue.spvasm",
       "sampled_image_type_image_type_not_declared.spvasm",
       "sampled_image_type_invalid_image_type.spvasm",
       "sampled_image_type_previously_declared.spvasm",
