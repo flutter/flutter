@@ -1318,41 +1318,6 @@ void main() {
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
   });
 
-  testWidgets('can hide toolbar with DismissIntent', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      ),
-    );
-
-    final EditableTextState state =
-      tester.state<EditableTextState>(find.byType(EditableText));
-
-    // Show the toolbar
-    state.renderEditable.selectWordsInRange(
-      from: Offset.zero,
-      cause: SelectionChangedCause.tap,
-    );
-    await tester.pump();
-
-    // On web, we don't let Flutter show the toolbar.
-    expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
-    await tester.pumpAndSettle();
-    expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
-
-    // Hide the menu using the DismissIntent.
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pump();
-    expect(find.text('Paste'), findsNothing);
-  });
-
   testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

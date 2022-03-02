@@ -3181,20 +3181,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     bringIntoView(newSelection.extent);
   }
 
-  Object? _hideToolbarIfVisible(DismissIntent intent) {
-    if (_selectionOverlay?.toolbarIsVisible ?? false) {
-      hideToolbar(false);
-      return null;
-    }
-    return Actions.invoke(context, intent);
-  }
-
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
-    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete
     DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary)),
