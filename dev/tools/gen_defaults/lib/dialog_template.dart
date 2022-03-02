@@ -24,6 +24,7 @@ class _TokenDefaultsM3 extends DialogTheme {
   final ColorScheme _colors;
   final TextTheme _textTheme;
 
+  // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override
   Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.${color("md.comp.dialog.container")}, _colors.primary, ${elevation("md.comp.dialog.container")});
 

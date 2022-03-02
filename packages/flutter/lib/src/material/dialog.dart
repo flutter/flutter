@@ -1189,7 +1189,7 @@ class _DefaultsM2 extends DialogTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_81
+// Generated version v0_86
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
     : _colors = Theme.of(context).colorScheme,
@@ -1204,6 +1204,7 @@ class _TokenDefaultsM3 extends DialogTheme {
   final ColorScheme _colors;
   final TextTheme _textTheme;
 
+  // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override
   Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 6.0);
 
