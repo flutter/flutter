@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <limits>
 #include "impeller/geometry/geometry_unittests.h"
 #include <limits>
 #include "flutter/testing/testing.h"
@@ -10,10 +11,19 @@
 #include "impeller/geometry/path_component.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
 namespace testing {
+
+TEST(GeometryTest, ScalarNearlyEqual) {
+  ASSERT_FALSE(ScalarNearlyEqual(0.002f, 0.001f));
+  ASSERT_TRUE(ScalarNearlyEqual(0.002f, 0.001f, 0.0011f));
+  ASSERT_FALSE(ScalarNearlyEqual(0.002f, 0.001f, 0.0009f));
+  ASSERT_TRUE(
+      ScalarNearlyEqual(1.0f, 1.0f + std::numeric_limits<float>::epsilon()*4));
+}
 
 TEST(GeometryTest, RotationMatrix) {
   auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
