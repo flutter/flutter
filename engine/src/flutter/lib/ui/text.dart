@@ -2823,7 +2823,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
     Int32List encoded,
     ByteData? strutData,
     String? fontFamily,
-    List<dynamic>? strutFontFamily,
+    List<Object?>? strutFontFamily,
     double? fontSize,
     double? height,
     String? ellipsis,
@@ -2888,16 +2888,16 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
 
   void _pushStyle(
     Int32List encoded,
-    List<dynamic> fontFamilies,
+    List<Object?> fontFamilies,
     double? fontSize,
     double? letterSpacing,
     double? wordSpacing,
     double? height,
     double? decorationThickness,
     String locale,
-    List<dynamic>? backgroundObjects,
+    List<Object?>? backgroundObjects,
     ByteData? backgroundData,
-    List<dynamic>? foregroundObjects,
+    List<Object?>? foregroundObjects,
     ByteData? foregroundData,
     ByteData shadowsData,
     ByteData? fontFeaturesData,
@@ -3015,7 +3015,7 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
 }
 
 final ByteData _fontChangeMessage = utf8.encoder.convert(
-  json.encode(<String, dynamic>{'type': 'fontsChange'})
+  json.encode(<String, Object?>{'type': 'fontsChange'})
 ).buffer.asByteData();
 
 FutureOr<void> _sendFontChangeMessage() async {

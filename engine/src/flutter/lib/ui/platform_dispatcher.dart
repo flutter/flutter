@@ -866,20 +866,20 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateUserSettingsData(String jsonData) {
-    final Map<String, dynamic> data = json.decode(jsonData) as Map<String, dynamic>;
+    final Map<String, Object?> data = json.decode(jsonData) as Map<String, Object?>;
     if (data.isEmpty) {
       return;
     }
 
-    final double textScaleFactor = (data['textScaleFactor'] as num).toDouble();
-    final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat'] as bool;
+    final double textScaleFactor = (data['textScaleFactor']! as num).toDouble();
+    final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
     // This field is optional.
     final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
     if (brieflyShowPassword != null) {
       _brieflyShowPassword = brieflyShowPassword;
     }
     final Brightness platformBrightness =
-    data['platformBrightness'] as String == 'dark' ? Brightness.dark : Brightness.light;
+    data['platformBrightness']! as String == 'dark' ? Brightness.dark : Brightness.light;
     final PlatformConfiguration previousConfiguration = configuration;
     final bool platformBrightnessChanged =
         previousConfiguration.platformBrightness != platformBrightness;
