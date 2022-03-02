@@ -356,6 +356,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::VmSnapshotData),
                               &vm_snapshot_data_filename);
 
+  command_line.GetOptionValue(FlagForSwitch(Switch::Route), &settings.route);
+
   std::string vm_snapshot_instr_filename;
   command_line.GetOptionValue(FlagForSwitch(Switch::VmSnapshotInstructions),
                               &vm_snapshot_instr_filename);
