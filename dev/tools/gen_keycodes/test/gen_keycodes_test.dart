@@ -106,7 +106,7 @@ void main() {
     final PlatformCodeGenerator codeGenerator = WindowsCodeGenerator(
       physicalData,
       logicalData,
-      readDataFile(path.join(dataRoot, 'windows_scancode_logical_map.json')),
+      readDataFile('windows_scancode_logical_map.json'),
     );
     final String output = codeGenerator.generate();
 
@@ -121,8 +121,8 @@ void main() {
     final PlatformCodeGenerator codeGenerator = GtkCodeGenerator(
       physicalData,
       logicalData,
-      readDataFile(path.join(dataRoot, 'gtk_modifier_bit_mapping.json')),
-      readDataFile(path.join(dataRoot, 'gtk_lock_bit_mapping.json')),
+      readDataFile('gtk_modifier_bit_mapping.json'),
+      readDataFile('gtk_lock_bit_mapping.json'),
     );
     final String output = codeGenerator.generate();
 
@@ -136,7 +136,7 @@ void main() {
     final PlatformCodeGenerator codeGenerator = WebCodeGenerator(
       physicalData,
       logicalData,
-      readDataFile(path.join(dataRoot, 'web_logical_location_mapping.json')),
+      readDataFile('web_logical_location_mapping.json'),
       verbatimMap,
     );
     final String output = codeGenerator.generate();
