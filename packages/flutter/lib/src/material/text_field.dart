@@ -963,7 +963,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
-    //TODO(camillesimon): Determine default behavior here.
+    //TODO(camillesimon): Determine default behavior here. Might be common across text fields depending on input so may move out to static method in services/spell_check.dart.
     _spellCheckService = widget.spellCheckService ?? MaterialSpellCheckService();
   }
 

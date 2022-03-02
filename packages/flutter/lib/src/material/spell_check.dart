@@ -10,9 +10,6 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 class MaterialSpellCheckService implements SpellCheckService {
-  //TODO(camillesimon): Determine whether or not this should be doable.
-  //TODO(camillesimon): Determine whether or not to add getter/setter.
-  //TODO(camillesimon): Fix messy isSet and setting handler logic.
   MaterialSpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = MaterialSpellCheckSuggestionsHandler();
 
   @override
@@ -26,7 +23,6 @@ class MaterialSpellCheckService implements SpellCheckService {
   }
 
   @override
-  //TODO(camillesimon): Determine if I actually need this or not.
   void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions) {
     this.spellCheckSuggestionsHandler!.spellCheckSuggestions = suggestions;
   }

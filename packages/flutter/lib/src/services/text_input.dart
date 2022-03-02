@@ -1796,7 +1796,7 @@ class TextInput {
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
         // TODO(camillesimon): Remove support for passing text (and remove from engine).
-        //TODO(camillesimon): Find platform from a context.
+        //TODO(camillesimon): Find platform from a context. Or just have it contained in central place like the service itself.
         _currentConfiguration.spellCheckConfiguration.spellCheckService!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
         break;
       default:

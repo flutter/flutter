@@ -35,10 +35,8 @@ class SpellCheckerSuggestionSpan {
 
 /// Creates a configuration that controls how spell check is handled in a subtree of text input related widgets.
 class SpellCheckConfiguration {
-    //TODO(camillesimon): Figure out what can be inferred and what can't.
-    //TODO(camillesimon): Determine proper nullity of everything.
-    //TODO(camillesimon): Determine if platform is necessary.
     //TODO(camillesimon): Figure out if this should be const or not.
+    //TODO(camillesimon): Make platform nullable and add logic to handle.
     const SpellCheckConfiguration({
         required this.platform,
         required this.spellCheckEnabled,
@@ -49,7 +47,7 @@ class SpellCheckConfiguration {
 
     /// SpellCheckConfiguration that indicates that spell check should not be run on text input.
     static const SpellCheckConfiguration disabled = SpellCheckConfiguration(
-        platform: TargetPlatform.android, //TODO(camillesimon): Make platform nullable and logic to handle.
+        platform: TargetPlatform.android, 
         spellCheckEnabled: false,
         spellCheckService: null,
       );
@@ -62,19 +60,6 @@ class SpellCheckConfiguration {
 
     /// Service used for spell checking.
     final SpellCheckService? spellCheckService;
-
-    /// Determines spell check service to be used by default.
-    //TODO(camillesimon): Give developers access to platform?
-    //TODO(camillesimon): Factor in possibility that spellCheckService is not null.
-    // SpellCheckService? getDefaultSpellCheckService(TargetPlatform platform) {
-    //     switch(platform) {
-    //         case TargetPlatform.android:
-    //             return MaterialSpellCheckService();
-    //         default:
-    //             // Null for all cases where a default implementation of spell check has not been provided.
-    //             return null;
-    //     }
-    // }
 }
 
 /// Interface that represents the core functionality needed to support spell check on text input.
@@ -87,7 +72,7 @@ abstract class SpellCheckService {
     void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions);
 
     // Relates service to a handler for the results it provides.
-    //TODO(camillesimon): Determine exactly which getters and setters are needed.
+    //TODO(camillesimon): Determine whether or not to add getter/setter instead of update method:
     //TODO(camillesimon): Provide default implementation to give developers access?
     SpellCheckSuggestionsHandler? getSpellCheckSuggestionsHandler();
 }

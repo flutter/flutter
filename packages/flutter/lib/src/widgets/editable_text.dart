@@ -2922,7 +2922,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckEnabled) {
         return false;
       }
-      //TODO(camillesimon): Find platform using a context.
+      //TODO(camillesimon): Find platform using a context. Or just have it contained in central place like the service itself.
       _selectionOverlay!.showToolbar(toolbarType, 
       _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.getSpellCheckSuggestionsHandler()!);
       return true;
@@ -3319,7 +3319,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         context: context,
         style: widget.style,
         withComposing: !widget.readOnly && _hasFocus,
-        //TODO(camillesimon): Determine pltform using context.
+        //TODO(camillesimon): Determine platform using context. Or just have it contained in central place like the service itself.
         spellCheckSuggestionsHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.getSpellCheckSuggestionsHandler()!,
       );
     }
