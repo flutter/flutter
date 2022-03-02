@@ -30,7 +30,9 @@ struct ThreadHost {
   /// The collection of all the thread configures, and we create custom thread
   /// configure in engine to info the thread.
   struct ThreadHostConfig {
-    ThreadHostConfig() : type_mask(0) {}
+    explicit ThreadHostConfig(
+        const ThreadConfigSetter& setter = fml::Thread::SetCurrentThreadName)
+        : type_mask(0), config_setter(setter) {}
 
     ThreadHostConfig(
         const std::string& name_prefix,
@@ -48,6 +50,21 @@ struct ThreadHost {
 
     /// Use the prefix and thread type to generator a thread name.
     static std::string MakeThreadName(Type type, const std::string& prefix);
+
+    /// Specified the UI Thread Config, meanwhile set the mask.
+    void SetUIConfig(const ThreadConfig&);
+
+    /// Specified the Platform Thread Config, meanwhile set the mask.
+    void SetPlatformConfig(const ThreadConfig&);
+
+    /// Specified the IO Thread Config, meanwhile set the mask.
+    void SetRasterConfig(const ThreadConfig&);
+
+    /// Specified the IO Thread Config, meanwhile set the mask.
+    void SetIOConfig(const ThreadConfig&);
+
+    /// Specified the ProfilerThread  Config, meanwhile set the mask.
+    void SetProfilerConfig(const ThreadConfig&);
 
     uint64_t type_mask;
 
