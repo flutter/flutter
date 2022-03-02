@@ -11,6 +11,7 @@
 #include "impeller/entity/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
@@ -284,8 +285,7 @@ const IRect& TextureContents::GetSourceRect() const {
 
 SolidStrokeContents::SolidStrokeContents() {
   SetStrokeCap(Cap::kButt);
-  // TODO(99089): Change this to kMiter once implemented.
-  SetStrokeJoin(Join::kBevel);
+  SetStrokeJoin(Join::kMiter);
 }
 
 SolidStrokeContents::~SolidStrokeContents() = default;
@@ -302,7 +302,8 @@ static VertexBuffer CreateSolidStrokeVertices(
     const Path& path,
     HostBuffer& buffer,
     const SolidStrokeContents::CapProc& cap_proc,
-    const SolidStrokeContents::JoinProc& join_proc) {
+    const SolidStrokeContents::JoinProc& join_proc,
+    Scalar miter_limit) {
   using VS = SolidStrokeVertexShader;
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
@@ -380,7 +381,7 @@ static VertexBuffer CreateSolidStrokeVertices(
 
           // Generate join from the current line to the next line.
           join_proc(vtx_builder, polyline.points[point_i], previous_normal,
-                    normal);
+                    normal, miter_limit);
         }
       }
     }
@@ -390,7 +391,7 @@ static VertexBuffer CreateSolidStrokeVertices(
       cap_proc(vtx_builder, polyline.points[contour_end_point_i - 1], normal);
     } else {
       join_proc(vtx_builder, polyline.points[contour_start_point_i], normal,
-                contour_first_normal);
+                contour_first_normal, miter_limit);
     }
   }
 
@@ -419,8 +420,9 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   cmd.label = "SolidStroke";
   cmd.pipeline = renderer.GetSolidStrokePipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(CreateSolidStrokeVertices(
-      entity.GetPath(), pass.GetTransientsBuffer(), cap_proc_, join_proc_));
+  cmd.BindVertices(
+      CreateSolidStrokeVertices(entity.GetPath(), pass.GetTransientsBuffer(),
+                                cap_proc_, join_proc_, miter_limit_));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   VS::BindStrokeInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(stroke_info));
@@ -438,12 +440,15 @@ Scalar SolidStrokeContents::GetStrokeSize() const {
   return stroke_size_;
 }
 
-void SolidStrokeContents::SetStrokeMiter(Scalar miter) {
-  miter_ = miter;
+void SolidStrokeContents::SetStrokeMiter(Scalar miter_limit) {
+  if (miter_limit < 0) {
+    return;  // Skia behaves like this.
+  }
+  miter_limit_ = miter_limit;
 }
 
-Scalar SolidStrokeContents::GetStrokeMiter(Scalar miter) {
-  return miter_;
+Scalar SolidStrokeContents::GetStrokeMiter() {
+  return miter_limit_;
 }
 
 void SolidStrokeContents::SetStrokeCap(Cap cap) {
@@ -484,6 +489,26 @@ SolidStrokeContents::Cap SolidStrokeContents::GetStrokeCap() {
   return cap_;
 }
 
+static Scalar CreateBevelAndGetDirection(
+    VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
+    const Point& position,
+    const Point& start_normal,
+    const Point& end_normal) {
+  SolidStrokeVertexShader::PerVertexData vtx;
+  vtx.vertex_position = position;
+  vtx.pen_down = 1.0;
+  vtx.vertex_normal = {};
+  vtx_builder.AppendVertex(vtx);
+
+  Scalar dir = start_normal.Cross(end_normal) > 0 ? -1 : 1;
+  vtx.vertex_normal = start_normal * dir;
+  vtx_builder.AppendVertex(vtx);
+  vtx.vertex_normal = end_normal * dir;
+  vtx_builder.AppendVertex(vtx);
+
+  return dir;
+}
+
 void SolidStrokeContents::SetStrokeJoin(Join join) {
   join_ = join;
 
@@ -492,22 +517,36 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
     case Join::kBevel:
       join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                       const Point& position, const Point& start_normal,
-                      const Point& end_normal) {
-        SolidStrokeVertexShader::PerVertexData vtx;
-        vtx.vertex_position = position;
-        vtx.pen_down = 1.0;
-        vtx.vertex_normal = {};
-        vtx_builder.AppendVertex(vtx);
-
-        Scalar dir = start_normal.Cross(end_normal) > 0 ? -1 : 1;
-        vtx.vertex_normal = start_normal * dir;
-        vtx_builder.AppendVertex(vtx);
-        vtx.vertex_normal = end_normal * dir;
-        vtx_builder.AppendVertex(vtx);
+                      const Point& end_normal, Scalar miter_limit) {
+        CreateBevelAndGetDirection(vtx_builder, position, start_normal, end_normal);
       };
       break;
     case Join::kMiter:
-      FML_DLOG(ERROR) << "Unimplemented.";
+      join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                      const Point& position, const Point& start_normal,
+                      const Point& end_normal, Scalar miter_limit) {
+        // 1 for no joint (straight line), 0 for max joint (180 degrees).
+        Scalar alignment = (start_normal.Dot(end_normal) + 1) / 2;
+        if (ScalarNearlyEqual(alignment, 1)) {
+          return;
+        }
+
+        Scalar dir =
+            CreateBevelAndGetDirection(vtx_builder, position, start_normal, end_normal);
+
+        Point miter_point = (start_normal + end_normal) / 2 / alignment;
+        if (miter_point.GetDistanceSquared({0, 0}) >
+            miter_limit * miter_limit) {
+          return;  // Convert to bevel when we exceed the miter limit.
+        }
+
+        // Outer miter point.
+        SolidStrokeVertexShader::PerVertexData vtx;
+        vtx.vertex_position = position;
+        vtx.pen_down = 1.0;
+        vtx.vertex_normal = miter_point * dir;
+        vtx_builder.AppendVertex(vtx);
+      };
       break;
     case Join::kRound:
       FML_DLOG(ERROR) << "Unimplemented.";

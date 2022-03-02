@@ -137,7 +137,8 @@ class SolidStrokeContents final : public Contents {
       VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
       const Point& position,
       const Point& start_normal,
-      const Point& end_normal)>;
+      const Point& end_normal,
+      Scalar miter_limit)>;
 
   SolidStrokeContents();
 
@@ -151,9 +152,9 @@ class SolidStrokeContents final : public Contents {
 
   Scalar GetStrokeSize() const;
 
-  void SetStrokeMiter(Scalar miter);
+  void SetStrokeMiter(Scalar miter_limit);
 
-  Scalar GetStrokeMiter(Scalar miter);
+  Scalar GetStrokeMiter();
 
   void SetStrokeCap(Cap cap);
 
@@ -171,7 +172,7 @@ class SolidStrokeContents final : public Contents {
  private:
   Color color_;
   Scalar stroke_size_ = 0.0;
-  Scalar miter_ = 0.0;
+  Scalar miter_limit_ = 4.0;
 
   Cap cap_;
   CapProc cap_proc_;

@@ -5,12 +5,21 @@
 #pragma once
 
 #include <cfloat>
+#include <valarray>
 
+#include "flutter/fml/logging.h"
 #include "impeller/geometry/constants.h"
 
 namespace impeller {
 
 using Scalar = float;
+
+constexpr inline bool ScalarNearlyEqual(Scalar x,
+                                        Scalar y,
+                                        Scalar tolerance = 1e-3) {
+  FML_DCHECK(tolerance >= 0);
+  return std::abs(x - y) <= tolerance;
+}
 
 struct Degrees;
 
