@@ -897,7 +897,6 @@ class DropdownButton<T> extends StatefulWidget {
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        _inputDecoration = null,
        _isEmpty = false,
-       _isFocused = false,
        super(key: key);
 
   DropdownButton._formField({
@@ -929,7 +928,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     required InputDecoration inputDecoration,
     required bool isEmpty,
-    required bool isFocused,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -946,10 +944,8 @@ class DropdownButton<T> extends StatefulWidget {
        assert(autofocus != null),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        assert(isEmpty != null),
-       assert(isFocused != null),
        _inputDecoration = inputDecoration,
        _isEmpty = isEmpty,
-       _isFocused = isFocused,
        super(key: key);
 
   /// The list of items the user can select.
@@ -1163,8 +1159,6 @@ class DropdownButton<T> extends StatefulWidget {
 
   final bool _isEmpty;
 
-  final bool _isFocused;
-
   @override
   State<DropdownButton<T>> createState() => _DropdownButtonState<T>();
 }
@@ -1177,6 +1171,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
   late Map<Type, Action<Intent>> _actionMap;
+  bool _isMenuOpen = false;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1308,9 +1303,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       borderRadius: widget.borderRadius,
     );
 
+    _isMenuOpen = true;
     focusNode?.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
+      _isMenuOpen = false;
       if (!mounted || newValue == null)
         return;
       widget.onChanged?.call(newValue.result);
@@ -1486,7 +1483,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       result = InputDecorator(
         decoration: widget._inputDecoration!,
         isEmpty: widget._isEmpty,
-        isFocused: widget._isFocused,
+        isFocused: _isMenuOpen,
         child: result,
       );
     }
@@ -1640,7 +1637,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    borderRadius: borderRadius,
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
-                   isFocused: Focus.of(context).hasFocus,
                  ),
                );
              }),
