@@ -70,7 +70,6 @@ const int _opFunction = 54;
 const int _opFunctionParameter = 55;
 const int _opFunctionEnd = 56;
 const int _opFunctionCall = 57;
-const int _opFUnordNotEqual = 183;
 const int _opVariable = 59;
 const int _opLoad = 61;
 const int _opStore = 62;
@@ -95,8 +94,23 @@ const int _opVectorTimesMatrix = 144;
 const int _opMatrixTimesVector = 145;
 const int _opMatrixTimesMatrix = 146;
 const int _opDot = 148;
+const int _opFOrdEqual = 180;
+const int _opFUnordNotEqual = 183;
+const int _opFOrdLessThan = 184;
+const int _opFOrdGreaterThan = 186;
+const int _opFOrdLessThanEqual = 188;
+const int _opFOrdGreaterThanEqual = 190;
+const int _opLogicalEqual = 164;
+const int _opLogicalNotEqual = 165;
+const int _opLogicalOr = 166;
+const int _opLogicalAnd = 167;
+const int _opLogicalNot = 168;
 const int _opSelect = 169;
+const int _opLoopMerge = 246;
+const int _opSelectionMerge = 247;
 const int _opLabel = 248;
+const int _opBranch = 249;
+const int _opBranchConditional = 250;
 const int _opReturn = 253;
 const int _opReturnValue = 254;
 
@@ -212,3 +226,55 @@ const Map<int, int> _glslStd450OpArgc = <int, int>{
   _glslStd450FaceForward: 3,
   _glslStd450Reflect: 2,
 };
+
+enum _Operator {
+  addition,
+  subtraction,
+  division,
+  multiplication,
+  modulo,
+  negation,
+  equality,
+  inequality,
+  and,
+  or,
+  not,
+  lessThan,
+  greaterThan,
+  lessThanEqual,
+  greaterThanEqual,
+}
+
+const Set<_Operator> _compoundAssignmentOperators = <_Operator>{
+  _Operator.addition,
+  _Operator.subtraction,
+  _Operator.division,
+  _Operator.multiplication,
+  _Operator.modulo,
+};
+
+const Map<_Operator, String> _operatorStrings = <_Operator, String>{
+  _Operator.addition: '+',
+  _Operator.subtraction: '-',
+  _Operator.division: '/',
+  _Operator.multiplication: '*',
+  _Operator.modulo: '%',
+  _Operator.negation: '-',
+  _Operator.equality: '==',
+  _Operator.inequality: '!=',
+  _Operator.and: '&&',
+  _Operator.or: '||',
+  _Operator.not: '!',
+  _Operator.lessThan: '<',
+  _Operator.greaterThan: '>',
+  _Operator.lessThanEqual: '<=',
+  _Operator.greaterThanEqual: '>=',
+};
+
+String _operatorString(_Operator op) {
+  return _operatorStrings[op]!;
+}
+
+bool _isCompoundAssignment(_Operator op) {
+  return _compoundAssignmentOperators.contains(op);
+}

@@ -1,0 +1,78 @@
+; Copyright 2013 The Flutter Authors. All rights reserved.
+; Use of this source code is governed by a BSD-style license that can be
+; found in the LICENSE file.
+;
+; SPIR-V
+; Version: 1.0
+; Generator: Khronos Glslang Reference Front End; 10
+; Bound: 41
+; Schema: 0
+;
+; Condition %27 depends on more than one variable, but is used as a for-loop
+; condition.
+;
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %oColor
+               OpExecutionMode %main OriginLowerLeft
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %oColor "oColor"
+               OpName %i "i"
+               OpName %j "j"
+               OpName %a "a"
+               OpDecorate %oColor Location 0
+               OpDecorate %a Location 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+     %oColor = OpVariable %_ptr_Output_v4float Output
+    %float_0 = OpConstant %float 0
+         %11 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+%_ptr_Function_float = OpTypePointer Function %float
+   %float_10 = OpConstant %float 10
+       %bool = OpTypeBool
+    %float_5 = OpConstant %float 5
+%_ptr_UniformConstant_float = OpTypePointer UniformConstant %float
+          %a = OpVariable %_ptr_UniformConstant_float UniformConstant
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Output_float = OpTypePointer Output %float
+    %float_1 = OpConstant %float 1
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+          %i = OpVariable %_ptr_Function_float Function
+          %j = OpVariable %_ptr_Function_float Function
+               OpStore %oColor %11
+               OpStore %i %float_0
+               OpStore %j %float_0
+               OpBranch %15
+         %15 = OpLabel
+               OpLoopMerge %17 %18 None
+               OpBranch %19
+         %19 = OpLabel
+         %20 = OpLoad %float %i
+         %23 = OpFOrdLessThan %bool %20 %float_10
+         %24 = OpLoad %float %j
+         %26 = OpFOrdLessThan %bool %24 %float_5
+         %27 = OpLogicalAnd %bool %23 %26
+               OpBranchConditional %27 %16 %17
+         %16 = OpLabel
+         %30 = OpLoad %float %a
+         %34 = OpAccessChain %_ptr_Output_float %oColor %uint_0
+         %35 = OpLoad %float %34
+         %36 = OpFAdd %float %35 %30
+         %37 = OpAccessChain %_ptr_Output_float %oColor %uint_0
+               OpStore %37 %36
+               OpBranch %18
+         %18 = OpLabel
+         %38 = OpLoad %float %i
+         %40 = OpFAdd %float %38 %float_1
+               OpStore %i %40
+               OpBranch %15
+         %17 = OpLabel
+               OpReturn
+               OpFunctionEnd

@@ -44,10 +44,10 @@ class TranspileResult {
   final int samplerCount;
 
   TranspileResult._(
-      this.src,
-      this.uniformFloatCount,
-      this.samplerCount,
-      this.language,
+    this.src,
+    this.uniformFloatCount,
+    this.samplerCount,
+    this.language,
   );
 }
 

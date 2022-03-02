@@ -19,9 +19,13 @@ the code will need to adhere to the following rules.
 - The output can only be written to from the main function.
 - `gl_FragCoord` can only be read from the main function, and its z and w components
   have no meaning.
-- Control flow is prohibited (`if`, `while`, `for`, `switch`, etc.) aside from function calls and `return`.
+- `if`, `else`, and `for` and function calls are the only permitted control
+  flow operations. `for` loops must initialize a float variable to a constant
+  value, compare it against a constant value, and increment/modify it by a
+  constant value.
+- `while` and `switch` statements are not supported.
 - No inputs from other shader stages.
-- Only sampler2D, float, float-vector types, and square float-matrix types.
+- Only sampler2D, bool, float, float-vector types, and square float-matrix types.
 - Only square matrices are supported.
 - Only built-in functions present in GLSL ES 100 are used.
 - Only the `texture` function is supported for sampling from a sampler2D object.
