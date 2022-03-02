@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
     return SizedBox(height: 100.0, child: Text('$i'));
+  });
+}
+
+List<Widget> childrenSizeIncrease(int n) {
+  return List<Widget>.generate(n, (int i) {
+    return SizedBox(height: 40.0 + i * 3, child: Text('$i'));
   });
 }
 
@@ -127,6 +135,117 @@ void main() {
     await tester.pump();
     expect(find.text('Page 9'), findsOneWidget);
   });
+
+  testWidgets('Check for duplicate pixels with ClampingScrollPhysics', (WidgetTester tester) async {
+    final List<double> scrollSimulationXList = <double>[];
+    final TestScrollPhysics testScrollPhysics = TestScrollPhysics(
+        scrollSimulationXList,
+        parent: const ClampingScrollPhysics(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          physics: testScrollPhysics,
+          children: childrenSizeIncrease(100),
+        ),
+      ),
+    );
+    await tester.fling(
+        find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.pumpAndSettle();
+    final Set<double> checkSet = <double>{};
+    checkSet.addAll(scrollSimulationXList);
+    /// checkSet.length + 1 is because:
+    /// simulation.x(0.0) will be call in _startSimulation.
+    /// The first frame of the animation will also call simulation.x(0.0).
+    /// It can be tolerated that it has at most one duplicate value.
+    final bool noDuplicate = scrollSimulationXList.length == checkSet.length + 1;
+    expect(true, noDuplicate); // and ends up at the end
+  });
+
+  testWidgets('Check for duplicate pixels with BouncingScrollPhysics', (WidgetTester tester) async {
+    final List<double> scrollSimulationXList = <double>[];
+    final TestScrollPhysics testScrollPhysics = TestScrollPhysics(
+      scrollSimulationXList,
+      parent: const BouncingScrollPhysics(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          physics: testScrollPhysics,
+          children: childrenSizeIncrease(100),
+        ),
+      ),
+    );
+    await tester.fling(
+        find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.pumpAndSettle();
+    final Set<double> checkSet = <double>{};
+    checkSet.addAll(scrollSimulationXList);
+    /// checkSet.length + 1 is because:
+    /// simulation.x(0.0) will be call in _startSimulation.
+    /// The first frame of the animation will also call simulation.x(0.0).
+    /// It can be tolerated that it has at most one duplicate value.
+    final bool noDuplicate = scrollSimulationXList.length == checkSet.length + 1;
+    expect(true, noDuplicate); // and ends up at the end
+  });
+}
+
+class TestScrollPhysics extends ScrollPhysics {
+  const TestScrollPhysics(
+    this.scrollSimulationXList, {
+    ScrollPhysics? parent,
+  }) : super(parent: parent);
+
+  final List<double> scrollSimulationXList;
+
+  @override
+  ScrollSimulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    final ScrollSimulation? scrollSimulation =
+        super.createBallisticSimulation(position, velocity);
+    if (scrollSimulation != null && scrollSimulationXList != null) {
+      return TestScrollScrollSimulation(
+        scrollSimulation,
+        scrollSimulationXList,
+      );
+    }
+    return scrollSimulation;
+  }
+
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return TestScrollPhysics(scrollSimulationXList,
+        parent: buildParent(ancestor));
+  }
+}
+
+class TestScrollScrollSimulation extends ScrollSimulation {
+  TestScrollScrollSimulation(
+    this.innerScrollSimulation,
+    this.scrollSimulationXList,
+  );
+
+  final ScrollSimulation innerScrollSimulation;
+
+  final List<double> scrollSimulationXList;
+
+  @override
+  double dx(double time) => innerScrollSimulation.dx(time);
+
+  @override
+  bool isDone(double time) => innerScrollSimulation.isDone(time);
+
+  @override
+  double x(double time) {
+    final double simulationX = innerScrollSimulation.x(time);
+    if (scrollSimulationXList != null) {
+      scrollSimulationXList.add(simulationX);
+    }
+    return simulationX;
+  }
 }
 
 class PageView62209 extends StatefulWidget {
