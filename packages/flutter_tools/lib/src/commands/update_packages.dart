@@ -827,7 +827,7 @@ class PubspecYaml {
     // that we added in a previous run.
     return inputData
         .whereType<PubspecDependency>()
-        .where((PubspecDependency data) => data.kind != DependencyKind.overridden && !data.isTransitive && !data.isDevDependency!);
+        .where((PubspecDependency data) => data.kind != DependencyKind.overridden && !data.isTransitive && !data.isDevDependency);
   }
 
   /// This returns all regular dependencies and all dev dependencies.
@@ -1230,7 +1230,7 @@ class PubspecDependency extends PubspecLine {
   final String version; // the version string if found, or blank.
   final bool isTransitive; // whether the suffix matched kTransitiveMagicString
   final String sourcePath; // the filename of the pubspec.yaml file, for error messages
-  bool? isDevDependency; // Whether this dependency is under the `dev dependencies` section.
+  late bool isDevDependency; // Whether this dependency is under the `dev dependencies` section.
 
   DependencyKind get kind => _kind;
   DependencyKind _kind = DependencyKind.normal;
@@ -1604,7 +1604,7 @@ environment:
 
     output.writeln('dependencies:');
     for (final PubspecDependency dependency in pubspecYaml.dependencies) {
-      if (dependency.isTransitive || dependency.isDevDependency!) {
+      if (dependency.isTransitive || dependency.isDevDependency) {
         continue;
       }
       if (dependency.kind == DependencyKind.sdk) {
