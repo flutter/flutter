@@ -1333,7 +1333,7 @@ void main() {
     );
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+      tester.state<EditableTextState>(find.byType(EditableText));
 
     // Show the toolbar
     state.renderEditable.selectWordsInRange(
