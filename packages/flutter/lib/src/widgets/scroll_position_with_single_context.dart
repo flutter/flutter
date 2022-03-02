@@ -15,6 +15,7 @@ import 'scroll_context.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scroll_simulation.dart';
 
 /// A scroll position that manages scroll activities for a single
 /// [ScrollContext].
@@ -144,7 +145,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void goBallistic(double velocity) {
     assert(hasPixels);
-    final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
+    final ScrollSimulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
     } else {

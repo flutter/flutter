@@ -337,7 +337,7 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  ScrollSimulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     if (parent == null)
       return null;
     return parent!.createBallisticSimulation(position, velocity);
@@ -646,7 +646,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  ScrollSimulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       return BouncingScrollSimulation(
@@ -748,7 +748,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  ScrollSimulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity > 0.0 && position.pixels == position.maxScrollExtent)
       return null;

@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -479,7 +480,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  ScrollSimulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     assert(
       position is _FixedExtentScrollPosition,
       'FixedExtentScrollPhysics can only be used with Scrollables that uses '
@@ -534,25 +535,50 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     // If we're going to end back at the same item because initial velocity
     // is too low to break past it, use a spring simulation to get back.
     if (settlingItemIndex == metrics.itemIndex) {
-      return SpringSimulation(
-        spring,
-        metrics.pixels,
-        settlingPixels,
-        velocity,
-        tolerance: tolerance,
+      return FixedExtentScrollSimulation(
+        SpringSimulation(
+          spring,
+          metrics.pixels,
+          settlingPixels,
+          velocity,
+          tolerance: tolerance,
+        ),
       );
     }
 
     // Scenario 5:
     // Create a new friction simulation except the drag will be tweaked to land
     // exactly on the item closest to the natural stopping point.
-    return FrictionSimulation.through(
-      metrics.pixels,
-      settlingPixels,
-      velocity,
-      tolerance.velocity * velocity.sign,
+    return FixedExtentScrollSimulation(
+      FrictionSimulation.through(
+        metrics.pixels,
+        settlingPixels,
+        velocity,
+        tolerance.velocity * velocity.sign,
+      ),
     );
   }
+}
+
+/// Boxing the Simulation used by FixedExtentScrollPhysics
+/// and ensure it extends [ScrollSimulation].
+class FixedExtentScrollSimulation extends ScrollSimulation {
+
+  /// Create a FixedExtentScrollSimulation by passing in the real Simulation.
+  FixedExtentScrollSimulation(
+    Simulation innerSimulation,
+  ) : _innerSimulation = innerSimulation;
+
+  final Simulation _innerSimulation;
+
+  @override
+  double dx(double time) => _innerSimulation.dx(time);
+
+  @override
+  bool isDone(double time) => _innerSimulation.isDone(time);
+
+  @override
+  double x(double time) => _innerSimulation.x(time);
 }
 
 /// A box in which children on a wheel can be scrolled.

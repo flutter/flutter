@@ -10,10 +10,52 @@ import 'scroll_activity.dart';
 import 'scroll_position.dart';
 
 /// Extension of ScrollSimulation
-mixin ScrollSimulationMixin {
+abstract class ScrollSimulation extends Simulation {
+
+  /// Initializes the [tolerance] field for subclasses.
+  ScrollSimulation({
+    Tolerance tolerance = Tolerance.defaultTolerance,
+  }) : super(tolerance: tolerance);
+
   /// Called when the scroll view that is performing this activity changes its metrics.
   /// Only call when the current scrollActivity is [BallisticScrollActivity]
   void applyNewDimensions(ScrollPosition newScrollPosition, double velocity) {}
+}
+
+/// A [SpringSimulation] where the value of [x] is guaranteed to have exactly the
+/// end value when the simulation [isDone].
+class ScrollSpringSimulation extends ScrollSimulation {
+
+  /// Creates a spring simulation from the provided spring description, start
+  /// distance, end distance, and initial velocity.
+  ///
+  /// See the [new SpringSimulation] constructor on the superclass for a
+  /// discussion of the arguments' units.
+  ScrollSpringSimulation(
+    SpringDescription spring,
+    double start,
+    double end,
+    double velocity, {
+    Tolerance tolerance = Tolerance.defaultTolerance,
+  }) : super(tolerance: tolerance) {
+    _springSimulation =
+        SpringSimulation(spring, start, end, velocity, tolerance: tolerance);
+    _endPosition = end;
+  }
+
+  late double _endPosition;
+
+  late SpringSimulation _springSimulation;
+
+  @override
+  double x(double time) => isDone(time) ? _endPosition : _springSimulation.x(time);
+
+  @override
+  double dx(double time) => _springSimulation.dx(time);
+
+  @override
+  bool isDone(double time) => _springSimulation.isDone(time);
+
 }
 
 /// An implementation of scroll physics that matches iOS.
@@ -22,7 +64,7 @@ mixin ScrollSimulationMixin {
 ///
 ///  * [ClampingScrollSimulation], which implements Android scroll physics.
 ///  * [PageScrollSimulation], which implements Android page view scroll physics.
-class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
+class BouncingScrollSimulation extends ScrollSimulation {
   /// Creates a simulation group for scrolling on iOS, with the given
   /// parameters.
   ///
@@ -179,7 +221,7 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
 //
 // The "See..." comments below refer to Scroller methods and values. Some
 // simplifications have been made.
-class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
+class ClampingScrollSimulation extends ScrollSimulation {
   /// Creates a scroll physics simulation that matches Android scrolling.
   ClampingScrollSimulation({
     required this.position,
@@ -348,7 +390,7 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
 //
 // See Android Scroller.java `startScroll` source code
 // https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/widget/Scroller.java;l=393;drc=ae5bcf23b5f0875e455790d6af387184dbd009c1
-class PageScrollSimulation extends Simulation {
+class PageScrollSimulation extends ScrollSimulation {
   /// Creates a scroll physics simulation that matches Android page view.
   PageScrollSimulation({
     required this.position,

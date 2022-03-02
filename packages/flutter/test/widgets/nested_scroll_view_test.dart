@@ -21,7 +21,7 @@ class _CustomPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
+  ScrollSimulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
     return ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
   }
 }

@@ -19,6 +19,7 @@ import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scroll_simulation.dart';
 import 'scroll_view.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
@@ -1337,7 +1338,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   // ballistic.
   @override
   void goBallistic(double velocity) {
-    Simulation? simulation;
+    ScrollSimulation? simulation;
     if (velocity != 0.0 || outOfRange)
       simulation = physics.createBallisticSimulation(this, velocity);
     beginActivity(createBallisticScrollActivity(
@@ -1347,7 +1348,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   ScrollActivity createBallisticScrollActivity(
-    Simulation? simulation, {
+    ScrollSimulation? simulation, {
     required _NestedBallisticScrollActivityMode mode,
     _NestedScrollMetrics? metrics,
   }) {
@@ -1444,7 +1445,7 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   _NestedInnerBallisticScrollActivity(
     this.coordinator,
     _NestedScrollPosition position,
-    Simulation simulation,
+    ScrollSimulation simulation,
     TickerProvider vsync,
   ) : super(position, simulation, vsync);
 
@@ -1480,7 +1481,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.coordinator,
     _NestedScrollPosition position,
     this.metrics,
-    Simulation simulation,
+    ScrollSimulation simulation,
     TickerProvider vsync,
   ) : assert(metrics.minRange != metrics.maxRange),
       assert(metrics.maxRange > metrics.minRange),
