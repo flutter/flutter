@@ -138,8 +138,9 @@ abstract class CreateBase extends FlutterCommand {
     argParser.addOption(
       'initial-create-revision',
       defaultsTo: null,
-      help: 'The revision to store in .migrate_config.',
-      hide: !verboseHelp,
+      help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
+            'internally and should generally not be used manually.',
+      hide: true,
     );
   }
 
@@ -509,6 +510,14 @@ abstract class CreateBase extends FlutterCommand {
       generatedCount += _injectGradleWrapper(project);
     }
 
+    final bool androidPlatform = templateContext['android'] as bool ?? false;
+    final bool iosPlatform = templateContext['ios'] as bool ?? false;
+    final bool linuxPlatform = templateContext['linux'] as bool ?? false;
+    final bool macOSPlatform = templateContext['macos'] as bool ?? false;
+    final bool windowsPlatform = templateContext['windows'] as bool ?? false;
+    final bool webPlatform = templateContext['web'] as bool ?? false;
+    final bool winUwpPlatform = templateContext['winuwp'] as bool ?? false;
+
     if (boolArg('pub')) {
       final Environment environment = Environment(
         artifacts: globals.artifacts,
@@ -541,47 +550,48 @@ abstract class CreateBase extends FlutterCommand {
       );
 
       await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: templateContext['android'] as bool ?? false,
-        iosPlatform: templateContext['ios'] as bool ?? false,
-        linuxPlatform: templateContext['linux'] as bool ?? false,
-        macOSPlatform: templateContext['macos'] as bool ?? false,
-        windowsPlatform: templateContext['windows'] as bool ?? false,
-        webPlatform: templateContext['web'] as bool ?? false,
-        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        androidPlatform: androidPlatform,
+        iosPlatform: iosPlatform,
+        linuxPlatform: linuxPlatform,
+        macOSPlatform: macOSPlatform,
+        windowsPlatform: windowsPlatform,
+        webPlatform: webPlatform,
+        winUwpPlatform: winUwpPlatform,
       );
     }
-    if (templateContext['android'] == true) {
+    final List<SupportedPlatform> platformsForMigrateConfig = <String>[SupportedPlatform.root];
+    if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      platformsForMigrateConfig.add(SupportedPlatform.android);
     }
-    final List<String> platformsForMigrateConfig = <String>['root'];
-    if (templateContext['android'] == true) {
-      platformsForMigrateConfig.add('android');
+    if (iosPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.ios);
     }
-    if (templateContext['ios'] == true) {
-      platformsForMigrateConfig.add('ios');
+    if (linuxPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.linux);
     }
-    if (templateContext['linux'] == true) {
-      platformsForMigrateConfig.add('linux');
+    if (macOSPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.macos);
     }
-    if (templateContext['macos'] == true) {
-      platformsForMigrateConfig.add('macos');
+    if (webPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.web);
     }
-    if (templateContext['windows'] == true) {
-      platformsForMigrateConfig.add('windows');
+    if (windowsPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.windows);
     }
-    if (templateContext['winuwp'] == true) {
-      platformsForMigrateConfig.add('windowsUwp');
+    if (winUwpPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.windowsuwp);
     }
     if (templateContext['fuchsia'] == true) {
-      platformsForMigrateConfig.add('fuchisa');
+      platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
     await MigrateConfig.parseOrCreateMigrateConfigs(
-        platforms: platformsForMigrateConfig,
-        projectDirectory: directory,
-        create: true,
-        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
-        createRevision: globals.flutterVersion.frameworkRevision,
-      );
+      platforms: platformsForMigrateConfig,
+      projectDirectory: directory,
+      create: true,
+      currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+      createRevision: globals.flutterVersion.frameworkRevision,
+    );
     return generatedCount;
   }
 

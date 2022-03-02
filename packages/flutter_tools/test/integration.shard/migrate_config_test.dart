@@ -6,6 +6,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/migrate/migrate_config.dart';
+import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -53,7 +54,7 @@ unmanagedFiles:
 ''', flush: true);
     MigrateConfig config = MigrateConfig.fromFile(configFile);
 
-    expect(config.platform, equals('root'));
+    expect(config.platform, equals(SupportedPlatform.root));
     expect(config.createRevision, equals('abcdefg1234567'));
     expect(config.baseRevision, equals('abcdefg1234567base'));
     expect(config.unmanagedFiles[0], equals('lib/main.dart'));
@@ -76,7 +77,7 @@ unmanagedFiles:
 
     config = MigrateConfig.fromFile(configFile);
 
-    expect(config.platform, equals('root'));
+    expect(config.platform, equals(SupportedPlatform.root));
     expect(config.createRevision, equals(null));
     expect(config.baseRevision, equals(null));
     expect(config.unmanagedFiles.isEmpty, true);
@@ -88,7 +89,7 @@ unmanagedFiles:
     await project.setUpIn(tempDir);
 
     MigrateConfig config = MigrateConfig(
-      platform: 'root',
+      platform: SupportedPlatform.root,
       unmanagedFiles: <String>[],
     );
     config.writeFile(projectDirectory: tempDir);
@@ -110,7 +111,7 @@ unmanagedFiles:
 '''));
 
     config = MigrateConfig(
-      platform: 'android',
+      platform: SupportedPlatform.android,
       createRevision: 'abcd',
       baseRevision: '1234',
       unmanagedFiles: <String>['test1/test.dart', 'file/two.txt'],
@@ -181,11 +182,11 @@ unmanagedFiles:
     final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(projectDirectory: tempDir, currentRevision: currentRevision);
 
     expect(configs.length, equals(3));
-    expect(configs[0].platform, equals('root'));
+    expect(configs[0].platform, equals(SupportedPlatform.root));
     expect(configs[0].baseRevision, equals('abcdefg1234567base'));
-    expect(configs[1].platform, equals('android'));
+    expect(configs[1].platform, equals(SupportedPlatform.android));
     expect(configs[1].baseRevision, equals('abcdefg1234567'));
-    expect(configs[2].platform, equals('ios'));
+    expect(configs[2].platform, equals(SupportedPlatform.ios));
     expect(configs[2].baseRevision, equals(currentRevision));
     expect(configs[2].createRevision, equals(null));
   });
