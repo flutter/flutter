@@ -1009,8 +1009,12 @@ abstract class BoxScrollView extends ScrollView {
 /// `ListView` has no built-in notion of a selected item or items. For a small
 /// example of how a caller might wire up basic item selection, see
 /// [ListTile.selected].
-/// For a custom implementation of ListTile selection in a ListView, please refer the example at
-/// [examples/api/lib/widgets/scroll_view/listview_select.1.dart](https://github.com/flutter/flutter/tree/master/examples/api/lib/widgets/scroll_view/listview_select.1.dart)
+/// 
+/// {@tool dartpad}
+/// This example shows a custom implementation of ListTile selection in a ListView. 
+/// Long Press any ListTile to enable selection mode.
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
