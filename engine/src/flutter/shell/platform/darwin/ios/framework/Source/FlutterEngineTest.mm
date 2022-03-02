@@ -159,6 +159,26 @@ FLUTTER_ASSERT_ARC
                                        message:encodedSetInitialRouteMethod]);
 }
 
+- (void)testInitialRouteSettingsSendsNavigationMessage {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+
+  auto settings = FLTDefaultSettingsForBundle();
+  settings.route = "test";
+  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine run];
+
+  // Now check that an encoded method call has been made on the binary messenger to set the
+  // initial route to "test".
+  FlutterMethodCall* setInitialRouteMethodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"setInitialRoute" arguments:@"test"];
+  NSData* encodedSetInitialRouteMethod =
+      [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
+                                       message:encodedSetInitialRouteMethod]);
+}
+
 - (void)testPlatformViewsControllerRenderingMetalBackend {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine run];

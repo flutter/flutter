@@ -105,6 +105,9 @@ DEF_SWITCH(EnableSoftwareRendering,
            "Enable rendering using the Skia software backend. This is useful "
            "when testing Flutter on emulators. By default, Flutter will "
            "attempt to either use OpenGL, Metal, or Vulkan.")
+DEF_SWITCH(Route,
+           "route",
+           "Start app with an specific route defined on the framework")
 DEF_SWITCH(SkiaDeterministicRendering,
            "skia-deterministic-rendering",
            "Skips the call to SkGraphics::Init(), thus avoiding swapping out "

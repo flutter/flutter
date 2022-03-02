@@ -107,6 +107,8 @@ struct Settings {
   std::string isolate_snapshot_instr_path;  // deprecated
   MappingCallback isolate_snapshot_instr;
 
+  std::string route;
+
   // Returns the Mapping to a kernel buffer which contains sources for dart:*
   // libraries.
   MappingCallback dart_library_sources_kernel;

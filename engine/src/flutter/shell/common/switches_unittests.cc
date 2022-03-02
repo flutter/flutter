@@ -46,5 +46,15 @@ TEST(SwitchesTest, SkiaTraceAllowlistFlag) {
 #endif
 }
 
+TEST(SwitchesTest, RouteParsedFlag) {
+  fml::CommandLine command_line =
+      fml::CommandLineFromInitializerList({"command", "--route=/animation"});
+  Settings settings = SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.route, "/animation");
+  command_line = fml::CommandLineFromInitializerList({"command", "--route"});
+  settings = SettingsFromCommandLine(command_line);
+  EXPECT_TRUE(settings.route.empty());
+}
+
 }  // namespace testing
 }  // namespace flutter
