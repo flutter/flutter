@@ -488,8 +488,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      // int.tryParse will not accept null, but will convert empty string to
-      // null
+      // int.tryParse will not accept null, but will convert empty string to null
       final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
