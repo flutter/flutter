@@ -130,7 +130,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         NoIdeValidator(),
       if (proxyValidator.shouldShow)
         proxyValidator,
-      if (globals.deviceManager?.canListAnything == true)
+      if (globals.deviceManager?.canListAnything ?? false)
         DeviceValidator(
           deviceManager: globals.deviceManager,
           userMessages: globals.userMessages,
@@ -153,11 +153,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows!.add(globals.iosWorkflow!);
       }
 
-      if (androidWorkflow?.appliesToHostPlatform == true) {
+      if (androidWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(androidWorkflow!);
       }
 
-      if (fuchsiaWorkflow?.appliesToHostPlatform == true) {
+      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(fuchsiaWorkflow!);
       }
 
@@ -169,7 +169,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows!.add(macOSWorkflow);
       }
 
-      if (windowsWorkflow?.appliesToHostPlatform == true) {
+      if (windowsWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(windowsWorkflow!);
       }
 

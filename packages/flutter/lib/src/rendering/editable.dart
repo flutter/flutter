@@ -1265,6 +1265,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // [assembleSemanticsNode] invocations.
   Queue<SemanticsNode>? _cachedChildNodes;
 
+  /// Returns a list of rects that bound the given selection.
+  ///
+  /// See [TextPainter.getBoxesForSelection] for more details.
+  List<Rect> getBoxesForSelection(TextSelection selection) {
+    _computeTextMetricsIfNeeded();
+    return _textPainter.getBoxesForSelection(selection)
+                       .map((TextBox textBox) => textBox.toRect().shift(_paintOffset))
+                       .toList();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -1321,7 +1331,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (hasFocus && !readOnly)
       config.onSetText = _handleSetText;
 
-    if (selectionEnabled && selection?.isValid == true) {
+    if (selectionEnabled && (selection?.isValid ?? false)) {
       config.textSelection = selection;
       if (_textPainter.getOffsetBefore(selection!.extentOffset) != null) {
         config
@@ -1437,7 +1447,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
-        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
+        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty ?? false)
             ? _cachedChildNodes!.removeFirst()
             : SemanticsNode();
         newChild
@@ -2406,7 +2416,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // ui.LineMetrics, then we can get rid of this.
     final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
     for (final ui.LineMetrics lineMetrics in metrics) {
-      if (lineMetrics.baseline + lineMetrics.descent > offset.dy) {
+      if (lineMetrics.baseline > offset.dy) {
         return MapEntry<int, Offset>(lineMetrics.lineNumber, Offset(offset.dx, lineMetrics.baseline));
       }
     }

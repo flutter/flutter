@@ -10,7 +10,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('toString control tests', (GestureTester tester) {
     expect(const PointerDownEvent(), hasOneLineDescription);

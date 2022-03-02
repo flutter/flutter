@@ -130,7 +130,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pump();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     await tester.pumpWidget(
       Directionality(
@@ -145,7 +145,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -160,7 +160,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -175,7 +175,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Does OutlineButton work with focus', (WidgetTester tester) async {
@@ -845,13 +845,11 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: OutlineButton(
-              key: buttonKey,
-              onPressed: () {},
-              child: const Text('ABC'),
-            ),
+        child: Center(
+          child: OutlineButton(
+            key: buttonKey,
+            onPressed: () {},
+            child: const Text('ABC'),
           ),
         ),
       ),
@@ -868,12 +866,10 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: OutlineButton(
-              onPressed: () {},
-              child: const Text('ABC'),
-            ),
+        child: Center(
+          child: OutlineButton(
+            onPressed: () {},
+            child: const Text('ABC'),
           ),
         ),
       ),
@@ -908,14 +904,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Center(
-              child: OutlineButton(
-                onPressed: () {},
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Center(
+            child: OutlineButton(
+              onPressed: () {},
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -929,14 +923,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
-            child: Center(
-              child: FlatButton(
-                onPressed: () {},
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 1.3),
+          child: Center(
+            child: FlatButton(
+              onPressed: () {},
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -953,14 +945,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 3.0),
-            child: Center(
-              child: FlatButton(
-                onPressed: () {},
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 3.0),
+          child: Center(
+            child: FlatButton(
+              onPressed: () {},
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -1043,13 +1033,11 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: OutlineButton(
-              materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () {},
-              child: const SizedBox(width: 50.0, height: 8.0),
-            ),
+        child: Center(
+          child: OutlineButton(
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            onPressed: () {},
+            child: const SizedBox(width: 50.0, height: 8.0),
           ),
         ),
       ),
@@ -1061,13 +1049,11 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: OutlineButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {},
-              child: const SizedBox(width: 50.0, height: 8.0),
-            ),
+        child: Center(
+          child: OutlineButton(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: () {},
+            child: const SizedBox(width: 50.0, height: 8.0),
           ),
         ),
       ),
@@ -1080,15 +1066,13 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: OutlineButton.icon(
-              key: key1,
-              materialTapTargetSize: MaterialTapTargetSize.padded,
-              icon: const Icon(Icons.add_alarm),
-              label: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () { },
-            ),
+        child: Center(
+          child: OutlineButton.icon(
+            key: key1,
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            icon: const Icon(Icons.add_alarm),
+            label: const SizedBox(width: 50.0, height: 8.0),
+            onPressed: () { },
           ),
         ),
       ),
@@ -1107,15 +1091,13 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: OutlineButton.icon(
-              key: key2,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              icon: const Icon(Icons.add),
-              label: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () { },
-            ),
+        child: Center(
+          child: OutlineButton.icon(
+            key: key2,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            icon: const Icon(Icons.add),
+            label: const SizedBox(width: 50.0, height: 8.0),
+            onPressed: () { },
           ),
         ),
       ),

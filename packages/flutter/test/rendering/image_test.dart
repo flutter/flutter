@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 Future<void> main() async {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   final ui.Image squareImage = await createTestImage(width: 10, height: 10);
   final ui.Image wideImage =   await createTestImage(width: 20, height: 10);
   final ui.Image tallImage =   await createTestImage(width: 10, height: 20);

@@ -139,35 +139,11 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
-/// To control the text that is displayed in the text field, use the
-/// [controller]. For example, to set the initial value of the text field, use
-/// a [controller] that already contains some text such as:
+/// {@tool dartpad}
+/// This example shows how to set the initial value of the `CupertinoTextField` using
+/// a [controller] that already contains some text.
 ///
-/// {@tool snippet}
-///
-/// ```dart
-/// class MyPrefilledText extends StatefulWidget {
-///   const MyPrefilledText({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyPrefilledText> createState() => _MyPrefilledTextState();
-/// }
-///
-/// class _MyPrefilledTextState extends State<MyPrefilledText> {
-///   late TextEditingController _textController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _textController = TextEditingController(text: 'initial text');
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoTextField(controller: _textController);
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/text_field/cupertino_text_field.0.dart **
 /// {@end-tool}
 ///
 /// The [controller] can also control the selection and composing region (and to
@@ -297,6 +273,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofillHints = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -468,6 +445,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofillHints = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -826,6 +804,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.editableText.scribbleEnabled}
+  final bool scribbleEnabled;
+
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
@@ -871,6 +852,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
@@ -991,6 +973,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
+    if (cause == SelectionChangedCause.scribble)
+      return true;
+
     if (_effectiveController.text.isNotEmpty)
       return true;
 
@@ -1025,7 +1010,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   @override
-  bool get wantKeepAlive => _controller?.value.text.isNotEmpty == true;
+  bool get wantKeepAlive => _controller?.value.text.isNotEmpty ?? false;
 
   bool _shouldShowAttachment({
     required OverlayVisibilityMode attachment,
@@ -1320,6 +1305,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             autofillClient: this,
             clipBehavior: widget.clipBehavior,
             restorationId: 'editable',
+            scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
           ),
         ),

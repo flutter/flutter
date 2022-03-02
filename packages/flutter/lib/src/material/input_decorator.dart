@@ -55,7 +55,7 @@ class _InputBorderGap extends ChangeNotifier {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
-  int get hashCode => hashValues(start, extent);
+  int get hashCode => Object.hash(start, extent);
 
   @override
   String toString() => describeIdentity(this);
@@ -637,30 +637,28 @@ class _Decoration {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      contentPadding,
-      floatingLabelHeight,
-      floatingLabelProgress,
-      floatingLabelAlignment,
-      border,
-      borderGap,
-      alignLabelWithHint,
-      isDense,
-      visualDensity,
-      icon,
-      input,
-      label,
-      hint,
-      prefix,
-      suffix,
-      prefixIcon,
-      suffixIcon,
-      helperError,
-      counter,
-      container,
-    );
-  }
+  int get hashCode => Object.hash(
+    contentPadding,
+    floatingLabelHeight,
+    floatingLabelProgress,
+    floatingLabelAlignment,
+    border,
+    borderGap,
+    alignLabelWithHint,
+    isDense,
+    visualDensity,
+    icon,
+    input,
+    label,
+    hint,
+    prefix,
+    suffix,
+    prefixIcon,
+    suffixIcon,
+    helperError,
+    counter,
+    container,
+  );
 }
 
 // A container for the layout values computed by _RenderDecoration._layout.
@@ -2095,7 +2093,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
     } else {
-      borderColor = (decoration!.filled == true && decoration!.border?.isOutline != true)
+      borderColor = ((decoration!.filled ?? false) && !(decoration!.border?.isOutline ?? false))
         ? Colors.transparent
         : themeData.disabledColor;
     }
@@ -2188,7 +2186,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
 
-    final bool decorationIsDense = decoration!.isDense == true; // isDense == null, same as false
+    final bool decorationIsDense = decoration!.isDense ?? false;
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration!.icon == null ? null :
@@ -2284,7 +2282,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
-      if (decoration!.filled == true) { // filled == null same as filled == false
+      if (decoration!.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
@@ -3618,7 +3616,7 @@ class InputDecoration {
       alignLabelWithHint,
       constraints,
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 
   @override
@@ -3656,7 +3654,7 @@ class InputDecoration {
       if (counter != null) 'counter: $counter',
       if (counterText != null) 'counterText: $counterText',
       if (counterStyle != null) 'counterStyle: $counterStyle',
-      if (filled == true) 'filled: true', // filled == null same as filled == false
+      if (filled ?? false) 'filled: true',
       if (fillColor != null) 'fillColor: $fillColor',
       if (focusColor != null) 'focusColor: $focusColor',
       if (hoverColor != null) 'hoverColor: $hoverColor',
@@ -4161,27 +4159,27 @@ class InputDecorationTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<dynamic>[
-      labelStyle,
-      floatingLabelStyle,
-      helperStyle,
-      helperMaxLines,
-      hintStyle,
-      errorStyle,
-      errorMaxLines,
-      floatingLabelBehavior,
-      floatingLabelAlignment,
-      isDense,
-      contentPadding,
-      isCollapsed,
-      iconColor,
-      prefixStyle,
-      prefixIconColor,
-      suffixStyle,
-      suffixIconColor,
-      counterStyle,
-      filled,
+  int get hashCode => Object.hash(
+    labelStyle,
+    floatingLabelStyle,
+    helperStyle,
+    helperMaxLines,
+    hintStyle,
+    errorStyle,
+    errorMaxLines,
+    floatingLabelBehavior,
+    floatingLabelAlignment,
+    isDense,
+    contentPadding,
+    isCollapsed,
+    iconColor,
+    prefixStyle,
+    prefixIconColor,
+    suffixStyle,
+    suffixIconColor,
+    counterStyle,
+    filled,
+    Object.hash(
       fillColor,
       focusColor,
       hoverColor,
@@ -4193,8 +4191,8 @@ class InputDecorationTheme with Diagnosticable {
       border,
       alignLabelWithHint,
       constraints,
-    ]);
-  }
+    ),
+  );
 
   @override
   bool operator ==(Object other) {

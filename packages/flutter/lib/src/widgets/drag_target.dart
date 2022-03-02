@@ -20,7 +20,7 @@ typedef DragTargetWillAccept<T> = bool Function(T? data);
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
 /// Used by [DragTarget.onAccept].
-typedef DragTargetAccept<T> = void Function(T data);
+typedef DragTargetAccept<T> = void Function(T? data);
 
 /// Signature for determining information about the acceptance by a [DragTarget].
 ///
@@ -638,7 +638,7 @@ class DragTargetDetails<T> {
   DragTargetDetails({required this.data, required this.offset}) : assert(offset != null);
 
   /// The data that was dropped onto this [DragTarget].
-  final T data;
+  final T? data;
 
   /// The global position when the specific pointer event occurred on
   /// the draggable.
@@ -767,14 +767,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    widget.onAccept?.call(avatar.data! as T);
-    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onAccept?.call(avatar.data as T?);
+    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data as T?, offset: avatar._lastOffset!));
   }
 
   void didMove(_DragAvatar<Object> avatar) {
     if (!mounted)
       return;
-    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data as T?, offset: avatar._lastOffset!));
   }
 
   @override
@@ -858,7 +858,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _lastOffset = globalPosition - dragStartPoint;
     _entry!.markNeedsBuild();
     final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance!.hitTest(result, globalPosition + feedbackOffset);
+    WidgetsBinding.instance.hitTest(result, globalPosition + feedbackOffset);
 
     final List<_DragTargetState<Object>> targets = _getDragTargets(result.path).toList();
 

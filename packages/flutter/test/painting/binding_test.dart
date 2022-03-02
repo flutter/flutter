@@ -15,17 +15,17 @@ Future<void> main() async {
   final ui.Image image = await createTestImage();
 
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
-    imageCache!.putIfAbsent(1, () => OneFrameImageStreamCompleter(
+    imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,
       )),
     ));
 
     await tester.idle();
-    expect(imageCache!.currentSize, 1);
+    expect(imageCache.currentSize, 1);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
-    expect(imageCache!.currentSize, 0);
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    expect(imageCache.currentSize, 0);
   });
 
   test('evict clears live references', () async {

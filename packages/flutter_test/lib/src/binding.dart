@@ -108,8 +108,11 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 
 /// Base class for bindings used by widgets library tests.
 ///
-/// The [ensureInitialized] method creates (if necessary) and returns
-/// an instance of the appropriate subclass.
+/// The [ensureInitialized] method creates (if necessary) and returns an
+/// instance of the appropriate subclass. (If one is already created, it returns
+/// that one, even if it's not the one that it would normally create. This
+/// allows tests to force the use of [LiveTestWidgetsFlutterBinding] even in a
+/// normal unit test environment, e.g. to test that binding.)
 ///
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
@@ -263,6 +266,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// equivalent to [Future.delayed].
   Future<void> delayed(Duration duration);
 
+  /// The current [TestWidgetsFlutterBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this binding. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [testWidgets] or [TestWidgetsFlutterBinding.ensureInitialized].
+  static TestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static TestWidgetsFlutterBinding? _instance;
+
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
@@ -281,13 +292,26 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
   /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
   ///
-  /// The parameter `environment` is exposed to test different environment
-  /// variable values, and should not be used.
-  static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) => binding.ensureInitialized(environment);
+  /// The parameter `environment` is used to test the test framework
+  /// itself by checking how it reacts to different environment
+  /// variable values, and should not be used outside of this context.
+  ///
+  /// If a [TestWidgetsFlutterBinding] subclass was explicitly initialized
+  /// before calling [ensureInitialized], then that version of the binding is
+  /// returned regardless of the logic described above. This allows tests to
+  /// force a specific test binding to be used.
+  ///
+  /// This is called automatically by [testWidgets].
+  static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
+    if (_instance != null)
+      return _instance!;
+    return binding.ensureInitialized(environment);
+  }
 
   @override
   void initInstances() {
     super.initInstances();
+    _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     if (overrideHttpClient) {
       binding.setupHttpOverrides();
@@ -925,12 +949,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
-    assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
+    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
-    RendererBinding.instance!.initMouseTracker();
+    RendererBinding.instance.initMouseTracker();
   }
 }
 
@@ -942,11 +966,39 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 ///
 /// This class assumes it is always run in debug mode (since tests are always
 /// run in debug mode).
+///
+/// See [TestWidgetsFlutterBinding] for a list of mixins that must be
+/// provided by the binding active while the test framework is
+/// running.
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
+    _instance = this;
     binding.mockFlutterAssets();
+  }
+
+  /// The current [AutomatedTestWidgetsFlutterBinding], if one has been created.
+  ///
+  /// The binding must be initialized before using this getter. If you
+  /// need the binding to be constructed before calling [testWidgets],
+  /// you can ensure a binding has been constructed by calling the
+  /// [TestWidgetsFlutterBinding.ensureInitialized] function.
+  static AutomatedTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static AutomatedTestWidgetsFlutterBinding? _instance;
+
+  /// Returns an instance of the binding that implements
+  /// [AutomatedTestWidgetsFlutterBinding]. If no binding has yet been
+  /// initialized, the a new instance is created.
+  ///
+  /// Generally, there is no need to call this method. Use
+  /// [TestWidgetsFlutterBinding.ensureInitialized] instead, as it
+  /// will select the correct test binding implementation
+  /// automatically.
+  static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
+    if (AutomatedTestWidgetsFlutterBinding._instance == null)
+      AutomatedTestWidgetsFlutterBinding();
+    return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest
@@ -1371,7 +1423,40 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// [pump]. (There would be no point setting it to a value that
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
+///
+/// See [TestWidgetsFlutterBinding] for a list of mixins that must be
+/// provided by the binding active while the test framework is
+/// running.
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The current [LiveTestWidgetsFlutterBinding], if one has been created.
+  ///
+  /// The binding must be initialized before using this getter. If you
+  /// need the binding to be constructed before calling [testWidgets],
+  /// you can ensure a binding has been constructed by calling the
+  /// [TestWidgetsFlutterBinding.ensureInitialized] function.
+  static LiveTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static LiveTestWidgetsFlutterBinding? _instance;
+
+  /// Returns an instance of the binding that implements
+  /// [LiveTestWidgetsFlutterBinding]. If no binding has yet been
+  /// initialized, the a new instance is created.
+  ///
+  /// Generally, there is no need to call this method. Use
+  /// [TestWidgetsFlutterBinding.ensureInitialized] instead, as it
+  /// will select the correct test binding implementation
+  /// automatically.
+  static LiveTestWidgetsFlutterBinding ensureInitialized() {
+    if (LiveTestWidgetsFlutterBinding._instance == null)
+      LiveTestWidgetsFlutterBinding();
+    return LiveTestWidgetsFlutterBinding.instance;
+  }
+
   @override
   bool get inTest => _inTest;
   bool _inTest = false;

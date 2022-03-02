@@ -478,7 +478,7 @@ class _CursorUpdateDetails extends MethodCall {
   }
 
   @override
-  int get hashCode => hashValues(method, arguments);
+  int get hashCode => Object.hash(method, arguments);
 
   @override
   String toString() {

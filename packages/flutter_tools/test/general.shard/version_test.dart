@@ -372,7 +372,7 @@ void main() {
 
     // Master channel
     gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.3.0-0.0.pre.13');
     expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
@@ -491,8 +491,8 @@ void main() {
       logger: BufferLogger.test(),
     );
     final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
-    // reported version should increment the number after the dash
-    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.3-3.0.pre.12');
+    // reported version should increment the y
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.3.0-0.0.pre.12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {

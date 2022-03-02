@@ -2150,7 +2150,7 @@ class LayerLink {
       if (_debugLeaderCheckScheduled)
         return true;
       _debugLeaderCheckScheduled = true;
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _debugLeaderCheckScheduled = false;
         assert(_debugPreviousLeaders!.isEmpty);
       });

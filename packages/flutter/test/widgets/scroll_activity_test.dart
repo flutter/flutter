@@ -228,13 +228,13 @@ class _Carousel62209State extends State<Carousel62209> {
         _pages = widget.pages.toList();
       } else {
         _jumpingToPage = true;
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             setState(() {
               _pages = widget.pages.toList();
               _currentPage = newPage;
               _pageController.jumpToPage(_currentPage);
-              SchedulerBinding.instance!.addPostFrameCallback((_) {
+              SchedulerBinding.instance.addPostFrameCallback((_) {
                 _jumpingToPage = false;
               });
             });

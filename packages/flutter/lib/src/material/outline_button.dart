@@ -575,7 +575,7 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   }
 
   @override
-  int get hashCode => hashValues(side, shape);
+  int get hashCode => Object.hash(side, shape);
 
   @override
   ShapeBorder resolve(Set<MaterialState> states) {

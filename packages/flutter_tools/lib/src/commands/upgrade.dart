@@ -49,7 +49,7 @@ class UpgradeCommand extends FlutterCommand {
       )
       ..addFlag(
         'verify-only',
-        help: 'Checks for any new flutter updates, without actually fetching them.',
+        help: 'Checks for any new Flutter updates, without actually fetching them.',
         negatable: false,
       );
   }

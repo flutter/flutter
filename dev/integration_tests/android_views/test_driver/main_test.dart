@@ -22,7 +22,9 @@ Future<void> main() async {
     final SerializableFinder motionEventsListTile =
     find.byValueKey('MotionEventsListTile');
     await driver.tap(motionEventsListTile);
-    await driver.waitFor(find.byValueKey('PlatformView'));
+    await driver.runUnsynchronized(() async {
+      driver.waitFor(find.byValueKey('PlatformView'));
+    });
     final String errorMessage = await driver.requestData('run test');
     expect(errorMessage, '');
     final SerializableFinder backButton = find.byValueKey('back');

@@ -86,6 +86,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
+    Radius? trackRadius,
     OutlinedBorder? shape,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
@@ -117,6 +118,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _minLength = minLength,
        _trackColor = trackColor,
        _trackBorderColor = trackBorderColor,
+       _trackRadius = trackRadius,
        _scrollbarOrientation = scrollbarOrientation,
        _minOverscrollLength = minOverscrollLength ?? minLength,
        _ignorePointer = ignorePointer {
@@ -156,6 +158,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     _trackBorderColor = value;
+    notifyListeners();
+  }
+
+  /// [Radius] of corners of the Scrollbar's track.
+  ///
+  /// Scrollbar's track will be rectangular if [trackRadius] is null.
+  Radius? get trackRadius => _trackRadius;
+  Radius? _trackRadius;
+  set trackRadius(Radius? value) {
+    if (trackRadius == value)
+      return;
+
+    _trackRadius = value;
     notifyListeners();
   }
 
@@ -496,7 +511,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // Paint if the opacity dictates visibility
     if (fadeoutOpacityAnimation.value != 0.0) {
       // Track
-      canvas.drawRect(_trackRect!, _paintTrack());
+      if (trackRadius == null) {
+        canvas.drawRect(_trackRect!, _paintTrack());
+      } else {
+        canvas.drawRRect(RRect.fromRectAndRadius(_trackRect!, trackRadius!), _paintTrack());
+      }
       // Track Border
       canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
       if (radius != null) {
@@ -668,6 +687,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         return interactiveRect.contains(position);
     }
   }
@@ -700,6 +721,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         return _thumbRect!.contains(position);
     }
   }
@@ -737,6 +760,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != oldDelegate.mainAxisMargin
         || crossAxisMargin != oldDelegate.crossAxisMargin
         || radius != oldDelegate.radius
+        || trackRadius != oldDelegate.trackRadius
         || shape != oldDelegate.shape
         || padding != oldDelegate.padding
         || minLength != oldDelegate.minLength
@@ -875,6 +899,10 @@ class RawScrollbar extends StatefulWidget {
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
     this.minOverscrollLength,
+    this.trackVisibility,
+    this.trackRadius,
+    this.trackColor,
+    this.trackBorderColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
@@ -893,6 +921,10 @@ class RawScrollbar extends StatefulWidget {
          thumbVisibility == null || isAlwaysShown == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
          'isAlwaysShown is deprecated.'
+       ),
+       assert(
+         !((thumbVisibility == false || isAlwaysShown == false) && (trackVisibility ?? false)),
+         'A scrollbar track cannot be drawn without a scrollbar thumb.'
        ),
        assert(minThumbLength != null),
        assert(minThumbLength >= 0),
@@ -1199,6 +1231,42 @@ class RawScrollbar extends StatefulWidget {
   /// When null, it will default to the value of [minThumbLength].
   final double? minOverscrollLength;
 
+  /// {@template flutter.widgets.Scrollbar.trackVisibility}
+  /// Indicates that the scrollbar track should be visible.
+  ///
+  /// When true, the scrollbar track will always be visible so long as the thumb
+  /// is visible. If the scrollbar thumb is not visible, the track will not be
+  /// visible either.
+  ///
+  /// Defaults to false when null.
+  /// {@endtemplate}
+  ///
+  /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
+  /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
+  final bool? trackVisibility;
+
+  /// The [Radius] of the scrollbar track's rounded rectangle corners.
+  ///
+  /// Scrollbar's track will be rectangular if [trackRadius] is null, which is
+  /// the default behavior.
+  final Radius? trackRadius;
+
+  /// The color of the scrollbar track.
+  ///
+  /// The scrollbar track will only be visible when [trackVisibility] and
+  /// [thumbVisibility] are true.
+  ///
+  /// If null, defaults to Color(0x08000000).
+  final Color? trackColor;
+
+  /// The color of the scrollbar track's border.
+  ///
+  /// The scrollbar track will only be visible when [trackVisibility] and
+  /// [thumbVisibility] are true.
+  ///
+  /// If null, defaults to Color(0x1a000000).
+  final Color? trackBorderColor;
+
   /// The [Duration] of the fade animation.
   ///
   /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
@@ -1304,6 +1372,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? widget.thumbVisibility ?? false;
 
+  bool get _showTrack => showScrollbar && (widget.trackVisibility ?? false);
+
   /// Overridable getter to indicate is gestures should be enabled on the
   /// scrollbar.
   ///
@@ -1337,6 +1407,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
+      trackRadius: widget.trackRadius,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
       shape: widget.shape,
@@ -1355,7 +1426,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   bool _debugScheduleCheckHasValidScrollPosition() {
     if (!showScrollbar)
       return true;
-    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       assert(_debugCheckHasValidScrollPosition());
     });
     return true;
@@ -1470,6 +1541,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void updateScrollbarPainter() {
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
+      ..trackRadius = widget.trackRadius
+      ..trackColor = _showTrack ? const Color(0x08000000) : const Color(0x00000000)
+      ..trackBorderColor = _showTrack ? const Color(0x1a000000) : const Color(0x00000000)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
@@ -1488,7 +1562,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.didUpdateWidget(oldWidget);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown
         || widget.thumbVisibility != oldWidget.thumbVisibility) {
-      if (widget.isAlwaysShown == true || widget.thumbVisibility == true) {
+      if ((widget.isAlwaysShown ?? false) || (widget.thumbVisibility ?? false)) {
         assert(_debugScheduleCheckHasValidScrollPosition());
         _fadeoutTimer?.cancel();
         _fadeoutAnimationController.animateTo(1.0);
@@ -1895,6 +1969,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
+                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                           // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },
@@ -1908,6 +1984,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
+                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                           // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },

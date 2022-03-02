@@ -4,13 +4,9 @@
 
 // @dart = 2.8
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
+import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/src/interface/file.dart';
@@ -77,12 +73,12 @@ class FakeDaemonStreams implements DaemonStreams {
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
-  BufferLogger bufferLogger;
 
   group('daemon', () {
     FakeDaemonStreams daemonStreams;
     DaemonConnection daemonConnection;
     setUp(() {
+      BufferLogger bufferLogger;
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
       daemonStreams = FakeDaemonStreams();
@@ -564,39 +560,157 @@ void main() {
     }, overrides: <Type, Generator>{
       DevtoolsLauncher: () => FakeDevtoolsLauncher(null),
     });
+
+    testUsingContext('proxy.connect tries to connect to an ipv4 address and proxies the connection correctly', () async {
+      final TestIOOverrides ioOverrides = TestIOOverrides();
+      await io.IOOverrides.runWithIOOverrides(() async {
+        final FakeSocket socket = FakeSocket();
+        bool connectCalled = false;
+        int connectPort;
+        ioOverrides.connectCallback = (dynamic host, int port) async {
+          connectCalled = true;
+          connectPort = port;
+          if (host == io.InternetAddress.loopbackIPv4) {
+            return socket;
+          }
+          throw const io.SocketException('fail');
+        };
+
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+        );
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+        final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(firstResponse.data['id'], 0);
+        expect(firstResponse.data['result'], isNotNull);
+        expect(connectCalled, true);
+        expect(connectPort, 123);
+
+        final Object id = firstResponse.data['result'];
+
+        // Can send received data as event.
+        socket.controller.add(Uint8List.fromList(<int>[10, 11, 12]));
+        final DaemonMessage dataEvent = await broadcastOutput.firstWhere(
+          (DaemonMessage message) => message.data['event'] != null && message.data['event'] == 'proxy.data.$id',
+        );
+        expect(dataEvent.binary, isNotNull);
+        final List<List<int>> data = await dataEvent.binary.toList();
+        expect(data[0], <int>[10, 11, 12]);
+
+        // Can proxy data to the socket.
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.write', 'params': <String, dynamic>{'id': id}}, Stream<List<int>>.value(<int>[21, 22, 23])));
+        await pumpEventQueue();
+        expect(socket.addedData[0], <int>[21, 22, 23]);
+
+        // Closes the connection when disconnect request received.
+        expect(socket.closeCalled, false);
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.disconnect', 'params': <String, dynamic>{'id': id}}));
+        await pumpEventQueue();
+        expect(socket.closeCalled, true);
+
+        // Sends disconnected event when socket.done completer finishes.
+        socket.doneCompleter.complete();
+        final DaemonMessage disconnectEvent = await broadcastOutput.firstWhere(
+          (DaemonMessage message) => message.data['event'] != null && message.data['event'] == 'proxy.disconnected.$id',
+        );
+        expect(disconnectEvent.data, isNotNull);
+      }, ioOverrides);
+    });
+
+    testUsingContext('proxy.connect connects to ipv6 if ipv4 failed', () async {
+      final TestIOOverrides ioOverrides = TestIOOverrides();
+      await io.IOOverrides.runWithIOOverrides(() async {
+        final FakeSocket socket = FakeSocket();
+        bool connectIpv4Called = false;
+        int connectPort;
+        ioOverrides.connectCallback = (dynamic host, int port) async {
+          connectPort = port;
+          if (host == io.InternetAddress.loopbackIPv4) {
+            connectIpv4Called = true;
+          } else if (host == io.InternetAddress.loopbackIPv6) {
+            return socket;
+          }
+          throw const io.SocketException('fail');
+        };
+
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+        );
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+        final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(firstResponse.data['id'], 0);
+        expect(firstResponse.data['result'], isNotNull);
+        expect(connectIpv4Called, true);
+        expect(connectPort, 123);
+      }, ioOverrides);
+    });
+
+    testUsingContext('proxy.connect fails if both ipv6 and ipv4 failed', () async {
+      final TestIOOverrides ioOverrides = TestIOOverrides();
+      await io.IOOverrides.runWithIOOverrides(() async {
+        ioOverrides.connectCallback = (dynamic host, int port) => throw const io.SocketException('fail');
+
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+        );
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+        final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(firstResponse.data['id'], 0);
+        expect(firstResponse.data['result'], isNull);
+        expect(firstResponse.data['error'], isNotNull);
+      }, ioOverrides);
+    });
   });
 
-  testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
+  group('notifyingLogger', () {
+    BufferLogger bufferLogger;
+    setUp(() {
+      bufferLogger = BufferLogger.test();
+    });
 
-    logger.printTrace('test');
+    tearDown(() {
+      bufferLogger.clear();
+    });
 
-    expect(bufferLogger.errorText, contains('test'));
-  });
+    testUsingContext('outputs trace messages in verbose mode', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
+      logger.printTrace('test');
+      expect(bufferLogger.errorText, contains('test'));
+    });
 
-  testUsingContext('notifyingLogger ignores trace messages in non-verbose mode', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+    testUsingContext('ignores trace messages in non-verbose mode', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
-    final Future<LogMessage> messageResult = logger.onMessage.first;
-    logger.printTrace('test');
-    logger.printStatus('hello');
+      final Future<LogMessage> messageResult = logger.onMessage.first;
+      logger.printTrace('test');
+      logger.printStatus('hello');
 
-    final LogMessage message = await messageResult;
+      final LogMessage message = await messageResult;
 
-    expect(message.level, 'status');
-    expect(message.message, 'hello');
-    expect(bufferLogger.errorText, contains('test'));
-  });
+      expect(message.level, 'status');
+      expect(message.message, 'hello');
+      expect(bufferLogger.errorText, isEmpty);
+    });
 
-  testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
-    final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+    testUsingContext('buffers messages sent before a subscription', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
-    logger.printStatus('hello');
+      logger.printStatus('hello');
 
-    final LogMessage message = await logger.onMessage.first;
+      final LogMessage message = await logger.onMessage.first;
 
-    expect(message.level, 'status');
-    expect(message.message, 'hello');
+      expect(message.level, 'status');
+      expect(message.message, 'hello');
+    });
   });
 
   group('daemon queue', () {
@@ -660,7 +774,7 @@ void main() {
       bool isRunning = false;
       Future<int> f(int ret) async {
         if (isRunning) {
-          throw 'Functions ran concurrently!';
+          throw Exception('Functions ran concurrently!');
         }
         isRunning = true;
         await Future<void>.delayed(debounceDuration * 2);
@@ -851,3 +965,46 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
 }
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+
+class TestIOOverrides extends io.IOOverrides {
+  Future<io.Socket> Function(dynamic host, int port) connectCallback;
+
+  @override
+  Future<io.Socket> socketConnect(dynamic host, int port,
+      {dynamic sourceAddress, int sourcePort = 0, Duration timeout}) {
+    return connectCallback(host, port);
+  }
+}
+
+class FakeSocket extends Fake implements io.Socket {
+  bool closeCalled = false;
+  final StreamController<Uint8List> controller = StreamController<Uint8List>();
+  final List<List<int>> addedData = <List<int>>[];
+  final Completer<bool> doneCompleter = Completer<bool>();
+
+  @override
+  StreamSubscription<Uint8List> listen(
+    void Function(Uint8List event) onData, {
+    Function onError,
+    void Function() onDone,
+    bool cancelOnError,
+  }) {
+    return controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  void add(List<int> data) {
+    addedData.add(data);
+  }
+
+  @override
+  Future<void> close() async {
+    closeCalled = true;
+  }
+
+  @override
+  Future<bool> get done => doneCompleter.future;
+
+  @override
+  void destroy() {}
+}

@@ -863,6 +863,62 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96890
+    const Duration waitDuration = Duration.zero;
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Trigger the tip overlay.
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+
+    // Remove the `Tooltip` widget.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    // The tooltip overlay still on the tree and it will removed in the next frame.
+
+    // Dispatch the mouse in and out events before the overlay detached.
+    await gesture.moveTo(tester.getCenter(find.text(tooltipText)));
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // Go without crashes.
+    await gesture.removePointer();
+    gesture = null;
+  });
+
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);

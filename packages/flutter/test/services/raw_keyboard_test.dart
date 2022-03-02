@@ -434,7 +434,7 @@ void main() {
         isDown: false,
       )..['metaState'] = 0;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data2),
         (ByteData? data) {},
@@ -453,7 +453,7 @@ void main() {
       );
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data3),
         (ByteData? data) {},
@@ -474,7 +474,7 @@ void main() {
         isDown: false,
       )..['metaState'] = 0;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data4),
         (ByteData? data) {},
@@ -575,7 +575,7 @@ void main() {
           RawKeyEventDataIos.modifierCommand |
           RawKeyEventDataIos.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -611,7 +611,7 @@ void main() {
         LogicalKeyboardKey.keyA,
         platform: 'windows',
       );
-      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
         (ByteData? data) {},
@@ -619,7 +619,7 @@ void main() {
       expect(receivedEvent.repeat, false);
 
       // Dispatch another down event, which should be recognized as a repeat.
-      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
         (ByteData? data) {},
@@ -627,7 +627,7 @@ void main() {
       expect(receivedEvent.repeat, true);
 
       // Dispatch an up event.
-      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(KeyEventSimulator.getKeyData(
           LogicalKeyboardKey.keyA,
@@ -1923,7 +1923,7 @@ void main() {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
       Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
-        return ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
             'type': type,

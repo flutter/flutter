@@ -61,9 +61,11 @@ class FakeDevice extends Device {
   FakeDevice(this.name, String id, {
     bool ephemeral = true,
     bool isSupported = true,
+    bool isSupportedForProject = true,
     PlatformType type = PlatformType.web,
     LaunchResult? launchResult,
   }) : _isSupported = isSupported,
+      _isSupportedForProject = isSupportedForProject,
       _launchResult = launchResult ?? LaunchResult.succeeded(),
       super(
         id,
@@ -73,6 +75,7 @@ class FakeDevice extends Device {
       );
 
   final bool _isSupported;
+  final bool _isSupportedForProject;
   final LaunchResult _launchResult;
 
   @override
@@ -110,7 +113,7 @@ class FakeDevice extends Device {
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
   bool isSupported() => _isSupported;

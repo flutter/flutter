@@ -723,6 +723,10 @@ class MaterialApp extends StatefulWidget {
 /// When using the desktop platform, if the [Scrollable] widget scrolls in the
 /// [Axis.vertical], a [Scrollbar] is applied.
 ///
+/// If the scroll direction is [Axis.horizontal] scroll views are less
+/// discoverable, so consider adding a Scrollbar in these cases, either directly
+/// or through the [buildScrollbar] method.
+///
 /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
 /// overscroll indicator that is used on [TargetPlatform.android]. When null,
 /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default

@@ -505,7 +505,10 @@ class AndroidDevice extends Device {
   /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
   Future<String> _getWakefulness() async {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
-    final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
+    // A motoG4 phone returns `mWakefulness=Awake`.
+    // A Samsung phone returns `getWakefullnessLocked()=Awake`.
+    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
+    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
   }
 
@@ -542,7 +545,7 @@ class AndroidDevice extends Device {
     }
   }
 
-  /// Executes [command] on `adb shell` and returns its exit code.
+  /// Executes [command] on `adb shell`.
   Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     await adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
@@ -634,7 +637,7 @@ class AndroidDevice extends Device {
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
-        await adb(<String>['logcat', '--clear']);
+        await adb(<String>['logcat', '-c']);
         final Process process = await startProcess(
           adbPath,
           // Make logcat less chatty by filtering down to just ActivityManager

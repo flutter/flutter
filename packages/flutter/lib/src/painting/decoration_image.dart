@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
@@ -208,7 +207,7 @@ class DecorationImage {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     image,
     colorFilter,
     fit,
@@ -557,7 +556,7 @@ void paintImage({
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
       // It's ok to use this instead of a MediaQuery because if this changes,
       // whatever is aware of the MediaQuery will be repainting the image anyway.
-      displaySize: outputSize * PaintingBinding.instance!.window.devicePixelRatio,
+      displaySize: outputSize * PaintingBinding.instance.window.devicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&
@@ -602,7 +601,7 @@ void paintImage({
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
       debugOnPaintImage?.call(sizeInfo);
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {
           return;
