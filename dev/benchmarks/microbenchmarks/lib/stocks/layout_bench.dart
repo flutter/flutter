@@ -33,11 +33,11 @@ Future<void> main() async {
 
     final TestViewConfiguration big = TestViewConfiguration(
       size: const Size(360.0, 640.0),
-      window: RendererBinding.instance.window,
+      window: RendererBinding.instance.view,
     );
     final TestViewConfiguration small = TestViewConfiguration(
       size: const Size(355.0, 635.0),
-      window: RendererBinding.instance.window,
+      window: RendererBinding.instance.view,
     );
     final RenderView renderView = WidgetsBinding.instance.renderView;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;

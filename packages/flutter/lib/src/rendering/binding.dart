@@ -32,7 +32,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
-    window
+    platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
@@ -207,7 +207,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugIsRenderViewInitialized = true;
       return true;
     }());
-    renderView = RenderView(configuration: createViewConfiguration(), window: window);
+    renderView = RenderView(configuration: createViewConfiguration(), window: view);
     renderView.prepareInitialFrame();
   }
   bool _debugIsRenderViewInitialized = false;
@@ -294,9 +294,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
+    final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
-      size: window.physicalSize / devicePixelRatio,
+      size: view.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
@@ -327,7 +327,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(window.semanticsEnabled);
+    setSemanticsEnabled(platformDispatcher.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree

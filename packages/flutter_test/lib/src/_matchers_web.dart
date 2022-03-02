@@ -54,7 +54,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     // to an image directly. Instead, we will use `window.render()` to render
     // only the element being requested, and send a request to the test server
     // requesting it to take a screenshot through the browser's debug interface.
-    _renderElement(binding.window, renderObject);
+    _renderElement(binding.view, renderObject);
     final String? result = await binding.runAsync<String?>(() async {
       if (autoUpdateGoldenFiles) {
         await webGoldenComparator.update(size.width, size.height, key);
@@ -67,7 +67,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return ex.message;
       }
     }, additionalTime: const Duration(seconds: 22));
-    _renderElement(binding.window, _findRepaintBoundary(e));
+    _renderElement(binding.view, _findRepaintBoundary(e));
     return result;
   }
 

@@ -61,7 +61,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    window.onKeyData = _keyEventManager.handleKeyData;
+    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
     SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
   }
 
@@ -240,7 +240,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }

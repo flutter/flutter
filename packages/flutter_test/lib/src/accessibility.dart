@@ -110,11 +110,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
-        || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
+        || (paintBounds.bottom - tester.binding.view.physicalSize.height).abs() <= delta
+        || (paintBounds.right - tester.binding.view.physicalSize.width).abs() <= delta)
         return result;
       // shrink by device pixel ratio.
-      final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
+      final Size candidateSize = paintBounds.size / tester.binding.view.devicePixelRatio;
       if (candidateSize.width < size.width - delta || candidateSize.height < size.height - delta) {
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
@@ -205,7 +205,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.view.devicePixelRatio);
       return image!.toByteData();
     }))!;
     assert(image != null);
@@ -267,7 +267,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
+      if (_isNodeOffScreen(paintBounds, tester.binding.view)) {
         return result;
       }
       final List<int> subset = _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
@@ -380,7 +380,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.view.devicePixelRatio);
       return image!.toByteData();
     }))!;
     assert(image != null);

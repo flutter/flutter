@@ -88,7 +88,7 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  ui.SingletonFlutterWindow get window => throw UnimplementedError();
+  ui.SingletonFlutterWindow get view => throw UnimplementedError();
 
   @override
   ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();

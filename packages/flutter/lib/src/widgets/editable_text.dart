@@ -1941,7 +1941,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final bool revealObscuredInput = _hasInputConnection
                                     && widget.obscureText
-                                    && WidgetsBinding.instance.window.brieflyShowPassword
+                                    && WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && value.text.length == _value.text.length + 1;
 
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
@@ -2544,15 +2544,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void didChangeMetrics() {
-    if (_lastBottomViewInset != WidgetsBinding.instance.window.viewInsets.bottom) {
+    if (_lastBottomViewInset != WidgetsBinding.instance.view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
       });
-      if (_lastBottomViewInset < WidgetsBinding.instance.window.viewInsets.bottom) {
+      if (_lastBottomViewInset < WidgetsBinding.instance.view.viewInsets.bottom) {
         _scheduleShowCaretOnScreen();
       }
     }
-    _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+    _lastBottomViewInset = WidgetsBinding.instance.view.viewInsets.bottom;
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -2656,7 +2656,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_obscureShowCharTicksPending > 0) {
       setState(() {
-        _obscureShowCharTicksPending = WidgetsBinding.instance.window.brieflyShowPassword
+        _obscureShowCharTicksPending = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
           ? _obscureShowCharTicksPending - 1
           : 0;
       });
@@ -2731,7 +2731,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
-      _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+      _lastBottomViewInset = WidgetsBinding.instance.view.viewInsets.bottom;
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen();
       }
@@ -2763,7 +2763,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
     // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth)
+    if (WidgetsBinding.instance.view.physicalSize.shortestSide < _kIPadWidth)
       return;
 
     final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
@@ -3333,7 +3333,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
         TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia,
       };
-      final bool breiflyShowPassword = WidgetsBinding.instance.window.brieflyShowPassword
+      final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
       if (breiflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;

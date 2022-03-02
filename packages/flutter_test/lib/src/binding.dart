@@ -157,7 +157,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  TestWindow get window => _window;
+  TestWindow get view => _window;
   final TestWindow _window;
 
   @override
@@ -441,8 +441,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -1112,8 +1112,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void ensureFrameCallbacksRegistered() {
     // Leave PlatformDispatcher alone, do nothing.
-    assert(window.onDrawFrame == null);
-    assert(window.onBeginFrame == null);
+    assert(platformDispatcher.onDrawFrame == null);
+    assert(platformDispatcher.onBeginFrame == null);
   }
 
   @override
@@ -1550,7 +1550,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = null;
       _expectingFrame = false;
     } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-      window.scheduleFrame();
+      platformDispatcher.scheduleFrame();
     }
   }
 
@@ -1559,7 +1559,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: window,
+      window: view,
     );
     renderView.prepareInitialFrame();
   }
@@ -1739,7 +1739,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ViewConfiguration createViewConfiguration() {
     return TestViewConfiguration(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      window: window,
+      window: view,
     );
   }
 

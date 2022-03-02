@@ -13,7 +13,7 @@ void main() {
   group('DisplayFeatureSubScreen', () {
     testWidgets('without Directionality or anchor', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.view).copyWith(
           displayFeatures: <DisplayFeature>[
             const DisplayFeature(
               bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -43,7 +43,7 @@ void main() {
 
     testWidgets('with anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.view).copyWith(
           displayFeatures: <DisplayFeature>[
             const DisplayFeature(
               bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -76,7 +76,7 @@ void main() {
 
     testWidgets('with infinity anchorpoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.view).copyWith(
           displayFeatures: <DisplayFeature>[
             const DisplayFeature(
               bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -109,7 +109,7 @@ void main() {
 
     testWidgets('with horizontal hinge and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.view).copyWith(
           displayFeatures: <DisplayFeature>[
             const DisplayFeature(
               bounds: Rect.fromLTRB(0, 290, 800, 310),
@@ -141,7 +141,7 @@ void main() {
 
     testWidgets('with multiple display features and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.view).copyWith(
           displayFeatures: <DisplayFeature>[
             const DisplayFeature(
               bounds: Rect.fromLTRB(0, 290, 800, 310),
@@ -178,7 +178,7 @@ void main() {
 
     testWidgets('with non-splitting display features and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.view).copyWith(
           displayFeatures: <DisplayFeature>[
             // Top notch
             const DisplayFeature(

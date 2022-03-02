@@ -98,7 +98,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Offset? _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * WidgetsBinding.instance.view.devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -159,7 +159,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _pipelineOwner,
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
-        WidgetsBinding.instance.window.devicePixelRatio,
+        WidgetsBinding.instance.view.devicePixelRatio,
         widget.labelStyle,
       ),
       child: GestureDetector(
