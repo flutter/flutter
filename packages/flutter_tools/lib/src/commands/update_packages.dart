@@ -906,8 +906,8 @@ class PubspecYaml {
                 // unmodified. If there was an additional line (e.g. an "sdk:
                 // flutter" line) then we output that too.
                 output.add(data.line);
-                if (data._lockLine != null) {
-                  output.add(data._lockLine!);
+                if (data.lockLine != null) {
+                  output.add(data.lockLine!);
                 }
               }
               // Remember that we've dealt with this dependency so we don't
@@ -933,8 +933,8 @@ class PubspecYaml {
           case Section.other:
             // In other sections, pass everything through in its original form.
             output.add(data.line);
-            if (data._lockLine != null) {
-              output.add(data._lockLine!);
+            if (data.lockLine != null) {
+              output.add(data.lockLine!);
             }
             break;
         }
@@ -1240,6 +1240,7 @@ class PubspecDependency extends PubspecLine {
 
   /// If we were a two-line dependency, the second line (see the inherited [line]
   /// for the first).
+  String? get lockLine => _lockLine;
   String? _lockLine;
 
   /// If we're a path or sdk dependency, whether we were found in a
@@ -1354,10 +1355,10 @@ class PubspecDependency extends PubspecLine {
         if (lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
-          overrides.writeln(_lockLine);
+          overrides.writeln(lockLine);
         } else {
           dependencies.writeln('  $name:');
-          dependencies.writeln(_lockLine);
+          dependencies.writeln(lockLine);
         }
     }
   }
