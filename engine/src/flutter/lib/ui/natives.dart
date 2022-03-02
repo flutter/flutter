@@ -9,11 +9,11 @@
 part of dart.ui;
 
 // Corelib 'print' implementation.
-void _print(dynamic arg) {
+void _print(Object? arg) {
   _Logger._printString(arg.toString());
 }
 
-void _printDebug(dynamic arg) {
+void _printDebug(Object? arg) {
   _Logger._printDebugString(arg.toString());
 }
 

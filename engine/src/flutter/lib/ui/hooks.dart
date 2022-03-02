@@ -125,7 +125,7 @@ void _runMainZoned(Function startMainIsolateFunction,
   startMainIsolateFunction(() {
     runZonedGuarded<void>(() {
       if (userMainFunction is _ListStringArgFunction) {
-        (userMainFunction as dynamic)(args);
+        userMainFunction(args);
       } else {
         userMainFunction();
       }
@@ -233,7 +233,7 @@ bool _isLoopback(String host) {
 @pragma('vm:entry-point')
 void Function(Uri) _getHttpConnectionHookClosure(bool mayInsecurelyConnectToAllDomains) {
   return (Uri uri) {
-      final dynamic zoneOverride = Zone.current[#flutter.io.allow_http];
+      final Object? zoneOverride = Zone.current[#flutter.io.allow_http];
       if (zoneOverride == true) {
         return;
       }
