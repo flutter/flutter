@@ -198,6 +198,7 @@
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/module_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
 
 ## Host only framework tests
 # Linux analyze

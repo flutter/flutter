@@ -2564,6 +2564,30 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac entrypoint_dart_registrant
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
+      dependencies: >-
+        [
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: entrypoint_dart_registrant
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
     timeout: 60
