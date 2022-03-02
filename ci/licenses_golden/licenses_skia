@@ -1,4 +1,4 @@
-Signature: 75416ca2a78dad4c6254571ab86d5675
+Signature: 3bea02c0ce92cb042a7cad506ac3a63e
 
 UNUSED LICENSES:
 
@@ -2524,6 +2524,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipelineDesc.c
 FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDataCache.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDataCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ProgramCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Recording.cpp
@@ -2545,8 +2547,6 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
-FILE: ../../../third_party/skia/experimental/graphite/src/UniformCache.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/UniformCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
