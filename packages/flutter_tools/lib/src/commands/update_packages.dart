@@ -397,7 +397,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         directory: tempDir.path,
         upgrade: doUpgrade,
         offline: boolArg('offline'),
-        flutterRootOverride: doUpgrade ? temporaryFlutterSdk!.path : null,
+        flutterRootOverride: temporaryFlutterSdk?.path,
       );
       // Cleanup the temporary SDK
       try {
@@ -1242,8 +1242,8 @@ class PubspecDependency extends PubspecLine {
   /// dependencies/dev_dependencies section, or a dependency_overrides section.
   /// We track this so that we can put ourselves in the right section when
   /// generating the fake pubspec.yaml.
-  bool get lockIsOverride => _lockIsOverride!;
-  bool? _lockIsOverride;
+  bool get lockIsOverride => _lockIsOverride;
+  late bool _lockIsOverride;
 
   static const String _pathPrefix = '    path: ';
   static const String _sdkPrefix = '    sdk: ';
