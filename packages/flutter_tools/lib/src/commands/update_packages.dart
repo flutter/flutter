@@ -1397,20 +1397,19 @@ String _generateFakePubspec(
       for (final PubspecDependency dependency in dependencies)
         dependency.name,
     };
-    for (final String package in kManuallyPinnedDependencies.keys) {
+    kManuallyPinnedDependencies.forEach((String package, String version) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
       if (!allTransitive.contains(package)) {
         if (verbose) {
           globals.printStatus('Skipping $package because it was not transitive');
         }
-        continue;
+        return;
       }
-      final String version = kManuallyPinnedDependencies[package]!;
       result.writeln('  $package: $version');
       if (verbose) {
         globals.printStatus('  - $package: $version');
       }
-    }
+    });
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
@@ -1503,12 +1502,13 @@ class PubDependencyTree {
     assert(seen != null);
     assert(exclude != null);
     result ??= <String>[];
-    if (!_dependencyTree.containsKey(package)) {
+    final Set<String>? dependencies = _dependencyTree[package];
+    if (dependencies == null) {
       // We have no transitive dependencies extracted for flutter_sdk packages
       // because they were omitted from pubspec.yaml used for 'pub upgrade' run.
       return result;
     }
-    for (final String dependency in _dependencyTree[package]!) {
+    for (final String dependency in dependencies) {
       if (!seen.contains(dependency)) {
         if (!exclude.contains(dependency)) {
           result.add(dependency);
