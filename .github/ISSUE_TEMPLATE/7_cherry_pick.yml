@@ -19,30 +19,28 @@ body:
       placeholder: fabfeed
     validations:
       required: true
-  - type: dropdown
-    id: merge_instructions
-    attributes:
-      label: Merge Instructions
-      description: Does this cherry-pick merge cleanly into the candidate branch?
-      options:
-        - clean merge
-        - merge conflict
-    validations:
-      required: true
   - type: input
-    id: issue_description
+    id: impacted_users
     attributes:
-      label: Issue Description
-      description: Brief description of the issue this cherry-pick is solving for.
-      placeholder: This makes Flutter even better!
+      label: Impacted Users
+      description: Approximately who will hit this issue (ex. all Flutter devs, Windows developers, all end-customers, apps using X framework feature)?
+      placeholder: All Flutter devs
     validations:
       required: true
   - type: textarea
-    id: cherry-pick_reason
+    id: impact_description
     attributes:
-      label: Cherry-pick reasoning
-      description: Why should this be cherry-picked and not exist as part of a regular release?
+      label: Impact Description
+      description: What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)
       placeholder: Android apps can not compile without this fix.
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Is there a workaround for this issue?
+      placeholder: Reload the app
     validations:
       required: true
   - type: dropdown
@@ -56,3 +54,19 @@ body:
         - high
     validations:
       required: true
+  - type: dropdown
+    id: test_coverage
+    attributes:
+      label: Test Coverage
+      description: Are you confident that your fix is well-tested by automated tests?
+      options:
+        - "yes"
+        - "no"
+    validations:
+      required: true
+  - type: textarea
+    id: fix_steps
+    attributes:
+      label: Validation Steps
+      description: What are the steps to validate that this fix works?
+      placeholder: Hot reload feature should work again.
