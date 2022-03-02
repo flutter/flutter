@@ -230,6 +230,7 @@ targets:
     properties:
       tags: >
         ["framework","hostonly","shard"]
+    scheduler: luci
     runIf:
       - .ci.yaml
 
