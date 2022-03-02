@@ -27,7 +27,8 @@ web_engine_sources =
                 ],
                 "list lines")
 
-web_engine_sources += [ "//flutter/lib/web_ui/lib/src/engine.dart" ]
+web_engine_sources +=
+    [ rebase_path("//flutter/lib/web_ui/lib/src/engine.dart") ]
 
 group("web_sdk") {
   deps = [
@@ -567,7 +568,7 @@ _kernel_worker("flutter_dartdevc_kernel_sdk_outline_sound") {
 
 # Archives Flutter Web SDK
 if (!is_fuchsia) {
-  zip_bundle("flutter_web_sdk_archive") {
+  zip_bundle_from_file("flutter_web_sdk_archive") {
     output = "flutter-web-sdk-${full_platform_name}.zip"
     deps = [
       ":flutter_dartdevc_canvaskit_html_kernel_sdk",
@@ -597,7 +598,7 @@ if (!is_fuchsia) {
     foreach(source, sources) {
       tmp_files += [
         {
-          source = source
+          source = rebase_path(source)
           destination = rebase_path(source, "$root_build_dir")
         },
       ]
@@ -606,7 +607,7 @@ if (!is_fuchsia) {
       rebased_path = rebase_path(source, "//flutter/lib/web_ui/lib")
       tmp_files += [
         {
-          source = source
+          source = rebase_path(source)
           destination = "flutter_web_sdk/lib/ui/$rebased_path"
         },
       ]
@@ -615,7 +616,7 @@ if (!is_fuchsia) {
       rebased_path = rebase_path(source, "//flutter/lib/web_ui/lib/src")
       tmp_files += [
         {
-          source = source
+          source = rebase_path(source)
           destination = "flutter_web_sdk/lib/_engine/$rebased_path"
         },
       ]
