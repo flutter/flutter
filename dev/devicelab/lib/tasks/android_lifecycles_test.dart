@@ -17,8 +17,8 @@ const String _kOrgName = 'com.example.activitydestroy';
 
 final RegExp _lifecycleSentinelRegExp = RegExp(r'==== lifecycle\: (.+) ====');
 
-/// Tests the following Android lifecycles: Activity#onStop(), Activity#onResume(), Activity#onPause()
-/// from Dart perspective in debug, profile, and release modes.
+/// Tests the following Android lifecycles: Activity#onStop(), Activity#onResume(), Activity#onPause(), 
+/// and Activity#onDestroy() from Dart perspective in debug, profile, and release modes.
 TaskFunction androidLifecyclesTest({
   Map<String, String>? environment,
 }) {
