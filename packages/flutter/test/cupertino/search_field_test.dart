@@ -22,7 +22,7 @@ void main() {
             find.descendant(
               of: find.byType(CupertinoSearchTextField),
               matching: find.byType(DecoratedBox),
-            )
+            ),
           )
           .decoration as BoxDecoration;
 
