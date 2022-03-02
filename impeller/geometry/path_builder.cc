@@ -6,8 +6,6 @@
 
 namespace impeller {
 
-static const Scalar kArcApproximationMagic = 0.551915024494;
-
 PathBuilder::PathBuilder() = default;
 
 PathBuilder::~PathBuilder() = default;
