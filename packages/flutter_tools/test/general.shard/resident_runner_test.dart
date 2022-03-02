@@ -1189,8 +1189,8 @@ void main() {
   ]
 }
 ''');
-    // Start from an empty generated_main.dart file.
-    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
+    // Start from an empty dart_plugin_registrant.dart file.
+    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('dart_plugin_registrant.dart').createSync(recursive: true);
 
     await residentRunner.runSourceGenerators();
 
@@ -1267,9 +1267,9 @@ flutter:
 
     final File generatedMain = globals.fs.directory('.dart_tool')
         .childDirectory('flutter_build')
-        .childFile('generated_main.dart');
+        .childFile('dart_plugin_registrant.dart');
 
-    expect(generatedMain.readAsStringSync(), contains('custom_main.dart'));
+    expect(generatedMain.existsSync(), isTrue);
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
   }));
