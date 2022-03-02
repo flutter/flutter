@@ -55,7 +55,7 @@ void FragmentProgram::init(std::string sksl, bool debugPrintSksl) {
 
 fml::RefPtr<FragmentShader> FragmentProgram::shader(
     Dart_Handle shader,
-    const tonic::Float32List& uniforms,
+    tonic::Float32List& uniforms,
     Dart_Handle samplers) {
   auto sampler_shaders =
       tonic::DartConverter<std::vector<ImageShader*>>::FromDart(samplers);
@@ -69,6 +69,7 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(
   for (size_t i = 0; i < uniform_count; i++) {
     uniform_floats[i] = uniforms[i];
   }
+  uniforms.Release();
   std::vector<sk_sp<SkShader>> sk_samplers(sampler_shaders.size());
   for (size_t i = 0; i < sampler_shaders.size(); i++) {
     ImageShader* image_shader = sampler_shaders[i];
