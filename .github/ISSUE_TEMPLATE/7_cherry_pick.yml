@@ -32,7 +32,7 @@ body:
     attributes:
       label: Impact Description
       description: What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)
-      placeholder: Android apps can not compile without this fix.
+      placeholder: Android apps cannot compile without this fix.
     validations:
       required: true
   - type: textarea
@@ -40,7 +40,7 @@ body:
     attributes:
       label: Workaround
       description: Is there a workaround for this issue?
-      placeholder: Reload the app
+      placeholder: Relaunch the app
     validations:
       required: true
   - type: dropdown
@@ -69,4 +69,4 @@ body:
     attributes:
       label: Validation Steps
       description: What are the steps to validate that this fix works?
-      placeholder: Hot reload feature should work again.
+      placeholder: Step 1. `flutter run` the app on Android...
