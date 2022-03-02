@@ -808,6 +808,8 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
+    final bool isEndDrawerOpen = scaffold?.isEndDrawerOpen ?? false;
+    final bool isFirstRoute = parentRoute?.isFirst ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
@@ -881,8 +883,10 @@ class _AppBarState extends State<AppBar> {
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
-        if (!hasEndDrawer && canPop)
+        final bool canHaveLeadingWithEndDrawer = !(isFirstRoute && isEndDrawerOpen);
+        if (canPop && canHaveLeadingWithEndDrawer) {
           leading = useCloseButton ? const CloseButton() : const BackButton();
+        }
       }
     }
     if (leading != null) {
