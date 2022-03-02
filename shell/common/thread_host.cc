@@ -29,6 +29,33 @@ std::string ThreadHost::ThreadHostConfig::MakeThreadName(
   }
 }
 
+void ThreadHost::ThreadHostConfig::SetIOConfig(const ThreadConfig& config) {
+  type_mask |= ThreadHost::Type::IO;
+  io_config = config;
+}
+
+void ThreadHost::ThreadHostConfig::SetUIConfig(const ThreadConfig& config) {
+  type_mask |= ThreadHost::Type::UI;
+  ui_config = config;
+}
+
+void ThreadHost::ThreadHostConfig::SetPlatformConfig(
+    const ThreadConfig& config) {
+  type_mask |= ThreadHost::Type::Platform;
+  platform_config = config;
+}
+
+void ThreadHost::ThreadHostConfig::SetRasterConfig(const ThreadConfig& config) {
+  type_mask |= ThreadHost::Type::RASTER;
+  raster_config = config;
+}
+
+void ThreadHost::ThreadHostConfig::SetProfilerConfig(
+    const ThreadConfig& config) {
+  type_mask |= ThreadHost::Type::Profiler;
+  profiler_config = config;
+}
+
 std::unique_ptr<fml::Thread> ThreadHost::CreateThread(
     Type type,
     std::optional<ThreadConfig> thread_config,
