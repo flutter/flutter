@@ -542,7 +542,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// Keys often produce different characters when combined with modifiers. For
 /// example, it might be helpful for the user to bring up a help menu by
 /// pressing the question mark ('?'). However, there is no logical key that
-/// directly represents a question mark. Althouh 'Shift+Slash' produces a '?'
+/// directly represents a question mark. Although 'Shift+Slash' produces a '?'
 /// character on a US keyboard, its logical key is still considered a Slash key,
 /// and hard-coding 'Shift+Slash' in this situation is unfriendly to other
 /// keyboard layouts.
