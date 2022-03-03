@@ -65,7 +65,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                     });
                   },
                 )
-              : const BackButton(),
+              : const SizedBox(),
           actions: <Widget>[
             if (_isGridMode)
               IconButton(
