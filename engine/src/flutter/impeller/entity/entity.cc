@@ -4,7 +4,7 @@
 
 #include "impeller/entity/entity.h"
 
-#include "impeller/entity/content_context.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {

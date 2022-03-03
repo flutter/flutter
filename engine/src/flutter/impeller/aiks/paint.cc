@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/aiks/paint.h"
+#include "impeller/entity/contents/solid_color_contents.h"
+#include "impeller/entity/contents/solid_stroke_contents.h"
 
 namespace impeller {
 

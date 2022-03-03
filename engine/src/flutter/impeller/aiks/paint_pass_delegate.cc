@@ -4,7 +4,8 @@
 
 #include "impeller/aiks/paint_pass_delegate.h"
 
-#include "impeller/entity/contents.h"
+#include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 
 namespace impeller {
 
