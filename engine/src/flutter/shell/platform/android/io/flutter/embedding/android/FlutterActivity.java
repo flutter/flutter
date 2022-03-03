@@ -1170,6 +1170,19 @@ public class FlutterActivity extends Activity
     return true;
   }
 
+  /**
+   * Give the host application a chance to take control of the app lifecycle events.
+   *
+   * <p>Return {@code false} means the host application dispatches these app lifecycle events, while
+   * return {@code true} means the engine dispatches these events.
+   *
+   * <p>Defaults to {@code true}.
+   */
+  @Override
+  public boolean shouldDispatchAppLifecycleState() {
+    return true;
+  }
+
   @Override
   public boolean popSystemNavigator() {
     // Hook for subclass. No-op if returns false.

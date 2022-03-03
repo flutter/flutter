@@ -513,7 +513,9 @@ import java.util.Arrays;
   void onResume() {
     Log.v(TAG, "onResume()");
     ensureAlive();
-    flutterEngine.getLifecycleChannel().appIsResumed();
+    if (host.shouldDispatchAppLifecycleState()) {
+      flutterEngine.getLifecycleChannel().appIsResumed();
+    }
   }
 
   /**
@@ -559,7 +561,9 @@ import java.util.Arrays;
   void onPause() {
     Log.v(TAG, "onPause()");
     ensureAlive();
-    flutterEngine.getLifecycleChannel().appIsInactive();
+    if (host.shouldDispatchAppLifecycleState()) {
+      flutterEngine.getLifecycleChannel().appIsInactive();
+    }
   }
 
   /**
@@ -579,7 +583,11 @@ import java.util.Arrays;
   void onStop() {
     Log.v(TAG, "onStop()");
     ensureAlive();
-    flutterEngine.getLifecycleChannel().appIsPaused();
+
+    if (host.shouldDispatchAppLifecycleState()) {
+      flutterEngine.getLifecycleChannel().appIsPaused();
+    }
+
     // This is a workaround for a bug on some OnePlus phones. The visibility of the application
     // window is still true after locking the screen on some OnePlus phones, and shows a black
     // screen when unlocked. We can work around this by changing the visibility of FlutterView in
@@ -681,7 +689,9 @@ import java.util.Arrays;
       platformPlugin = null;
     }
 
-    flutterEngine.getLifecycleChannel().appIsDetached();
+    if (host.shouldDispatchAppLifecycleState()) {
+      flutterEngine.getLifecycleChannel().appIsDetached();
+    }
 
     // Destroy our FlutterEngine if we're not set to retain it.
     if (host.shouldDestroyEngineWithHost()) {
@@ -1078,5 +1088,28 @@ import java.util.Arrays;
      * SplashScreenView#remove}.
      */
     void updateSystemUiOverlays();
+
+    /**
+     * Give the host application a chance to take control of the app lifecycle events to avoid
+     * lifecycle crosstalk.
+     *
+     * <p>In the add-to-app scenario where multiple {@link FlutterActivity} shares the same {@link
+     * FlutterEngine}, the application lifecycle state will have crosstalk causing the page to
+     * freeze. For example, we open a new page called FlutterActivity#2 from the previous page
+     * called FlutterActivity#1. The flow of app lifecycle states received by dart is as follows:
+     *
+     * <p>inactive (from FlutterActivity#1) -> resumed (from FlutterActivity#2) -> paused (from
+     * FlutterActivity#1)
+     *
+     * <p>On the one hand, the {@code paused} state from FlutterActivity#1 will cause the
+     * FlutterActivity#2 page to be stuck; On the other hand, these states are not expected from the
+     * perspective of the entire application lifecycle. If the host application gets the control of
+     * sending {@link AppLifecycleState}, It will be possible to correctly match the {@link
+     * AppLifecycleState} with the application-level lifecycle.
+     *
+     * <p>Return {@code false} means the host application dispatches these app lifecycle events,
+     * while return {@code true} means the engine dispatches these events.
+     */
+    boolean shouldDispatchAppLifecycleState();
   }
 }

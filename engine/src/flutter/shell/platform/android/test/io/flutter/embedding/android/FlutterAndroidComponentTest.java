@@ -381,6 +381,11 @@ public class FlutterAndroidComponentTest {
     }
 
     @Override
+    public boolean shouldDispatchAppLifecycleState() {
+      return true;
+    }
+
+    @Override
     public void onFlutterSurfaceViewCreated(@NonNull FlutterSurfaceView flutterSurfaceView) {}
 
     @Override
