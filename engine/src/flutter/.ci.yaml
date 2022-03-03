@@ -320,6 +320,10 @@ targets:
     properties:
       config_name: mac_ios_engine
       environment: Staging
+      dependencies: >-
+        [
+          {"dependency": "jazzy"}
+        ]
     scheduler: luci
 
   - name:  Mac mac_ios_engine_profile
