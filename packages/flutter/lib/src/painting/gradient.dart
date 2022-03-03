@@ -349,8 +349,9 @@ abstract class Gradient {
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
 /// {@tool dartpad}
-/// This sample draws a picture that looks like vertical window shades by having
-/// a [Container] display a [BoxDecoration] with a [LinearGradient].
+/// This sample draws a picture with a gradient sweeping through different
+/// colors, by having a [Container] display a [BoxDecoration] with a
+/// [LinearGradient].
 ///
 /// ** See code in examples/api/lib/painting/gradient/linear_gradient.0.dart **
 /// {@end-tool}
