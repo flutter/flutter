@@ -140,6 +140,7 @@ source_set("ui") {
     "//flutter/common",
     "//flutter/display_list",
     "//flutter/fml",
+    "//flutter/runtime:dart_plugin_registrant",
     "//flutter/runtime:test_font",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:dart_io_api",

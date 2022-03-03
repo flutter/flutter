@@ -35,6 +35,18 @@ group("libdart") {
   }
 }
 
+source_set("dart_plugin_registrant") {
+  sources = [
+    "dart_plugin_registrant.cc",
+    "dart_plugin_registrant.h",
+  ]
+  deps = [
+    "//flutter/fml",
+    "//flutter/third_party/tonic",
+    "//third_party/dart/runtime:dart_api",
+  ]
+}
+
 source_set("runtime") {
   sources = [
     "dart_isolate.cc",
@@ -83,6 +95,7 @@ source_set("runtime") {
   public_configs = [ "//flutter:config" ]
 
   deps = [
+    ":dart_plugin_registrant",
     ":test_font",
     "//flutter/assets",
     "//flutter/common",

@@ -4,9 +4,26 @@
 
 // TODO(dnfield): remove unused_element ignores when https://github.com/dart-lang/sdk/issues/35164 is resolved.
 
-
 // @dart = 2.12
 part of dart.ui;
+
+// ignore_for_file: avoid_classes_with_only_static_members
+
+/// Helper functions for Dart Plugin Registrants.
+class DartPluginRegistrant {
+  static bool _wasInitialized = false;
+
+  /// Makes sure the that the Dart Plugin Registrant has been called for this
+  /// isolate. This can safely be executed multiple times on the same isolate,
+  /// but should not be called on the Root isolate.
+  static void ensureInitialized() {
+    if (!_wasInitialized) {
+      _wasInitialized = true;
+      _ensureInitialized();
+    }
+  }
+  static void _ensureInitialized() native 'DartPluginRegistrant_EnsureInitialized';
+}
 
 // Corelib 'print' implementation.
 void _print(Object? arg) {
