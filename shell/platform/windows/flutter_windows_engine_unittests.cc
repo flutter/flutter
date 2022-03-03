@@ -7,6 +7,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
+#include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "gtest/gtest.h"
 
 // winbase.h defines GetCurrentTime as a macro.
@@ -315,6 +316,36 @@ TEST(FlutterWindowsEngine, DispatchSemanticsAction) {
   engine->DispatchSemanticsAction(42, kFlutterSemanticsActionDismiss,
                                   std::move(data));
   EXPECT_TRUE(called);
+}
+
+TEST(FlutterWindowsEngine, AddPluginRegistrarDestructionCallback) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  MockEmbedderApiForKeyboard(modifier,
+                             std::make_shared<MockKeyResponseController>());
+
+  engine->RunWithEntrypoint(nullptr);
+
+  // Verify that destruction handlers don't overwrite each other.
+  int result1 = 0;
+  int result2 = 0;
+  engine->AddPluginRegistrarDestructionCallback(
+      [](FlutterDesktopPluginRegistrarRef ref) {
+        auto result = reinterpret_cast<int*>(ref);
+        *result = 1;
+      },
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(&result1));
+  engine->AddPluginRegistrarDestructionCallback(
+      [](FlutterDesktopPluginRegistrarRef ref) {
+        auto result = reinterpret_cast<int*>(ref);
+        *result = 2;
+      },
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(&result2));
+
+  engine->Stop();
+  EXPECT_EQ(result1, 1);
+  EXPECT_EQ(result2, 2);
 }
 
 }  // namespace testing

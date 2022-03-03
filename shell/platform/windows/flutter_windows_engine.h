@@ -72,9 +72,10 @@ class FlutterWindowsEngine {
   // Returns the currently configured Plugin Registrar.
   FlutterDesktopPluginRegistrarRef GetRegistrar();
 
-  // Sets |callback| to be called when the plugin registrar is destroyed.
-  void SetPluginRegistrarDestructionCallback(
-      FlutterDesktopOnPluginRegistrarDestroyed callback);
+  // Registers |callback| to be called when the plugin registrar is destroyed.
+  void AddPluginRegistrarDestructionCallback(
+      FlutterDesktopOnPluginRegistrarDestroyed callback,
+      FlutterDesktopPluginRegistrarRef registrar);
 
   // Sets switches member to the given switches.
   void SetSwitches(const std::vector<std::string>& switches);
@@ -221,10 +222,11 @@ class FlutterWindowsEngine {
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<BasicMessageChannel<rapidjson::Document>> settings_channel_;
 
-  // A callback to be called when the engine (and thus the plugin registrar)
-  // is being destroyed.
-  FlutterDesktopOnPluginRegistrarDestroyed
-      plugin_registrar_destruction_callback_ = nullptr;
+  // Callbacks to be called when the engine (and thus the plugin registrar) is
+  // being destroyed.
+  std::map<FlutterDesktopOnPluginRegistrarDestroyed,
+           FlutterDesktopPluginRegistrarRef>
+      plugin_registrar_destruction_callbacks_;
 
   // The approximate time between vblank events.
   std::chrono::nanoseconds FrameInterval();
