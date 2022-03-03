@@ -1318,6 +1318,19 @@ public class FlutterFragment extends Fragment
   }
 
   /**
+   * Give the host application a chance to take control of the app lifecycle events.
+   *
+   * <p>Return {@code false} means the host application dispatches these app lifecycle events, while
+   * return {@code true} means the engine dispatches these events.
+   *
+   * <p>Defaults to {@code true}.
+   */
+  @Override
+  public boolean shouldDispatchAppLifecycleState() {
+    return true;
+  }
+
+  /**
    * {@inheritDoc}
    *
    * <p>Avoid overriding this method when using {@code
