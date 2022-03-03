@@ -2199,7 +2199,7 @@ targets:
       task_name: platform_view__start_up
     scheduler: luci
 
-  - name: Linux_android route_test
+  - name: Linux_android routing_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3289,7 +3289,7 @@ targets:
       task_name: external_ui_integration_test_ios
     scheduler: luci
 
-  - name: Mac_ios route_test
+  - name: Mac_ios routing_test
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
