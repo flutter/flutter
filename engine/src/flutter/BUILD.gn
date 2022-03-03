@@ -68,6 +68,7 @@ group("flutter") {
 
   # Compile the engine.
   public_deps = [
+    ":unittests",
     "//flutter/shell/platform/embedder:flutter_engine",
     "//flutter/sky",
   ]
@@ -129,7 +130,12 @@ group("flutter") {
       current_cpu == "arm64") {
     public_deps += [ "//flutter/testing/android_background_image" ]
   }
+}
 
+group("unittests") {
+  testonly = true
+
+  public_deps = []
   if (is_android) {
     public_deps +=
         [ "//flutter/shell/platform/android:flutter_shell_native_unittests" ]
