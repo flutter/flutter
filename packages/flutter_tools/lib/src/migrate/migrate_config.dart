@@ -224,6 +224,6 @@ $unmanagedFilesString
         return metadata.versionRevision!;
       }
     }
-    return flutterVersion.flutterRevision;
+    return flutterVersion.frameworkRevision;
   }
 }
