@@ -571,22 +571,25 @@ Future<void> main() async {
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 
-  testWidgets('Hoveing over Bar item updates cursor to clickable', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
-          ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
+  testWidgets('Hovering over tab bar item updates cursor to clickable', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: CupertinoTabBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'Tab 1',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'Tab 2',
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
