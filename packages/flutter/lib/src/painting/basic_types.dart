@@ -40,10 +40,7 @@ export 'dart:ui' show
   TextDirection,
   TextPosition,
   TileMode,
-  VertexMode,
-  // TODO(werainkhatri): remove these after all the dependencies are migrated
-  hashValues,
-  hashList;
+  VertexMode;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -154,7 +153,7 @@ class StackFrameEquality implements Equality<StackFrame> {
   // TODO(dnfield): This ignore shouldn't be necessary, see https://github.com/dart-lang/sdk/issues/46477
   @override
   int hash(StackFrame e) { // ignore: avoid_renaming_method_parameters
-    return hashValues(e.number, e.packageScheme, e.package, e.packagePath, e.line, e.column, e.className, e.method);
+    return Object.hash(e.number, e.packageScheme, e.package, e.packagePath, e.line, e.column, e.className, e.method);
   }
 
   @override

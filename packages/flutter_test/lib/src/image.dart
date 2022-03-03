@@ -35,7 +35,7 @@ Future<ui.Image> createTestImage({
   assert(height != null && height > 0);
   assert(cache != null);
 
-  final int cacheKey = hashValues(width, height);
+  final int cacheKey = Object.hash(width, height);
   if (cache && _cache.containsKey(cacheKey)) {
     return _cache[cacheKey]!.clone();
   }
