@@ -346,8 +346,9 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
 
 bool FlutterWindowsEngine::Stop() {
   if (engine_) {
-    if (plugin_registrar_destruction_callback_) {
-      plugin_registrar_destruction_callback_(plugin_registrar_.get());
+    for (const auto& [callback, registrar] :
+         plugin_registrar_destruction_callbacks_) {
+      callback(registrar);
     }
     FlutterEngineResult result = embedder_api_.Shutdown(engine_);
     engine_ = nullptr;
@@ -395,9 +396,10 @@ FlutterDesktopPluginRegistrarRef FlutterWindowsEngine::GetRegistrar() {
   return plugin_registrar_.get();
 }
 
-void FlutterWindowsEngine::SetPluginRegistrarDestructionCallback(
-    FlutterDesktopOnPluginRegistrarDestroyed callback) {
-  plugin_registrar_destruction_callback_ = callback;
+void FlutterWindowsEngine::AddPluginRegistrarDestructionCallback(
+    FlutterDesktopOnPluginRegistrarDestroyed callback,
+    FlutterDesktopPluginRegistrarRef registrar) {
+  plugin_registrar_destruction_callbacks_[callback] = registrar;
 }
 
 void FlutterWindowsEngine::SendWindowMetricsEvent(
