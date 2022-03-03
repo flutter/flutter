@@ -227,10 +227,10 @@ void main() {
     const Size kCommonScreenSizeLandscape = Size(1770, 1070);
 
     Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
-      tester.binding.window.physicalSizeTestValue = size;
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+      tester.binding.view.physicalSizeTestValue = size;
+      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
+      tester.binding.view.devicePixelRatioTestValue = 1.0;
+      addTearDown(tester.binding.view.clearDevicePixelRatioTestValue);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(

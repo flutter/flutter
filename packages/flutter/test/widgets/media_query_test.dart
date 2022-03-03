@@ -916,11 +916,11 @@ void main() {
   });
 
   testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ViewConfiguration(
+    tester.binding.view.viewConfigurationTestValue = const ViewConfiguration(
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
-    tester.binding.window.viewConfigurationTestValue = null;
+    expect(MediaQueryData.fromWindow(tester.binding.view).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    tester.binding.view.viewConfigurationTestValue = null;
   });
 }

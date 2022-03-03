@@ -31,7 +31,7 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
   final ScheduledFrameTrackingWindow _window = ScheduledFrameTrackingWindow();
 
   @override
-  ScheduledFrameTrackingWindow get window => _window;
+  ScheduledFrameTrackingWindow get view => _window;
 }
 
 class OffscreenRenderView extends RenderView {

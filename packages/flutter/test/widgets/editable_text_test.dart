@@ -3685,9 +3685,9 @@ void main() {
     await tester.enterText(find.byType(EditableText), 'AAA');
     await tester.pump();
 
-    tester.binding.window.brieflyShowPasswordTestValue = false;
+    tester.binding.platformDispatcher.brieflyShowPasswordTestValue = false;
     addTearDown(() {
-      tester.binding.window.brieflyShowPasswordTestValue = true;
+      tester.binding.platformDispatcher.brieflyShowPasswordTestValue = true;
     });
     expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
     await tester.pump(const Duration(milliseconds: 500));

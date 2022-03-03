@@ -781,19 +781,19 @@ void main() {
     }
 
     testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
-      final ui.Size originalScreenSize = tester.binding.window.physicalSize;
-      final double originalDevicePixelRatio = tester.binding.window.devicePixelRatio;
+      final ui.Size originalScreenSize = tester.binding.view.physicalSize;
+      final double originalDevicePixelRatio = tester.binding.view.devicePixelRatio;
       addTearDown(() {
-        tester.binding.window.devicePixelRatioTestValue = originalDevicePixelRatio;
-        tester.binding.window.physicalSizeTestValue = originalScreenSize;
+        tester.binding.view.devicePixelRatioTestValue = originalDevicePixelRatio;
+        tester.binding.view.physicalSizeTestValue = originalScreenSize;
       });
       const double screenHeight = 400.0;
       const double screenWidth = 400.0;
       const double itemHeight = screenHeight / 10.0;
       const ValueKey<String> centerKey = ValueKey<String>('center');
 
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      tester.binding.window.physicalSizeTestValue = const Size(screenWidth, screenHeight);
+      tester.binding.view.devicePixelRatioTestValue = 1.0;
+      tester.binding.view.physicalSizeTestValue = const Size(screenWidth, screenHeight);
 
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,

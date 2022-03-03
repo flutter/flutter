@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 void main() {
   testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
+    tester.binding.view.viewConfigurationTestValue = const ui.ViewConfiguration(
       gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
     );
     final TestResult result = TestResult();

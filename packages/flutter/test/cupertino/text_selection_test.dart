@@ -245,8 +245,8 @@ void main() {
 
     testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
-      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.view.physicalSizeTestValue = const Size(800, 800);
+      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
@@ -317,8 +317,8 @@ void main() {
     testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
       // the same page.
-      tester.binding.window.physicalSizeTestValue = const Size(640, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.view.physicalSizeTestValue = const Size(640, 800);
+      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(

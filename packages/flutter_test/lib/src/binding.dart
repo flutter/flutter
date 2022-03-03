@@ -161,6 +161,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   final TestWindow _window;
 
   @override
+  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+
+  @override
   TestRestorationManager get restorationManager {
     _restorationManager ??= createRestorationManager();
     return _restorationManager!;
