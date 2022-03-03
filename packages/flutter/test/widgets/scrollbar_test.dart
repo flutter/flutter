@@ -2053,21 +2053,21 @@ void main() {
         ),
       );
     }
-    tester.binding.view.physicalSizeTestValue = const Size(800.0, 600.0);
-    tester.binding.view.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.view.clearDevicePixelRatioTestValue);
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
 
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
 
-    tester.binding.view.physicalSizeTestValue = const Size(800.0, 599.0);
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
 
-    tester.binding.view.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });

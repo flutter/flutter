@@ -157,8 +157,8 @@ void main() {
 
     testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
-      tester.binding.view.physicalSizeTestValue = const Size(1000, 800);
-      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(
@@ -231,8 +231,8 @@ void main() {
 
     testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
       // Set the screen size so narrow that only Cut and Copy can fit.
-      tester.binding.view.physicalSizeTestValue = const Size(800, 800);
-      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(
@@ -296,8 +296,8 @@ void main() {
 
     testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
-      tester.binding.view.physicalSizeTestValue = const Size(1000, 800);
-      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(
@@ -370,8 +370,8 @@ void main() {
 
     testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
-      tester.binding.view.physicalSizeTestValue = const Size(1000, 800);
-      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(

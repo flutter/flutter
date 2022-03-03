@@ -426,8 +426,8 @@ void main() {
 
       // Portrait layout.
 
-      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
-      tester.binding.view.physicalSizeTestValue = const Size(900, 1200);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeTestValue = const Size(900, 1200);
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await tester.tap(find.text('X'));
@@ -1085,10 +1085,10 @@ void main() {
     const Size kSmallScreenSizeLandscape = Size(521, 320);
 
     Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
-      tester.binding.view.physicalSizeTestValue = size;
-      addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
-      tester.binding.view.devicePixelRatioTestValue = 1.0;
-      addTearDown(tester.binding.view.clearDevicePixelRatioTestValue);
+      tester.binding.window.physicalSizeTestValue = size;
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('OK'));
       });

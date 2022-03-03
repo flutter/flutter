@@ -157,7 +157,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  TestWindow get view => _window;
+  TestWindow get window => _window;
   final TestWindow _window;
 
   @override
@@ -444,8 +444,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = view.devicePixelRatio;
-    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+    final double devicePixelRatio = window.devicePixelRatio;
+    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -1562,7 +1562,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: view,
+      window: window,
     );
     renderView.prepareInitialFrame();
   }
@@ -1742,7 +1742,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ViewConfiguration createViewConfiguration() {
     return TestViewConfiguration(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      window: view,
+      window: window,
     );
   }
 

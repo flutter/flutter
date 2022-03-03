@@ -5,7 +5,7 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window, FlutterView;
+import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -193,8 +193,7 @@ abstract class BindingBase {
   /// provides access to the one and only window.
   // TODO(gspencergoog): remove the preceding note once multi-window support is
   // active.
-  // ui.SingletonFlutterWindow get window => ui.window;
-  ui.FlutterView get view => ui.window;
+  ui.SingletonFlutterWindow get window => ui.window;
 
   /// The [ui.PlatformDispatcher] to which this binding is bound.
   ///

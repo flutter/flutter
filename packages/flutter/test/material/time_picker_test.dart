@@ -584,8 +584,8 @@ void _tests() {
 
   testWidgets('header touch regions are large enough', (WidgetTester tester) async {
     // Ensure picker is displayed in portrait mode.
-    tester.binding.view.physicalSizeTestValue = const Size(400, 800);
-    tester.binding.view.devicePixelRatioTestValue = 1;
+    tester.binding.window.physicalSizeTestValue = const Size(400, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1;
     await mediaQueryBoilerplate(tester, false);
 
     final Size dayPeriodControlSize = tester.getSize(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'));
@@ -607,8 +607,8 @@ void _tests() {
     expect(minuteSize.width, greaterThanOrEqualTo(48.0));
     expect(minuteSize.height, greaterThanOrEqualTo(48.0));
 
-    tester.binding.view.clearPhysicalSizeTestValue();
-    tester.binding.view.clearDevicePixelRatioTestValue();
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('builder parameter', (WidgetTester tester) async {

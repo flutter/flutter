@@ -88,14 +88,13 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  ui.SingletonFlutterWindow get view => throw UnimplementedError();
+  ui.SingletonFlutterWindow get window => throw UnimplementedError();
 
   @override
   ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
-
   @override
   final FakeImageCache imageCache = FakeImageCache();
 

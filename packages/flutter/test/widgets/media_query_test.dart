@@ -101,10 +101,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromWindow is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.view);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance.view.physicalSize / WidgetsBinding.instance.view.devicePixelRatio));
+    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -116,7 +116,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.view);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -155,7 +155,7 @@ void main() {
       ),
     ];
 
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.view);
+    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
@@ -726,7 +726,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance.view);
+    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
@@ -916,11 +916,11 @@ void main() {
   });
 
   testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
-    tester.binding.view.viewConfigurationTestValue = const ViewConfiguration(
+    tester.binding.window.viewConfigurationTestValue = const ViewConfiguration(
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    expect(MediaQueryData.fromWindow(tester.binding.view).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
-    tester.binding.view.viewConfigurationTestValue = null;
+    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    tester.binding.window.viewConfigurationTestValue = null;
   });
 }

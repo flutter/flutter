@@ -23,7 +23,7 @@ void main() {
         bottom: bottomPadding,
       );
 
-      binding.view
+      binding.window
         ..viewPaddingTestValue = padding
         ..paddingTestValue = padding
         ..devicePixelRatioTestValue = devicePixelRatio

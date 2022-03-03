@@ -1974,7 +1974,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.view),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

@@ -76,8 +76,8 @@ Future<void> main() async {
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
-      final Size windowCenter = tester.binding.view.physicalSize /
-          tester.binding.view.devicePixelRatio /
+      final Size windowCenter = tester.binding.window.physicalSize /
+          tester.binding.window.devicePixelRatio /
           2;
       final double windowCenterX = windowCenter.width;
       final double windowCenterY = windowCenter.height;

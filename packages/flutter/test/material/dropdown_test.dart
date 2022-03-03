@@ -3173,10 +3173,10 @@ void main() {
     // The default item height is 48.0 pixels and needs two items padding since
     // the menu requires empty space surrounding the menu. Finally, the constraint height
     // is 47.0 pixels for the menu rendering.
-    tester.binding.view.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
-    tester.binding.view.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.view.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.view.clearDevicePixelRatioTestValue);
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
 
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();

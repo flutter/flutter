@@ -1091,7 +1091,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.view);
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     if (!kReleaseMode) {
       data = data.copyWith(platformBrightness: debugBrightnessOverride);
     }

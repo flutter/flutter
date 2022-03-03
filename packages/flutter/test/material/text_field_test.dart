@@ -2277,10 +2277,10 @@ void main() {
       // Add a viewInset tall enough to push the field to the top, where there
       // is no room to display the toolbar above. This is similar to when the
       // keyboard is shown.
-      tester.binding.view.viewInsetsTestValue = const _TestWindowPadding(
+      tester.binding.window.viewInsetsTestValue = const _TestWindowPadding(
         bottom: 500.0,
       );
-      addTearDown(tester.binding.view.clearViewInsetsTestValue);
+      addTearDown(tester.binding.window.clearViewInsetsTestValue);
       await tester.pumpAndSettle();
 
       // Verify the selection toolbar position is below the text.
@@ -2289,7 +2289,7 @@ void main() {
       expect(toolbarTopLeft.dy, greaterThan(textFieldTopLeft.dy));
 
       // Remove the viewInset, as if the keyboard were hidden.
-      tester.binding.view.clearViewInsetsTestValue();
+      tester.binding.window.clearViewInsetsTestValue();
       await tester.pumpAndSettle();
 
       // Verify the selection toolbar position is below the text.

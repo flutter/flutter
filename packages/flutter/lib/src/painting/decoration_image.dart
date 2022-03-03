@@ -556,7 +556,7 @@ void paintImage({
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
       // It's ok to use this instead of a MediaQuery because if this changes,
       // whatever is aware of the MediaQuery will be repainting the image anyway.
-      displaySize: outputSize * PaintingBinding.instance.view.devicePixelRatio,
+      displaySize: outputSize * PaintingBinding.instance.window.devicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&
