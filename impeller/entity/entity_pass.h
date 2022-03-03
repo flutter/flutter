@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/contents.h"
+#include "impeller/entity/contents/contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_delegate.h"
 #include "impeller/renderer/render_target.h"

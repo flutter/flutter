@@ -5,6 +5,7 @@
 #include "impeller/display_list/display_list_dispatcher.h"
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "third_party/skia/include/core/SkColor.h"

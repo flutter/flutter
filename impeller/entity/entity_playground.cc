@@ -4,7 +4,7 @@
 
 #include "impeller/entity/entity_playground.h"
 
-#include "impeller/entity/content_context.h"
+#include "impeller/entity/contents/content_context.h"
 
 namespace impeller {
 
