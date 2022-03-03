@@ -140,7 +140,7 @@ abstract class CreateBase extends FlutterCommand {
       defaultsTo: null,
       help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
             'internally and should generally not be used manually.',
-      hide: true,
+      hide: !verboseHelp,
     );
   }
 
