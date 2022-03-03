@@ -31,7 +31,7 @@ class ListTileSelectExample extends StatefulWidget {
 }
 
 class ListTileSelectExampleState extends State<ListTileSelectExample> {
-  bool isEditMode = false;
+  bool isSelectionMode = false;
   final int listLength = 30;
   late List<bool> _selected;
   bool _selectAll = false;
@@ -56,12 +56,12 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
           title: const Text(
             'ListTile select example',
           ),
-          leading: isEditMode
+          leading: isSelectionMode
               ? IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () {
                     setState(() {
-                      isEditMode = false;
+                      isSelectionMode = false;
                     });
                   },
                 )
@@ -85,7 +85,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                   });
                 },
               ),
-            if (isEditMode)
+            if (isSelectionMode)
               TextButton(
                   child: !_selectAll
                       ? const Text('select all')
@@ -101,20 +101,20 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
         ),
         body: _isGridMode
             ? GridBuilder(
-                isEditMode: isEditMode,
+                isSelectionMode: isSelectionMode,
                 selectedList: _selected,
                 onEditChange: (bool x) {
                   setState(() {
-                    isEditMode = x;
+                    isSelectionMode = x;
                   });
                 },
               )
             : ListBuilder(
-                isEditMode: isEditMode,
+                isSelectionMode: isSelectionMode,
                 selectedList: _selected,
                 onEditChange: (bool x) {
                   setState(() {
-                    isEditMode = x;
+                    isSelectionMode = x;
                   });
                 },
               ));
@@ -126,11 +126,11 @@ class GridBuilder extends StatefulWidget {
   GridBuilder(
       {Key? key,
       required this.selectedList,
-      required this.isEditMode,
+      required this.isSelectionMode,
       this.onEditChange})
       : super(key: key);
 
-  bool isEditMode;
+  bool isSelectionMode;
   final Function(bool)? onEditChange;
   final List<bool> selectedList;
 
@@ -140,7 +140,7 @@ class GridBuilder extends StatefulWidget {
 
 class GridBuilderState extends State<GridBuilder> {
   void _toggle(int index) {
-    if (widget.isEditMode) {
+    if (widget.isSelectionMode) {
       setState(() {
         widget.selectedList[index] = !widget.selectedList[index];
       });
@@ -157,9 +157,9 @@ class GridBuilderState extends State<GridBuilder> {
           return InkWell(
             onTap: () => _toggle(index),
             onLongPress: () {
-              if (!widget.isEditMode) {
+              if (!widget.isSelectionMode) {
                 setState(() {
-                  widget.isEditMode = true;
+                  widget.isSelectionMode = true;
                   widget.selectedList[index] = true;
                 });
                 widget.onEditChange!(true);
@@ -167,7 +167,7 @@ class GridBuilderState extends State<GridBuilder> {
             },
             child: GridTile(
                 child: Container(
-              child: widget.isEditMode
+              child: widget.isSelectionMode
                   ? Checkbox(
                       onChanged: (bool? x) => _toggle(index),
                       value: widget.selectedList[index])
@@ -183,11 +183,11 @@ class ListBuilder extends StatefulWidget {
   ListBuilder(
       {Key? key,
       required this.selectedList,
-      required this.isEditMode,
+      required this.isSelectionMode,
       this.onEditChange})
       : super(key: key);
 
-  bool isEditMode;
+  bool isSelectionMode;
   final List<bool> selectedList;
   final Function(bool)? onEditChange;
 
@@ -197,7 +197,7 @@ class ListBuilder extends StatefulWidget {
 
 class _ListBuilderState extends State<ListBuilder> {
   void _toggle(int index) {
-    if (widget.isEditMode) {
+    if (widget.isSelectionMode) {
       setState(() {
         widget.selectedList[index] = !widget.selectedList[index];
       });
@@ -212,15 +212,15 @@ class _ListBuilderState extends State<ListBuilder> {
           return ListTile(
               onTap: () => _toggle(index),
               onLongPress: () {
-                if (!widget.isEditMode) {
+                if (!widget.isSelectionMode) {
                   setState(() {
-                    widget.isEditMode = true;
+                    widget.isSelectionMode = true;
                     widget.selectedList[index] = true;
                   });
                   widget.onEditChange!(true);
                 }
               },
-              trailing: widget.isEditMode
+              trailing: widget.isSelectionMode
                   ? Checkbox(
                       value: widget.selectedList[index],
                       onChanged: (bool? x) => _toggle(index),
