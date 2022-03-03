@@ -1,4 +1,4 @@
-Signature: be3455e5f77a7f519762b96e2e61d20b
+Signature: 52ba66a8f920102f1897887cee6c651c
 
 UNUSED LICENSES:
 
@@ -3332,7 +3332,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/tree.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connection-info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connection-options.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/deprecated.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/file2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/io.fidl
