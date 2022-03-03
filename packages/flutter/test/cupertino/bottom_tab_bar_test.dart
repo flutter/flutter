@@ -571,7 +571,7 @@ Future<void> main() async {
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 
-  testWidgets('Hovering over tab bar item updates cursor to clickable', (WidgetTester tester) async {
+  testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
