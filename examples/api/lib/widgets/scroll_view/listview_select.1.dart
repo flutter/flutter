@@ -88,8 +88,14 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
             if (isSelectionMode)
               TextButton(
                   child: !_selectAll
-                      ? const Text('select all')
-                      : const Text('unselect all'),
+                      ? const Text(
+                          'select all',
+                          style: TextStyle(color: Colors.white),
+                        )
+                      : const Text(
+                          'unselect all',
+                          style: TextStyle(color: Colors.white),
+                        ),
                   onPressed: () {
                     _selectAll = !_selectAll;
                     setState(() {
