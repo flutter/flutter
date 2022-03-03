@@ -4,8 +4,10 @@
 
 @Timeout(Duration(seconds: 600))
 
+import 'dart:io';
+// import 'package:flutter_tools/src/base/io.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+// import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_utils.dart';
@@ -34,7 +36,7 @@ class MigrateProject extends Project {
       depotToolsDir.path,
     ], workingDirectory: dir.path);
 
-    final File cipdFile = depotToolsDir.childFile(globals.platform.isWindows ? 'cipd.bat' : 'cipd');
+    final File cipdFile = depotToolsDir.childFile(Platform.isWindows ? 'cipd.bat' : 'cipd');
     await processManager.run(<String>[
       cipdFile.path,
       'init',
@@ -52,7 +54,7 @@ class MigrateProject extends Project {
     ], workingDirectory: dir.path);
 
     // This cp command changes the symlinks to real files so the tool can edit them.
-    if (globals.platform.isWindows) {
+    if (Platform.isWindows) {
       await processManager.run(<String>[
         'robocopy',
         tempDir.path,

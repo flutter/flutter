@@ -37,10 +37,9 @@ class MigrateConfig {
     if (!_validate(yamlRoot)) {
       // Error
       throwToolExit('Invalid migrate config yaml file found at ${file.path}');
-      return;
     }
-    final YamlMap map = yamlRoot as YamlMap;
-    platform = SupportedPlatform.values.firstWhere((e) => e.toString() == 'SupportedPlatform.${map['platform'] as String}');
+    final YamlMap map = yamlRoot! as YamlMap;
+    platform = SupportedPlatform.values.firstWhere((SupportedPlatform platform) => platform.toString() == 'SupportedPlatform.${map['platform'] as String}');
     createRevision = map['createRevision'] as String?;
     baseRevision = map['baseRevision'] as String?;
     final Object? unmanagedFilesMap = map['unmanagedFiles'];
@@ -63,12 +62,12 @@ class MigrateConfig {
   /// The platform this config file is describing.
   SupportedPlatform platform;
 
-  /// The git revision this platform was initially created with.
+  /// The Flutter SDK revision this platform was created by.
   ///
   /// Null if the initial create git revision is unknown.
   String? createRevision;
 
-  /// The git revision this platform was last successfully migrated with.
+  /// The Flutter SDK revision this platform was last migrated by.
   ///
   /// Null if the project was never migrated or the revision is unknown.
   String? baseRevision;
@@ -80,10 +79,10 @@ class MigrateConfig {
 
   /// Verifies the expected yaml keys are present in the file.
   bool _validate(Object? yamlRoot) {
-    if (yamlRoot is! YamlMap) {
+    if (yamlRoot != null && yamlRoot is! YamlMap) {
       return false;
     }
-    final YamlMap map = yamlRoot;
+    final YamlMap map = yamlRoot! as YamlMap;
     return map.keys.contains('platform') &&
     (map['platform'] is String || map['platform'] == null) &&
     map.keys.contains('createRevision') &&
@@ -141,13 +140,14 @@ $unmanagedFilesString
     String? createRevision,
     bool create = true,
   }) async {
-    FlutterProject flutterProject = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
+    final FlutterProject flutterProject = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
     final List<MigrateConfig> configs = <MigrateConfig>[];
     for (final SupportedPlatform platform in platforms) {
-      if (MigrateConfig.getFileFromPlatform(platform, projectDirectory: projectDirectory).existsSync()) {
+      final File fileFromPlatform = getFileFromPlatform(platform, projectDirectory: projectDirectory);
+      if (fileFromPlatform.existsSync()) {
         // Existing config. Parsing.
-        configs.add(MigrateConfig.fromFile(getFileFromPlatform(platform, projectDirectory: projectDirectory)));
+        configs.add(MigrateConfig.fromFile(fileFromPlatform));
       } else {
         // No config found, creating empty config.
         final MigrateConfig newConfig = MigrateConfig(

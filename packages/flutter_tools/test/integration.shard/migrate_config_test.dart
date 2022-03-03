@@ -29,7 +29,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('parse simple config file', () async {
+  testWithoutContext('parse simple config file', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);

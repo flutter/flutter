@@ -559,7 +559,7 @@ abstract class CreateBase extends FlutterCommand {
         winUwpPlatform: winUwpPlatform,
       );
     }
-    final List<SupportedPlatform> platformsForMigrateConfig = <String>[SupportedPlatform.root];
+    final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
       platformsForMigrateConfig.add(SupportedPlatform.android);
