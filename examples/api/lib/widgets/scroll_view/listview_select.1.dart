@@ -40,6 +40,10 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
   @override
   void initState() {
     super.initState();
+    initializeSelection();
+  }
+
+  void initializeSelection() {
     _selected = List<bool>.generate(listLength, (_) => false);
   }
 
@@ -63,6 +67,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                     setState(() {
                       isSelectionMode = false;
                     });
+                    initializeSelection();
                   },
                 )
               : const SizedBox(),
@@ -109,7 +114,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
             ? GridBuilder(
                 isSelectionMode: isSelectionMode,
                 selectedList: _selected,
-                onEditChange: (bool x) {
+                onSelectionChange: (bool x) {
                   setState(() {
                     isSelectionMode = x;
                   });
@@ -118,7 +123,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
             : ListBuilder(
                 isSelectionMode: isSelectionMode,
                 selectedList: _selected,
-                onEditChange: (bool x) {
+                onSelectionChange: (bool x) {
                   setState(() {
                     isSelectionMode = x;
                   });
@@ -127,17 +132,16 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
   }
 }
 
-// ignore: must_be_immutable
 class GridBuilder extends StatefulWidget {
-  GridBuilder(
-      {Key? key,
-      required this.selectedList,
-      required this.isSelectionMode,
-      this.onEditChange})
-      : super(key: key);
+  const GridBuilder({
+    Key? key,
+    required this.selectedList,
+    required this.isSelectionMode,
+    required this.onSelectionChange,
+  }) : super(key: key);
 
-  bool isSelectionMode;
-  final Function(bool)? onEditChange;
+  final bool isSelectionMode;
+  final Function(bool)? onSelectionChange;
   final List<bool> selectedList;
 
   @override
@@ -165,10 +169,9 @@ class GridBuilderState extends State<GridBuilder> {
             onLongPress: () {
               if (!widget.isSelectionMode) {
                 setState(() {
-                  widget.isSelectionMode = true;
                   widget.selectedList[index] = true;
                 });
-                widget.onEditChange!(true);
+                widget.onSelectionChange!(true);
               }
             },
             child: GridTile(
@@ -184,18 +187,17 @@ class GridBuilderState extends State<GridBuilder> {
   }
 }
 
-// ignore: must_be_immutable
 class ListBuilder extends StatefulWidget {
-  ListBuilder(
-      {Key? key,
-      required this.selectedList,
-      required this.isSelectionMode,
-      this.onEditChange})
-      : super(key: key);
+  const ListBuilder({
+    Key? key,
+    required this.selectedList,
+    required this.isSelectionMode,
+    required this.onSelectionChange,
+  }) : super(key: key);
 
-  bool isSelectionMode;
+  final bool isSelectionMode;
   final List<bool> selectedList;
-  final Function(bool)? onEditChange;
+  final Function(bool)? onSelectionChange;
 
   @override
   State<ListBuilder> createState() => _ListBuilderState();
@@ -220,10 +222,9 @@ class _ListBuilderState extends State<ListBuilder> {
               onLongPress: () {
                 if (!widget.isSelectionMode) {
                   setState(() {
-                    widget.isSelectionMode = true;
                     widget.selectedList[index] = true;
                   });
-                  widget.onEditChange!(true);
+                  widget.onSelectionChange!(true);
                 }
               },
               trailing: widget.isSelectionMode
