@@ -83,6 +83,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.shouldAttachEngineToActivity()).thenReturn(true);
     when(mockHost.shouldHandleDeeplinking()).thenReturn(false);
     when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
+    when(mockHost.shouldDispatchAppLifecycleState()).thenReturn(true);
   }
 
   @Test
@@ -134,6 +135,30 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsDetached();
+  }
+
+  @Test
+  public void itDoesNotSendsLifecycleEventsToFlutter() {
+    // ---- Test setup ----
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    when(mockHost.shouldDispatchAppLifecycleState()).thenReturn(false);
+
+    // We're testing lifecycle behaviors, which require/expect that certain methods have already
+    // been executed by the time they run. Therefore, we run those expected methods first.
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDetach();
+
+    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
+    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
+    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
   }
 
   @Test
