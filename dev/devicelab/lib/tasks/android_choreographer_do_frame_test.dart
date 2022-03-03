@@ -18,12 +18,11 @@ const List<String> kSentinelStr = <String>[
   '==== sentinel #3 ====',
 ];
 
-// Regression test for https://github.com/flutter/flutter/issues/98973
-// This test ensures that Choreographer#doFrame finishes during application startup.
-// This test fails if the application hangs during this period.
-// https://ui.perfetto.dev/#!/?s=da6628c3a92456ae8fa3f345d0186e781da77e90fc8a64d073e9fee11d1e65
+/// Tests that Choreographer#doFrame finishes during application startup.
+/// This test fails if the application hangs during this period.
+/// https://ui.perfetto.dev/#!/?s=da6628c3a92456ae8fa3f345d0186e781da77e90fc8a64d073e9fee11d1e65
+/// Regression test for https://github.com/flutter/flutter/issues/98973
 TaskFunction androidChoreographerDoFrameTest({
-  String? deviceIdOverride,
   Map<String, String>? environment,
 }) {
   final Directory tempDir = Directory.systemTemp
@@ -87,18 +86,19 @@ Future<void> main() async {
         }
 
         section('Flutter run (mode: $mode)');
+        late Process run;
         await inDirectory(path.join(tempDir.path, 'app'), () async {
-          final Process run = await startProcess(
+          run = await startProcess(
             path.join(flutterDirectory.path, 'bin', 'flutter'),
             flutterCommandArgs('run', <String>['--$mode', '--verbose']),
           );
+        });
 
-          int currSentinelIdx = 0;
-          final StreamSubscription<void> stdout = run.stdout
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String line) {
-
+        int currSentinelIdx = 0;
+        final StreamSubscription<void> stdout = run.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
             if (currSentinelIdx < sentinelCompleters.keys.length &&
                 line.contains(sentinelCompleters.keys.elementAt(currSentinelIdx))) {
               sentinelCompleters.values.elementAt(currSentinelIdx).complete();
@@ -107,61 +107,59 @@ Future<void> main() async {
             } else {
               print('stdout: $line');
             }
-
           });
 
-          final StreamSubscription<void> stderr = run.stderr
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String line) {
-              print('stderr: $line');
-            });
+        final StreamSubscription<void> stderr = run.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            print('stderr: $line');
+          });
 
-          final Completer<void> exitCompleter = Completer<void>();
+        final Completer<void> exitCompleter = Completer<void>();
 
-          unawaited(run.exitCode.then((int exitCode) {
-            exitCompleter.complete();
-          }));
+        unawaited(run.exitCode.then((int exitCode) {
+          exitCompleter.complete();
+        }));
 
-          section('Wait for sentinels (mode: $mode)');
-          for (final Completer<void> completer in sentinelCompleters.values) {
-            if (nextCompleterIdx == 0) {
-              // Don't time out because we don't know how long it would take to get the first log.
+        section('Wait for sentinels (mode: $mode)');
+        for (final Completer<void> completer in sentinelCompleters.values) {
+          if (nextCompleterIdx == 0) {
+            // Don't time out because we don't know how long it would take to get the first log.
+            await Future.any<dynamic>(
+              <Future<dynamic>>[
+                completer.future,
+                exitCompleter.future,
+              ],
+            );
+          } else {
+            try {
+              // Time out since this should not take 1s after the first log was received.
               await Future.any<dynamic>(
                 <Future<dynamic>>[
-                  completer.future,
+                  completer.future.timeout(const Duration(seconds: 1)),
                   exitCompleter.future,
                 ],
               );
-            } else {
-              try {
-                // Time out since this should not take 1s after the first log was received.
-                await Future.any<dynamic>(
-                  <Future<dynamic>>[
-                    completer.future.timeout(const Duration(seconds: 1)),
-                    exitCompleter.future,
-                  ],
-                );
-              } on TimeoutException {
-                break;
-              }
-            }
-            if (exitCompleter.isCompleted) {
-              // The process exited.
+            } on TimeoutException {
               break;
             }
-            nextCompleterIdx++;
           }
+          if (exitCompleter.isCompleted) {
+            // The process exited.
+            break;
+          }
+          nextCompleterIdx++;
+        }
 
-          section('Quit app (mode: $mode)');
-          run.stdin.write('q');
-          await exitCompleter.future;
+        section('Quit app (mode: $mode)');
+        run.stdin.write('q');
+        await exitCompleter.future;
 
-          section('Stop listening to stdout and stderr (mode: $mode)');
-          await stdout.cancel();
-          await stderr.cancel();
-          run.kill();
-        });
+        section('Stop listening to stdout and stderr (mode: $mode)');
+        await stdout.cancel();
+        await stderr.cancel();
+        run.kill();
 
         if (nextCompleterIdx == sentinelCompleters.values.length) {
           return TaskResult.success(null);

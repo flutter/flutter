@@ -1671,7 +1671,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
-    _clipboardStatus?.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -1695,7 +1694,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       hideToolbar();
     }
-    _clipboardStatus?.update();
   }
 
   /// Paste text from [Clipboard].
@@ -2921,7 +2919,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
-    _clipboardStatus?.update();
+
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3028,7 +3026,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && copyEnabled
         && _hasFocus
         && (controls?.canCopy(this) ?? false)
-      ? () => controls!.handleCopy(this)
+      ? () => controls!.handleCopy(this, _clipboardStatus)
       : null;
   }
 
@@ -3037,7 +3035,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && cutEnabled
         && _hasFocus
         && (controls?.canCut(this) ?? false)
-      ? () => controls!.handleCut(this)
+      ? () => controls!.handleCut(this, _clipboardStatus)
       : null;
   }
 
@@ -3183,11 +3181,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     bringIntoView(newSelection.extent);
   }
 
+  Object? _hideToolbarIfVisible(DismissIntent intent) {
+    if (_selectionOverlay?.toolbarIsVisible ?? false) {
+      hideToolbar(false);
+      return null;
+    }
+    return Actions.invoke(context, intent);
+  }
+
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete
     DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary)),
@@ -3286,10 +3293,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         textWidthBasis: widget.textWidthBasis,
                         obscuringCharacter: widget.obscuringCharacter,
                         obscureText: widget.obscureText,
-                        autocorrect: widget.autocorrect,
-                        smartDashesType: widget.smartDashesType,
-                        smartQuotesType: widget.smartQuotesType,
-                        enableSuggestions: widget.enableSuggestions,
                         offset: offset,
                         onCaretChanged: _handleCaretChanged,
                         rendererIgnoresPointer: widget.rendererIgnoresPointer,
@@ -3392,10 +3395,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
-    required this.autocorrect,
-    required this.smartDashesType,
-    required this.smartQuotesType,
-    required this.enableSuggestions,
     required this.offset,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
@@ -3452,10 +3451,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool obscureText;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
-  final bool autocorrect;
-  final SmartDashesType smartDashesType;
-  final SmartQuotesType smartQuotesType;
-  final bool enableSuggestions;
   final ViewportOffset offset;
   final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;

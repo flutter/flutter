@@ -16,9 +16,9 @@ class ExampleDragTarget extends StatefulWidget {
 class ExampleDragTargetState extends State<ExampleDragTarget> {
   Color _color = Colors.grey;
 
-  void _handleAccept(Color? data) {
+  void _handleAccept(Color data) {
     setState(() {
-      _color = data!;
+      _color = data;
     });
   }
 
@@ -215,7 +215,7 @@ class MovableBall extends StatelessWidget {
       );
     } else {
       return DragTarget<bool>(
-        onAccept: (bool? data) { callback(position); },
+        onAccept: (bool data) { callback(position); },
         builder: (BuildContext context, List<bool?> accepted, List<dynamic> rejected) {
           return dashedBall;
         },

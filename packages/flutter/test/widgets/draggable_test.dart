@@ -39,9 +39,7 @@ void main() {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onMove: (_) => moveCount++,
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -93,60 +91,9 @@ void main() {
     expect(moveCount, 1);
   });
 
-  testWidgets('Draggable can be accepted when the data is null', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/84816
-    final Map<String, int?> receivedData = <String, int?>{};
-
-    await tester.pumpWidget(MaterialApp(
-      home: Column(
-        children: <Widget>[
-          const Draggable<int>(
-            feedback: Text('Dragging'),
-            child: Text('Source'),
-          ),
-          DragTarget<int>(
-            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return const SizedBox(height: 100.0, child: Text('Target 1'));
-            },
-            onWillAccept: (int? data) {
-              receivedData['onWillAccept'] = data;
-              return true;
-            },
-            onAccept: (int? data) {
-              receivedData['onAccept'] = data;
-            },
-            onAcceptWithDetails: (DragTargetDetails<int> details) {
-              receivedData['onAcceptWithDetails'] = details.data;
-            },
-            onMove: (DragTargetDetails<int> details) {
-              receivedData['onMove'] = details.data;
-            },
-          ),
-        ],
-      ),
-    ));
-
-    final Offset firstLocation = tester.getCenter(find.text('Source'));
-    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
-    await tester.pump();
-
-    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
-    await gesture.moveTo(secondLocation);
-    await tester.pump();
-
-    await gesture.up();
-    await tester.pump();
-
-    expect(receivedData.length, 4);
-    expect(receivedData['onWillAccept'], null);
-    expect(receivedData['onMove'], null);
-    expect(receivedData['onAccept'], null);
-    expect(receivedData['onAcceptWithDetails'], null);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter', (WidgetTester tester) async {
-    final Map<String, int> leftBehind = <String, int>{
+    final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -221,7 +168,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
-    final Map<String, int> leftBehind = <String, int>{
+    final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -297,7 +244,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onMove callback fires correctly with generic parameter', (WidgetTester tester) async {
-    final Map<String, int> targetMoveCount = <String, int>{
+    final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -316,7 +263,7 @@ void main() {
             },
             onMove: (DragTargetDetails<int> details) {
               targetMoveCount['Target 1'] =
-                  targetMoveCount['Target 1']! + details.data!;
+                  targetMoveCount['Target 1']! + details.data;
             },
           ),
           DragTarget<int>(
@@ -325,7 +272,7 @@ void main() {
             },
             onMove: (DragTargetDetails<int> details) {
               targetMoveCount['Target 2'] =
-                  targetMoveCount['Target 2']! + details.data!;
+                  targetMoveCount['Target 2']! + details.data;
             },
           ),
         ],
@@ -370,7 +317,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
-    final Map<String, int> targetMoveCount = <String, int>{
+    final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -1220,9 +1167,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -1298,9 +1243,7 @@ void main() {
               );
             },
             onWillAccept: (int? data) => false,
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -1373,9 +1316,7 @@ void main() {
             return const SizedBox(height: 100.0, child: Text('Target'));
           },
           onWillAccept: (int? data) => false,
-          onAccept: (int? data) {
-            accepted.add(data!);
-          },
+          onAccept: accepted.add,
           onAcceptWithDetails: acceptedDetails.add,
         ),
       ]),
@@ -1425,9 +1366,7 @@ void main() {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onWillAccept: (int? data) => false,
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -1641,9 +1580,7 @@ void main() {
               );
             },
             onWillAccept: (int? data) => false,
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -1711,9 +1648,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -1854,9 +1789,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -1934,9 +1867,7 @@ void main() {
                     ),
                   );
                 },
-                onAccept: (int? data) {
-                  acceptedInts.add(data!);
-                },
+                onAccept: acceptedInts.add,
                 onAcceptWithDetails: acceptedIntsDetails.add,
               ),
               DragTarget<double>(
@@ -1948,9 +1879,7 @@ void main() {
                     ),
                   );
                 },
-                onAccept: (double? data) {
-                  acceptedDoubles.add(data!);
-                },
+                onAccept: acceptedDoubles.add,
                 onAcceptWithDetails: acceptedDoublesDetails.add,
               ),
             ],
@@ -2066,9 +1995,7 @@ void main() {
                       child: Text('Target1'),
                     ),
                   );
-                }, onAccept: (DragTargetData? data) {
-                acceptedDragTargetDatas.add(data!);
-              },
+                }, onAccept: acceptedDragTargetDatas.add,
                 onAcceptWithDetails: acceptedDragTargetDataDetails.add,
               ),
               DragTarget<ExtendedDragTargetData>(
@@ -2080,9 +2007,7 @@ void main() {
                     ),
                   );
                 },
-                onAccept: (ExtendedDragTargetData? data) {
-                  acceptedExtendedDragTargetDatas.add(data!);
-                },
+                onAccept: acceptedExtendedDragTargetDatas.add,
                 onAcceptWithDetails: acceptedExtendedDragTargetDataDetails.add,
               ),
             ],
@@ -2132,9 +2057,7 @@ void main() {
               builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                 return const SizedBox(height: 100.0, child: Text('Target'));
               },
-              onAccept: (int? data) {
-                accepted.add(data!);
-              },
+              onAccept: accepted.add,
               onAcceptWithDetails: acceptedDetails.add,
             ),
           ],
@@ -2393,9 +2316,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -2425,9 +2346,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -2507,9 +2426,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -2594,9 +2511,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
         ],
@@ -2850,9 +2765,7 @@ void main() {
             builder: (BuildContext context, List<Object?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (Object? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
           ),
         ],
       ),
@@ -2888,9 +2801,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
           ),
         ],
       ),
@@ -2926,9 +2837,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onAccept: (int? data) {
-              accepted.add(data!);
-            },
+            onAccept: accepted.add,
             onWillAccept: (int? data) {
               if (data == null)
                 isReceiveNullDataForCheck = true;
@@ -3271,9 +3180,7 @@ Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, do
                   builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                     return const SizedBox(height: 100.0, child: Text('Target'));
                   },
-                  onAccept: (int? data) {
-                    accepted.add(data!);
-                  },
+                  onAccept: accepted.add,
                   onAcceptWithDetails: acceptedDetails.add,
                 ),
               ],
