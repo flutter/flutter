@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(dnfield): remove unused_element ignores when https://github.com/dart-lang/sdk/issues/35164 is resolved.
-
 // @dart = 2.12
 part of dart.ui;
 
@@ -59,7 +57,7 @@ Future<developer.ServiceExtensionResponse> _scheduleFrame(
 }
 
 @pragma('vm:entry-point')
-void _setupHooks() {  // ignore: unused_element
+void _setupHooks() {
   assert(() {
     // In debug mode, register the schedule frame extension.
     developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);
@@ -95,10 +93,16 @@ void _scheduleMicrotask(void Function() callback) native 'ScheduleMicrotask';
 int? _getCallbackHandle(Function closure) native 'GetCallbackHandle';
 Function? _getCallbackFromHandle(int handle) native 'GetCallbackFromHandle';
 
-// Required for gen_snapshot to work correctly.
-int? _isolateId; // ignore: unused_element
+typedef _PrintClosure = void Function(String line);
 
+// Used by the embedder to initialize how printing is performed.
+// See also https://github.com/dart-lang/sdk/blob/main/sdk/lib/_internal/vm/lib/print_patch.dart
 @pragma('vm:entry-point')
-Function _getPrintClosure() => _print;
+_PrintClosure _getPrintClosure() => _print;
+
+typedef _ScheduleImmediateClosure = void Function(void Function());
+
+// Used by the embedder to initialize how microtasks are scheduled.
+// See also https://github.com/dart-lang/sdk/blob/main/sdk/lib/_internal/vm/lib/schedule_microtask_patch.dart
 @pragma('vm:entry-point')
-Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
+_ScheduleImmediateClosure _getScheduleMicrotaskClosure() => _scheduleMicrotask;
