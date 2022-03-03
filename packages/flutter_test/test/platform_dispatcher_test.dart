@@ -152,15 +152,15 @@ void main() {
   });
 }
 
-void verifyThatTestPlatformDispatcherCanFakeProperty<WindowPropertyType>({
+void verifyThatTestPlatformDispatcherCanFakeProperty<PlatformDispatcherPropertyType>({
   required WidgetTester tester,
-  required WindowPropertyType? realValue,
-  required WindowPropertyType fakeValue,
-  required WindowPropertyType? Function() propertyRetriever,
-  required Function(TestWidgetsFlutterBinding, WindowPropertyType fakeValue) propertyFaker,
+  required PlatformDispatcherPropertyType? realValue,
+  required PlatformDispatcherPropertyType fakeValue,
+  required PlatformDispatcherPropertyType? Function() propertyRetriever,
+  required Function(TestWidgetsFlutterBinding, PlatformDispatcherPropertyType fakeValue) propertyFaker,
 }) {
-  WindowPropertyType? propertyBeforeFaking;
-  WindowPropertyType? propertyAfterFaking;
+  PlatformDispatcherPropertyType? propertyBeforeFaking;
+  PlatformDispatcherPropertyType? propertyAfterFaking;
 
   propertyBeforeFaking = propertyRetriever();
 
