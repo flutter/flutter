@@ -1477,7 +1477,6 @@ targets:
 
   - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -1627,7 +1626,6 @@ targets:
 
   - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -1730,7 +1728,6 @@ targets:
 
   - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -1764,7 +1761,6 @@ targets:
 
   - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -2088,7 +2084,6 @@ targets:
 
   - name: Linux_samsung_s10 imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -2206,7 +2201,6 @@ targets:
 
   - name: Linux_samsung_s10 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -2240,7 +2234,6 @@ targets:
 
   - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -2304,7 +2297,6 @@ targets:
 
   - name: Linux_samsung_s10 platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
@@ -2368,7 +2360,6 @@ targets:
 
   - name: Linux_samsung_s10 textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/92612
     presubmit: false
     timeout: 60
     properties:
