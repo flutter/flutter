@@ -466,6 +466,27 @@ void main() {
       expect(key, Uri.parse('foo.png'));
     });
 
+    test('adds namePrefix', () async {
+      const String libraryName = 'sidedishes';
+      const String namePrefix = 'tomatosalad';
+      const String fileName = 'lettuce.png';
+      final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
+      final Directory basedir = fs.directory('flutter/test/$libraryName/')
+        ..createSync(recursive: true);
+      final FlutterGoldenFileComparator comparator = FlutterPostSubmitFileComparator(
+        basedir.uri,
+        fakeSkiaClient,
+        fs: fs,
+        platform: platform,
+        namePrefix: namePrefix,
+      );
+      await comparator.compare(
+        Uint8List.fromList(_kTestPngBytes),
+        Uri.parse(fileName),
+      );
+      expect(fakeSkiaClient.testNames.single, '$namePrefix.$libraryName.$fileName');
+    });
+
     group('Post-Submit', () {
       late FakeSkiaGoldClient fakeSkiaClient;
 
@@ -478,6 +499,26 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+        );
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
         );
       });
 
@@ -576,6 +617,26 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+        );
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
         );
       });
 
@@ -745,6 +806,26 @@ void main() {
         fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
       });
 
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
+      });
+
       test('passes when bytes match', () async {
         expect(
           await comparator.compare(
@@ -866,11 +947,16 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> auth() async {}
 
+  final List<String> testNames = <String>[];
+
   int initCalls = 0;
   @override
   Future<void> imgtestInit() async => initCalls += 1;
   @override
-  Future<bool> imgtestAdd(String testName, File goldenFile) async => true;
+  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+    testNames.add(testName);
+    return true;
+  }
 
   int tryInitCalls = 0;
   @override

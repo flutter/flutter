@@ -71,7 +71,7 @@ class SymbolizeCommand extends FlutterCommand {
     if (!_fileSystem.isFileSync(stringArg('debug-info')!)) {
       throwToolExit('${stringArg('debug-info')} does not exist.');
     }
-    if (argResults?.wasParsed('input') == true && !_fileSystem.isFileSync(stringArg('input')!)) {
+    if ((argResults?.wasParsed('input') ?? false) && !_fileSystem.isFileSync(stringArg('input')!)) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
     return super.validateCommand();
@@ -83,7 +83,7 @@ class SymbolizeCommand extends FlutterCommand {
     IOSink output;
 
     // Configure output to either specified file or stdout.
-    if (argResults?.wasParsed('output') == true) {
+    if (argResults?.wasParsed('output') ?? false) {
       final File outputFile = _fileSystem.file(stringArg('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
@@ -99,7 +99,7 @@ class SymbolizeCommand extends FlutterCommand {
     }
 
     // Configure input from either specified file or stdin.
-    if (argResults?.wasParsed('input') == true) {
+    if (argResults?.wasParsed('input') ?? false) {
       input = _fileSystem.file(stringArg('input')).openRead();
     } else {
       input = _stdio.stdin;

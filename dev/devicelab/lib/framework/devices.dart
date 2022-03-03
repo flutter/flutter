@@ -446,6 +446,7 @@ class AndroidDevice extends Device {
   @override
   final String deviceId;
   String deviceInfo = '';
+  int apiLevel = 0;
 
   /// Whether the device is awake.
   @override
@@ -539,13 +540,15 @@ class AndroidDevice extends Device {
     }
     final List<String> list = info.split('\n');
     if (list.length == 3) {
-      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: ${list[2]}';
+      apiLevel = int.parse(list[2]);
+      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: $apiLevel';
     } else {
+      apiLevel = 0;
       deviceInfo = '';
     }
   }
 
-  /// Executes [command] on `adb shell` and returns its exit code.
+  /// Executes [command] on `adb shell`.
   Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     await adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
@@ -637,7 +640,7 @@ class AndroidDevice extends Device {
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
-        await adb(<String>['logcat', '--clear']);
+        await adb(<String>['logcat', '-c']);
         final Process process = await startProcess(
           adbPath,
           // Make logcat less chatty by filtering down to just ActivityManager
