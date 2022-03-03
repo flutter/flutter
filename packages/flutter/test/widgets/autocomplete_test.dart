@@ -887,7 +887,6 @@ void main() {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
-    late TextEditingController textEditingController;
     bool wrappingActionInvoked = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -906,11 +905,10 @@ void main() {
               },
               fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
                 focusNode = fieldFocusNode;
-                textEditingController = fieldTextEditingController;
                 return TextFormField(
                   key: fieldKey,
                   focusNode: focusNode,
-                  controller: textEditingController,
+                  controller: fieldTextEditingController,
                   onFieldSubmitted: (String value) {
                     onFieldSubmitted();
                   },
