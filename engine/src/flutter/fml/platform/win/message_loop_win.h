@@ -25,6 +25,7 @@ class MessageLoopWin : public MessageLoopImpl {
 
   bool running_;
   fml::UniqueObject<HANDLE, UniqueHandleTraits> timer_;
+  uint32_t timer_resolution_;
 
   MessageLoopWin();
 

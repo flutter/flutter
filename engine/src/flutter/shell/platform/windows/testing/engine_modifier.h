@@ -7,6 +7,8 @@
 
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
+#include <chrono>
+
 namespace flutter {
 
 // A test utility class providing the ability to access and alter various
@@ -33,6 +35,20 @@ class EngineModifier {
   // engine unless overwritten again.
   void SetSurfaceManager(AngleSurfaceManager* surface_manager) {
     engine_->surface_manager_.reset(surface_manager);
+  }
+
+  /// Reset the start_time field that is used to align vsync events.
+  void SetStartTime(uint64_t start_time_nanos) {
+    engine_->start_time_ = std::chrono::nanoseconds(start_time_nanos);
+  }
+
+  /// Override the frame interval to the provided nanosecond interval.
+  ///
+  /// This will prevent the windows engine from delegating to dwm to
+  /// discover the true frame interval, which can vary across machines.
+  void SetFrameInterval(uint64_t frame_interval_nanos) {
+    engine_->frame_interval_override_ =
+        std::optional<std::chrono::nanoseconds>(frame_interval_nanos);
   }
 
   // Explicitly releases the SurfaceManager being used by the

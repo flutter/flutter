@@ -78,6 +78,13 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
         key_event_logs.push_back(kKeyEventFromEmbedder);
         callback(test_response);
       });
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([engine_instance = engine.get()](
+                            FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                            const FlutterEngineDisplaysUpdateType update_type,
+                            const FlutterEngineDisplay* embedder_displays,
+                            size_t display_count) { return kSuccess; }));
 
   MockEmbedderApiForKeyboard(modifier, key_response_controller);
 

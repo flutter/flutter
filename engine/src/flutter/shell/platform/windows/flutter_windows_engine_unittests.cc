@@ -9,6 +9,9 @@
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "gtest/gtest.h"
 
+// winbase.h defines GetCurrentTime as a macro.
+#undef GetCurrentTime
+
 namespace flutter {
 namespace testing {
 
@@ -63,6 +66,7 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
         EXPECT_NE(args->platform_message_callback, nullptr);
         EXPECT_NE(args->custom_task_runners, nullptr);
         EXPECT_EQ(args->custom_dart_entrypoint, nullptr);
+        EXPECT_NE(args->vsync_callback, nullptr);
 
         return kSuccess;
       }));
@@ -93,6 +97,29 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
         return kSuccess;
       }));
 
+  // And it should send display info.
+  bool notify_display_update_called = false;
+  modifier.SetFrameInterval(16600000);  // 60 fps.
+  modifier.embedder_api().NotifyDisplayUpdate = MOCK_ENGINE_PROC(
+      NotifyDisplayUpdate,
+      ([&notify_display_update_called, engine_instance = engine.get()](
+           FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+           const FlutterEngineDisplaysUpdateType update_type,
+           const FlutterEngineDisplay* embedder_displays,
+           size_t display_count) {
+        EXPECT_EQ(update_type, kFlutterEngineDisplaysUpdateTypeStartup);
+        EXPECT_EQ(display_count, 1);
+
+        FlutterEngineDisplay display = embedder_displays[0];
+
+        EXPECT_EQ(display.display_id, 0);
+        EXPECT_EQ(display.single_display, true);
+        EXPECT_EQ(std::floor(display.refresh_rate), 60.0);
+
+        notify_display_update_called = true;
+        return kSuccess;
+      }));
+
   // Set the AngleSurfaceManager to !nullptr to test ANGLE rendering.
   modifier.SetSurfaceManager(reinterpret_cast<AngleSurfaceManager*>(1));
 
@@ -101,6 +128,7 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
   EXPECT_TRUE(run_called);
   EXPECT_TRUE(update_locales_called);
   EXPECT_TRUE(settings_message_sent);
+  EXPECT_TRUE(notify_display_update_called);
 
   // Ensure that deallocation doesn't call the actual Shutdown with the bogus
   // engine pointer that the overridden Run returned.
@@ -108,9 +136,43 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
   modifier.ReleaseSurfaceManager();
 }
 
+TEST(FlutterWindowsEngine, ConfiguresFrameVsync) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  bool on_vsync_called = false;
+
+  modifier.embedder_api().GetCurrentTime =
+      MOCK_ENGINE_PROC(GetCurrentTime, ([]() -> uint64_t { return 1; }));
+  modifier.embedder_api().OnVsync = MOCK_ENGINE_PROC(
+      OnVsync,
+      ([&on_vsync_called, engine_instance = engine.get()](
+           FLUTTER_API_SYMBOL(FlutterEngine) engine, intptr_t baton,
+           uint64_t frame_start_time_nanos, uint64_t frame_target_time_nanos) {
+        EXPECT_EQ(baton, 1);
+        EXPECT_EQ(frame_start_time_nanos, 16600000);
+        EXPECT_EQ(frame_target_time_nanos, 33200000);
+        on_vsync_called = true;
+        return kSuccess;
+      }));
+  modifier.SetStartTime(0);
+  modifier.SetFrameInterval(16600000);
+
+  engine->OnVsync(1);
+
+  EXPECT_TRUE(on_vsync_called);
+}
+
 TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([engine_instance = engine.get()](
+                            FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                            const FlutterEngineDisplaysUpdateType update_type,
+                            const FlutterEngineDisplay* embedder_displays,
+                            size_t display_count) { return kSuccess; }));
 
   // The engine should be run with expected configuration values.
   bool run_called = false;

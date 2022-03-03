@@ -189,6 +189,10 @@ void MockEmbedderApiForKeyboard(
         return kSuccess;
       };
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.embedder_api().NotifyDisplayUpdate =
+      [](auto engine, const FlutterEngineDisplaysUpdateType update_type,
+         const FlutterEngineDisplay* embedder_displays,
+         size_t display_count) { return kSuccess; };
 }
 
 void MockMessageQueue::PushBack(const Win32Message* message) {
