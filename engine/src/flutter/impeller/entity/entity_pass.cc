@@ -5,7 +5,7 @@
 #include "impeller/entity/entity_pass.h"
 
 #include "flutter/fml/trace_event.h"
-#include "impeller/entity/content_context.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"

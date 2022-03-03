@@ -18,6 +18,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
+#include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_frame.h"
 
 namespace impeller {

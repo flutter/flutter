@@ -19,7 +19,6 @@
 #include "flutter/impeller/entity/solid_stroke.vert.h"
 #include "flutter/impeller/entity/texture_fill.frag.h"
 #include "flutter/impeller/entity/texture_fill.vert.h"
-#include "impeller/renderer/pipeline.h"
 
 namespace impeller {
 
@@ -37,55 +36,62 @@ using GlyphAtlasPipeline =
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
-class ContentContext {
- public:
-  struct Options {
-    SampleCount sample_count = SampleCount::kCount1;
+struct ContentContextOptions {
+  SampleCount sample_count = SampleCount::kCount1;
 
-    struct Hash {
-      constexpr std::size_t operator()(const Options& o) const {
-        return fml::HashCombine(o.sample_count);
-      }
-    };
-
-    struct Equal {
-      constexpr bool operator()(const Options& lhs, const Options& rhs) const {
-        return lhs.sample_count == rhs.sample_count;
-      }
-    };
+  struct Hash {
+    constexpr std::size_t operator()(const ContentContextOptions& o) const {
+      return fml::HashCombine(o.sample_count);
+    }
   };
 
+  struct Equal {
+    constexpr bool operator()(const ContentContextOptions& lhs,
+                              const ContentContextOptions& rhs) const {
+      return lhs.sample_count == rhs.sample_count;
+    }
+  };
+};
+
+class ContentContext {
+ public:
   ContentContext(std::shared_ptr<Context> context);
 
   ~ContentContext();
 
   bool IsValid() const;
 
-  std::shared_ptr<Pipeline> GetGradientFillPipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetGradientFillPipeline(
+      ContentContextOptions opts) const {
     return GetPipeline(gradient_fill_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetSolidFillPipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetSolidFillPipeline(
+      ContentContextOptions opts) const {
     return GetPipeline(solid_fill_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetTexturePipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetTexturePipeline(
+      ContentContextOptions opts) const {
     return GetPipeline(texture_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetSolidStrokePipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetSolidStrokePipeline(
+      ContentContextOptions opts) const {
     return GetPipeline(solid_stroke_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetClipPipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetClipPipeline(ContentContextOptions opts) const {
     return GetPipeline(clip_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetClipRestorePipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetClipRestorePipeline(
+      ContentContextOptions opts) const {
     return GetPipeline(clip_restoration_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetGlyphAtlasPipeline(Options opts) const {
+  std::shared_ptr<Pipeline> GetGlyphAtlasPipeline(
+      ContentContextOptions opts) const {
     return GetPipeline(glyph_atlas_pipelines_, opts);
   }
 
@@ -95,8 +101,10 @@ class ContentContext {
   std::shared_ptr<Context> context_;
 
   template <class T>
-  using Variants = std::
-      unordered_map<Options, std::unique_ptr<T>, Options::Hash, Options::Equal>;
+  using Variants = std::unordered_map<ContentContextOptions,
+                                      std::unique_ptr<T>,
+                                      ContentContextOptions::Hash,
+                                      ContentContextOptions::Equal>;
 
   // These are mutable because while the prototypes are created eagerly, any
   // variants requested from that are lazily created and cached in the variants
@@ -110,13 +118,13 @@ class ContentContext {
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
 
   static void ApplyOptionsToDescriptor(PipelineDescriptor& desc,
-                                       const Options& options) {
+                                       const ContentContextOptions& options) {
     desc.SetSampleCount(options.sample_count);
   }
 
   template <class TypedPipeline>
   std::shared_ptr<Pipeline> GetPipeline(Variants<TypedPipeline>& container,
-                                        Options opts) const {
+                                        ContentContextOptions opts) const {
     if (!IsValid()) {
       return nullptr;
     }

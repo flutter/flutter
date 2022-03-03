@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "entity/contents.h"
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/solid_color_contents.h"
+#include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/geometry/path_builder.h"

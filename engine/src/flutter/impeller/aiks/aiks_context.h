@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/content_context.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {

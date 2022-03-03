@@ -8,6 +8,9 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/aiks/paint_pass_delegate.h"
+#include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 #include "impeller/geometry/path_builder.h"
 
 namespace impeller {
