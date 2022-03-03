@@ -178,14 +178,14 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// Hides the real locale and reports the given [localeTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.localeTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set localeTestValue(ui.Locale localeTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.localeTestValue = localeTestValue;
   }
   @Deprecated(
     'Use platformDispatcher.clearLocaleTestValue() instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
@@ -197,7 +197,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// Hides the real locales and reports the given [localesTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.localesTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set localesTestValue(List<ui.Locale> localesTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.localesTestValue = localesTestValue;
@@ -205,7 +205,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// Deletes any existing test locales and returns to using the real locales.
   @Deprecated(
     'Use platformDispatcher.clearLocalesTestValue() instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearLocalesTestValue() {
     platformDispatcher.clearLocalesTestValue();
@@ -223,7 +223,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// Sets a faked initialLifecycleState for testing.
   @Deprecated(
     'Use platformDispatcher.initialLifecycleStateTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
     platformDispatcher.initialLifecycleStateTestValue = state;
@@ -235,7 +235,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// [textScaleFactorTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.textScaleFactorTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
@@ -244,7 +244,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// text scale factor.
   @Deprecated(
     'Use platformDispatcher.clearTextScaleFactorTestValue() instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearTextScaleFactorTestValue() {
     platformDispatcher.clearTextScaleFactorTestValue();
@@ -262,7 +262,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// [platformBrightnessTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.platformBrightnessTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
@@ -271,7 +271,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// real platform brightness.
   @Deprecated(
     'Use platformDispatcher.clearPlatformBrightnessTestValue() instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearPlatformBrightnessTestValue() {
     platformDispatcher.clearPlatformBrightnessTestValue();
@@ -283,7 +283,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// [alwaysUse24HourFormatTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.alwaysUse24HourFormatTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
@@ -292,7 +292,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// format.
   @Deprecated(
     'Use platformDispatcher.clearAlwaysUse24HourTestValue() instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearAlwaysUse24HourTestValue() {
     platformDispatcher.clearAlwaysUse24HourTestValue();
@@ -311,7 +311,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// `brieflyShowPasswordTestValue` instead.
   @Deprecated(
     'Use platformDispatcher.brieflyShowPasswordTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
@@ -351,7 +351,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// [defaultRouteNameTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.defaultRouteNameTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.defaultRouteNameTestValue = defaultRouteNameTestValue;
@@ -360,7 +360,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// default route name.
   @Deprecated(
     'Use platformDispatcher.clearDefaultRouteNameTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearDefaultRouteNameTestValue() {
     platformDispatcher.clearDefaultRouteNameTestValue();
@@ -382,7 +382,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// [semanticsEnabledTestValue] instead.
   @Deprecated(
     'Use platformDispatcher.semanticsEnabledTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.semanticsEnabledTestValue = semanticsEnabledTestValue;
@@ -391,7 +391,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// semantics enabled.
   @Deprecated(
     'Use platformDispatcher.clearSemanticsEnabledTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearSemanticsEnabledTestValue() {
     platformDispatcher.clearSemanticsEnabledTestValue();
@@ -420,7 +420,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// values for the various accessibility features under test.
   @Deprecated(
     'Use platformDispatcher.accessibilityFeaturesTestValue instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
@@ -429,7 +429,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// real accessibility features.
   @Deprecated(
     'Use platformDispatcher.clearAccessibilityFeaturesTestValue() instead. '
-    'This feature was deprecated after 2.11.0-0.0.pre.'
+    'This feature was deprecated after v2.11.0-0.0.pre.'
   )
   void clearAccessibilityFeaturesTestValue() {
     platformDispatcher.clearAccessibilityFeaturesTestValue();
