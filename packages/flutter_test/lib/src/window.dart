@@ -46,6 +46,12 @@ import 'package:flutter/foundation.dart';
 ///
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues()].
+///
+/// See also:
+///
+///   * [TestPlatformDispatcher], which wraps a [PlatformDispatcher] for
+///     testing purposes and is used by the [platformDispatcher] property of
+///     this class.
 class TestWindow implements ui.SingletonFlutterWindow {
   /// Constructs a [TestWindow] that defers all behavior to the given
   /// [dart:ui.SingletonFlutterWindow] unless explicitly overridden for test purposes.
@@ -591,6 +597,11 @@ class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
 
 /// [PlatformDispatcher] that wraps another [PlatformDispatcher] and
 /// allows faking of some properties for testing purposes.
+///
+/// See also:
+///
+///   * [TestWindow], which wraps a [SingletonFlutterWindow] for
+///     testing and mocking purposes.
 class TestPlatformDispatcher implements ui.PlatformDispatcher {
   /// Constructs a [TestPlatformDispatcher] that defers all behavior to the given
   /// [dart:ui.PlatformDispatcher] unless explicitly overridden for test purposes.
