@@ -15,6 +15,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/runtime/dart_plugin_registrant.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
@@ -37,11 +38,12 @@ namespace flutter {
 #define DECLARE_FUNCTION(name, count) \
   extern void name(Dart_NativeArguments args);
 
-#define BUILTIN_NATIVE_LIST(V)  \
-  V(Logger_PrintString, 1)      \
-  V(Logger_PrintDebugString, 1) \
-  V(ScheduleMicrotask, 1)       \
-  V(GetCallbackHandle, 1)       \
+#define BUILTIN_NATIVE_LIST(V)                 \
+  V(Logger_PrintString, 1)                     \
+  V(Logger_PrintDebugString, 1)                \
+  V(DartPluginRegistrant_EnsureInitialized, 0) \
+  V(ScheduleMicrotask, 1)                      \
+  V(GetCallbackHandle, 1)                      \
   V(GetCallbackFromHandle, 1)
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
@@ -302,6 +304,10 @@ void GetCallbackFromHandle(Dart_NativeArguments args) {
   Dart_Handle h = Dart_GetNativeArgument(args, 0);
   int64_t handle = DartConverter<int64_t>::FromDart(h);
   Dart_SetReturnValue(args, DartCallbackCache::GetCallback(handle));
+}
+
+void DartPluginRegistrant_EnsureInitialized(Dart_NativeArguments args) {
+  FindAndInvokeDartPluginRegistrant();
 }
 
 }  // namespace flutter
