@@ -454,7 +454,7 @@ void main() {
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 
-  testWidgets('Cupertino button changes mouse cursor when hovered on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton.filled(
