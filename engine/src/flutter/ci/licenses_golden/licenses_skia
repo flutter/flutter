@@ -1,4 +1,4 @@
-Signature: 5861b88aaa059c09a83f2690b11ac255
+Signature: 3c196d928bf295122b8921c18cdb3bb1
 
 UNUSED LICENSES:
 
@@ -805,6 +805,7 @@ FILE: ../../../third_party/skia/include/sksl/BUILD.bazel
 FILE: ../../../third_party/skia/include/svg/BUILD.bazel
 FILE: ../../../third_party/skia/include/utils/BUILD.bazel
 FILE: ../../../third_party/skia/include/utils/mac/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
@@ -1028,6 +1029,19 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/no
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/compile_wasm_gm_tests/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/g3_canary/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_canvas/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_render_skps/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_frames/make_lotties_with_assets/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/push_apps_from_skia_image/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/push_bazel_apps_from_wasm_image/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/recreate_skps/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/run_gn_to_bp/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/run_wasm_gm_tests/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/tasks.json
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/linux64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/mac64/isolate.sha1
