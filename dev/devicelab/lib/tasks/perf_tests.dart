@@ -371,6 +371,23 @@ TaskFunction createColorFilterAndFadePerfE2ETest() {
   ).run;
 }
 
+TaskFunction createColorFilterCachePrefTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'color_filter_cache_perf',
+    testDriver: 'test_driver/color_filter_cache_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createColorFilterCachePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/color_filter_cache_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
