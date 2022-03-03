@@ -13,6 +13,7 @@ import '../base/logger.dart';
 import '../cache.dart';
 import '../flutter_project_metadata.dart';
 import '../project.dart';
+import '../version.dart';
 
 /// Represents one .migrate_config file.
 ///
@@ -214,7 +215,7 @@ $unmanagedFilesString
   }
 
   /// Finds the fallback revision to use when no base revision is found in the .migrate_config.
-  static Future<String> getFallbackBaseRevision(Logger logger) async {
+  static Future<String> getFallbackBaseRevision(Logger logger, FlutterVersion flutterVersion) async {
     // Use the .metadata file if it exists.
     final File metadataFile = FlutterProject.current().directory.childFile('.metadata');
     if (metadataFile.existsSync()) {
@@ -223,12 +224,6 @@ $unmanagedFilesString
         return metadata.versionRevision!;
       }
     }
-    return _getGitHash(Cache.flutterRoot!);
-  }
-
-  static Future<String> _getGitHash(String flutterRootPath, [String tag = 'HEAD']) async {
-    final List<String> cmdArgs = <String>['rev-parse', tag];
-    final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: flutterRootPath);
-    return result.stdout as String;
+    return flutterVersion.flutterRevision;
   }
 }
