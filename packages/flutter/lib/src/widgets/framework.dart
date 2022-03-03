@@ -6070,16 +6070,16 @@ abstract class RenderObjectElement extends Element {
         ),
         ErrorDescription(
           'insertChildRenderObject() has been deprecated in favor of '
-              'insertRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-              'for details.',
+          'insertRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
         ),
         ErrorHint(
           'Rather than overriding insertChildRenderObject() in your '
-              'RenderObjectElement subclass, override insertRenderObjectChild() instead, '
-              "and DON'T call super.insertRenderObjectChild(). If you're implementing a "
-              'new RenderObjectElement, you should override/implement '
-              'insertRenderObjectChild(), moveRenderObjectChild(), and '
-              'removeRenderObjectChild().',
+          'RenderObjectElement subclass, override insertRenderObjectChild() instead, '
+          "and DON'T call super.insertRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
         ),
       ]);
     }());
@@ -6110,16 +6110,16 @@ abstract class RenderObjectElement extends Element {
         ),
         ErrorDescription(
           'moveChildRenderObject() has been deprecated in favor of '
-              'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-              'for details.',
+          'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
         ),
         ErrorHint(
           'Rather than overriding moveChildRenderObject() in your '
-              'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
-              "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
-              'new RenderObjectElement, you should override/implement '
-              'insertRenderObjectChild(), moveRenderObjectChild(), and '
-              'removeRenderObjectChild().',
+          'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
+          "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
         ),
       ]);
     }());
@@ -6140,16 +6140,16 @@ abstract class RenderObjectElement extends Element {
         ),
         ErrorDescription(
           'removeChildRenderObject() has been deprecated in favor of '
-              'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-              'for details.',
+          'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
+          'for details.',
         ),
         ErrorHint(
           'Rather than overriding removeChildRenderObject() in your '
-              'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
-              "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
-              'new RenderObjectElement, you should override/implement '
-              'insertRenderObjectChild(), moveRenderObjectChild(), and '
-              'removeRenderObjectChild().',
+          'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
+          "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
+          'new RenderObjectElement, you should override/implement '
+          'insertRenderObjectChild(), moveRenderObjectChild(), and '
+          'removeRenderObjectChild().',
         ),
       ]);
     }());
