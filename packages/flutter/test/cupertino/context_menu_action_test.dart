@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -122,4 +125,22 @@ void main() {
     expect(_getTextStyle(tester).fontWeight, kDefaultActionWeight);
   });
 
+  testWidgets(
+    'Hovering over Cupertino context menu action updates cursor to clickable on Web',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(_getApp());
+      final Offset actionCenter = tester.getCenter(find.byType(CupertinoContextMenuAction));
+      await tester.startGesture(actionCenter);
+      await tester.pump();
+
+      final Offset contextMenuAction = tester.getCenter(find.byType(CupertinoContextMenuAction));
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: contextMenuAction);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+  });
 }
