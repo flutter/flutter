@@ -882,17 +882,11 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                               ),
                             ),
                           );
-                          final bool isDesktop =
-                              defaultTargetPlatform == TargetPlatform.macOS
-                              || defaultTargetPlatform == TargetPlatform.windows
-                              || defaultTargetPlatform == TargetPlatform.linux;
-                          if (kIsWeb && isDesktop) {
+                          if (kIsWeb) {
                             child = GestureDetector(
                               onTapDown: (TapDownDetails details) {
                                 routeFocusNode.requestFocus();
                               },
-                              // TODO(justinmc): Only remove focus when clicking out
-                              // for web.
                               child: Focus(
                                 focusNode: routeFocusNode,
                                 skipTraversal: true,
