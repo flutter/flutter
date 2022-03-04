@@ -32,6 +32,32 @@ namespace flutter {
 
 class FlutterWindowsView;
 
+// Update the thread priority for the Windows engine.
+static void WindowsPlatformThreadPrioritySetter(
+    FlutterThreadPriority priority) {
+  // TODO(99502): Add support for tracing to the windows embedding so we can
+  // mark thread priorities and success/failure.
+  switch (priority) {
+    case FlutterThreadPriority::kBackground: {
+      SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
+      break;
+    }
+    case FlutterThreadPriority::kDisplay: {
+      SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+      break;
+    }
+    case FlutterThreadPriority::kRaster: {
+      SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+      break;
+    }
+    case FlutterThreadPriority::kNormal: {
+      // For normal or default priority we do not need to set the priority
+      // class.
+      break;
+    }
+  }
+}
+
 // Manages state associated with the underlying FlutterEngine that isn't
 // related to its display.
 //
@@ -163,9 +189,7 @@ class FlutterWindowsEngine {
   void UpdateSemanticsEnabled(bool enabled);
 
   // Returns true if the semantics tree is enabled.
-  bool semantics_enabled() const {
-    return semantics_enabled_;
-  }
+  bool semantics_enabled() const { return semantics_enabled_; }
 
   // Returns the native accessibility node with the given id.
   gfx::NativeViewAccessible GetNativeAccessibleFromId(AccessibilityNodeId id);

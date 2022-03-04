@@ -66,9 +66,14 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
         EXPECT_EQ(strcmp(args->dart_entrypoint_argv[1], "arg2"), 0);
         EXPECT_NE(args->platform_message_callback, nullptr);
         EXPECT_NE(args->custom_task_runners, nullptr);
+        EXPECT_NE(args->custom_task_runners->thread_priority_setter, nullptr);
         EXPECT_EQ(args->custom_dart_entrypoint, nullptr);
         EXPECT_NE(args->vsync_callback, nullptr);
 
+        args->custom_task_runners->thread_priority_setter(
+            FlutterThreadPriority::kRaster);
+        EXPECT_EQ(GetThreadPriority(GetCurrentThread()),
+                  THREAD_PRIORITY_ABOVE_NORMAL);
         return kSuccess;
       }));
 
@@ -316,6 +321,27 @@ TEST(FlutterWindowsEngine, DispatchSemanticsAction) {
   engine->DispatchSemanticsAction(42, kFlutterSemanticsActionDismiss,
                                   std::move(data));
   EXPECT_TRUE(called);
+}
+
+TEST(FlutterWindowsEngine, SetsThreadPriority) {
+  WindowsPlatformThreadPrioritySetter(FlutterThreadPriority::kBackground);
+  EXPECT_EQ(GetThreadPriority(GetCurrentThread()),
+            THREAD_PRIORITY_BELOW_NORMAL);
+
+  WindowsPlatformThreadPrioritySetter(FlutterThreadPriority::kDisplay);
+  EXPECT_EQ(GetThreadPriority(GetCurrentThread()),
+            THREAD_PRIORITY_ABOVE_NORMAL);
+
+  WindowsPlatformThreadPrioritySetter(FlutterThreadPriority::kRaster);
+  EXPECT_EQ(GetThreadPriority(GetCurrentThread()),
+            THREAD_PRIORITY_ABOVE_NORMAL);
+
+  // FlutterThreadPriority::kNormal does not change thread priority, reset to 0
+  // here.
+  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+
+  WindowsPlatformThreadPrioritySetter(FlutterThreadPriority::kNormal);
+  EXPECT_EQ(GetThreadPriority(GetCurrentThread()), THREAD_PRIORITY_NORMAL);
 }
 
 TEST(FlutterWindowsEngine, AddPluginRegistrarDestructionCallback) {
