@@ -6,6 +6,7 @@
 
 #include "flutter/fml/message_loop_task_queues.h"
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <optional>
