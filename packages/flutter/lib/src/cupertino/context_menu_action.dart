@@ -108,7 +108,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
         key: _globalKey,
         onTapDown: onTapDown,

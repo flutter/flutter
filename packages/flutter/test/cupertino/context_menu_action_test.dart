@@ -128,14 +128,21 @@ void main() {
   testWidgets(
     'Hovering over Cupertino context menu action updates cursor to clickable on Web',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_getApp());
-      final Offset actionCenter = tester.getCenter(find.byType(CupertinoContextMenuAction));
-      await tester.startGesture(actionCenter);
-      await tester.pump();
-
-      final Offset contextMenuAction = tester.getCenter(find.byType(CupertinoContextMenuAction));
+      await tester.pumpWidget(_getApp(onPressed: (){}));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-      await gesture.addPointer(location: contextMenuAction);
+      await gesture.addPointer(location: const Offset(10, 10));
+      await tester.pump();
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+      /// Cupertino conext menu action without "onPressed" callback.
+      await tester.pumpWidget(_getApp());
+      final Offset contextMenuAction = tester.getCenter(find.byType(CupertinoContextMenuAction));
+      await gesture.moveTo(contextMenuAction);
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+      /// Cupertino conext menu action with "onPressed" callback.
+      await tester.pumpWidget(_getApp(onPressed: (){}));
+      await gesture.moveTo(contextMenuAction);
       addTearDown(gesture.removePointer);
       await tester.pump();
       expect(

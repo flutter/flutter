@@ -214,9 +214,13 @@ void main() {
         ),
       ));
 
-      final Offset contextMenu = tester.getCenter(find.byWidget(child));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-      await gesture.addPointer(location: contextMenu);
+      await gesture.addPointer(location: const Offset(10, 10));
+      await tester.pump();
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+      final Offset contextMenu = tester.getCenter(find.byWidget(child));
+      await gesture.moveTo(contextMenu);
       addTearDown(gesture.removePointer);
       await tester.pump();
       expect(
