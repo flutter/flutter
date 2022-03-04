@@ -834,10 +834,6 @@ void main() {
       'tooltipTheme',
       'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'useTextSelectionTheme',
-      'textSelectionColor',
-      'cursorColor',
-      'textSelectionHandleColor',
       'accentColor',
       'accentColorBrightness',
       'accentTextTheme',
