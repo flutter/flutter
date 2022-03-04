@@ -216,13 +216,13 @@ void main() {
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
       await gesture.addPointer(location: const Offset(10, 10));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
       final Offset contextMenu = tester.getCenter(find.byWidget(child));
       await gesture.moveTo(contextMenu);
       addTearDown(gesture.removePointer);
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
         kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
