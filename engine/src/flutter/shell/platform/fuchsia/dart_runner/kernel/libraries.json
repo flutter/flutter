@@ -50,6 +50,7 @@
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/double_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/errors_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/expando_patch.dart",
+          "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/function.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/function_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/growable_array.dart",
@@ -86,6 +87,7 @@
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart",
+          "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_type_patch.dart",
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart"
         ]
