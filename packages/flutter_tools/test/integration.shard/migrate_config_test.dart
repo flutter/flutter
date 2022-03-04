@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/migrate/migrate_config.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -18,10 +19,12 @@ import 'test_utils.dart';
 void main() {
   Directory tempDir;
   FlutterRunTestDriver flutter;
+  Logger logger;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
     flutter = FlutterRunTestDriver(tempDir);
+    logger = BufferLogger.test();
   });
 
   tearDown(() async {
@@ -52,7 +55,7 @@ unmanagedFiles:
   - 'lib/main.dart'
 
 ''', flush: true);
-    MigrateConfig config = MigrateConfig.fromFile(configFile);
+    MigrateConfig config = MigrateConfig.fromFile(configFile, logger);
 
     expect(config.platform, equals(SupportedPlatform.root));
     expect(config.createRevision, equals('abcdefg1234567'));
@@ -75,7 +78,7 @@ unmanagedFiles:
 
 ''', flush: true);
 
-    config = MigrateConfig.fromFile(configFile);
+    config = MigrateConfig.fromFile(configFile, logger);
 
     expect(config.platform, equals(SupportedPlatform.root));
     expect(config.createRevision, equals(null));
@@ -91,6 +94,7 @@ unmanagedFiles:
     MigrateConfig config = MigrateConfig(
       platform: SupportedPlatform.root,
       unmanagedFiles: <String>[],
+      logger: logger
     );
     config.writeFile(projectDirectory: tempDir);
     File configFile = tempDir.childFile('.migrate_config');
@@ -115,6 +119,7 @@ unmanagedFiles:
       createRevision: 'abcd',
       baseRevision: '1234',
       unmanagedFiles: <String>['test1/test.dart', 'file/two.txt'],
+      logger: logger,
     );
     config.writeFile(projectDirectory: tempDir);
     configFile = tempDir.childDirectory('android').childFile('.migrate_config');
@@ -179,7 +184,7 @@ unmanagedFiles:
 ''', flush: true);
 
     const String currentRevision = 'newlygenerated';
-    final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(projectDirectory: tempDir, currentRevision: currentRevision);
+    final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(projectDirectory: tempDir, currentRevision: currentRevision, logger: logger);
 
     expect(configs.length, equals(3));
     expect(configs[0].platform, equals(SupportedPlatform.root));

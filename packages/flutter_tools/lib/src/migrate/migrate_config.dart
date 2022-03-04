@@ -28,10 +28,11 @@ class MigrateConfig {
     this.createRevision,
     this.baseRevision,
     required this.unmanagedFiles,
+    required this.logger,
   });
 
   /// Creates a MigrateConfig by parsing an existing .migrate_config yaml file.
-  MigrateConfig.fromFile(File file) : platform = SupportedPlatform.root, unmanagedFiles = <String>[] {
+  MigrateConfig.fromFile(File file, this.logger) : platform = SupportedPlatform.root, unmanagedFiles = <String>[] {
     final Object? yamlRoot = loadYaml(file.readAsStringSync());
     if (!_validate(yamlRoot)) {
       // Error
@@ -76,20 +77,35 @@ class MigrateConfig {
   /// These files are typically user-owned files that should not be changed.
   List<String> unmanagedFiles;
 
+  /// The logger to use for status updates.
+  Logger logger;
+
   /// Verifies the expected yaml keys are present in the file.
   bool _validate(Object? yamlRoot) {
+    final Map<String, Type> validations = <String, Type>{
+      'platform': String,
+      'createRevision': String,
+      'baseRevision': String,
+      'unmanagedFiles': YamlList,
+    };
     if (yamlRoot != null && yamlRoot is! YamlMap) {
       return false;
     }
     final YamlMap map = yamlRoot! as YamlMap;
-    return map.keys.contains('platform') &&
-    (map['platform'] is String || map['platform'] == null) &&
-    map.keys.contains('createRevision') &&
-    (map['createRevision'] is String || map['createRevision'] == null) &&
-    map.keys.contains('baseRevision') &&
-    (map['baseRevision'] is String || map['baseRevision'] == null) &&
-    map.keys.contains('unmanagedFiles') &&
-    (map['unmanagedFiles'] is YamlList || map['unmanagedFiles'] == null);
+    bool isValid = true;
+    for (final MapEntry<String, Object> entry in validations.entries) {
+      if (!map.keys.contains(entry.key)) {
+        isValid = false;
+        logger.printError('The key ${entry.key} was not found');
+        break;
+      }
+      if (map[entry.key] != null && (map[entry.key] as Object).runtimeType != entry.value) {
+        isValid = false;
+        logger.printError('The value of key ${entry.key} was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
+        break;
+      }
+    }
+    return isValid;
   }
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
@@ -138,6 +154,7 @@ $unmanagedFilesString
     String? currentRevision,
     String? createRevision,
     bool create = true,
+    required Logger logger,
   }) async {
     final FlutterProject flutterProject = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
@@ -146,7 +163,7 @@ $unmanagedFilesString
       final File fileFromPlatform = getFileFromPlatform(platform, projectDirectory: projectDirectory);
       if (fileFromPlatform.existsSync()) {
         // Existing config. Parsing.
-        configs.add(MigrateConfig.fromFile(fileFromPlatform));
+        configs.add(MigrateConfig.fromFile(fileFromPlatform, logger));
       } else {
         // No config found, creating empty config.
         final MigrateConfig newConfig = MigrateConfig(
@@ -154,6 +171,7 @@ $unmanagedFilesString
           createRevision: createRevision,
           baseRevision: currentRevision,
           unmanagedFiles: _kDefaultUnmanagedFiles[platform] ?? <String>[],
+          logger: logger,
         );
         if (create) {
           newConfig.writeFile(projectDirectory: projectDirectory);

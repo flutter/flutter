@@ -591,6 +591,7 @@ abstract class CreateBase extends FlutterCommand {
       create: true,
       currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
       createRevision: globals.flutterVersion.frameworkRevision,
+      logger: globals.logger,
     );
     return generatedCount;
   }
