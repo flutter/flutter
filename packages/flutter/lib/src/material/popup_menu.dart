@@ -1112,7 +1112,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// [offset] is used to change the position of the popup menu relative to the
   /// position set by this parameter.
   ///
-  /// When not set, the position defaults to [MenuPosition.over] which makes the
+  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
   /// popup menu appear directly over the button that was used to create it.
   final PopupMenuPosition position;
 
