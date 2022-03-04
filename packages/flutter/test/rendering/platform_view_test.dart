@@ -78,7 +78,7 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
@@ -91,7 +91,7 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
@@ -124,7 +124,7 @@ void main() {
 
     FakeAsync().run((FakeAsync async) {
       // Put one pointer down.
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.down, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
@@ -132,7 +132,7 @@ void main() {
       async.flushMicrotasks();
 
       // Put another pointer down and then cancel it.
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 2, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.down, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.cancel, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
@@ -140,7 +140,7 @@ void main() {
       async.flushMicrotasks();
 
       // The first pointer can still moving without crashing.
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.move, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
@@ -202,8 +202,8 @@ ui.PointerData _pointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,
     change: change,
-    physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
+    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
+    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
     kind: kind,
     device: device,
   );

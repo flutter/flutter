@@ -446,6 +446,7 @@ class AndroidDevice extends Device {
   @override
   final String deviceId;
   String deviceInfo = '';
+  int apiLevel = 0;
 
   /// Whether the device is awake.
   @override
@@ -539,8 +540,10 @@ class AndroidDevice extends Device {
     }
     final List<String> list = info.split('\n');
     if (list.length == 3) {
-      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: ${list[2]}';
+      apiLevel = int.parse(list[2]);
+      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: $apiLevel';
     } else {
+      apiLevel = 0;
       deviceInfo = '';
     }
   }

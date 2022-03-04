@@ -17,8 +17,8 @@ const String _kOrgName = 'com.example.activitydestroy';
 
 final RegExp _lifecycleSentinelRegExp = RegExp(r'==== lifecycle\: (.+) ====');
 
-/// Tests the following Android lifecycles: Activity#onStop(), Activity#onResume(), Activity#onPause()
-/// from Dart perspective in debug, profile, and release modes.
+/// Tests the following Android lifecycles: Activity#onStop(), Activity#onResume(), Activity#onPause(),
+/// and Activity#onDestroy() from Dart perspective in debug, profile, and release modes.
 TaskFunction androidLifecyclesTest({
   Map<String, String>? environment,
 }) {
@@ -69,10 +69,11 @@ void main() {
 }
 ''', flush: true);
 
-      final List<String> androidLifecycles = <String>[];
-
       Future<TaskResult> runTestFor(String mode) async {
-        section('Flutter run (mode: $mode)');
+        final AndroidDevice device = await devices.workingDevice as AndroidDevice;
+        await device.unlock();
+
+        section('Flutter run on device running API level ${device.apiLevel} (mode: $mode)');
 
         late Process run;
         await inDirectory(path.join(tempDir.path, 'app'), () async {
@@ -82,10 +83,8 @@ void main() {
           );
         });
 
-        final AndroidDevice device = await devices.workingDevice as AndroidDevice;
-        await device.unlock();
-
         final StreamController<String> lifecyles = StreamController<String>();
+        final StreamIterator<String> lifecycleItr = StreamIterator<String>(lifecyles.stream);
 
         final StreamSubscription<void> stdout = run.stdout
           .transform<String>(utf8.decoder)
@@ -97,8 +96,6 @@ void main() {
                 return;
               }
               final String lifecycle = match[1]!;
-              androidLifecycles.add(lifecycle);
-
               print('stdout: Found app lifecycle: $lifecycle');
               lifecyles.add(lifecycle);
           });
@@ -110,73 +107,44 @@ void main() {
             print('stderr: $log');
           });
 
-        final StreamIterator<String> lifecycleItr = StreamIterator<String>(lifecyles.stream);
-
-        {
-          const String expected = 'AppLifecycleState.resumed';
+        Future<void> expectedLifecycle(String expected) async {
+          section('Wait for lifecycle: $expected (mode: $mode)');
           await lifecycleItr.moveNext();
           final String got = lifecycleItr.current;
           if (expected != got) {
-            return TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
+            throw TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
           }
         }
+
+        await expectedLifecycle('AppLifecycleState.resumed');
 
         section('Toggling app switch (mode: $mode)');
         await device.shellExec('input', <String>['keyevent', 'KEYCODE_APP_SWITCH']);
 
-        {
-          const String expected = 'AppLifecycleState.inactive';
-          await lifecycleItr.moveNext();
-          final String got = lifecycleItr.current;
-          if (expected != got) {
-            return TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
-          }
+        await expectedLifecycle('AppLifecycleState.inactive');
+        if (device.apiLevel == 28) { // Device lab currently runs 28.
+          await expectedLifecycle('AppLifecycleState.paused');
+          await expectedLifecycle('AppLifecycleState.detached');
         }
 
         section('Bring activity to foreground (mode: $mode)');
-        await device.shellExec('am', <String>['start', '--activity-single-top', '$_kOrgName.app/.MainActivity']);
+        await device.shellExec('am', <String>['start', '-n', '$_kOrgName.app/.MainActivity']);
 
-        {
-          const String expected = 'AppLifecycleState.resumed';
-          await lifecycleItr.moveNext();
-          final String got = lifecycleItr.current;
-          if (expected != got) {
-            return TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
-          }
-        }
+        await expectedLifecycle('AppLifecycleState.resumed');
 
         section('Launch Settings app (mode: $mode)');
         await device.shellExec('am', <String>['start', '-a', 'android.settings.SETTINGS']);
 
-        {
-          const String expected = 'AppLifecycleState.inactive';
-          await lifecycleItr.moveNext();
-          final String got = lifecycleItr.current;
-          if (expected != got) {
-            return TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
-          }
-        }
-
-        {
-          const String expected = 'AppLifecycleState.paused';
-          await lifecycleItr.moveNext();
-          final String got = lifecycleItr.current;
-          if (expected != got) {
-            return TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
-          }
+        await expectedLifecycle('AppLifecycleState.inactive');
+        if (device.apiLevel == 28) { // Device lab currently runs 28.
+          await expectedLifecycle('AppLifecycleState.paused');
+          await expectedLifecycle('AppLifecycleState.detached');
         }
 
         section('Bring activity to foreground (mode: $mode)');
-        await device.shellExec('am', <String>['start', '--activity-single-top', '$_kOrgName.app/.MainActivity']);
+        await device.shellExec('am', <String>['start', '-n', '$_kOrgName.app/.MainActivity']);
 
-        {
-          const String expected = 'AppLifecycleState.resumed';
-          await lifecycleItr.moveNext();
-          final String got = lifecycleItr.current;
-          if (expected != got) {
-            return TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
-          }
-        }
+        await expectedLifecycle('AppLifecycleState.resumed');
 
         run.kill();
 
@@ -205,6 +173,8 @@ void main() {
       }
 
       return TaskResult.success(null);
+    } on TaskResult catch (error) {
+      return error;
     } finally {
       rmTree(tempDir);
     }
