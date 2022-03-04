@@ -304,6 +304,93 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   XCTAssertNil(gMockPlatformView);
 }
 
+- (void)testReplacedSemanticsDoesNotCleanupChildren {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+  id engine = OCMClassMock([FlutterEngine class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine opaque:YES];
+  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  std::string label = "some label";
+  auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+      /*view_controller=*/mockFlutterViewController,
+      /*platform_view=*/platform_view.get(),
+      /*platform_views_controller=*/flutterPlatformViewsController);
+  @autoreleasepool {
+    flutter::SemanticsNodeUpdates nodes;
+    flutter::SemanticsNode parent;
+    parent.id = 0;
+    parent.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+    parent.label = "label";
+    parent.value = "value";
+    parent.hint = "hint";
+
+    flutter::SemanticsNode node;
+    node.id = 1;
+    node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+    node.label = "label";
+    node.value = "value";
+    node.hint = "hint";
+    node.scrollExtentMax = 100.0;
+    node.scrollPosition = 0.0;
+    parent.childrenInTraversalOrder.push_back(1);
+
+    flutter::SemanticsNode child;
+    child.id = 2;
+    child.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+    child.label = "label";
+    child.value = "value";
+    child.hint = "hint";
+    node.childrenInTraversalOrder.push_back(2);
+
+    nodes[0] = parent;
+    nodes[1] = node;
+    nodes[2] = child;
+    flutter::CustomAccessibilityActionUpdates actions;
+    bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
+
+    // Add implicit scroll from node 1 to cause replacement.
+    flutter::SemanticsNodeUpdates new_nodes;
+    flutter::SemanticsNode new_node;
+    new_node.id = 1;
+    new_node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+    new_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+    new_node.actions = flutter::kHorizontalScrollSemanticsActions;
+    new_node.label = "label";
+    new_node.value = "value";
+    new_node.hint = "hint";
+    new_node.scrollExtentMax = 100.0;
+    new_node.scrollPosition = 0.0;
+    new_node.childrenInTraversalOrder.push_back(2);
+
+    new_nodes[1] = new_node;
+    bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/actions);
+  }
+  /// The old node should be deallocated at this moment. Procced to check
+  /// accessibility tree integrity.
+  id rootContainer = flutterView.accessibilityElements[0];
+  XCTAssertTrue([rootContainer accessibilityElementCount] ==
+                2);  // one for root, one for scrollable.
+  id scrollableContainer = [rootContainer accessibilityElementAtIndex:1];
+  XCTAssertTrue([scrollableContainer accessibilityElementCount] ==
+                2);  // one for scrollable, one for scrollable child.
+  id child = [scrollableContainer accessibilityElementAtIndex:1];
+  /// Replacing node 1 should not accidentally clean up its child's container.
+  XCTAssertNotNil([child accessibilityContainer]);
+}
+
 - (void)testScrollableSemanticsDeallocated {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");

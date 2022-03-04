@@ -243,8 +243,9 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
   NSNumber* nodeId = @(oldObject.node.id);
   NSUInteger positionInChildlist = [oldObject.parent.children indexOfObject:oldObject];
   [[oldObject retain] autorelease];
-  [objects removeObjectForKey:nodeId];
+  oldObject.children = @[];
   [oldObject.parent replaceChildAtIndex:positionInChildlist withChild:newObject];
+  [objects removeObjectForKey:nodeId];
   objects[nodeId] = newObject;
 }
 
