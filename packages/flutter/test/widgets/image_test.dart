@@ -1995,7 +1995,7 @@ class _ConfigurationAwareKey {
   }
 
   @override
-  int get hashCode => hashValues(provider, configuration);
+  int get hashCode => Object.hash(provider, configuration);
 }
 
 class _ConfigurationKeyedTestImageProvider extends _TestImageProvider {

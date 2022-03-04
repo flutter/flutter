@@ -770,15 +770,16 @@ assembleProfile
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
           '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
-          '│ Fix this issue by adding the following to the file /android/local.properties:                 │\n'
-          '│                                                                                               │\n'
-          '│ flutter.minSdkVersion=19                                                                      │\n'
+          '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
+          '│ android {                                                                                     │\n'
+          '│   defaultConfig {                                                                             │\n'
+          '│     minSdkVersion 19                                                                          │\n'
+          '│   }                                                                                           │\n'
+          '│ }                                                                                             │\n'
           '│                                                                                               │\n'
           "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
-          '│ For more information, see:                                                                    │\n'
-          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );

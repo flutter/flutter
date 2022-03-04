@@ -736,6 +736,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (ignorePointer) {
       return false;
     }
+
     // The thumb is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
@@ -745,7 +746,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    return _thumbRect!.contains(position!);
+    return _trackRect!.contains(position!);
   }
 
   @override

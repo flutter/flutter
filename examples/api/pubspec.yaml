@@ -25,6 +25,8 @@ dev_dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  flutter_goldens:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   test: 1.20.1

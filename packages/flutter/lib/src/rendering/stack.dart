@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble, hashValues;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -164,7 +164,7 @@ class RelativeRect {
   }
 
   @override
-  int get hashCode => hashValues(left, top, right, bottom);
+  int get hashCode => Object.hash(left, top, right, bottom);
 
   @override
   String toString() => 'RelativeRect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
