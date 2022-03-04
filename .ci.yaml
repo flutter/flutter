@@ -4403,7 +4403,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows home_scroll_perf__timeline_summary
+  - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: true
     timeout: 60
