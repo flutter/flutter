@@ -1041,10 +1041,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// and the button will behave like an [IconButton].
   final Widget? icon;
 
-  /// The offset applied to the popup menu.
+  /// The offset is applied relative to the initial position
+  /// set by the [position].
   ///
-  /// When not set, the popup menu will be positioned directly over
-  /// the button that was used to create it.
+  /// When not set, the offset defaults to [Offset.zero].
   final Offset offset;
 
   /// Whether this popup menu button is interactive.
@@ -1109,8 +1109,11 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// Whether the popup menu is positioned over or under the popup menu button.
   ///
-  /// When not set, the popup menu will be positioned directly over
-  /// the button that was used to create it.
+  /// [offset] is used to change the position of the popup menu relative to the
+  /// position set by this parameter.
+  ///
+  /// When not set, the position defaults to [MenuPosition.over] which makes the
+  /// popup menu appear directly over the button that was used to create it.
   final MenuPosition position;
 
   @override
@@ -1135,14 +1138,13 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final Offset offset;
-    if (widget.position == MenuPosition.over && widget.offset != Offset.zero) {
-      offset = widget.offset;
-    } else if (widget.position == MenuPosition.under && widget.offset == Offset.zero) {
-      offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2));
-    } else if (widget.position == MenuPosition.under && widget.offset != Offset.zero) {
-      offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
-    } else {
-      offset = Offset.zero;
+    switch (widget.position) {
+      case MenuPosition.over:
+        offset = widget.offset;
+        break;
+      case MenuPosition.under:
+        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+        break;
     }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
