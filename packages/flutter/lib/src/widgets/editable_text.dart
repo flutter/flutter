@@ -1943,7 +1943,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final bool revealObscuredInput = _hasInputConnection
                                     && widget.obscureText
-                                    && WidgetsBinding.instance.window.brieflyShowPassword
+                                    && WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && value.text.length == _value.text.length + 1;
 
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
@@ -2658,7 +2658,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_obscureShowCharTicksPending > 0) {
       setState(() {
-        _obscureShowCharTicksPending = WidgetsBinding.instance.window.brieflyShowPassword
+        _obscureShowCharTicksPending = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
           ? _obscureShowCharTicksPending - 1
           : 0;
       });
@@ -3335,7 +3335,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
         TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia,
       };
-      final bool breiflyShowPassword = WidgetsBinding.instance.window.brieflyShowPassword
+      final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
       if (breiflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;

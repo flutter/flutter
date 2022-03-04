@@ -61,7 +61,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    window.onKeyData = _keyEventManager.handleKeyData;
+    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
     SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
   }
 
@@ -225,11 +225,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // App life cycle
 
   /// Initializes the [lifecycleState] with the
-  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState].
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState].
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState] may already be
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be
   /// stale and it no longer makes sense to use the initial state at dart vm
   /// startup as the current state anymore.
   ///
@@ -240,7 +240,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }
