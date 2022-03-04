@@ -16,16 +16,13 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
     super.initState();
     _controller.addListener(() {
       if (_controller.offset < 50) {
-        _controller.animateTo(550,
-            duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+        _controller.animateTo(550, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       } else if (_controller.offset > 500) {
-        _controller.animateTo(0,
-            duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+        _controller.animateTo(0, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       }
     });
     Timer(const Duration(milliseconds: 1000), () {
-      _controller.animateTo(550,
-          duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      _controller.animateTo(550, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
     });
   }
 
@@ -38,33 +35,35 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
         children: <Widget>[
           const SizedBox(height: 500),
           ColorFiltered(
-              colorFilter:
-                  ColorFilter.mode(Colors.pink[300]!, BlendMode.luminosity),
+            colorFilter:
+                ColorFilter.mode(Colors.green[300]!, BlendMode.luminosity),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: const BoxDecoration(boxShadow: [
+                BoxShadow(
+                  color: Colors.red,
+                  blurRadius: 5.0,
+                ),
+              ], color: Colors.blue, backgroundBlendMode: BlendMode.luminosity),
               child: Column(
                 children: [
-                  const Text('Color Filter Test'),
-                  const SizedBox(
-                    height: 10,
+                  const Text(
+                    'Color Filter Cache Pref Test',
                   ),
                   Image.asset(
                     'food/butternut_squash_soup.png',
                     package: 'flutter_gallery_assets',
                     fit: BoxFit.cover,
-                    width: 220,
-                    height: 140,
+                    width: 330,
+                    height: 210,
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Image.asset(
-                    'food/cherry_pie.png',
-                    package: 'flutter_gallery_assets',
-                    fit: BoxFit.cover,
-                    width: 220,
-                    height: 140,
+                  const Text(
+                    'Color Filter Cache Pref Test',
                   ),
                 ],
-              )),
+              ),
+            ),
+          ),
           const SizedBox(height: 1000),
         ],
       ),
