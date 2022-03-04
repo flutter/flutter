@@ -134,13 +134,13 @@ void main() {
       await tester.pump();
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-      /// Cupertino conext menu action without "onPressed" callback.
+      /// Cupertino context menu action without "onPressed" callback.
       await tester.pumpWidget(_getApp());
       final Offset contextMenuAction = tester.getCenter(find.byType(CupertinoContextMenuAction));
       await gesture.moveTo(contextMenuAction);
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-      /// Cupertino conext menu action with "onPressed" callback.
+      /// Cupertino context menu action with "onPressed" callback.
       await tester.pumpWidget(_getApp(onPressed: (){}));
       await gesture.moveTo(contextMenuAction);
       addTearDown(gesture.removePointer);
