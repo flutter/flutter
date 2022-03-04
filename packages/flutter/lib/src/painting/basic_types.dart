@@ -40,7 +40,11 @@ export 'dart:ui' show
   TextDirection,
   TextPosition,
   TileMode,
-  VertexMode;
+  VertexMode,
+  // TODO(werainkhatri): remove these after their deprecation period in engine
+  // https://github.com/flutter/flutter/pull/99505
+  hashValues,
+  hashList;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 
