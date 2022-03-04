@@ -13,56 +13,56 @@ import 'isolates.dart' as isolates;
 /// The dart:io implementation of [isolate.compute].
 Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String? debugLabel }) async {
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
+
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
-  final ReceivePort resultPort = ReceivePort();
-  final ReceivePort exitPort = ReceivePort();
-  final ReceivePort errorPort = ReceivePort();
+  final ReceivePort port = ReceivePort();
   Timeline.finishSync();
+
+  final Completer<dynamic> completer = Completer<dynamic>();
+  port.listen((dynamic msg) {
+    completer.complete(msg);
+
+    Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
+    port.close();
+    Timeline.finishSync();
+  });
+
   await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
     _spawn,
     _IsolateConfiguration<Q, FutureOr<R>>(
       callback,
       message,
-      resultPort.sendPort,
+      port.sendPort,
       debugLabel,
       flow.id,
     ),
     errorsAreFatal: true,
-    onExit: exitPort.sendPort,
-    onError: errorPort.sendPort,
+    onExit: port.sendPort,
+    onError: port.sendPort,
   );
-  final Completer<R> result = Completer<R>();
-  errorPort.listen((dynamic errorData) {
-    assert(errorData is List<dynamic>);
-    if (errorData is List<dynamic>) {
-      assert(errorData.length == 2);
-      final Exception exception = Exception(errorData[0]);
-      final StackTrace stack = StackTrace.fromString(errorData[1] as String);
-      if (result.isCompleted) {
-        Zone.current.handleUncaughtError(exception, stack);
-      } else {
-        result.completeError(exception, stack);
-      }
-    }
-  });
-  exitPort.listen((dynamic exitData) {
-    if (!result.isCompleted) {
-      result.completeError(Exception('Isolate exited without result or error.'));
-    }
-  });
-  resultPort.listen((dynamic resultData) {
-    assert(resultData == null || resultData is R);
-    if (!result.isCompleted)
-      result.complete(resultData as R);
-  });
-  await result.future;
-  Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
-  resultPort.close();
-  exitPort.close();
-  errorPort.close();
-  Timeline.finishSync();
-  return result.future;
+
+  final dynamic response = await completer.future;
+
+  if(response == null) {
+    throw Exception('Isolate exited without result or error.');
+  }
+
+  assert(response is List<dynamic>);
+  response as List<dynamic>;
+
+  // success; see _spawn, where we wrap the result in a List
+  if (response.length == 1) {
+    assert(response[0] is R);
+    return response[0] as R;
+  }
+
+  // error; documented by Isolate.addErrorListener
+  assert(response.length == 2);
+
+  final Exception exception = Exception(response[0]);
+  final StackTrace stack = StackTrace.fromString(response[1] as String);
+  await Future<Never>.error(exception, stack);  
 }
 
 @immutable
@@ -96,5 +96,10 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
     '${configuration.debugLabel}: exiting and returning a result', () {},
     flow: Flow.step(configuration.flowId),
   );
-  Isolate.exit(configuration.resultPort, result);
+
+  // Wrap in list to ensure our expectations in the main isolate are met.
+  // We need to wrap the result in a List because the user provided type R could 
+  // also be a List. Meaning, a check `result is R` could return true for what
+  // was an error event. (Error event is specified by the dart SDK)
+  Isolate.exit(configuration.resultPort, <R>[result]);
 }
