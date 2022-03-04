@@ -82,6 +82,8 @@ class Tracing {
                 _logger.printTrace('No isolate ID associated with the view.');
                 continue;
               }
+              final vm_service.Stack stack = await vmService.service.getStack(isolateId);
+              _logger.printTrace(stack.toString());
               final vm_service.Isolate? isolate = await vmService.getIsolateOrNull(isolateId);
               if (isolate == null) {
                 _logger.printTrace('Isolate $isolateId not found.');
@@ -92,9 +94,6 @@ class Tracing {
               // "libraries" has very long output and is likely unrelated to any first-frame issues.
               isolateState.remove('libraries');
               _logger.printTrace(jsonEncode(isolateState));
-
-              final vm_service.Stack stack = await vmService.service.getStack(isolateId);
-              _logger.printTrace(stack.toString());
             }
             _logger.printTrace('Received VM events:');
             _logger.printTrace(bufferedEvents.toString());
