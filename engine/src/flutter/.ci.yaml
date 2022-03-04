@@ -192,6 +192,7 @@ targets:
     recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
+      clobber: "true"
     timeout: 60
     scheduler: luci
 
