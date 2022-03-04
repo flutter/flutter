@@ -43,7 +43,7 @@ class MockTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     throw UnimplementedError();
