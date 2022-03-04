@@ -576,31 +576,32 @@ Future<void> main() async {
       tester,
       MediaQuery(
         data: const MediaQueryData(),
-        child: CupertinoTabBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              label: 'Tab 1',
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              label: 'Tab 2',
-            ),
-          ],
+        child: Center(
+          child: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.alarm),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.app_badge),
+                label: 'Tab 2',
+              ),
+            ],
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
-    addTearDown(gesture.removePointer);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-    // Hovering over the first tab should show a hover cursor.
     final Offset tabItem = tester.getCenter(find.text('Tab 1'));
     await gesture.moveTo(tabItem);
-    await tester.pump();
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
