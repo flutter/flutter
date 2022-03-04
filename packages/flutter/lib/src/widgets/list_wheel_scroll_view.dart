@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -20,7 +21,6 @@ import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
-import 'scroll_simulation.dart';
 import 'scrollable.dart';
 
 /// A delegate that supplies children for [ListWheelScrollView].
