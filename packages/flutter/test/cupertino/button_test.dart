@@ -457,23 +457,24 @@ void main() {
   testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: CupertinoButton.filled(
-          onPressed: () { },
-          child: const Text('Tap me'),
+        home: Center(
+          child: CupertinoButton.filled(
+            onPressed: () { },
+            child: const Text('Tap me'),
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
-    addTearDown(gesture.removePointer);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-    // Hover on the button.
     final Offset button = tester.getCenter(find.byType(CupertinoButton));
     await gesture.moveTo(button);
-    await tester.pump();
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
