@@ -40,10 +40,6 @@ void main() {
     // The version of TalkBack running on the device.
     Version talkbackVersion;
 
-    // The version of TalkBack where the actions on the first item were fixed.
-    final Version fixedTalkback = Version(9, 1, 0);
-
-
     Future<Version> getTalkbackVersion() async {
       final io.ProcessResult result = await io.Process.run(adbPath(), const <String>[
         'shell',
