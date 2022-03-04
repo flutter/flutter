@@ -62,7 +62,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
 
   final Exception exception = Exception(response[0]);
   final StackTrace stack = StackTrace.fromString(response[1] as String);
-  await Future<Never>.error(exception, stack);  
+  await Future<Never>.error(exception, stack);
 }
 
 @immutable
@@ -83,6 +83,15 @@ class _IsolateConfiguration<Q, R> {
   FutureOr<R> apply() => callback(message);
 }
 
+/// The spawn point MUST guarantee only one result event is sent through the
+/// [SendPort.send] be it directly or indirectly i. e. [Isolate.exit].
+///
+/// In case an [Error] or [Exception] are thrown AFTER the data
+/// is sent, they will NOT be handled or reported by the main [Isolate] because
+/// it stops listening after the first event is received.
+///
+/// Also the awaited result from the [configuration.callback] has to be wrapped
+/// in a [List].
 Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   final R result = await Timeline.timeSync(
     configuration.debugLabel,
@@ -98,7 +107,7 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
   );
 
   // Wrap in list to ensure our expectations in the main isolate are met.
-  // We need to wrap the result in a List because the user provided type R could 
+  // We need to wrap the result in a List because the user provided type R could
   // also be a List. Meaning, a check `result is R` could return true for what
   // was an error event. (Error event is specified by the dart SDK)
   Isolate.exit(configuration.resultPort, <R>[result]);
