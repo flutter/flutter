@@ -20,6 +20,11 @@ namespace {
 static constexpr char kScanCodeKey[] = "scanCode";
 static constexpr int kHandledScanCode = 20;
 static constexpr int kUnhandledScanCode = 21;
+static constexpr char kTextPlainFormat[] = "text/plain";
+// Should be identical to constants in text_input_plugin.cc.
+static constexpr char kChannelName[] = "flutter/textinput";
+static constexpr char kEnableDeltaModel[] = "enableDeltaModel";
+static constexpr char kSetClientMethod[] = "TextInput.setClient";
 
 static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   auto response_doc =
@@ -76,7 +81,7 @@ TEST(TextInputPluginTest, ClearClientResetsComposing) {
 
   auto& codec = JsonMethodCodec::GetInstance();
   auto message = codec.EncodeMethodCall({"TextInput.clearClient", nullptr});
-  messenger.SimulateEngineMessage("flutter/textinput", message->data(),
+  messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
   EXPECT_TRUE(delegate.ime_was_reset());
 }
@@ -103,6 +108,7 @@ TEST(TextInputPluginTest, VerifyComposingSendStateUpdate) {
   rapidjson::Value config(rapidjson::kObjectType);
   config.AddMember("inputAction", "done", allocator);
   config.AddMember("inputType", "text", allocator);
+  config.AddMember(kEnableDeltaModel, false, allocator);
   arguments->PushBack(config, allocator);
   auto message =
       codec.EncodeMethodCall({"TextInput.setClient", std::move(arguments)});
@@ -135,6 +141,62 @@ TEST(TextInputPluginTest, VerifyComposingSendStateUpdate) {
   sent_message = false;
   handler.ComposeEndHook();
   EXPECT_TRUE(sent_message);
+}
+
+TEST(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
+  auto handled_message = CreateResponse(true);
+  auto unhandled_message = CreateResponse(false);
+  int received_scancode = 0;
+
+  TestBinaryMessenger messenger(
+      [&received_scancode, &handled_message, &unhandled_message](
+          const std::string& channel, const uint8_t* message,
+          size_t message_size, BinaryReply reply) {});
+  EmptyTextInputPluginDelegate delegate;
+
+  int redispatch_scancode = 0;
+  TextInputPlugin handler(&messenger, &delegate);
+
+  auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = args->GetAllocator();
+  args->PushBack(123, allocator);  // client_id
+
+  rapidjson::Value client_config(rapidjson::kObjectType);
+  client_config.AddMember(kEnableDeltaModel, true, allocator);
+
+  args->PushBack(client_config, allocator);
+  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
+      MethodCall<rapidjson::Document>(kSetClientMethod, std::move(args)));
+
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, encoded->data(), encoded->size(),
+      [](const uint8_t* reply, size_t reply_size) {}));
+
+  handler.KeyboardHook(VK_RETURN, 100, WM_KEYDOWN, '\n', false, false);
+  handler.ComposeBeginHook();
+  std::u16string text;
+  text.push_back('\n');
+  handler.ComposeChangeHook(text, 1);
+  handler.ComposeEndHook();
+
+  handler.KeyboardHook(0x4E, 100, WM_KEYDOWN, 'n', false, false);
+  handler.ComposeBeginHook();
+  std::u16string textN;
+  text.push_back('n');
+  handler.ComposeChangeHook(textN, 1);
+  handler.KeyboardHook(0x49, 100, WM_KEYDOWN, 'i', false, false);
+  std::u16string textNi;
+  text.push_back('n');
+  text.push_back('i');
+  handler.ComposeChangeHook(textNi, 2);
+  handler.KeyboardHook(VK_RETURN, 100, WM_KEYDOWN, '\n', false, false);
+  std::u16string textChineseCharacter;
+  text.push_back(u'\u4F60');
+  handler.ComposeChangeHook(textChineseCharacter, 1);
+  handler.ComposeCommitHook();
+  handler.ComposeEndHook();
+
+  // Passes if it did not crash
 }
 
 }  // namespace testing

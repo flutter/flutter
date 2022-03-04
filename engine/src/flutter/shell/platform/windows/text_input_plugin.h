@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
+#include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
@@ -50,6 +51,10 @@ class TextInputPlugin {
   // Sends the current state of the given model to the Flutter engine.
   void SendStateUpdate(const TextInputModel& model);
 
+  // Sends the current state of the given model to the Flutter engine.
+  void SendStateUpdateWithDelta(const TextInputModel& model,
+                                const TextEditingDelta*);
+
   // Sends an action triggered by the Enter key to the Flutter engine.
   void EnterPressed(TextInputModel* model);
 
@@ -73,6 +78,12 @@ class TextInputPlugin {
 
   // The active model. nullptr if not set.
   std::unique_ptr<TextInputModel> active_model_;
+
+  // Whether to enable that the engine sends text input updates to the framework
+  // as TextEditingDeltas or as one TextEditingValue.
+  // For more information on the delta model, see:
+  // https://master-api.flutter.dev/flutter/services/TextInputConfiguration/enableDeltaModel.html
+  bool enable_delta_model;
 
   // Keyboard type of the client. See available options:
   // https://api.flutter.dev/flutter/services/TextInputType-class.html
