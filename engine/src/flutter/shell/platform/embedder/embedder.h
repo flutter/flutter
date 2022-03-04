@@ -226,6 +226,18 @@ typedef enum {
   kFlutterTextDirectionLTR = 2,
 } FlutterTextDirection;
 
+/// Valid values for priority of Thread.
+typedef enum {
+  /// Suitable for threads that shouldn't disrupt high priority work.
+  kBackground = 0,
+  /// Default priority level.
+  kNormal = 1,
+  /// Suitable for threads which generate data for the display.
+  kDisplay = 2,
+  /// Suitable for thread which raster data.
+  kRaster = 3,
+} FlutterThreadPriority;
+
 typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 
 typedef struct {
@@ -1061,6 +1073,9 @@ typedef struct {
   /// and platform task runners. This makes the Flutter engine use the same
   /// thread for both task runners.
   const FlutterTaskRunnerDescription* render_task_runner;
+  /// Specify a callback that is used to set the thread priority for embedder
+  /// task runners.
+  void (*thread_priority_setter)(FlutterThreadPriority);
 } FlutterCustomTaskRunners;
 
 typedef struct {
