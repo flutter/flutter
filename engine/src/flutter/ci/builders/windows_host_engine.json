@@ -11,7 +11,7 @@
                         "out/host_debug/zip_archives/windows-x64/flutter-cpp-client-wrapper.zip",
                         "out/host_debug/zip_archives/windows-x64/font-subset.zip",
                         "out/host_debug/zip_archives/dart-sdk-windows-x64.zip",
-                        "out/host_debug/zip_archives/flutter-web-sdk-linux-x64.zip"
+                        "out/host_debug/zip_archives/flutter-web-sdk-windows-x64.zip"
                     ],
                     "name": "host_debug"
                 }
