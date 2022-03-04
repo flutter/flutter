@@ -39,7 +39,7 @@ const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
 /// Used to configure how the [PopupMenuButton] positions its popup menu.
-enum MenuPosition {
+enum PopupMenuPosition {
   /// Menu is positioned over the anchor.
   over,
   /// Menu is positioned under the anchor.
@@ -985,7 +985,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.color,
     this.enableFeedback,
     this.constraints,
-    this.position = MenuPosition.over,
+    this.position = PopupMenuPosition.over,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
        assert(
@@ -1114,7 +1114,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// When not set, the position defaults to [MenuPosition.over] which makes the
   /// popup menu appear directly over the button that was used to create it.
-  final MenuPosition position;
+  final PopupMenuPosition position;
 
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
@@ -1139,10 +1139,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final Offset offset;
     switch (widget.position) {
-      case MenuPosition.over:
+      case PopupMenuPosition.over:
         offset = widget.offset;
         break;
-      case MenuPosition.under:
+      case PopupMenuPosition.under:
         offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
         break;
     }

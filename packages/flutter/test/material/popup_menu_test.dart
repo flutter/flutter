@@ -2571,7 +2571,7 @@ void main() {
   });
 
   testWidgets('Can change menu position and offset', (WidgetTester tester) async {
-    PopupMenuButton<int> buildMenuButton({required MenuPosition position}) {
+    PopupMenuButton<int> buildMenuButton({required PopupMenuPosition position}) {
       return PopupMenuButton<int>(
         position: position,
         itemBuilder: (BuildContext context) {
@@ -2594,7 +2594,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Material(
-            child: buildMenuButton(position: MenuPosition.over),
+            child: buildMenuButton(position: PopupMenuPosition.over),
           ),
         ),
       ),
@@ -2615,7 +2615,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Material(
-            child: buildMenuButton(position: MenuPosition.under),
+            child: buildMenuButton(position: PopupMenuPosition.under),
           ),
         ),
       ),
@@ -2673,7 +2673,7 @@ void main() {
           body: Material(
             child: PopupMenuButton<int>(
               offset: const Offset(0.0, 50),
-              position: MenuPosition.under,
+              position: PopupMenuPosition.under,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem<int>>[
                   PopupMenuItem<int>(
