@@ -1,4 +1,4 @@
-Signature: bd274865fbc78fb02db615bf09aab3f0
+Signature: 1b3e87cc21dc4a5b8861f4ed43b90072
 
 UNUSED LICENSES:
 
@@ -1067,6 +1067,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/catchExceptionNop.js
 FILE: ../../../third_party/skia/modules/canvaskit/color.js
 FILE: ../../../third_party/skia/modules/canvaskit/cpu.js
 FILE: ../../../third_party/skia/modules/canvaskit/debug.js
+FILE: ../../../third_party/skia/modules/canvaskit/debugger.js
 FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/index.html
 FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/module_uses_ck.ts
 FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/package-lock.json
@@ -3360,6 +3361,7 @@ FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmCommon.h
+FILE: ../../../third_party/skia/modules/canvaskit/debugger_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
