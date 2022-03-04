@@ -111,12 +111,13 @@ void main() {
       );
     },
   );
+
   testWidgets('can change keyboard type', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              keyboardType: TextInputType.text
+              keyboardType: TextInputType.number,
             ),
           ),
         ),
@@ -126,6 +127,7 @@ void main() {
       expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
     },
   );
+
   testWidgets(
     'can control text content via controller',
     (WidgetTester tester) async {
