@@ -58,7 +58,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
     return Scaffold(
         appBar: AppBar(
           title: const Text(
-            'ListTile select example',
+            'ListTile selection',
           ),
           leading: isSelectionMode
               ? IconButton(
