@@ -1157,6 +1157,8 @@ class ThemeData with Diagnosticable {
   ///
   ///   * [FloatingActionButton]
   ///   * [NavigationBar]
+  ///   * [Dialog]
+  ///   * [AlertDialog]
   ///
   /// See also:
   ///

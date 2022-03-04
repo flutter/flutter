@@ -53,9 +53,14 @@ Finder _findButtonBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
 
-const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+const ShapeBorder _defaultM2DialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+final ShapeBorder _defaultM3DialogShape =  RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0));
 
 void main() {
+
+  final ThemeData material3Theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+  final ThemeData material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
+
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
     final AlertDialog dialog = AlertDialog(
@@ -104,20 +109,33 @@ void main() {
       content: Text('Y'),
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material2Theme));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, Colors.grey[800]);
-    expect(materialWidget.shape, _defaultDialogShape);
+    expect(materialWidget.shape, _defaultM2DialogShape);
     expect(materialWidget.elevation, 24.0);
 
     final Offset bottomLeft = tester.getBottomLeft(
       find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
     );
     expect(bottomLeft.dy, 360.0);
+
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material material3Widget = _getMaterialFromDialog(tester);
+    expect(material3Widget.color, const Color(0xff424242));
+    expect(material3Widget.shape, _defaultM3DialogShape);
+    expect(material3Widget.elevation, 6.0);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
@@ -223,7 +241,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material materialWidget = _getMaterialFromDialog(tester);
-    expect(materialWidget.shape, _defaultDialogShape);
+    expect(materialWidget.shape, _defaultM2DialogShape);
   });
 
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
@@ -585,9 +603,7 @@ void main() {
       ],
     );
 
-    await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
-    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material2Theme));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -621,6 +637,46 @@ void main() {
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
       tester.getBottomRight(_findButtonBar()).dx - 8.0,
+    ); // right
+
+    // Dismiss it and test materail 3 dialog
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Padding between both buttons
+    expect(
+      tester.getBottomLeft(find.byKey(key2)).dx,
+      tester.getBottomRight(find.byKey(key1)).dx + 8.0,
+    );
+
+    // Padding between button and edges of the button bar
+    // First button
+    expect(
+      tester.getTopRight(find.byKey(key1)).dy,
+      tester.getTopRight(_findButtonBar()).dy + 8.0,
+    ); // top
+    expect(
+      tester.getBottomRight(find.byKey(key1)).dy,
+      tester.getBottomRight(_findButtonBar()).dy - 20.0,
+    ); // bottom
+
+    // // Second button
+    expect(
+      tester.getTopRight(find.byKey(key2)).dy,
+      tester.getTopRight(_findButtonBar()).dy + 8.0,
+    ); // top
+    expect(
+      tester.getBottomRight(find.byKey(key2)).dy,
+      tester.getBottomRight(_findButtonBar()).dy - 20.0,
+    ); // bottom
+    expect(
+      tester.getBottomRight(find.byKey(key2)).dx,
+      tester.getBottomRight(_findButtonBar()).dx - 26.0,
     ); // right
   });
 
