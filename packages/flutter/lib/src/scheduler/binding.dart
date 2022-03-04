@@ -271,10 +271,10 @@ mixin SchedulerBinding on BindingBase {
   void addTimingsCallback(TimingsCallback callback) {
     _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {
-      assert(window.onReportTimings == null);
-      window.onReportTimings = _executeTimingsCallbacks;
+      assert(platformDispatcher.onReportTimings == null);
+      platformDispatcher.onReportTimings = _executeTimingsCallbacks;
     }
-    assert(window.onReportTimings == _executeTimingsCallbacks);
+    assert(platformDispatcher.onReportTimings == _executeTimingsCallbacks);
   }
 
   /// Removes a callback that was earlier added by [addTimingsCallback].
@@ -282,7 +282,7 @@ mixin SchedulerBinding on BindingBase {
     assert(_timingsCallbacks.contains(callback));
     _timingsCallbacks.remove(callback);
     if (_timingsCallbacks.isEmpty) {
-      window.onReportTimings = null;
+      platformDispatcher.onReportTimings = null;
     }
   }
 
@@ -727,8 +727,8 @@ mixin SchedulerBinding on BindingBase {
   /// [PlatformDispatcher.onDrawFrame] are registered.
   @protected
   void ensureFrameCallbacksRegistered() {
-    window.onBeginFrame ??= _handleBeginFrame;
-    window.onDrawFrame ??= _handleDrawFrame;
+    platformDispatcher.onBeginFrame ??= _handleBeginFrame;
+    platformDispatcher.onDrawFrame ??= _handleDrawFrame;
   }
 
   /// Schedules a new frame using [scheduleFrame] if this object is not
@@ -793,7 +793,7 @@ mixin SchedulerBinding on BindingBase {
       return true;
     }());
     ensureFrameCallbacksRegistered();
-    window.scheduleFrame();
+    platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -825,7 +825,7 @@ mixin SchedulerBinding on BindingBase {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    window.scheduleFrame();
+    platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }
 

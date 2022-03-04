@@ -10,8 +10,7 @@ import 'dart:ui' show
   Size,
   Rect,
   TextAlign,
-  TextDirection,
-  hashValues;
+  TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -217,7 +216,7 @@ class TextInputType {
   }
 
   @override
-  int get hashCode => hashValues(index, signed, decimal);
+  int get hashCode => Object.hash(index, signed, decimal);
 }
 
 /// An action the user has requested the text input control to perform.
@@ -913,7 +912,7 @@ class TextEditingValue {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     text.hashCode,
     selection.hashCode,
     composing.hashCode,
@@ -1174,7 +1173,7 @@ class SelectionRect {
   }
 
   @override
-  int get hashCode => hashValues(position, bounds);
+  int get hashCode => Object.hash(position, bounds);
 
   @override
   String toString() => 'SelectionRect($position, $bounds)';

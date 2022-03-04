@@ -33,7 +33,7 @@ class _SaltedKey<S, V> extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, salt, value);
+  int get hashCode => Object.hash(runtimeType, salt, value);
 
   @override
   String toString() {

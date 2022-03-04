@@ -674,27 +674,27 @@ class SliderThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<Object?>[
-      trackHeight,
-      activeTrackColor,
-      inactiveTrackColor,
-      disabledActiveTrackColor,
-      disabledInactiveTrackColor,
-      activeTickMarkColor,
-      inactiveTickMarkColor,
-      disabledActiveTickMarkColor,
-      disabledInactiveTickMarkColor,
-      thumbColor,
-      overlappingShapeStrokeColor,
-      disabledThumbColor,
-      overlayColor,
-      valueIndicatorColor,
-      overlayShape,
-      tickMarkShape,
-      thumbShape,
-      trackShape,
-      valueIndicatorShape,
+  int get hashCode => Object.hash(
+    trackHeight,
+    activeTrackColor,
+    inactiveTrackColor,
+    disabledActiveTrackColor,
+    disabledInactiveTrackColor,
+    activeTickMarkColor,
+    inactiveTickMarkColor,
+    disabledActiveTickMarkColor,
+    disabledInactiveTickMarkColor,
+    thumbColor,
+    overlappingShapeStrokeColor,
+    disabledThumbColor,
+    overlayColor,
+    valueIndicatorColor,
+    overlayShape,
+    tickMarkShape,
+    thumbShape,
+    trackShape,
+    valueIndicatorShape,
+    Object.hash(
       rangeTickMarkShape,
       rangeThumbShape,
       rangeTrackShape,
@@ -704,8 +704,8 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation,
       thumbSelector,
       mouseCursor,
-    ]);
-  }
+    ),
+  );
 
   @override
   bool operator ==(Object other) {
@@ -1524,25 +1524,7 @@ mixin BaseSliderTrackShape {
 ///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Creates a slider track that draws 2 rectangles.
-  const RectangularSliderTrackShape({
-    @Deprecated(
-      'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    this.disabledThumbGapWidth = 2.0,
-  });
-
-  /// Horizontal spacing, or gap, between the disabled thumb and the track.
-  ///
-  /// This is only used when the slider is disabled. There is no gap around
-  /// the thumb and any part of the track when the slider is enabled. The
-  /// Material spec defaults this gap width 2, which is half of the disabled
-  /// thumb radius.
-  @Deprecated(
-    'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-    'This feature was deprecated after v1.26.0-18.0.pre.',
-  )
-  final double disabledThumbGapWidth;
+  const RectangularSliderTrackShape();
 
   @override
   void paint(
@@ -2476,7 +2458,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
-    if (isOnTop == true) {
+    if (isOnTop ?? false) {
       final Paint strokePaint = Paint()
         ..color = sliderTheme.overlappingShapeStrokeColor!
         ..strokeWidth = 1.0
@@ -3324,7 +3306,7 @@ class RangeValues {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() {
@@ -3364,7 +3346,7 @@ class RangeLabels {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() {

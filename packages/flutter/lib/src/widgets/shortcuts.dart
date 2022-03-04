@@ -117,11 +117,11 @@ class KeySet<T extends KeyboardKey> {
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
       return h1 < h2
-        ? hashValues(h1, h2)
-        : hashValues(h2, h1);
+        ? Object.hash(h1, h2)
+        : Object.hash(h2, h1);
     }
 
-    // Sort key hash codes and feed to hashList to ensure the aggregate
+    // Sort key hash codes and feed to Object.hashAll to ensure the aggregate
     // hash code does not depend on the key order.
     final List<int> sortedHashes = length == 3
       ? _tempHashStore3
@@ -135,7 +135,7 @@ class KeySet<T extends KeyboardKey> {
       sortedHashes[3] = iterator.current.hashCode;
     }
     sortedHashes.sort();
-    return hashList(sortedHashes);
+    return Object.hashAll(sortedHashes);
   }
 }
 
@@ -542,7 +542,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// Keys often produce different characters when combined with modifiers. For
 /// example, it might be helpful for the user to bring up a help menu by
 /// pressing the question mark ('?'). However, there is no logical key that
-/// directly represents a question mark. Althouh 'Shift+Slash' produces a '?'
+/// directly represents a question mark. Although 'Shift+Slash' produces a '?'
 /// character on a US keyboard, its logical key is still considered a Slash key,
 /// and hard-coding 'Shift+Slash' in this situation is unfriendly to other
 /// keyboard layouts.

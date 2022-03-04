@@ -467,7 +467,7 @@ class _TableSlot with Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(column, row);
+  int get hashCode => Object.hash(column, row);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

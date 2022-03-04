@@ -1,5 +1,5 @@
 {
-  "version": "v0_81",
+  "version": "v0_86",
 
   "md.comp.slider.active.track.color": "primary",
   "md.comp.slider.active.track.height": 6.0,
@@ -34,7 +34,7 @@
   "md.comp.slider.pressed.handle.color": "primary",
   "md.comp.slider.pressed.state-layer.color": "primary",
   "md.comp.slider.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
-  "md.comp.slider.state-layer.size": 48.0,
+  "md.comp.slider.state-layer.size": 40.0,
   "md.comp.slider.track.elevation": "md.sys.elevation.level0",
   "md.comp.slider.with-overlap.handle.outline.color": "onPrimary",
   "md.comp.slider.with-overlap.handle.outline.width": 1.0,
