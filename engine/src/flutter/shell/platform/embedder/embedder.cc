@@ -16,6 +16,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/native_library.h"
+#include "flutter/fml/thread.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
 
@@ -1450,10 +1451,33 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
   }
 #endif
-
+  auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
+  auto thread_config_callback = [&custom_task_runners](
+                                    const fml::Thread::ThreadConfig& config) {
+    fml::Thread::SetCurrentThreadName(config);
+    if (!custom_task_runners || !custom_task_runners->thread_priority_setter) {
+      return;
+    }
+    FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
+    switch (config.priority) {
+      case fml::Thread::ThreadPriority::BACKGROUND:
+        priority = FlutterThreadPriority::kBackground;
+        break;
+      case fml::Thread::ThreadPriority::NORMAL:
+        priority = FlutterThreadPriority::kNormal;
+        break;
+      case fml::Thread::ThreadPriority::DISPLAY:
+        priority = FlutterThreadPriority::kDisplay;
+        break;
+      case fml::Thread::ThreadPriority::RASTER:
+        priority = FlutterThreadPriority::kRaster;
+        break;
+    }
+    custom_task_runners->thread_priority_setter(priority);
+  };
   auto thread_host =
       flutter::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
-          SAFE_ACCESS(args, custom_task_runners, nullptr));
+          custom_task_runners, thread_config_callback);
 
   if (!thread_host || !thread_host->IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
