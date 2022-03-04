@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
+import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -14,26 +14,26 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/39494.
 
     // Preconditions.
-    expect(window.onBeginFrame, isNull);
-    expect(window.onDrawFrame, isNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
     expect(WidgetsFlutterBinding.ensureInitialized(), isA<WidgetsFlutterBinding>());
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
-    expect(window.onBeginFrame, isNull);
-    expect(window.onDrawFrame, isNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(window.onBeginFrame, isNull);
-    expect(window.onDrawFrame, isNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNull);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
 
     // Frame callbacks are registered lazily (and a frame scheduled) when the root widget is attached.
     WidgetsBinding.instance.attachRootWidget(const Placeholder());
-    expect(window.onBeginFrame, isNotNull);
-    expect(window.onDrawFrame, isNotNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNotNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNotNull);
     expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
   });
 }
