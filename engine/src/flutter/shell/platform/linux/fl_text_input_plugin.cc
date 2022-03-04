@@ -144,12 +144,12 @@ static void update_editing_state(FlTextInputPlugin* self) {
   fl_value_set_string_take(value, kSelectionExtentKey,
                            fl_value_new_int(selection.extent()));
 
-  int composing_base = priv->text_model->composing()
-                           ? priv->text_model->composing_range().base()
-                           : -1;
-  int composing_extent = priv->text_model->composing()
-                             ? priv->text_model->composing_range().extent()
-                             : -1;
+  int composing_base = -1;
+  int composing_extent = -1;
+  if (!priv->text_model->composing_range().collapsed()) {
+    composing_base = priv->text_model->composing_range().base();
+    composing_extent = priv->text_model->composing_range().extent();
+  }
   fl_value_set_string_take(value, kComposingBaseKey,
                            fl_value_new_int(composing_base));
   fl_value_set_string_take(value, kComposingExtentKey,
@@ -203,15 +203,14 @@ static void update_editing_state_with_delta(FlTextInputPlugin* self,
   fl_value_set_string_take(deltaValue, "selectionIsDirectional",
                            fl_value_new_bool(FALSE));
 
-  int composing_base = priv->text_model->composing()
-                           ? priv->text_model->composing_range().base()
-                           : -1;
+  int composing_base = -1;
+  int composing_extent = -1;
+  if (!priv->text_model->composing_range().collapsed()) {
+    composing_base = priv->text_model->composing_range().base();
+    composing_extent = priv->text_model->composing_range().extent();
+  }
   fl_value_set_string_take(deltaValue, "composingBase",
                            fl_value_new_int(composing_base));
-
-  int composing_extent = priv->text_model->composing()
-                             ? priv->text_model->composing_range().extent()
-                             : -1;
   fl_value_set_string_take(deltaValue, "composingExtent",
                            fl_value_new_int(composing_extent));
 
