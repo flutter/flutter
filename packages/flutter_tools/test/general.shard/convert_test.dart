@@ -11,11 +11,9 @@ void main() {
   late String passedString;
   late String nonpassString;
 
-  late Utf8Decoder encoder;
+  const Utf8Decoder decoder = Utf8Decoder();
 
   setUp(() {
-    encoder = const Utf8Decoder();
-
     passedString = 'normal string';
     nonpassString = 'malformed string => �';
   });
@@ -23,14 +21,14 @@ void main() {
   testWithoutContext('Decode a normal string', () async {
     assert(passedString != null);
 
-    expect(encoder.convert(passedString.codeUnits), passedString);
+    expect(decoder.convert(passedString.codeUnits), passedString);
   });
 
   testWithoutContext('Decode a malformed string', () async {
     assert(nonpassString != null);
 
     expect(
-      () => encoder.convert(nonpassString.codeUnits),
+      () => decoder.convert(nonpassString.codeUnits),
       throwsA(
         isA<ToolExit>().having(
           (ToolExit error) => error.message,
