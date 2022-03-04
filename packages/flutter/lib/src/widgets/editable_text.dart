@@ -1009,7 +1009,7 @@ class EditableText extends StatefulWidget {
   /// [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
-  /// of editing, like when pressing the "done" button on the keyboard. That default
+  /// of editing, such as when pressing the "done" button on the keyboard. That default
   /// behavior can be overridden. See [onEditingComplete] for details.
   ///
   /// {@tool dartpad}
@@ -1068,9 +1068,9 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   ///
-  /// When the user has finalized editing, by default [onSubmitted] is called after
-  /// [onChanged] or after [onEditingComplete] when the default behaviour is overridden.
-  /// See [onEditingComplete] for details.
+  /// By default, [onSubmitted] is called after [onChanged] when the user
+  /// has finalized editing; or, if the default behavior has been overridden,
+  /// after [onEditingComplete]. See [onEditingComplete] for details.
   /// {@endtemplate}
   final ValueChanged<String>? onSubmitted;
 
