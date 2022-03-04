@@ -1671,6 +1671,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
+    _clipboardStatus?.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -1694,6 +1695,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       hideToolbar();
     }
+    _clipboardStatus?.update();
   }
 
   /// Paste text from [Clipboard].
@@ -2919,7 +2921,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
-
+    _clipboardStatus?.update();
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3026,7 +3028,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && copyEnabled
         && _hasFocus
         && (controls?.canCopy(this) ?? false)
-      ? () => controls!.handleCopy(this, _clipboardStatus)
+      ? () => controls!.handleCopy(this)
       : null;
   }
 
@@ -3035,7 +3037,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && cutEnabled
         && _hasFocus
         && (controls?.canCut(this) ?? false)
-      ? () => controls!.handleCut(this, _clipboardStatus)
+      ? () => controls!.handleCut(this)
       : null;
   }
 
