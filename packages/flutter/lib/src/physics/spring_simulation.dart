@@ -124,6 +124,27 @@ class SpringSimulation extends Simulation {
   String toString() => '${objectRuntimeType(this, 'SpringSimulation')}(end: ${_endPosition.toStringAsFixed(1)}, $type)';
 }
 
+/// A [SpringSimulation] where the value of [x] is guaranteed to have exactly the
+/// end value when the simulation [isDone].
+class ScrollSpringSimulation extends SpringSimulation {
+  /// Creates a spring simulation from the provided spring description, start
+  /// distance, end distance, and initial velocity.
+  ///
+  /// See the [new SpringSimulation] constructor on the superclass for a
+  /// discussion of the arguments' units.
+  ScrollSpringSimulation(
+    SpringDescription spring,
+    double start,
+    double end,
+    double velocity, {
+    Tolerance tolerance = Tolerance.defaultTolerance,
+  }) : super(spring, start, end, velocity, tolerance: tolerance);
+
+  @override
+  double x(double time) => isDone(time) ? _endPosition : super.x(time);
+}
+
+
 // SPRING IMPLEMENTATIONS
 
 abstract class _SpringSolution {

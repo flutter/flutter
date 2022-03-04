@@ -530,7 +530,7 @@ class BallisticScrollActivity extends ScrollActivity {
   /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     ScrollActivityDelegate delegate,
-    ScrollSimulation simulation,
+    Simulation simulation,
     TickerProvider vsync,
   ) : _simulation = simulation, super(delegate) {
     _controller = AnimationController.unbounded(
@@ -544,7 +544,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
   late AnimationController _controller;
 
-  final ScrollSimulation _simulation;
+  final Simulation _simulation;
 
   @override
   void resetActivity() {
@@ -554,8 +554,9 @@ class BallisticScrollActivity extends ScrollActivity {
   @override
   void applyNewDimensions() {
     final ScrollPosition position = delegate.scrollPosition;
-    if (position != null) {
-      _simulation.applyNewDimensions(position, velocity);
+    final dynamic simulation = _simulation;
+    if (position != null && simulation is ScrollSimulationMixin){
+      simulation.applyNewDimensions(position,velocity);
     } else {
       delegate.goBallistic(velocity);
     }
