@@ -4403,6 +4403,17 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows windows_home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: windows_home_scroll_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
