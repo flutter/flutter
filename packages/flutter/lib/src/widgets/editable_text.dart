@@ -335,6 +335,7 @@ class ToolbarOptions {
 /// [textInputAction]s can be chosen by checking the current platform and then
 /// selecting the appropriate action.
 ///
+/// {@template flutter.widgets.EditableText.lifeCycle}
 /// ## Lifecycle
 ///
 /// Upon completion of editing, like pressing the "done" button on the keyboard,
@@ -352,6 +353,7 @@ class ToolbarOptions {
 /// When the widget has focus, it will prevent itself from disposing via
 /// [AutomaticKeepAliveClientMixin.wantKeepAlive] in order to avoid losing the
 /// selection. Removing the focus will allow it to be disposed.
+/// {@endtemplate}
 ///
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
@@ -1006,6 +1008,10 @@ class EditableText extends StatefulWidget {
   /// and selection, one can add a listener to its [controller] with
   /// [TextEditingController.addListener].
   ///
+  /// [onChanged] is called before [onSubmitted] when user indicates completion
+  /// of editing, such as when pressing the "done" button on the keyboard. That default
+  /// behavior can be overridden. See [onEditingComplete] for details.
+  ///
   /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
@@ -1061,6 +1067,10 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.onSubmitted}
   /// Called when the user indicates that they are done editing the text in the
   /// field.
+  ///
+  /// By default, [onSubmitted] is called after [onChanged] when the user
+  /// has finalized editing; or, if the default behavior has been overridden,
+  /// after [onEditingComplete]. See [onEditingComplete] for details.
   /// {@endtemplate}
   final ValueChanged<String>? onSubmitted;
 
