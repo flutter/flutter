@@ -4409,6 +4409,10 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
       task_name: windows_home_scroll_perf__timeline_summary
       benchmark: "true"
     scheduler: luci
