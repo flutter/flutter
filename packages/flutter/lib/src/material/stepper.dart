@@ -204,16 +204,19 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
-    this.connectorStyle,
+    this.connectorColor,
+    this.connectorThickness = 2.0,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
        assert(0 <= currentStep && currentStep < steps.length),
        super(key: key);
 
-  
+  /// The thickness of the connecting lines.
+  final double? connectorThickness;
 
-  final ConnectorStyle? connectorStyle;
+  /// The color of the connection lines.
+  final Color? connectorColor;
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -357,26 +360,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
-  Widget _buildLine(bool visible, int index) {
-
-     final ConnectorStyle? widgetStyle = widget.connectorStyle;
-    final ConnectorStyle defaultStyle = ConnectorStyle._defaultStyle(context);
-
-    effectiveValue(Function(ConnectorStyle? style) getProperty) {
-      final widgetValue = getProperty(widgetStyle);
-      final defaultValue = getProperty(defaultStyle);
-      return widgetValue ?? defaultValue;
-    }
-
-    final Color? activeColor = effectiveValue((style) => style?.activeColor);
-    final Color? inactiveColor =
-        effectiveValue((style) => style?.inactiveColor);
-    final double? width = effectiveValue((style) => style?.width);
-
+  Widget _buildLine(bool visible, bool isActive) {
+    final ColorScheme colorSchema = Theme.of(context).colorScheme;
     return Container(
-      width: visible ? width : 0.0,
+      width: visible ? widget.connectorThickness : 0.0,
       height: 16.0,
-      color: widget.steps[index].isActive ? activeColor : inactiveColor,
+      color: isActive ? widget.connectorColor ?? colorSchema.primary : Colors.grey.shade400,
     );
   }
 
@@ -624,9 +613,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             children: <Widget>[
               // Line parts are always added in order for the ink splash to
               // flood the tips of the connector lines.
-              _buildLine(!_isFirst(index), index),
+              _buildLine(!_isFirst(index), widget.steps[index].isActive),
               _buildIcon(index),
-              _buildLine(!_isLast(index), index),
+              _buildLine(!_isLast(index), widget.steps[index].isActive),
             ],
           ),
           Expanded(
@@ -641,22 +630,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalBody(int index) {
-
-    final ConnectorStyle? widgetStyle = widget.connectorStyle;
-    final ConnectorStyle defaultStyle = ConnectorStyle._defaultStyle(context);
-
-    effectiveValue(Function(ConnectorStyle? style) getProperty) {
-      final widgetValue = getProperty(widgetStyle);
-      final defaultValue = getProperty(defaultStyle);
-      return widgetValue ?? defaultValue;
-    }
-
-    final Color? activeColor = effectiveValue((style) => style?.activeColor);
-    final Color? inactiveColor =
-        effectiveValue((style) => style?.inactiveColor);
-    final double? width = effectiveValue((style) => style?.width);
-
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Stack(
       children: <Widget>[
         if (!_isLast(index))
@@ -668,11 +642,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               width: 24.0,
               child: Center(
                 child: SizedBox(
-                  width: width,
+                  width: widget.connectorThickness,
                   child: Container(
-                    color: widget.steps[index + 1].isActive
-                            ? activeColor
-                            : inactiveColor,
+                    color: widget.steps[index].isActive ? widget.connectorColor ?? colorScheme.primary : Colors.orange,
                   ),
                 ),
               ),
@@ -735,21 +707,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHorizontal() {
-
-    final ConnectorStyle? widgetStyle = widget.connectorStyle;
-    final ConnectorStyle defaultStyle = ConnectorStyle._defaultStyle(context);
-
-    effectiveValue(Function(ConnectorStyle? style) getProperty) {
-      final widgetValue = getProperty(widgetStyle);
-      final defaultValue = getProperty(defaultStyle);
-      return widgetValue ?? defaultValue;
-    }
-
-    final Color? activeColor = effectiveValue((style) => style?.activeColor);
-    final Color? inactiveColor =
-        effectiveValue((style) => style?.inactiveColor);
-    final double? height = effectiveValue((style) => style?.height);
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final List<Widget> children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
@@ -776,15 +734,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: height,
-              color: (widget.steps[i + 1].isActive)
-                    ? activeColor
-                    : inactiveColor,
+              height: widget.connectorThickness,
+              color: widget.steps[i + 1].isActive ? widget.connectorColor ?? colorScheme.primary : Colors.grey.shade300,
             ),
           ),
       ],
     ];
-
     final List<Widget> stepPanels = <Widget>[];
     for (int i = 0; i < widget.steps.length; i += 1) {
       stepPanels.add(
@@ -880,57 +835,6 @@ class _TrianglePainter extends CustomPainter {
     canvas.drawPath(
       Path()..addPolygon(points, true),
       Paint()..color = color,
-    );
-  }
-}
-
-
-/// designing connector lines
-class ConnectorStyle {
-
-  /// The line color when step is completed.
-  final Color? activeColor;
-
-  /// The line color when step is uncompleted.
-  final Color? inactiveColor;
-
-  /// The height of lines on horizontal type.
-  /// This will apply only if [StepperType == StepperType.horizontal]
-  final double? height;
-
-  /// The width of lines on vertical type.
-  /// This will apply only if [StepperType == StepperType.vertical]
-  final double? width;
-
-   ConnectorStyle({
-    this.activeColor,
-    this.inactiveColor,
-    this.height,
-    this.width,
-  });
-
-  static ConnectorStyle _styleForm({
-    Color? activeColor,
-    Color? inactiveColor,
-    double? height,
-    double? width,
-  }) {
-    return ConnectorStyle(
-      activeColor: activeColor,
-      inactiveColor: inactiveColor,
-      height: height,
-      width: width,
-    );
-  }
-
-  static ConnectorStyle _defaultStyle(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return _styleForm(
-      activeColor: colorScheme.primary,
-      inactiveColor: Colors.grey.shade400,
-      height: 4,
-      width: 3,
     );
   }
 }

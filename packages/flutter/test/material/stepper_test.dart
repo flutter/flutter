@@ -944,49 +944,46 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
           home: Material(
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return
-                  Stepper(
-              currentStep: _currentIndex,
-            type: StepperType.horizontal,
-            onStepContinue: () {
-              setState(() {
-                if (_currentIndex < 2) {
-                  _currentIndex++;
-                }
-              });
-            },
-            onStepCancel: () {
-              setState(() {
-                if (_currentIndex > 0) {
-                  _currentIndex--;
-                }
-              });
-            },
-            onStepTapped: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-              connectorStyle: ConnectorStyle(),
-            steps: [
-              Step(
-                isActive: _currentIndex >= 0,
-                title: Container(),
-                content: const Text('STEP 1'),
-              ),
-              Step(
-                isActive: _currentIndex >= 1,
-                title: Container(),
-                content: const Text('STEP 2'),
-              ),
-              Step(
-                isActive: _currentIndex >= 2,
-                title: Container(),
-                content: const Text('STEP 3'),
-              ),
-            ],
-          )
-;
+                return Stepper(
+                  currentStep: _currentIndex,
+                  type: StepperType.horizontal,
+                  onStepContinue: () {
+                    setState(() {
+                      if (_currentIndex < 2) {
+                        _currentIndex++;
+                      }
+                    });
+                  },
+                  onStepCancel: () {
+                    setState(() {
+                      if (_currentIndex > 0) {
+                        _currentIndex--;
+                      }
+                    });
+                  },
+                  onStepTapped: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  steps: [
+                    Step(
+                      isActive: _currentIndex >= 0,
+                      title: Container(),
+                      content: const Text('STEP 1'),
+                    ),
+                    Step(
+                      isActive: _currentIndex >= 1,
+                      title: Container(),
+                      content: const Text('STEP 2'),
+                    ),
+                    Step(
+                      isActive: _currentIndex >= 2,
+                      title: Container(),
+                      content: const Text('STEP 3'),
+                    ),
+                  ],
+                );
               },
             ),
           ),
