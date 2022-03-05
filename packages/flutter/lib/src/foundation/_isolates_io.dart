@@ -84,7 +84,7 @@ class _IsolateConfiguration<Q, R> {
 }
 
 /// The spawn point MUST guarantee only one result event is sent through the
-/// [SendPort.send] be it directly or indirectly i. e. [Isolate.exit].
+/// [SendPort.send] be it directly or indirectly i.e. [Isolate.exit].
 ///
 /// In case an [Error] or [Exception] are thrown AFTER the data
 /// is sent, they will NOT be handled or reported by the main [Isolate] because
@@ -106,9 +106,10 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) async {
     flow: Flow.step(configuration.flowId),
   );
 
-  // Wrap in list to ensure our expectations in the main isolate are met.
+  // Wrap in List to ensure our expectations in the main isolate are met.
+  //
   // We need to wrap the result in a List because the user provided type R could
   // also be a List. Meaning, a check `result is R` could return true for what
-  // was an error event. (Error event is specified by the dart SDK)
+  // was an error event. (Error event is specified by the Dart SDK)
   Isolate.exit(configuration.resultPort, <R>[result]);
 }
