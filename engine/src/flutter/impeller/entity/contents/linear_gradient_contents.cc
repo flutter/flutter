@@ -7,7 +7,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/tessellator.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 

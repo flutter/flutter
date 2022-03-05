@@ -91,8 +91,6 @@ impeller_component("renderer") {
               "shader_types.h",
               "surface.h",
               "surface.cc",
-              "tessellator.cc",
-              "tessellator.h",
               "texture.h",
               "texture.cc",
               "texture_descriptor.h",
@@ -109,9 +107,8 @@ impeller_component("renderer") {
     "../base",
     "../geometry",
     "../image",
+    "../tessellator",
   ]
-
-  deps = [ "//third_party/libtess2" ]
 
   frameworks = [ "Metal.framework" ]
 }

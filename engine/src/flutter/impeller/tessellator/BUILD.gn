@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("tessellator") {
+  sources = [
+    "tessellator.cc",
+    "tessellator.h",
+  ]
+
+  public_deps = [ "../geometry" ]
+
+  deps = [ "//third_party/libtess2" ]
+}
+
+shared_library("tessellator_shared") {
+  output_name = "tessellator"
+
+  sources = [
+    "c/tessellator.h",
+    "c/tessellator.cc",
+    "tessellator.cc",
+    "tessellator.h",
+  ]
+
+  deps = [
+    "../geometry",
+    "//flutter/fml",
+    "//third_party/libtess2",
+  ]
+}

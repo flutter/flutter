@@ -131,11 +131,6 @@ enum class TextureUsage : TextureUsageMask {
   kRenderTarget = 1 << 2,
 };
 
-enum class WindingOrder {
-  kClockwise,
-  kCounterClockwise,
-};
-
 enum class CullMode {
   kNone,
   kFrontFace,

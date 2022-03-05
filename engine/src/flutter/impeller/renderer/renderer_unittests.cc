@@ -21,7 +21,7 @@
 #include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/surface.h"
-#include "impeller/renderer/tessellator.h"
+#include "impeller/tessellator/tessellator.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
