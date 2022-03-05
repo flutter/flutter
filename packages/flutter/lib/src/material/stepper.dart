@@ -365,7 +365,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Container(
       width: visible ? widget.connectorThickness : 0.0,
       height: 16.0,
-      color: isActive ? widget.connectorColor ?? colorSchema.primary : Colors.grey.shade400,
+      color: isActive ? widget.connectorColor ?? colorSchema.primary : Colors.grey.shade300,
     );
   }
 
@@ -644,7 +644,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 child: SizedBox(
                   width: widget.connectorThickness,
                   child: Container(
-                    color: widget.steps[index].isActive ? widget.connectorColor ?? colorScheme.primary : Colors.orange,
+                    color: widget.steps[index].isActive ? widget.connectorColor ?? colorScheme.primary : Colors.grey.shade300,
                   ),
                 ),
               ),
