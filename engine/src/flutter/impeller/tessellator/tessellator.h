@@ -10,9 +10,13 @@
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
+
+enum class WindingOrder {
+  kClockwise,
+  kCounterClockwise,
+};
 
 //------------------------------------------------------------------------------
 /// @brief      A utility that generates triangles of the specified fill type

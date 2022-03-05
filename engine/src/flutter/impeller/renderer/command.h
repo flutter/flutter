@@ -20,6 +20,7 @@
 #include "impeller/renderer/texture.h"
 #include "impeller/renderer/vertex_buffer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 
