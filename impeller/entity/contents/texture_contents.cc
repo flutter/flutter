@@ -10,7 +10,7 @@
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
-#include "impeller/renderer/tessellator.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 

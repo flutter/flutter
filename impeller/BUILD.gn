@@ -21,6 +21,7 @@ group("impeller") {
     "geometry",
     "image",
     "renderer",
+    "tessellator",
     "typographer",
   ]
 
