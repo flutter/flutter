@@ -92,7 +92,7 @@ class _IsolateConfiguration<Q, R> {
 ///
 /// Also the awaited result from the [configuration.callback] has to be wrapped
 /// in a [List].
-Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
+Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) async {
   final R result = await Timeline.timeSync(
     configuration.debugLabel,
     () async {
