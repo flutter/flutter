@@ -57,7 +57,8 @@ Future<void> _rebuildApp({ required int version }) async {
 /// test zone.
 void expect(Object? actual, Object? expected) {
   final Matcher matcher = wrapMatcher(expected);
-  final Map<Object, Object> matchState = <Object, Object>{};
+  // matchState needs to be of type <Object?, Object?>, see https://github.com/flutter/flutter/issues/99522
+  final Map<Object?, Object?> matchState = <Object?, Object?>{};
   if (matcher.matches(actual, matchState)) {
     return;
   }

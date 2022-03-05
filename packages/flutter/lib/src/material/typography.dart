@@ -335,15 +335,13 @@ class Typography with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      black,
-      white,
-      englishLike,
-      dense,
-      tall,
-    );
-  }
+  int get hashCode => Object.hash(
+    black,
+    white,
+    englishLike,
+    dense,
+    tall,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -731,7 +729,7 @@ class Typography with Diagnosticable {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_81
+// Generated version v0_86
 class _M3Typography {
   _M3Typography._();
 

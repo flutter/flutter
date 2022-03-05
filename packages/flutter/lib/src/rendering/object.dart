@@ -1630,8 +1630,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     }
     if (_relayoutBoundary == null) {
-      if (parent != null)
+      _needsLayout = true;
+      if (parent != null) {
+        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
+        // Conservatively mark everything dirty until it reaches the closest
+        // known relayout boundary.
         markParentNeedsLayout();
+      }
       return;
     }
     if (_relayoutBoundary != this) {

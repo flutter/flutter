@@ -600,7 +600,7 @@ class BoxConstraints extends Constraints {
   @override
   int get hashCode {
     assert(debugAssertIsValid());
-    return hashValues(minWidth, maxWidth, minHeight, maxHeight);
+    return Object.hash(minWidth, maxWidth, minHeight, maxHeight);
   }
 
   @override
@@ -934,7 +934,7 @@ class _IntrinsicDimensionsCacheEntry {
   }
 
   @override
-  int get hashCode => hashValues(dimension, argument);
+  int get hashCode => Object.hash(dimension, argument);
 }
 
 /// A render object in a 2D Cartesian coordinate system.

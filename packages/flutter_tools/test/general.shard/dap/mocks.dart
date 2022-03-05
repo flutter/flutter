@@ -52,6 +52,14 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     // launchRequest will complete.
     appStartedCompleter.complete();
   }
+
+  @override
+  Future<void> get debuggerInitialized {
+    // If we were mocking debug mode, then simulate the debugger initializing.
+    return enableDebugger
+        ? Future<void>.value()
+        : throw StateError('Invalid attempt to wait for debuggerInitialized when not debugging');
+  }
 }
 
 /// A [FlutterTestDebugAdapter] that captures what process/args will be launched.

@@ -204,24 +204,22 @@ class ListTileThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      dense,
-      shape,
-      style,
-      selectedColor,
-      iconColor,
-      textColor,
-      contentPadding,
-      tileColor,
-      selectedTileColor,
-      horizontalTitleGap,
-      minVerticalPadding,
-      minLeadingWidth,
-      enableFeedback,
-      mouseCursor,
-    );
-  }
+  int get hashCode => Object.hash(
+    dense,
+    shape,
+    style,
+    selectedColor,
+    iconColor,
+    textColor,
+    contentPadding,
+    tileColor,
+    selectedTileColor,
+    horizontalTitleGap,
+    minVerticalPadding,
+    minLeadingWidth,
+    enableFeedback,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {

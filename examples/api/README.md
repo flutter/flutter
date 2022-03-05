@@ -6,7 +6,7 @@ documentation in the framework.
 The examples can be run individually by just specifying the path to the example
 on the command line (or in the run configuration of an IDE).
 
-For example (no pun intended!), to run, the first example from the `Curve2D`
+For example (no pun intended!), to run the first example from the `Curve2D`
 class in Chrome, you would run it like so from the [api](.) directory:
 
 ```

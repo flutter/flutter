@@ -86,6 +86,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
+    Radius? trackRadius,
     OutlinedBorder? shape,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
@@ -117,6 +118,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _minLength = minLength,
        _trackColor = trackColor,
        _trackBorderColor = trackBorderColor,
+       _trackRadius = trackRadius,
        _scrollbarOrientation = scrollbarOrientation,
        _minOverscrollLength = minOverscrollLength ?? minLength,
        _ignorePointer = ignorePointer {
@@ -156,6 +158,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     _trackBorderColor = value;
+    notifyListeners();
+  }
+
+  /// [Radius] of corners of the Scrollbar's track.
+  ///
+  /// Scrollbar's track will be rectangular if [trackRadius] is null.
+  Radius? get trackRadius => _trackRadius;
+  Radius? _trackRadius;
+  set trackRadius(Radius? value) {
+    if (trackRadius == value)
+      return;
+
+    _trackRadius = value;
     notifyListeners();
   }
 
@@ -496,7 +511,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // Paint if the opacity dictates visibility
     if (fadeoutOpacityAnimation.value != 0.0) {
       // Track
-      canvas.drawRect(_trackRect!, _paintTrack());
+      if (trackRadius == null) {
+        canvas.drawRect(_trackRect!, _paintTrack());
+      } else {
+        canvas.drawRRect(RRect.fromRectAndRadius(_trackRect!, trackRadius!), _paintTrack());
+      }
       // Track Border
       canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
       if (radius != null) {
@@ -717,6 +736,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (ignorePointer) {
       return false;
     }
+
     // The thumb is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
@@ -726,7 +746,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    return _thumbRect!.contains(position!);
+    return _trackRect!.contains(position!);
   }
 
   @override
@@ -741,6 +761,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != oldDelegate.mainAxisMargin
         || crossAxisMargin != oldDelegate.crossAxisMargin
         || radius != oldDelegate.radius
+        || trackRadius != oldDelegate.trackRadius
         || shape != oldDelegate.shape
         || padding != oldDelegate.padding
         || minLength != oldDelegate.minLength
@@ -880,6 +901,7 @@ class RawScrollbar extends StatefulWidget {
     this.minThumbLength = _kMinThumbExtent,
     this.minOverscrollLength,
     this.trackVisibility,
+    this.trackRadius,
     this.trackColor,
     this.trackBorderColor,
     this.fadeDuration = _kScrollbarFadeDuration,
@@ -1224,6 +1246,12 @@ class RawScrollbar extends StatefulWidget {
   /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
   final bool? trackVisibility;
 
+  /// The [Radius] of the scrollbar track's rounded rectangle corners.
+  ///
+  /// Scrollbar's track will be rectangular if [trackRadius] is null, which is
+  /// the default behavior.
+  final Radius? trackRadius;
+
   /// The color of the scrollbar track.
   ///
   /// The scrollbar track will only be visible when [trackVisibility] and
@@ -1380,6 +1408,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
+      trackRadius: widget.trackRadius,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
       shape: widget.shape,
@@ -1513,6 +1542,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void updateScrollbarPainter() {
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
+      ..trackRadius = widget.trackRadius
       ..trackColor = _showTrack ? const Color(0x08000000) : const Color(0x00000000)
       ..trackBorderColor = _showTrack ? const Color(0x1a000000) : const Color(0x00000000)
       ..textDirection = Directionality.of(context)

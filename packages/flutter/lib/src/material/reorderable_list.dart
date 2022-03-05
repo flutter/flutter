@@ -72,6 +72,7 @@ class ReorderableListView extends StatefulWidget {
     this.buildDefaultDragHandles = true,
     this.padding,
     this.header,
+    this.footer,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.scrollController,
@@ -141,6 +142,7 @@ class ReorderableListView extends StatefulWidget {
     this.buildDefaultDragHandles = true,
     this.padding,
     this.header,
+    this.footer,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.scrollController,
@@ -213,6 +215,11 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// If null, no header will appear before the list.
   final Widget? header;
+
+  /// A non-reorderable footer item to show after the items of the list.
+  ///
+  /// If null, no footer will appear after the list.
+  final Widget? footer;
 
   /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
@@ -426,39 +433,41 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasOverlay(context));
 
-    // If there is a header we can't just apply the padding to the list,
-    // so we break it up into padding for the header and padding for the list.
+    // If there is a header or footer we can't just apply the padding to the list,
+    // so we break it up into padding for the header, footer and padding for the list.
     final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
     late final EdgeInsets headerPadding;
+    late final EdgeInsets footerPadding;
     late final EdgeInsets listPadding;
 
-    if (widget.header == null) {
+    if (widget.header == null && widget.footer == null) {
       headerPadding = EdgeInsets.zero;
+      footerPadding = EdgeInsets.zero;
       listPadding = padding;
-    } else {
+    } else if (widget.header != null || widget.footer != null) {
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           if (widget.reverse) {
-            // Header on the right
             headerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(widget.footer != null ? 0 : padding.left, padding.top, widget.header != null ? 0 : padding.right, padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
           } else {
-            // Header on the left
             headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(widget.header != null ? 0 : padding.left, padding.top, widget.footer != null ? 0 : padding.right, padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
           }
           break;
         case Axis.vertical:
           if (widget.reverse) {
-            // Header on the bottom
             headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+            listPadding = EdgeInsets.fromLTRB(padding.left, widget.footer != null ? 0 : padding.top, padding.right, widget.header != null ? 0 : padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
           } else {
-            // Header on the top
             headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-            listPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(padding.left, widget.header != null ? 0 : padding.top, padding.right, widget.footer != null ? 0 : padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
           }
-          break;
+         break;
       }
     }
 
@@ -494,6 +503,11 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
           ),
         ),
+        if (widget.footer != null)
+          SliverPadding(
+            padding: footerPadding,
+            sliver: SliverToBoxAdapter(child: widget.footer),
+          ),
       ],
     );
   }
@@ -521,5 +535,5 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
   }
 
   @override
-  int get hashCode => hashValues(subKey, state);
+  int get hashCode => Object.hash(subKey, state);
 }
