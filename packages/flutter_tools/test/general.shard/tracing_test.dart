@@ -232,7 +232,8 @@ void main() {
       return completer.future;
     });
     expect(logger.statusText, contains('First frame is taking longer than expected'));
-    expect(logger.traceText, contains('id: 1 isolate: null'));
+    expect(logger.traceText, contains('View ID: 1'));
+    expect(logger.traceText, contains('No isolate ID associated with the view'));
     expect(logger.traceText, contains('Flutter.Error: [ExtensionData {test: data, renderedErrorText: error text}]'));
   });
 
