@@ -16,17 +16,17 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
 
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
-  final ReceivePort port = ReceivePort();
+  final RawReceivePort port = RawReceivePort();
   Timeline.finishSync();
 
   final Completer<dynamic> completer = Completer<dynamic>();
-  port.listen((dynamic msg) {
+  port.handler = (dynamic msg) {
     completer.complete(msg);
 
     Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
     port.close();
     Timeline.finishSync();
-  });
+  };
 
   await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
     _spawn,
