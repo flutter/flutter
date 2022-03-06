@@ -28,19 +28,24 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
     Timeline.finishSync();
   };
 
-  await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
-    _spawn,
-    _IsolateConfiguration<Q, FutureOr<R>>(
-      callback,
-      message,
-      port.sendPort,
-      debugLabel,
-      flow.id,
-    ),
-    errorsAreFatal: true,
-    onExit: port.sendPort,
-    onError: port.sendPort,
-  );
+  try {
+    await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
+      _spawn,
+      _IsolateConfiguration<Q, FutureOr<R>>(
+        callback,
+        message,
+        port.sendPort,
+        debugLabel,
+        flow.id,
+      ),
+      errorsAreFatal: true,
+      onExit: port.sendPort,
+      onError: port.sendPort,
+    );
+  } on Object {
+    port.close();
+    rethrow;
+  }
 
   final dynamic response = await completer.future;
 

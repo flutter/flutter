@@ -78,6 +78,20 @@ Future<int> test5CallCompute(int value) {
   return compute(test5, value);
 }
 
+Future<void> expectFileClosesAllPorts(String filename) async {
+  // Run a Dart script that calls compute().
+  // The Dart process will terminate only if the script exits cleanly with
+  // all isolate ports closed.
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final String flutterRoot = platform.environment['FLUTTER_ROOT']!;
+  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+  final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
+  final String scriptPath = fs.path.join(packageRoot, 'test', 'foundation', filename);
+  final ProcessResult result = await Process.run(dartPath, <String>[scriptPath]);
+  expect(result.exitCode, 0);
+}
+
 void main() {
   test('compute()', () async {
     expect(await compute(test1, 0), 1);
@@ -99,17 +113,12 @@ void main() {
     expect(compute(test5CallCompute, 0), throwsException);
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 
-  test('compute closes all ports', () async {
-    // Run a Dart script that calls compute().
-    // The Dart process will terminate only if the script exits cleanly with
-    // all isolate ports closed.
-    const FileSystem fs = LocalFileSystem();
-    const Platform platform = LocalPlatform();
-    final String flutterRoot = platform.environment['FLUTTER_ROOT']!;
-    final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
-    final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
-    final String scriptPath = fs.path.join(packageRoot, 'test', 'foundation', '_compute_caller.dart');
-    final ProcessResult result = await Process.run(dartPath, <String>[scriptPath]);
-    expect(result.exitCode, 0);
+  group('compute closes all ports', () {
+    test('with valid message', () async {
+      await expectFileClosesAllPorts('_compute_caller.dart');
+    });
+    test('with invalid message', () async {
+      await expectFileClosesAllPorts('_compute_caller_invalid_message.dart');
+    });
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 }
