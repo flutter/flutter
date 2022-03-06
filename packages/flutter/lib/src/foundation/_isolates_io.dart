@@ -108,5 +108,8 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) async {
   // We need to wrap the result in a List because the user provided type R could
   // also be a List. Meaning, a check `result is R` could return true for what
   // was an error event. (Error event is specified by the Dart SDK)
-  Isolate.exit(configuration.resultPort, <R>[result]);
+  Isolate.exit(
+    configuration.resultPort,
+    List<R>.filled(1, result),
+  );
 }
