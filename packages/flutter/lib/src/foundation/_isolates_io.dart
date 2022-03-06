@@ -29,9 +29,9 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   };
 
   try {
-    await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
+    await Isolate.spawn<_IsolateConfiguration<Q, R>>(
       _spawn,
-      _IsolateConfiguration<Q, FutureOr<R>>(
+      _IsolateConfiguration<Q, R>(
         callback,
         message,
         port.sendPort,
