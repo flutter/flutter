@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
+import 'dart:io' as io;
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -184,13 +189,18 @@ class FileStore {
 
   /// Computes a diff of the provided files and returns a list of files
   /// that were dirty.
-  List<File> diffFileList(List<File> files) {
+  Future<List<File>> diffFileList(List<File> files) async {
     final List<File> dirty = <File>[];
     switch (_strategy) {
       case FileStoreStrategy.hash:
-        for (final File file in files) {
-          _hashFile(file, dirty);
-        }
+        // var sw = Stopwatch()..start();
+        // int totalBytes = 0;
+        // for (final File file in files) {
+        //   totalBytes += _hashFile(file, dirty);
+        // }
+        // sw.stop();
+        // _logger.printStatus('Hashed $totalBytes in ${sw.elapsedMilliseconds} or ${totalBytes/sw.elapsedMilliseconds} b/ms');
+        await _hashAllFiles(files, dirty);
         break;
       case FileStoreStrategy.timestamp:
         for (final File file in files) {
@@ -222,7 +232,7 @@ class FileStore {
   // 64k is the same sized buffer used by dart:io for `File.openRead`.
   static final Uint8List _readBuffer = Uint8List(64 * 1024);
 
-  void _hashFile(File file, List<File> dirty) {
+  int _hashFile(File file, List<File> dirty) {
     final String absolutePath = file.path;
     final String? previousHash = previousAssetKeys[absolutePath];
     // If the file is missing it is assumed to be dirty.
@@ -230,7 +240,7 @@ class FileStore {
       currentAssetKeys.remove(absolutePath);
       previousAssetKeys.remove(absolutePath);
       dirty.add(file);
-      return;
+      return 0;
     }
     final int fileBytes = file.lengthSync();
     final Md5Hash hash = Md5Hash();
@@ -252,5 +262,87 @@ class FileStore {
       dirty.add(file);
     }
     currentAssetKeys[absolutePath] = currentHash;
+    return fileBytes;
   }
+
+  Future<void> _hashAllFiles(List<File> files, List<File> dirty) async {
+    final Stopwatch sw = Stopwatch()..start();
+    final Pool pool = Pool(4);
+    final List<Future<FileHashResult>> pendingResults = <Future<FileHashResult>>[];
+    for (final File file in files) {
+      final PoolResource resource = await pool.request();
+      try {
+        final String absolutePath = file.path;
+        final String? previousHash = previousAssetKeys[absolutePath];
+        // If the file is missing it is assumed to be dirty.
+        if (!file.existsSync()) {
+          currentAssetKeys.remove(absolutePath);
+          previousAssetKeys.remove(absolutePath);
+          dirty.add(file);
+          continue;
+        }
+        pendingResults.add(Isolate.run<FileHashResult>(_runWrapper(FileHashArgs(absolutePath, previousHash)), debugName: absolutePath));
+      } finally {
+        resource.release();
+      }
+    }
+    final List<FileHashResult> results = await Future.wait(pendingResults);
+
+    int totalBytes = 0;
+    for (final FileHashResult result in results) {
+      if (result.dirty) {
+        dirty.add(_cacheFile.fileSystem.file(result.absolutePath));
+      }
+      currentAssetKeys[result.absolutePath] = result.currentHash;
+      totalBytes += result.bytes;
+    }
+    sw.stop();
+    _logger.printStatus('Hashed $totalBytes in ${sw.elapsedMilliseconds} or ${totalBytes/sw.elapsedMilliseconds} b/ms');
+  }
+
+  static FileHashResult Function()  _runWrapper(FileHashArgs args) {
+    return () {
+      return hashSingleFile(args);
+    };
+  }
+
+  static FileHashResult hashSingleFile(FileHashArgs args) {
+    final io.File file = io.File(args.absolutePath);
+    final int fileBytes = file.lengthSync();
+    final Md5Hash hash = Md5Hash();
+    RandomAccessFile? openFile;
+    try {
+      openFile = file.openSync();
+      int bytes = 0;
+      while (bytes < fileBytes) {
+        final int bytesRead = openFile.readIntoSync(_readBuffer);
+        hash.addChunk(_readBuffer, bytesRead);
+        bytes += bytesRead;
+      }
+    } finally {
+      openFile?.closeSync();
+    }
+    final Digest digest = Digest(hash.finalize().buffer.asUint8List());
+    final String currentHash = digest.toString();
+    final bool dirty = currentHash != args.previousHash;
+    return FileHashResult(dirty, currentHash, args.absolutePath, fileBytes);
+  }
+}
+
+@visibleForTesting
+class FileHashResult {
+  const FileHashResult(this.dirty, this.currentHash, this.absolutePath, this.bytes);
+
+  final String absolutePath;
+  final bool dirty;
+  final String currentHash;
+  final int bytes;
+}
+
+@visibleForTesting
+class FileHashArgs {
+  const FileHashArgs(this.absolutePath, this.previousHash);
+
+  final String absolutePath;
+  final String? previousHash;
 }

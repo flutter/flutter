@@ -74,7 +74,7 @@ void main() {
       ..writeAsStringSync('hello');
 
     fileCache.initialize();
-    fileCache.diffFileList(<File>[file]);
+    await fileCache.diffFileList(<File>[file]);
     fileCache.persist();
     final String? currentHash = fileCache.currentAssetKeys[file.path];
     final Uint8List buffer = cacheFile
@@ -131,7 +131,7 @@ void main() {
 
     cacheFile.parent.deleteSync(recursive: true);
 
-    fileCache.diffFileList(<File>[file]);
+    await fileCache.diffFileList(<File>[file]);
 
     expect(fileCache.persist, returnsNormally);
   });
@@ -145,7 +145,7 @@ void main() {
     );
     fileCache.initialize();
 
-    final List<File> results = fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
+    final List<File> results = await fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
 
     expect(results, hasLength(1));
     expect(results.single.path, 'hello.dart');
@@ -208,7 +208,7 @@ void main() {
 
     cacheFile.parent.deleteSync(recursive: true);
 
-    fileCache.diffFileList(<File>[file]);
+    await fileCache.diffFileList(<File>[file]);
 
     expect(fileCache.currentAssetKeys['foo.dart'], '5d41402abc4b2a76b9719d911017c592');
   });
