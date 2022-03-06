@@ -29,11 +29,47 @@ import 'package:vector_math/vector_math_64.dart';
 /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
 /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
 class InkSparkle extends InteractiveInkFeature {
+  /// Begin a sparkly ripple effect, centered at [position] relative to
+  /// [referenceBox].
+  /// 
+  /// The [color] defines the color of the splash itself. The sparkles are
+  /// always [Color.white].
+  ///
+  /// The [controller] argument is typically obtained via
+  /// `Material.of(context)`.
+  /// 
+  /// [textDirection] is used by [customBorder] if it is non-null. This allows 
+  /// the [customBorder]'s path to be properly defined if it was the path was
+  /// expressed in terms of "start" and "end" instead of
+  /// "left" and "right".
+  /// 
+  /// Clipping can happen in 3 different ways:
+  ///  1. If [customBorder] is provided, it is used to determine the path for
+  ///     clipping.
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///     is clipped by an [RRect] created from [_clipCallback] and
+  ///     [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] 
+  ///     provided by [_clipCallback] is used for clipping.
+  ///
+  /// If [containedInkWell] is true, then the ripple will be sized to fit
+  /// the well rectangle, then clipped to it when drawn. The well
+  /// rectangle is the box returned by [rectCallback], if provided, or
+  /// otherwise is the bounds of the [referenceBox].
+  ///
+  /// If [containedInkWell] is false, then [rectCallback] should be null.
+  /// The ink ripple is clipped only to the edges of the [Material].
+  /// This is the default.
+  /// 
+  /// [radius] is derived from the [referenceBox] and is multiplied by
+  /// [_targetRadiusMultiplier] so that the effect fills the container no matter
+  /// where the [postition] is.
+  /// 
+  /// When the ripple is removed, [onRemoved] will be called.
   InkSparkle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
     required Color color,
-    VoidCallback? onRemoved,
     required Offset position,
     required TextDirection textDirection,
     bool containedInkWell = true,
@@ -41,6 +77,7 @@ class InkSparkle extends InteractiveInkFeature {
     BorderRadius? borderRadius,
     ShapeBorder? customBorder,
     double? radius,
+    VoidCallback? onRemoved,
   }) : _color = color,
        _rectCallback = rectCallback,
        _position = position,
@@ -214,6 +251,11 @@ class InkSparkle extends InteractiveInkFeature {
   double get _width => referenceBox.size.width;
   double get _height => referenceBox.size.height;
 
+  /// All double values for uniforms come from the Android 12 ripple
+  /// implentation from the following files:
+  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
+  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
+  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
   Shader _createRippleShader() {
     const double turbulenceScale = 1.5;
     final double turbulencePhase = _turbulenceSeed + _radiusScale.value;
@@ -378,13 +420,13 @@ class InkSparkleFactory extends InteractiveInkFeatureFactory {
       referenceBox: referenceBox,
       position: position,
       color: color,
+      textDirection: textDirection,
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
-      textDirection: textDirection,
     );
   }
 }
