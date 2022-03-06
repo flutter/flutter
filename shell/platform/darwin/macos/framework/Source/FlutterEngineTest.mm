@@ -58,6 +58,31 @@ TEST_F(FlutterEngineTest, MessengerSend) {
   EXPECT_TRUE(called);
 }
 
+TEST_F(FlutterEngineTest, CanLogToStdout) {
+  // Replace stdout stream buffer with our own.
+  std::stringstream buffer;
+  std::streambuf* old_buffer = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  // Launch the test entrypoint.
+  FlutterEngine* engine = GetFlutterEngine();
+  EXPECT_TRUE([engine runWithEntrypoint:@"canLogToStdout"]);
+  EXPECT_TRUE(engine.running);
+
+  // Block until completion of print statement.
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("SignalNativeTest",
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  latch.Wait();
+
+  // Restore old stdout stream buffer.
+  std::cout.rdbuf(old_buffer);
+
+  // Verify hello world was written to stdout.
+  std::string logs = buffer.str();
+  EXPECT_TRUE(logs.find("Hello logging") != std::string::npos);
+}
+
 TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   FlutterEngine* engine = GetFlutterEngine();
   // Capture the update callbacks before the embedder API initializes.

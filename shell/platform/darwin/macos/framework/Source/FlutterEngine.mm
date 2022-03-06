@@ -6,6 +6,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.h"
@@ -298,6 +299,13 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   flutterArguments.dart_entrypoint_argc = dartEntrypointArgs.size();
   flutterArguments.dart_entrypoint_argv = dartEntrypointArgs.data();
   flutterArguments.root_isolate_create_callback = _project.rootIsolateCreateCallback;
+  flutterArguments.log_message_callback = [](const char* tag, const char* message,
+                                             void* user_data) {
+    if (tag && tag[0]) {
+      std::cout << tag << ": ";
+    }
+    std::cout << message << std::endl;
+  };
 
   static size_t sTaskRunnerIdentifiers = 0;
   const FlutterTaskRunnerDescription cocoa_task_runner_description = {
