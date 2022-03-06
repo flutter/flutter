@@ -214,7 +214,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      throwToolExit('Screenshot not supported for ${device.name}.');
+      _logger.printError('Screenshot not supported for ${device.name}.');
     }
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
@@ -359,6 +359,9 @@ class DriveCommand extends RunCommandBase {
   }
 
   Future<void> _takeScreenshot(Device device) async {
+    if (!device.supportsScreenshot) {
+      return;
+    }
     try {
       final Directory outputDirectory = _fileSystem.directory(screenshot)
         ..createSync(recursive: true);
