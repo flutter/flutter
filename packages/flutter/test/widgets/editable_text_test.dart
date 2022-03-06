@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -37,6 +39,26 @@ class _MatchesMethodCall extends Matcher {
         newDescription.add(' with arguments: ').addDescriptionOf(arguments);
     return newDescription;
   }
+}
+
+// Used to set window.viewInsets since the real ui.WindowPadding has only a
+// private constructor.
+class _TestWindowPadding implements ui.WindowPadding {
+  const _TestWindowPadding({
+    required this.bottom,
+  });
+
+  @override
+  final double bottom;
+
+  @override
+  double get top => 0.0;
+
+  @override
+  double get left => 0.0;
+
+  @override
+  double get right => 0.0;
 }
 
 late TextEditingController controller;
@@ -106,6 +128,53 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('test'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
+
+  // Related issue: https://github.com/flutter/flutter/issues/98115
+  testWidgets('test editable text scheduleShowCaretOnScreen with no animation when the window changes its metrics',
+          (WidgetTester tester)
+      async {
+
+    final ScrollController scrollController = ScrollController();
+    final Widget widget = MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            children: <Widget>[
+              Column(
+                children: List<Widget>.generate(
+                    5,
+                        (_) => Container(
+                      height: 1200.0,
+                      color: Colors.black12,
+                    )),
+              ),
+              SizedBox(
+                  height: 20,
+                  child: EditableText(
+                    controller: TextEditingController(),
+                    backgroundCursorColor: Colors.grey,
+                    focusNode: focusNode,
+                    style: const TextStyle(),
+                    cursorColor: Colors.red,
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+        widget
+    );
+    await tester.showKeyboard(find.byType(EditableText));
+    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
+    await tester.pump();
+    final double offsetAfter = scrollController.offset;
+
+    // The offset of the scrollController should change immediately after window changes its metrics
+    expect(0,isNot(equals(offsetAfter)));
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/34538.
   testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
