@@ -3,8 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
-void main() {
 
+void signalNativeTest() native 'SignalNativeTest';
+
+void main() {
+}
+
+@pragma('vm:entry-point')
+void canLogToStdout() {
+  // Emit hello world message to output then signal the test.
+  print('Hello logging');
+  signalNativeTest();
 }
 
 Picture CreateSimplePicture() {
@@ -28,8 +37,6 @@ void can_composite_platform_views() {
   };
   PlatformDispatcher.instance.scheduleFrame();
 }
-
-void signalNativeTest() native 'SignalNativeTest';
 
 @pragma('vm:entry-point')
 void native_callback() {
