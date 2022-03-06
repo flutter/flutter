@@ -309,7 +309,7 @@ class InkSparkle extends InteractiveInkFeature {
   ///     for clipping.
   ///  2. If a non-zero [borderRadius] is provided, the canvas
   ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
-  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] provided
+  ///  3. Otherwise, it is clipped with the [Rect] provided by [clipCallback]
   ///      by [clipCallback] is used for clipping.
   ///
   /// [textDirection] is used by [customBorder] if it is non-null. This allows 
