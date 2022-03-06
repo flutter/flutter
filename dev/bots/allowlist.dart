@@ -48,6 +48,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'sync_http',
   'term_glyph',
   'test_api',
+  'typed_data',
   'vector_math',
   'vm_service',
   'webdriver',
