@@ -307,7 +307,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path
   ///     for clipping.
-  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///  2. If a non-zero [borderRadius] is provided, the canvas
   ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
   ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] provided
   ///      by [clipCallback] is used for clipping.
