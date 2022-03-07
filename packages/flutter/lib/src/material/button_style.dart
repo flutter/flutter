@@ -337,29 +337,27 @@ class ButtonStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      textStyle,
-      backgroundColor,
-      foregroundColor,
-      overlayColor,
-      shadowColor,
-      elevation,
-      padding,
-      minimumSize,
-      fixedSize,
-      maximumSize,
-      side,
-      shape,
-      mouseCursor,
-      visualDensity,
-      tapTargetSize,
-      animationDuration,
-      enableFeedback,
-      alignment,
-      splashFactory,
-    );
-  }
+  int get hashCode => Object.hash(
+    textStyle,
+    backgroundColor,
+    foregroundColor,
+    overlayColor,
+    shadowColor,
+    elevation,
+    padding,
+    minimumSize,
+    fixedSize,
+    maximumSize,
+    side,
+    shape,
+    mouseCursor,
+    visualDensity,
+    tapTargetSize,
+    animationDuration,
+    enableFeedback,
+    alignment,
+    splashFactory,
+  );
 
   @override
   bool operator ==(Object other) {

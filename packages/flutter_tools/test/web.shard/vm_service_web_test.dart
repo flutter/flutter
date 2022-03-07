@@ -62,7 +62,7 @@ void main() {
         validateFlutterVersion(client1),
         validateFlutterVersion(client2)]
       );
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/99003
   });
 
   group('Clients of flutter run on web with DDS disabled', () {

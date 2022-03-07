@@ -38,6 +38,14 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
+/// Used to configure how the [PopupMenuButton] positions its popup menu.
+enum PopupMenuPosition {
+  /// Menu is positioned over the anchor.
+  over,
+  /// Menu is positioned under the anchor.
+  under,
+}
+
 /// A base class for entries in a material design popup menu.
 ///
 /// The popup menu widget uses this interface to interact with the menu items.
@@ -977,8 +985,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.color,
     this.enableFeedback,
     this.constraints,
+    this.position = PopupMenuPosition.over,
   }) : assert(itemBuilder != null),
-       assert(offset != null),
        assert(enabled != null),
        assert(
          !(child != null && icon != null),
@@ -1033,10 +1041,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// and the button will behave like an [IconButton].
   final Widget? icon;
 
-  /// The offset applied to the Popup Menu Button.
+  /// The offset is applied relative to the initial position
+  /// set by the [position].
   ///
-  /// When not set, the Popup Menu Button will be positioned directly next to
-  /// the button that was used to create it.
+  /// When not set, the offset defaults to [Offset.zero].
   final Offset offset;
 
   /// Whether this popup menu button is interactive.
@@ -1099,6 +1107,15 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// the default maximum width.
   final BoxConstraints? constraints;
 
+  /// Whether the popup menu is positioned over or under the popup menu button.
+  ///
+  /// [offset] is used to change the position of the popup menu relative to the
+  /// position set by this parameter.
+  ///
+  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
+  /// popup menu appear directly over the button that was used to create it.
+  final PopupMenuPosition position;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1120,10 +1137,19 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final Offset offset;
+    switch (widget.position) {
+      case PopupMenuPosition.over:
+        offset = widget.offset;
+        break;
+      case PopupMenuPosition.under:
+        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+        break;
+    }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
-        button.localToGlobal(widget.offset, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero) + widget.offset, ancestor: overlay),
+        button.localToGlobal(offset, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero) + offset, ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );

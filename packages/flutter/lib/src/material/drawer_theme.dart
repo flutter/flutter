@@ -84,14 +84,12 @@ class DrawerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      scrimColor,
-      elevation,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    scrimColor,
+    elevation,
+    shape,
+  );
 
   @override
   bool operator ==(Object other) {

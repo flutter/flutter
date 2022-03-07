@@ -3359,6 +3359,8 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 /// the top of the child to the baseline of the child, then the child
 /// is top-aligned instead.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=8ZaFk0yvNlI}
+///
 /// See also:
 ///
 ///  * [Align], a widget that aligns its child within itself and optionally

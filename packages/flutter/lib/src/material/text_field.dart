@@ -184,6 +184,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ** See code in examples/api/lib/material/text_field/text_field.1.dart **
 /// {@end-tool}
 ///
+/// {@macro flutter.widgets.EditableText.lifeCycle}
+///
 /// For most applications the [onSubmitted] callback will be sufficient for
 /// reacting to user input.
 ///

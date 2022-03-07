@@ -734,7 +734,7 @@ class _DetailArguments {
   }
 
   @override
-  int get hashCode => hashValues(packageName, hashList(licenseEntries));
+  int get hashCode => Object.hash(packageName, Object.hashAll(licenseEntries));
 }
 
 class _PackageLicensePage extends StatefulWidget {

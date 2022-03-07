@@ -93,7 +93,7 @@ class Chrome {
         options.url!,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true')
         '--no-sandbox',
-      if (options.headless == true)
+      if (options.headless ?? false)
         '--headless',
       if (withDebugging)
         '--remote-debugging-port=${options.debugPort}',
