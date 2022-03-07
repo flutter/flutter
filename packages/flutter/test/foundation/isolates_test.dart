@@ -95,22 +95,22 @@ Future<void> expectFileClosesAllPorts(String filename) async {
 void main() {
   test('compute()', () async {
     expect(await compute(test1, 0), 1);
-    expect(compute(test2, 0), throwsException);
-    expect(compute(test3, 0), throwsException);
+    expect(compute(test2, 0), throwsA(2));
+    expect(compute(test3, 0), throwsA(isA<RemoteError>()));
     expect(await compute(test4, 0), 1);
-    expect(compute(test5, 0), throwsException);
+    expect(compute(test5, 0), throwsA(isA<RemoteError>()));
 
     expect(await compute(test1Async, 0), 1);
-    expect(compute(test2Async, 0), throwsException);
-    expect(compute(test3Async, 0), throwsException);
+    expect(compute(test2Async, 0), throwsA(2));
+    expect(compute(test3Async, 0), throwsA(isA<RemoteError>()));
     expect(await compute(test4Async, 0), 1);
-    expect(compute(test5Async, 0), throwsException);
+    expect(compute(test5Async, 0), throwsA(isA<RemoteError>()));
 
     expect(await compute(test1CallCompute, 0), 1);
-    expect(compute(test2CallCompute, 0), throwsException);
-    expect(compute(test3CallCompute, 0), throwsException);
+    expect(compute(test2CallCompute, 0), throwsA(2));
+    expect(compute(test3CallCompute, 0), throwsA(isA<RemoteError>()));
     expect(await compute(test4CallCompute, 0), 1);
-    expect(compute(test5CallCompute, 0), throwsException);
+    expect(compute(test5CallCompute, 0), throwsA(isA<RemoteError>()));
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 
   group('compute closes all ports', () {
@@ -119,6 +119,6 @@ void main() {
     });
     test('with invalid message', () async {
       await expectFileClosesAllPorts('_compute_caller_invalid_message.dart');
-    });
+    }, skip: true); // Blocked by: https://github.com/dart-lang/sdk/issues/48516
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 }
