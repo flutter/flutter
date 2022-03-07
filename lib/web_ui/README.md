@@ -135,8 +135,54 @@ When running tests on LUCI using Chromium, LUCI uses the version of Chromium
 fetched from CIPD.
 
 Since the engine code and infra recipes do not live in the same repository
-there are few steps to follow in order to upgrade a browser's version. For
-now these instructins are most relevant to Chrome.
+there are few steps to follow in order to upgrade a browser's version.
+
+#### Chromium
+
+Chromium is an independent project that gets rolled into Flutter manually, and as needed.
+Flutter consumes a pre-built Chromium version from chromium.org. When a new version of
+Chromium (check [here](https://www.chromium.org/getting-involved/download-chromium/#downloading-old-builds-of-chrome-chromium))
+is needed, follow these steps to roll the new version:
+
+- Make sure you have `depot_tools` installed (if you are regularly hacking on
+  the engine code, you probably do).
+- If not already authenticated with CIPD, run `cipd auth-login` and follow
+  instructions (this step requires sufficient privileges; contact
+  #hackers-infra-🌡 on [Flutter's Discord server](https://github.com/flutter/flutter/wiki/Chat)).
+- Edit `dev/browser_lock.yaml` and update the following values under `chrome`:
+  - Set `Windows`, `Mac` and `Linux` to the `branch_base_position`s given [in this table](https://omahaproxy.appspot.com).
+  (Pick from `linux`, `mac` and `win` as `os`, and the `stable` channel.)
+  - Set `version` to a string composed of the Major Version of the browser, and
+  the number of times that major version has been uploaded to CIPD. For example,
+  start with `'99'` for version 99.0.4844.51 of Chromium, and update to `'99.1'`,
+  `'99.2'` and so on if you need to upload newer bundles of the same major version.
+  (This is required because tags can't be repeated in CIPD).
+- Run `dart dev/browser_roller.dart` and make sure it completes successfully.
+  The script uploads the specified versions of Chromium (and Chromedriver) to the
+  right locations in CIPD: [Chrome](https://chrome-infra-packages.appspot.com/p/flutter_internal/browsers/chrome),
+  [Chromedriver](https://chrome-infra-packages.appspot.com/p/flutter_internal/browser-drivers/chrome).
+- Send a pull request containing the above file changes. Newer versions of Chromium
+  might break some tests or Goldens. Get those fixed too!
+
+If you have questions, contact the Flutter Web team on Flutter Discord on the
+\#hackers-web-🌍 channel.
+
+##### **browser_roller.dart**
+
+The script has the following command-line options:
+
+- `--dry-run` - The script will stop before uploading artifacts to CIPD. The location of the data will be reported at the end of the script, if the script finishes successfullyThe output of the script will be visible in /tmp/browser-roll-RANDOM_STRING
+- `--verbose` - Greatly increase the amount of information printed to `stdout` by the script.
+
+> Try the following!
+>
+> ```bash
+> dart ./dev/browser_roller.dart --dry-run --verbose
+> ```
+
+#### **Other browsers / manual upload**
+
+In general, the manual process goes like this:
 
 1. Dowload the binaries for the new browser/driver for each operaing system
    (macOS, linux, windows).
@@ -147,11 +193,10 @@ now these instructins are most relevant to Chrome.
 
 Resources:
 
-1. For Chrome downloads [link][3].
-2. Browser and driver CIPD [packages][4] (required speciall access; ping
+1. Browser and driver CIPD [packages][4] (requires special access; ping
    hackers-infra on Discord for more information)
-3. LUCI web [recipe][5]
-4. More general reading on CIPD packages [link][6]
+2. LUCI web [recipe][5]
+3. More general reading on CIPD packages [link][6]
 
 ### Rolling CanvasKit
 
@@ -222,7 +267,6 @@ FELT_USE_SNAPSHOT=false felt <command>
 
 [1]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
 [2]: https://github.com/flutter/engine/blob/main/lib/web_ui/dev/browser_lock.yaml
-[3]: https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html
 [4]: https://chrome-infra-packages.appspot.com/p/flutter_internal
-[5]: https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/web_engine.py
+[5]: https://cs.opensource.google/flutter/recipes/+/master:recipes/engine/web_engine.py
 [6]: https://chromium.googlesource.com/chromium/src.git/+/main/docs/cipd_and_3pp.md#What-is-CIPD

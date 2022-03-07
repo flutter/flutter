@@ -183,12 +183,14 @@ class ChromeInstaller {
         final String filename = file.name;
         if (file.isFile) {
           final List<int> data = file.content as List<int>;
-          io.File(path.join(versionDir.path, filename))
+          io.File(path.joinAll(<String>[
+            versionDir.path,
+            // Remove the "chrome-win/" path prefix, which is the Windows
+            // convention for Chromium directory structure.
+            ...path.split(filename).skip(1),
+          ]))
             ..createSync(recursive: true)
             ..writeAsBytesSync(data);
-        } else {
-          io.Directory(path.join(versionDir.path, filename))
-              .create(recursive: true);
         }
       }
 
@@ -215,8 +217,9 @@ class ChromeInstaller {
             'With the version path ${versionDir.path}\n'
             'The unzip process exited with code ${unzipResult.exitCode}.');
       }
-      // For Linux, we need to copy over the files out of the chrome-linux
-      // sub directory.
+
+      // Remove the "chrome-linux/" path prefix, which is the Linux
+      // convention for Chromium directory structure.
       if (io.Platform.isLinux) {
         final io.Directory chromeLinuxDir =
             await tmpDir.list().single as io.Directory;

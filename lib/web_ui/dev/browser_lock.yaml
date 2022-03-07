@@ -4,13 +4,19 @@ chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
   #
+  # Follow these instructions to find the correct build number for a specific
+  # Chromium version + OS combo:
+  #
+  # https://www.chromium.org/getting-involved/download-chromium/#downloading-old-builds-of-chrome-chromium
+  #
   # The OS names here must match what recipe Python expression
   # `self.m.platform.name.capitalize()` evaluates to. See:
   #
   # recipe_modules/web_util/api.py
-  Linux: 927388 # Major version 96
-  Mac: 927385 # Major version 96
-  Win: 927369 # Major version 96
+  Linux: 929514
+  Mac: 929514
+  Win: 929514
+  version: '96.2' # CIPD tag for the above Build IDs. Normally "ChromeMajorVersion.UploadAttempt". ;)
 
 ## Firefox does not use CIPD. To update the version, simply update it in this
 ## file.
