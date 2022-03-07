@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
+final Matcher throwsRemoteError = throwsA(isA<RemoteError>());
+
 int test1(int value) {
   return value + 1;
 }
@@ -92,25 +94,74 @@ Future<void> expectFileClosesAllPorts(String filename) async {
   expect(result.exitCode, 0);
 }
 
+class ComputeTestSubject {
+  ComputeTestSubject(this.base, [this.additional]);
+
+  final int base;
+  final dynamic additional;
+
+  int method(int x) {
+    return base * x;
+  }
+
+  static int staticMethod(int square) {
+    return square * square;
+  }
+}
+
+Future<int> computeStaticMethod(int square) {
+  return compute(ComputeTestSubject.staticMethod, square);
+}
+
+Future<int> computeClosure(int square) {
+  return compute((_) => square * square, null);
+}
+
+Future<int> computeInvalidClosure(int square) {
+  final ReceivePort r = ReceivePort();
+
+  return compute((_) {
+    r.sendPort.send('Computing!');
+
+    return square * square;
+  }, null);
+}
+
+Future<int> computeInstanceMethod(int square) {
+  final ComputeTestSubject subject = ComputeTestSubject(square);
+  return compute(subject.method, square);
+}
+
+Future<int> computeInvalidInstanceMethod(int square) {
+  final ComputeTestSubject subject = ComputeTestSubject(square, ReceivePort());
+  return compute(subject.method, square);
+}
+
 void main() {
   test('compute()', () async {
     expect(await compute(test1, 0), 1);
     expect(compute(test2, 0), throwsA(2));
-    expect(compute(test3, 0), throwsA(isA<RemoteError>()));
+    expect(compute(test3, 0), throwsRemoteError);
     expect(await compute(test4, 0), 1);
-    expect(compute(test5, 0), throwsA(isA<RemoteError>()));
+    expect(compute(test5, 0), throwsRemoteError);
 
     expect(await compute(test1Async, 0), 1);
     expect(compute(test2Async, 0), throwsA(2));
-    expect(compute(test3Async, 0), throwsA(isA<RemoteError>()));
+    expect(compute(test3Async, 0), throwsRemoteError);
     expect(await compute(test4Async, 0), 1);
-    expect(compute(test5Async, 0), throwsA(isA<RemoteError>()));
+    expect(compute(test5Async, 0), throwsRemoteError);
 
     expect(await compute(test1CallCompute, 0), 1);
     expect(compute(test2CallCompute, 0), throwsA(2));
-    expect(compute(test3CallCompute, 0), throwsA(isA<RemoteError>()));
+    expect(compute(test3CallCompute, 0), throwsRemoteError);
     expect(await compute(test4CallCompute, 0), 1);
-    expect(compute(test5CallCompute, 0), throwsA(isA<RemoteError>()));
+    expect(compute(test5CallCompute, 0), throwsRemoteError);
+
+    expect(await computeStaticMethod(10), 100);
+    expect(await computeClosure(10), 100);
+    expect(computeInvalidClosure(10), throwsArgumentError);
+    expect(await computeInstanceMethod(10), 100);
+    expect(computeInvalidInstanceMethod(10), throwsArgumentError);
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 
   group('compute closes all ports', () {
