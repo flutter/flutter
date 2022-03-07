@@ -33,7 +33,7 @@ class RefreshRateSummary {
         continue;
       }
       if ((refreshRate - 90).abs() < _kErrorMargin) {
-        _numberOf90HzFrames ++;
+        _numberOf90HzFrames++;
         continue;
       }
       if ((refreshRate - 120).abs() < _kErrorMargin) {
@@ -46,6 +46,7 @@ class RefreshRateSummary {
         _numberOf30HzFrames +
             _numberOf60HzFrames +
             _numberOf80HzFrames +
+            _numberOf90HzFrames +
             _numberOf120HzFrames +
             _framesWithIllegalRefreshRate.length);
   }
@@ -97,8 +98,8 @@ class RefreshRateSummary {
 
   /// A list of all the frames with Illegal refresh rate.
   ///
-  /// A refresh rate is consider illegal if it does not belong to anyone below:
-  /// 30hz, 60hz, 80hz or 120hz.
+  /// A refresh rate is consider illegal if it does not belong to anyone of the refresh rate this class is
+  /// explicitly tracking.
   List<double> get framesWithIllegalRefreshRate =>
       _framesWithIllegalRefreshRate;
 
