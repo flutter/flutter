@@ -121,10 +121,20 @@ public class FlutterRenderer implements TextureRegistry {
     private final long id;
     @NonNull private final SurfaceTextureWrapper textureWrapper;
     private boolean released;
+    @Nullable private OnFrameConsumedListener listener;
+    private final Runnable onFrameConsumed =
+        new Runnable() {
+          @Override
+          public void run() {
+            if (listener != null) {
+              listener.onFrameConsumed();
+            }
+          }
+        };
 
     SurfaceTextureRegistryEntry(long id, @NonNull SurfaceTexture surfaceTexture) {
       this.id = id;
-      this.textureWrapper = new SurfaceTextureWrapper(surfaceTexture);
+      this.textureWrapper = new SurfaceTextureWrapper(surfaceTexture, onFrameConsumed);
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         // The callback relies on being executed on the UI thread (unsynchronised read of
@@ -194,6 +204,11 @@ public class FlutterRenderer implements TextureRegistry {
       } finally {
         super.finalize();
       }
+    }
+
+    @Override
+    public void setOnFrameConsumedListener(@Nullable OnFrameConsumedListener listener) {
+      this.listener = listener;
     }
   }
 
