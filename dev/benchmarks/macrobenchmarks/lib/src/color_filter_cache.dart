@@ -43,14 +43,14 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
                 ColorFilter.mode(Colors.green[300]!, BlendMode.luminosity),
             child: Container(
               clipBehavior: Clip.antiAlias,
-              decoration: const BoxDecoration(boxShadow: [
+              decoration: const BoxDecoration(boxShadow: <BoxShadow>[
                 BoxShadow(
                   color: Colors.red,
                   blurRadius: 5.0,
                 ),
               ], color: Colors.blue, backgroundBlendMode: BlendMode.luminosity),
               child: Column(
-                children: [
+                children: <Widget>[
                   const Text(
                     'Color Filter Cache Pref Test',
                   ),
