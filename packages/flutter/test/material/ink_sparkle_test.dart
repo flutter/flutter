@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  // Regression test for https://github.com/flutter/flutter/issues/21506.
   testWidgets('InkSparkle renders with sparkles', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
