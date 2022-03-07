@@ -40,13 +40,16 @@ class ChromeLock {
   ChromeLock._fromYaml(YamlMap yaml) :
     linux = (yaml['Linux'] as int).toString(),
     mac = (yaml['Mac'] as int).toString(),
-    windows = (yaml['Win'] as int).toString();
+    windows = (yaml['Win'] as int).toString(),
+    version = yaml['version'] as String;
 
   final String linux;
   final String mac;
   final String windows;
+  /// The major version of Chromium represented by this lock. E.g: '96' (for Chromium 96.0.554.51)
+  final String version;
 
-  /// Return the version of Chromium to use for the current operating system.
+  /// Return the Chromium Build ID to use for the current operating system.
   String get versionForCurrentPlatform {
     return PlatformBinding.instance.getChromeBuild(this);
   }

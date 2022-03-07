@@ -25,9 +25,6 @@ import '../pipeline.dart';
 import '../test_platform.dart';
 import '../utils.dart';
 
-// Maximum number of tests that run concurrently.
-const int _testConcurrency = int.fromEnvironment('FELT_TEST_CONCURRENCY', defaultValue: 10);
-
 /// Runs web tests.
 ///
 /// Assumes the artifacts from [CompileTestsStep] are available, either from
@@ -106,12 +103,11 @@ class RunTestsStep implements PipelineStep {
       }
     }
 
-    // Run non-screenshot tests with high concurrency.
+    // Run non-screenshot tests.
     if (unitTestFiles.isNotEmpty) {
       await _runTestBatch(
         testFiles: unitTestFiles,
         browserEnvironment: _browserEnvironment,
-        concurrency: _testConcurrency,
         expectFailure: false,
         isDebug: isDebug,
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
@@ -121,13 +117,11 @@ class RunTestsStep implements PipelineStep {
       _checkExitCode('Unit tests');
     }
 
-    // Run screenshot tests one at a time to prevent tests from screenshotting
-    // each other.
+    // Run screenshot tests.
     if (screenshotTestFiles.isNotEmpty) {
       await _runTestBatch(
         testFiles: screenshotTestFiles,
         browserEnvironment: _browserEnvironment,
-        concurrency: 1,
         expectFailure: false,
         isDebug: isDebug,
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
@@ -219,7 +213,6 @@ Future<void> _runTestBatch({
   required bool isDebug,
   required BrowserEnvironment browserEnvironment,
   required bool doUpdateScreenshotGoldens,
-  required int concurrency,
   required bool expectFailure,
   required SkiaGoldClient? skiaClient,
   required String? overridePathToCanvasKit,
@@ -230,7 +223,8 @@ Future<void> _runTestBatch({
   );
   final List<String> testArgs = <String>[
     ...<String>['-r', 'compact'],
-    '--concurrency=$concurrency',
+    // Disable concurrency. Running with concurrency proved to be flaky.
+    '--concurrency=1',
     if (isDebug) '--pause-after-load',
     // Don't pollute logs with output from tests that are expected to fail.
     if (expectFailure)
