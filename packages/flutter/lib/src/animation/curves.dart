@@ -1760,7 +1760,7 @@ class Curves {
   static const Curve bounceInOut = _BounceInOutCurve._();
 
   /// An oscillating curve that grows in magnitude while overshooting its bounds.
-  /// add
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in.mp4}
   static const ElasticInCurve elasticIn = ElasticInCurve();
 
