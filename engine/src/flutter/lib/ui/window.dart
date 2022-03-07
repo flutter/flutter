@@ -771,6 +771,7 @@ class AccessibilityFeatures {
   static const int _kBoldTextIndex = 1 << 3;
   static const int _kReduceMotionIndex = 1 << 4;
   static const int _kHighContrastIndex = 1 << 5;
+  static const int _kOnOffSwitchLabelsIndex = 1 << 6;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -803,6 +804,11 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get highContrast => _kHighContrastIndex & _index != 0;
 
+  /// The platform is requesting to show on/off labels inside switches.
+  ///
+  /// Only supported on iOS.
+  bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
+
   @override
   String toString() {
     final List<String> features = <String>[];
@@ -818,6 +824,8 @@ class AccessibilityFeatures {
       features.add('reduceMotion');
     if (highContrast)
       features.add('highContrast');
+    if (onOffSwitchLabels)
+      features.add('onOffSwitchLabels');
     return 'AccessibilityFeatures$features';
   }
 

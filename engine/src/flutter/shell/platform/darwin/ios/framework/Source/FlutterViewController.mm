@@ -331,6 +331,13 @@ typedef enum UIAccessibilityContrast : NSInteger {
                  name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification
                object:nil];
 
+  if (@available(iOS 13.0, *)) {
+    [center addObserver:self
+               selector:@selector(onAccessibilityStatusChanged:)
+                   name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
+                 object:nil];
+  }
+
   [center addObserver:self
              selector:@selector(onUserSettingsChanged:)
                  name:UIContentSizeCategoryDidChangeNotification
@@ -1417,19 +1424,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
   auto platformView = [_engine.get() platformView];
-  int32_t flags = 0;
-  if (UIAccessibilityIsInvertColorsEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kInvertColors);
-  }
-  if (UIAccessibilityIsReduceMotionEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kReduceMotion);
-  }
-  if (UIAccessibilityIsBoldTextEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kBoldText);
-  }
-  if (UIAccessibilityDarkerSystemColorsEnabled()) {
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kHighContrast);
-  }
+  int32_t flags = [self accessibilityFlags];
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
@@ -1445,6 +1440,35 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
   platformView->SetAccessibilityFeatures(flags);
 #endif
+}
+
+- (int32_t)accessibilityFlags {
+  int32_t flags = 0;
+  if (UIAccessibilityIsInvertColorsEnabled()) {
+    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kInvertColors);
+  }
+  if (UIAccessibilityIsReduceMotionEnabled()) {
+    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kReduceMotion);
+  }
+  if (UIAccessibilityIsBoldTextEnabled()) {
+    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kBoldText);
+  }
+  if (UIAccessibilityDarkerSystemColorsEnabled()) {
+    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kHighContrast);
+  }
+  if ([FlutterViewController accessibilityIsOnOffSwitchLabelsEnabled]) {
+    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels);
+  }
+
+  return flags;
+}
+
++ (BOOL)accessibilityIsOnOffSwitchLabelsEnabled {
+  if (@available(iOS 13, *)) {
+    return UIAccessibilityIsOnOffSwitchLabelsEnabled();
+  } else {
+    return NO;
+  }
 }
 
 #pragma mark - Set user settings

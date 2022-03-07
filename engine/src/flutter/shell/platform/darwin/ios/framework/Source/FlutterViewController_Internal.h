@@ -29,6 +29,7 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
 @interface FlutterViewController () <FlutterViewResponder>
 
+@property(class, nonatomic, readonly) BOOL accessibilityIsOnOffSwitchLabelsEnabled;
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
 @property(nonatomic, retain) FlutterKeyboardManager* keyboardManager;
@@ -45,6 +46,7 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
               nextAction:(void (^)())nextAction API_AVAILABLE(ios(13.4));
 - (void)addInternalPlugins;
 - (void)deregisterNotifications;
+- (int32_t)accessibilityFlags;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_
