@@ -52,4 +52,5 @@
 @interface FlutterTextInputPlugin (TestMethods)
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange;
+- (NSDictionary*)editingState;
 @end

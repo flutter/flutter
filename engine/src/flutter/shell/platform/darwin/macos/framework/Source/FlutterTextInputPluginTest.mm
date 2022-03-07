@@ -30,6 +30,7 @@
 
 @interface FlutterInputPluginTestObjc : NSObject
 - (bool)testEmptyCompositionRange;
+- (bool)testClearClientDuringComposing;
 @end
 
 @implementation FlutterInputPluginTestObjc
@@ -96,6 +97,60 @@
   } @catch (...) {
     return false;
   }
+  return true;
+}
+
+- (bool)testClearClientDuringComposing {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Set editing state with an active composing range.
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                             arguments:@{
+                                                               @"text" : @"Text",
+                                                               @"selectionBase" : @(0),
+                                                               @"selectionExtent" : @(0),
+                                                               @"composingBase" : @(0),
+                                                               @"composingExtent" : @(1),
+                                                             }]
+                    result:^(id){
+                    }];
+
+  // Verify composing range is (0, 1).
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_EQ([editingState[@"composingBase"] intValue], 0);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], 1);
+
+  // Clear input client.
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.clearClient"
+                                                             arguments:@[]]
+                    result:^(id){
+                    }];
+
+  // Verify composing range is collapsed.
+  editingState = [plugin editingState];
+  EXPECT_EQ([editingState[@"composingBase"] intValue], [editingState[@"composingExtent"] intValue]);
   return true;
 }
 
@@ -366,6 +421,10 @@ FlutterEngine* CreateTestEngine() {
 
 TEST(FlutterTextInputPluginTest, TestEmptyCompositionRange) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testEmptyCompositionRange]);
+}
+
+TEST(FlutterTextInputPluginTest, TestClearClientDuringComposing) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testClearClientDuringComposing]);
 }
 
 TEST(FlutterTextInputPluginTest, TestFirstRectForCharacterRange) {
