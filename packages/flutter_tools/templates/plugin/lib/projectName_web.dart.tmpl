@@ -19,8 +19,8 @@ class {{pluginDartClass}}Web extends {{pluginDartClass}}Platform {
 
   /// Returns a [String] containing the version of the platform.
   @override
-  Future<String?> getPlatformVersion() {
+  Future<String?> getPlatformVersion() async {
     final version = html.window.navigator.userAgent;
-    return Future.value(version);
+    return version;
   }
 }

@@ -499,6 +499,8 @@ void main() {
       <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
       <String>[
         'analysis_options.yaml',
+        'LICENSE',
+        'README.md',
         'example/lib/main.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',

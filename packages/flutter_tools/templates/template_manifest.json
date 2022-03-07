@@ -328,7 +328,6 @@
         "templates/plugin/lib/projectName.dart.tmpl",
         "templates/plugin/lib/projectName_platform_interface.dart.tmpl",
         "templates/plugin/lib/projectName_method_channel.dart.tmpl",
-        "templates/plugin/LICENSE.tmpl",
         "templates/plugin/linux.tmpl/CMakeLists.txt.tmpl",
         "templates/plugin/linux.tmpl/include/projectName.tmpl/pluginClassSnakeCase.h.tmpl",
         "templates/plugin/linux.tmpl/pluginClassSnakeCase.cc.tmpl",

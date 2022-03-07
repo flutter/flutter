@@ -1,4 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
 import '{{projectName}}_method_channel.dart';
 
 abstract class {{pluginDartClass}}Platform extends PlatformInterface {
@@ -14,8 +15,9 @@ abstract class {{pluginDartClass}}Platform extends PlatformInterface {
   /// Defaults to [MethodChannel{{pluginDartClass}}].
   static {{pluginDartClass}}Platform get instance => _instance;
   
-  /// Platform-specific plugins should set this with their own platform-specific
-  /// class that extends [{{pluginDartClass}}Platform] when they register themselves.
+  /// Platform-specific implementations should set this with their own
+  /// platform-specific class that extends [{{pluginDartClass}}Platform] when
+  /// they register themselves.
   static set instance({{pluginDartClass}}Platform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
