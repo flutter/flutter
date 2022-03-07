@@ -20,7 +20,48 @@ void main() {
   // Change this to 25, or another factor of 100, for more granular tests.
   const int testIntervalPercent = 50;
 
-  testWidgets('InkSparkle renders with sparkles', (WidgetTester tester) async {
+  testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
+    final Key repaintKey = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: RepaintBoundary(
+            key: repaintKey,
+            child: Theme(
+              data: ThemeData(splashFactory: InkSparkle.splashFactory),
+              child: ElevatedButton(
+                child: const Text('Sparkle!'),
+                onPressed: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Finder buttonFinder = find.text('Sparkle!');
+    final Finder repaintFinder = find.byKey(repaintKey);
+    await tester.tap(buttonFinder);
+
+    // Warm up shader. Compilation is of the order of 10 milliseconds and 
+    // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
+    // net to prevent flakiness.
+    await tester.pumpAndSettle(const Duration(milliseconds: 2000));
+
+    final Offset topLeft = tester.getTopLeft(buttonFinder);
+    final Offset bottomRight = tester.getBottomRight(buttonFinder);
+
+    final Offset topLeftTarget = topLeft + (bottomRight - topLeft) * 0.2;
+    await tester.tapAt(topLeftTarget);
+    for (int i = 0; i <= 100; i += testIntervalPercent) {
+      await expectLater(
+        repaintFinder,
+        matchesGoldenFile('ink_sparkle.top_left.$i.png'),
+      );
+      await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
+    }
+  });
+
+    testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     final Key repaintKey = UniqueKey();
 
     await tester.pumpWidget(MaterialApp(
@@ -51,19 +92,6 @@ void main() {
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
 
-    // Test tapping the top left quadrant of the button.
-    final Offset topLeftTarget = topLeft + (bottomRight - topLeft) * 0.2;
-    await tester.tapAt(topLeftTarget);
-    for (int i = 0; i <= 100; i += testIntervalPercent) {
-      await expectLater(
-        repaintFinder,
-        matchesGoldenFile('ink_sparkle.top_left.$i.png'),
-      );
-      await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
-    }
-    await tester.pumpAndSettle(const Duration(milliseconds: 1000));
-
-    // Test tapping the center of the button.
     final Offset centerTarget = topLeft + (bottomRight - topLeft) * 0.5;
     await tester.tapAt(centerTarget);
     for (int i = 0; i <= 100; i += testIntervalPercent) {
@@ -73,9 +101,40 @@ void main() {
       );
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
-    await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+  });
 
-    // Test tapping the bottom right quadrant of the button.
+
+    testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
+    final Key repaintKey = UniqueKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: RepaintBoundary(
+            key: repaintKey,
+            child: Theme(
+              data: ThemeData(splashFactory: InkSparkle.splashFactory),
+              child: ElevatedButton(
+                child: const Text('Sparkle!'),
+                onPressed: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Finder buttonFinder = find.text('Sparkle!');
+    final Finder repaintFinder = find.byKey(repaintKey);
+    await tester.tap(buttonFinder);
+
+    // Warm up shader. Compilation is of the order of 10 milliseconds and 
+    // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
+    // net to prevent flakiness.
+    await tester.pumpAndSettle(const Duration(milliseconds: 2000));
+
+    final Offset topLeft = tester.getTopLeft(buttonFinder);
+    final Offset bottomRight = tester.getBottomRight(buttonFinder);
+
     final Offset bottomRightTarget = topLeft + (bottomRight - topLeft) * 0.8;
     await tester.tapAt(bottomRightTarget);
     for (int i = 0; i <= 100; i += testIntervalPercent) {
@@ -85,6 +144,5 @@ void main() {
       );
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
-    await tester.pumpAndSettle(const Duration(milliseconds: 1000));
   });
 }
