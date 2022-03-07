@@ -28,8 +28,12 @@ class RefreshRateSummary {
         _numberOf60HzFrames++;
         continue;
       }
+      if ((refreshRate - 80).abs() < _kErrorMargin) {
+        _numberOf80HzFrames++;
+        continue;
+      }
       if ((refreshRate - 90).abs() < _kErrorMargin) {
-        _numberOf90HzFrames++;
+        _numberOf90HzFrames ++;
         continue;
       }
       if ((refreshRate - 120).abs() < _kErrorMargin) {
@@ -41,24 +45,15 @@ class RefreshRateSummary {
     assert(_numberOfTotalFrames ==
         _numberOf30HzFrames +
             _numberOf60HzFrames +
-            _numberOf90HzFrames +
+            _numberOf80HzFrames +
             _numberOf120HzFrames +
             _framesWithIllegalRefreshRate.length);
   }
 
+  // The error margin to determine the frame refresh rate.
+  // For example, when we calculated a frame that has a refresh rate of 65, we consider the frame to be a 60Hz frame.
+  // Can be adjusted if necessary.
   static const double _kErrorMargin = 6.0;
-
-  /// Number of frames with 30hz refresh rate
-  int get numberOf30HzFrames => _numberOf30HzFrames;
-
-  /// Number of frames with 60hz refresh rate
-  int get numberOf60HzFrames => _numberOf60HzFrames;
-
-  /// Number of frames with 90hz refresh rate
-  int get numberOf90HzFrames => _numberOf90HzFrames;
-
-  /// Number of frames with 120hz refresh rate
-  int get numberOf120HzFrames => _numberOf120HzFrames;
 
   /// The percentage of 30hz frames.
   ///
@@ -76,6 +71,14 @@ class RefreshRateSummary {
       ? _numberOf60HzFrames / _numberOfTotalFrames * 100
       : 0;
 
+  /// The percentage of 80hz frames.
+  ///
+  /// For example, if this value is 20, it means there are 20 percent of total
+  /// frames are 80hz. 0 means no frames are 80hz, 100 means all frames are 80hz.
+  double get percentageOf80HzFrames => _numberOfTotalFrames > 0
+      ? _numberOf80HzFrames / _numberOfTotalFrames * 100
+      : 0;
+
   /// The percentage of 90hz frames.
   ///
   /// For example, if this value is 20, it means there are 20 percent of total
@@ -84,7 +87,7 @@ class RefreshRateSummary {
       ? _numberOf90HzFrames / _numberOfTotalFrames * 100
       : 0;
 
-  /// The percentage of 90hz frames.
+  /// The percentage of 120hz frames.
   ///
   /// For example, if this value is 20, it means there are 20 percent of total
   /// frames are 120hz. 0 means no frames are 120hz, 100 means all frames are 120hz.
@@ -95,12 +98,13 @@ class RefreshRateSummary {
   /// A list of all the frames with Illegal refresh rate.
   ///
   /// A refresh rate is consider illegal if it does not belong to anyone below:
-  /// 30hz, 60hz, 90hz or 120hz.
+  /// 30hz, 60hz, 80hz or 120hz.
   List<double> get framesWithIllegalRefreshRate =>
       _framesWithIllegalRefreshRate;
 
   int _numberOf30HzFrames = 0;
   int _numberOf60HzFrames = 0;
+  int _numberOf80HzFrames = 0;
   int _numberOf90HzFrames = 0;
   int _numberOf120HzFrames = 0;
   int _numberOfTotalFrames = 0;
