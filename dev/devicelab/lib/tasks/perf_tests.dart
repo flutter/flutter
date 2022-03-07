@@ -615,6 +615,7 @@ class StartupTest {
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
+        case DeviceOperatingSystem.windows:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
           break;
@@ -730,6 +731,7 @@ class DevtoolsStartupTest {
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
+        case DeviceOperatingSystem.windows:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
           break;
@@ -1307,6 +1309,8 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
+      case DeviceOperatingSystem.windows:
+        throw Exception('Unsupported option for Windows devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:
@@ -1343,6 +1347,8 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
         break;
+      case DeviceOperatingSystem.windows:
+        throw Exception('Unsupported option for Windows devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:

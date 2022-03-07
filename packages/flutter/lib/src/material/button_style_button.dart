@@ -422,7 +422,7 @@ class _MouseCursor extends MaterialStateMouseCursor {
   String get debugDescription => 'ButtonStyleButton_MouseCursor';
 }
 
-/// A widget to pad the area around a [MaterialButton]'s inner [Material].
+/// A widget to pad the area around a [ButtonStyleButton]'s inner [Material].
 ///
 /// Redirect taps that occur in the padded area around the child to the center
 /// of the child. This increases the size of the button and the button's

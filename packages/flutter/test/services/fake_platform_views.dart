@@ -503,7 +503,14 @@ class FakeAndroidPlatformView {
   }
 
   @override
-  int get hashCode => hashValues(id, type, hashList(creationParams), size, layoutDirection, hybrid);
+  int get hashCode => Object.hash(
+    id,
+    type,
+    creationParams == null ? null : Object.hashAll(creationParams!),
+    size,
+    layoutDirection,
+    hybrid,
+  );
 
   @override
   String toString() {
@@ -529,7 +536,7 @@ class FakeAndroidMotionEvent {
   }
 
   @override
-  int get hashCode => hashValues(action, hashList(pointers), hashList(pointerIds));
+  int get hashCode => Object.hash(action, Object.hashAll(pointers), Object.hashAll(pointerIds));
 
   @override
   String toString() {
@@ -556,7 +563,7 @@ class FakeUiKitView {
   }
 
   @override
-  int get hashCode => hashValues(id, type);
+  int get hashCode => Object.hash(id, type);
 
   @override
   String toString() {
@@ -581,7 +588,7 @@ class FakeHtmlPlatformView {
   }
 
   @override
-  int get hashCode => hashValues(id, type);
+  int get hashCode => Object.hash(id, type);
 
   @override
   String toString() {

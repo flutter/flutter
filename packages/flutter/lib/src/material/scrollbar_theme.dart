@@ -215,23 +215,21 @@ class ScrollbarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      thumbVisibility,
-      thickness,
-      trackVisibility,
-      showTrackOnHover,
-      isAlwaysShown,
-      interactive,
-      radius,
-      thumbColor,
-      trackColor,
-      trackBorderColor,
-      crossAxisMargin,
-      mainAxisMargin,
-      minThumbLength,
-    );
-  }
+  int get hashCode => Object.hash(
+    thumbVisibility,
+    thickness,
+    trackVisibility,
+    showTrackOnHover,
+    isAlwaysShown,
+    interactive,
+    radius,
+    thumbColor,
+    trackColor,
+    trackBorderColor,
+    crossAxisMargin,
+    mainAxisMargin,
+    minThumbLength,
+  );
 
   @override
   bool operator ==(Object other) {

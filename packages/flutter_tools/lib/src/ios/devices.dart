@@ -371,6 +371,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
+      if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
     ];
 
@@ -437,12 +438,12 @@ class IOSDevice extends Device {
       final Uri? localUri = await observatoryDiscovery?.uri;
       timer.cancel();
       if (localUri == null) {
-        iosDeployDebugger?.detach();
+        await iosDeployDebugger?.stopAndDumpBacktrace();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
-      iosDeployDebugger?.detach();
+      await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {

@@ -293,6 +293,15 @@ class IOSDeployDebugger {
   // (lldb) Process 6152 stopped
   static final RegExp _lldbProcessStopped = RegExp(r'Process \d* stopped');
 
+  // (lldb) Process 6152 detached
+  static final RegExp _lldbProcessDetached = RegExp(r'Process \d* detached');
+
+  // Send signal to stop (pause) the app. Used before a backtrace dump.
+  static const String _signalStop = 'process signal SIGSTOP';
+
+  // Print backtrace for all threads while app is stopped.
+  static const String _backTraceAll = 'thread backtrace all';
+
   /// Launch the app on the device, and attach the debugger.
   ///
   /// Returns whether or not the debugger successfully attached.
@@ -330,16 +339,41 @@ class IOSDeployDebugger {
           }
           return;
         }
-        if (line.contains('PROCESS_STOPPED') ||
-            line.contains('PROCESS_EXITED') ||
-            _lldbProcessExit.hasMatch(line) ||
-            _lldbProcessStopped.hasMatch(line)) {
+        if (line == _signalStop) {
+          // The app is about to be stopped. Only show in verbose mode.
+          _logger.printTrace(line);
+          return;
+        }
+        if (line == _backTraceAll) {
+          // The app is stopped and the backtrace for all threads will be printed.
+          _logger.printTrace(line);
+          // Even though we're not "detached", just stopped, mark as detached so the backtrace
+          // is only show in verbose.
+          _debuggerState = _IOSDeployDebuggerState.detached;
+          return;
+        }
+
+        if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
+          // The app has been stopped. Dump the backtrace, and detach.
+          _logger.printTrace(line);
+          _iosDeployProcess?.stdin.writeln(_backTraceAll);
+          detach();
+          return;
+        }
+        if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
           _logger.printTrace(line);
           exit();
           return;
         }
+        if (_lldbProcessDetached.hasMatch(line)) {
+          // The debugger has detached from the app, and there will be no more debugging messages.
+          // Kill the ios-deploy process.
+          exit();
+          return;
+        }
+
         if (_debuggerState != _IOSDeployDebuggerState.attached) {
           _logger.printTrace(line);
           return;
@@ -361,11 +395,11 @@ class IOSDeployDebugger {
         _monitorIOSDeployFailure(line, _logger);
         _logger.printTrace(line);
       });
-      unawaited(_iosDeployProcess!.exitCode.then((int status) {
+      unawaited(_iosDeployProcess!.exitCode.then((int status) async {
         _logger.printTrace('ios-deploy exited with code $exitCode');
         _debuggerState = _IOSDeployDebuggerState.detached;
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
+        await stdoutSubscription.cancel();
+        await stderrSubscription.cancel();
       }).whenComplete(() async {
         if (_debuggerOutput.hasListener) {
           // Tell listeners the process died.
@@ -395,6 +429,22 @@ class IOSDeployDebugger {
     return success;
   }
 
+  Future<void> stopAndDumpBacktrace() async {
+    if (!debuggerAttached) {
+      return;
+    }
+
+    try {
+      // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
+      _iosDeployProcess?.stdin.writeln(_signalStop);
+    } on SocketException catch (error) {
+      // Best effort, try to detach, but maybe the app already exited or already detached.
+      _logger.printTrace('Could not stop app from debugger: $error');
+    }
+    // Wait for logging to finish on process exit.
+    return logLines.drain();
+  }
+
   void detach() {
     if (!debuggerAttached) {
       return;
@@ -403,7 +453,6 @@ class IOSDeployDebugger {
     try {
       // Detach lldb from the app process.
       _iosDeployProcess?.stdin.writeln('process detach');
-      _debuggerState = _IOSDeployDebuggerState.detached;
     } on SocketException catch (error) {
       // Best effort, try to detach, but maybe the app already exited or already detached.
       _logger.printTrace('Could not detach from debugger: $error');

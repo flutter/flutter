@@ -393,8 +393,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 
       final List<String> pluginsUsingV1 = <String>[];
       for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
           templateContext['needsShim'] = true;
           if (plugin['name'] != null) {
@@ -431,8 +431,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
       );
       for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
@@ -706,10 +706,6 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 // @dart = {{dartLanguageVersion}}
 
-// When `{{mainEntrypoint}}` defines `main`, that definition is shadowed by the definition below.
-export '{{mainEntrypoint}}';
-
-import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
@@ -753,18 +749,6 @@ $_dartPluginRegisterWith
 $_dartPluginRegisterWith
       {{/windows}}
     }
-  }
-
-}
-
-typedef _UnaryFunction = dynamic Function(List<String> args);
-typedef _NullaryFunction = dynamic Function();
-
-void main(List<String> args) {
-  if (entrypoint.main is _UnaryFunction) {
-    (entrypoint.main as _UnaryFunction)(args);
-  } else {
-    (entrypoint.main as _NullaryFunction)();
   }
 }
 ''';
