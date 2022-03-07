@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_tools/src/base/platform.dart';
@@ -63,12 +64,12 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
+          // Check for a ValidationType.notAvailable result
           expect(result.type, equals(ValidationType.notAvailable));
         }
       });
 
-      testWithoutContext('one http hosts are not available', () async {
+      testWithoutContext('one http host is not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
@@ -86,30 +87,7 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.partial));
-        }
-      });
-
-      testWithoutContext('one http hosts are not available', () async {
-        // Run the check for all operating systems one by one
-        for(final String os in osTested) {
-          final Platform platform = FakePlatform(operatingSystem: os);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
-            platform: platform,
-            featureFlags: TestFeatureFlags(),
-            httpClient: FakeHttpClient.list(<FakeRequest>[
-              FakeRequest(Uri.parse(kgCloudHttpHost), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
-              FakeRequest(Uri.parse(androidRequiredHttpHosts(platform)[0]), method: HttpMethod.head),
-              FakeRequest(Uri.parse(kPubDevHttpHost), method: HttpMethod.head),
-              FakeRequest(Uri.parse(macOSRequiredHttpHosts[0]), method: HttpMethod.head),
-            ]),
-          );
-
-          // Run the validation check and get the results
-          final ValidationResult result = await httpHostValidator.validate();
-
-          // Check for a ValidationType.installed result
+          // Check for a ValidationType.partial result
           expect(result.type, equals(ValidationType.partial));
         }
       });
@@ -152,12 +130,12 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
+          // Check for a ValidationType.notAvailable result
           expect(result.type, equals(ValidationType.notAvailable));
         }
       });
 
-      testWithoutContext('one http hosts are not available', () async {
+      testWithoutContext('one http host is not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os, environment: kTestEnvironment);
@@ -174,31 +152,87 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
+          // Check for a ValidationType.partial result
           expect(result.type, equals(ValidationType.partial));
         }
       });
 
-      testWithoutContext('one http hosts are not available', () async {
-        // Run the check for all operating systems one by one
-        for(final String os in osTested) {
-          final Platform platform = FakePlatform(operatingSystem: os, environment: kTestEnvironment);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
-            platform: platform,
-            featureFlags: TestFeatureFlags(),
-            httpClient: FakeHttpClient.list(<FakeRequest>[
-              FakeRequest(Uri.parse(kTestEnvGCloudHost), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
-              FakeRequest(Uri.parse(kTestEnvPubHost), method: HttpMethod.head),
-              FakeRequest(Uri.parse(macOSRequiredHttpHosts[0]), method: HttpMethod.head),
-            ]),
-          );
+      testWithoutContext('does not throw on invalid user-defined timeout', () async {
+        final HttpHostValidator httpHostValidator = HttpHostValidator(
+          platform: FakePlatform(
+            environment: <String,String> {
+              'PUB_HOSTED_URL': kTestEnvPubHost,
+              'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
+              'FLUTTER_DOCTOR_HOST_TIMEOUT' : 'deadbeef',
+            },
+          ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+          httpClient: FakeHttpClient.any(),
+        );
 
-          // Run the validation check and get the results
-          final ValidationResult result = await httpHostValidator.validate();
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.partial));
-        }
+        expect(result.type, equals(ValidationType.notAvailable));
+        expect(
+          result.messages,
+          contains(const ValidationMessage.error(
+            'HTTP host "$kTestEnvPubHost" is not reachable. '
+            'Reason: The value of FLUTTER_DOCTOR_HOST_TIMEOUT(deadbeef) is not a valid duration in seconds',
+          )),
+        );
+      });
+
+      testWithoutContext('does not throw on unparseable user-defined host uri', () async {
+        final HttpHostValidator httpHostValidator = HttpHostValidator(
+          platform: FakePlatform(
+            environment: <String,String> {
+              'PUB_HOSTED_URL': '::Not A Uri::',
+              'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
+              'FLUTTER_DOCTOR_HOST_TIMEOUT' : '1',
+            },
+          ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        expect(result.type, equals(ValidationType.partial));
+        expect(
+          result.messages,
+          contains(const ValidationMessage.error(
+            'HTTP host "::Not A Uri::" is not reachable. '
+            'Reason: The value of PUB_HOSTED_URL(::Not A Uri::) could not be parsed as a valid url',
+          )),
+        );
+      });
+
+      testWithoutContext('does not throw on invalid user-defined host', () async {
+        final HttpHostValidator httpHostValidator = HttpHostValidator(
+          platform: FakePlatform(
+            environment: <String,String> {
+              'PUB_HOSTED_URL': kTestEnvPubHost,
+              'FLUTTER_STORAGE_BASE_URL': '',
+              'FLUTTER_DOCTOR_HOST_TIMEOUT' : '1',
+            },
+          ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        expect(result.type, equals(ValidationType.partial));
+        expect(
+          result.messages,
+          contains(const ValidationMessage.error(
+            'HTTP host "" is not reachable. '
+            'Reason: The value of FLUTTER_STORAGE_BASE_URL() is not a valid host',
+          )),
+        );
       });
     });
 
@@ -266,5 +300,25 @@ void main() {
         }
       });
     });
+  });
+
+  testWithoutContext('Http host validator timeout message includes timeout duration.', () async {
+    final HttpHostValidator httpHostValidator = HttpHostValidator(
+      platform: FakePlatform(environment: kTestEnvironment),
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(Uri.parse(kTestEnvPubHost), method: HttpMethod.head, responseError: TimeoutException('Timeout error')),
+        FakeRequest(Uri.parse(kTestEnvGCloudHost), method: HttpMethod.head),
+      ]),
+    );
+
+    // Run the validation check and get the results
+    final ValidationResult result = await httpHostValidator.validate();
+
+    // Timeout duration for tests is set to 1 second
+    expect(
+      result.messages,
+      contains(const ValidationMessage.error('HTTP host "$kTestEnvPubHost" is not reachable. Reason: Failed to connect to host in 1 second')),
+    );
   });
 }

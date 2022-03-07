@@ -95,7 +95,6 @@ class TestBindingBase implements BindingBase {
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
-
   @override
   final FakeImageCache imageCache = FakeImageCache();
 

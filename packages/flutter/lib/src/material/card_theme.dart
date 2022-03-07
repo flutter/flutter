@@ -116,16 +116,14 @@ class CardTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      clipBehavior,
-      color,
-      shadowColor,
-      elevation,
-      margin,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    clipBehavior,
+    color,
+    shadowColor,
+    elevation,
+    margin,
+    shape,
+  );
 
   @override
   bool operator ==(Object other) {

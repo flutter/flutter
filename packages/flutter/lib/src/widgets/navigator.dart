@@ -215,7 +215,7 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      if (navigator?.widget.requestFocus == true) {
+      if (navigator?.widget.requestFocus ?? false) {
         navigator!.focusScopeNode.requestFocus();
       }
     });
@@ -231,7 +231,7 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator?.widget.requestFocus == true) {
+    if (navigator?.widget.requestFocus ?? false) {
       // This TickerFuture serves two purposes. First, we want to make sure
       // that animations triggered by other operations will finish before focusing the
       // navigator. Second, navigator.focusScopeNode might acquire more focused
@@ -514,7 +514,7 @@ abstract class Route<T> {
     return _navigator!._history.cast<_RouteEntry?>().firstWhere(
       (_RouteEntry? e) => e != null && _RouteEntry.isRoutePredicate(this)(e),
       orElse: () => null,
-    )?.isPresent == true;
+    )?.isPresent ?? false;
   }
 }
 
@@ -5359,7 +5359,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
       }
 
       assert(!entry.hasPage);
-      restorationEnabled = restorationEnabled && entry.restorationInformation?.isRestorable == true;
+      restorationEnabled = restorationEnabled && (entry.restorationInformation?.isRestorable ?? false);
       entry.restorationEnabled = restorationEnabled;
       if (restorationEnabled) {
         assert(entry.restorationId != null);

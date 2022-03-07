@@ -409,9 +409,6 @@ vars = {
           command: <String>['git', 'checkout', 'beta', '--'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'dev', '--'],
-        ),
-        const FakeCommand(
           command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
         ),
         const FakeCommand(

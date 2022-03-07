@@ -138,20 +138,18 @@ class NavigationRailThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      elevation,
-      unselectedLabelTextStyle,
-      selectedLabelTextStyle,
-      unselectedIconTheme,
-      selectedIconTheme,
-      groupAlignment,
-      labelType,
-      useIndicator,
-      indicatorColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    elevation,
+    unselectedLabelTextStyle,
+    selectedLabelTextStyle,
+    unselectedIconTheme,
+    selectedIconTheme,
+    groupAlignment,
+    labelType,
+    useIndicator,
+    indicatorColor,
+  );
 
   @override
   bool operator ==(Object other) {
