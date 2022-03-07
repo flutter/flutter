@@ -52,6 +52,7 @@ void main() {
 
     final Offset topLeftTarget = topLeft + (bottomRight - topLeft) * 0.2;
     await tester.tapAt(topLeftTarget);
+    await tester.pump();
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
         repaintFinder,
@@ -94,6 +95,7 @@ void main() {
 
     final Offset centerTarget = topLeft + (bottomRight - topLeft) * 0.5;
     await tester.tapAt(centerTarget);
+    await tester.pump();
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
         find.byType(MaterialApp),
@@ -137,6 +139,7 @@ void main() {
 
     final Offset bottomRightTarget = topLeft + (bottomRight - topLeft) * 0.8;
     await tester.tapAt(bottomRightTarget);
+    await tester.pump();
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
         repaintFinder,
