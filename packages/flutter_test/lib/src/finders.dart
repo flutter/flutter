@@ -663,7 +663,7 @@ abstract class _MatchTextFinder extends MatchFinder {
   /// In either case, [EditableText] widgets will also be matched.
   final bool findRichText;
 
-  bool textMatcher(String textToMatch);
+  bool matchesText(String textToMatch);
 
   @override
   bool matches(Element candidate) {
@@ -685,7 +685,7 @@ abstract class _MatchTextFinder extends MatchFinder {
 
   bool _matchesRichText(Widget widget) {
     if (widget is RichText) {
-      return textMatcher(widget.text.toPlainText());
+      return matchesText(widget.text.toPlainText());
     }
     return false;
   }
@@ -693,16 +693,16 @@ abstract class _MatchTextFinder extends MatchFinder {
   bool _matchesNonRichText(Widget widget) {
     if (widget is Text) {
       if (widget.data != null) {
-        return textMatcher(widget.data!);
+        return matchesText(widget.data!);
       }
       assert(widget.textSpan != null);
-      return textMatcher(widget.textSpan!.toPlainText());
+      return matchesText(widget.textSpan!.toPlainText());
     }
     return false;
   }
 
   bool _matchesEditableText(EditableText widget) {
-    return textMatcher(widget.controller.text);
+    return matchesText(widget.controller.text);
   }
 }
 
@@ -719,7 +719,7 @@ class _TextFinder extends _MatchTextFinder {
   String get description => 'text "$text"';
 
   @override
-  bool textMatcher(String textToMatch) {
+  bool matchesText(String textToMatch) {
     return textToMatch == text;
   }
 }
@@ -737,7 +737,7 @@ class _TextContainingFinder extends _MatchTextFinder {
   String get description => 'text containing $pattern';
 
   @override
-  bool textMatcher(String textToMatch) {
+  bool matchesText(String textToMatch) {
     return textToMatch.contains(pattern);
   }
 }
