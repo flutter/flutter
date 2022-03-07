@@ -21,12 +21,15 @@ void main() {
   const int testIntervalPercent = 50;
 
   testWidgets('InkSparkle renders with sparkles', (WidgetTester tester) async {
+    final Key repaintKey = UniqueKey();
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Theme(
-            data: ThemeData(splashFactory: InkSparkle.splashFactory),
-            child: RepaintBoundary(
+          child: RepaintBoundary(
+            key: repaintKey,
+            child: Theme(
+              data: ThemeData(splashFactory: InkSparkle.splashFactory),
               child: ElevatedButton(
                 child: const Text('Sparkle!'),
                 onPressed: () { },
@@ -37,7 +40,7 @@ void main() {
       ),
     ));
     final Finder buttonFinder = find.text('Sparkle!');
-    final Finder repaintFinder = find.byType(RepaintBoundary);
+    final Finder repaintFinder = find.byKey(repaintKey);
     await tester.tap(buttonFinder);
 
     // Warm up shader. Compilation is of the order of 10 milliseconds and 
@@ -78,7 +81,7 @@ void main() {
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
         repaintFinder,
-        matchesGoldenFile('ink_sparkle._bottom_right.$i.png'),
+        matchesGoldenFile('ink_sparkle.bottom_right.$i.png'),
       );
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
