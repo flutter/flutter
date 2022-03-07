@@ -78,7 +78,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder textContaining(
-    Pattern pattern, { 
+    Pattern pattern, {
     bool findRichText = false,
     bool skipOffstage = true,
   }) {
@@ -644,14 +644,11 @@ abstract class MatchFinder extends Finder {
   }
 }
 
-class _TextFinder extends MatchFinder {
-  _TextFinder(
-    this.text, {
+abstract class _MatchTextFinder extends MatchFinder {
+  _MatchTextFinder({
     this.findRichText = false,
     bool skipOffstage = true,
   }) : super(skipOffstage: skipOffstage);
-
-  final String text;
 
   /// Whether standalone [RichText] widgets should be found or not.
   ///
@@ -665,101 +662,83 @@ class _TextFinder extends MatchFinder {
   ///
   /// In either case, [EditableText] widgets will also be matched.
   final bool findRichText;
+
+  bool textMatcher(String textToMatch);
+
+  @override
+  bool matches(Element candidate) {
+    final Widget widget = candidate.widget;
+    if (widget is EditableText) {
+      return _matchesEditableText(widget);
+    }
+
+    if (!findRichText) {
+      return _matchesNonRichText(widget);
+    }
+    // It would be sufficient to always use _matchesRichText if we wanted to
+    // match both standalone RichText widgets as well as Text widgets. However,
+    // the find.text() finder used to always ignore standalone RichText widgets,
+    // which is why we need the _matchesNonRichText method in order to not be
+    // backwards-compatible and not break existing tests.
+    return _matchesRichText(widget);
+  }
+
+  bool _matchesRichText(Widget widget) {
+    if (widget is RichText) {
+      return textMatcher(widget.text.toPlainText());
+    }
+    return false;
+  }
+
+  bool _matchesNonRichText(Widget widget) {
+    if (widget is Text) {
+      if (widget.data != null) {
+        return textMatcher(widget.data!);
+      }
+      assert(widget.textSpan != null);
+      return textMatcher(widget.textSpan!.toPlainText());
+    }
+    return false;
+  }
+
+  bool _matchesEditableText(EditableText widget) {
+    return textMatcher(widget.controller.text);
+  }
+}
+
+class _TextFinder extends _MatchTextFinder {
+  _TextFinder(
+    this.text, {
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) : super(findRichText: findRichText, skipOffstage: skipOffstage);
+
+  final String text;
 
   @override
   String get description => 'text "$text"';
 
   @override
-  bool matches(Element candidate) {
-    final Widget widget = candidate.widget;
-    if (widget is EditableText)
-      return _matchesEditableText(widget);
-
-    if (!findRichText)
-      return _matchesNonRichText(widget);
-    // It would be sufficient to always use _matchesRichText if we wanted to
-    // match both standalone RichText widgets as well as Text widgets. However,
-    // the find.text() finder used to always ignore standalone RichText widgets,
-    // which is why we need the _matchesNonRichText method in order to not be
-    // backwards-compatible and not break existing tests.
-    return _matchesRichText(widget);
-  }
-
-  bool _matchesRichText(Widget widget) {
-    if (widget is RichText)
-      return widget.text.toPlainText() == text;
-    return false;
-  }
-
-  bool _matchesNonRichText(Widget widget) {
-    if (widget is Text) {
-      if (widget.data != null)
-        return widget.data == text;
-      assert(widget.textSpan != null);
-      return widget.textSpan!.toPlainText() == text;
-    }
-    return false;
-  }
-
-  bool _matchesEditableText(EditableText widget) {
-    return widget.controller.text == text;
+  bool textMatcher(String textToMatch) {
+    return textToMatch == text;
   }
 }
 
-class _TextContainingFinder extends MatchFinder {
-  _TextContainingFinder(this.pattern, {
-    this.findRichText = false, 
+class _TextContainingFinder extends _MatchTextFinder {
+  _TextContainingFinder(
+    this.pattern, {
+    bool findRichText = false,
     bool skipOffstage = true,
-  }) : super(skipOffstage: skipOffstage);
+  }) : super(findRichText: findRichText, skipOffstage: skipOffstage);
 
   final Pattern pattern;
-
-  /// Whether standalone [RichText] widgets should be found or not.
-  ///
-  /// Defaults to `false`.
-  ///
-  /// If disabled, only [Text] widgets will be matched. [RichText] widgets
-  /// *without* a [Text] ancestor will be ignored.
-  /// If enabled, only [RichText] widgets will be matched. This *implicitly*
-  /// matches [Text] widgets as well since they always insert a [RichText]
-  /// child.
-  ///
-  /// In either case, [EditableText] widgets will also be matched.
-  final bool findRichText;
 
   @override
   String get description => 'text containing $pattern';
 
   @override
-  bool matches(Element candidate) {
-    final Widget widget = candidate.widget;
-    if (widget is EditableText) return _matchesEditableText(widget);
-
-    if (!findRichText) return _matchesNonRichText(widget);
-    // It would be sufficient to always use _matchesRichText if we wanted to
-    // match both standalone RichText widgets as well as Text widgets. However,
-    // the find.text() finder used to always ignore standalone RichText widgets,
-    // which is why we need the _matchesNonRichText method in order to not be
-    // backwards-compatible and not break existing tests.
-    return _matchesRichText(widget);
-  }
-
-  bool _matchesRichText(Widget widget) {
-    if (widget is RichText) return widget.text.toPlainText().contains(pattern);
-    return false;
-  }
-
-  bool _matchesNonRichText(Widget widget) {
-    if (widget is Text) {
-      if (widget.data != null) return widget.data!.contains(pattern);
-      assert(widget.textSpan != null);
-      return widget.textSpan!.toPlainText().contains(pattern);
-    }
-    return false;
-  }
-
-  bool _matchesEditableText(EditableText widget) {
-    return widget.controller.text.contains(pattern);
+  bool textMatcher(String textToMatch) {
+    return textToMatch.contains(pattern);
   }
 }
 
