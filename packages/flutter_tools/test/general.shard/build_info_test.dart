@@ -152,7 +152,7 @@ void main() {
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
-      'PACKAGE_CONFIG': 'foo/.packages',
+      'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
     });
   });
