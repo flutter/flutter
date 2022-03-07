@@ -58,6 +58,15 @@ inline ::testing::AssertionResult RectNear(impeller::Rect a, impeller::Rect b) {
                : ::testing::AssertionFailure() << "Rects are not equal.";
 }
 
+inline ::testing::AssertionResult ColorNear(impeller::Color a,
+                                            impeller::Color b) {
+  auto equal = NumberNear(a.red, b.red) && NumberNear(a.green, b.green) &&
+               NumberNear(a.blue, b.blue) && NumberNear(a.alpha, b.alpha);
+
+  return equal ? ::testing::AssertionSuccess()
+               : ::testing::AssertionFailure() << "Colors are not equal.";
+}
+
 inline ::testing::AssertionResult PointNear(impeller::Point a,
                                             impeller::Point b) {
   auto equal = NumberNear(a.x, b.x) && NumberNear(a.y, b.y);
@@ -76,5 +85,6 @@ inline ::testing::AssertionResult SizeNear(impeller::Size a, impeller::Size b) {
 #define ASSERT_MATRIX_NEAR(a, b) ASSERT_PRED2(&::MatrixNear, a, b)
 #define ASSERT_QUATERNION_NEAR(a, b) ASSERT_PRED2(&::QuaternionNear, a, b)
 #define ASSERT_RECT_NEAR(a, b) ASSERT_PRED2(&::RectNear, a, b)
+#define ASSERT_COLOR_NEAR(a, b) ASSERT_PRED2(&::ColorNear, a, b)
 #define ASSERT_POINT_NEAR(a, b) ASSERT_PRED2(&::PointNear, a, b)
 #define ASSERT_SIZE_NEAR(a, b) ASSERT_PRED2(&::SizeNear, a, b)
