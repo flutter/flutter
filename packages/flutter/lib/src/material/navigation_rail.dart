@@ -371,8 +371,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
     final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? defaults.backgroundColor!;
     final double elevation = widget.elevation ?? navigationRailTheme.elevation ?? defaults.elevation!;
-    final double minWidth = widget.minWidth ?? defaults.minWidth!;
-    final double minExtendedWidth = widget.minExtendedWidth ?? defaults.minExtendedWidth!;
+    final double minWidth = widget.minWidth ?? navigationRailTheme.minWidth ?? defaults.minWidth!;
+    final double minExtendedWidth = widget.minExtendedWidth ?? navigationRailTheme.minExtendedWidth ?? defaults.minExtendedWidth!;
     final TextStyle unselectedLabelTextStyle = widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle ?? defaults.unselectedLabelTextStyle!;
     final TextStyle selectedLabelTextStyle = widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle ?? defaults.selectedLabelTextStyle!;
     final IconThemeData unselectedIconTheme = widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme ?? defaults.unselectedIconTheme!;
@@ -558,9 +558,12 @@ class _RailDestination extends StatelessWidget {
 
     switch (labelType) {
       case NavigationRailLabelType.none:
+        // Split the destination spacing across the top and bottom to keep the icon centered.
+        final Widget? spacing = material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
+
         final Widget iconPart = Column(
           children: <Widget>[
-            if (material3) const SizedBox(height: 6),
+            if (spacing != null) spacing,
             SizedBox(
               width: minWidth,
               height: material3 ? null : minWidth,
@@ -574,7 +577,7 @@ class _RailDestination extends StatelessWidget {
                 ),
               ),
             ),
-            if (material3) const SizedBox(height: 6),
+            if (spacing != null) spacing,
           ],
         );
         if (extendedTransitionAnimation.value == 0) {
@@ -634,7 +637,7 @@ class _RailDestination extends StatelessWidget {
         final double minHeight = material3 ? 0 : minWidth;
         final Widget topSpacing = SizedBox(height: material3 ? 0 : verticalPadding);
         final Widget labelSpacing = SizedBox(height: material3 ? lerpDouble(0, _verticalIconLabelSpacingM3, appearingAnimationValue)! : 0);
-        final Widget bottomSpacing = SizedBox(height: material3 ? _verticalBottomPaddingM3 : verticalPadding);
+        final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : verticalPadding);
 
         content = Container(
           constraints: BoxConstraints(
@@ -676,7 +679,7 @@ class _RailDestination extends StatelessWidget {
         final double minHeight = material3 ? 0 : minWidth;
         final Widget topSpacing = SizedBox(height: material3 ? 0 : _verticalDestinationPaddingWithLabel);
         final Widget labelSpacing = SizedBox(height: material3 ? _verticalIconLabelSpacingM3 : 0);
-        final Widget bottomSpacing = SizedBox(height: material3 ? _verticalBottomPaddingM3 : _verticalDestinationPaddingWithLabel);
+        final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : _verticalDestinationPaddingWithLabel);
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -878,12 +881,14 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
 
+// There don't appear to be tokens for these values, but they are
+// shown in the spec.
 const double _horizontalDestinationPadding = 8.0;
 const double _verticalDestinationPaddingNoLabel = 24.0;
 const double _verticalDestinationPaddingWithLabel = 16.0;
 const Widget _verticalSpacer = SizedBox(height: 8.0);
 const double _verticalIconLabelSpacingM3 = 4.0;
-const double _verticalBottomPaddingM3 = 12.0;
+const double _verticalDestinationSpacingM3 = 12.0;
 
 class _DefaultsM2 extends NavigationRailThemeData {
   _DefaultsM2(BuildContext context)
@@ -934,7 +939,7 @@ class _DefaultsM2 extends NavigationRailThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_86
+// Generated version v0_90
 class _TokenDefaultsM3 extends NavigationRailThemeData {
   _TokenDefaultsM3(BuildContext context)
       : _theme = Theme.of(context),
