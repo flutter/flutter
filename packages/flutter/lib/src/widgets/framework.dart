@@ -1132,9 +1132,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// # Performance considerations
   ///
   /// Calls to [setState] cause a rebuild of the current widget and,
-  /// potentially, all of its children. This isn't efficient and generally not
-  /// desiderable. Generally, [setState] calls should be made on widgets with
-  /// small subtrees in order to rebuild the least amount of children.
+  /// potentially, all of its children. Generally, [setState] calls should be
+  /// made on widgets with small subtrees in order to rebuild the least amount
+  /// of children.
   ///
   /// If [setState] was frequently called by a ticker or a listener for example,
   /// move the state into a separated widget. In this way, rebuilds would be
