@@ -103,7 +103,7 @@ class InkSparkle extends InteractiveInkFeature {
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     // InkSparkle will not be painted until the async compilation completes.
-    InkSparkleFactory.compileShaderIfNeccessary();
+    _InkSparkleFactory.compileShaderIfNeccessary();
     
     controller.addInkFeature(this);
 
@@ -220,7 +220,7 @@ class InkSparkle extends InteractiveInkFeature {
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
-  static const InteractiveInkFeatureFactory splashFactory = InkSparkleFactory();
+  static const InteractiveInkFeatureFactory splashFactory = _InkSparkleFactory();
 
   @override
   void dispose() {
@@ -232,7 +232,7 @@ class InkSparkle extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     // InkSparkle can only paint if its shader has been compiled.
-    if (InkSparkleFactory._shaderManager == null) {
+    if (_InkSparkleFactory._shaderManager == null) {
       debugPrint(
        '''
        Skipping InkSparkle.paintFeature because the shader it relies on is not ready to be used.
@@ -279,7 +279,7 @@ class InkSparkle extends InteractiveInkFeature {
     final double rotation2 = turbulencePhase * _rotateLeft + 2.0 * math.pi;
     final double rotation3 = turbulencePhase * _rotateRight + 2.75 * math.pi;
 
-    return InkSparkleFactory._shaderManager!.shader(
+    return _InkSparkleFactory._shaderManager!.shader(
       // The following uniforms are the same throughout the animation.
       uColor: _colorToVector4(_color),
       uSparkleColor: Vector4(1.0, 1.0, 1.0, 1.0),
@@ -400,8 +400,8 @@ class InkSparkle extends InteractiveInkFeature {
   }
 }
 
-class InkSparkleFactory extends InteractiveInkFeatureFactory {
-  const InkSparkleFactory();
+class _InkSparkleFactory extends InteractiveInkFeatureFactory {
+  const _InkSparkleFactory();
 
 
   // TODO(clocksmith): Update this once shaders are precompiled.
