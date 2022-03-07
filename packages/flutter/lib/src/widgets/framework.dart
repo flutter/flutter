@@ -6053,31 +6053,14 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [insertRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [insertRenderObjectChild] instead of
-  /// [insertChildRenderObject]. The arguments stay the same. Subclasses should
-  /// _not_ call `super.insertRenderObjectChild(...)`.
+  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
+  /// The semantics of `slot` are determined by this element. For example, if
+  /// this element has a single child, the slot should always be null. If this
+  /// element has a list of children, the previous sibling element wrapped in an
+  /// [IndexedSlot] is a convenient value for the slot.
+  /// {@endtemplate}
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override insertRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void insertChildRenderObject(covariant RenderObject child, covariant Object? slot) {
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.insertChildRenderObject() is deprecated.'),
@@ -6102,20 +6085,7 @@ abstract class RenderObjectElement extends Element {
     }());
   }
 
-  /// Insert the given child into [renderObject] at the given slot.
-  ///
-  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  /// The semantics of `slot` are determined by this element. For example, if
-  /// this element has a single child, the slot should always be null. If this
-  /// element has a list of children, the previous sibling element wrapped in an
-  /// [IndexedSlot] is a convenient value for the slot.
-  /// {@endtemplate}
-  @protected
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    insertChildRenderObject(child, slot);
-  }
-
-  /// Move the given child to the given slot.
+  /// Move the given child from the given old slot to the given new slot.
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
@@ -6129,32 +6099,8 @@ abstract class RenderObjectElement extends Element {
   /// always having the same slot (and where children in different slots are never
   /// compared against each other for the purposes of updating one slot with the
   /// element from another slot) would never call this.
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [moveRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [moveRenderObjectChild] instead of
-  /// [moveChildRenderObject]. The `slot` argument becomes the `newSlot`
-  /// argument, and the method will now take a new `oldSlot` argument that
-  /// subclasses may find useful. Subclasses should _not_ call
-  /// `super.moveRenderObjectChild(...)`.
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override moveRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void moveChildRenderObject(covariant RenderObject child, covariant Object? slot) {
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.moveChildRenderObject() is deprecated.'),
@@ -6179,53 +6125,12 @@ abstract class RenderObjectElement extends Element {
     }());
   }
 
-  /// Move the given child from the given old slot to the given new slot.
-  ///
-  /// The given child is guaranteed to have [renderObject] as its parent.
-  ///
-  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  ///
-  /// This method is only ever called if [updateChild] can end up being called
-  /// with an existing [Element] child and a `slot` that differs from the slot
-  /// that element was previously given. [MultiChildRenderObjectElement] does this,
-  /// for example. [SingleChildRenderObjectElement] does not (since the `slot` is
-  /// always null). An [Element] that has a specific set of slots with each child
-  /// always having the same slot (and where children in different slots are never
-  /// compared against each other for the purposes of updating one slot with the
-  /// element from another slot) would never call this.
-  @protected
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
-    moveChildRenderObject(child, newSlot);
-  }
-
   /// Remove the given child from [renderObject].
   ///
-  /// The given child is guaranteed to have [renderObject] as its parent.
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [removeRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [removeRenderObjectChild] instead of
-  /// [removeChildRenderObject]. The method will now take a new `slot` argument
-  /// that subclasses may find useful. Subclasses should _not_ call
-  /// `super.removeRenderObjectChild(...)`.
+  /// The given child is guaranteed to have been inserted at the given `slot`
+  /// and have [renderObject] as its parent.
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override removeRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void removeChildRenderObject(covariant RenderObject child) {
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.removeChildRenderObject() is deprecated.'),
@@ -6248,15 +6153,6 @@ abstract class RenderObjectElement extends Element {
         ),
       ]);
     }());
-  }
-
-  /// Remove the given child from [renderObject].
-  ///
-  /// The given child is guaranteed to have been inserted at the given `slot`
-  /// and have [renderObject] as its parent.
-  @protected
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    removeChildRenderObject(child);
   }
 
   @override
