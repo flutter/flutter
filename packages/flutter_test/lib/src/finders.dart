@@ -65,8 +65,20 @@ class CommonFinders {
     );
   }
 
-  /// Finds [Text] and [EditableText] widgets which contain the given
-  /// `pattern` argument.
+  /// Finds [Text] and [EditableText], and optionally [RichText] widgets
+  /// which contain the given `pattern` argument.
+  ///
+  /// If `findRichText` is false, all standalone [RichText] widgets are
+  /// ignored and `pattern` is matched with [Text.data] or [Text.textSpan].
+  /// If `findRichText` is true, [RichText] widgets (and therefore also
+  /// [Text] and [Text.rich] widgets) are matched by comparing the
+  /// [InlineSpan.toPlainText] with the given `pattern`.
+  ///
+  /// For [EditableText] widgets, the `pattern` is always compared to the currentt
+  /// value of the [EditableText.controller].
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   ///
   /// ## Sample code
   ///
@@ -75,8 +87,16 @@ class CommonFinders {
   /// expect(find.textContain(RegExp(r'(\w+)')), findsOneWidget);
   /// ```
   ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  /// This will match [Text], [Text.rich], and [EditableText] widgets that
+  /// contain the given pattern : 'Back' or RegExp(r'(\w+)').
+  ///
+  /// ```dart
+  /// expect(find.textContain('Close', findRichText: true), findsOneWidget);
+  /// expect(find.textContain(RegExp(r'(\w+)'), findRichText: true), findsOneWidget);
+  /// ```
+  ///
+  /// This will match [Text], [Text.rich], [EditableText], as well as standalone
+  /// [RichText] widgets that contain the given pattern : 'Close' or RegExp(r'(\w+)').
   Finder textContaining(
     Pattern pattern, {
     bool findRichText = false,
