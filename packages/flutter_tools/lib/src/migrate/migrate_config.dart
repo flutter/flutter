@@ -3,19 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../globals.dart' as globals;
-import '../migrate/migrate_utils.dart';
 import '../flutter_project_metadata.dart';
 import '../project.dart';
-import '../cache.dart';
+import '../version.dart';
 
 /// Represents one .migrate_config file.
 ///
@@ -29,56 +25,105 @@ class MigrateConfig {
   /// Creates a MigrateConfig by explicitly providing all values.
   MigrateConfig({
     required this.platform,
-    required this.createRevision,
-    required this.baseRevision,
-    required this.unmanagedFiles
-  }) {}
+    this.createRevision,
+    this.baseRevision,
+    required this.unmanagedFiles,
+    required this.logger,
+  });
 
-  /// Creates a MigrateConfig by parsing an existing migrate config yaml file.
-  MigrateConfig.fromFile(File file) : unmanagedFiles = <String>[] {
-    final dynamic yamlRoot = loadYaml(file.readAsStringSync());
-    if (!validate(yamlRoot)) {
+  /// Creates a MigrateConfig by parsing an existing .migrate_config yaml file.
+  MigrateConfig.fromFile(File file, this.logger) : platform = SupportedPlatform.root, unmanagedFiles = <String>[] {
+    final Object? yamlRoot = loadYaml(file.readAsStringSync());
+    if (!_validate(yamlRoot)) {
       // Error
-      globals.logger.printError('Invalid migrate config yaml file found at ${file.path}');
-      return;
+      throwToolExit('Invalid migrate config yaml file found at ${file.path}');
     }
-    final YamlMap map = yamlRoot as YamlMap;
-    platform = map['platform']!;
-    createRevision = map['createRevision'];
-    baseRevision = map['baseRevision'];
-    if (map['unmanagedFiles'] != null) {
-      unmanagedFiles = List<String>.from(map['unmanagedFiles']);
+    final YamlMap map = yamlRoot! as YamlMap;
+    platform = SupportedPlatform.values.firstWhere((SupportedPlatform platform) => platform.toString() == 'SupportedPlatform.${map['platform'] as String}');
+    createRevision = map['createRevision'] as String?;
+    baseRevision = map['baseRevision'] as String?;
+    final Object? unmanagedFilesMap = map['unmanagedFiles'];
+    if (unmanagedFilesMap is YamlList && unmanagedFilesMap.isNotEmpty) {
+      unmanagedFiles = List<String>.from(unmanagedFilesMap.value.cast<String>());
     } else {
       unmanagedFiles = <String>[];
     }
   }
+
+  /// The name of the config file.
   static const String kFileName = '.migrate_config';
-  static const Map<String, List<String>> kIosDefaultUnmanagedFiles = const <String, List<String>>{
+
+  /// A mapping of the files that are unmanaged by defult for each platform.
+  static const Map<String, List<String>> _kDefaultUnmanagedFiles = <String, List<String>>{
     'root': <String>['lib/main.dart'],
     'ios': <String>['Runner.xcodeproj/project.pbxproj'],
   };
 
-  String? platform;
+  /// The platform this config file is describing.
+  SupportedPlatform platform;
+
+  /// The Flutter SDK revision this platform was created by.
+  ///
+  /// Null if the initial create git revision is unknown.
   String? createRevision;
+
+  /// The Flutter SDK revision this platform was last migrated by.
+  ///
+  /// Null if the project was never migrated or the revision is unknown.
   String? baseRevision;
+
+  /// A list of paths relative to this file the migrate tool should ignore.
+  ///
+  /// These files are typically user-owned files that should not be changed.
   List<String> unmanagedFiles;
+
+  /// The logger to use for status updates.
+  Logger logger;
+
+  /// Verifies the expected yaml keys are present in the file.
+  bool _validate(Object? yamlRoot) {
+    final Map<String, Type> validations = <String, Type>{
+      'platform': String,
+      'createRevision': String,
+      'baseRevision': String,
+      'unmanagedFiles': YamlList,
+    };
+    if (yamlRoot != null && yamlRoot is! YamlMap) {
+      return false;
+    }
+    final YamlMap map = yamlRoot! as YamlMap;
+    bool isValid = true;
+    for (final MapEntry<String, Object> entry in validations.entries) {
+      if (!map.keys.contains(entry.key)) {
+        isValid = false;
+        logger.printError('The key ${entry.key} was not found');
+        break;
+      }
+      if (map[entry.key] != null && (map[entry.key] as Object).runtimeType != entry.value) {
+        isValid = false;
+        logger.printError('The value of key ${entry.key} was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
+        break;
+      }
+    }
+    return isValid;
+  }
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
   ///
   /// We write the file manually instead of with a template because this
   /// needs to be able to write the .migrate_config file into legacy apps.
   void writeFile({Directory? projectDirectory}) {
-    File file = getFileFromPlatform(platform, projectDirectory: projectDirectory);
-    file.createSync(recursive: true);
     String unmanagedFilesString = '';
-    for (String path in unmanagedFiles) {
-      unmanagedFilesString += '  - $path\n';
+    for (final String path in unmanagedFiles) {
+      unmanagedFilesString += "  - '$path'\n";
     }
-    file.writeAsStringSync('''
+    getFileFromPlatform(platform, projectDirectory: projectDirectory)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
 # Generated section.
-platform: $platform
-createRevision: $createRevision
-baseRevision: $baseRevision
+platform: '${platform.toString().split('.').last}'
+createRevision: ${createRevision == null ? 'null' : "'$createRevision'"}
+baseRevision: ${baseRevision == null ? 'null' : "'$baseRevision'"}
 
 # User provided section
 
@@ -92,123 +137,41 @@ $unmanagedFilesString
     flush: true);
   }
 
-  /// Returns the File that the migrate config belongs given a platform and a project directory.
-  static File getFileFromPlatform(String? platform, {Directory? projectDirectory}) {
-    Directory? platformDir;
-    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
-    switch (platform) {
-      case 'root': {
-        platformDir = project.directory;
-        break;
-      }
-      case 'android': {
-        platformDir = project.android.hostAppGradleRoot;
-        break;
-      }
-      case 'ios': {
-        platformDir = project.ios.hostAppRoot;
-        break;
-      }
-      case 'web': {
-        platformDir = project.web.directory;
-        break;
-      }
-      case 'macos': {
-        platformDir = project.macos.hostAppRoot;
-        break;
-      }
-      case 'linux': {
-        platformDir = project.linux.managedDirectory.parent;
-        break;
-      }
-      case 'windows': {
-        platformDir = project.windows.managedDirectory.parent;
-        break;
-      }
-      case 'windowsUwp': {
-        platformDir = project.windowsUwp.managedDirectory.parent;
-        break;
-      }
-      case 'fuchsia': {
-        platformDir = project.fuchsia.editableHostAppDirectory;
-        break;
-      }
-    }
-    if (platformDir == null) {
-      throwToolExit('Invalid platform when creating MigrateConfig', exitCode: 1);
-    }
-    return platformDir.childFile(kFileName);
-  }
-
+  /// Returns the absolute path of the platform directory this config belongs to.
+  ///
+  /// For example, if the config is the android config with a project directory of `/project`,
+  /// the base path returned would be `/project/android`.
   String getBasePath(Directory? projectDirectory) {
     return getFileFromPlatform(platform, projectDirectory: projectDirectory).parent.absolute.path;
   }
 
-  /// Verifies the expected yaml keys are present in the file.
-  bool validate(dynamic yamlRoot) {
-    if (yamlRoot is! YamlMap) {
-      return false;
-    }
-    final YamlMap map = yamlRoot as YamlMap;
-    return map.keys.contains('platform') &&
-    map.keys.contains('createRevision') &&
-    map.keys.contains('baseRevision') &&
-    map.keys.contains('unmanagedFiles');
-  }
-
-  /// Returns a list of platform names that are supported by the project.
-  static List<String> getSupportedPlatforms({bool includeRoot = false, FlutterProject? flutterProject}) {
-    final List<String> platforms = includeRoot ? <String>['root'] : <String>[];
-    if (flutterProject == null) {
-      flutterProject = FlutterProject.current();
-    }
-    if (flutterProject.android.existsSync()) {
-      platforms.add('android');
-    }
-    if (flutterProject.ios.existsSync()) {
-      platforms.add('ios');
-    }
-    if (flutterProject.web.existsSync()) {
-      platforms.add('web');
-    }
-    if (flutterProject.macos.existsSync()) {
-      platforms.add('macos');
-    }
-    if (flutterProject.linux.existsSync()) {
-      platforms.add('linux');
-    }
-    if (flutterProject.windows.existsSync()) {
-      platforms.add('windows');
-    }
-    if (flutterProject.windowsUwp.existsSync()) {
-      platforms.add('windowsUwp');
-    }
-    if (flutterProject.fuchsia.existsSync()) {
-      platforms.add('fuchsia');
-    }
-    return platforms;
-  }
-
-  /// Searches the flutter project for all .migrate_config files. Optionally, missing files can be
-  /// initialized with default values.
-  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, String? currentRevision, String? createRevision, bool create = true}) async {
-    if (platforms == null) {
-      platforms = getSupportedPlatforms(includeRoot: true, flutterProject: projectDirectory == null ? null : FlutterProject.fromDirectory(projectDirectory));
-    }
-    print(platforms);
-
-    List<MigrateConfig> configs = <MigrateConfig>[];
-    for (String platform in platforms) {
-      if (MigrateConfig.getFileFromPlatform(platform, projectDirectory: projectDirectory).existsSync()) {
+  /// Searches the flutter project for all .migrate_config files.
+  ///
+  /// Optionally, missing files can be initialized with default values.
+  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({
+    List<SupportedPlatform>? platforms,
+    Directory? projectDirectory,
+    String? currentRevision,
+    String? createRevision,
+    bool create = true,
+    required Logger logger,
+  }) async {
+    final FlutterProject flutterProject = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
+    platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
+    final List<MigrateConfig> configs = <MigrateConfig>[];
+    for (final SupportedPlatform platform in platforms) {
+      final File fileFromPlatform = getFileFromPlatform(platform, projectDirectory: projectDirectory);
+      if (fileFromPlatform.existsSync()) {
         // Existing config. Parsing.
-        configs.add(MigrateConfig.fromFile(getFileFromPlatform(platform, projectDirectory: projectDirectory)));
+        configs.add(MigrateConfig.fromFile(fileFromPlatform, logger));
       } else {
         // No config found, creating empty config.
-        MigrateConfig newConfig = MigrateConfig(
+        final MigrateConfig newConfig = MigrateConfig(
           platform: platform,
           createRevision: createRevision,
           baseRevision: currentRevision,
-          unmanagedFiles: kIosDefaultUnmanagedFiles[platform] != null ? kIosDefaultUnmanagedFiles[platform]! : <String>[],
+          unmanagedFiles: _kDefaultUnmanagedFiles[platform] ?? <String>[],
+          logger: logger,
         );
         if (create) {
           newConfig.writeFile(projectDirectory: projectDirectory);
@@ -219,16 +182,64 @@ $unmanagedFilesString
     return configs;
   }
 
+  /// Returns the File that the migrate config belongs given a platform and a project directory.
+  ///
+  /// A projectDirectory can be specified to obtain files that are based on a different project than
+  /// the current working directory Flutter project.
+  static File getFileFromPlatform(SupportedPlatform platform, {Directory? projectDirectory}) {
+    Directory? platformDir;
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
+    switch (platform) {
+      case SupportedPlatform.root: {
+        platformDir = project.directory;
+        break;
+      }
+      case SupportedPlatform.android: {
+        platformDir = project.android.hostAppGradleRoot;
+        break;
+      }
+      case SupportedPlatform.ios: {
+        platformDir = project.ios.hostAppRoot;
+        break;
+      }
+      case SupportedPlatform.web: {
+        platformDir = project.web.directory;
+        break;
+      }
+      case SupportedPlatform.macos: {
+        platformDir = project.macos.hostAppRoot;
+        break;
+      }
+      case SupportedPlatform.linux: {
+        platformDir = project.linux.managedDirectory.parent;
+        break;
+      }
+      case SupportedPlatform.windows: {
+        platformDir = project.windows.managedDirectory.parent;
+        break;
+      }
+      case SupportedPlatform.windowsuwp: {
+        platformDir = project.windowsUwp.managedDirectory.parent;
+        break;
+      }
+      case SupportedPlatform.fuchsia: {
+        platformDir = project.fuchsia.editableHostAppDirectory;
+        break;
+      }
+    }
+    return platformDir.childFile(kFileName);
+  }
+
   /// Finds the fallback revision to use when no base revision is found in the .migrate_config.
-  static Future<String> getFallbackBaseRevision() async {
+  static Future<String> getFallbackBaseRevision(Logger logger, FlutterVersion flutterVersion) async {
     // Use the .metadata file if it exists.
     final File metadataFile = FlutterProject.current().directory.childFile('.metadata');
     if (metadataFile.existsSync()) {
-      final FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, globals.logger);
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
       if (metadata.versionRevision != null) {
         return metadata.versionRevision!;
       }
     }
-    return MigrateUtils.getGitHash(Cache.flutterRoot!);
+    return flutterVersion.frameworkRevision;
   }
 }

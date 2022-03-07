@@ -4,9 +4,10 @@
 
 @Timeout(Duration(seconds: 600))
 
+import 'dart:io';
+// import 'package:flutter_tools/src/base/io.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/migrate/migrate_utils.dart';
+// import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_utils.dart';
@@ -25,10 +26,26 @@ class MigrateProject extends Project {
     if (androidLocalProperties != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
-    Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
+    final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
+    final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 
-    ProcessResult result = await processManager.run(<String>[
-      'cipd',
+    await processManager.run(<String>[
+      'git',
+      'clone',
+      'https://chromium.googlesource.com/chromium/tools/depot_tools',
+      depotToolsDir.path,
+    ], workingDirectory: dir.path);
+
+    final File cipdFile = depotToolsDir.childFile(Platform.isWindows ? 'cipd.bat' : 'cipd');
+    await processManager.run(<String>[
+      cipdFile.path,
+      'init',
+      tempDir.path,
+      '-force',
+    ], workingDirectory: dir.path);
+
+    await processManager.run(<String>[
+      cipdFile.path,
       'install',
       'flutter/test/full_app_fixtures/vanilla',
       version,
@@ -37,43 +54,55 @@ class MigrateProject extends Project {
     ], workingDirectory: dir.path);
 
     // This cp command changes the symlinks to real files so the tool can edit them.
-    result = await processManager.run(<String>[
-      'cp',
-      '-R',
-      '-L',
-      '-f',
-      '${tempDir.path}/',
-      dir.path,
-    ]);
+    if (Platform.isWindows) {
+      await processManager.run(<String>[
+        'robocopy',
+        tempDir.path,
+        dir.path,
+        '*',
+        '/E',
+        '/mov',
+      ]);
+    } else {
+      await processManager.run(<String>[
+        'cp',
+        '-R',
+        '-L',
+        '-f',
+        '${tempDir.path}/.',
+        dir.path,
+      ]);
 
-    result = await processManager.run(<String>[
-      'rm',
-      '-rf',
-      '.cipd',
-    ], workingDirectory: dir.path);
-
-    final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
-    for (FileSystemEntity file in allFiles) {
-      if (file is! File) {
-        continue;
-      }
-      result = await processManager.run(<String>[
-        'chmod',
-        '+w',
-        file.path,
+      await processManager.run(<String>[
+        'rm',
+        '-rf',
+        '.cipd',
       ], workingDirectory: dir.path);
+
+      final List<FileSystemEntity> allFiles = dir.listSync(recursive: true);
+      for (final FileSystemEntity file in allFiles) {
+        if (file is! File) {
+          continue;
+        }
+        await processManager.run(<String>[
+          'chmod',
+          '+w',
+          file.path,
+        ], workingDirectory: dir.path);
+      }
     }
+
     if (!vanilla) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), libMain);
       writeFile(fileSystem.path.join(dir.path, 'lib', 'other.dart'), libOther);
       writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspecCustom);
     }
     tryToDelete(tempDir);
+    tryToDelete(depotToolsDir);
   }
 
   final String version;
   final bool vanilla;
-  late String _ensurePath;
   late String _appPath;
 
   // Maintain the same pubspec as the configured app.
