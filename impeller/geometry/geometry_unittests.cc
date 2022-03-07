@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <limits>
 #include "impeller/geometry/geometry_unittests.h"
 #include <limits>
 #include "flutter/testing/testing.h"
@@ -565,6 +564,29 @@ TEST(GeometryTest, PointReflect) {
     Point a(-1, -1);
     auto reflected = a.Reflect(axis);
     ASSERT_POINT_NEAR(reflected, -a);
+  }
+}
+
+TEST(GeometryTest, ColorPremultiply) {
+  {
+    Color a(1.0, 0.5, 0.2, 0.5);
+    Color premultiplied = a.Premultiply();
+    Color expected = Color(0.5, 0.25, 0.1, 0.5);
+    ASSERT_COLOR_NEAR(premultiplied, expected);
+  }
+
+  {
+    Color a(0.5, 0.25, 0.1, 0.5);
+    Color unpremultiplied = a.Unpremultiply();
+    Color expected = Color(1.0, 0.5, 0.2, 0.5);
+    ASSERT_COLOR_NEAR(unpremultiplied, expected);
+  }
+
+  {
+    Color a(0.5, 0.25, 0.1, 0.0);
+    Color unpremultiplied = a.Unpremultiply();
+    Color expected = Color(0.0, 0.0, 0.0, 0.0);
+    ASSERT_COLOR_NEAR(unpremultiplied, expected);
   }
 }
 
