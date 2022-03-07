@@ -475,6 +475,8 @@ double _getTargetRadius(
 /// 
 /// precision highp float;
 /// 
+/// // TODO(antrob): Put these in a more logical order (e.g. separate consts vs varying, etc)
+/// 
 /// layout(location = 0) uniform vec4 u_color;
 /// layout(location = 1) uniform float u_alpha;
 /// layout(location = 2) uniform vec4 u_sparkle_color;
