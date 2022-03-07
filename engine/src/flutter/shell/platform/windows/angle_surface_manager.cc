@@ -95,6 +95,12 @@ bool AngleSurfaceManager::Initialize() {
       // behalf of the application when it gets suspended.
       EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
       EGL_TRUE,
+
+      // This extension allows angle to render directly on a D3D swapchain
+      // in the correct orientation on D3D11.
+      EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE,
+      EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE,
+
       EGL_NONE,
   };
 
