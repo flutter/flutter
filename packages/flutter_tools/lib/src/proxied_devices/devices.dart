@@ -16,6 +16,7 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
+import 'file_transfer.dart';
 
 bool _isNullable<T>() => null is T;
 
@@ -29,15 +30,22 @@ T _cast<T>(Object? object) {
 
 /// A [DeviceDiscovery] that will connect to a flutter daemon and connects to
 /// the devices remotely.
+///
+/// If [deltaFileTransfer] is true, the proxy will use an rsync-like algorithm that
+/// only transfers the changed part of the application package for deployment.
 class ProxiedDevices extends DeviceDiscovery {
   ProxiedDevices(this.connection, {
+    bool deltaFileTransfer = true,
     required Logger logger,
-  }) : _logger = logger;
+  }) : _deltaFileTransfer = deltaFileTransfer,
+       _logger = logger;
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
   final Logger _logger;
+
+  final bool _deltaFileTransfer;
 
   @override
   bool get supportsPlatform => true;
@@ -70,6 +78,7 @@ class ProxiedDevices extends DeviceDiscovery {
     final Map<String, Object?> capabilities = _cast<Map<String, Object?>>(device['capabilities']);
     return ProxiedDevice(
       connection, _cast<String>(device['id']),
+      deltaFileTransfer: _deltaFileTransfer,
       category: Category.fromString(_cast<String>(device['category'])),
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
       targetPlatform: getTargetPlatformForName(_cast<String>(device['platform'])),
@@ -92,8 +101,12 @@ class ProxiedDevices extends DeviceDiscovery {
 /// A [Device] that acts as a proxy to remotely connected device.
 ///
 /// The communication happens via a flutter daemon.
+///
+/// If [deltaFileTransfer] is true, the proxy will use an rsync-like algorithm that
+/// only transfers the changed part of the application package for deployment.
 class ProxiedDevice extends Device {
   ProxiedDevice(this.connection, String id, {
+    bool deltaFileTransfer = true,
     required Category? category,
     required PlatformType? platformType,
     required TargetPlatform targetPlatform,
@@ -109,7 +122,8 @@ class ProxiedDevice extends Device {
     required this.supportsFastStart,
     required bool supportsHardwareRendering,
     required Logger logger,
-  }): _isLocalEmulator = isLocalEmulator,
+  }): _deltaFileTransfer = deltaFileTransfer,
+      _isLocalEmulator = isLocalEmulator,
       _emulatorId = emulatorId,
       _sdkNameAndVersion = sdkNameAndVersion,
       _supportsHardwareRendering = supportsHardwareRendering,
@@ -124,6 +138,8 @@ class ProxiedDevice extends Device {
   final DaemonConnection connection;
 
   final Logger _logger;
+
+  final bool _deltaFileTransfer;
 
   @override
   final String name;
@@ -288,9 +304,37 @@ class ProxiedDevice extends Device {
     final String fileName = binary.basename;
     final Completer<String> idCompleter = Completer<String>();
     _applicationPackageMap[path] = idCompleter.future;
-    await connection.sendRequest('proxy.writeTempFile', <String, Object>{
-      'path': fileName,
-    }, await binary.readAsBytes());
+
+    final Map<String, Object> args = <String, Object>{'path': fileName};
+
+    Map<String, Object?>? rollingHashResultJson;
+    if (_deltaFileTransfer) {
+     rollingHashResultJson = _cast<Map<String, Object?>?>(await connection.sendRequest('proxy.calculateFileHashes', args));
+    }
+
+    if (rollingHashResultJson == null) {
+      // Either file not found on the remote end, or deltaFileTransfer is set to false, transfer the file directly.
+      if (_deltaFileTransfer) {
+        _logger.printTrace('Delta file transfer is enabled but file is not found on the remote end, do a full transfer.');
+      }
+
+      await connection.sendRequest('proxy.writeTempFile', args, await binary.readAsBytes());
+    } else {
+      final BlockHashes rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
+      final List<FileDeltaBlock> delta = await FileTransfer().computeDelta(binary, rollingHashResult);
+
+      // Delta is empty if the file does not need to be updated
+      if (delta.isNotEmpty) {
+        final List<Map<String, Object>> deltaJson = delta.map((FileDeltaBlock block) => block.toJson()).toList();
+        final Uint8List buffer = await FileTransfer().binaryForRebuilding(binary, delta);
+
+        await connection.sendRequest('proxy.updateFile', <String, Object>{
+          'path': fileName,
+          'delta': deltaJson,
+        }, buffer);
+      }
+    }
+
     final String id = _cast<String>(await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
       'targetPlatform': getNameForTargetPlatform(_targetPlatform),
       'applicationBinary': fileName,

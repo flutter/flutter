@@ -17,7 +17,7 @@ class NotifyMaterial extends StatelessWidget {
   const NotifyMaterial({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    LayoutChangedNotification().dispatch(context);
+    const LayoutChangedNotification().dispatch(context);
     return Container();
   }
 }
@@ -420,7 +420,8 @@ void main() {
           ),
       );
 
-      expect(find.byKey(materialKey), hasNoImmediateClip);
+      final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+      expect(renderClip.clipBehavior, equals(Clip.none));
     });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {

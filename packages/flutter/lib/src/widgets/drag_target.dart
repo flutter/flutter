@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
@@ -498,6 +499,12 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   void dispose() {
     _disposeRecognizerIfInactive();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _recognizer!.gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    super.didChangeDependencies();
   }
 
   // This gesture recognizer has an unusual lifetime. We want to support the use

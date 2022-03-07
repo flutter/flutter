@@ -738,5 +738,5 @@ class _CustomColor extends Color {
   bool operator ==(Object other) => isEqual ?? super == other;
 
   @override
-  int get hashCode => hashValues(super.hashCode, isEqual);
+  int get hashCode => Object.hash(super.hashCode, isEqual);
 }

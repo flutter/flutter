@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
@@ -892,5 +890,5 @@ class _ModifierSidePair {
   }
 
   @override
-  int get hashCode => ui.hashValues(modifier, side);
+  int get hashCode => Object.hash(modifier, side);
 }
