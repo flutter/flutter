@@ -917,6 +917,7 @@ public class FlutterView extends SurfaceView
               // still be called by a stale reference after released==true and mNativeView==null.
               return;
             }
+
             mNativeView
                 .getFlutterJNI()
                 .markTextureFrameAvailable(SurfaceTextureRegistryEntry.this.id);

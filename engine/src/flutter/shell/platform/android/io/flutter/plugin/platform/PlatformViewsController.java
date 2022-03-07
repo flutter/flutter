@@ -188,10 +188,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final PlatformView platformView = viewFactory.create(context, viewId, createParams);
           platformViews.put(viewId, platformView);
 
-          final PlatformViewWrapper wrapperView = new PlatformViewWrapper(context);
           final TextureRegistry.SurfaceTextureEntry textureEntry =
               textureRegistry.createSurfaceTexture();
-          wrapperView.setTexture(textureEntry.surfaceTexture());
+          final PlatformViewWrapper wrapperView = new PlatformViewWrapper(context, textureEntry);
           wrapperView.setTouchProcessor(androidTouchProcessor);
 
           final int physicalWidth = toPhysicalPixels(request.logicalWidth);
