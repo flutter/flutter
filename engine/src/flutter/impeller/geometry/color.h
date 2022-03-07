@@ -49,6 +49,17 @@ struct Color {
            alpha == c.alpha;
   }
 
+  constexpr Color Premultiply() const {
+    return {red * alpha, green * alpha, blue * alpha, alpha};
+  }
+
+  constexpr Color Unpremultiply() const {
+    if (ScalarNearlyEqual(alpha, 0.0)) {
+      return Color::BlackTransparent();
+    }
+    return {red / alpha, green / alpha, blue / alpha, alpha};
+  }
+
   static constexpr Color White() { return {1.0, 1.0, 1.0, 1.0}; }
 
   static constexpr Color Black() { return {0.0, 0.0, 0.0, 1.0}; }
