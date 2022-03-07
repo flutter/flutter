@@ -53,19 +53,6 @@ if (target_cpu == "") {
   }
 }
 
-if (is_wasm) {
-  target_os = "wasm"
-  is_android = false
-  is_chromeos = false
-  is_fuchsia = false
-  is_fuchsia_host = false
-  is_ios = false
-  is_linux = false
-  is_mac = false
-  is_posix = false
-  is_win = false
-}
-
 if (current_cpu == "") {
   current_cpu = target_cpu
 }
@@ -281,6 +268,16 @@ if (current_os == "win") {
   is_linux = false
   is_mac = false
   is_posix = true
+  is_win = false
+} else if (target_os == "wasm") {
+  is_android = false
+  is_chromeos = false
+  is_fuchsia = false
+  is_fuchsia_host = false
+  is_ios = false
+  is_linux = false
+  is_mac = false
+  is_posix = false
   is_win = false
 }
 
@@ -559,6 +556,13 @@ if (custom_toolchain != "") {
   }
   set_default_toolchain("//build/toolchain/fuchsia")
 } else if (is_wasm) {
+  ar = "ar"
+  cc = "cc"
+  cxx = "c++"
+  win_vc = ""
+  win_toolchain_version = ""
+  clang_win = ""
+  clang_win_version = ""
   host_toolchain = "//build/toolchain/wasm"
   set_default_toolchain("//build/toolchain/wasm")
 } else {

@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# If building for WASM, we only want to build CanvasKit. The flutter build
+# is ignored.
+if (target_cpu != "wasm") {
 # This target will be built if no target is specified when invoking ninja.
 group("default") {
   testonly = true
@@ -18,10 +21,17 @@ group("dist") {
   ]
 }
 
-group("archives") {
-  testonly = true
+  group("archives") {
+    testonly = true
 
-  deps = [
-    "//flutter/build/archives:artifacts"
-  ]
+    deps = [
+      "//flutter/build/archives:artifacts"
+    ]
+  }
+} else {
+  group("default") {
+    deps = [
+      "//flutter/lib/web_ui:canvaskit"
+    ]
+  }
 }

@@ -237,7 +237,11 @@ template("gcc_toolchain") {
         unstripped_outfile = "{{root_out_dir}}/exe.unstripped/$exename"
       }
 
-      command = "$ld {{ldflags}} $coverage_flags -o $unstripped_outfile -Wl,--build-id=sha1 -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group $libs_section_prefix {{libs}} $libs_section_postfix"
+      build_id = "-Wl,--build-id=sha1"
+      if (is_wasm) {
+        build_id = ""
+      }
+      command = "$ld {{ldflags}} $coverage_flags -o $unstripped_outfile $build_id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group $libs_section_prefix {{libs}} $libs_section_postfix"
       if (defined(invoker.strip)) {
         strip = invoker.strip
         strip_command =

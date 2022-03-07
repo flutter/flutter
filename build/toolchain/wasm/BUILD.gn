@@ -22,7 +22,7 @@ gcc_toolchain("wasm") {
   ar = "$compiler_prefix$emsdk_dir/upstream/emscripten/emar --em-config $em_config_path"
   cc = "$compiler_prefix$emsdk_dir/upstream/emscripten/emcc --em-config $em_config_path"
   cxx = "$compiler_prefix$emsdk_dir/upstream/emscripten/em++ --em-config $em_config_path"
-  ld = cc
+  ld = cxx
   readelf = "readelf"
   nm = "nm"
 

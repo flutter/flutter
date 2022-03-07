@@ -290,8 +290,6 @@ config("compiler") {
       "NO_EXIT_RUNTIME=1",
       "-s",
       "STRICT=1",
-      "-s",
-      "WARN_UNALIGNED=1",
       # Reduces global namespace pollution.
       "-s",
       "MODULARIZE=1",
@@ -665,7 +663,7 @@ if (is_win) {
 # part of Chromium.
 
 config("chromium_code") {
-  if (is_win) {
+  if (is_win || is_wasm) {
     cflags = []
   } else {
     cflags = [
@@ -814,7 +812,7 @@ if (is_win) {
       "-Wl,--gc-sections",
     ]
 
-    if (!using_sanitizer) {
+    if (!using_sanitizer && !is_wasm) {
       # Functions interposed by the sanitizers can make ld think
       # that some libraries aren't needed when they actually are,
       # http://crbug.com/234010. As workaround, disable --as-needed.
@@ -869,7 +867,7 @@ config("no_optimize") {
     }
     ldflags = common_optimize_on_ldflags
   } else if (is_wasm) {
-    cflags = [ "-O0", "-g4" ]
+    cflags = [ "-O0", "-gsource-map" ]
   } else  {
     cflags = [ "-O0" ]
   }

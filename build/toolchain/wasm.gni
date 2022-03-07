@@ -37,8 +37,6 @@ template("wasm_lib") {
 
   _target_cflags = [
     "-s",
-    "WARN_UNALIGNED=1",
-    "-s",
     "MAIN_MODULE=1",
   ]
 
@@ -66,17 +64,9 @@ template("wasm_lib") {
     output_extension = ""
   }
 
-  executable("${_lib_name}.wasm") {
-    forward_variables_from(invoker, _vars_to_forward)
-    cflags = _target_cflags
-    ldflags = _target_ldflags
-    output_extension = ""
-  }
-
   group("$_lib_name") {
     deps = [
       ":${_lib_name}.js($wasm_toolchain)",
-      ":${_lib_name}.wasm($wasm_toolchain)",
     ]
   }
 }
