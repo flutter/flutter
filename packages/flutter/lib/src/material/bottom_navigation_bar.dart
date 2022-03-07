@@ -129,7 +129,7 @@ enum BottomNavigationBarLandscapeLayout {
 /// int _selectedIndex = 1;
 /// FontWeight _fontWeight = FontWeight.normal;
 /// final ScrollController _homeController = ScrollController();
-/// / Widget _listViewBody() {
+/// Widget _listViewBody() {
 ///   return ListView.separated(
 ///       controller: _homeController,
 ///       itemBuilder: (BuildContext context, int index) {
