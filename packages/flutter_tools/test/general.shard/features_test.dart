@@ -96,7 +96,7 @@ void main() {
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on Linux. '
+      'Enable or disable support for desktop on Linux. '
       'This setting will take effect on the master, beta, and stable channels. '
       'Newer beta versions are available on the beta channel.');
     });
