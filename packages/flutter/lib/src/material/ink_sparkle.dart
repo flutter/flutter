@@ -16,6 +16,13 @@ import 'package:vector_math/vector_math_64.dart';
 /// in software, but will not be performant. Hardware enabled support for
 /// CanvasKit web can be tracked here:
 ///  - [https://github.com/flutter/flutter/issues/85238]
+/// 
+/// To use this effect, pass an instance of [InkSparkleFactory] to the
+/// `splashFactory` parameter of eitther the Mataerial [ThemeData] or any
+/// component that has a `splashFactory` paramter, such as buttons:
+///  - [ElevatedButton]
+///  - [TextButton]
+///  - [OutlinedButton]
 ///
 /// The [controller] argument is typically obtained via
 /// `Material.of(context)`.
@@ -35,6 +42,8 @@ import 'package:vector_math/vector_math_64.dart';
 /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
 /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
 /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
+/// 
+/// 
 class InkSparkle extends InteractiveInkFeature {
   /// Begin a sparkly ripple effect, centered at [position] relative to
   /// [referenceBox].
