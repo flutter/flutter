@@ -77,7 +77,17 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder textContaining(Pattern pattern, { bool skipOffstage = true }) => _TextContainingFinder(pattern, skipOffstage: skipOffstage);
+  Finder textContaining(
+    Pattern pattern, { 
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) {
+    return _TextContainingFinder(
+      pattern,
+      findRichText: findRichText,
+      skipOffstage: skipOffstage
+    );
+  }
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -697,10 +707,25 @@ class _TextFinder extends MatchFinder {
 }
 
 class _TextContainingFinder extends MatchFinder {
-  _TextContainingFinder(this.pattern, {bool skipOffstage = true})
-      : super(skipOffstage: skipOffstage);
+  _TextContainingFinder(this.pattern, {
+    this.findRichText = false, 
+    bool skipOffstage = true,
+  }) : super(skipOffstage: skipOffstage);
 
   final Pattern pattern;
+
+  /// Whether standalone [RichText] widgets should be found or not.
+  ///
+  /// Defaults to `false`.
+  ///
+  /// If disabled, only [Text] widgets will be matched. [RichText] widgets
+  /// *without* a [Text] ancestor will be ignored.
+  /// If enabled, only [RichText] widgets will be matched. This *implicitly*
+  /// matches [Text] widgets as well since they always insert a [RichText]
+  /// child.
+  ///
+  /// In either case, [EditableText] widgets will also be matched.
+  final bool findRichText;
 
   @override
   String get description => 'text containing $pattern';
@@ -708,15 +733,33 @@ class _TextContainingFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
+    if (widget is EditableText) return _matchesEditableText(widget);
+
+    if (!findRichText) return _matchesNonRichText(widget);
+    // It would be sufficient to always use _matchesRichText if we wanted to
+    // match both standalone RichText widgets as well as Text widgets. However,
+    // the find.text() finder used to always ignore standalone RichText widgets,
+    // which is why we need the _matchesNonRichText method in order to not be
+    // backwards-compatible and not break existing tests.
+    return _matchesRichText(widget);
+  }
+
+  bool _matchesRichText(Widget widget) {
+    if (widget is RichText) return widget.text.toPlainText().contains(pattern);
+    return false;
+  }
+
+  bool _matchesNonRichText(Widget widget) {
     if (widget is Text) {
-      if (widget.data != null)
-        return widget.data!.contains(pattern);
+      if (widget.data != null) return widget.data!.contains(pattern);
       assert(widget.textSpan != null);
       return widget.textSpan!.toPlainText().contains(pattern);
-    } else if (widget is EditableText) {
-      return widget.controller.text.contains(pattern);
     }
     return false;
+  }
+
+  bool _matchesEditableText(EditableText widget) {
+    return widget.controller.text.contains(pattern);
   }
 }
 
