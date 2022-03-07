@@ -105,7 +105,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       fileSystemRoots: <String>['test5', 'test6'],
       fileSystemScheme: 'scheme',
@@ -137,7 +137,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
@@ -167,7 +167,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
