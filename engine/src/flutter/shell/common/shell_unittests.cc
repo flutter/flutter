@@ -535,6 +535,7 @@ TEST_F(ShellTest,
 #if !FLUTTER_RELEASE
   flags.push_back("--max_profile_depth 1");
   flags.push_back("--random_seed 42");
+  flags.push_back("--max_subtype_cache_entries=22");
   if (!DartVM::IsRunningPrecompiledCode()) {
     flags.push_back("--enable_mirrors");
   }

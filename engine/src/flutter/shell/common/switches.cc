@@ -68,6 +68,7 @@ static const std::string gAllowedDartFlags[] = {
     "--strict_null_safety_checks",
     "--enable-display-list",
     "--no-enable-display-list",
+    "--max_subtype_cache_entries",
 };
 // clang-format on
 
