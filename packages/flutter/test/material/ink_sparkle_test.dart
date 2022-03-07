@@ -27,15 +27,18 @@ void main() {
         body: Center(
           child: Theme(
             data: ThemeData(splashFactory: InkSparkle.splashFactory),
-            child: ElevatedButton(
-              child: const Text('Sparkle!'),
-              onPressed: () { },
+            child: RepaintBoundary(
+              child: ElevatedButton(
+                child: const Text('Sparkle!'),
+                onPressed: () { },
+              ),
             ),
           ),
         ),
       ),
     ));
     final Finder buttonFinder = find.text('Sparkle!');
+    final Finder repaintFinder = find.byType(RepaintBoundary);
     await tester.tap(buttonFinder);
 
     // Warm up shader. Compilation is of the order of 10 milliseconds and 
@@ -51,8 +54,8 @@ void main() {
     await tester.tapAt(topLeftTarget);
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('ink_sparkle_top_left_$i.png'),
+        repaintFinder,
+        matchesGoldenFile('ink_sparkle.top_left.$i.png'),
       );
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
@@ -64,7 +67,7 @@ void main() {
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
         find.byType(MaterialApp),
-        matchesGoldenFile('ink_sparkle_center_$i.png'),
+        matchesGoldenFile('ink_sparkle.center.$i.png'),
       );
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
@@ -75,8 +78,8 @@ void main() {
     await tester.tapAt(bottomRightTarget);
     for (int i = 0; i <= 100; i += testIntervalPercent) {
       await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('ink_sparkle_center_bottom_right_$i.png'),
+        repaintFinder,
+        matchesGoldenFile('ink_sparkle._bottom_right.$i.png'),
       );
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
