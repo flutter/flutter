@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.renderer;
 import android.graphics.SurfaceTexture;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A wrapper for a SurfaceTexture that tracks whether the texture has been released.
@@ -20,10 +21,25 @@ public class SurfaceTextureWrapper {
   private SurfaceTexture surfaceTexture;
   private boolean released;
   private boolean attached;
+  private Runnable onFrameConsumed;
 
   public SurfaceTextureWrapper(@NonNull SurfaceTexture surfaceTexture) {
+    this(surfaceTexture, null);
+  }
+
+  /**
+   * A wrapper for a SurfaceTexture.
+   *
+   * <p>The provided {@code onFrameConsumed} callback must be invoked when the most recent image was
+   * consumed.
+   *
+   * @param onFrameConsumed The callback after the {@code updateTexImage} is called.
+   */
+  public SurfaceTextureWrapper(
+      @NonNull SurfaceTexture surfaceTexture, @Nullable Runnable onFrameConsumed) {
     this.surfaceTexture = surfaceTexture;
     this.released = false;
+    this.onFrameConsumed = onFrameConsumed;
   }
 
   @NonNull
@@ -37,6 +53,9 @@ public class SurfaceTextureWrapper {
     synchronized (this) {
       if (!released) {
         surfaceTexture.updateTexImage();
+        if (onFrameConsumed != null) {
+          onFrameConsumed.run();
+        }
       }
     }
   }
