@@ -18,11 +18,12 @@ namespace impeller {
 namespace testing {
 
 TEST(GeometryTest, ScalarNearlyEqual) {
-  ASSERT_FALSE(ScalarNearlyEqual(0.002f, 0.001f));
+  ASSERT_FALSE(ScalarNearlyEqual(0.0021f, 0.001f));
+  ASSERT_TRUE(ScalarNearlyEqual(0.0019f, 0.001f));
   ASSERT_TRUE(ScalarNearlyEqual(0.002f, 0.001f, 0.0011f));
   ASSERT_FALSE(ScalarNearlyEqual(0.002f, 0.001f, 0.0009f));
-  ASSERT_TRUE(
-      ScalarNearlyEqual(1.0f, 1.0f + std::numeric_limits<float>::epsilon()*4));
+  ASSERT_TRUE(ScalarNearlyEqual(
+      1.0f, 1.0f + std::numeric_limits<float>::epsilon() * 4));
 }
 
 TEST(GeometryTest, RotationMatrix) {
