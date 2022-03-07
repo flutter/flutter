@@ -275,6 +275,13 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     _shown = FALSE;
     [_textInputContext deactivate];
   } else if ([method isEqualToString:kClearClientMethod]) {
+    // If there's an active mark region, commit it, end composing, and clear the IME's mark text.
+    if (_activeModel && _activeModel->composing()) {
+      _activeModel->CommitComposing();
+      _activeModel->EndComposing();
+    }
+    [_textInputContext discardMarkedText];
+
     _clientID = nil;
     _inputAction = nil;
     _enableDeltaModel = NO;
@@ -360,14 +367,20 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
   flutter::TextRange composing_range = RangeFromBaseExtent(
       state[kComposingBaseKey], state[kComposingExtentKey], _activeModel->composing_range());
   size_t cursor_offset = selected_range.base() - composing_range.start();
+  if (!composing_range.collapsed() && !_activeModel->composing()) {
+    _activeModel->BeginComposing();
+  } else if (composing_range.collapsed() && _activeModel->composing()) {
+    _activeModel->EndComposing();
+    [_textInputContext discardMarkedText];
+  }
   _activeModel->SetComposingRange(composing_range, cursor_offset);
   [_client becomeFirstResponder];
   [self updateTextAndSelection];
 }
 
-- (void)updateEditState {
+- (NSDictionary*)editingState {
   if (_activeModel == nullptr) {
-    return;
+    return nil;
   }
 
   NSString* const textAffinity = [self textAffinityString];
@@ -375,7 +388,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
   int composingBase = _activeModel->composing() ? _activeModel->composing_range().base() : -1;
   int composingExtent = _activeModel->composing() ? _activeModel->composing_range().extent() : -1;
 
-  NSDictionary* state = @{
+  return @{
     kSelectionBaseKey : @(_activeModel->selection().base()),
     kSelectionExtentKey : @(_activeModel->selection().extent()),
     kSelectionAffinityKey : textAffinity,
@@ -384,7 +397,14 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     kComposingExtentKey : @(composingExtent),
     kTextKey : [NSString stringWithUTF8String:_activeModel->GetText().c_str()]
   };
+}
 
+- (void)updateEditState {
+  if (_activeModel == nullptr) {
+    return;
+  }
+
+  NSDictionary* state = [self editingState];
   [_channel invokeMethod:kUpdateEditStateResponseMethod arguments:@[ self.clientID, state ]];
   [self updateTextAndSelection];
 }
