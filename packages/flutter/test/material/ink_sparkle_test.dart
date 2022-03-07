@@ -11,8 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
-  // TODO(clocksmith): Mock math.Random().nextDouble() to return 0.1337.
-  Mock
+  // TODO(clocksmith): Mock math.Random().nextDouble() to return 0.1337?
 
   // From InkSparkle._animationDuration.
   const double animationDurationMicros = 617 * 1000;
