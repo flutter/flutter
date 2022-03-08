@@ -87,7 +87,7 @@ void main() {
   /////////////
   // Goldens //
   /////////////
-  
+
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   });
