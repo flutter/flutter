@@ -436,7 +436,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _handleDragCancel() {
-    if (_controller.isDismissed || _controller.isAnimating) 
+    if (_controller.isDismissed || _controller.isAnimating)
       return;
     if (_controller.value < 0.5) {
       close();
@@ -449,7 +449,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   double get _width {
     final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null) 
+    if (box != null)
       return box.size.width;
     return _kWidth; // drawer not being shown currently
   }
@@ -481,7 +481,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _settle(DragEndDetails details) {
-    if (_controller.isDismissed) 
+    if (_controller.isDismissed)
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
       double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
@@ -529,8 +529,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   ColorTween _buildScrimColorTween() {
     return ColorTween(
       begin: Colors.transparent,
-      end: widget.scrimColor 
-          ?? DrawerTheme.of(context).scrimColor 
+      end: widget.scrimColor
+          ?? DrawerTheme.of(context).scrimColor
           ?? Colors.black54,
     );
   }
