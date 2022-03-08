@@ -36,20 +36,21 @@ void main() {
     ));
     final Finder buttonFinder = find.text('Sparkle!');
     await tester.tap(buttonFinder);
+    await tester.pump();
     await tester.pumpAndSettle();
   });
 
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
-    _runTest(tester, 'top_left', 0.2);
+    await _runTest(tester, 'top_left', 0.2);
   });
 
   testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
-    _runTest(tester, 'center', 0.5);
+    await _runTest(tester, 'center', 0.5);
   });
 
 
   testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
-    _runTest(tester, 'bottom_right', 0.8);
+    await _runTest(tester, 'bottom_right', 0.8);
   });
 }
 
@@ -72,7 +73,7 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
     final Finder buttonFinder = find.text('Sparkle!');
     final Finder repaintFinder = find.byKey(repaintKey);
 
-    _warmUpShader(tester, buttonFinder);
+    await _warmUpShader(tester, buttonFinder);
 
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
