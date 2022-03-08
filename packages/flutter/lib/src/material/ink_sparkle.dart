@@ -642,14 +642,14 @@ class FragmentShaderManager {
     Vector2? uRotation3,
   }) {
     return _program.shader(
-      floatUniforms: Float32List.fromList([
+      floatUniforms: Float32List.fromList(<double>[
         ...uColor != null ? uColor.storage : <double>[0, 0, 0, 0],
         ...uAlpha != null ? <double>[uAlpha] : <double>[0],
         ...uSparkleColor != null ? uSparkleColor.storage : <double>[0, 0, 0, 0],
         ...uSparkleAlpha != null ? <double>[uSparkleAlpha] : <double>[0],
         ...uBlur != null ? <double>[uBlur] : <double>[0],
         ...uCenter != null ? uCenter.storage : <double>[0, 0],
-        ...uRadiusScale != null ? [uRadiusScale] : <double>[0],
+        ...uRadiusScale != null ? <double>[uRadiusScale] : <double>[0],
         ...uMaxRadius != null ? <double>[uMaxRadius] : <double>[0],
         ...uResolutionScale != null ? uResolutionScale.storage : <double>[0, 0],
         ...uNoiseScale != null ? uNoiseScale.storage : <double>[0, 0],
