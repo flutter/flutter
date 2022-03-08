@@ -553,7 +553,7 @@ final GradleHandledError jvm11Required = GradleHandledError(
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
-      'You can update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
+      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
       'To check the Java version used by Flutter, run `flutter doctor -v`.',
       title: _boxTitle,
     );

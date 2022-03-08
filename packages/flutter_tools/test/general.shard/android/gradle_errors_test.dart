@@ -984,7 +984,7 @@ A problem occurred evaluating project ':flutter'.
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
           '│ [!] You need Java 11 or higher to build your app with this version of Gradle. │\n'
           '│                                                                               │\n'
-          '│ You can update to the latest version of Android Studio on                     │\n'
+          '│ To get Java 11, update to the latest version of Android Studio on             │\n'
           '│ https://developer.android.com/studio/install.                                 │\n'
           '│                                                                               │\n'
           '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
