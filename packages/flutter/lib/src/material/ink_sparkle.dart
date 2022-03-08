@@ -226,7 +226,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// 
   /// Since a [turbulenceSeed] is passed, the effect will not be random for
   /// subsequent presses in the same position. This can be used for testing.
-  static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory(1337.0);
+  static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory.constantTurbulenceSeed();
 
   @override
   void dispose() {
@@ -406,7 +406,9 @@ class InkSparkle extends InteractiveInkFeature {
 }
 
 class _InkSparkleFactory extends InteractiveInkFeatureFactory {
-  const _InkSparkleFactory(this.turbulenceSeed);
+  const _InkSparkleFactory() : turbulenceSeed = null;
+
+  const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
   // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
@@ -420,7 +422,7 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
   static bool _initCalled = false;
   static FragmentShaderManager? _shaderManager;
 
-  final double turbulenceSeed;
+  final double? turbulenceSeed;
 
   @override
   InteractiveInkFeature create({
