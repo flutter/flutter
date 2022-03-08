@@ -49,8 +49,6 @@ impeller_component("renderer") {
               "command.cc",
               "command_buffer.h",
               "command_buffer.cc",
-              "comparable.cc",
-              "comparable.h",
               "context.h",
               "context.cc",
               "device_buffer.h",

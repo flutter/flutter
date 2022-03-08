@@ -5,7 +5,7 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/comparable.h"
+#include "impeller/base/comparable.h"
 #include "impeller/renderer/formats.h"
 
 namespace impeller {
