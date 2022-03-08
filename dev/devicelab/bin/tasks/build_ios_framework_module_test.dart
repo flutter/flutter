@@ -167,7 +167,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   section('Check debug build has no Dart AOT');
 
-  final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath);
+  final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath, true);
 
   if (aotSymbols.contains('architecture') ||
       aotSymbols.contains('_kDartVmSnapshot')) {
@@ -188,10 +188,17 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
     await _checkBitcode(appFrameworkPath, mode);
 
-    final String aotSymbols = await _dylibSymbols(appFrameworkPath);
+    final String aotSymbols = await _dylibSymbols(appFrameworkPath, true);
 
     if (!aotSymbols.contains('_kDartVmSnapshot')) {
       throw TaskResult.failure('$mode App.framework missing Dart AOT');
+    }
+
+    if (mode == 'Release') {
+      final String aotAllSymbols = await _dylibSymbols(appFrameworkPath, false);
+      if (aotAllSymbols.contains('Precompiled')) {
+        throw TaskResult.failure('$mode App.framework missing xcrun strip step');
+      }
     }
 
     checkFileNotExists(path.join(
@@ -460,9 +467,10 @@ Future<void> _checkBitcode(String frameworkPath, String mode) async {
   }
 }
 
-Future<String> _dylibSymbols(String pathToDylib) {
+Future<String> _dylibSymbols(String pathToDylib, global) {
   return eval('nm', <String>[
-    '-g',
+    if (global)
+      '-g',
     pathToDylib,
     '-arch',
     'arm64',

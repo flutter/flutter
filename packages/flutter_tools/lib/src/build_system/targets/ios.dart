@@ -123,6 +123,7 @@ abstract class AotAssemblyBase extends Target {
     if (result.exitCode != 0) {
       throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
     }
+    _stripDebugSymbols(environment, resultPath, buildMode);
   }
 }
 
@@ -622,6 +623,20 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
   }
 
   _signFramework(environment, outputFile.path, BuildMode.debug);
+}
+
+void _stripDebugSymbols(Environment environment, String binaryPath, BuildMode buildMode) {
+  if (buildMode == BuildMode.release) {
+    final ProcessResult result = environment.processManager.runSync(<String>[
+      'xcrun',
+      'strip',
+      '-rSTx',
+      binaryPath,
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception('Failed to strip debug symbols in binary $binaryPath.\n${result.stderr}');
+    }
+  }
 }
 
 void _signFramework(Environment environment, String binaryPath, BuildMode buildMode) {
