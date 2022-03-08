@@ -45,12 +45,10 @@ void main() {
         body: Center(
           child: RepaintBoundary(
             key: repaintKey,
-            child: Theme(
-              data: ThemeData(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-              child: ElevatedButton(
-                child: const Text('Sparkle!'),
-                onPressed: () { },
-              ),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+              child: const Text('Sparkle!'),
+              onPressed: () { },
             ),
           ),
         ),
@@ -58,12 +56,8 @@ void main() {
     ));
     final Finder buttonFinder = find.text('Sparkle!');
     final Finder repaintFinder = find.byKey(repaintKey);
-    await tester.tap(buttonFinder);
 
-    // Warm up shader. Compilation is of the order of 10 milliseconds and
-    // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
-    // net to prevent flakiness.
-    await tester.pumpAndSettle(const Duration(milliseconds: 2000));
+    _warmUpShader(tester, buttonFinder);
 
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
@@ -88,12 +82,10 @@ void main() {
         body: Center(
           child: RepaintBoundary(
             key: repaintKey,
-            child: Theme(
-              data: ThemeData(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-              child: ElevatedButton(
-                child: const Text('Sparkle!'),
-                onPressed: () { },
-              ),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+              child: const Text('Sparkle!'),
+              onPressed: () { },
             ),
           ),
         ),
@@ -101,12 +93,8 @@ void main() {
     ));
     final Finder buttonFinder = find.text('Sparkle!');
     final Finder repaintFinder = find.byKey(repaintKey);
-    await tester.tap(buttonFinder);
 
-    // Warm up shader. Compilation is of the order of 10 milliseconds and
-    // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
-    // net to prevent flakiness.
-    await tester.pumpAndSettle(const Duration(milliseconds: 2000));
+    _warmUpShader(tester, buttonFinder);
 
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
@@ -132,12 +120,10 @@ void main() {
         body: Center(
           child: RepaintBoundary(
             key: repaintKey,
-            child: Theme(
-              data: ThemeData(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-              child: ElevatedButton(
-                child: const Text('Sparkle!'),
-                onPressed: () { },
-              ),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+              child: const Text('Sparkle!'),
+              onPressed: () { },
             ),
           ),
         ),
@@ -145,12 +131,8 @@ void main() {
     ));
     final Finder buttonFinder = find.text('Sparkle!');
     final Finder repaintFinder = find.byKey(repaintKey);
-    await tester.tap(buttonFinder);
 
-    // Warm up shader. Compilation is of the order of 10 milliseconds and
-    // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
-    // net to prevent flakiness.
-    await tester.pumpAndSettle(const Duration(milliseconds: 2000));
+    _warmUpShader(tester, buttonFinder);
 
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
@@ -166,4 +148,12 @@ void main() {
       await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
     }
   });
+}
+
+Future<void> _warmUpShader(WidgetTester tester, Finder buttonFinder) async {
+    // Warm up shader. Compilation is of the order of 10 milliseconds and
+    // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
+    // net to prevent flakiness.
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle(const Duration(milliseconds: 2000));
 }
