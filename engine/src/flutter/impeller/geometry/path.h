@@ -61,6 +61,8 @@ class Path {
 
     /// Convenience method to compute the start (inclusive) and end (exclusive)
     /// point of the given contour index.
+    ///
+    /// The contour_index parameter is clamped to contours.size().
     std::tuple<size_t, size_t> GetContourPointBounds(
         size_t contour_index) const;
   };

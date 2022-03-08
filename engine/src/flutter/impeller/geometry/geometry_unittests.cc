@@ -853,5 +853,12 @@ TEST(GeometryTest, PolylineGetContourPointBoundsReturnsCorrectRanges) {
   ASSERT_EQ(b2, 6u);
 }
 
+TEST(GeometryTest, PolylineGetContourOutOfBoundsAborts) {
+  Path::Polyline polyline =
+      PathBuilder{}.AddLine({100, 100}, {200, 100}).TakePath().CreatePolyline();
+  ASSERT_EQ(polyline.GetContourPointBounds(0), std::make_tuple(2u, 2u));
+  ASSERT_EQ(polyline.GetContourPointBounds(14), std::make_tuple(2u, 2u));
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -18,10 +18,13 @@ Path::~Path() = default;
 
 std::tuple<size_t, size_t> Path::Polyline::GetContourPointBounds(
     size_t contour_index) const {
-  const size_t start_index = contours[contour_index].start_index;
+  if (contour_index >= contours.size()) {
+    return {points.size(), points.size()};
+  }
+  const size_t start_index = contours.at(contour_index).start_index;
   const size_t end_index = (contour_index >= contours.size() - 1)
                                ? points.size()
-                               : contours[contour_index + 1].start_index;
+                               : contours.at(contour_index + 1).start_index;
   return std::make_tuple(start_index, end_index);
 }
 
