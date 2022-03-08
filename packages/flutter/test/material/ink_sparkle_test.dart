@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 // machines.
 @Tags(<String>['reduced-test-set'])
 
-
-
 void main() {
   debugDisableShadows = false;
 
