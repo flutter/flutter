@@ -875,6 +875,7 @@ void main() {
         const int num90Hz = 20;
         const int num120Hz = 40;
         const int numIllegal = 10;
+        const int totalFrames = num30Hz + num60Hz + num80Hz + num90Hz + num120Hz + numIllegal;
 
         // Add 30hz frames
         events.addAll(_populateEvents(numberOfEvents: num30Hz,
@@ -919,11 +920,12 @@ void main() {
                                       ));
 
         final RefreshRateSummary summary  = _summarize(events);
-        expect(summary.percentageOf30HzFrames, closeTo(num30Hz, kCompareDelta));
-        expect(summary.percentageOf60HzFrames, closeTo(num60Hz, kCompareDelta));
-        expect(summary.percentageOf80HzFrames, closeTo(num80Hz, kCompareDelta));
-        expect(summary.percentageOf90HzFrames, closeTo(num90Hz, kCompareDelta));
-        expect(summary.percentageOf120HzFrames, closeTo(num120Hz, kCompareDelta));
+
+        expect(summary.percentageOf30HzFrames, closeTo(num30Hz/totalFrames*100, kCompareDelta));
+        expect(summary.percentageOf60HzFrames, closeTo(num60Hz/totalFrames*100, kCompareDelta));
+        expect(summary.percentageOf80HzFrames, closeTo(num80Hz/totalFrames*100, kCompareDelta));
+        expect(summary.percentageOf90HzFrames, closeTo(num90Hz/totalFrames*100, kCompareDelta));
+        expect(summary.percentageOf120HzFrames, closeTo(num120Hz/totalFrames*100, kCompareDelta));
         expect(summary.framesWithIllegalRefreshRate, isNotEmpty);
         expect(summary.framesWithIllegalRefreshRate.length, 10);
       });
