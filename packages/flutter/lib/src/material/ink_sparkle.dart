@@ -167,7 +167,7 @@ class InkSparkle extends InteractiveInkFeature {
         ),
       ],
     ).animate(_animationController);
-  
+
     _sparkleAlpha = TweenSequence<double>(
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
@@ -560,7 +560,7 @@ double _getTargetRadius(
 ///   float circle_inner = soft_circle(uv, xy, max(radius - thickness, 0.0), blur);
 ///   return saturate(circle_outer - circle_inner);
 /// }
-/// 
+///
 /// float circle_grid(vec2 resolution, vec2 p, float time, vec2 xy, vec2 rotation, float cell_diameter) {
 ///   p = rotate2d(rotation) * (xy - p) + xy;
 ///   p = mod(p, cell_diameter) / resolution;
@@ -577,7 +577,7 @@ double _getTargetRadius(
 ///   s += threshold(n + sin(PI * (t + 1.05)), 0.3, 0.35);
 ///   return saturate(s) * 0.55;
 /// }
-/// 
+///
 /// float turbulence(vec2 uv) {
 ///   vec2 uv_scale = uv * TURBULENCE_SCALE;
 ///   float g1 = circle_grid(TURBULENCE_SCALE, uv_scale, u_turbulence_phase, u_circle1, u_rotation1, 0.17);
@@ -672,7 +672,7 @@ class FragmentShaderManager {
   /// Direct access to the the SPIR-V bytecode that was used to generate this class.
   ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
-  ///
+  ///git 
   /// Words in SPIR-V are 32 bits. Every 4 elements in this list represents 1
   /// SPIR-V word. See https://www.khronos.org/registry/SPIR-V/.
   ByteBuffer get spirvByteBuffer => Uint8List.fromList(_spirvByteList).buffer;
