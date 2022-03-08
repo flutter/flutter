@@ -3450,7 +3450,7 @@ targets:
       task_name: external_ui_integration_test_ios
     scheduler: luci
 
-  - name: Mac_ios routing_test
+  - name: Mac_ios route_test_ios
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3458,7 +3458,7 @@ targets:
     properties:
       tags: >
         ["devicelab","ios","mac"]
-      task_name: routing_test
+      task_name: route_test_ios
     scheduler: luci
 
   - name: Mac_ios flavors_test_ios
