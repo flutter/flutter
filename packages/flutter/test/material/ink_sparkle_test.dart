@@ -9,15 +9,16 @@ import 'package:flutter_test/flutter_test.dart';
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+// From InkSparkle._animationDuration.
+const double _animationDurationMicros = 617 * 1000;
+
+// Animation progress is captured at 0, 25, 50, 75, and 100.
+// This can be changed to another factor of 100: lower for more granular
+// animation screenshots, and higher for less granular animation screenshots.
+const int _testIntervalPercent = 25;
+
 void main() {
   debugDisableShadows = false;
-
-  // From InkSparkle._animationDuration.
-  const double animationDurationMicros = 617 * 1000;
-
-  // Animation progress is captured at 0, 50, and 100.
-  // Change this to 25, or another factor of 100, for more granular tests.
-  const int testIntervalPercent = 50;
 
   testWidgets('InkSparkle default splashFactory compiles and completes', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -39,8 +40,22 @@ void main() {
   });
 
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
-    final Key repaintKey = UniqueKey();
-    await tester.pumpWidget(MaterialApp(
+    _runTest(tester, 'top_left', 0.2);
+  });
+
+  testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
+    _runTest(tester, 'center', 0.5);
+  });
+
+
+  testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
+    _runTest(tester, 'bottom_right', 0.8);
+  });
+}
+
+Future<void> _runTest(WidgetTester tester, String positionName, double distanceFromTopLeft) async {
+   final Key repaintKey = UniqueKey();
+   await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
           child: RepaintBoundary(
@@ -62,92 +77,16 @@ void main() {
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
 
-    final Offset topLeftTarget = topLeft + (bottomRight - topLeft) * 0.2;
+    final Offset topLeftTarget = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
     await tester.tapAt(topLeftTarget);
     await tester.pump();
-    for (int i = 0; i <= 100; i += testIntervalPercent) {
+    for (int i = 0; i <= 100; i += _testIntervalPercent) {
       await expectLater(
         repaintFinder,
-        matchesGoldenFile('ink_sparkle.top_left.$i.png'),
+        matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
       );
-      await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
+      await tester.pump(Duration(microseconds: (_testIntervalPercent / _animationDurationMicros * 1000.0).round()));
     }
-  });
-
-    testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
-    final Key repaintKey = UniqueKey();
-
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: RepaintBoundary(
-            key: repaintKey,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-              child: const Text('Sparkle!'),
-              onPressed: () { },
-            ),
-          ),
-        ),
-      ),
-    ));
-    final Finder buttonFinder = find.text('Sparkle!');
-    final Finder repaintFinder = find.byKey(repaintKey);
-
-    _warmUpShader(tester, buttonFinder);
-
-    final Offset topLeft = tester.getTopLeft(buttonFinder);
-    final Offset bottomRight = tester.getBottomRight(buttonFinder);
-
-    final Offset centerTarget = topLeft + (bottomRight - topLeft) * 0.5;
-    await tester.tapAt(centerTarget);
-    await tester.pump();
-    for (int i = 0; i <= 100; i += testIntervalPercent) {
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('ink_sparkle.center.$i.png'),
-      );
-      await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
-    }
-  });
-
-
-    testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
-    final Key repaintKey = UniqueKey();
-
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: RepaintBoundary(
-            key: repaintKey,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-              child: const Text('Sparkle!'),
-              onPressed: () { },
-            ),
-          ),
-        ),
-      ),
-    ));
-    final Finder buttonFinder = find.text('Sparkle!');
-    final Finder repaintFinder = find.byKey(repaintKey);
-
-    _warmUpShader(tester, buttonFinder);
-
-    final Offset topLeft = tester.getTopLeft(buttonFinder);
-    final Offset bottomRight = tester.getBottomRight(buttonFinder);
-
-    final Offset bottomRightTarget = topLeft + (bottomRight - topLeft) * 0.8;
-    await tester.tapAt(bottomRightTarget);
-    await tester.pump();
-    for (int i = 0; i <= 100; i += testIntervalPercent) {
-      await expectLater(
-        repaintFinder,
-        matchesGoldenFile('ink_sparkle.bottom_right.$i.png'),
-      );
-      await tester.pump(Duration(microseconds: (testIntervalPercent * animationDurationMicros).round()));
-    }
-  });
 }
 
 Future<void> _warmUpShader(WidgetTester tester, Finder buttonFinder) async {
