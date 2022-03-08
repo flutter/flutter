@@ -1001,10 +1001,10 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// See also:
 ///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
@@ -1140,8 +1140,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
 ///
@@ -1166,6 +1164,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
@@ -1242,8 +1242,6 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1275,8 +1273,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
-///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
-///    displaying the dialog.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
@@ -1330,16 +1328,14 @@ Future<T?> showCupertinoDialog<T>({
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// See also:
 ///
 ///  * [showCupertinoDialog], which is a way to display
 ///     an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showDialog], which displays a Material dialog.
-///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
-///    displaying the dialog.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route that shows an iOS-style dialog.
   CupertinoDialogRoute({

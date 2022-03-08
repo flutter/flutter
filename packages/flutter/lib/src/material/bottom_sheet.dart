@@ -652,8 +652,6 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -674,8 +672,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    non-modal bottom sheets.
 ///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
 ///    that grows and then becomes scrollable once it reaches its maximum size.
-///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
-///    displaying the bottom sheet.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showModalBottomSheet<T>({
   required BuildContext context,

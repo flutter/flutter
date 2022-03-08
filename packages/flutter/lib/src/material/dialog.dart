@@ -1009,8 +1009,6 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1045,8 +1043,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
-///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
-///    displaying the dialog.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/dialogs.html>
 Future<T?> showDialog<T>({
   required BuildContext context,
@@ -1123,15 +1121,13 @@ Future<T?> showDialog<T>({
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// See also:
 ///
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
-///    displaying the dialog.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 class DialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route with Material entrance and exit animations,
   /// modal barrier color, and modal barrier behavior (dialog is dismissible

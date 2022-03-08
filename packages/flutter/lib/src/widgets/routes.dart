@@ -1866,14 +1866,24 @@ abstract class RouteAware {
 /// [RouteSettings] for details.
 ///
 /// {@template flutter.widgets.RawDialogRoute}
-/// [DisplayFeatureSubScreen] is used for displaying this route on only one
-/// sub-screen.
-/// {@endtemplate}
+/// A [DisplayFeature] can split the screen into sub-screens. The closest one to
+/// [anchorPoint] is used to render the content.
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+/// If no [anchorPoint] is provided, then [Directionality] is used:
+///
+///   * for [TextDirection.ltr], [anchorPoint] is `Offset.zero`, which will
+///     cause the content to appear in the top-left sub-screen.
+///   * for [TextDirection.rtl], [anchorPoint] is `Offset(double.maxFinite, 0)`,
+///     which will cause the content to appear in the top-right sub-screen.
+///
+/// If no [anchorPoint] is provided, and there is no [Directionality] ancestor
+/// widget in the tree, then the widget asserts during build in debug mode.
+/// {@endtemplate}
 ///
 /// See also:
 ///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
@@ -1996,8 +2006,6 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
-/// {@macro flutter.widgets.DisplayFeatureSubScreen}
-///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -2022,6 +2030,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 Future<T?> showGeneralDialog<T extends Object?>({

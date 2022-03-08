@@ -614,19 +614,18 @@ void main() {
           );
         },
         home: Builder(
-            builder: (BuildContext context) => ElevatedButton(
-              onPressed: () {
-                showAboutDialog(
-                  context: context,
-                  useRootNavigator: false,
-                  applicationName: 'A',
-                );
-              },
-              child: const Text('Show About Dialog'),
-            )
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                applicationName: 'A',
+              );
+            },
+            child: const Text('Show About Dialog'),
+          ),
         ),
-      ),
-      );
+      ));
 
       // Open the dialog.
       await tester.tap(find.byType(ElevatedButton));
@@ -656,20 +655,19 @@ void main() {
           );
         },
         home: Builder(
-            builder: (BuildContext context) => ElevatedButton(
-              onPressed: () {
-                showAboutDialog(
-                  context: context,
-                  useRootNavigator: false,
-                  applicationName: 'A',
-                  anchorPoint: const Offset(1000, 0),
-                );
-              },
-              child: const Text('Show About Dialog'),
-            )
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                applicationName: 'A',
+                anchorPoint: const Offset(1000, 0),
+              );
+            },
+            child: const Text('Show About Dialog'),
+          ),
         ),
-      ),
-      );
+      ));
 
       // Open the dialog.
       await tester.tap(find.byType(ElevatedButton));
@@ -702,19 +700,18 @@ void main() {
           );
         },
         home: Builder(
-            builder: (BuildContext context) => ElevatedButton(
-              onPressed: () {
-                showAboutDialog(
-                  context: context,
-                  useRootNavigator: false,
-                  applicationName: 'A',
-                );
-              },
-              child: const Text('Show About Dialog'),
-            )
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                applicationName: 'A',
+              );
+            },
+            child: const Text('Show About Dialog'),
+          ),
         ),
-      ),
-      );
+      ));
 
       // Open the dialog.
       await tester.tap(find.byType(ElevatedButton));

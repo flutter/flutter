@@ -852,7 +852,6 @@ void _tests() {
     expect(tester.getSize(find.text('AM')).height, equals(amHeight2x));
   });
 
-
   group('showTimePicker avoids overlapping display features', () {
     testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(

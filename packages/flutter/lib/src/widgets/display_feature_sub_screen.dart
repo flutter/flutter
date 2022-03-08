@@ -26,7 +26,6 @@ import 'media_query.dart';
 ///     sub-screen or it is at least as wide as the screen, producing a top and
 ///     bottom sub-screen
 ///
-/// {@template flutter.widgets.DisplayFeatureSubScreen}
 /// After determining the sub-screens, the closest one to [anchorPoint] is used
 /// to render the content.
 ///
@@ -39,7 +38,6 @@ import 'media_query.dart';
 ///
 /// If no [anchorPoint] is provided, and there is no [Directionality] ancestor
 /// widget in the tree, then the widget asserts during build in debug mode.
-/// {@endtemplate}
 ///
 /// Similarly to [SafeArea], this widget assumes there is no added padding
 /// between it and the first [MediaQuery] ancestor. The [child] is wrapped in a
