@@ -934,7 +934,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
   });
 
 
-  testWidgets('Stepper Connector style', (WidgetTester tester) async {
+  testWidgets('Stepper Connector style test', (WidgetTester tester) async {
 
     int _currentIndex = 0;
 
@@ -945,8 +945,10 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
+                  connectorColor: MaterialStateProperty.resolveWith<Color>((states) => !states.contains(MaterialState.disabled) ? Colors.green : Colors.greenAccent),
+                  connectorThickness: 4,
                   currentStep: _currentIndex,
-                  type: StepperType.horizontal,
+                  type: type,
                   onStepContinue: () {
                     setState(() {
                       if (_currentIndex < 2) {

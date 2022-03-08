@@ -216,7 +216,7 @@ class Stepper extends StatefulWidget {
   final double? connectorThickness;
 
   /// The color of the connection lines.
-  final Color? connectorColor;
+  final MaterialStateProperty<Color>? connectorColor;
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -360,12 +360,32 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
-  Widget _buildLine(bool visible, bool isActive) {
+  Color _connectorColor(bool isActive) {
     final ColorScheme colorSchema = Theme.of(context).colorScheme;
+
+    if(widget.connectorColor == null) {
+      Color getColor(Set<MaterialState> states) {
+        if(!states.contains(MaterialState.disabled)) {
+          return colorSchema.primary;
+        } else {
+          return Colors.grey.shade400;
+        }
+      }
+      return MaterialStateProperty.resolveWith<Color>(getColor).resolve(<MaterialState>{
+        if (!isActive) MaterialState.disabled,
+      });
+    } else {
+      return widget.connectorColor!.resolve(<MaterialState>{
+        if (!isActive) MaterialState.disabled,
+      });
+    }
+  }
+
+  Widget _buildLine(bool visible, bool isActive) {
     return Container(
       width: visible ? widget.connectorThickness : 0.0,
       height: 16.0,
-      color: isActive ? widget.connectorColor ?? colorSchema.primary : Colors.grey.shade300,
+      color: _connectorColor(isActive),
     );
   }
 
@@ -644,7 +664,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 child: SizedBox(
                   width: widget.connectorThickness,
                   child: Container(
-                    color: widget.steps[index].isActive ? widget.connectorColor ?? colorScheme.primary : Colors.grey.shade300,
+                    color: _connectorColor(widget.steps[index].isActive),
                   ),
                 ),
               ),
@@ -735,7 +755,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: widget.connectorThickness,
-              color: widget.steps[i + 1].isActive ? widget.connectorColor ?? colorScheme.primary : Colors.grey.shade300,
+              color: _connectorColor(widget.steps[i + 1].isActive),
             ),
           ),
       ],
