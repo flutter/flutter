@@ -36,13 +36,6 @@ import 'package:vector_math/vector_math_64.dart';
 /// This is the default.
 ///
 /// When the ripple is removed, [onRemoved] will be called.
-/// 
-/// All animation values are derived from Android 12 source code. See:
-/// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
-/// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
-/// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
-/// 
-/// 
 class InkSparkle extends InteractiveInkFeature {
   /// Begin a sparkly ripple effect, centered at [position] relative to
   /// [referenceBox].
@@ -94,7 +87,6 @@ class InkSparkle extends InteractiveInkFeature {
     double? radius,
     VoidCallback? onRemoved,
   }) : _color = color,
-       _rectCallback = rectCallback,
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
@@ -107,8 +99,12 @@ class InkSparkle extends InteractiveInkFeature {
     
     controller.addInkFeature(this);
 
-    // Immediately begin animating the ink.
+    // All animation values are derived from Android 12 source code. See:
+    // - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
+    // - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
+    // - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
 
+    // Immediately begin animating the ink.
     _animationController = AnimationController(
       duration: _animationDuration,
       vsync: controller.vsync,
@@ -129,11 +125,11 @@ class InkSparkle extends InteractiveInkFeature {
  
     // Functionally equivalent to Android 12's SkSL:
     //`return mix(u_touch, u_resolution, saturate(in_radius_scale * 2.0))`
-    final centerTween = Tween<Vector2>(
-      begin: Vector2.array([_position.dx, _position.dy]),
-      end: Vector2.array([referenceBox.size.width / 2, referenceBox.size.height / 2]),
+    final Tween<Vector2> centerTween = Tween<Vector2>(
+      begin: Vector2.array(<double>[_position.dx, _position.dy]),
+      end: Vector2.array(<double>[referenceBox.size.width / 2, referenceBox.size.height / 2]),
     );
-    final centerProgress = TweenSequence<double>(
+    final Animation<double> centerProgress = TweenSequence<double>(
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
           tween: Tween<double>(begin: 0.0, end: 1.0),
@@ -186,10 +182,6 @@ class InkSparkle extends InteractiveInkFeature {
     _turbulenceSeed = math.Random().nextDouble() * 1000.0;
   }
 
-  /// All animation values are derived from Android 12 source code. See:
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
   static const Duration _animationDuration = Duration(milliseconds: 617);
   static const double _targetRadiusMultiplier = 2.3;
   static const double _rotateRight = math.pi * 0.0078125;
@@ -210,7 +202,6 @@ class InkSparkle extends InteractiveInkFeature {
   late double _turbulenceSeed;
 
   final Color _color;
-  final RectCallback? _rectCallback;
   final Offset _position;
   final BorderRadius _borderRadius;
   final ShapeBorder? _customBorder;
@@ -254,7 +245,7 @@ class InkSparkle extends InteractiveInkFeature {
       );
     }
 
-    Paint paint = Paint()..shader = _createRippleShader();
+    final Paint paint = Paint()..shader = _createRippleShader();
     if (_clipCallback != null) {
       canvas.drawRect(_clipCallback!(), paint);
     } else {
@@ -403,12 +394,11 @@ class InkSparkle extends InteractiveInkFeature {
 class _InkSparkleFactory extends InteractiveInkFeatureFactory {
   const _InkSparkleFactory();
 
-
   // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
     if (!_initCalled) {
-      FragmentShaderManager.inkSparkle().then((value) {
-        _shaderManager = value;
+      FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
+        _shaderManager = manager;
       });
       _initCalled = true;
     }
@@ -455,7 +445,9 @@ RectCallback? _getClipCallback(
     assert(containedInkWell);
     return rectCallback;
   }
-  if (containedInkWell) return () => Offset.zero & referenceBox.size;
+  if (containedInkWell) {
+    return () => Offset.zero & referenceBox.size;
+  }
   return null;
 }
 
@@ -488,8 +480,6 @@ double _getTargetRadius(
 /// #version 320 es
 /// 
 /// precision highp float;
-/// 
-/// // TODO(antrob): Put these in a more logical order (e.g. separate consts vs varying, etc)
 /// 
 /// layout(location = 0) uniform vec4 u_color;
 /// layout(location = 1) uniform float u_alpha;
@@ -591,14 +581,16 @@ double _getTargetRadius(
 /// 
 /// 
 class FragmentShaderManager {
+  FragmentShaderManager._();
+
+  /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
   static Future<FragmentShaderManager> inkSparkle() async {
-    final manager = FragmentShaderManager._();
+    final FragmentShaderManager manager = FragmentShaderManager._();
     await manager.compile();
     return manager;
   }
 
-  FragmentShaderManager._();
-
+  /// Compiles the spir-v bytecode into a shader program.
   Future<void> compile() async {
     _program = await ui.FragmentProgram.compile(spirv: spirvByteBuffer);
   }
@@ -629,17 +621,17 @@ class FragmentShaderManager {
     return _program.shader(
       floatUniforms: Float32List.fromList([
         ...uColor != null ? uColor.storage : <double>[0, 0, 0, 0],
-        ...uAlpha != null ? [uAlpha] : <double>[0],
+        ...uAlpha != null ? <double>[uAlpha] : <double>[0],
         ...uSparkleColor != null ? uSparkleColor.storage : <double>[0, 0, 0, 0],
-        ...uSparkleAlpha != null ? [uSparkleAlpha] : <double>[0],
-        ...uBlur != null ? [uBlur] : <double>[0],
+        ...uSparkleAlpha != null ? <double>[uSparkleAlpha] : <double>[0],
+        ...uBlur != null ? <double>[uBlur] : <double>[0],
         ...uCenter != null ? uCenter.storage : <double>[0, 0],
         ...uRadiusScale != null ? [uRadiusScale] : <double>[0],
-        ...uMaxRadius != null ? [uMaxRadius] : <double>[0],
+        ...uMaxRadius != null ? <double>[uMaxRadius] : <double>[0],
         ...uResolutionScale != null ? uResolutionScale.storage : <double>[0, 0],
         ...uNoiseScale != null ? uNoiseScale.storage : <double>[0, 0],
-        ...uNoisePhase != null ? [uNoisePhase] : <double>[0],
-        ...uTurbulencePhase != null ? [uTurbulencePhase] : <double>[0],
+        ...uNoisePhase != null ? <double>[uNoisePhase] : <double>[0],
+        ...uTurbulencePhase != null ? <double>[uTurbulencePhase] : <double>[0],
         ...uCircle1 != null ? uCircle1.storage : <double>[0, 0],
         ...uCircle2 != null ? uCircle2.storage : <double>[0, 0],
         ...uCircle3 != null ? uCircle3.storage : <double>[0, 0],
@@ -668,7 +660,7 @@ class FragmentShaderManager {
 }
 
 /// 11900 bytes
-const _spirvByteList = [
+const List<int> _spirvByteList = <int>[
   0x03,0x02,0x23,0x07,
   0x00,0x00,0x01,0x00,
   0x0A,0x00,0x0D,0x00,
