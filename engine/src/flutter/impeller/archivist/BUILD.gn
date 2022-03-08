@@ -31,7 +31,14 @@ impeller_component("archivist") {
 
   public_deps = [ "../base" ]
 
-  deps = [ "//third_party/sqlite" ]
+  deps = [
+    "//flutter/fml",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
+    "//third_party/sqlite",
+  ]
 }
 
 impeller_component("archivist_unittests") {

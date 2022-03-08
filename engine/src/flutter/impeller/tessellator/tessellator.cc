@@ -4,8 +4,6 @@
 
 #include "impeller/tessellator/tessellator.h"
 
-#include "flutter/fml/logging.h"
-#include "flutter/fml/trace_event.h"
 #include "third_party/libtess2/Include/tesselator.h"
 
 namespace impeller {
@@ -38,7 +36,6 @@ static void DestroyTessellator(TESStesselator* tessellator) {
 
 bool Tessellator::Tessellate(const Path::Polyline& polyline,
                              VertexCallback callback) const {
-  TRACE_EVENT0("impeller", "Tessellator::Tessellate");
   if (!callback) {
     return false;
   }

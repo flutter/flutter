@@ -27,7 +27,6 @@ shared_library("tessellator_shared") {
 
   deps = [
     "../geometry",
-    "//flutter/fml",
     "//third_party/libtess2",
   ]
 }

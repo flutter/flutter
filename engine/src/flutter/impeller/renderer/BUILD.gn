@@ -110,6 +110,14 @@ impeller_component("renderer") {
     "../tessellator",
   ]
 
+  deps = [
+    "//flutter/fml",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
+  ]
+
   frameworks = [ "Metal.framework" ]
 }
 

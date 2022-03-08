@@ -6,7 +6,6 @@
 
 #include <optional>
 
-#include "flutter/fml/logging.h"
 #include "impeller/geometry/path_component.h"
 
 namespace impeller {
@@ -19,8 +18,6 @@ Path::~Path() = default;
 
 std::tuple<size_t, size_t> Path::Polyline::GetContourPointBounds(
     size_t contour_index) const {
-  FML_DCHECK(contour_index < contours.size());
-
   const size_t start_index = contours[contour_index].start_index;
   const size_t end_index = (contour_index >= contours.size() - 1)
                                ? points.size()

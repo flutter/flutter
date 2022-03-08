@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "flutter/fml/build_config.h"
-
 #if defined(__GNUC__) || defined(__clang__)
 #define IMPELLER_COMPILER_CLANG 1
 #else  // defined(__GNUC__) || defined(__clang__)
