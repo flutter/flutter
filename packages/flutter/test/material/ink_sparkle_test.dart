@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
@@ -20,16 +22,14 @@ const int _testIntervalPercent = 25;
 final Duration _betweenGoldenInterval = Duration(microseconds: (_testIntervalPercent / 100.0 * _animationDurationMicros).round());
 
 void main() {
-  testWidgets('InkSparkle default splashFactory compiles and completes', (WidgetTester tester) async {
+  testWidgets('InkSparkle in a Button with default splashFactory paints by calling drawRect', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Theme(
-            data: ThemeData(splashFactory: InkSparkle.splashFactory),
-            child: ElevatedButton(
-              child: const Text('Sparkle!'),
-              onPressed: () { },
-            ),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.splashFactory),
+            child: const Text('Sparkle!'),
+            onPressed: () { },
           ),
         ),
       ),
@@ -40,6 +40,54 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: InkWell(
+            splashFactory: InkSparkle.splashFactory,
+            child: const Text('Sparkle!'),
+            onTap: () { },
+          ),
+        ),
+      ),
+    ));
+    final Finder buttonFinder = find.text('Sparkle!');
+    await tester.tap(buttonFinder);
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawRect, 1));
+  });
+
+    testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: InkResponse(
+            splashFactory: InkSparkle.splashFactory,
+            child: const Text('Sparkle!'),
+            onTap: () { },
+          ),
+        ),
+      ),
+    ));
+    final Finder buttonFinder = find.text('Sparkle!');
+    await tester.tap(buttonFinder);
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawPaint, 1));
+  });
+
+  /////////////
+  // Goldens //
+  /////////////
+  
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   });
@@ -78,15 +126,16 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
     final Offset topLeft = tester.getTopLeft(buttonFinder);
     final Offset bottomRight = tester.getBottomRight(buttonFinder);
 
-    final Offset topLeftTarget = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
-    await tester.tapAt(topLeftTarget);
+    final Offset target = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
+    await tester.tapAt(target);
     await tester.pump();
     for (int i = 0; i <= 100; i += _testIntervalPercent) {
       await expectLater(
         repaintFinder,
         matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
       );
-      await tester.pump(_betweenGoldenInterval);
+      // TODO(clocksmith): make this proper fraction of total animation time.
+      await tester.pump(const Duration(milliseconds: 100));
     }
 }
 
