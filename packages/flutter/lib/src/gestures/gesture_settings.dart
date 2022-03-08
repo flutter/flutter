@@ -22,7 +22,7 @@ class DeviceGestureSettings {
   });
 
   /// Create a new [DeviceGestureSettings] from the provided [window].
-  factory DeviceGestureSettings.fromWindow(ui.SingletonFlutterWindow window) {
+  factory DeviceGestureSettings.fromWindow(ui.FlutterView window) {
     final double? physicalTouchSlop = window.viewConfiguration.gestureSettings.physicalTouchSlop;
     return DeviceGestureSettings(
       touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / window.devicePixelRatio

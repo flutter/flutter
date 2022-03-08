@@ -77,7 +77,7 @@ platform_properties:
           {"name":"chrome_and_driver","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
-          {"name":"osx_sdk","path":"osx_sdk"},
+          {"name":"osx_sdk_13a233","path":"osx_sdk"},
           {"name":"pub_cache","path":".pub-cache"},
           {"name":"xcode_binary","path":"xcode_binary"}
         ]
@@ -118,7 +118,7 @@ platform_properties:
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
             {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk","path":"osx_sdk"}
+            {"name":"osx_sdk_13a233","path":"osx_sdk"}
           ]
       dependencies: >-
         [
@@ -3758,7 +3758,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/97961
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4413,6 +4412,21 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Windows windows_home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_home_scroll_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
 
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
