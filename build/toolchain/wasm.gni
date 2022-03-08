@@ -6,7 +6,7 @@
 
 declare_args() {
   # The location of an activated embedded emsdk.
-  emsdk_dir = rebase_path("//third_party/emsdk")
+  emsdk_dir = rebase_path("//buildtools/emsdk")
 }
 
 wasm_toolchain = "//build/toolchain/wasm"
