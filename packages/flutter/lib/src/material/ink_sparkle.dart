@@ -7,8 +7,11 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'ink_well.dart';
+import 'material.dart';
 
 /// Begin a Material 3 ink sparkle ripple, centered at the tap or click position
 /// relative to the [referenceBox].

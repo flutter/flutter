@@ -17,9 +17,9 @@ const double _animationDurationMicros = 617 * 1000;
 // animation screenshots, and higher for less granular animation screenshots.
 const int _testIntervalPercent = 25;
 
-void main() {
-  debugDisableShadows = false;
+final Duration _betweenGoldenInterval = Duration(microseconds: (_testIntervalPercent / 100.0 * _animationDurationMicros).round());
 
+void main() {
   testWidgets('InkSparkle default splashFactory compiles and completes', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -86,7 +86,7 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
         repaintFinder,
         matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
       );
-      await tester.pump(Duration(microseconds: (_testIntervalPercent / _animationDurationMicros * 1000.0).round()));
+      await tester.pump(_betweenGoldenInterval);
     }
 }
 
