@@ -17,7 +17,7 @@ import 'package:vector_math/vector_math_64.dart';
 ///  - [https://github.com/flutter/flutter/issues/85238]
 /// 
 /// To use this effect, pass an instance of [InkSparkleFactory] to the
-/// `splashFactory` parameter of eitther the Mataerial [ThemeData] or any
+/// `splashFactory` parameter of either the Material [ThemeData] or any
 /// component that has a `splashFactory` paramter, such as buttons:
 ///  - [ElevatedButton]
 ///  - [TextButton]
