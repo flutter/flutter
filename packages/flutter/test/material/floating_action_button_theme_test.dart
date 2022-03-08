@@ -23,17 +23,27 @@ void main() {
       ),
     ));
 
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    final Size minimumSize = style.minimumSize!.resolve(enabled)!;
+    final Size maximumSize = style.maximumSize!.resolve(enabled)!;
+    final BoxConstraints buttonConstraints = BoxConstraints(
+      minWidth: minimumSize.width,
+      minHeight: minimumSize.height,
+      maxWidth: maximumSize.width,
+      maxHeight: maximumSize.height,
+    );
+
     // The color scheme values are guaranteed to be non null since the default
     // [ThemeData] creates it with [ColorScheme.fromSwatch].
-    expect(_getRawMaterialButton(tester).fillColor, ThemeData().colorScheme.secondary);
+    expect(style.backgroundColor!.resolve(enabled), ThemeData().colorScheme.secondary);
     expect(_getRichText(tester).text.style!.color, ThemeData().colorScheme.onSecondary);
 
     // These defaults come directly from the [FloatingActionButton].
-    expect(_getRawMaterialButton(tester).elevation, 6);
-    expect(_getRawMaterialButton(tester).highlightElevation, 12);
-    expect(_getRawMaterialButton(tester).shape, const CircleBorder());
-    expect(_getRawMaterialButton(tester).splashColor, ThemeData().splashColor);
-    expect(_getRawMaterialButton(tester).constraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
+    expect(style.elevation!.resolve(enabled), 6);
+    expect(style.elevation!.resolve(pressed), 12);
+    expect(style.shape!.resolve(enabled), const CircleBorder());
+    expect(style.overlayColor!.resolve(pressed), ThemeData().splashColor);
+    expect(buttonConstraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
     expect(_getIconSize(tester).width, 24.0);
     expect(_getIconSize(tester).height, 24.0);
   });
@@ -69,14 +79,23 @@ void main() {
       ),
     ));
 
-    expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    final Size minimumSize = style.minimumSize!.resolve(enabled)!;
+    final Size maximumSize = style.maximumSize!.resolve(enabled)!;
+    final BoxConstraints buttonConstraints = BoxConstraints(
+      minWidth: minimumSize.width,
+      minHeight: minimumSize.height,
+      maxWidth: maximumSize.width,
+      maxHeight: maximumSize.height,
+    );
+    expect(style.backgroundColor!.resolve(enabled), backgroundColor);
     expect(_getRichText(tester).text.style!.color, foregroundColor);
-    expect(_getRawMaterialButton(tester).elevation, elevation);
-    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
-    expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
-    expect(_getRawMaterialButton(tester).shape, shape);
-    expect(_getRawMaterialButton(tester).splashColor, splashColor);
-    expect(_getRawMaterialButton(tester).constraints, constraints);
+    expect(style.elevation!.resolve(enabled), elevation);
+    expect(style.elevation!.resolve(disabled), disabledElevation);
+    expect(style.elevation!.resolve(pressed), highlightElevation);
+    expect(style.shape!.resolve(enabled), shape);
+    expect(style.overlayColor!.resolve(pressed), splashColor);
+    expect(buttonConstraints, constraints);
   });
 
   testWidgets('FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -115,13 +134,14 @@ void main() {
       ),
     ));
 
-    expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    expect(style.backgroundColor!.resolve(enabled), backgroundColor);
     expect(_getRichText(tester).text.style!.color, foregroundColor);
-    expect(_getRawMaterialButton(tester).elevation, elevation);
-    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
-    expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
-    expect(_getRawMaterialButton(tester).shape, shape);
-    expect(_getRawMaterialButton(tester).splashColor, splashColor);
+    expect(style.elevation!.resolve(enabled), elevation);
+    expect(style.elevation!.resolve(disabled), disabledElevation);
+    expect(style.elevation!.resolve(pressed), highlightElevation);
+    expect(style.shape!.resolve(enabled), shape);
+    expect(style.overlayColor!.resolve(pressed), splashColor);
   });
 
   testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (WidgetTester tester) async {
@@ -136,7 +156,8 @@ void main() {
       ),
     ));
 
-    expect(_getRawMaterialButton(tester).shape, customShape);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    expect(style.shape!.resolve(enabled), customShape);
   });
 
   testWidgets('FloatingActionButton.small uses custom constraints when specified in the theme', (WidgetTester tester) async {
@@ -157,7 +178,16 @@ void main() {
       ),
     ));
 
-    expect(_getRawMaterialButton(tester).constraints, constraints);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    final Size minimumSize = style.minimumSize!.resolve(enabled)!;
+    final Size maximumSize = style.maximumSize!.resolve(enabled)!;
+    final BoxConstraints buttonConstraints = BoxConstraints(
+      minWidth: minimumSize.width,
+      minHeight: minimumSize.height,
+      maxWidth: maximumSize.width,
+      maxHeight: maximumSize.height,
+    );
+    expect(buttonConstraints, constraints);
     expect(_getIconSize(tester).width, iconSize);
     expect(_getIconSize(tester).height, iconSize);
   });
@@ -180,7 +210,16 @@ void main() {
       ),
     ));
 
-    expect(_getRawMaterialButton(tester).constraints, constraints);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    final Size minimumSize = style.minimumSize!.resolve(enabled)!;
+    final Size maximumSize = style.maximumSize!.resolve(enabled)!;
+    final BoxConstraints buttonConstraints = BoxConstraints(
+      minWidth: minimumSize.width,
+      minHeight: minimumSize.height,
+      maxWidth: maximumSize.width,
+      maxHeight: maximumSize.height,
+    );
+    expect(buttonConstraints, constraints);
     expect(_getIconSize(tester).width, iconSize);
     expect(_getIconSize(tester).height, iconSize);
   });
@@ -211,12 +250,21 @@ void main() {
       ),
     ));
 
-    expect(_getRawMaterialButton(tester).constraints, constraints);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
+    final Size minimumSize = style.minimumSize!.resolve(enabled)!;
+    final Size maximumSize = style.maximumSize!.resolve(enabled)!;
+    final BoxConstraints buttonConstraints = BoxConstraints(
+      minWidth: minimumSize.width,
+      minHeight: minimumSize.height,
+      maxWidth: maximumSize.width,
+      maxHeight: maximumSize.height,
+    );
+    expect(buttonConstraints, constraints);
     expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
     expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
     expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
     // The color comes from the default color scheme's onSecondary value.
-    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
+    expect(style.textStyle!.resolve(enabled), textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
   testWidgets('FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
@@ -249,8 +297,9 @@ void main() {
     expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
     expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
     expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+    final ButtonStyle style = tester.widget<ElevatedButton>(find.byType(ElevatedButton)).style!;
     // The color comes from the default color scheme's onSecondary value.
-    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
+    expect(style.textStyle!.resolve(enabled), textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
   testWidgets('default FloatingActionButton debugFillProperties', (WidgetTester tester) async {
@@ -346,14 +395,9 @@ void main() {
   });
 }
 
-RawMaterialButton _getRawMaterialButton(WidgetTester tester) {
-  return tester.widget<RawMaterialButton>(
-    find.descendant(
-      of: find.byType(FloatingActionButton),
-      matching: find.byType(RawMaterialButton),
-    ),
-  );
-}
+const Set<MaterialState> enabled = <MaterialState>{};
+const Set<MaterialState> pressed = <MaterialState>{ MaterialState.pressed };
+const Set<MaterialState> disabled = <MaterialState>{ MaterialState.disabled };
 
 RichText _getRichText(WidgetTester tester) {
   return tester.widget<RichText>(

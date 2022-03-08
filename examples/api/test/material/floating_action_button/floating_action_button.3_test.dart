@@ -9,10 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('FloatingActionButton variants', (WidgetTester tester) async {
-    RawMaterialButton getRawMaterialButtonWidget(Finder finder) {
-      return tester.widget<RawMaterialButton>(finder);
-    }
-
     await tester.pumpWidget(
       const example.MyApp(),
     );
@@ -22,28 +18,52 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNWidgets(4));
     expect(find.byIcon(Icons.add), findsNWidgets(4));
 
-    final Finder smallFabMaterialButton = find.byType(RawMaterialButton).at(0);
-    final RenderBox smallFabRenderBox = tester.renderObject(smallFabMaterialButton);
+    final Finder smallFabElevatedButton = find.byType(ElevatedButton).at(0);
+    final RenderBox smallFabRenderBox = tester.renderObject(smallFabElevatedButton);
     expect(smallFabRenderBox.size, const Size(48.0, 48.0));
-    expect(getRawMaterialButtonWidget(smallFabMaterialButton).fillColor, theme.colorScheme.primaryContainer);
-    expect(getRawMaterialButtonWidget(smallFabMaterialButton).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(12.0)));
+    Material material = tester.widget(
+      find.descendant(
+        of: find.byType(ElevatedButton).at(0),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, theme.colorScheme.primaryContainer);
+    expect(material.shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(12.0)));
 
-    final Finder regularFABMaterialButton = find.byType(RawMaterialButton).at(1);
-    final RenderBox regularFABRenderBox = tester.renderObject(regularFABMaterialButton);
+    final Finder regularFABElevatedButton = find.byType(ElevatedButton).at(1);
+    final RenderBox regularFABRenderBox = tester.renderObject(regularFABElevatedButton);
     expect(regularFABRenderBox.size, const Size(56.0, 56.0));
-    expect(getRawMaterialButtonWidget(regularFABMaterialButton).fillColor, theme.colorScheme.primaryContainer);
-    expect(getRawMaterialButtonWidget(regularFABMaterialButton).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(16.0)));
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(ElevatedButton).at(1),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, theme.colorScheme.primaryContainer);
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)));
 
-    final Finder largeFABMaterialButton = find.byType(RawMaterialButton).at(2);
-    final RenderBox largeFABRenderBox = tester.renderObject(largeFABMaterialButton);
+    final Finder largeFABElevatedButton = find.byType(ElevatedButton).at(2);
+    final RenderBox largeFABRenderBox = tester.renderObject(largeFABElevatedButton);
     expect(largeFABRenderBox.size, const Size(96.0, 96.0));
-    expect(getRawMaterialButtonWidget(largeFABMaterialButton).fillColor, theme.colorScheme.primaryContainer);
-    expect(getRawMaterialButtonWidget(largeFABMaterialButton).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(28.0)));
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(ElevatedButton).at(2),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, theme.colorScheme.primaryContainer);
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0)));
 
-    final Finder extendedFABMaterialButton = find.byType(RawMaterialButton).at(3);
-    final RenderBox extendedFABRenderBox = tester.renderObject(extendedFABMaterialButton);
+    final Finder extendedFABElevatedButton = find.byType(ElevatedButton).at(3);
+    final RenderBox extendedFABRenderBox = tester.renderObject(extendedFABElevatedButton);
     expect(extendedFABRenderBox.size, const Size(111.0, 56.0));
-    expect(getRawMaterialButtonWidget(extendedFABMaterialButton).fillColor, theme.colorScheme.primaryContainer);
-    expect(getRawMaterialButtonWidget(extendedFABMaterialButton).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(16.0)));
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(ElevatedButton).at(3),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, theme.colorScheme.primaryContainer);
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)));
   });
 }

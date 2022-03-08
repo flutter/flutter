@@ -9,7 +9,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'button_style.dart';
 import 'color_scheme.dart';
+import 'constants.dart';
+import 'elevated_button.dart';
 import 'floating_action_button_theme.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -602,26 +605,39 @@ class FloatingActionButton extends StatelessWidget {
         break;
     }
 
-    Widget result = RawMaterialButton(
-      onPressed: onPressed,
-      mouseCursor: _EffectiveMouseCursor(mouseCursor, floatingActionButtonTheme.mouseCursor),
+    final MaterialStateProperty<double> elevationValue = _EffectiveElevation(
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,
-      highlightElevation: highlightElevation,
       disabledElevation: disabledElevation,
-      constraints: sizeConstraints,
-      materialTapTargetSize: materialTapTargetSize,
-      fillColor: backgroundColor,
-      focusColor: focusColor,
-      hoverColor: hoverColor,
-      splashColor: splashColor,
-      textStyle: extendedTextStyle,
-      shape: shape,
+      highlightElevation: highlightElevation,
+    );
+
+    Widget result = ElevatedButton(
+      style: ButtonStyle(
+        textStyle: MaterialStateProperty.all<TextStyle?>(extendedTextStyle),
+        backgroundColor: MaterialStateProperty.all<Color?>(backgroundColor),
+        foregroundColor: MaterialStateProperty.all<Color?>(foregroundColor),
+        overlayColor: _EffectiveOverlay(
+          hoverColor: hoverColor,
+          focusColor: focusColor,
+          splashColor: splashColor,
+        ),
+        elevation: elevationValue,
+        padding: MaterialStateProperty.all<EdgeInsetsGeometry?>(EdgeInsets.zero),
+        minimumSize: MaterialStateProperty.all<Size?>(Size(sizeConstraints.minWidth, sizeConstraints.minHeight)),
+        maximumSize: MaterialStateProperty.all<Size?>(Size(sizeConstraints.maxWidth, sizeConstraints.maxHeight)),
+        shape: MaterialStateProperty.all<OutlinedBorder?>(shape as OutlinedBorder),
+        mouseCursor: _EffectiveMouseCursor(mouseCursor, floatingActionButtonTheme.mouseCursor),
+        visualDensity: VisualDensity.standard,
+        tapTargetSize: materialTapTargetSize,
+        animationDuration: kThemeChangeDuration,
+        enableFeedback: enableFeedback,
+      ),
+      onPressed: onPressed,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      enableFeedback: enableFeedback,
       child: resolvedChild,
     );
 
@@ -665,6 +681,40 @@ class FloatingActionButton extends StatelessWidget {
   }
 }
 
+@immutable
+class _EffectiveElevation extends MaterialStateProperty<double> with Diagnosticable {
+  _EffectiveElevation({
+    required this.elevation,
+    required this.focusElevation,
+    required this.hoverElevation,
+    required this.highlightElevation,
+    required this.disabledElevation,
+  });
+
+  final double elevation;
+  final double disabledElevation;
+  final double highlightElevation;
+  final double hoverElevation;
+  final double focusElevation;
+
+  @override
+  double resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledElevation;
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return highlightElevation;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return hoverElevation;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return focusElevation;
+    }
+    return elevation;
+  }
+}
+
 // This MaterialStateProperty is passed along to RawMaterialButton which
 // resolves the property against MaterialState.pressed, MaterialState.hovered,
 // MaterialState.focused, MaterialState.disabled.
@@ -683,6 +733,33 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
 
   @override
   String get debugDescription => 'MaterialStateMouseCursor(FloatActionButton)';
+}
+
+@immutable
+class _EffectiveOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
+  _EffectiveOverlay({
+    required this.hoverColor,
+    required this.focusColor,
+    required this.splashColor,
+  });
+
+  final Color hoverColor;
+  final Color focusColor;
+  final Color splashColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered)) {
+      return hoverColor;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return focusColor;
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return splashColor;
+    }
+    return null;
+  }
 }
 
 // This widget's size matches its child's size unless its constraints
