@@ -1499,6 +1499,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android color_filter_cache_perf__e2e_summary
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1510,6 +1511,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android color_filter_cache_perf__timeline_summary
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
