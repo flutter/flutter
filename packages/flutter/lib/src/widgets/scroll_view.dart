@@ -1010,6 +1010,13 @@ abstract class BoxScrollView extends ScrollView {
 /// example of how a caller might wire up basic item selection, see
 /// [ListTile.selected].
 ///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [ListView] or [GridView].
+/// Long press any ListTile to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -1698,6 +1705,13 @@ class ListView extends BoxScrollView {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [GridView] or [ListView].
+/// Long press any ListTile to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
 /// {@end-tool}
 ///
 /// See also:
