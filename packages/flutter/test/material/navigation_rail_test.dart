@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is run as part of a reduced test set in CI on Mac and Windows
-// machines.
-@Tags(<String>['reduced-test-set'])
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -565,7 +561,9 @@ void main() {
         ),
       ),
     );
-  });
+  },
+  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
+  );
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -657,7 +655,9 @@ void main() {
         ),
       ),
     );
-  });
+  },
+  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
+  );
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -749,7 +749,9 @@ void main() {
         ),
       ),
     );
-  });
+  },
+  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
+  );
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -840,7 +842,9 @@ void main() {
         ),
       ),
     );
-  });
+  },
+  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
+  );
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -932,7 +936,9 @@ void main() {
         ),
       ),
     );
-  });
+  },
+  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
+  );
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -1024,7 +1030,9 @@ void main() {
         ),
       ),
     );
-  });
+  },
+  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
+  );
 
   testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
