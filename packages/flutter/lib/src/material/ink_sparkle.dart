@@ -43,6 +43,20 @@ import 'material.dart';
 /// This is the default.
 ///
 /// When the ripple is removed, [onRemoved] will be called.
+/// 
+/// {@tool snippet}
+///
+/// For typical use, pass the [InkSparkle.splashFactory] to the `splashFactory`
+/// parameter of a button style or [ThemeData].
+///
+/// ```dart
+/// ElevatedButton(
+///   style: ElevatedButton.styleFrom(splashFactory: InkSparkle.splashFactory),
+///   child: const Text('Sparkle!'),
+///   onPressed: () { },
+/// )
+/// ```
+/// {@end-tool}
 class InkSparkle extends InteractiveInkFeature {
   /// Begin a sparkly ripple effect, centered at [position] relative to
   /// [referenceBox].
