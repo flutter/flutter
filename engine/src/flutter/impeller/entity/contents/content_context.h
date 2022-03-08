@@ -19,6 +19,8 @@
 #include "flutter/impeller/entity/solid_stroke.vert.h"
 #include "flutter/impeller/entity/texture_fill.frag.h"
 #include "flutter/impeller/entity/texture_fill.vert.h"
+#include "impeller/entity/entity.h"
+#include "impeller/renderer/formats.h"
 
 namespace impeller {
 
@@ -38,17 +40,19 @@ using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
+  Entity::BlendMode blend_mode = Entity::BlendMode::kSource;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
-      return fml::HashCombine(o.sample_count);
+      return fml::HashCombine(o.sample_count, o.blend_mode);
     }
   };
 
   struct Equal {
     constexpr bool operator()(const ContentContextOptions& lhs,
                               const ContentContextOptions& rhs) const {
-      return lhs.sample_count == rhs.sample_count;
+      return lhs.sample_count == rhs.sample_count &&
+             lhs.blend_mode == rhs.blend_mode;
     }
   };
 };
@@ -120,6 +124,43 @@ class ContentContext {
   static void ApplyOptionsToDescriptor(PipelineDescriptor& desc,
                                        const ContentContextOptions& options) {
     desc.SetSampleCount(options.sample_count);
+
+    ColorAttachmentDescriptor color0 = *desc.GetColorAttachmentDescriptor(0u);
+    color0.alpha_blend_op = BlendOperation::kAdd;
+    color0.color_blend_op = BlendOperation::kAdd;
+    switch (options.blend_mode) {
+      case Entity::BlendMode::kClear:
+        color0.dst_alpha_blend_factor = BlendFactor::kZero;
+        color0.dst_color_blend_factor = BlendFactor::kZero;
+        color0.src_alpha_blend_factor = BlendFactor::kZero;
+        color0.src_color_blend_factor = BlendFactor::kZero;
+        break;
+      case Entity::BlendMode::kSource:
+        color0.dst_alpha_blend_factor = BlendFactor::kZero;
+        color0.dst_color_blend_factor = BlendFactor::kZero;
+        color0.src_alpha_blend_factor = BlendFactor::kSourceAlpha;
+        color0.src_color_blend_factor = BlendFactor::kOne;
+        break;
+      case Entity::BlendMode::kDestination:
+        color0.dst_alpha_blend_factor = BlendFactor::kDestinationAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kOne;
+        color0.src_alpha_blend_factor = BlendFactor::kZero;
+        color0.src_color_blend_factor = BlendFactor::kZero;
+        break;
+      case Entity::BlendMode::kSourceOver:
+        color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kSourceAlpha;
+        color0.src_color_blend_factor = BlendFactor::kOne;
+        break;
+      case Entity::BlendMode::kDestinationOver:
+        color0.dst_alpha_blend_factor = BlendFactor::kDestinationAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kOne;
+        color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        break;
+    }
+    desc.SetColorAttachmentDescriptor(0u, std::move(color0));
   }
 
   template <class TypedPipeline>
