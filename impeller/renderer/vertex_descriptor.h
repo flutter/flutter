@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/comparable.h"
+#include "impeller/base/comparable.h"
 #include "impeller/renderer/shader_types.h"
 
 namespace impeller {
