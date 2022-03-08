@@ -14,8 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   debugDisableShadows = true;
 
-  // TODO(clocksmith): Mock math.Random().nextDouble() to return 0.1337?
-
   // From InkSparkle._animationDuration.
   const double animationDurationMicros = 617 * 1000;
 
