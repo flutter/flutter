@@ -9,7 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+
+
 void main() {
+  debugDisableShadows = true;
 
   // TODO(clocksmith): Mock math.Random().nextDouble() to return 0.1337?
 
