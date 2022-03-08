@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "flutter/fml/macros.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/scalar.h"
@@ -109,7 +108,8 @@ class PathBuilder {
 
   Point ReflectedCubicControlPoint1() const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PathBuilder);
+  PathBuilder(const PathBuilder&) = delete;
+  PathBuilder& operator=(const PathBuilder&&) = delete;
 };
 
 }  // namespace impeller

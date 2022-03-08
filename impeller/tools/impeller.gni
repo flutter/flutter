@@ -36,13 +36,6 @@ template("impeller_component") {
     cflags_objcc += flutter_cflags_objcc_arc + objc_warning_flags
 
     public_configs += [ "//flutter/impeller:impeller_public_config" ]
-
-    deps += [
-      "//flutter/fml",
-
-      # For tracing, seems to be pulled in by FML. Must be removed.
-      "//flutter/runtime:libdart",
-    ]
   }
 }
 
