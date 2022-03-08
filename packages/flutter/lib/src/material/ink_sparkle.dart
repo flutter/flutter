@@ -43,7 +43,7 @@ import 'material.dart';
 /// This is the default.
 ///
 /// When the ripple is removed, [onRemoved] will be called.
-/// 
+///
 /// {@tool snippet}
 ///
 /// For typical use, pass the [InkSparkle.splashFactory] to the `splashFactory`
@@ -509,7 +509,7 @@ double _getTargetRadius(
 
 /// A generated class for managing [FragmentProgram] that includes a
 /// pre-transpiled shader program into SPIR-V.
-/// 
+///
 /// See:
 /// - [https://github.com/material-components/material-components-flutter-experimental/tree/fragment-shader-manager/fragment_shader_manager]
 ///
