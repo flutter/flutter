@@ -672,7 +672,7 @@ class FragmentShaderManager {
   /// Direct access to the the SPIR-V bytecode that was used to generate this class.
   ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
-  ///git 
+  ///
   /// Words in SPIR-V are 32 bits. Every 4 elements in this list represents 1
   /// SPIR-V word. See https://www.khronos.org/registry/SPIR-V/.
   ByteBuffer get spirvByteBuffer => Uint8List.fromList(_spirvByteList).buffer;
