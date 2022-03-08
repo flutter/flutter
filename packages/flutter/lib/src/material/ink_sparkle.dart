@@ -10,17 +10,17 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-/// Begin a Material 3 ink sparkle ripple, centered at [position] relative to
-/// [referenceBox].
+/// Begin a Material 3 ink sparkle ripple, centered at the tap or click position
+/// relative to the [referenceBox].
 ///
 /// This effect relies on a shader, and therefore hardware acceleration.
 /// Currently, this is only supported by C++ engine platforms: Android, iOS,
 /// MacOS, Windows, and Linux, etc. It can run on other platforms with emulation
 /// in software, but will not be performant. Hardware enabled support for
 /// CanvasKit web can be tracked here:
-///  - [https://github.com/flutter/flutter/issues/85238]
+///  - https://github.com/flutter/flutter/issues/85238
 ///
-/// To use this effect, pass an instance of [InkSparkleFactory] to the
+/// To use this effect, pass an instance of [splashFactory] to the
 /// `splashFactory` parameter of either the Material [ThemeData] or any
 /// component that has a `splashFactory` paramter, such as buttons:
 ///  - [ElevatedButton]
@@ -45,7 +45,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// [referenceBox].
   ///
   /// The [color] defines the color of the splash itself. The sparkles are
-  /// always [Color.white].
+  /// always white.
   ///
   /// The [controller] argument is typically obtained via
   /// `Material.of(context)`.
