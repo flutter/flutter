@@ -55,10 +55,10 @@ class InkSparkle extends InteractiveInkFeature {
   ///  1. If [customBorder] is provided, it is used to determine the path for
   ///     clipping.
   ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
-  ///     is clipped by an [RRect] created from [_clipCallback] and
+  ///     is clipped by an [RRect] created from `_clipCallback` and
   ///     [borderRadius].
   ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] 
-  ///     provided by [_clipCallback] is used for clipping.
+  ///     provided by `_clipCallback` is used for clipping.
   ///
   /// If [containedInkWell] is true, then the ripple will be sized to fit
   /// the well rectangle, then clipped to it when drawn. The well
@@ -361,9 +361,8 @@ class InkSparkle extends InteractiveInkFeature {
   ///      by [clipCallback] is used for clipping.
   ///
   /// [textDirection] is used by [customBorder] if it is non-null. This allows 
-  /// the [customBorder]'s path to be properly defined if it was the path was
-  /// expressed in terms of "start" and "end" instead of
-  /// "left" and "right".
+  /// the [customBorder]'s path to be properly defined if the path was expressed
+  /// in terms of "start" and "end" instead of "left" and "right".
   ///
   /// For examples on how the function is used, see [InkSparkle].
   void _clipCanvas({
