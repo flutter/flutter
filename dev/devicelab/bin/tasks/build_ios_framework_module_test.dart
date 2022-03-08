@@ -467,7 +467,7 @@ Future<void> _checkBitcode(String frameworkPath, String mode) async {
   }
 }
 
-Future<String> _dylibSymbols(String pathToDylib, global) {
+Future<String> _dylibSymbols(String pathToDylib, bool global) {
   return eval('nm', <String>[
     if (global)
       '-g',
