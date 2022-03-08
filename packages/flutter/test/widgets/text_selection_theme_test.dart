@@ -14,6 +14,21 @@ void main() {
     expect(const TextSelectionThemeData().hashCode, const TextSelectionThemeData().copyWith().hashCode);
   });
 
+  test('TextSelectionThemeData merge', () {
+    const TextSelectionThemeData theme1 = TextSelectionThemeData(
+      cursorColor: Colors.yellow,
+      selectionColor: Colors.red,
+      selectionHandleColor: Colors.blue,
+    );
+    const TextSelectionThemeData theme2 = TextSelectionThemeData(
+      selectionColor: Colors.black,
+    );
+    final TextSelectionThemeData merged = theme1.merge(theme2);
+    expect(merged.cursorColor, theme1.cursorColor);
+    expect(merged.selectionColor, theme2.selectionColor);
+    expect(merged.selectionHandleColor, theme1.selectionHandleColor);
+  });
+
   test('TextSelectionThemeData null fields by default', () {
     const TextSelectionThemeData theme = TextSelectionThemeData();
     expect(theme.cursorColor, null);
@@ -150,6 +165,41 @@ void main() {
     await tester.pumpAndSettle();
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: textSelectionTheme.selectionHandleColor));
+  });
+
+  testWidgets('ThemeData.textSelectionTheme will be used in EditableText if provided', (WidgetTester tester) async {
+    const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
+      selectionColor: Color(0x88888888),
+    );
+    final ThemeData theme = ThemeData.fallback().copyWith(
+      textSelectionTheme: textSelectionTheme,
+    );
+
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    // Test TextField's cursor & selection color.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: Colors.yellow,
+            cursorWidth: 10.0,
+            cursorHeight: 10.0,
+            cursorRadius: const Radius.circular(2.0),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    expect(renderEditable.selectionColor, textSelectionTheme.selectionColor);
   });
 
   testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {

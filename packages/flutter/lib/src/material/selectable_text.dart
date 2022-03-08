@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
-import 'text_selection_theme.dart';
 import 'theme.dart';
 
 /// An eyeballed value that moves the cursor slightly left of where it is

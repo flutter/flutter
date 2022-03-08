@@ -552,11 +552,9 @@ void main() {
   group('material handles', () {
     testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
-        child: Theme(
-          data: ThemeData(
-            textSelectionTheme: const TextSelectionThemeData(
-              selectionHandleColor: Color(0x550000AA),
-            ),
+        child: TextSelectionTheme(
+          data: const TextSelectionThemeData(
+            selectionHandleColor: Color(0x550000AA),
           ),
           child: Builder(
             builder: (BuildContext context) {

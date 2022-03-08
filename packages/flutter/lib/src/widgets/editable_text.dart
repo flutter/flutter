@@ -34,6 +34,7 @@ import 'shortcuts.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+import 'text_selection_theme.dart';
 import 'ticker_provider.dart';
 import 'widget_span.dart';
 
@@ -3296,7 +3297,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         minLines: widget.minLines,
                         expands: widget.expands,
                         strutStyle: widget.strutStyle,
-                        selectionColor: widget.selectionColor,
+                        selectionColor: widget.selectionColor ?? TextSelectionTheme.of(context).selectionColor,
                         textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                         textAlign: widget.textAlign,
                         textDirection: _textDirection,

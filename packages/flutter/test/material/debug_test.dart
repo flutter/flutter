@@ -170,6 +170,7 @@ void main() {
       '     _InheritedTheme\n'
       '     Theme\n'
       '     AnimatedTheme\n'
+      '     TextSelectionTheme\n'
       '     _ScaffoldMessengerScope\n'
       '     ScaffoldMessenger\n'
       '     Builder\n'

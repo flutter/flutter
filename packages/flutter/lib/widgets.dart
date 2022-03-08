@@ -124,6 +124,7 @@ export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_editing_intents.dart';
 export 'src/widgets/text_selection.dart';
+export 'src/widgets/text_selection_theme.dart';
 export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/texture.dart';
 export 'src/widgets/ticker_provider.dart';

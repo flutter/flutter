@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
 
-import 'theme.dart';
+import 'framework.dart';
+import 'inherited_theme.dart';
 
-/// Defines the visual properties needed for text selection in [TextField] and
-/// [SelectableText] widgets.
+/// Defines the visual properties needed for text selection in [EditableText]
+/// and its subclasses, [TextField] and [SelectableText].
 ///
 /// Used by [TextSelectionTheme] to control the visual properties of text
 /// selection in a widget subtree.
@@ -64,6 +67,23 @@ class TextSelectionThemeData with Diagnosticable {
     );
   }
 
+  /// Creates a copy of this object with the given fields replaced with the
+  /// specified values.
+  ///
+  /// Returns a new text selection theme that matches this text selection theme
+  /// but with some values replaced by the non-null parameters of the given text
+  /// selection theme. If the given text selection theme is null, simply returns
+  /// this text selection theme.
+  TextSelectionThemeData merge(TextSelectionThemeData? other) {
+    if (other == null)
+      return this;
+    return copyWith(
+      cursorColor: other.cursorColor,
+      selectionColor: other.selectionColor,
+      selectionHandleColor: other.selectionHandleColor,
+    );
+  }
+
   /// Linearly interpolate between two text field themes.
   ///
   /// If both arguments are null, then null is returned.
@@ -111,8 +131,9 @@ class TextSelectionThemeData with Diagnosticable {
 /// An inherited widget that defines the appearance of text selection in
 /// this widget's subtree.
 ///
-/// Values specified here are used for [TextField] and [SelectableText]
-/// properties that are not given an explicit non-null value.
+/// Values specified here are used for [EditableText] and its subclasses,
+/// [TextField] and [SelectableText], properties that are not given an explicit
+/// non-null value.
 ///
 /// {@tool snippet}
 ///
@@ -154,7 +175,7 @@ class TextSelectionTheme extends InheritedTheme {
   /// ```
   static TextSelectionThemeData of(BuildContext context) {
     final TextSelectionTheme? selectionTheme = context.dependOnInheritedWidgetOfExactType<TextSelectionTheme>();
-    return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
+    return selectionTheme?.data ?? const TextSelectionThemeData();
   }
 
   @override

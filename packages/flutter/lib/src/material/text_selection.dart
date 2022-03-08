@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'material_localizations.dart';
-import 'text_selection_theme.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 import 'theme.dart';

@@ -579,18 +579,24 @@ class _CupertinoAppState extends State<CupertinoApp> {
   @override
   Widget build(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
-
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
           data: effectiveThemeData,
-          child: HeroControllerScope(
-            controller: _heroController,
-            child: Builder(
-              builder: _buildWidgetApp,
+          child: TextSelectionTheme(
+            data: TextSelectionThemeData(
+              cursorColor: effectiveThemeData.primaryColor,
+              selectionColor: effectiveThemeData.primaryColor.withOpacity(0.40),
+              selectionHandleColor: effectiveThemeData.primaryColor,
             ),
+            child: HeroControllerScope(
+              controller: _heroController,
+              child: Builder(
+                builder: _buildWidgetApp,
+              ),
+            )
           ),
         ),
       ),

@@ -43,7 +43,6 @@ import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_button_theme.dart';
-import 'text_selection_theme.dart';
 import 'text_theme.dart';
 import 'time_picker_theme.dart';
 import 'toggle_buttons_theme.dart';
