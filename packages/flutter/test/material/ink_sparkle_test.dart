@@ -28,7 +28,7 @@ void main() {
           child: RepaintBoundary(
             key: repaintKey,
             child: Theme(
-              data: ThemeData(splashFactory: InkSparkle.splashFactory),
+              data: ThemeData(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
               child: ElevatedButton(
                 child: const Text('Sparkle!'),
                 onPressed: () { },
@@ -71,7 +71,7 @@ void main() {
           child: RepaintBoundary(
             key: repaintKey,
             child: Theme(
-              data: ThemeData(splashFactory: InkSparkle.splashFactory),
+              data: ThemeData(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
               child: ElevatedButton(
                 child: const Text('Sparkle!'),
                 onPressed: () { },
@@ -115,7 +115,7 @@ void main() {
           child: RepaintBoundary(
             key: repaintKey,
             child: Theme(
-              data: ThemeData(splashFactory: InkSparkle.splashFactory),
+              data: ThemeData(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
               child: ElevatedButton(
                 child: const Text('Sparkle!'),
                 onPressed: () { },

@@ -74,6 +74,10 @@ class InkSparkle extends InteractiveInkFeature {
   /// where the [postition] is.
   /// 
   /// When the ripple is removed, [onRemoved] will be called.
+  /// 
+  /// [turbulenceSeed] can be passed if a non random seed shold be used for
+  /// the turbulence and sparkles. By default, the seed is a random number
+  /// between 0.0 and 1000.0.
   InkSparkle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
@@ -86,6 +90,7 @@ class InkSparkle extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     VoidCallback? onRemoved,
+    double? turbulenceSeed,
   }) : _color = color,
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -179,7 +184,7 @@ class InkSparkle extends InteractiveInkFeature {
 
     // Creates an element of randomness so that ink eminating from the same
     // pixel have slightly different rings and sparkles.
-    _turbulenceSeed = math.Random().nextDouble() * 1000.0;
+    _turbulenceSeed = turbulenceSeed ?? math.Random().nextDouble() * 1000.0;
   }
 
   static const Duration _animationDuration = Duration(milliseconds: 617);
@@ -211,7 +216,17 @@ class InkSparkle extends InteractiveInkFeature {
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
+  /// 
+  /// Since no [turbulenceSeed] is passed, the effect will be random for
+  /// subsequent presses in the same position.
   static const InteractiveInkFeatureFactory splashFactory = _InkSparkleFactory();
+
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
+  /// material [Theme], or [ButtonStyle].
+  /// 
+  /// Since a [turbulenceSeed] is passed, the effect will not be random for
+  /// subsequent presses in the same position. This can be used for testing.
+  static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory(1337.0);
 
   @override
   void dispose() {
@@ -391,7 +406,7 @@ class InkSparkle extends InteractiveInkFeature {
 }
 
 class _InkSparkleFactory extends InteractiveInkFeatureFactory {
-  const _InkSparkleFactory();
+  const _InkSparkleFactory(this.turbulenceSeed);
 
   // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
@@ -404,6 +419,8 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
   }
   static bool _initCalled = false;
   static FragmentShaderManager? _shaderManager;
+
+  final double turbulenceSeed;
 
   @override
   InteractiveInkFeature create({
@@ -431,6 +448,7 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      turbulenceSeed: turbulenceSeed,
     );
   }
 }
