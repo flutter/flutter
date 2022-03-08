@@ -17,11 +17,18 @@ impeller_component("image") {
     "decompressed_image.cc",
   ]
 
-  deps = [ "//third_party/skia" ]
-
   public_deps = [
     "../base",
     "../geometry",
+  ]
+
+  deps = [
+    "//flutter/fml",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
+    "//third_party/skia",
   ]
 }
 

@@ -36,6 +36,14 @@ impeller_component("typographer") {
     "../renderer",
     "//third_party/skia",
   ]
+
+  deps = [
+    "//flutter/fml",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
+  ]
 }
 
 impeller_component("typographer_unittests") {
