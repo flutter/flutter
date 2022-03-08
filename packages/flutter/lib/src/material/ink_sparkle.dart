@@ -78,7 +78,7 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// [radius] is derived from the [referenceBox] and is multiplied by
   /// [_targetRadiusMultiplier] so that the effect fills the container no matter
-  /// where the [postition] is.
+  /// where the [position] is.
   ///
   /// When the ripple is removed, [onRemoved] will be called.
   ///
