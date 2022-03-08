@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('relayout boundary change does not trigger relayout', (WidgetTester tester) async {
-    final LayoutCountWidget layoutCount = LayoutCountWidget();
+    final RenderLayoutCount renderLayoutCount = RenderLayoutCount();
     final Widget layoutCounter = Center(
       key: GlobalKey(),
-      child: layoutCount,
+      child: WidgetToRenderBoxAdapter(renderBox: renderLayoutCount),
     );
 
     await tester.pumpWidget(
@@ -32,7 +32,7 @@ void main() {
       ),
     );
 
-    expect(layoutCount.layoutCount, 1);
+    expect(renderLayoutCount.layoutCount, 1);
 
     await tester.pumpWidget(
       Center(
@@ -44,26 +44,12 @@ void main() {
       ),
     );
 
-    expect(layoutCount.layoutCount, 1);
+    expect(renderLayoutCount.layoutCount, 1);
   });
 }
 
-class LayoutCountWidget extends LeafRenderObjectWidget {
-  LayoutCountWidget({ Key? key }) : super(key: key);
-
-  final RenderLayoutCount renderObject = RenderLayoutCount();
-
-  int get layoutCount => renderObject.layoutCount;
-  set layoutCount(int newValue) {
-    renderObject.layoutCount = newValue;
-  }
-
-  @override
-  RenderObject createRenderObject(BuildContext context) => renderObject;
-}
-
 // This class is needed because LayoutBuilder's RenderObject does not always
-// call the builder in its PerformLayout method.
+// call the builder method in its PerformLayout method.
 class RenderLayoutCount extends RenderBox {
   int layoutCount = 0;
 
