@@ -191,24 +191,22 @@ class BottomNavigationBarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      elevation,
-      selectedIconTheme,
-      unselectedIconTheme,
-      selectedItemColor,
-      unselectedItemColor,
-      selectedLabelStyle,
-      unselectedLabelStyle,
-      showSelectedLabels,
-      showUnselectedLabels,
-      type,
-      enableFeedback,
-      landscapeLayout,
-      mouseCursor,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    elevation,
+    selectedIconTheme,
+    unselectedIconTheme,
+    selectedItemColor,
+    unselectedItemColor,
+    selectedLabelStyle,
+    unselectedLabelStyle,
+    showSelectedLabels,
+    showUnselectedLabels,
+    type,
+    enableFeedback,
+    landscapeLayout,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {

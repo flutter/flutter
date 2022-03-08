@@ -831,9 +831,7 @@ class _BodyBoxConstraints extends BoxConstraints {
   }
 
   @override
-  int get hashCode {
-    return hashValues(super.hashCode, materialBannerHeight, bottomWidgetsHeight, appBarHeight);
-  }
+  int get hashCode => Object.hash(super.hashCode, materialBannerHeight, bottomWidgetsHeight, appBarHeight);
 }
 
 // Used when Scaffold.extendBody is true to wrap the scaffold's body in a MediaQuery

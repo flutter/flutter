@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
@@ -20,7 +21,7 @@ typedef DragTargetWillAccept<T> = bool Function(T? data);
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
 /// Used by [DragTarget.onAccept].
-typedef DragTargetAccept<T> = void Function(T? data);
+typedef DragTargetAccept<T> = void Function(T data);
 
 /// Signature for determining information about the acceptance by a [DragTarget].
 ///
@@ -500,6 +501,12 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    _recognizer!.gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    super.didChangeDependencies();
+  }
+
   // This gesture recognizer has an unusual lifetime. We want to support the use
   // case of removing the Draggable from the tree in the middle of a drag. That
   // means we need to keep this recognizer alive after this state object has
@@ -638,7 +645,7 @@ class DragTargetDetails<T> {
   DragTargetDetails({required this.data, required this.offset}) : assert(offset != null);
 
   /// The data that was dropped onto this [DragTarget].
-  final T? data;
+  final T data;
 
   /// The global position when the specific pointer event occurred on
   /// the draggable.
@@ -767,14 +774,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    widget.onAccept?.call(avatar.data as T?);
-    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data as T?, offset: avatar._lastOffset!));
+    widget.onAccept?.call(avatar.data! as T);
+    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   void didMove(_DragAvatar<Object> avatar) {
     if (!mounted)
       return;
-    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data as T?, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override

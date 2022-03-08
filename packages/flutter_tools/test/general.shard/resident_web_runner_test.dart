@@ -936,7 +936,7 @@ void main() {
 
   // While this file should be ignored on web, generating it here will cause a
   // perf regression in hot restart.
-  testUsingContext('Does not generate generated_main.dart', () async {
+  testUsingContext('Does not generate dart_plugin_registrant.dart', () async {
     // Create necessary files for [DartPluginRegistrantTarget]
     final File packageConfig = globals.fs.directory('.dart_tool')
         .childFile('package_config.json');
@@ -954,10 +954,10 @@ void main() {
   ]
 }
 ''');
-    // Start with a generated_main.dart file.
+    // Start with a dart_plugin_registrant.dart file.
     globals.fs.directory('.dart_tool')
               .childDirectory('flutter_build')
-              .childFile('generated_main.dart')
+              .childFile('dart_plugin_registrant.dart')
               .createSync(recursive: true);
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
@@ -965,7 +965,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     await residentWebRunner.runSourceGenerators();
 
-    // generated_main.dart should be untouched, indicating that its
+    // dart_plugin_registrant.dart should be untouched, indicating that its
     // generation didn't run. If it had run, the file would have been removed as
     // there are no plugins in the project.
     expect(project.dartPluginRegistrant.existsSync(), true);

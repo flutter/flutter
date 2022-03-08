@@ -1066,7 +1066,7 @@ class PubspecLine {
 class PubspecChecksum extends PubspecLine {
   PubspecChecksum(this.value, String line) : super(line);
 
-  /// The checksum value, computed using [hashValues] over the direct, dev,
+  /// The checksum value, computed using [Object.hash] over the direct, dev,
   /// and special dependencies sorted lexically.
   ///
   /// If the line cannot be parsed, [value] will be null.
