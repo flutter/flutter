@@ -12,14 +12,14 @@ import 'package:vector_math/vector_math_64.dart';
 
 /// Begin a Material 3 ink sparkle ripple, centered at [position] relative to
 /// [referenceBox].
-/// 
+///
 /// This effect relies on a shader, and therefore hardware acceleration.
 /// Currently, this is only supported by C++ engine platforms: Android, iOS,
 /// MacOS, Windows, and Linux, etc. It can run on other platforms with emulation
 /// in software, but will not be performant. Hardware enabled support for
 /// CanvasKit web can be tracked here:
 ///  - [https://github.com/flutter/flutter/issues/85238]
-/// 
+///
 /// To use this effect, pass an instance of [InkSparkleFactory] to the
 /// `splashFactory` parameter of either the Material [ThemeData] or any
 /// component that has a `splashFactory` paramter, such as buttons:
@@ -43,25 +43,25 @@ import 'package:vector_math/vector_math_64.dart';
 class InkSparkle extends InteractiveInkFeature {
   /// Begin a sparkly ripple effect, centered at [position] relative to
   /// [referenceBox].
-  /// 
+  ///
   /// The [color] defines the color of the splash itself. The sparkles are
   /// always [Color.white].
   ///
   /// The [controller] argument is typically obtained via
   /// `Material.of(context)`.
-  /// 
-  /// [textDirection] is used by [customBorder] if it is non-null. This allows 
+  ///
+  /// [textDirection] is used by [customBorder] if it is non-null. This allows
   /// the [customBorder]'s path to be properly defined if it was the path was
   /// expressed in terms of "start" and "end" instead of
   /// "left" and "right".
-  /// 
+  ///
   /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path for
   ///     clipping.
   ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
   ///     is clipped by an [RRect] created from `_clipCallback` and
   ///     [borderRadius].
-  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] 
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect]
   ///     provided by `_clipCallback` is used for clipping.
   ///
   /// If [containedInkWell] is true, then the ripple will be sized to fit
@@ -72,13 +72,13 @@ class InkSparkle extends InteractiveInkFeature {
   /// If [containedInkWell] is false, then [rectCallback] should be null.
   /// The ink ripple is clipped only to the edges of the [Material].
   /// This is the default.
-  /// 
+  ///
   /// [radius] is derived from the [referenceBox] and is multiplied by
   /// [_targetRadiusMultiplier] so that the effect fills the container no matter
   /// where the [postition] is.
-  /// 
+  ///
   /// When the ripple is removed, [onRemoved] will be called.
-  /// 
+  ///
   /// [turbulenceSeed] can be passed if a non random seed shold be used for
   /// the turbulence and sparkles. By default, the seed is a random number
   /// between 0.0 and 1000.0.
@@ -105,7 +105,6 @@ class InkSparkle extends InteractiveInkFeature {
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
-    
     controller.addInkFeature(this);
 
     // All animation values are derived from Android 12 source code. See:
@@ -131,7 +130,7 @@ class InkSparkle extends InteractiveInkFeature {
         ),
       ],
     ).animate(_animationController);
- 
+
     // Functionally equivalent to Android 12's SkSL:
     //`return mix(u_touch, u_resolution, saturate(in_radius_scale * 2.0))`
     final Tween<Vector2> centerTween = Tween<Vector2>(
@@ -168,7 +167,7 @@ class InkSparkle extends InteractiveInkFeature {
         ),
       ],
     ).animate(_animationController);
-    
+  
     _sparkleAlpha = TweenSequence<double>(
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
@@ -220,14 +219,14 @@ class InkSparkle extends InteractiveInkFeature {
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
-  /// 
+  ///
   /// Since no [turbulenceSeed] is passed, the effect will be random for
   /// subsequent presses in the same position.
   static const InteractiveInkFeatureFactory splashFactory = _InkSparkleFactory();
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
-  /// 
+  ///
   /// Since a [turbulenceSeed] is passed, the effect will not be random for
   /// subsequent presses in the same position. This can be used for testing.
   static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory.constantTurbulenceSeed();
@@ -379,9 +378,9 @@ class InkSparkle extends InteractiveInkFeature {
   ///  3. Otherwise, it is clipped with the [Rect] provided by [clipCallback]
   ///      by [clipCallback] is used for clipping.
   ///
-  /// [textDirection] is used by [customBorder] if it is non-null. This allows 
+  /// [textDirection] is used by [customBorder] if it is non-null. This allows
   /// the [customBorder]'s path to be properly defined if the path was expressed
-  /// in terms of "start" and "end" instead of "left" and "right".git 
+  /// in terms of "start" and "end" instead of "left" and "right".git
   ///
   /// For examples on how the function is used, see [InkSparkle].
   void _clipCanvas({
@@ -501,9 +500,9 @@ double _getTargetRadius(
 /// GLSL source for this shader:
 ///
 /// #version 320 es
-/// 
+///
 /// precision highp float;
-/// 
+///
 /// layout(location = 0) uniform vec4 u_color;
 /// layout(location = 1) uniform float u_alpha;
 /// layout(location = 2) uniform vec4 u_sparkle_color;
@@ -522,40 +521,40 @@ double _getTargetRadius(
 /// layout(location = 15) uniform vec2 u_rotation1;
 /// layout(location = 16) uniform vec2 u_rotation2;
 /// layout(location = 17) uniform vec2 u_rotation3;
-/// 
+///
 /// layout(location = 0) out vec4 fragColor;
-/// 
+///
 /// const float PI = 3.1415926535897932384626;
 /// const float PI_ROTATE_RIGHT = PI * 0.0078125;
 /// const float PI_ROTATE_LEFT = PI * -0.0078125;
 /// const float ONE_THIRD = 1./3.;
 /// const vec2 TURBULENCE_SCALE = vec2(0.8);
-/// 
+///
 /// float saturate(float x) {
 ///   return clamp(x, 0.0, 1.0);
 /// }
-/// 
+///
 /// float triangle_noise(highp vec2 n) {
 ///   n = fract(n * vec2(5.3987, 5.4421));
 ///   n += dot(n.yx, n.xy + vec2(21.5351, 14.3137));
 ///   float xy = n.x * n.y;
 ///   return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;
 /// }
-/// 
+///
 /// float threshold(float v, float l, float h) {
 ///   return step(l, v) * (1.0 - step(h, v));
 /// }
-/// 
+///
 /// mat2 rotate2d(vec2 rad){
 ///   return mat2(rad.x, -rad.y, rad.y, rad.x);
 /// }
-/// 
+///
 /// float soft_circle(vec2 uv, vec2 xy, float radius, float blur) {
 ///   float blur_half = blur * 0.5;
 ///   float d = distance(uv, xy);
 ///   return 1.0 - smoothstep(1.0 - blur_half, 1.0 + blur_half, d / radius);
 /// }
-/// 
+///
 /// float soft_ring(vec2 uv, vec2 xy, float radius, float thickness, float blur) {
 ///   float circle_outer = soft_circle(uv, xy, radius + thickness, blur);
 ///   float circle_inner = soft_circle(uv, xy, max(radius - thickness, 0.0), blur);
@@ -569,7 +568,7 @@ double _getTargetRadius(
 ///   float r = 0.65 * cell_uv;
 ///   return soft_circle(p, vec2(cell_uv), r, r * 50.0);
 /// }
-/// 
+///
 /// float sparkle(vec2 uv, float t) {
 ///   float n = triangle_noise(uv);
 ///   float s = threshold(n, 0.0, 0.05);
@@ -587,7 +586,7 @@ double _getTargetRadius(
 ///   float v = (g1 * g1 + g2 - g3) * 0.5;
 ///   return saturate(0.45 + 0.8 * v);
 /// }
-/// 
+///
 /// void main() {
 ///   vec2 p = gl_FragCoord.xy;
 ///   vec2 uv = p * u_resolution_scale;
@@ -601,8 +600,6 @@ double _getTargetRadius(
 ///   vec4 sparkle_color = vec4(u_sparkle_color.rgb * u_sparkle_color.a, u_sparkle_color.a);
 ///   fragColor = mix(wave_color, sparkle_color, sparkle);
 /// }
-/// 
-/// 
 class FragmentShaderManager {
   FragmentShaderManager._();
 
@@ -619,7 +616,7 @@ class FragmentShaderManager {
   }
 
   /// Creates a shader with the original program and optional uniforms.
-  /// 
+  ///
   /// A new shader must be made whenever the uniforms are updated.
   Shader shader({
     Vector4? uColor,
@@ -664,17 +661,16 @@ class FragmentShaderManager {
       ]),
     );
   }
-  
+
   late ui.FragmentProgram _program;
 
   /// Direct access to the [ui.FragmentProgram] that this class manages.
-  /// 
+  ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ui.FragmentProgram get program => _program;
 
-
   /// Direct access to the the SPIR-V bytecode that was used to generate this class.
-  /// 
+  ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ///
   /// Words in SPIR-V are 32 bits. Every 4 elements in this list represents 1

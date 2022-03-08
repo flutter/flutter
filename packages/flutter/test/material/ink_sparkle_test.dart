@@ -60,7 +60,7 @@ void main() {
     final Finder repaintFinder = find.byKey(repaintKey);
     await tester.tap(buttonFinder);
 
-    // Warm up shader. Compilation is of the order of 10 milliseconds and 
+    // Warm up shader. Compilation is of the order of 10 milliseconds and
     // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
     // net to prevent flakiness.
     await tester.pumpAndSettle(const Duration(milliseconds: 2000));
@@ -103,7 +103,7 @@ void main() {
     final Finder repaintFinder = find.byKey(repaintKey);
     await tester.tap(buttonFinder);
 
-    // Warm up shader. Compilation is of the order of 10 milliseconds and 
+    // Warm up shader. Compilation is of the order of 10 milliseconds and
     // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
     // net to prevent flakiness.
     await tester.pumpAndSettle(const Duration(milliseconds: 2000));
@@ -147,7 +147,7 @@ void main() {
     final Finder repaintFinder = find.byKey(repaintKey);
     await tester.tap(buttonFinder);
 
-    // Warm up shader. Compilation is of the order of 10 milliseconds and 
+    // Warm up shader. Compilation is of the order of 10 milliseconds and
     // Animation is < 1000 milliseconds. Use 2000 milliseconds as a safety
     // net to prevent flakiness.
     await tester.pumpAndSettle(const Duration(milliseconds: 2000));
