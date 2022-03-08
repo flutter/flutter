@@ -1200,10 +1200,13 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// This example shows what an implementation of this method could look like.
   ///
   /// ```dart
-  /// TextEditingValue _localValue;
+  /// TextEditingValue? _localValue;
   /// @override
   /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   TextEditingValue newValue = _localValue;
+  ///   if (_localValue == null) {
+  ///     return;
+  ///   }
+  ///   TextEditingValue newValue = _localValue!;
   ///   for (final TextEditingDelta delta in textEditingDeltas) {
   ///     newValue = delta.apply(newValue);
   ///   }
