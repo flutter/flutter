@@ -81,7 +81,7 @@ Future<void> main() async {
 
       section('Build ephemeral host app when SDK is on external disk');
 
-      // Don't clean, pretend the SDK was on an external drive with stray "._" files in the xcframework
+      // Pretend the SDK was on an external drive with stray "._" files in the xcframework.
       // and build again.
       Directory(path.join(
         projectDir.path,
