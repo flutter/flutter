@@ -20,6 +20,25 @@ void main() {
   // Change this to 25, or another factor of 100, for more granular tests.
   const int testIntervalPercent = 50;
 
+  testWidgets('InkSparkle default splashFactory compiles and completes', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Theme(
+            data: ThemeData(splashFactory: InkSparkle.splashFactory),
+            child: ElevatedButton(
+              child: const Text('Sparkle!'),
+              onPressed: () { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Finder buttonFinder = find.text('Sparkle!');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     final Key repaintKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
