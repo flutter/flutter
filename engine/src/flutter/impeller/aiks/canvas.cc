@@ -266,7 +266,7 @@ void Canvas::DrawTextFrame(TextFrame text_frame,
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(std::move(text_frame));
   text_contents->SetGlyphAtlas(std::move(atlas));
-  text_contents->SetColor(paint.color);
+  text_contents->SetColor(paint.color.Premultiply());
 
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation() *

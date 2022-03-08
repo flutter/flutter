@@ -10,6 +10,8 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/vertex_buffer_builder.h"
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {
@@ -42,7 +44,7 @@ TEST_F(EntityTest, ThreeStrokesInOnePath) {
   Entity entity;
   entity.SetPath(path);
   auto contents = std::make_unique<SolidStrokeContents>();
-  contents->SetColor(Color::Red());
+  contents->SetColor(Color::Red().Premultiply());
   contents->SetStrokeSize(5.0);
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
@@ -72,7 +74,7 @@ TEST_F(EntityTest, TriangleInsideASquare) {
     Entity entity;
     entity.SetPath(path);
     auto contents = std::make_unique<SolidStrokeContents>();
-    contents->SetColor(Color::Red());
+    contents->SetColor(Color::Red().Premultiply());
     contents->SetStrokeSize(20.0);
     entity.SetContents(std::move(contents));
 
@@ -110,7 +112,7 @@ TEST_F(EntityTest, StrokeCapAndJoinTest) {
     auto create_contents = [width = width](SolidStrokeContents::Cap cap,
                                            SolidStrokeContents::Join join) {
       auto contents = std::make_unique<SolidStrokeContents>();
-      contents->SetColor(Color::Red());
+      contents->SetColor(Color::Red().Premultiply());
       contents->SetStrokeSize(width);
       contents->SetStrokeCap(cap);
       contents->SetStrokeJoin(join);
@@ -489,6 +491,114 @@ TEST_F(EntityTest, SolidStrokeContentsSetMiter) {
 
   contents.SetStrokeMiter(-1);
   ASSERT_FLOAT_EQ(contents.GetStrokeMiter(), 8);
+}
+
+TEST_F(EntityTest, BlendingModeOptions) {
+  std::vector<const char*> blend_mode_names;
+  std::vector<Entity::BlendMode> blend_mode_values;
+  {
+    // Force an exhausiveness check with a switch. When adding blend modes,
+    // update this switch with a new name/value to to make it selectable in the
+    // test GUI.
+
+    const Entity::BlendMode b{};
+    static_assert(
+        b == Entity::BlendMode::kClear);  // Ensure the first item in
+                                                  // the switch is the first
+                                                  // item in the enum.
+    switch (b) {
+      case Entity::BlendMode::kClear:
+        blend_mode_names.push_back("Clear");
+        blend_mode_values.push_back(Entity::BlendMode::kClear);
+      case Entity::BlendMode::kSource:
+        blend_mode_names.push_back("Source");
+        blend_mode_values.push_back(Entity::BlendMode::kSource);
+      case Entity::BlendMode::kDestination:
+        blend_mode_names.push_back("Destination");
+        blend_mode_values.push_back(Entity::BlendMode::kDestination);
+      case Entity::BlendMode::kSourceOver:
+        blend_mode_names.push_back("SourceOver");
+        blend_mode_values.push_back(Entity::BlendMode::kSourceOver);
+      case Entity::BlendMode::kDestinationOver:
+        blend_mode_names.push_back("DestinationOver");
+        blend_mode_values.push_back(
+            Entity::BlendMode::kDestinationOver);
+    };
+  }
+
+  bool first_frame = true;
+  auto callback = [&](ContentContext& context, RenderPass& pass) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({350, 200});
+      ImGui::SetNextWindowPos({200, 450});
+    }
+
+    auto draw_rect = [&context, &pass](
+                         Rect rect, Color color,
+                         Entity::BlendMode blend_mode) -> bool {
+      using VS = SolidFillPipeline::VertexShader;
+      VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+      {
+        auto r = rect.GetLTRB();
+        vtx_builder.AddVertices({
+            {Point(r[0], r[1])},
+            {Point(r[2], r[1])},
+            {Point(r[2], r[3])},
+            {Point(r[0], r[1])},
+            {Point(r[2], r[3])},
+            {Point(r[0], r[3])},
+        });
+      }
+
+      Command cmd;
+      cmd.label = "Blended Rectangle";
+      auto options = OptionsFromPass(pass);
+      options.blend_mode = blend_mode;
+      cmd.pipeline = context.GetSolidFillPipeline(options);
+      cmd.BindVertices(
+          vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+
+      VS::FrameInfo frame_info;
+      frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+      frame_info.color = color.Premultiply();
+      VS::BindFrameInfo(cmd,
+                        pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+
+      cmd.primitive_type = PrimitiveType::kTriangle;
+
+      return pass.AddCommand(std::move(cmd));
+    };
+
+    ImGui::Begin("Controls");
+    static Color color1(1, 0, 0, 0.5), color2(0, 1, 0, 0.5);
+    ImGui::ColorEdit4("Color 1", reinterpret_cast<float*>(&color1));
+    ImGui::ColorEdit4("Color 2", reinterpret_cast<float*>(&color2));
+    static int current_blend_index = 3;
+    ImGui::ListBox("Blending mode", &current_blend_index,
+                   blend_mode_names.data(), blend_mode_names.size());
+    ImGui::End();
+
+    Entity::BlendMode selected_mode =
+        blend_mode_values[current_blend_index];
+
+    Point a, b, c, d;
+    std::tie(a, b) = IMPELLER_PLAYGROUND_LINE(
+        Point(400, 100), Point(200, 300), 20, Color::White(), Color::White());
+    std::tie(c, d) = IMPELLER_PLAYGROUND_LINE(
+        Point(470, 190), Point(270, 390), 20, Color::White(), Color::White());
+
+    bool result = true;
+    result = result && draw_rect(Rect(0, 0, pass.GetRenderTargetSize().width,
+                                      pass.GetRenderTargetSize().height),
+                                 Color(), Entity::BlendMode::kClear);
+    result = result && draw_rect(Rect::MakeLTRB(a.x, a.y, b.x, b.y), color1,
+                                 Entity::BlendMode::kSourceOver);
+    result = result && draw_rect(Rect::MakeLTRB(c.x, c.y, d.x, d.y), color2,
+                                 selected_mode);
+    return result;
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
