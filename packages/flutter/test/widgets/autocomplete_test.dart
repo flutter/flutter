@@ -883,6 +883,65 @@ void main() {
     expect(find.byKey(optionsKey), findsNothing);
   });
 
+  testWidgets('re-invokes DismissIntent if options not shown', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    bool wrappingActionInvoked = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Actions(
+            actions: <Type, Action<Intent>>{
+              DismissIntent: CallbackAction<DismissIntent>(
+                onInvoke: (_) => wrappingActionInvoked = true,
+              ),
+            },
+            child: RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return kOptions.where((String option) {
+                  return option.contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                focusNode = fieldFocusNode;
+                return TextFormField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: fieldTextEditingController,
+                  onFieldSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
+              },
+              optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                return Container(key: optionsKey);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Enter text to show options.
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pumpAndSettle();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Hide the options.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(wrappingActionInvoked, false);
+
+    // Ensure the wrapping Actions can receive the DismissIntent.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    expect(wrappingActionInvoked, true);
+  });
+
   testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
