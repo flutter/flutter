@@ -107,7 +107,7 @@ void main() {
     }
 
     final List<String> pubOutput = <String>[
-      globals.fs.path.join('.dart_tool', 'package_config'),
+      globals.fs.path.join('.dart_tool', 'package_config.json'),
       'pubspec.lock',
     ];
 
