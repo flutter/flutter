@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window, SemanticsFlag;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -2569,6 +2569,135 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
   });
+
+  testWidgets('Can change menu position and offset', (WidgetTester tester) async {
+    PopupMenuButton<int> buildMenuButton({required PopupMenuPosition position}) {
+      return PopupMenuButton<int>(
+        position: position,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
+            ),
+          ];
+        },
+      );
+    }
+
+    // Popup menu with `MenuPosition.over (default) with default offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: PopupMenuPosition.over),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under`(custom) with default offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: PopupMenuPosition.under),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 40.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.over (default) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 50.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under (custom) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              position: PopupMenuPosition.under,
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
+  });
 }
 
 class TestApp extends StatefulWidget {
@@ -2595,7 +2724,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(window),
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(

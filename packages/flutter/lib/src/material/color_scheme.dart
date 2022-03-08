@@ -900,27 +900,27 @@ class ColorScheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<Object?>[
-      brightness,
-      primary,
-      onPrimary,
-      primaryContainer,
-      onPrimaryContainer,
-      secondary,
-      onSecondary,
-      secondaryContainer,
-      onSecondaryContainer,
-      tertiary,
-      onTertiary,
-      tertiaryContainer,
-      onTertiaryContainer,
-      error,
-      onError,
-      errorContainer,
-      onErrorContainer,
-      background,
-      onBackground,
+  int get hashCode => Object.hash(
+    brightness,
+    primary,
+    onPrimary,
+    primaryContainer,
+    onPrimaryContainer,
+    secondary,
+    onSecondary,
+    secondaryContainer,
+    onSecondaryContainer,
+    tertiary,
+    onTertiary,
+    tertiaryContainer,
+    onTertiaryContainer,
+    error,
+    onError,
+    errorContainer,
+    onErrorContainer,
+    background,
+    onBackground,
+    Object.hash(
       surface,
       onSurface,
       surfaceVariant,
@@ -932,8 +932,8 @@ class ColorScheme with Diagnosticable {
       inversePrimary,
       primaryVariant,
       secondaryVariant,
-    ]);
-  }
+    ),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -134,21 +134,21 @@ class MediaQueryData {
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.SingletonFlutterWindow window)
+  MediaQueryData.fromWindow(ui.FlutterView window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = window.textScaleFactor,
-      platformBrightness = window.platformBrightness,
+      textScaleFactor = window.platformDispatcher.textScaleFactor,
+      platformBrightness = window.platformDispatcher.platformBrightness,
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.accessibilityFeatures.invertColors,
-      disableAnimations = window.accessibilityFeatures.disableAnimations,
-      boldText = window.accessibilityFeatures.boldText,
-      highContrast = window.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = window.platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
       gestureSettings = DeviceGestureSettings.fromWindow(window),
       displayFeatures = window.displayFeatures;
@@ -640,26 +640,24 @@ class MediaQueryData {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      size,
-      devicePixelRatio,
-      textScaleFactor,
-      platformBrightness,
-      padding,
-      viewPadding,
-      viewInsets,
-      alwaysUse24HourFormat,
-      highContrast,
-      disableAnimations,
-      invertColors,
-      accessibleNavigation,
-      boldText,
-      navigationMode,
-      gestureSettings,
-      hashList(displayFeatures),
-    );
-  }
+  int get hashCode => Object.hash(
+    size,
+    devicePixelRatio,
+    textScaleFactor,
+    platformBrightness,
+    padding,
+    viewPadding,
+    viewInsets,
+    alwaysUse24HourFormat,
+    highContrast,
+    disableAnimations,
+    invertColors,
+    accessibleNavigation,
+    boldText,
+    navigationMode,
+    gestureSettings,
+    Object.hashAll(displayFeatures),
+  );
 
   @override
   String toString() {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1360,7 +1359,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (result == null) {
       // If there's no MediaQuery, then use the window aspect to determine
       // orientation.
-      final Size size = window.physicalSize;
+      final Size size = WidgetsBinding.instance.window.physicalSize;
       result = size.width > size.height ? Orientation.landscape : Orientation.portrait;
     }
     return result;

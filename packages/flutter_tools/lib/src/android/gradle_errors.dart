@@ -167,7 +167,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
       }
     } else {
       globals.printBox(
-        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
+        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --multidex flag.',
         title: _boxTitle,
       );
     }
@@ -226,8 +226,8 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required bool multidexEnabled,
   }) async {
     globals.printError(
-      '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
-      'Retrying to download...'
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
     );
     try {
       final String? homeDir = globals.platform.environment['HOME'];

@@ -13,8 +13,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
-
-export 'dart:ui' show hashValues, hashList;
+import 'notification_listener.dart';
 
 export 'package:flutter/foundation.dart' show
   factory,
@@ -98,7 +97,7 @@ class ObjectKey extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, identityHashCode(value));
+  int get hashCode => Object.hash(runtimeType, identityHashCode(value));
 
   @override
   String toString() {
@@ -2392,6 +2391,13 @@ abstract class BuildContext {
   /// data down to them.
   void visitChildElements(ElementVisitor visitor);
 
+  /// Start bubbling this notification at the given build context.
+  ///
+  /// The notification will be delivered to any [NotificationListener] widgets
+  /// with the appropriate type parameters that are ancestors of the given
+  /// [BuildContext].
+  void dispatchNotification(Notification notification);
+
   /// Returns a description of the [Element] associated with the current build context.
   ///
   /// The `name` is typically something like "The element being rebuilt was".
@@ -3103,6 +3109,39 @@ class BuildOwner {
   }
 }
 
+/// Mixin this class to allow receiving [Notification] objects dispatched by
+/// child elements.
+///
+/// See also:
+///   * [NotificationListener], for a widget that allows consuming notifications.
+mixin NotifiableElementMixin on Element {
+  /// Called when a notification of the appropriate type arrives at this
+  /// location in the tree.
+  ///
+  /// Return true to cancel the notification bubbling. Return false to
+  /// allow the notification to continue to be dispatched to further ancestors.
+  bool onNotification(Notification notification);
+
+  @override
+  void attachNotificationTree() {
+    _notificationTree = _NotificationNode(_parent?._notificationTree, this);
+  }
+}
+
+class _NotificationNode {
+  _NotificationNode(this.parent, this.current);
+
+  NotifiableElementMixin? current;
+  _NotificationNode? parent;
+
+  void dispatchNotification(Notification notification) {
+    if (current?.onNotification(notification) ?? true) {
+      return;
+    }
+    parent?.dispatchNotification(notification);
+  }
+}
+
 /// An instantiation of a [Widget] at a particular location in the tree.
 ///
 /// Widgets describe how to configure a subtree but the same widget can be used
@@ -3163,6 +3202,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
+  _NotificationNode? _notificationTree;
 
   /// Compare two widgets for equality.
   ///
@@ -3616,6 +3656,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner!._registerGlobalKey(key, this);
     }
     _updateInheritance();
+    attachNotificationTree();
   }
 
   void _debugRemoveGlobalKeyReservation(Element child) {
@@ -3952,6 +3993,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
+    attachNotificationTree();
     if (_dirty)
       owner!.scheduleBuildFor(this);
     if (hadDependencies)
@@ -4233,6 +4275,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor;
   }
 
+  /// Called in [Element.mount] and [Element.activate] to register this element in
+  /// the notification tree.
+  ///
+  /// This method is only exposed so that [NotifiableElementMixin] can be implemented.
+  /// Subclasses of [Element] that wish to respond to notifications should mix that
+  /// in instead.
+  ///
+  /// See also:
+  ///   * [NotificationListener], a widget that allows listening to notifications.
+  @protected
+  void attachNotificationTree() {
+    _notificationTree = _parent?._notificationTree;
+  }
+
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedLookup = _parent?._inheritedLookup;
@@ -4359,6 +4415,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       node = node._parent;
     }
     return chain;
+  }
+
+  @override
+  void dispatchNotification(Notification notification) {
+    _notificationTree?.dispatchNotification(notification);
   }
 
   /// A short, textual description of this element.
@@ -5992,31 +6053,14 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [insertRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [insertRenderObjectChild] instead of
-  /// [insertChildRenderObject]. The arguments stay the same. Subclasses should
-  /// _not_ call `super.insertRenderObjectChild(...)`.
+  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
+  /// The semantics of `slot` are determined by this element. For example, if
+  /// this element has a single child, the slot should always be null. If this
+  /// element has a list of children, the previous sibling element wrapped in an
+  /// [IndexedSlot] is a convenient value for the slot.
+  /// {@endtemplate}
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override insertRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void insertChildRenderObject(covariant RenderObject child, covariant Object? slot) {
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.insertChildRenderObject() is deprecated.'),
@@ -6041,20 +6085,7 @@ abstract class RenderObjectElement extends Element {
     }());
   }
 
-  /// Insert the given child into [renderObject] at the given slot.
-  ///
-  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  /// The semantics of `slot` are determined by this element. For example, if
-  /// this element has a single child, the slot should always be null. If this
-  /// element has a list of children, the previous sibling element wrapped in an
-  /// [IndexedSlot] is a convenient value for the slot.
-  /// {@endtemplate}
-  @protected
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    insertChildRenderObject(child, slot);
-  }
-
-  /// Move the given child to the given slot.
+  /// Move the given child from the given old slot to the given new slot.
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
@@ -6068,32 +6099,8 @@ abstract class RenderObjectElement extends Element {
   /// always having the same slot (and where children in different slots are never
   /// compared against each other for the purposes of updating one slot with the
   /// element from another slot) would never call this.
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [moveRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [moveRenderObjectChild] instead of
-  /// [moveChildRenderObject]. The `slot` argument becomes the `newSlot`
-  /// argument, and the method will now take a new `oldSlot` argument that
-  /// subclasses may find useful. Subclasses should _not_ call
-  /// `super.moveRenderObjectChild(...)`.
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override moveRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void moveChildRenderObject(covariant RenderObject child, covariant Object? slot) {
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.moveChildRenderObject() is deprecated.'),
@@ -6118,53 +6125,12 @@ abstract class RenderObjectElement extends Element {
     }());
   }
 
-  /// Move the given child from the given old slot to the given new slot.
-  ///
-  /// The given child is guaranteed to have [renderObject] as its parent.
-  ///
-  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  ///
-  /// This method is only ever called if [updateChild] can end up being called
-  /// with an existing [Element] child and a `slot` that differs from the slot
-  /// that element was previously given. [MultiChildRenderObjectElement] does this,
-  /// for example. [SingleChildRenderObjectElement] does not (since the `slot` is
-  /// always null). An [Element] that has a specific set of slots with each child
-  /// always having the same slot (and where children in different slots are never
-  /// compared against each other for the purposes of updating one slot with the
-  /// element from another slot) would never call this.
-  @protected
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
-    moveChildRenderObject(child, newSlot);
-  }
-
   /// Remove the given child from [renderObject].
   ///
-  /// The given child is guaranteed to have [renderObject] as its parent.
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [removeRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [removeRenderObjectChild] instead of
-  /// [removeChildRenderObject]. The method will now take a new `slot` argument
-  /// that subclasses may find useful. Subclasses should _not_ call
-  /// `super.removeRenderObjectChild(...)`.
+  /// The given child is guaranteed to have been inserted at the given `slot`
+  /// and have [renderObject] as its parent.
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override removeRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void removeChildRenderObject(covariant RenderObject child) {
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.removeChildRenderObject() is deprecated.'),
@@ -6187,15 +6153,6 @@ abstract class RenderObjectElement extends Element {
         ),
       ]);
     }());
-  }
-
-  /// Remove the given child from [renderObject].
-  ///
-  /// The given child is guaranteed to have been inserted at the given `slot`
-  /// and have [renderObject] as its parent.
-  @protected
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    removeChildRenderObject(child);
   }
 
   @override
@@ -6530,7 +6487,7 @@ class IndexedSlot<T extends Element?> {
   }
 
   @override
-  int get hashCode => hashValues(index, value);
+  int get hashCode => Object.hash(index, value);
 }
 
 /// Used as a placeholder in [List<Element>] objects when the actual

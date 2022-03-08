@@ -46,7 +46,6 @@ export 'package:flutter/rendering.dart' show
   MouseCursor,
   SystemMouseCursors,
   MultiChildLayoutDelegate,
-  Overflow,
   PaintingContext,
   PointerCancelEvent,
   PointerCancelEventListener,
@@ -3359,6 +3358,8 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 /// the top of the child to the baseline of the child, then the child
 /// is top-aligned instead.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=8ZaFk0yvNlI}
+///
 /// See also:
 ///
 ///  * [Align], a widget that aligns its child within itself and optionally
@@ -3709,11 +3710,6 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
-    @Deprecated(
-      'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-      'This feature was deprecated after v1.22.0-12.0.pre.',
-    )
-    this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
@@ -3754,24 +3750,6 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  /// Whether overflowing children should be clipped. See [Overflow].
-  ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  ///
-  /// When set to [Overflow.visible], the visible overflow area will not accept
-  /// hit testing.
-  ///
-  /// This overrides [clipBehavior] for now due to a staged roll out.
-  /// We will remove it and only use [clipBehavior] soon.
-  ///
-  /// Deprecated. Use [clipBehavior] instead.
-  @Deprecated(
-    'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-    'This feature was deprecated after v1.22.0-12.0.pre.',
-  )
-  final Overflow overflow;
-
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -3796,7 +3774,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
       fit: fit,
-      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3807,7 +3785,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..fit = fit
-      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
+      ..clipBehavior = clipBehavior;
   }
 
   @override

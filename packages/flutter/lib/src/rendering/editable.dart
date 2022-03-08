@@ -1306,7 +1306,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (hasFocus && !readOnly)
       config.onSetText = _handleSetText;
 
-    if (selectionEnabled && selection?.isValid == true) {
+    if (selectionEnabled && (selection?.isValid ?? false)) {
       config.textSelection = selection;
       if (_textPainter.getOffsetBefore(selection!.extentOffset) != null) {
         config
@@ -1422,7 +1422,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
-        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
+        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty ?? false)
             ? _cachedChildNodes!.removeFirst()
             : SemanticsNode();
         newChild
