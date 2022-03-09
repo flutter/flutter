@@ -13,6 +13,7 @@ import 'package:path/path.dart' as path;
 void main() {
   task(() async {
 
+    deviceOperatingSystem = DeviceOperatingSystem.ios;
     final Device device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
