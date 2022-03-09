@@ -30,7 +30,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
 
   testWidgets('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
@@ -54,7 +54,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawRect, 1));
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
 
     testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
@@ -78,7 +78,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawPaint, 1));
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
 
   /////////////
@@ -88,19 +88,19 @@ void main() {
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
 
   testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'center', 0.5);
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
 
   testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'bottom_right', 0.8);
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
 }
 
