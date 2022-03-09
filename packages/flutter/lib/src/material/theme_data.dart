@@ -65,7 +65,10 @@ export 'package:flutter/services.dart' show Brightness;
 ///
 /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
 /// {@end-tool}
-abstract class ThemeExtension<T> {
+abstract class ThemeExtension<T extends ThemeExtension<T>> {
+  /// Enable const constructor for subclasses.
+  const ThemeExtension();
+  
   /// The extension's type.
   Object get id => T;
 
@@ -269,7 +272,7 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
-    Map<Object, ThemeExtension<Object>>? extensions,
+    Map<Object, ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -417,7 +420,7 @@ class ThemeData with Diagnosticable {
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    extensions ??= <Object, ThemeExtension<Object>>{};
+    extensions ??= <Object, ThemeExtension<dynamic>>{};
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -1097,7 +1100,7 @@ class ThemeData with Diagnosticable {
   /// See also:
   ///
   /// * [extension], a convenience function for obtaining a specific extension.
-  final Map<Object, ThemeExtension<Object>> extensions;
+  final Map<Object, ThemeExtension<dynamic>> extensions;
 
   /// Used to obtain a particular [ThemeExtension] from [extensions].
   ///
@@ -1628,7 +1631,7 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
-    Map<Object, ThemeExtension<Object>>? extensions,
+    Map<Object, ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -1936,18 +1939,16 @@ class ThemeData with Diagnosticable {
   /// Includes all theme extensions in [a] and [b].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Map<Object, ThemeExtension<Object>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
+  static Map<Object, ThemeExtension<dynamic>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
     // Lerp [a].
-    final Map<Object, ThemeExtension<Object>> newExtensions = a.extensions.map((Object id, ThemeExtension<Object> extensionA) {
-        final ThemeExtension<Object>? extensionB = b.extensions[id];
-        return MapEntry<Object, ThemeExtension<Object>>(id, extensionA.lerp(extensionB, t));
+    final Map<Object, ThemeExtension<dynamic>> newExtensions = a.extensions.map((Object id, ThemeExtension<dynamic> extensionA) {
+        final ThemeExtension<dynamic>? extensionB = b.extensions[id];
+        return MapEntry<Object, ThemeExtension<dynamic>>(id, extensionA.lerp(extensionB, t));
       });
     // Add [b]-only extensions.
-    for (final MapEntry<Object, ThemeExtension<Object>> entry in b.extensions.entries) {
-      if (!newExtensions.containsKey(entry.key)) {
-        newExtensions[entry.key] = entry.value;
-      }
-    }
+    newExtensions.addEntries(b.extensions.entries.where(
+      (MapEntry<Object, ThemeExtension<dynamic>> entry) => 
+          newExtensions.containsKey(entry.key)));
 
     return newExtensions;
   }

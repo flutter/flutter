@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 
 @immutable
-class MyColors implements ThemeExtension<MyColors> {
+class MyColors extends ThemeExtension<MyColors> {
   const MyColors({
     this.blue,
     this.red,
@@ -15,9 +15,6 @@ class MyColors implements ThemeExtension<MyColors> {
 
   final Color? blue;
   final Color? red;
-
-  @override
-  Object get id => MyColors;
 
   @override
   MyColors copyWith({Color? red, Color? blue}) {
@@ -29,14 +26,13 @@ class MyColors implements ThemeExtension<MyColors> {
 
   @override
   MyColors lerp(ThemeExtension<MyColors>? other, double t) {
-    if (other is MyColors) {
-      return MyColors(
-        blue: Color.lerp(blue, other.blue, t),
-        red: Color.lerp(red, other.red, t),
-      );
-    } else {
+    if (other is! MyColors) {
       return this;
     }
+    return MyColors(
+      blue: Color.lerp(blue, other.blue, t),
+      red: Color.lerp(red, other.red, t),
+    );
   }
 
   // Optional
@@ -48,9 +44,9 @@ class MyColors implements ThemeExtension<MyColors> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MyColors &&
-        other.blue == blue &&
-        other.red == red;
+    return other is MyColors 
+        && other.blue == blue
+        && other.red == red;
   }
 
   // Optional
@@ -88,7 +84,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
-        extensions: const <Object, ThemeExtension<Object>>{
+        extensions: const <Object, ThemeExtension<dynamic>>{
           MyColors: MyColors(
             blue: Color(0xFF1E88E5),
             red: Color(0xFFE53935),
@@ -96,7 +92,7 @@ class _MyAppState extends State<MyApp> {
         },
       ),
       darkTheme: ThemeData.dark().copyWith(
-        extensions: const <Object, ThemeExtension<Object>>{
+        extensions: const <Object, ThemeExtension<dynamic>>{
           MyColors: MyColors(
             blue: Color(0xFF90CAF9),
             red: Color(0xFFEF9A9A),

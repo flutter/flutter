@@ -469,7 +469,7 @@ void main() {
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
       androidOverscrollIndicator: null,
-      extensions: const <Object, ThemeExtension<Object>>{},
+      extensions: const <Object, ThemeExtension<dynamic>>{},
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -570,7 +570,7 @@ void main() {
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-      extensions: const <Object, ThemeExtension<Object>>{},
+      extensions: const <Object, ThemeExtension<dynamic>>{},
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
