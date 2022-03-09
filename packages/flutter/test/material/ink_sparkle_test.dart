@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('InkSparkle in a Button with default splashFactory paints by calling drawRect', (WidgetTester tester) async {
+  testWidgets('InkSparkle in a Button compiles and does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -29,10 +29,6 @@ void main() {
     await tester.tap(buttonFinder);
     await tester.pump();
     await tester.pumpAndSettle();
-
-    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(material, paintsExactlyCountTimes(#drawRect, 1));
   },
     skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
