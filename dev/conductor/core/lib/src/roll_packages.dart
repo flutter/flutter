@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//import 'package:args/args.dart';
-import 'package:args/command_runner.dart';
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:platform/platform.dart';
 
@@ -12,12 +11,20 @@ import 'globals.dart';
 import 'repository.dart';
 import 'stdio.dart';
 
-class RollPackagesCommand extends Command<void> {
-  RollPackagesCommand({
+class RollPackagesContext {
+  RollPackagesContext._({
     required this.flutterRoot,
     required this.checkouts,
-  }) : git = Git(checkouts.processManager), stdio = checkouts.stdio, platform = checkouts.platform {
-    //argParser.addOption();
+  }) : git = Git(checkouts.processManager), stdio = checkouts.stdio, platform = checkouts.platform;
+
+  factory RollPackagesContext.fromCommandLine({
+    required Directory flutterRoot,
+    required Checkouts checkouts,
+    required List<String> args,
+  }) {
+    final ArgParser parser = ArgParser();
+    final ArgResults results = parser.parse(args);
+    return RollPackagesContext._(flutterRoot: flutterRoot, checkouts: checkouts);
   }
 
   final Checkouts checkouts;
@@ -34,12 +41,7 @@ class RollPackagesCommand extends Command<void> {
     return envValue;
   }
 
-  @override
-  final String name = 'roll-packages';
-
-  @override
-  final String description = 'Update all dart packages in the Flutter SDK.';
-
-  @override
-  Future<void> run() async {}
+  Future<void> run() async {
+    final FrameworkRepository framework = FrameworkRepository(checkouts);
+  }
 }
