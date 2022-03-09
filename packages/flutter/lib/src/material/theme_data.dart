@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashList, lerpDouble;
+import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -108,7 +108,6 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlinedButton]
 ///   * [TextButton]
 ///   * [ElevatedButton]
-///   * [OutlineButton]
 ///   * [FlatButton]
 ///   * [RaisedButton]
 ///   * The time picker widget ([showTimePicker])
@@ -688,7 +687,7 @@ class ThemeData with Diagnosticable {
   /// [ThemeData] constructor.
   const ThemeData.raw({
     // Warning: make sure these properties are in the exact same order as in
-    // operator == and in the hashValues method and in the order of fields
+    // operator == and in the Object.hash method and in the order of fields
     // in this class, and in the lerp() method.
     // GENERAL CONFIGURATION
     required this.androidOverscrollIndicator,
@@ -1013,7 +1012,7 @@ class ThemeData with Diagnosticable {
   Brightness get brightness => colorScheme.brightness;
 
   // Warning: make sure these properties are in the exact same order as in
-  // hashValues() and in the raw constructor and in the order of fields in
+  // Object.hash() and in the raw constructor and in the order of fields in
   // the class and in the lerp() method.
 
   // GENERAL CONFIGURATION
@@ -1217,6 +1216,8 @@ class ThemeData with Diagnosticable {
   ///
   ///   * [FloatingActionButton]
   ///   * [NavigationBar]
+  ///   * [Dialog]
+  ///   * [AlertDialog]
   ///
   /// See also:
   ///
@@ -1961,7 +1962,7 @@ class ThemeData with Diagnosticable {
     assert(b != null);
     assert(t != null);
     // Warning: make sure these properties are in the exact same order as in
-    // hashValues() and in the raw constructor and in the order of fields in
+    // Object.hash() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -2062,7 +2063,7 @@ class ThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     // Warning: make sure these properties are in the exact same order as in
-    // hashValues() and in the raw constructor and in the order of fields in
+    // Object.hash() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return other is ThemeData &&
         // GENERAL CONFIGURATION
@@ -2254,7 +2255,7 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 
   @override
@@ -2554,7 +2555,6 @@ class _FifoCache<K, V> {
 ///  * [InputDecorator] (which gives density support to [TextField], etc.)
 ///  * [ListTile]
 ///  * [MaterialButton]
-///  * [OutlineButton]
 ///  * [OutlinedButton]
 ///  * [Radio]
 ///  * [RawMaterialButton]
@@ -2726,7 +2726,7 @@ class VisualDensity with Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(horizontal, vertical);
+  int get hashCode => Object.hash(horizontal, vertical);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

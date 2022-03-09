@@ -32,7 +32,7 @@ void main() {
     });
 
     test('does not replace the root layer unnecessarily', () {
-      final ui.FlutterView window = TestWindow(window: ui.window);
+      final ui.FlutterView window = TestWindow(window: RendererBinding.instance.window);
       final RenderView view = RenderView(
         configuration: createViewConfiguration(),
         window: window,

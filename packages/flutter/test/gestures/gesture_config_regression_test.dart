@@ -13,16 +13,16 @@ class TestResult {
   bool dragUpdate = false;
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.testResult}) : super(key: key);
+class NestedScrollableCase extends StatefulWidget {
+  const NestedScrollableCase({Key? key, required this.testResult}) : super(key: key);
 
   final TestResult testResult;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<NestedScrollableCase> createState() => _NestedScrollableCaseState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _NestedScrollableCaseState extends State<NestedScrollableCase> {
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +57,50 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class NestedDragableCase extends StatefulWidget {
+  const NestedDragableCase({Key? key, required this.testResult}) : super(key: key);
+
+  final TestResult testResult;
+
+  @override
+  State<NestedDragableCase> createState() => _NestedDragableCaseState();
+}
+
+class _NestedDragableCaseState extends State<NestedDragableCase> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverFixedExtentList(
+            itemExtent: 50.0,
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Container(
+                  alignment: Alignment.center,
+                  child: Draggable<Object>(
+                    key: ValueKey<int>(index),
+                    feedback: const Text('Dragging'),
+                    child: Text('List Item $index'),
+                    onDragStarted: () {
+                      widget.testResult.dragStarted = true;
+                    },
+                    onDragUpdate: (DragUpdateDetails details){
+                      widget.testResult.dragUpdate = true;
+                    },
+                    onDragEnd: (_) {},
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 void main() {
   testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
     tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
@@ -66,7 +110,30 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       title: 'Scroll Bug',
-      home: MyHomePage(testResult: result),
+      home: NestedScrollableCase(testResult: result),
+    ));
+
+    // By dragging the scroll view more than the configured touch slop above but less than
+    // the framework default value, we demonstrate that this causes gesture detectors
+    // that do not receive the same gesture settings to fire at different times than would
+    // be expected.
+    final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
+    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
+
+   expect(result.dragStarted, true);
+   expect(result.dragUpdate, true);
+  });
+
+  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
+    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
+      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
+    );
+    final TestResult result = TestResult();
+
+    await tester.pumpWidget(MaterialApp(
+      title: 'Scroll Bug',
+      home: NestedDragableCase(testResult: result),
     ));
 
     // By dragging the scroll view more than the configured touch slop above but less than

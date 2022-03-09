@@ -130,7 +130,7 @@ class CustomSemanticsAction {
   final SemanticsAction? action;
 
   @override
-  int get hashCode => ui.hashValues(label, hint, action);
+  int get hashCode => Object.hash(label, hint, action);
 
   @override
   bool operator ==(Object other) {
@@ -242,12 +242,7 @@ class AttributedString {
   }
 
   @override
-  int get hashCode {
-    return ui.hashValues(
-      string,
-      attributes,
-    );
-  }
+  int get hashCode => Object.hash(string, attributes,);
 
   @override
   String toString() {
@@ -642,35 +637,33 @@ class SemanticsData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return ui.hashValues(
-      ui.hashValues(
-        flags,
-        actions,
-        attributedLabel,
-        attributedValue,
-        attributedIncreasedValue,
-        attributedDecreasedValue,
-        attributedHint,
-        textDirection,
-        rect,
-        tags,
-        textSelection,
-        scrollChildCount,
-        scrollIndex,
-        scrollPosition,
-        scrollExtentMax,
-        scrollExtentMin,
-        platformViewId,
-        maxValueLength,
-        currentValueLength,
-        transform,
-      ),
+  int get hashCode => Object.hash(
+    flags,
+    actions,
+    attributedLabel,
+    attributedValue,
+    attributedIncreasedValue,
+    attributedDecreasedValue,
+    attributedHint,
+    textDirection,
+    rect,
+    tags,
+    textSelection,
+    scrollChildCount,
+    scrollIndex,
+    scrollPosition,
+    scrollExtentMax,
+    scrollExtentMin,
+    platformViewId,
+    maxValueLength,
+    currentValueLength,
+    Object.hash(
+      transform,
       elevation,
       thickness,
-      ui.hashList(customSemanticsActionIds),
-    );
-  }
+      customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
+    ),
+  );
 
   static bool _sortedListsEqual(List<int>? left, List<int>? right) {
     if (left == null && right == null)
@@ -744,7 +737,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   bool get isNotEmpty => onTapHint != null || onLongPressHint != null;
 
   @override
-  int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
+  int get hashCode => Object.hash(onTapHint, onLongPressHint);
 
   @override
   bool operator ==(Object other) {
@@ -3053,7 +3046,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.platformDispatcher.updateSemantics(builder.build());
     notifyListeners();
   }
 
