@@ -12,6 +12,7 @@ export 'src/globals.dart';
 export 'src/next.dart' hide kStateOption, kYesFlag;
 export 'src/packages_autoroller.dart';
 export 'src/repository.dart';
+export 'src/roll_packages.dart';
 export 'src/start.dart' hide kStateOption;
 export 'src/state.dart';
 export 'src/status.dart' hide kStateOption;

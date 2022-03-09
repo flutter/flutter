@@ -67,6 +67,10 @@ Future<void> main(List<String> args) async {
     NextCommand(
       checkouts: checkouts,
     ),
+    RollPackagesCommand(
+      checkouts: checkouts,
+      flutterRoot: _localFlutterRoot,
+    ),
   ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {
