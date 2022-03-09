@@ -92,7 +92,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// [turbulenceSeed] can be passed if a non random seed shold be used for
   /// the turbulence and sparkles. By default, the seed is a random number
   /// between 0.0 and 1000.0.
-  /// 
+  ///
   /// Turbulence is an input to the shader provides a more natural non-circular
   /// "splash" effect. Sparkles randomization is also driven by the
   /// [turbulenceSeed]. Sparkles are identified in the shader as "noise",
@@ -118,7 +118,6 @@ class InkSparkle extends InteractiveInkFeature {
        _textDirection = textDirection,
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-       
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
