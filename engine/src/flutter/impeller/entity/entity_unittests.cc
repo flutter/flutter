@@ -502,10 +502,9 @@ TEST_F(EntityTest, BlendingModeOptions) {
     // test GUI.
 
     const Entity::BlendMode b{};
-    static_assert(
-        b == Entity::BlendMode::kClear);  // Ensure the first item in
-                                                  // the switch is the first
-                                                  // item in the enum.
+    static_assert(b == Entity::BlendMode::kClear);  // Ensure the first item in
+                                                    // the switch is the first
+                                                    // item in the enum.
     switch (b) {
       case Entity::BlendMode::kClear:
         blend_mode_names.push_back("Clear");
@@ -521,8 +520,7 @@ TEST_F(EntityTest, BlendingModeOptions) {
         blend_mode_values.push_back(Entity::BlendMode::kSourceOver);
       case Entity::BlendMode::kDestinationOver:
         blend_mode_names.push_back("DestinationOver");
-        blend_mode_values.push_back(
-            Entity::BlendMode::kDestinationOver);
+        blend_mode_values.push_back(Entity::BlendMode::kDestinationOver);
     };
   }
 
@@ -534,9 +532,8 @@ TEST_F(EntityTest, BlendingModeOptions) {
       ImGui::SetNextWindowPos({200, 450});
     }
 
-    auto draw_rect = [&context, &pass](
-                         Rect rect, Color color,
-                         Entity::BlendMode blend_mode) -> bool {
+    auto draw_rect = [&context, &pass](Rect rect, Color color,
+                                       Entity::BlendMode blend_mode) -> bool {
       using VS = SolidFillPipeline::VertexShader;
       VertexBufferBuilder<VS::PerVertexData> vtx_builder;
       {
@@ -579,8 +576,7 @@ TEST_F(EntityTest, BlendingModeOptions) {
                    blend_mode_names.data(), blend_mode_names.size());
     ImGui::End();
 
-    Entity::BlendMode selected_mode =
-        blend_mode_values[current_blend_index];
+    Entity::BlendMode selected_mode = blend_mode_values[current_blend_index];
 
     Point a, b, c, d;
     std::tie(a, b) = IMPELLER_PLAYGROUND_LINE(
@@ -599,6 +595,30 @@ TEST_F(EntityTest, BlendingModeOptions) {
     return result;
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_F(EntityTest, BezierCircleScaled) {
+  Entity entity;
+  auto path = PathBuilder{}
+                  .MoveTo({97.325, 34.818})
+                  .CubicCurveTo({98.50862885295136, 34.81812293973836},
+                                {99.46822048142015, 33.85863261475589},
+                                {99.46822048142015, 32.67499810206613})
+                  .CubicCurveTo({99.46822048142015, 31.491363589376355},
+                                {98.50862885295136, 30.53187326439389},
+                                {97.32499434685802, 30.531998226542708})
+                  .CubicCurveTo({96.14153655073771, 30.532123170035373},
+                                {95.18222070648729, 31.491540299350355},
+                                {95.18222070648729, 32.67499810206613})
+                  .CubicCurveTo({95.18222070648729, 33.85845590478189},
+                                {96.14153655073771, 34.81787303409686},
+                                {97.32499434685802, 34.81799797758954})
+                  .Close()
+                  .TakePath();
+  entity.SetPath(path);
+  entity.SetTransformation(Matrix::MakeScale({20.0, 20.0, 1.0}).Translate({-80, -15, 0}));
+  entity.SetContents(SolidColorContents::Make(Color::Red()));
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
 }  // namespace testing
