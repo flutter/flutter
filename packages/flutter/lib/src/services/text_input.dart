@@ -970,17 +970,6 @@ mixin TextSelectionDelegate {
   ///
   /// The new [value] is treated as user input and thus may subject to input
   /// formatting.
-  @Deprecated(
-    'Use the userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.',
-  )
-  set textEditingValue(TextEditingValue value) {}
-
-  /// Indicates that the user has requested the delegate to replace its current
-  /// text editing state with [value].
-  ///
-  /// The new [value] is treated as user input and thus may subject to input
-  /// formatting.
   ///
   /// See also:
   ///
