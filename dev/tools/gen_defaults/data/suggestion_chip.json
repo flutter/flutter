@@ -1,9 +1,9 @@
 {
-  "version": "v0_81",
+  "version": "v0_88",
 
   "md.comp.suggestion-chip.container.height": 32.0,
   "md.comp.suggestion-chip.container.shape": "md.sys.shape.corner.small",
-  "md.comp.suggestion-chip.container.surface-tint-layer.color": "surfaceTintColor",
+  "md.comp.suggestion-chip.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.suggestion-chip.disabled.label-text.color": "onSurface",
   "md.comp.suggestion-chip.disabled.label-text.opacity": 0.38,
   "md.comp.suggestion-chip.dragged.container.elevation": "md.sys.elevation.level4",

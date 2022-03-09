@@ -71,7 +71,7 @@ class GalleryOptions {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     themeMode,
     textScaleFactor,
     visualDensity,

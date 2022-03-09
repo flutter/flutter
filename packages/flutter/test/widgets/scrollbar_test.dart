@@ -1345,6 +1345,55 @@ void main() {
     );
   });
 
+  testWidgets('hit test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/99324
+    final ScrollController scrollController = ScrollController();
+    bool onTap = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              trackVisibility: true,
+              thumbVisibility: true,
+              controller: scrollController,
+              child: SingleChildScrollView(
+                child: GestureDetector(
+                  onTap: () => onTap = true,
+                  child: const SizedBox(
+                    width: 4000.0,
+                    height: 4000.0,
+                    child: ColoredBox(color: Color(0x00000000)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(onTap, false);
+
+    // Tap on track area.
+    await tester.tapAt(const Offset(795.0, 550.0));
+    await tester.pumpAndSettle();
+    expect(onTap, false);
+
+    // Tap on thumb area.
+    await tester.tapAt(const Offset(795.0, 10.0));
+    await tester.pumpAndSettle();
+    expect(onTap, false);
+
+    // Tap on content area.
+    await tester.tapAt(const Offset(400.0, 300.0));
+    await tester.pumpAndSettle();
+    expect(onTap, true);
+  });
+
   testWidgets('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
     final FlutterExceptionHandler? handler = FlutterError.onError;
     FlutterErrorDetails? error;

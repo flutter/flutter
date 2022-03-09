@@ -170,25 +170,23 @@ class ToggleButtonsThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      textStyle,
-      constraints,
-      color,
-      selectedColor,
-      disabledColor,
-      fillColor,
-      focusColor,
-      highlightColor,
-      hoverColor,
-      splashColor,
-      borderColor,
-      selectedBorderColor,
-      disabledBorderColor,
-      borderRadius,
-      borderWidth,
-    );
-  }
+  int get hashCode => Object.hash(
+    textStyle,
+    constraints,
+    color,
+    selectedColor,
+    disabledColor,
+    fillColor,
+    focusColor,
+    highlightColor,
+    hoverColor,
+    splashColor,
+    borderColor,
+    selectedBorderColor,
+    disabledBorderColor,
+    borderRadius,
+    borderWidth,
+  );
 
   @override
   bool operator ==(Object other) {

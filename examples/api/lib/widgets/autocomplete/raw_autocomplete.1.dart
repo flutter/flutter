@@ -52,7 +52,7 @@ class User {
   }
 
   @override
-  int get hashCode => hashValues(email, name);
+  int get hashCode => Object.hash(email, name);
 }
 
 class AutocompleteCustomTypeExample extends StatelessWidget {

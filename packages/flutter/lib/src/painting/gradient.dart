@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -350,8 +349,9 @@ abstract class Gradient {
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
 /// {@tool dartpad}
-/// This sample draws a picture that looks like vertical window shades by having
-/// a [Container] display a [BoxDecoration] with a [LinearGradient].
+/// This sample draws a picture with a gradient sweeping through different
+/// colors, by having a [Container] display a [BoxDecoration] with a
+/// [LinearGradient].
 ///
 /// ** See code in examples/api/lib/painting/gradient/linear_gradient.0.dart **
 /// {@end-tool}
@@ -519,7 +519,14 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(begin, end, tileMode, transform, hashList(colors), hashList(stops));
+  int get hashCode => Object.hash(
+    begin,
+    end,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+  );
 
   @override
   String toString() {
@@ -793,7 +800,16 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, radius, tileMode, transform, hashList(colors), hashList(stops), focal, focalRadius);
+  int get hashCode => Object.hash(
+    center,
+    radius,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+    focal,
+    focalRadius,
+  );
 
   @override
   String toString() {
@@ -1051,7 +1067,15 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, transform, hashList(colors), hashList(stops));
+  int get hashCode => Object.hash(
+    center,
+    startAngle,
+    endAngle,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+  );
 
   @override
   String toString() {

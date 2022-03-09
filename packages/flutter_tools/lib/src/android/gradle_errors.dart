@@ -167,7 +167,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
       }
     } else {
       globals.printBox(
-        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
+        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --multidex flag.',
         title: _boxTitle,
       );
     }
@@ -390,17 +390,21 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final File localPropertiesFile = project.directory
+    final File gradleFile = project.directory
         .childDirectory('android')
-        .childFile('local.properties');
+        .childDirectory('app')
+        .childFile('build.gradle');
 
     final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
     assert(minSdkVersionMatch?.groupCount == 3);
 
     final String textInBold = globals.logger.terminal.bolden(
-      'Fix this issue by adding the following to the file ${localPropertiesFile.path}:\n'
-      '\n'
-      'flutter.minSdkVersion=${minSdkVersionMatch?.group(2)}\n'
+      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+      'android {\n'
+      '  defaultConfig {\n'
+      '    minSdkVersion ${minSdkVersionMatch?.group(2)}\n'
+      '  }\n'
+      '}\n'
     );
     globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
