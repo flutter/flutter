@@ -176,7 +176,7 @@ void KeyboardManagerWin32::OnKey(std::unique_ptr<PendingEvent> event,
           (1 /* repeat_count */ << 0) | (ctrl_left_scancode << 16) |
           (0 /* extended */ << 24) | (1 /* prev_state */ << 30) |
           (1 /* transition */ << 31);
-      window_delegate_->Win32DispatchMessage(WM_KEYUP, VK_LCONTROL, lParam);
+      window_delegate_->Win32DispatchMessage(WM_KEYUP, VK_CONTROL, lParam);
     }
   }
 

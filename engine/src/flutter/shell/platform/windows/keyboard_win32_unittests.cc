@@ -1203,7 +1203,7 @@ TEST(KeyboardTest, AltGrModifiedKey) {
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_LCONTROL, false, true},
       ExpectForgedMessage{
-          WmKeyUpInfo{VK_LCONTROL, kScanCodeControl, kNotExtended}.Build(
+          WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
               kWmResultZero)},
       KeyStateChange{VK_RMENU, false, true},
       WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
@@ -1243,7 +1243,7 @@ TEST(KeyboardTest, AltGrTwice) {
   // AltLeft) down.
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_LCONTROL, true, true},
-      WmKeyDownInfo{VK_LCONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
+      WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       KeyStateChange{VK_RMENU, true, true},
       WmKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
@@ -1265,7 +1265,7 @@ TEST(KeyboardTest, AltGrTwice) {
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_LCONTROL, false, true},
       ExpectForgedMessage{
-          WmKeyUpInfo{VK_LCONTROL, kScanCodeControl, kNotExtended}.Build(
+          WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
               kWmResultZero)},
       KeyStateChange{VK_RMENU, false, true},
       WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
@@ -1284,7 +1284,7 @@ TEST(KeyboardTest, AltGrTwice) {
 
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_LCONTROL, true, false},
-      WmKeyDownInfo{VK_LCONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
+      WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       KeyStateChange{VK_RMENU, true, true},
       WmKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
@@ -1306,7 +1306,7 @@ TEST(KeyboardTest, AltGrTwice) {
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_LCONTROL, false, false},
       ExpectForgedMessage{
-          WmKeyUpInfo{VK_LCONTROL, kScanCodeControl, kNotExtended}.Build(
+          WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
               kWmResultZero)},
       KeyStateChange{VK_RMENU, false, false},
       WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
@@ -1323,7 +1323,7 @@ TEST(KeyboardTest, AltGrTwice) {
 
   // 5. For key sequence 2: a real ControlLeft up.
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
-      WmKeyUpInfo{VK_LCONTROL, kScanCodeControl, kNotExtended}.Build(
+      WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
           kWmResultZero)});
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, 0, 0, "",
