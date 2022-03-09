@@ -1,4 +1,4 @@
-Signature: 28ce6144250e789e9fc80cd8e3f7d1b9
+Signature: 23864150c7aaf941b6b268057505e846
 
 UNUSED LICENSES:
 
@@ -6189,7 +6189,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathCurveTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathCurveTessellator.h
