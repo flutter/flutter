@@ -2495,6 +2495,8 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
+      runtime_versions: >
+        ["ios-13-0", "ios-15-0"]
     scheduler: luci
     runIf:
       - dev/**
