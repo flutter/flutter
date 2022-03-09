@@ -380,7 +380,6 @@ class InkSparkle extends InteractiveInkFeature {
     }
   }
 
-
   /// Clips the canvas for an ink feature to be painted on the [canvas].
   ///
   /// This should be called before painting ink features with [paintFeature]
