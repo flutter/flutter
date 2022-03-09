@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/time/time_point.h"
-#include "flutter/impeller/fixtures/box_fade.frag.h"
-#include "flutter/impeller/fixtures/box_fade.vert.h"
-#include "flutter/impeller/fixtures/test_texture.frag.h"
-#include "flutter/impeller/fixtures/test_texture.vert.h"
 #include "flutter/testing/testing.h"
+#include "impeller/fixtures/box_fade.frag.h"
+#include "impeller/fixtures/box_fade.vert.h"
+#include "impeller/fixtures/test_texture.frag.h"
+#include "impeller/fixtures/test_texture.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
@@ -21,8 +21,8 @@
 #include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/surface.h"
-#include "impeller/tessellator/tessellator.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 namespace testing {
