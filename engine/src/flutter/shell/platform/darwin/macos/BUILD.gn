@@ -5,6 +5,7 @@
 assert(is_mac)
 
 import("//build/config/mac/mac_sdk.gni")
+import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_shared.gni")
 import("//flutter/shell/platform/glfw/config.gni")
@@ -273,7 +274,10 @@ copy("copy_license") {
 action("_generate_symlinks") {
   visibility = [ ":*" ]
   script = "//build/config/mac/package_framework.py"
-  outputs = [ "$root_build_dir/$_flutter_framework_name.stamp" ]
+  outputs = [
+    "$root_build_dir/$_flutter_framework_name.stamp",
+    "$root_out_dir/$_flutter_framework_filename",
+  ]
   args = [
     "--framework",
     "$_flutter_framework_filename",
@@ -316,4 +320,34 @@ if (build_glfw_shell) {
 
     public_configs = [ "//flutter:config" ]
   }
+}
+
+zip_bundle("zip_macos_flutter_framework") {
+  output = "FlutterMacOS.framework.zip"
+  visibility = [ ":*" ]
+  deps = [ ":_generate_symlinks" ]
+  files = [
+    {
+      source = "$root_out_dir/FlutterMacOS.framework"
+      destination = "FlutterMacOS.framework.zip"
+    },
+  ]
+}
+
+zip_bundle("macos_flutter_framework_archive") {
+  output = "$full_platform_name/FlutterMacOS.framework.zip"
+  deps = [
+    ":copy_framework_podspec",
+    ":zip_macos_flutter_framework",
+  ]
+  files = [
+    {
+      source = "$root_out_dir/zip_archives/FlutterMacOS.framework.zip"
+      destination = "FlutterMacOS.framework.zip"
+    },
+    {
+      source = "$root_out_dir/FlutterMacOS.podspec"
+      destination = "FlutterMacOS.podspec"
+    },
+  ]
 }
