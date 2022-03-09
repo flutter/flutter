@@ -2179,8 +2179,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     return hitTarget;
   }
 
-  /// The focus dropping behavior is only present on desktop platforms
-  /// and mobile browsers.
+  /// The focus dropping behavior is only present on web (mobile and desktop).
   bool get _shouldIgnoreEvents {
     return !kIsWeb;
   }
