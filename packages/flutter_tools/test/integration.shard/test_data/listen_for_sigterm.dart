@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/io.dart';
 // SIGTERM signal.
 Future<void> main() async {
   final Stdout stdout = Stdio().stdout;
-  final IOSink stderr = Stdio().stderr;
   final Stream<ProcessSignal> interruptStream = ProcessSignal.sigterm.watch();
   interruptStream.listen((_) {
     // The test should assert that this was logged
@@ -21,6 +20,6 @@ Future<void> main() async {
   stdout.writeln('Ready to receive signals');
 
   await Future<void>.delayed(const Duration(seconds: 10));
-  stderr.writeln('Did not receive SIGTERM!');
+  stdout.writeln('Did not receive SIGTERM!');
   exit(1);
 }
