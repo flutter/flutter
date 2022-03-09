@@ -2996,6 +2996,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_lint_mac
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/99863
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
