@@ -5,10 +5,10 @@
 #include <sstream>
 
 #include "flutter/fml/paths.h"
-#include "flutter/impeller/entity/entity_shaders.h"
-#include "flutter/impeller/fixtures/shader_fixtures.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/validation.h"
+#include "impeller/entity/entity_shaders.h"
+#include "impeller/fixtures/shader_fixtures.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
 #include "impeller/playground/imgui/imgui_shaders.h"

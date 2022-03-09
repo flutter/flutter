@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/compiler/compiler.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
+#include "impeller/compiler/compiler.h"
 
 namespace impeller {
 namespace compiler {

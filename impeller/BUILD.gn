@@ -3,13 +3,8 @@
 # found in the LICENSE file.
 
 config("impeller_public_config") {
-  include_dirs = [
-    "..",
-    ".",
-  ]
+  include_dirs = [ ".." ]
 }
-
-is_host = is_mac || is_linux || is_win
 
 group("impeller") {
   public_deps = [
@@ -24,10 +19,6 @@ group("impeller") {
     "tessellator",
     "typographer",
   ]
-
-  if (is_host) {
-    public_deps += [ "compiler" ]
-  }
 }
 
 executable("impeller_unittests") {

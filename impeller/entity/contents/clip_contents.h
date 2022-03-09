@@ -10,7 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
-#include "typographer/glyph_atlas.h"
+#include "impeller/typographer/glyph_atlas.h"
 
 namespace impeller {
 
