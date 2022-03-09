@@ -55,6 +55,7 @@ public class FlutterLoaderTest {
     shadowOf(getMainLooper()).idle();
     assertTrue(flutterLoader.initialized());
     verify(mockFlutterJNI, times(1)).loadLibrary();
+    verify(mockFlutterJNI, times(1)).updateRefreshRate();
   }
 
   @Test

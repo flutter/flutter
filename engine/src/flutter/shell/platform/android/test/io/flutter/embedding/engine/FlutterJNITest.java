@@ -2,6 +2,7 @@ package io.flutter.embedding.engine;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -244,5 +245,14 @@ public class FlutterJNITest {
     FlutterJNI flutterJNI = new FlutterJNI();
     ByteBuffer buffer = ByteBuffer.allocate(4);
     flutterJNI.invokePlatformMessageResponseCallback(0, buffer, buffer.position());
+  }
+
+  @Test
+  public void setRefreshRateFPS__callsUpdateRefreshRate() {
+    FlutterJNI flutterJNI = spy(new FlutterJNI());
+    // --- Execute Test ---
+    flutterJNI.setRefreshRateFPS(120.0f);
+    // --- Verify Results ---
+    verify(flutterJNI, times(1)).updateRefreshRate();
   }
 }

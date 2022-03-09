@@ -185,6 +185,7 @@ public class FlutterLoader {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
                 flutterJNI.loadLibrary();
+                flutterJNI.updateRefreshRate();
 
                 // Prefetch the default font manager as soon as possible on a background thread.
                 // It helps to reduce time cost of engine setup that blocks the platform thread.

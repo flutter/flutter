@@ -1093,6 +1093,8 @@ FILE: ../../../flutter/shell/gpu/gpu_surface_vulkan.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_vulkan_delegate.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_vulkan_delegate.h
 FILE: ../../../flutter/shell/platform/android/AndroidManifest.xml
+FILE: ../../../flutter/shell/platform/android/android_choreographer.cc
+FILE: ../../../flutter/shell/platform/android/android_choreographer.h
 FILE: ../../../flutter/shell/platform/android/android_context_gl.cc
 FILE: ../../../flutter/shell/platform/android/android_context_gl.h
 FILE: ../../../flutter/shell/platform/android/android_context_gl_unittests.cc
