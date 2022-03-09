@@ -1588,33 +1588,33 @@ class ListView extends BoxScrollView {
 ///   children: <Widget>[
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text("He'd have you all unravel at the"),
 ///       color: Colors.teal[100],
+///       child: const Text("He'd have you all unravel at the"),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Heed not the rabble'),
 ///       color: Colors.teal[200],
+///       child: const Text('Heed not the rabble'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Sound of screams but the'),
 ///       color: Colors.teal[300],
+///       child: const Text('Sound of screams but the'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Who scream'),
 ///       color: Colors.teal[400],
+///       child: const Text('Who scream'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Revolution is coming...'),
 ///       color: Colors.teal[500],
+///       child: const Text('Revolution is coming...'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Revolution, they...'),
 ///       color: Colors.teal[600],
+///       child: const Text('Revolution, they...'),
 ///     ),
 ///   ],
 /// )
@@ -1640,33 +1640,33 @@ class ListView extends BoxScrollView {
 ///         children: <Widget>[
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text("He'd have you all unravel at the"),
 ///             color: Colors.green[100],
+///             child: const Text("He'd have you all unravel at the"),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Heed not the rabble'),
 ///             color: Colors.green[200],
+///             child: const Text('Heed not the rabble'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Sound of screams but the'),
 ///             color: Colors.green[300],
+///             child: const Text('Sound of screams but the'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Who scream'),
 ///             color: Colors.green[400],
+///             child: const Text('Who scream'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Revolution is coming...'),
 ///             color: Colors.green[500],
+///             child: const Text('Revolution is coming...'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Revolution, they...'),
 ///             color: Colors.green[600],
+///             child: const Text('Revolution, they...'),
 ///           ),
 ///         ],
 ///       ),
