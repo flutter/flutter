@@ -62,6 +62,8 @@ source_set("flutter_shell_native_src") {
 
   sources = [
     "$root_build_dir/flutter_icu/icudtl.o",
+    "android_choreographer.cc",
+    "android_choreographer.h",
     "android_context_gl.cc",
     "android_context_gl.h",
     "android_display.cc",

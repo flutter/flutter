@@ -257,7 +257,17 @@ public class FlutterJNI {
     // on Android we will need to refactor this. Static lookup makes things a
     // bit easier on the C++ side.
     FlutterJNI.refreshRateFPS = refreshRateFPS;
+    updateRefreshRate();
   }
+
+  public void updateRefreshRate() {
+    if (!FlutterJNI.loadLibraryCalled) {
+      return;
+    }
+    nativeUpdateRefreshRate(refreshRateFPS);
+  }
+
+  private native void nativeUpdateRefreshRate(float refreshRateFPS);
 
   /**
    * The Android vsync waiter implementation in C++ needs to know when a vsync signal arrives, which
