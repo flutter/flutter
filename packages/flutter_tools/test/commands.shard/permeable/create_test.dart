@@ -1486,7 +1486,6 @@ void main() {
     expect(displayName, 'My Project');
   });
 
-
   testUsingContext('has correct content and formatting with macOS app template', () async {
     Cache.flutterRoot = '../..';
 
