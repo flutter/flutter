@@ -522,12 +522,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static final Set<_TooltipState> _mouseIn = <_TooltipState>{};
 
   void _handleMouseEnter() {
-    _showTooltip();
+    if (mounted) {
+      _showTooltip();
+    }
   }
 
   void _handleMouseExit({bool immediately = false}) {
-    // If the tip is currently covered, we can just remove it without waiting.
-    _dismissTooltip(immediately: _isConcealed || immediately);
+    if (mounted) {
+      // If the tip is currently covered, we can just remove it without waiting.
+      _dismissTooltip(immediately: _isConcealed || immediately);
+    }
   }
 
   void _createNewEntry() {

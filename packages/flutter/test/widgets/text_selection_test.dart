@@ -1034,28 +1034,6 @@ void main() {
       });
     });
   });
-
-  group('TextSelectionControls', () {
-    test('ClipboardStatusNotifier is updated on handleCut', () async {
-      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
-      final FakeTextSelectionDelegate delegate = FakeTextSelectionDelegate();
-      final CustomTextSelectionControls textSelectionControls = CustomTextSelectionControls();
-
-      expect(clipboardStatus.updateCalled, false);
-      textSelectionControls.handleCut(delegate, clipboardStatus);
-      expect(clipboardStatus.updateCalled, true);
-    });
-
-    test('ClipboardStatusNotifier is updated on handleCopy', () async {
-      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
-      final FakeTextSelectionDelegate delegate = FakeTextSelectionDelegate();
-      final CustomTextSelectionControls textSelectionControls = CustomTextSelectionControls();
-
-      expect(clipboardStatus.updateCalled, false);
-      textSelectionControls.handleCopy(delegate, clipboardStatus);
-      expect(clipboardStatus.updateCalled, true);
-    });
-  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -1184,7 +1162,7 @@ class CustomTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     throw UnimplementedError();
@@ -1221,15 +1199,15 @@ class TextSelectionControlsSpy extends TextSelectionControls {
 
   @override
   Widget buildToolbar(
-      BuildContext context,
-      Rect globalEditableRegion,
-      double textLineHeight,
-      Offset position,
-      List<TextSelectionPoint> endpoints,
-      TextSelectionDelegate delegate,
-      ClipboardStatusNotifier clipboardStatus,
-      Offset? lastSecondaryTapDownPosition,
-      ) {
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
     return Text('dummy', key: toolBarKey);
   }
 
@@ -1246,9 +1224,6 @@ class TextSelectionControlsSpy extends TextSelectionControls {
 
 class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
   FakeClipboardStatusNotifier() : super(value: ClipboardStatus.unknown);
-
-  @override
-  bool get disposed => false;
 
   bool updateCalled = false;
   @override

@@ -144,10 +144,12 @@ class PageController extends ScrollController {
   ///    locations used to save scroll offsets.
   final bool keepPage;
 
+  /// {@template flutter.widgets.pageview.viewportFraction}
   /// The fraction of the viewport that each page should occupy.
   ///
   /// Defaults to 1.0, which means each page fills the viewport in the scrolling
   /// direction.
+  /// {@endtemplate}
   final double viewportFraction;
 
   /// The current page displayed in the controlled [PageView].

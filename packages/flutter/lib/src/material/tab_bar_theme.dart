@@ -133,20 +133,18 @@ class TabBarTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      indicator,
-      indicatorSize,
-      labelColor,
-      labelPadding,
-      labelStyle,
-      unselectedLabelColor,
-      unselectedLabelStyle,
-      overlayColor,
-      splashFactory,
-      mouseCursor,
-    );
-  }
+  int get hashCode => Object.hash(
+    indicator,
+    indicatorSize,
+    labelColor,
+    labelPadding,
+    labelStyle,
+    unselectedLabelColor,
+    unselectedLabelStyle,
+    overlayColor,
+    splashFactory,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -186,7 +184,7 @@ class _LerpColors implements MaterialStateProperty<Color?> {
 
   @override
   int get hashCode {
-    return hashValues(a, b, t);
+    return Object.hash(a, b, t);
   }
 
   @override

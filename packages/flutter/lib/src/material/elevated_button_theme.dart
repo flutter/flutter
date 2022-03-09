@@ -55,9 +55,7 @@ class ElevatedButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return style.hashCode;
-  }
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {

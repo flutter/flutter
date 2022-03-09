@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -135,7 +134,7 @@ abstract class AlignmentGeometry {
   }
 
   @override
-  int get hashCode => hashValues(_x, _start, _y);
+  int get hashCode => Object.hash(_x, _start, _y);
 }
 
 /// A point within a rectangle.

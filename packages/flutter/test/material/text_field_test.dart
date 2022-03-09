@@ -13,7 +13,7 @@
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle, WindowPadding;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, WindowPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -4290,7 +4290,7 @@ void main() {
     expect(textController.text, '#一#二#三#四#五');
   });
 
-  testWidgets("maxLength isn't enforced when maxLengthEnforced is false.", (WidgetTester tester) async {
+  testWidgets("maxLength isn't enforced when maxLengthEnforcement.none.", (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -4305,7 +4305,7 @@ void main() {
     expect(textController.text, '0123456789101112');
   });
 
-  testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforcement.none.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
@@ -4335,7 +4335,7 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
-  testWidgets('maxLength shows warning when maxLengthEnforced is false with surrogate pairs.', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforcement.none with surrogate pairs.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
@@ -4365,7 +4365,7 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
-  testWidgets('maxLength shows warning when maxLengthEnforced is false with grapheme clusters.', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforcement.none with grapheme clusters.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
@@ -6454,7 +6454,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaQuery(
-              data: MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
+              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: 4.0),
               child: Center(
                 child: TextField(
                   decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),

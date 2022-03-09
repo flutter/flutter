@@ -118,12 +118,6 @@ class TextFormField extends FormField<String> {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
-    @Deprecated(
-      'Use maxLengthEnforcement parameter which provides more specific '
-      'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.',
-    )
-    bool maxLengthEnforced = true,
     MaxLengthEnforcement? maxLengthEnforcement,
     int? maxLines = 1,
     int? minLines,
@@ -160,11 +154,6 @@ class TextFormField extends FormField<String> {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
-       assert(maxLengthEnforced != null),
-       assert(
-         maxLengthEnforced || maxLengthEnforcement == null,
-         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
-       ),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -223,7 +212,6 @@ class TextFormField extends FormField<String> {
                smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
                smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
                enableSuggestions: enableSuggestions,
-               maxLengthEnforced: maxLengthEnforced,
                maxLengthEnforcement: maxLengthEnforcement,
                maxLines: maxLines,
                minLines: minLines,

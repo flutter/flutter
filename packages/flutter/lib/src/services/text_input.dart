@@ -10,8 +10,7 @@ import 'dart:ui' show
   Size,
   Rect,
   TextAlign,
-  TextDirection,
-  hashValues;
+  TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -217,7 +216,7 @@ class TextInputType {
   }
 
   @override
-  int get hashCode => hashValues(index, signed, decimal);
+  int get hashCode => Object.hash(index, signed, decimal);
 }
 
 /// An action the user has requested the text input control to perform.
@@ -913,7 +912,7 @@ class TextEditingValue {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     text.hashCode,
     selection.hashCode,
     composing.hashCode,
@@ -1174,7 +1173,7 @@ class SelectionRect {
   }
 
   @override
-  int get hashCode => hashValues(position, bounds);
+  int get hashCode => Object.hash(position, bounds);
 
   @override
   String toString() => 'SelectionRect($position, $bounds)';
@@ -1196,16 +1195,23 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// to the client's editing state. A change is any mutation to the raw text
   /// value, or any updates to the selection and/or composing region.
   ///
-  /// Here is an example of what implementation of this method could look like:
   /// {@tool snippet}
+  /// This example shows what an implementation of this method could look like.
+  ///
+  /// ```dart
+  /// TextEditingValue? _localValue;
   /// @override
   /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   TextEditingValue newValue = _previousValue;
+  ///   if (_localValue == null) {
+  ///     return;
+  ///   }
+  ///   TextEditingValue newValue = _localValue!;
   ///   for (final TextEditingDelta delta in textEditingDeltas) {
   ///     newValue = delta.apply(newValue);
   ///   }
   ///   _localValue = newValue;
   /// }
+  /// ```
   /// {@end-tool}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
