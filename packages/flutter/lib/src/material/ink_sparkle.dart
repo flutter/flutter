@@ -71,15 +71,6 @@ class InkSparkle extends InteractiveInkFeature {
   /// expressed in terms of "start" and "end" instead of
   /// "left" and "right".
   ///
-  /// Clipping can happen in 3 different ways:
-  ///  1. If [customBorder] is provided, it is used to determine the path for
-  ///     clipping.
-  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
-  ///     is clipped by an [RRect] created from `_clipCallback` and
-  ///     [borderRadius].
-  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect]
-  ///     provided by `_clipCallback` is used for clipping.
-  ///
   /// If [containedInkWell] is true, then the ripple will be sized to fit
   /// the well rectangle, then clipped to it when drawn. The well
   /// rectangle is the box returned by [rectCallback], if provided, or
@@ -88,10 +79,22 @@ class InkSparkle extends InteractiveInkFeature {
   /// If [containedInkWell] is false, then [rectCallback] should be null.
   /// The ink ripple is clipped only to the edges of the [Material].
   /// This is the default.
-  ///
-  /// [radius] is derived from the [referenceBox] and is multiplied by
-  /// [_targetRadiusMultiplier] so that the effect fills the container no matter
-  /// where the [position] is.
+  /// 
+  /// Clipping can happen in 3 different ways:
+  ///  1. If [customBorder] is provided, it is used to determine the path for
+  ///     clipping.
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///     is clipped by an [RRect] created from `_clipCallback` and
+  ///     [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect]
+  ///     provided by `_clipCallback` is used for clipping.  /// Clipping can happen in 3 different ways:
+  ///  1. If [customBorder] is provided, it is used to determine the path for
+  ///     clipping.
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///     is clipped by an [RRect] created from `_clipCallback` and
+  ///     [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect]
+  ///     provided by `_clipCallback` is used for clipping.
   ///
   /// When the ripple is removed, [onRemoved] will be called.
   ///
@@ -103,7 +106,7 @@ class InkSparkle extends InteractiveInkFeature {
     required RenderBox referenceBox,
     required Color color,
     required Offset position,
-    required TextDirection textDirection,
+    TextDirection? textDirection,
     bool containedInkWell = true,
     RectCallback? rectCallback,
     BorderRadius? borderRadius,
@@ -383,16 +386,10 @@ class InkSparkle extends InteractiveInkFeature {
   /// This should be called before painting ink features with [paintFeature]
   /// that do not use [paintInkCircle].
   ///
-  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
+  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping
+  /// the ink effect.
+  /// 
   /// If [clipCallback] is null, no clipping is performed on the ink circle.
-  ///
-  /// Clipping can happen in 3 different ways:
-  ///  1. If [customBorder] is provided, it is used to determine the path
-  ///     for clipping.
-  ///  2. If a non-zero [borderRadius] is provided, the canvas
-  ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
-  ///  3. Otherwise, it is clipped with the [Rect] provided by [clipCallback]
-  ///      by [clipCallback] is used for clipping.
   ///
   /// [textDirection] is used by [customBorder] if it is non-null. This allows
   /// the [customBorder]'s path to be properly defined if the path was expressed
