@@ -676,7 +676,7 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
   if (changed) {
     if (priv->enable_delta_model) {
       flutter::TextEditingDelta delta = flutter::TextEditingDelta(
-          text_before_change, priv->text_model->composing_range(),
+          text_before_change, priv->text_model->selection(),
           priv->text_model->GetText());
       update_editing_state_with_delta(self, &delta);
     } else {
