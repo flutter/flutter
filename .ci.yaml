@@ -87,6 +87,8 @@ platform_properties:
       device_type: none
       mac_model: Macmini8,1
       xcode: 13a233
+      runtime_versions: >
+        ["ios-13-0", "ios-15-0"]
   mac_android:
     properties:
       caches: >-
