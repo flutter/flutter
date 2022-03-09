@@ -451,6 +451,7 @@ abstract class ResidentCompiler {
     List<String> fileSystemRoots,
     String? fileSystemScheme,
     String initializeFromDill,
+    bool assumeInitializeFromDillUpToDate,
     TargetModel targetModel,
     bool unsafePackageSerialization,
     List<String> extraFrontEndOptions,
@@ -559,6 +560,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String> fileSystemRoots = const <String>[],
     this.fileSystemScheme,
     this.initializeFromDill,
+    this.assumeInitializeFromDillUpToDate = false,
     this.targetModel = TargetModel.flutter,
     this.unsafePackageSerialization = false,
     this.extraFrontEndOptions,
@@ -591,6 +593,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final List<String> fileSystemRoots;
   final String? fileSystemScheme;
   final String? initializeFromDill;
+  final bool assumeInitializeFromDillUpToDate;
   final bool unsafePackageSerialization;
   final List<String>? extraFrontEndOptions;
   final List<String> dartDefines;
@@ -768,6 +771,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--initialize-from-dill',
         initializeFromDill!,
       ],
+      if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
       if (additionalSource != null) ...<String>[
         '--source',
         additionalSource,
