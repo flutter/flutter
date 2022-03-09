@@ -495,8 +495,7 @@ double _getTargetRadius(
   RectCallback? rectCallback,
   Offset position,
 ) {
-  final Size size =
-      rectCallback != null ? rectCallback().size : referenceBox.size;
+  final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;
   final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
   return math.max(d1, d2) / 2.0;
