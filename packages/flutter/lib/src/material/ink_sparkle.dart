@@ -93,10 +93,12 @@ class InkSparkle extends InteractiveInkFeature {
   /// the turbulence and sparkles. By default, the seed is a random number
   /// between 0.0 and 1000.0.
   ///
-  /// Turbulence is an input to the shader provides a more natural non-circular
-  /// "splash" effect. Sparkles randomization is also driven by the
-  /// [turbulenceSeed]. Sparkles are identified in the shader as "noise",
-  /// and the sparkles are derived from pseudorandom triangular noise.
+  /// Turbulence is an input to the shader and helps to provides a more natural,
+  ///  non-circular, "splash" effect.
+  /// 
+  /// Sparkle randomization is also driven by the [turbulenceSeed]. Sparkles are
+  /// identified in the shader as "noise", and the sparkles are derived from
+  /// pseudorandom triangular noise.
   InkSparkle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
