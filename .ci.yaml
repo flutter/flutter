@@ -2506,7 +2506,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android android_choreographer_do_frame_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
