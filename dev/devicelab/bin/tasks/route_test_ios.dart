@@ -12,7 +12,6 @@ import 'package:path/path.dart' as path;
 
 void main() {
   task(() async {
-
     deviceOperatingSystem = DeviceOperatingSystem.ios;
     final Device device = await devices.workingDevice;
     await device.unlock();
