@@ -2333,8 +2333,6 @@ targets:
     properties:
       tags: >
         ["devicelab","android","linux"]
-      runtime_versions: >
-        ["ios-13-0", "ios-15-0"]
       task_name: service_extensions_test
     scheduler: luci
 
@@ -2598,6 +2596,8 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
+      runtime_versions: >
+        ["ios-13-0", "ios-15-0"]
     scheduler: luci
 
   - name: Mac build_tests_2_4
