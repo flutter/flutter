@@ -707,7 +707,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    textSelectionDelegate.textEditingValue = newValue;
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
@@ -727,25 +726,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         extentOffset: math.min(nextSelection.extentOffset, textLength),
       );
     }
-    _handleSelectionChange(nextSelection, cause);
     _setTextEditingValue(
       textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
       cause,
     );
-  }
-
-  void _handleSelectionChange(
-    TextSelection nextSelection,
-    SelectionChangedCause cause,
-  ) {
-    // Changes made by the keyboard can sometimes be "out of band" for listening
-    // components, so always send those events, even if we didn't think it
-    // changed. Also, focusing an empty field is sent as a selection change even
-    // if the selection offset didn't change.
-    final bool focusingEmpty = nextSelection.baseOffset == 0 && nextSelection.extentOffset == 0 && !hasFocus;
-    if (nextSelection == selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
-      return;
-    }
   }
 
   @override
@@ -1956,6 +1940,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
     );
+    final bool focusingEmpty = newSelection.baseOffset == 0 && newSelection.extentOffset == 0 && !hasFocus;
+    if (newSelection == selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
+      return;
+    }
     _setSelection(newSelection, cause);
   }
 
