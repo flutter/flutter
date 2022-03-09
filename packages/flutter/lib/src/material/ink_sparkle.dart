@@ -17,7 +17,7 @@ import 'material.dart';
 /// relative to the [referenceBox].
 ///
 /// This effect relies on a shader, and therefore hardware acceleration.
-/// Currently, this is only supported by certain C++ engine platforms. The 
+/// Currently, this is only supported by certain C++ engine platforms. The
 /// platforms that are currently supported are Android, iOS, MacOS, and Windows.
 /// Support for CanvasKit web can be tracked here:
 ///  - https://github.com/flutter/flutter/issues/85238
@@ -510,7 +510,7 @@ double _getTargetRadius(
 /// pre-transpiled shader program into SPIR-V.
 ///
 /// See:
-/// - [https://github.com/material-components/material-components-flutter-experimental/tree/fragment-shader-manager/fragment_shader_manager]
+/// - https://github.com/material-components/material-components-flutter-experimental/tree/fragment-shader-manager/fragment_shader_manager
 ///
 /// GLSL source for this shader:
 ///
