@@ -1,11 +1,14 @@
 {
-  "version": "v0_88",
+  "version": "v0_90",
 
   "md.comp.outlined-card.container.color": "surface",
   "md.comp.outlined-card.container.elevation": "md.sys.elevation.level0",
   "md.comp.outlined-card.container.shadow-color": "shadow",
   "md.comp.outlined-card.container.shape": "md.sys.shape.corner.medium",
   "md.comp.outlined-card.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.outlined-card.disabled.container.elevation": "md.sys.elevation.level0",
+  "md.comp.outlined-card.disabled.outline.color": "outline",
+  "md.comp.outlined-card.disabled.outline.opacity": 0.12,
   "md.comp.outlined-card.dragged.container.elevation": "md.sys.elevation.level3",
   "md.comp.outlined-card.dragged.outline.color": "outline",
   "md.comp.outlined-card.dragged.state-layer.color": "onSurface",
