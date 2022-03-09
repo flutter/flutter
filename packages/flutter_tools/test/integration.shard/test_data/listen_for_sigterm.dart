@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'package:flutter_tools/src/base/io.dart';
 
 // This application will log to STDOUT and exit with 0 when it receives the
 // SIGTERM signal.
 Future<void> main() async {
+  final Stdout stdout = Stdio().stdout;
+  final IOSink stderr = Stdio().stderr;
   final Stream<ProcessSignal> interruptStream = ProcessSignal.sigterm.watch();
   interruptStream.listen((_) {
     // The test should assert that this was logged

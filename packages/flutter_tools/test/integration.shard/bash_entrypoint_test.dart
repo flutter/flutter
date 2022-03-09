@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -18,9 +18,11 @@ Future<void> main() async {
   test('verify terminating flutter/bin/dart terminates the underlying dart process', () async {
     final Completer<void> childReadyCompleter = Completer<void>();
     String stdout = '';
-    final io.Process process = await io.Process.start(
-      dartBash.path,
-      <String>[listenForSigtermScript.path],
+    final Process process = await processManager.start(
+      <String>[
+        dartBash.path,
+        listenForSigtermScript.path,
+      ],
     );
     final Future<Object?> stdoutFuture = process.stdout
         .transform<String>(utf8.decoder)
