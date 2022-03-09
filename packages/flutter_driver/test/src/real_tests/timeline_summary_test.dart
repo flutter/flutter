@@ -475,7 +475,6 @@ void main() {
             'total_ui_gc_time': 0.4,
             '30hz_frame_percentage': 0,
             '60hz_frame_percentage': 0,
-            '80hz_frame_percentage': 0,
             '90hz_frame_percentage': 0,
             '120hz_frame_percentage': 0,
             'illegal_refresh_rate_frame_count': 0,
@@ -596,7 +595,6 @@ void main() {
           'total_ui_gc_time': 0.4,
           '30hz_frame_percentage': 0,
           '60hz_frame_percentage': 100,
-          '80hz_frame_percentage': 0,
           '90hz_frame_percentage': 0,
           '120hz_frame_percentage': 0,
           'illegal_refresh_rate_frame_count': 0,
@@ -871,11 +869,9 @@ void main() {
         final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
         const int num30Hz = 10;
         const int num60Hz = 20;
-        const int num80Hz = 20;
         const int num90Hz = 20;
         const int num120Hz = 40;
         const int numIllegal = 10;
-        const int totalFrames = num30Hz + num60Hz + num80Hz + num90Hz + num120Hz + numIllegal;
 
         // Add 30hz frames
         events.addAll(_populateEvents(numberOfEvents: num30Hz,
@@ -891,12 +887,6 @@ void main() {
                                       margin: 0,
                                       ));
 
-        // Add 80hz frames
-        events.addAll(_populateEvents(numberOfEvents: num80Hz,
-                                      startTime: 0,
-                                      interval: 12000000,
-                                      margin: 0,
-                                      ));
 
         // Add 90hz frames
         events.addAll(_populateEvents(numberOfEvents: num90Hz,
@@ -920,12 +910,10 @@ void main() {
                                       ));
 
         final RefreshRateSummary summary  = _summarize(events);
-
-        expect(summary.percentageOf30HzFrames, closeTo(num30Hz/totalFrames*100, kCompareDelta));
-        expect(summary.percentageOf60HzFrames, closeTo(num60Hz/totalFrames*100, kCompareDelta));
-        expect(summary.percentageOf80HzFrames, closeTo(num80Hz/totalFrames*100, kCompareDelta));
-        expect(summary.percentageOf90HzFrames, closeTo(num90Hz/totalFrames*100, kCompareDelta));
-        expect(summary.percentageOf120HzFrames, closeTo(num120Hz/totalFrames*100, kCompareDelta));
+        expect(summary.percentageOf30HzFrames, closeTo(num30Hz, kCompareDelta));
+        expect(summary.percentageOf60HzFrames, closeTo(num60Hz, kCompareDelta));
+        expect(summary.percentageOf90HzFrames, closeTo(num90Hz, kCompareDelta));
+        expect(summary.percentageOf120HzFrames, closeTo(num120Hz, kCompareDelta));
         expect(summary.framesWithIllegalRefreshRate, isNotEmpty);
         expect(summary.framesWithIllegalRefreshRate.length, 10);
       });
