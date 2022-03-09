@@ -24,7 +24,7 @@ import 'material.dart';
 ///
 /// To use this effect, pass an instance of [splashFactory] to the
 /// `splashFactory` parameter of either the Material [ThemeData] or any
-/// component that has a `splashFactory` paramter, such as buttons:
+/// component that has a `splashFactory` parameter, such as buttons:
 ///  - [ElevatedButton]
 ///  - [TextButton]
 ///  - [OutlinedButton]
