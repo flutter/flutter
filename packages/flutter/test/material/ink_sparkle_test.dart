@@ -29,6 +29,10 @@ void main() {
     await tester.tap(buttonFinder);
     await tester.pump();
     await tester.pumpAndSettle();
+
+    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawRect, 1));
   },
     skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
@@ -105,40 +109,42 @@ void main() {
 }
 
 Future<void> _runTest(WidgetTester tester, String positionName, double distanceFromTopLeft) async {
-   final Key repaintKey = UniqueKey();
-   final Key buttonKey = UniqueKey();
-   await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: RepaintBoundary(
-            key: repaintKey,
-            child: ElevatedButton(
-              key: buttonKey,
-              style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-              child: const Text('Sparkle!'),
-              onPressed: () { },
-            ),
+  final Key repaintKey = UniqueKey();
+  final Key buttonKey = UniqueKey();
+
+  await tester.pumpWidget(MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: RepaintBoundary(
+          key: repaintKey,
+          child: ElevatedButton(
+            key: buttonKey,
+            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+            child: const Text('Sparkle!'),
+            onPressed: () { },
           ),
         ),
       ),
-    ));
-    final Finder buttonFinder = find.byKey(buttonKey);
-    final Finder repaintFinder = find.byKey(repaintKey);
+    ),
+  ));
 
-    await _warmUpShader(tester, buttonFinder);
+  final Finder buttonFinder = find.byKey(buttonKey);
+  final Finder repaintFinder = find.byKey(repaintKey);
 
-    final Offset topLeft = tester.getTopLeft(buttonFinder);
-    final Offset bottomRight = tester.getBottomRight(buttonFinder);
+  await _warmUpShader(tester, buttonFinder);
 
-    final Offset target = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
-    await tester.tapAt(target);
-    for (int i = 0; i <= 5; i++) {
-      await tester.pump(const Duration(milliseconds: 50));
-      await expectLater(
-        repaintFinder,
-        matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
-      );
-    }
+  final Offset topLeft = tester.getTopLeft(buttonFinder);
+  final Offset bottomRight = tester.getBottomRight(buttonFinder);
+
+  final Offset target = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
+  await tester.tapAt(target);
+  for (int i = 0; i <= 5; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    await expectLater(
+      repaintFinder,
+      matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
+    );
+  }
 }
 
 // Warm up shader. Compilation is of the order of 10 milliseconds and

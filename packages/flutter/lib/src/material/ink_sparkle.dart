@@ -18,8 +18,8 @@ import 'material.dart';
 ///
 /// This effect relies on a shader, and therefore hardware acceleration.
 /// Currently, this is only supported by certain C++ engine platforms. The
-/// platforms that are currently supported are Android, iOS, MacOS, and Windows.
-/// Support for CanvasKit web can be tracked here:
+/// platforms that are currently supported are Android, iOS, MacOS, Windows,
+/// and Linux. Support for CanvasKit web can be tracked here:
 ///  - https://github.com/flutter/flutter/issues/85238
 ///
 /// To use this effect, pass an instance of [splashFactory] to the
@@ -32,8 +32,8 @@ import 'material.dart';
 /// The [controller] argument is typically obtained via
 /// `Material.of(context)`.
 ///
-/// If [containedInkWell] is true, then the ripple will be sized to fit
-/// the well rectangle, then clipped to it when drawn. The well
+/// If [containedInkWell] is true, then the effect will be sized to fit
+/// the well rectangle, and clipped to it when drawn. The well
 /// rectangle is the box returned by [rectCallback], if provided, or
 /// otherwise is the bounds of the [referenceBox].
 ///
@@ -101,6 +101,11 @@ class InkSparkle extends InteractiveInkFeature {
   /// [turbulenceSeed] can be passed if a non random seed shold be used for
   /// the turbulence and sparkles. By default, the seed is a random number
   /// between 0.0 and 1000.0.
+  /// 
+  /// Turbulence is an input to the shader provides a more natural non-circular
+  /// "splash" effect. Sparkles randomization is also driven by the
+  /// [turbulenceSeed]. Sparkles are identified in the shader as "noise",
+  /// and the sparkles are derived from pseudorandom triangular noise.
   InkSparkle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
@@ -114,13 +119,15 @@ class InkSparkle extends InteractiveInkFeature {
     double? radius,
     VoidCallback? onRemoved,
     double? turbulenceSeed,
-  }) : _color = color,
+  }) : assert(!containedInkWell || rectCallback != null),
+       _color = color,
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+       
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
@@ -261,7 +268,7 @@ class InkSparkle extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     // InkSparkle can only paint if its shader has been compiled.
     if (_InkSparkleFactory._shaderManager == null) {
-      debugPrint(
+      assert(false,
        '''
        Skipping InkSparkle.paintFeature because the shader it relies on is not ready to be used.
        Please allow [InkSparkleFactory.compileShaderIfNeccessary] to complete before painting InkSparkle features.
@@ -385,14 +392,14 @@ class InkSparkle extends InteractiveInkFeature {
   /// This should be called before painting ink features with [paintFeature]
   /// that do not use [paintInkCircle].
   ///
-  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping
+  /// The [clipCallback] is the callback used to obtain the [Rect] used for clipping
   /// the ink effect.
   ///
   /// If [clipCallback] is null, no clipping is performed on the ink circle.
   ///
-  /// [textDirection] is used by [customBorder] if it is non-null. This allows
-  /// the [customBorder]'s path to be properly defined if the path was expressed
-  /// in terms of "start" and "end" instead of "left" and "right".
+  /// The [textDirection] is used by [customBorder] if it is non-null. This
+  /// allows the [customBorder]'s path to be properly defined if the path was
+  /// expressed in terms of "start" and "end" instead of "left" and "right".
   ///
   /// For examples on how the function is used, see [InkSparkle].
   void _clipCanvas({
@@ -686,6 +693,9 @@ class FragmentShaderManager {
   /// SPIR-V word. See https://www.khronos.org/registry/SPIR-V/.
   ByteBuffer get spirvByteBuffer => Uint8List.fromList(_spirvByteList).buffer;
 }
+
+// TODO(clocksmith): Move spirv to binary asset.
+// https://github.com/flutter/flutter/issues/99783
 
 /// 11900 bytes
 const List<int> _spirvByteList = <int>[
