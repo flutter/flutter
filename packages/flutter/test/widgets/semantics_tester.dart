@@ -367,7 +367,7 @@ class TestSemantics {
       buf.writeln("$indent  hint: '$hint',");
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       buf.writeln('$indent  textSelection:\n[${textSelection!.start}, ${textSelection!.end}],');
     if (scrollIndex != null)
       buf.writeln('$indent scrollIndex: $scrollIndex,');
@@ -716,7 +716,7 @@ class _HasSemantics extends Matcher {
     Description result = mismatchDescription
       .add('${matchState[TestSemantics]}\n')
       .add('Current SemanticsNode tree:\n')
-      .add(_indent(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder)))
+      .add(_indent(RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder)))
       .add('\n')
       .add('The semantics tree would have matched the following configuration:\n')
       .add(_indent(matchState['would-match'] as String));

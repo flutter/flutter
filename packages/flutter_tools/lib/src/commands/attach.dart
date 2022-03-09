@@ -237,7 +237,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final Daemon daemon = boolArg('machine')
       ? Daemon(
           DaemonConnection(
-            daemonStreams: StdioDaemonStreams(globals.stdio),
+            daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
             logger: globals.logger,
           ),
           notifyingLogger: (globals.logger is NotifyingLogger)

@@ -156,6 +156,18 @@ void main() {
         expectNotExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('works if there is an "example" folder', () async {
+        final FlutterProject project = await someProject();
+        // The presence of an "example" folder used to be used as an indicator
+        // that a project was a plugin, but shouldn't be as this creates false
+        // positives.
+        project.directory.childDirectory('example').createSync();
+        await project.regeneratePlatformSpecificTooling();
+        expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
+        expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+      });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
         await project.regeneratePlatformSpecificTooling();
@@ -913,7 +925,7 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   } else if (entity is File) {
     target.file(entity.absolute.path).writeAsBytesSync(entity.readAsBytesSync(), flush: true);
   } else {
-    throw 'Unsupported FileSystemEntity ${entity.runtimeType}';
+    throw Exception('Unsupported FileSystemEntity ${entity.runtimeType}');
   }
 }
 

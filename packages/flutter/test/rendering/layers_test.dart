@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
@@ -167,13 +169,25 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
     // This should not crash.
     leaderLayer.detach();
     expect(leaderLayer.link, link2);
+  });
+
+  test('layer link attach/detach order should not crash app.', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
+    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    leaderLayer1.attach(view);
+    leaderLayer2.attach(view);
+    leaderLayer2.detach();
+    leaderLayer1.detach();
+    expect(link.leader, isNull);
   });
 
   test('leader layers not dirty when connected to follower layer', () {

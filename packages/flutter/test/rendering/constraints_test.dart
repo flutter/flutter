@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderFractionallySizedBox constraints', () {
     RenderBox root, leaf, test;
     root = RenderPositionedBox(

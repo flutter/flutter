@@ -655,26 +655,23 @@ class TextTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    // The hashValues() function supports up to 20 arguments.
-    return hashValues(
-      displayLarge,
-      displayMedium,
-      displaySmall,
-      headlineLarge,
-      headlineMedium,
-      headlineSmall,
-      titleLarge,
-      titleMedium,
-      titleSmall,
-      bodyLarge,
-      bodyMedium,
-      bodySmall,
-      labelLarge,
-      labelMedium,
-      labelSmall,
-    );
-  }
+  int get hashCode => Object.hash(
+    displayLarge,
+    displayMedium,
+    displaySmall,
+    headlineLarge,
+    headlineMedium,
+    headlineSmall,
+    titleLarge,
+    titleMedium,
+    titleSmall,
+    bodyLarge,
+    bodyMedium,
+    bodySmall,
+    labelLarge,
+    labelMedium,
+    labelSmall,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

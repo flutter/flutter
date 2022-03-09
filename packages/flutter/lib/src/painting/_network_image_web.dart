@@ -2,14 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
+import 'dart:html' as html;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
+
+/// Creates a type for an overridable factory function for testing purposes.
+typedef HttpRequestFactory = html.HttpRequest Function();
+
+/// Default HTTP client.
+html.HttpRequest _httpClient() {
+  return html.HttpRequest();
+}
+
+/// Creates an overridable factory function.
+HttpRequestFactory httpRequestFactory = _httpClient;
+
+/// Restores to the default HTTP request factory.
+void debugRestoreHttpRequestFactory() {
+  httpRequestFactory = _httpClient;
+}
 
 /// The dart:html implementation of [image_provider.NetworkImage].
 ///
@@ -78,18 +95,67 @@ class NetworkImage
     NetworkImage key,
     image_provider.DecoderCallback decode,
     StreamController<ImageChunkEvent> chunkEvents,
-  ) {
+  ) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    // This API only exists in the web engine implementation and is not
-    // contained in the analyzer summary for Flutter.
-    return ui.webOnlyInstantiateImageCodecFromUrl(// ignore: undefined_function, avoid_dynamic_calls
-      resolved,
-      chunkCallback: (int bytes, int total) {
-        chunkEvents.add(ImageChunkEvent(cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
-      },
-    ) as Future<ui.Codec>;
+
+    // We use a different method when headers are set because the
+    // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
+    if (key.headers?.isNotEmpty ?? false) {
+      final Completer<html.HttpRequest> completer =
+          Completer<html.HttpRequest>();
+      final html.HttpRequest request = httpRequestFactory();
+
+      request.open('GET', key.url, async: true);
+      request.responseType = 'arraybuffer';
+      key.headers!.forEach((String header, String value) {
+        request.setRequestHeader(header, value);
+      });
+
+      request.onLoad.listen((html.ProgressEvent e) {
+        final int? status = request.status;
+        final bool accepted = status! >= 200 && status < 300;
+        final bool fileUri = status == 0; // file:// URIs have status of 0.
+        final bool notModified = status == 304;
+        final bool unknownRedirect = status > 307 && status < 400;
+        final bool success =
+            accepted || fileUri || notModified || unknownRedirect;
+
+        if (success) {
+          completer.complete(request);
+        } else {
+          completer.completeError(e);
+          throw image_provider.NetworkImageLoadException(
+              statusCode: request.status ?? 400, uri: resolved);
+        }
+      });
+
+      request.onError.listen(completer.completeError);
+
+      request.send();
+
+      await completer.future;
+
+      final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
+
+      if (bytes.lengthInBytes == 0)
+        throw image_provider.NetworkImageLoadException(
+            statusCode: request.status!, uri: resolved);
+
+      return decode(bytes);
+    } else {
+      // This API only exists in the web engine implementation and is not
+      // contained in the analyzer summary for Flutter.
+      // ignore: undefined_function, avoid_dynamic_calls
+      return ui.webOnlyInstantiateImageCodecFromUrl(
+        resolved,
+        chunkCallback: (int bytes, int total) {
+          chunkEvents.add(ImageChunkEvent(
+              cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
+        },
+      ) as Future<ui.Codec>;
+    }
   }
 
   @override
@@ -101,7 +167,7 @@ class NetworkImage
   }
 
   @override
-  int get hashCode => ui.hashValues(url, scale);
+  int get hashCode => Object.hash(url, scale);
 
   @override
   String toString() =>

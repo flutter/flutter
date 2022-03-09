@@ -138,20 +138,18 @@ class NavigationRailThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      elevation,
-      unselectedLabelTextStyle,
-      selectedLabelTextStyle,
-      unselectedIconTheme,
-      selectedIconTheme,
-      groupAlignment,
-      labelType,
-      useIndicator,
-      indicatorColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    elevation,
+    unselectedLabelTextStyle,
+    selectedLabelTextStyle,
+    unselectedIconTheme,
+    selectedIconTheme,
+    groupAlignment,
+    labelType,
+    useIndicator,
+    indicatorColor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -219,7 +217,7 @@ class NavigationRailTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// NavigationRailTheme theme = NavigationRailTheme.of(context);
+  /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
     final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();

@@ -37,6 +37,14 @@ class Category {
 
   @override
   String toString() => value;
+
+  static Category? fromString(String category) {
+    return <String, Category>{
+      'web': web,
+      'desktop': desktop,
+      'mobile': mobile,
+    }[category];
+  }
 }
 
 /// The platform sub-folder that a device type supports.
@@ -56,6 +64,19 @@ class PlatformType {
 
   @override
   String toString() => value;
+
+  static PlatformType? fromString(String platformType) {
+    return <String, PlatformType>{
+      'web': web,
+      'android': android,
+      'ios': ios,
+      'linux': linux,
+      'macos': macos,
+      'windows': windows,
+      'fuchsia': fuchsia,
+      'custom': custom,
+    }[platformType];
+  }
 }
 
 /// A discovery mechanism for flutter-supported development devices.
@@ -220,7 +241,8 @@ abstract class DeviceManager {
       await refreshAllConnectedDevices(timeout: timeout);
     }
 
-    List<Device> devices = await getDevices();
+    List<Device> devices = (await getDevices())
+        .where((Device device) => device.isSupported()).toList();
 
     // Always remove web and fuchsia devices from `--all`. This setting
     // currently requires devices to share a frontend_server and resident
@@ -430,7 +452,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-/// A device is a physical hardware that can run a flutter application.
+/// A device is a physical hardware that can run a Flutter application.
 ///
 /// This may correspond to a connected iOS or Android device, or represent
 /// the host operating system in the case of Flutter Desktop.
@@ -587,7 +609,7 @@ abstract class Device {
   /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
-  /// Whether flutter applications running on this device can be terminated
+  /// Whether Flutter applications running on this device can be terminated
   /// from the VM Service.
   bool get supportsFlutterExit => true;
 
@@ -809,6 +831,47 @@ class DebuggingOptions {
       nullAssertions = false,
       nativeNullAssertions = false;
 
+  DebuggingOptions._({
+    required this.buildInfo,
+    required this.debuggingEnabled,
+    required this.startPaused,
+    required this.dartFlags,
+    required this.dartEntrypointArgs,
+    required this.disableServiceAuthCodes,
+    required this.enableDds,
+    required this.enableSoftwareRendering,
+    required this.skiaDeterministicRendering,
+    required this.traceSkia,
+    required this.traceAllowlist,
+    required this.traceSkiaAllowlist,
+    required this.traceSystrace,
+    required this.endlessTraceBuffer,
+    required this.dumpSkpOnShaderCompilation,
+    required this.cacheSkSL,
+    required this.purgePersistentCache,
+    required this.useTestFonts,
+    required this.verboseSystemLogs,
+    required this.hostVmServicePort,
+    required this.deviceVmServicePort,
+    required this.disablePortPublication,
+    required this.ddsPort,
+    required this.devToolsServerAddress,
+    required this.port,
+    required this.hostname,
+    required this.webEnableExposeUrl,
+    required this.webUseSseForDebugProxy,
+    required this.webUseSseForDebugBackend,
+    required this.webUseSseForInjectedClient,
+    required this.webRunHeadless,
+    required this.webBrowserDebugPort,
+    required this.webEnableExpressionEvaluation,
+    required this.webLaunchUrl,
+    required this.vmserviceOutFile,
+    required this.fastStart,
+    required this.nullAssertions,
+    required this.nativeNullAssertions,
+  });
+
   final bool debuggingEnabled;
 
   final BuildInfo buildInfo;
@@ -870,6 +933,88 @@ class DebuggingOptions {
   final bool nativeNullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'debuggingEnabled': debuggingEnabled,
+    'startPaused': startPaused,
+    'dartFlags': dartFlags,
+    'dartEntrypointArgs': dartEntrypointArgs,
+    'disableServiceAuthCodes': disableServiceAuthCodes,
+    'enableDds': enableDds,
+    'enableSoftwareRendering': enableSoftwareRendering,
+    'skiaDeterministicRendering': skiaDeterministicRendering,
+    'traceSkia': traceSkia,
+    'traceAllowlist': traceAllowlist,
+    'traceSkiaAllowlist': traceSkiaAllowlist,
+    'traceSystrace': traceSystrace,
+    'endlessTraceBuffer': endlessTraceBuffer,
+    'dumpSkpOnShaderCompilation': dumpSkpOnShaderCompilation,
+    'cacheSkSL': cacheSkSL,
+    'purgePersistentCache': purgePersistentCache,
+    'useTestFonts': useTestFonts,
+    'verboseSystemLogs': verboseSystemLogs,
+    'hostVmServicePort': hostVmServicePort,
+    'deviceVmServicePort': deviceVmServicePort,
+    'disablePortPublication': disablePortPublication,
+    'ddsPort': ddsPort,
+    'devToolsServerAddress': devToolsServerAddress.toString(),
+    'port': port,
+    'hostname': hostname,
+    'webEnableExposeUrl': webEnableExposeUrl,
+    'webUseSseForDebugProxy': webUseSseForDebugProxy,
+    'webUseSseForDebugBackend': webUseSseForDebugBackend,
+    'webUseSseForInjectedClient': webUseSseForInjectedClient,
+    'webRunHeadless': webRunHeadless,
+    'webBrowserDebugPort': webBrowserDebugPort,
+    'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
+    'webLaunchUrl': webLaunchUrl,
+    'vmserviceOutFile': vmserviceOutFile,
+    'fastStart': fastStart,
+    'nullAssertions': nullAssertions,
+    'nativeNullAssertions': nativeNullAssertions,
+  };
+
+  static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
+    DebuggingOptions._(
+      buildInfo: buildInfo,
+      debuggingEnabled: (json['debuggingEnabled'] as bool?)!,
+      startPaused: (json['startPaused'] as bool?)!,
+      dartFlags: (json['dartFlags'] as String?)!,
+      dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
+      disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
+      enableDds: (json['enableDds'] as bool?)!,
+      enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
+      skiaDeterministicRendering: (json['skiaDeterministicRendering'] as bool?)!,
+      traceSkia: (json['traceSkia'] as bool?)!,
+      traceAllowlist: json['traceAllowlist'] as String?,
+      traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
+      traceSystrace: (json['traceSystrace'] as bool?)!,
+      endlessTraceBuffer: (json['endlessTraceBuffer'] as bool?)!,
+      dumpSkpOnShaderCompilation: (json['dumpSkpOnShaderCompilation'] as bool?)!,
+      cacheSkSL: (json['cacheSkSL'] as bool?)!,
+      purgePersistentCache: (json['purgePersistentCache'] as bool?)!,
+      useTestFonts: (json['useTestFonts'] as bool?)!,
+      verboseSystemLogs: (json['verboseSystemLogs'] as bool?)!,
+      hostVmServicePort: json['hostVmServicePort'] as int? ,
+      deviceVmServicePort: json['deviceVmServicePort'] as int?,
+      disablePortPublication: (json['disablePortPublication'] as bool?)!,
+      ddsPort: json['ddsPort'] as int?,
+      devToolsServerAddress: json['devToolsServerAddress'] != null ? Uri.parse(json['devToolsServerAddress']! as String) : null,
+      port: json['port'] as String?,
+      hostname: json['hostname'] as String?,
+      webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
+      webUseSseForDebugProxy: (json['webUseSseForDebugProxy'] as bool?)!,
+      webUseSseForDebugBackend: (json['webUseSseForDebugBackend'] as bool?)!,
+      webUseSseForInjectedClient: (json['webUseSseForInjectedClient'] as bool?)!,
+      webRunHeadless: (json['webRunHeadless'] as bool?)!,
+      webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
+      webEnableExpressionEvaluation: (json['webEnableExpressionEvaluation'] as bool?)!,
+      webLaunchUrl: json['webLaunchUrl'] as String?,
+      vmserviceOutFile: json['vmserviceOutFile'] as String?,
+      fastStart: (json['fastStart'] as bool?)!,
+      nullAssertions: (json['nullAssertions'] as bool?)!,
+      nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+    );
 }
 
 class LaunchResult {

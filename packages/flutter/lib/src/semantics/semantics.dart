@@ -130,7 +130,7 @@ class CustomSemanticsAction {
   final SemanticsAction? action;
 
   @override
-  int get hashCode => ui.hashValues(label, hint, action);
+  int get hashCode => Object.hash(label, hint, action);
 
   @override
   bool operator ==(Object other) {
@@ -242,12 +242,7 @@ class AttributedString {
   }
 
   @override
-  int get hashCode {
-    return ui.hashValues(
-      string,
-      attributes,
-    );
-  }
+  int get hashCode => Object.hash(string, attributes,);
 
   @override
   String toString() {
@@ -601,7 +596,7 @@ class SemanticsData with Diagnosticable {
     properties.add(AttributedStringProperty('decreasedValue', attributedDecreasedValue));
     properties.add(AttributedStringProperty('hint', attributedHint));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       properties.add(MessageProperty('textSelection', '[${textSelection!.start}, ${textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
@@ -642,35 +637,33 @@ class SemanticsData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return ui.hashValues(
-      ui.hashValues(
-        flags,
-        actions,
-        attributedLabel,
-        attributedValue,
-        attributedIncreasedValue,
-        attributedDecreasedValue,
-        attributedHint,
-        textDirection,
-        rect,
-        tags,
-        textSelection,
-        scrollChildCount,
-        scrollIndex,
-        scrollPosition,
-        scrollExtentMax,
-        scrollExtentMin,
-        platformViewId,
-        maxValueLength,
-        currentValueLength,
-        transform,
-      ),
+  int get hashCode => Object.hash(
+    flags,
+    actions,
+    attributedLabel,
+    attributedValue,
+    attributedIncreasedValue,
+    attributedDecreasedValue,
+    attributedHint,
+    textDirection,
+    rect,
+    tags,
+    textSelection,
+    scrollChildCount,
+    scrollIndex,
+    scrollPosition,
+    scrollExtentMax,
+    scrollExtentMin,
+    platformViewId,
+    maxValueLength,
+    currentValueLength,
+    Object.hash(
+      transform,
       elevation,
       thickness,
-      ui.hashList(customSemanticsActionIds),
-    );
-  }
+      customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
+    ),
+  );
 
   static bool _sortedListsEqual(List<int>? left, List<int>? right) {
     if (left == null && right == null)
@@ -744,7 +737,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   bool get isNotEmpty => onTapHint != null || onLongPressHint != null;
 
   @override
-  int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
+  int get hashCode => Object.hash(onTapHint, onLongPressHint);
 
   @override
   bool operator ==(Object other) {
@@ -2456,7 +2449,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     Int32List? customSemanticsActionIds;
-    if (data.customSemanticsActionIds?.isNotEmpty == true) {
+    if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
       customSemanticsActionIds = Int32List(data.customSemanticsActionIds!.length);
       for (int i = 0; i < data.customSemanticsActionIds!.length; i++) {
         customSemanticsActionIds[i] = data.customSemanticsActionIds![i];
@@ -2618,7 +2611,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(AttributedStringProperty('hint', _attributedHint));
     properties.add(EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
-    if (_textSelection?.isValid == true)
+    if (_textSelection?.isValid ?? false)
       properties.add(MessageProperty('text selection', '[${_textSelection!.start}, ${_textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
@@ -3032,7 +3025,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance!.createSemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -3053,7 +3046,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance!.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.platformDispatcher.updateSemantics(builder.build());
     notifyListeners();
   }
 

@@ -39,6 +39,12 @@ class FlutterExtension {
     static int targetSdkVersion = 31
 
     /**
+     * Sets the ndkVersion used by default in Flutter app projects.
+     * Chosen as default version of the AGP version below.
+     */
+    static String ndkVersion = "21.1.6352462"
+
+    /**
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's build.gradle is under android/app.
      */
@@ -54,6 +60,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        /* When bumping, also update ndkVersion above. */
         classpath 'com.android.tools.build:gradle:4.1.0'
     }
 }
@@ -131,6 +138,11 @@ class FlutterPlugin implements Plugin<Project> {
     private String localEngineSrcPath
     private Properties localProperties
     private String engineVersion
+
+    /**
+     * Flutter Docs Website URLs for help messages.
+     */
+    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration'
 
     @Override
     void apply(Project project) {
@@ -402,18 +414,55 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
+            // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
                 project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
+                project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
+
             project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
     }
 
-     /** Prints error message and fix for any plugin compileSdkVersion that are higher than the project. */
-    private void detectLowCompileSdkVersion() {
+    /**
+     * Compares semantic versions ignoring labels.
+     * 
+     * If the versions are equal (ignoring labels), returns one of the two strings arbitrarily.
+     *
+     * If minor or patch are omitted (non-conformant to semantic versioning), they are considered zero.
+     * If the provided versions in both are equal, the longest version string is returned.
+     * For example, "2.8.0" vs "2.8" will always consider "2.8.0" to be the most recent version.
+     */
+    static String mostRecentSemanticVersion(String version1, String version2) {
+        List version1Tokenized = version1.tokenize('.')
+        List version2Tokenized = version2.tokenize('.')
+        def version1numTokens = version1Tokenized.size()
+        def version2numTokens = version2Tokenized.size()
+        def minNumTokens = Math.min(version1numTokens, version2numTokens)
+        for (int i = 0; i < minNumTokens; i++) {
+            def num1 = version1Tokenized[i].toInteger()
+            def num2 = version2Tokenized[i].toInteger()
+            if (num1 > num2) {
+                return version1
+            }
+            if (num2 > num1) {
+                return version2
+            }
+        }
+        if (version1numTokens > version2numTokens) {
+            return version1
+        }
+        return version2
+    }
+
+    /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
+    private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
             int projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
+            String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
+            String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
+            String maxPluginNdkVersion = projectNdkVersion
             int numProcessedPlugins = getPluginList().size()
 
             getPluginList().each { plugin ->
@@ -421,11 +470,16 @@ class FlutterPlugin implements Plugin<Project> {
                 pluginProject.afterEvaluate {
                     int pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
+                    String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
+                    maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
 
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
                             project.logger.error("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
+                        }
+                        if (maxPluginNdkVersion != projectNdkVersion) {
+                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion ${maxPluginNdkVersion}\n  ...\n}\n")
                         }
                     }
                 }
@@ -963,7 +1017,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             configurePlugins()
-            detectLowCompileSdkVersion()
+            detectLowCompileSdkVersionOrNdkVersion()
             return
         }
         // Flutter host module project (Add-to-app).
@@ -1015,7 +1069,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         configurePlugins()
-        detectLowCompileSdkVersion()
+        detectLowCompileSdkVersionOrNdkVersion()
     }
 }
 

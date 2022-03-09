@@ -65,7 +65,7 @@ class _ColorChangerState extends State<ColorChanger> {
       child: Listener(
         onPointerSignal: (PointerSignalEvent event) {
           if (widget.useResolver) {
-            GestureBinding.instance!.pointerSignalResolver.register(event,
+            GestureBinding.instance.pointerSignalResolver.register(event,
                 (PointerSignalEvent event) {
               rotateColor();
             });

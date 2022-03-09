@@ -330,6 +330,8 @@ class FloatingActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -720,7 +722,30 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 class _M2Defaults extends FloatingActionButtonThemeData {
   _M2Defaults(BuildContext context, this.type, this.hasChild)
       : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme;
+        _colors = Theme.of(context).colorScheme,
+        super(
+          elevation: 6,
+          focusElevation: 6,
+          hoverElevation: 8,
+          highlightElevation: 12,
+          enableFeedback: true,
+          sizeConstraints: const BoxConstraints.tightFor(
+            width: 56.0,
+            height: 56.0,
+          ),
+          smallSizeConstraints: const BoxConstraints.tightFor(
+            width: 40.0,
+            height: 40.0,
+          ),
+          largeSizeConstraints: const BoxConstraints.tightFor(
+            width: 96.0,
+            height: 96.0,
+          ),
+          extendedSizeConstraints: const BoxConstraints.tightFor(
+            height: 48.0,
+          ),
+          extendedIconLabelSpacing: 8.0,
+        );
 
   final _FloatingActionButtonType type;
   final bool hasChild;
@@ -735,38 +760,9 @@ class _M2Defaults extends FloatingActionButtonThemeData {
   @override Color? get focusColor => _theme.focusColor;
   @override Color? get hoverColor => _theme.hoverColor;
   @override Color? get splashColor => _theme.splashColor;
-  @override double? get elevation => 6;
-  @override double? get focusElevation => 6;
-  @override double? get hoverElevation => 8;
-  @override double? get highlightElevation => 12;
   @override ShapeBorder? get shape => _isExtended ? const StadiumBorder() : const CircleBorder();
-  @override bool? get enableFeedback => true;
   @override double? get iconSize => _isLarge ? 36.0 : 24.0;
 
-  @override
-  BoxConstraints? get sizeConstraints => const BoxConstraints.tightFor(
-    width: 56.0,
-    height: 56.0,
-  );
-
-  @override
-  BoxConstraints? get smallSizeConstraints => const BoxConstraints.tightFor(
-    width: 40.0,
-    height: 40.0,
-  );
-
-  @override
-  BoxConstraints? get largeSizeConstraints => const BoxConstraints.tightFor(
-    width: 96.0,
-    height: 96.0,
-  );
-
-  @override
-  BoxConstraints? get extendedSizeConstraints => const BoxConstraints.tightFor(
-    height: 48.0,
-  );
-
-  @override double? get extendedIconLabelSpacing => 8.0;
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _theme.textTheme.button!.copyWith(letterSpacing: 1.2);
 }
@@ -777,11 +773,34 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0.74, 2022-01-06
+// Generated version v0_88
 class _M3Defaults extends FloatingActionButtonThemeData {
   _M3Defaults(this.context, this.type, this.hasChild)
     : _colors = Theme.of(context).colorScheme,
-      _textTheme = Theme.of(context).textTheme;
+      _textTheme = Theme.of(context).textTheme,
+      super(
+        elevation: 6.0,
+        focusElevation: 6.0,
+        hoverElevation: 8.0,
+        highlightElevation: 6.0,
+        enableFeedback: true,
+        sizeConstraints: const BoxConstraints.tightFor(
+          width: 56.0,
+          height: 56.0,
+        ),
+        smallSizeConstraints: const BoxConstraints.tightFor(
+          width: 40.0,
+          height: 40.0,
+        ),
+        largeSizeConstraints: const BoxConstraints.tightFor(
+          width: 96.0,
+          height: 96.0,
+        ),
+        extendedSizeConstraints: const BoxConstraints.tightFor(
+          height: 56.0,
+        ),
+        extendedIconLabelSpacing: 8.0,
+      );
 
   final BuildContext context;
   final _FloatingActionButtonType type;
@@ -794,28 +813,22 @@ class _M3Defaults extends FloatingActionButtonThemeData {
   @override Color? get foregroundColor => _colors.onPrimaryContainer;
   @override Color? get backgroundColor => _colors.primaryContainer;
   @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
-  @override double get elevation => 6.0;
   @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.12);
-  @override double get focusElevation => 6.0;
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
-  @override double get hoverElevation => 8.0;
-  @override double get highlightElevation => 6.0;
 
   @override
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
       case _FloatingActionButtonType.small:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)));
       case _FloatingActionButtonType.large:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0)));
       case _FloatingActionButtonType.extended:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
      }
   }
-
-  @override bool? get enableFeedback => true;
 
   @override
   double? get iconSize {
@@ -827,30 +840,6 @@ class _M3Defaults extends FloatingActionButtonThemeData {
     }
   }
 
-  @override
-  BoxConstraints? get sizeConstraints => const BoxConstraints.tightFor(
-    width: 56.0,
-    height: 56.0,
-  );
-
-  @override
-  BoxConstraints? get smallSizeConstraints => const BoxConstraints.tightFor(
-    width: 40.0,
-    height: 40.0,
-  );
-
-  @override
-  BoxConstraints? get largeSizeConstraints => const BoxConstraints.tightFor(
-    width: 96.0,
-    height: 96.0,
-  );
-
-  @override
-  BoxConstraints? get extendedSizeConstraints => const BoxConstraints.tightFor(
-    height: 56.0,
-  );
-
-  @override double? get extendedIconLabelSpacing => 8.0;
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;
 }

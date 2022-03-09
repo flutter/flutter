@@ -84,6 +84,8 @@ void testVariants(
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderEditable respects clipBehavior', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
@@ -1103,7 +1105,7 @@ void main() {
       editable.painter = painter;
       editable.foregroundPainter = painter;
       pumpFrame(phase: EnginePhase.paint, onErrors: () {
-        errorDetails = renderer.takeFlutterErrorDetails();
+        errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
       });
       expect(errorDetails, isNull);
 

@@ -168,7 +168,7 @@ void main() {
               AndroidSemanticsAction.click,
             ],
             // We can't predict the a11y focus when the screen changes.
-            ignoredActions: ignoredAccessibilityFocusActions
+            ignoredActions: ignoredAccessibilityFocusActions,
           ),
         );
 
@@ -185,12 +185,13 @@ void main() {
             isEditable: true,
             isPassword: false,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
               AndroidSemanticsAction.setText,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions,
           ),
         );
 
@@ -208,13 +209,14 @@ void main() {
             isEditable: true,
             isPassword: false,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
               AndroidSemanticsAction.setText,
               AndroidSemanticsAction.previousAtMovementGranularity,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions,
           ),
         );
       }, timeout: Timeout.none);
@@ -234,9 +236,10 @@ void main() {
             isFocused: false,
             isPassword: true,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions,
           ),
         );
 
@@ -253,12 +256,13 @@ void main() {
             isEditable: true,
             isPassword: true,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
               AndroidSemanticsAction.setText,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions,
           ),
         );
 
@@ -276,13 +280,14 @@ void main() {
             isEditable: true,
             isPassword: true,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
               AndroidSemanticsAction.setText,
               AndroidSemanticsAction.previousAtMovementGranularity,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions,
           ),
         );
       }, timeout: Timeout.none);

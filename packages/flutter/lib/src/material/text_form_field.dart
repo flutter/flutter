@@ -118,12 +118,6 @@ class TextFormField extends FormField<String> {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
-    @Deprecated(
-      'Use maxLengthEnforcement parameter which provides more specific '
-      'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.',
-    )
-    bool maxLengthEnforced = true,
     MaxLengthEnforcement? maxLengthEnforcement,
     int? maxLines = 1,
     int? minLines,
@@ -160,11 +154,6 @@ class TextFormField extends FormField<String> {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
-       assert(maxLengthEnforced != null),
-       assert(
-         maxLengthEnforced || maxLengthEnforcement == null,
-         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
-       ),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -223,7 +212,6 @@ class TextFormField extends FormField<String> {
                smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
                smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
                enableSuggestions: enableSuggestions,
-               maxLengthEnforced: maxLengthEnforced,
                maxLengthEnforcement: maxLengthEnforcement,
                maxLines: maxLines,
                minLines: minLines,
@@ -266,10 +254,9 @@ class TextFormField extends FormField<String> {
 class _TextFormFieldState extends FormFieldState<String> {
   RestorableTextEditingController? _controller;
 
-  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
+  TextEditingController get _effectiveController => _textFormField.controller ?? _controller!.value;
 
-  @override
-  TextFormField get widget => super.widget as TextFormField;
+  TextFormField get _textFormField => super.widget as TextFormField;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -300,26 +287,26 @@ class _TextFormFieldState extends FormFieldState<String> {
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null) {
+    if (_textFormField.controller == null) {
       _createLocalController(widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null);
     } else {
-      widget.controller!.addListener(_handleControllerChanged);
+      _textFormField.controller!.addListener(_handleControllerChanged);
     }
   }
 
   @override
   void didUpdateWidget(TextFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
+    if (_textFormField.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      widget.controller?.addListener(_handleControllerChanged);
+      _textFormField.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && widget.controller == null) {
+      if (oldWidget.controller != null && _textFormField.controller == null) {
         _createLocalController(oldWidget.controller!.value);
       }
 
-      if (widget.controller != null) {
-        setValue(widget.controller!.text);
+      if (_textFormField.controller != null) {
+        setValue(_textFormField.controller!.text);
         if (oldWidget.controller == null) {
           unregisterFromRestoration(_controller!);
           _controller!.dispose();
@@ -331,7 +318,7 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    widget.controller?.removeListener(_handleControllerChanged);
+    _textFormField.controller?.removeListener(_handleControllerChanged);
     _controller?.dispose();
     super.dispose();
   }

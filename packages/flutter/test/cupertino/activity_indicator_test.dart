@@ -15,18 +15,18 @@ import '../rendering/mock_canvas.dart';
 void main() {
   testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
     await tester.pumpWidget(buildCupertinoActivityIndicator(false));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
     await tester.pumpWidget(Container());
 
     await tester.pumpWidget(buildCupertinoActivityIndicator(false));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
     await tester.pumpWidget(buildCupertinoActivityIndicator());
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
   testWidgets('Activity indicator dark mode', (WidgetTester tester) async {

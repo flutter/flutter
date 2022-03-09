@@ -133,16 +133,30 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   @override
   List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
-  /// Similar to [WidgetsFlutterBinding.ensureInitialized].
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
   ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [IntegrationTestWidgetsFlutterBinding.ensureInitialized].
+  static IntegrationTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static IntegrationTestWidgetsFlutterBinding? _instance;
+
   /// Returns an instance of the [IntegrationTestWidgetsFlutterBinding], creating and
   /// initializing it if necessary.
-  static WidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) {
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
+  static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
+    if (_instance == null)
       IntegrationTestWidgetsFlutterBinding();
-    }
-    assert(WidgetsBinding.instance is IntegrationTestWidgetsFlutterBinding);
-    return WidgetsBinding.instance!;
+    return _instance!;
   }
 
   /// Test results that will be populated after the tests have completed.

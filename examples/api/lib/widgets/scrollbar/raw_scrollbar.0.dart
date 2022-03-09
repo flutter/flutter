@@ -50,7 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               // unique scroll controller to this scroll view prevents it
               // from attaching to the PrimaryScrollController.
               child: Scrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: _firstController,
                 child: ListView.builder(
                     controller: _firstController,
@@ -68,7 +68,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               // ScrollController, so it is using the
               // PrimaryScrollController.
               child: Scrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 child: ListView.builder(
                     itemCount: 100,
                     itemBuilder: (BuildContext context, int index) {

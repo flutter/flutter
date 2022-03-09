@@ -575,17 +575,15 @@ class StrutStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      fontFamily,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      height,
-      leading,
-      forceStrutHeight,
-    );
-  }
+  int get hashCode => Object.hash(
+    fontFamily,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    height,
+    leading,
+    forceStrutHeight,
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'StrutStyle');

@@ -14,7 +14,7 @@ void main() {
   enableFlutterDriverExtension();
 
   final Completer<List<FrameTiming>> completer = Completer<List<FrameTiming>>();
-  SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
+  SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
     completer.complete(timings);
   });
 

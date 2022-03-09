@@ -609,7 +609,7 @@ void main() {
 
 List<Type> getLayers() {
   final List<Type> layers = <Type>[];
-  Layer? container = RendererBinding.instance!.renderView.debugLayer;
+  Layer? container = RendererBinding.instance.renderView.debugLayer;
   while (container is ContainerLayer) {
     layers.add(container.runtimeType);
     expect(container.firstChild, same(container.lastChild));

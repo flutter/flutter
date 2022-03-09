@@ -2349,6 +2349,50 @@ void main() {
     expect(indicator.width, 56);
     expect(indicator.height, 32);
   });
+
+  testWidgets('NavigationRailDestination has center aligned indicator - [labelType]=none', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/97753
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.none,
+        selectedIndex: 0,
+        destinations:  <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Stack(
+              children: const <Widget>[
+                Icon(Icons.umbrella),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Text(
+                    'Text',
+                    style: TextStyle(fontSize: 10, color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+            label: const Text('Abc'),
+          ),
+          const NavigationRailDestination(
+            icon: Icon(Icons.umbrella),
+            label: Text('Def'),
+          ),
+          const NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+    // Indicator with Stack widget
+    final RenderBox firstIndicator = tester.renderObject(find.byType(Icon).first);
+    expect(firstIndicator.localToGlobal(Offset.zero).dx, 24.0);
+    // Indicator without Stack widget
+    final RenderBox lastIndicator = tester.renderObject(find.byType(Icon).last);
+    expect(lastIndicator.localToGlobal(Offset.zero).dx, 24.0);
+  });
 }
 
 TestSemantics _expectedSemantics() {
