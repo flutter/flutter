@@ -1,4 +1,4 @@
-Signature: d2a0696703d82e72de24ee6065c1b907
+Signature: 28ce6144250e789e9fc80cd8e3f7d1b9
 
 UNUSED LICENSES:
 
@@ -651,6 +651,7 @@ FILE: ../../../third_party/skia/BUILD.bazel
 FILE: ../../../third_party/skia/CQ_COMMITTERS
 FILE: ../../../third_party/skia/DEPS
 FILE: ../../../third_party/skia/DIR_METADATA
+FILE: ../../../third_party/skia/OWNERS.android
 FILE: ../../../third_party/skia/WORKSPACE.bazel
 FILE: ../../../third_party/skia/bazel/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/cc_binary_with_flags.bzl
@@ -6101,6 +6102,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.mm
 FILE: ../../../third_party/skia/gm/bug12866.cpp
+FILE: ../../../third_party/skia/include/core/SkAlphaType.h
+FILE: ../../../third_party/skia/include/core/SkColorType.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
