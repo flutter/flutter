@@ -95,7 +95,7 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// Turbulence is an input to the shader and helps to provides a more natural,
   ///  non-circular, "splash" effect.
-  /// 
+  ///
   /// Sparkle randomization is also driven by the [turbulenceSeed]. Sparkles are
   /// identified in the shader as "noise", and the sparkles are derived from
   /// pseudorandom triangular noise.
