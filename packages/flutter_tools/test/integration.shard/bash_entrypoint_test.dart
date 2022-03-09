@@ -46,7 +46,8 @@ Future<void> main() async {
         'stdout:\n$stdout',
     );
     expect(stdout, contains('Successfully received SIGTERM!'));
-  });
+    // Windows does not use the bash entrypoint
+  }, skip: platform.isWindows);
 }
 
 // A test Dart app that will run until it receives SIGTERM
