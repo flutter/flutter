@@ -19,14 +19,14 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
   void initState() {
     super.initState();
     _controller.addListener(() {
-      if (_controller.offset < 50) {
-        _controller.animateTo(550, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
-      } else if (_controller.offset > 500) {
+      if (_controller.offset < 5) {
+        _controller.animateTo(150, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      } else if (_controller.offset > 145) {
         _controller.animateTo(0, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       }
     });
     Timer(const Duration(milliseconds: 1000), () {
-      _controller.animateTo(550, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      _controller.animateTo(150, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
     });
   }
 
@@ -37,10 +37,9 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
       body: ListView(
         controller: _controller,
         children: <Widget>[
-          const SizedBox(height: 500),
+          const SizedBox(height: 150),
           ColorFiltered(
-            colorFilter:
-                ColorFilter.mode(Colors.green[300]!, BlendMode.luminosity),
+            colorFilter: ColorFilter.mode(Colors.green[300]!, BlendMode.luminosity),
             child: Container(
               clipBehavior: Clip.antiAlias,
               decoration: const BoxDecoration(boxShadow: <BoxShadow>[
@@ -51,9 +50,7 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
               ], color: Colors.blue, backgroundBlendMode: BlendMode.luminosity),
               child: Column(
                 children: <Widget>[
-                  const Text(
-                    'Color Filter Cache Pref Test',
-                  ),
+                  const Text('Color Filter Cache Pref Test'),
                   Image.asset(
                     'food/butternut_squash_soup.png',
                     package: 'flutter_gallery_assets',
@@ -61,9 +58,7 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
                     width: 330,
                     height: 210,
                   ),
-                  const Text(
-                    'Color Filter Cache Pref Test',
-                  ),
+                  const Text('Color Filter Cache Pref Test'),
                 ],
               ),
             ),
