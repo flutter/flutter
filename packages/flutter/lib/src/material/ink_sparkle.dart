@@ -83,19 +83,10 @@ class InkSparkle extends InteractiveInkFeature {
   /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path for
   ///     clipping.
-  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
-  ///     is clipped by an [RRect] created from `_clipCallback` and
-  ///     [borderRadius].
-  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect]
-  ///     provided by `_clipCallback` is used for clipping.  /// Clipping can happen in 3 different ways:
-  ///  1. If [customBorder] is provided, it is used to determine the path for
-  ///     clipping.
-  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
-  ///     is clipped by an [RRect] created from `_clipCallback` and
-  ///     [borderRadius].
-  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect]
-  ///     provided by `_clipCallback` is used for clipping.
-  ///
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, then the
+  ///     canvas is clipped by an [RRect] created from [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the canvas
+  ///     is clipped with [rectCallback].
   /// When the ripple is removed, [onRemoved] will be called.
   ///
   /// [turbulenceSeed] can be passed if a non random seed shold be used for
