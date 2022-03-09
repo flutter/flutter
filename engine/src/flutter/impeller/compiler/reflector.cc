@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/compiler/reflector.h"
+#include "impeller/compiler/reflector.h"
 
 #include <atomic>
 #include <optional>
@@ -11,12 +11,12 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
-#include "flutter/impeller/compiler/code_gen_template.h"
-#include "flutter/impeller/compiler/utilities.h"
-#include "flutter/impeller/geometry/matrix.h"
-#include "flutter/impeller/geometry/scalar.h"
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
+#include "impeller/compiler/code_gen_template.h"
+#include "impeller/compiler/utilities.h"
+#include "impeller/geometry/matrix.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 namespace compiler {

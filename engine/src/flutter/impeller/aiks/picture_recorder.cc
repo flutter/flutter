@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/aiks/picture_recorder.h"
+#include "impeller/aiks/picture_recorder.h"
 
-#include "flutter/impeller/aiks/canvas.h"
+#include "impeller/aiks/canvas.h"
 
 namespace impeller {
 

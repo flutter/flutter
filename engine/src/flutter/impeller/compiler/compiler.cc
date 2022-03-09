@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/compiler/compiler.h"
+#include "impeller/compiler/compiler.h"
 
 #include <filesystem>
 #include <memory>
 #include <sstream>
 
 #include "flutter/fml/paths.h"
-#include "flutter/impeller/compiler/logger.h"
+#include "impeller/compiler/logger.h"
 
 namespace impeller {
 namespace compiler {

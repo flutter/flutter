@@ -10,8 +10,8 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/impeller/compiler/include_dir.h"
-#include "flutter/impeller/compiler/reflector.h"
+#include "impeller/compiler/include_dir.h"
+#include "impeller/compiler/reflector.h"
 #include "shaderc/shaderc.hpp"
 #include "third_party/spirv_cross/spirv_msl.hpp"
 #include "third_party/spirv_cross/spirv_parser.hpp"

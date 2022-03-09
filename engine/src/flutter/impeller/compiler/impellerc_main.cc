@@ -8,9 +8,9 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/impeller/compiler/compiler.h"
-#include "flutter/impeller/compiler/switches.h"
-#include "flutter/impeller/compiler/utilities.h"
+#include "impeller/compiler/compiler.h"
+#include "impeller/compiler/switches.h"
+#include "impeller/compiler/utilities.h"
 #include "third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp"
 
 namespace impeller {
