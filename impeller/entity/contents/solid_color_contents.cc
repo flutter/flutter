@@ -30,8 +30,8 @@ VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
 
-  auto tesselation_result = Tessellator{path.GetFillType()}.Tessellate(
-      path.CreatePolyline(), [&vtx_builder](auto point) {
+  auto tesselation_result = Tessellator{}.Tessellate(
+      path.GetFillType(), path.CreatePolyline(), [&vtx_builder](auto point) {
         VS::PerVertexData vtx;
         vtx.vertices = point;
         vtx_builder.AppendVertex(vtx);

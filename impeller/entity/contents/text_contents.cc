@@ -78,7 +78,8 @@ bool TextContents::Render(const ContentContext& renderer,
   // atlas.
   {
     VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-    if (!Tessellator{FillType::kPositive}.Tessellate(
+    if (!Tessellator{}.Tessellate(
+            FillType::kPositive,
             PathBuilder{}
                 .AddRect(Rect::MakeXYWH(0.0, 0.0, 1.0, 1.0))
                 .TakePath()

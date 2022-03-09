@@ -8,7 +8,7 @@
 
 namespace impeller {
 
-Tessellator::Tessellator(FillType type) : fill_type_(type) {}
+Tessellator::Tessellator() = default;
 
 Tessellator::~Tessellator() = default;
 
@@ -34,7 +34,8 @@ static void DestroyTessellator(TESStesselator* tessellator) {
   }
 }
 
-bool Tessellator::Tessellate(const Path::Polyline& polyline,
+bool Tessellator::Tessellate(FillType fill_type,
+                             const Path::Polyline& polyline,
                              VertexCallback callback) const {
   if (!callback) {
     return false;
@@ -75,11 +76,11 @@ bool Tessellator::Tessellate(const Path::Polyline& polyline,
   //----------------------------------------------------------------------------
   /// Let's tessellate.
   ///
-  auto result = ::tessTesselate(tessellator.get(),              // tessellator
-                                ToTessWindingRule(fill_type_),  // winding
-                                TESS_POLYGONS,                  // element type
-                                kPolygonSize,                   // polygon size
-                                kVertexSize,                    // vertex size
+  auto result = ::tessTesselate(tessellator.get(),             // tessellator
+                                ToTessWindingRule(fill_type),  // winding
+                                TESS_POLYGONS,                 // element type
+                                kPolygonSize,                  // polygon size
+                                kVertexSize,                   // vertex size
                                 nullptr  // normal (null is automatic)
   );
 
@@ -109,10 +110,6 @@ bool Tessellator::Tessellate(const Path::Polyline& polyline,
   }
 
   return true;
-}
-
-WindingOrder Tessellator::GetFrontFaceWinding() const {
-  return WindingOrder::kClockwise;
 }
 
 }  // namespace impeller

@@ -112,7 +112,7 @@ Point CubicPathComponent::SolveDerivative(Scalar time) const {
 
 /*
  *  Paul de Casteljau's subdivision with modifications as described in
- *  http://www.antigrain.com/research/adaptive_bezier/index.html.
+ *  http://agg.sourceforge.net/antigrain.com/research/adaptive_bezier/index.html.
  *  Refer to the diagram on that page for a description of the points.
  */
 static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,

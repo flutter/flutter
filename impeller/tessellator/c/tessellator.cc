@@ -37,16 +37,21 @@ void Close(PathBuilder* builder) {
   builder->Close();
 }
 
-struct Vertices* Tessellate(PathBuilder* builder) {
-  auto path = builder->CopyPath();
-  auto polyline = path.CreatePolyline();
+struct Vertices* Tessellate(PathBuilder* builder,
+                            int fill_type,
+                            Scalar scale,
+                            Scalar angle_tolerance,
+                            Scalar cusp_limit) {
+  auto path = builder->CopyPath(static_cast<FillType>(fill_type));
+  auto smoothing = SmoothingApproximation(scale, angle_tolerance, cusp_limit);
+  auto polyline = path.CreatePolyline(smoothing);
 
   std::vector<float> points;
-  if (!Tessellator{path.GetFillType()}.Tessellate(polyline,
-                                                  [&points](Point vertex) {
-                                                    points.push_back(vertex.x);
-                                                    points.push_back(vertex.y);
-                                                  })) {
+  if (!Tessellator{}.Tessellate(path.GetFillType(), polyline,
+                                [&points](Point vertex) {
+                                  points.push_back(vertex.x);
+                                  points.push_back(vertex.y);
+                                })) {
     return nullptr;
   }
 
