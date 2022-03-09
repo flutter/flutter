@@ -969,6 +969,12 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_picture_cache_memory',
   'new_gen_gc_count',
   'old_gen_gc_count',
+  '30hz_frame_percentage',
+  '60hz_frame_percentage',
+  '80hz_frame_percentage',
+  '90hz_frame_percentage',
+  '120hz_frame_percentage',
+  'illegal_refresh_rate_frame_count',
 ];
 
 class PerfTestWithSkSL extends PerfTest {
