@@ -178,6 +178,10 @@ class SaveLayerOptions {
     return options;
   }
 
+  SaveLayerOptions& operator=(const SaveLayerOptions& other) {
+    flags_ = other.flags_;
+    return *this;
+  }
   bool operator==(const SaveLayerOptions& other) const {
     return flags_ == other.flags_;
   }
