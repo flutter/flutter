@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1188,6 +1189,123 @@ void main() {
       expect(route.barrierDismissible, isNotNull);
       expect(route.barrierColor, isNotNull);
       expect(route.transitionDuration, isNotNull);
+    });
+
+    group('showGeneralDialog avoids overlapping display features', () {
+      testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (BuildContext context, Widget? child) {
+              return MediaQuery(
+                // Display has a vertical hinge down the middle
+                data: const MediaQueryData(
+                  size: Size(800, 600),
+                  displayFeatures: <DisplayFeature>[
+                    DisplayFeature(
+                      bounds: Rect.fromLTRB(390, 0, 410, 600),
+                      type: DisplayFeatureType.hinge,
+                      state: DisplayFeatureState.unknown,
+                    ),
+                  ],
+                ),
+                child: child!,
+              );
+            },
+            home: const Center(child: Text('Test')),
+          ),
+        );
+        final BuildContext context = tester.element(find.text('Test'));
+
+        showGeneralDialog<void>(
+          context: context,
+          pageBuilder: (BuildContext context, _, __) {
+            return const Placeholder();
+          },
+          anchorPoint: const Offset(1000, 0),
+        );
+        await tester.pumpAndSettle();
+
+        // Should take the right side of the screen
+        expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+        expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+      });
+
+      testWidgets('positioning with Directionality', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (BuildContext context, Widget? child) {
+              return MediaQuery(
+                // Display has a vertical hinge down the middle
+                data: const MediaQueryData(
+                  size: Size(800, 600),
+                  displayFeatures: <DisplayFeature>[
+                    DisplayFeature(
+                      bounds: Rect.fromLTRB(390, 0, 410, 600),
+                      type: DisplayFeatureType.hinge,
+                      state: DisplayFeatureState.unknown,
+                    ),
+                  ],
+                ),
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: child!,
+                ),
+              );
+            },
+            home: const Center(child: Text('Test')),
+          ),
+        );
+        final BuildContext context = tester.element(find.text('Test'));
+
+        showGeneralDialog<void>(
+          context: context,
+          pageBuilder: (BuildContext context, _, __) {
+            return const Placeholder();
+          },
+        );
+        await tester.pumpAndSettle();
+
+        // Since this is RTL, it should place the dialog on the right screen
+        expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+        expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+      });
+
+      testWidgets('positioning by default', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (BuildContext context, Widget? child) {
+              return MediaQuery(
+                // Display has a vertical hinge down the middle
+                data: const MediaQueryData(
+                  size: Size(800, 600),
+                  displayFeatures: <DisplayFeature>[
+                    DisplayFeature(
+                      bounds: Rect.fromLTRB(390, 0, 410, 600),
+                      type: DisplayFeatureType.hinge,
+                      state: DisplayFeatureState.unknown,
+                    ),
+                  ],
+                ),
+                child: child!,
+              );
+            },
+            home: const Center(child: Text('Test')),
+          ),
+        );
+        final BuildContext context = tester.element(find.text('Test'));
+
+        showGeneralDialog<void>(
+          context: context,
+          pageBuilder: (BuildContext context, _, __) {
+            return const Placeholder();
+          },
+        );
+        await tester.pumpAndSettle();
+
+        // By default it should place the dialog on the left screen
+        expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
+        expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
+      });
     });
 
     testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
