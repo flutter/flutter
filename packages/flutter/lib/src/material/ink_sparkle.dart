@@ -112,7 +112,7 @@ class InkSparkle extends InteractiveInkFeature {
     double? radius,
     VoidCallback? onRemoved,
     double? turbulenceSeed,
-  }) : assert(!containedInkWell || rectCallback != null),
+  }) : assert(containedInkWell || rectCallback == null),
        _color = color,
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -260,12 +260,9 @@ class InkSparkle extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     // InkSparkle can only paint if its shader has been compiled.
     if (_InkSparkleFactory._shaderManager == null) {
-      assert(false,
-       '''
-       Skipping InkSparkle.paintFeature because the shader it relies on is not ready to be used.
-       Please allow [InkSparkleFactory.compileShaderIfNeccessary] to complete before painting InkSparkle features.
-       '''
-      );
+      // Skipping paintFeature because the shader it relies on is not ready to
+      // be used. InkSparkleFactory.compileShaderIfNeccessary must complete
+      // before InkSparkle can paint.
       return;
     }
 
