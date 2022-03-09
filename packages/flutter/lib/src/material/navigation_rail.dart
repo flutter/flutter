@@ -382,6 +382,13 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final bool useIndicator = widget.useIndicator ?? navigationRailTheme.useIndicator ?? defaults.useIndicator!;
     final Color? indicatorColor = widget.indicatorColor ?? navigationRailTheme.indicatorColor ?? defaults.indicatorColor;
 
+    // For backwards compatibility, in M2 the opacity of the unselected icons needs
+    // to be set to the default if it isn't in the given theme. This can be removed
+    // when Material 3 is the default.
+    final IconThemeData effectiveUnselectedIconTheme = Theme.of(context).useMaterial3
+      ? unselectedIconTheme
+      : unselectedIconTheme.copyWith(opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity);
+
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: Semantics(
@@ -413,7 +420,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           label: widget.destinations[i].label,
                           destinationAnimation: _destinationAnimations[i],
                           labelType: labelType,
-                          iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
+                          iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           useIndicator: useIndicator,
