@@ -17,10 +17,9 @@ import 'material.dart';
 /// relative to the [referenceBox].
 ///
 /// This effect relies on a shader, and therefore hardware acceleration.
-/// Currently, this is only supported by C++ engine platforms: Android, iOS,
-/// MacOS, Windows, and Linux, etc. It can run on other platforms with emulation
-/// in software, but will not be performant. Hardware enabled support for
-/// CanvasKit web can be tracked here:
+/// Currently, this is only supported by certain C++ engine platforms. The 
+/// platforms that are currently supported are Android, iOS, MacOS, and Windows.
+/// Support for CanvasKit web can be tracked here:
 ///  - https://github.com/flutter/flutter/issues/85238
 ///
 /// To use this effect, pass an instance of [splashFactory] to the

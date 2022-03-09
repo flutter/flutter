@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/material.dart';
+import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -28,7 +29,9 @@ void main() {
     await tester.tap(buttonFinder);
     await tester.pump();
     await tester.pumpAndSettle();
-  });
+  },
+    skip: kIsWeb,
+  );
 
   testWidgets('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -50,7 +53,9 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawRect, 1));
-  });
+  },
+    skip: kIsWeb,
+  );
 
     testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -72,7 +77,9 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawPaint, 1));
-  });
+  },
+    skip: kIsWeb,
+  );
 
   /////////////
   // Goldens //
@@ -80,16 +87,21 @@ void main() {
 
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
-  });
+  },
+    skip: kIsWeb,
+  );
 
   testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'center', 0.5);
-  });
-
+  },
+    skip: kIsWeb,
+  );
 
   testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'bottom_right', 0.8);
-  });
+  },
+    skip: kIsWeb,
+  );
 }
 
 Future<void> _runTest(WidgetTester tester, String positionName, double distanceFromTopLeft) async {
