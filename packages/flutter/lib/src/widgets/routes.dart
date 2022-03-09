@@ -2182,16 +2182,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   /// The focus dropping behavior is only present on desktop platforms
   /// and mobile browsers.
   bool get _shouldIgnoreEvents {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return !kIsWeb;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-        return false;
-    }
+    return !kIsWeb;
   }
 
   @override
@@ -2199,7 +2190,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     assert(debugHandleEvent(event, entry));
     if (event is! PointerDownEvent
       || event.buttons != kPrimaryButton
-      || event.kind != PointerDeviceKind.mouse
       || _shouldIgnoreEvents
       || _focusScopeNode.focusedChild == null) {
       return;

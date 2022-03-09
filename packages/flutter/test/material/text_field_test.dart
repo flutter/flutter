@@ -11004,4 +11004,40 @@ void main() {
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux,  TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
+
+  testWidgets('tapping an empty area loses focus only on web (desktop and mobile)', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home:  Material(
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isFalse);
+
+    final Offset fieldOffset = tester.getCenter(find.byType(EditableText));
+    final Offset emptyOffset = Offset(
+      fieldOffset.dx,
+      tester.getTopLeft(find.byType(EditableText)).dy - 50.0,
+    );
+
+    await tester.tapAt(fieldOffset);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.tapAt(emptyOffset);
+    await tester.pumpAndSettle();
+
+    if (kIsWeb) {
+      expect(focusNode.hasFocus, isFalse);
+    } else {
+      expect(focusNode.hasFocus, isTrue);
+    }
+  }, variant: TargetPlatformVariant.all());
 }
