@@ -81,7 +81,6 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlinedButton]
 ///   * [TextButton]
 ///   * [ElevatedButton]
-///   * [OutlineButton]
 ///   * [FlatButton]
 ///   * [RaisedButton]
 ///   * The time picker widget ([showTimePicker])
@@ -1105,6 +1104,8 @@ class ThemeData with Diagnosticable {
   ///
   ///   * [FloatingActionButton]
   ///   * [NavigationBar]
+  ///   * [Dialog]
+  ///   * [AlertDialog]
   ///
   /// See also:
   ///
@@ -2344,7 +2345,6 @@ class _FifoCache<K, V> {
 ///  * [InputDecorator] (which gives density support to [TextField], etc.)
 ///  * [ListTile]
 ///  * [MaterialButton]
-///  * [OutlineButton]
 ///  * [OutlinedButton]
 ///  * [Radio]
 ///  * [RawMaterialButton]

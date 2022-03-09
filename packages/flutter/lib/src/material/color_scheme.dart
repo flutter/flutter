@@ -708,7 +708,7 @@ class ColorScheme with Diagnosticable {
 
   final Color? _shadow;
   /// A color use to paint the drop shadows of elevated components.
-  Color get shadow => _shadow ?? onBackground;
+  Color get shadow => _shadow ?? const Color(0xff000000);
 
   final Color? _inverseSurface;
   /// A surface color used for displaying the reverse of what’s seen in the

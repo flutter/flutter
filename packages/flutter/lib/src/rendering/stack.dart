@@ -270,24 +270,6 @@ enum StackFit {
   passthrough,
 }
 
-/// Whether overflowing children should be clipped, or their overflow be
-/// visible.
-///
-/// Deprecated. Use [Stack.clipBehavior] instead.
-@Deprecated(
-  'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-  'This feature was deprecated after v1.22.0-12.0.pre.',
-)
-enum Overflow {
-  /// Overflowing children will be visible.
-  ///
-  /// The visible overflow area will not accept hit testing.
-  visible,
-
-  /// Overflowing children will be clipped to the bounds of their parent.
-  clip,
-}
-
 /// Implements the stack layout algorithm.
 ///
 /// In a stack layout, the children are positioned on top of each other in the
