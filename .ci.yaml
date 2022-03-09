@@ -2971,6 +2971,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_dependencies_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/99858
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
