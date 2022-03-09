@@ -1940,10 +1940,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
     );
-    final bool focusingEmpty = newSelection.baseOffset == 0 && newSelection.extentOffset == 0 && !hasFocus;
-    if (newSelection == selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
-      return;
-    }
     _setSelection(newSelection, cause);
   }
 

@@ -28,14 +28,12 @@ class _FakeEditableTextState with TextSelectionDelegate {
   TextEditingValue textEditingValue = TextEditingValue.empty;
 
   TextSelection? selection;
-  int selectionChangedCount = 0;
 
   @override
   void hideToolbar([bool hideHandles = true]) { }
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
-    selectionChangedCount++;
     selection = value.selection;
   }
 
@@ -704,57 +702,6 @@ void main() {
     expect(delegate.selection!.isCollapsed, isFalse);
     expect(delegate.selection!.baseOffset, 3);
     expect(delegate.selection!.extentOffset, 1);
-  });
-
-  test('selection does not flicker as user is dragging', () {
-    const String text = 'abc def ghi';
-    final _FakeEditableTextState delegate = _FakeEditableTextState()
-      ..textEditingValue = const TextEditingValue(text: text);
-    const TextSpan span = TextSpan(
-      text: text,
-      style: TextStyle(
-        height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-      ),
-    );
-
-    final RenderEditable editable1 = RenderEditable(
-      textSelectionDelegate: delegate,
-      textDirection: TextDirection.ltr,
-      offset: ViewportOffset.zero(),
-      selection: const TextSelection(baseOffset: 3, extentOffset: 4),
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      text: span,
-    );
-
-    layout(editable1);
-
-    // Shouldn't cause a selection change.
-    editable1.selectPositionAt(from: const Offset(30, 2), to: const Offset(42, 2), cause: SelectionChangedCause.drag);
-    pumpFrame();
-
-    expect(delegate.selection, isNull);
-    expect(delegate.selectionChangedCount, 0);
-
-    final RenderEditable editable2 = RenderEditable(
-      textSelectionDelegate: delegate,
-      textDirection: TextDirection.ltr,
-      offset: ViewportOffset.zero(),
-      selection: const TextSelection(baseOffset: 3, extentOffset: 4),
-      text: span,
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-    );
-
-    layout(editable2);
-
-    // Now this should cause a selection change.
-    editable2.selectPositionAt(from: const Offset(30, 2), to: const Offset(48, 2), cause: SelectionChangedCause.drag);
-    pumpFrame();
-
-    expect(delegate.selection!.baseOffset, 3);
-    expect(delegate.selection!.extentOffset, 5);
-    expect(delegate.selectionChangedCount, 1);
   });
 
   test('promptRect disappears when promptRectColor is set to null', () {
