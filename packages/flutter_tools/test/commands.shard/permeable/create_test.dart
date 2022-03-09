@@ -499,6 +499,8 @@ void main() {
       <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
       <String>[
         'analysis_options.yaml',
+        'LICENSE',
+        'README.md',
         'example/lib/main.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',
@@ -2064,6 +2066,53 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(),
   });
 
+  testUsingContext('plugin creates platform interface by default', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_method_channel.dart'),
+      exists);
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_platform_interface.dart'),
+      exists);
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('plugin passes analysis and unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    await _getPackages(projectDir);
+    await _analyzeProject(projectDir.path);
+    await _runFlutterTest(projectDir);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('plugin example passes analysis and unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    final Directory exampleDir = projectDir.childDirectory('example');
+
+    await _getPackages(exampleDir);
+    await _analyzeProject(exampleDir.path);
+    await _runFlutterTest(exampleDir);
+  });
+
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
 
@@ -2123,6 +2172,10 @@ void main() {
     androidIdentifier: 'com.example.flutter_project',
     webFileName: 'flutter_project_web.dart');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+
+    await _getPackages(projectDir);
+    await _analyzeProject(projectDir.path);
+    await _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Logger: () => logger,
@@ -3021,7 +3074,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   expect(errors, unorderedEquals(expectedFailures));
 }
 
-Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
+Future<void> _getPackages(Directory workingDir) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3041,6 +3094,18 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     ],
     workingDirectory: workingDir.path,
   );
+}
+
+Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
+    '..',
+    '..',
+    'bin',
+    'cache',
+    'flutter_tools.snapshot',
+  ));
+
+  await _getPackages(workingDir);
 
   final List<String> args = <String>[
     flutterToolsSnapshotPath,
