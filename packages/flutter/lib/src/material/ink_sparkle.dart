@@ -396,7 +396,7 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// [textDirection] is used by [customBorder] if it is non-null. This allows
   /// the [customBorder]'s path to be properly defined if the path was expressed
-  /// in terms of "start" and "end" instead of "left" and "right".git
+  /// in terms of "start" and "end" instead of "left" and "right".
   ///
   /// For examples on how the function is used, see [InkSparkle].
   void _clipCanvas({
