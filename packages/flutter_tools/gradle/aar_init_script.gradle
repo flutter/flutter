@@ -6,7 +6,6 @@
 import java.nio.file.Paths
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.maven.MavenDeployer
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.tasks.Upload
 
