@@ -115,6 +115,7 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+  static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
 }
 
@@ -829,6 +830,11 @@ abstract class FlutterCommand extends Command<void> {
         'the default cached location.',
       hide: hide,
     );
+    argParser.addFlag(FlutterOptions.kAssumeInitializeFromDillUpToDate,
+      help: 'If set, assumes that the file passed in initialize-from-dill is up '
+        'to date and skip the check and potential invalidation of files.',
+      hide: hide,
+    );
   }
 
   void addMultidexOption({ bool hide = false }) {
@@ -1113,6 +1119,8 @@ abstract class FlutterCommand extends Command<void> {
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
           ? stringArg(FlutterOptions.kInitializeFromDill)
           : null,
+      assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
+          && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
     );
   }
 
