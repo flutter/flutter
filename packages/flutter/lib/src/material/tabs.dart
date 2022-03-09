@@ -643,6 +643,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.enableFeedback,
     this.onTap,
     this.physics,
+    this.splashFactory,
+    this.splashBorderRadius,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -719,6 +721,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// occupied by the tab in the tab bar. If [indicatorSize] is
   /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
+  ///
+  /// See also:
+  ///
+  ///  * [splashBorderRadius], which defines the clipping radius of the splash
+  ///    and is generally used with [BoxDecoration.borderRadius].
   final Decoration? indicator;
 
   /// Whether this tab bar should automatically adjust the [indicatorColor].
@@ -786,23 +793,33 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [MaterialState.hovered], and [MaterialState.pressed].
   ///
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
-  /// the current Material Design spec. The [overlayColor] doesn't map
-  /// a state to [InkResponse.highlightColor] because a separate highlight
-  /// is not used by the current design guidelines. See
-  /// https://material.io/design/interaction/states.html#pressed
+  /// the current Material Design spec.
   ///
   /// If the overlay color is null or resolves to null, then the default values
-  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor]
-  /// will be used instead.
+  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor],
+  /// and [InkResponse.highlightColor] will be used instead.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.material.tabs.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If this property is null, [SystemMouseCursors.click] will be used.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [TabBarTheme.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -831,6 +848,41 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
+
+  /// Creates the tab bar's [InkWell] splash factory, which defines
+  /// the appearance of "ink" splashes that occur in response to taps.
+  ///
+  /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example
+  /// to defeat both the splash and the hover/pressed overlay, but not the
+  /// keyboard focused overlay:
+  /// ```dart
+  /// TabBar(
+  ///   splashFactory: NoSplash.splashFactory,
+  ///   overlayColor: MaterialStateProperty.resolveWith<Color?>(
+  ///     (Set<MaterialState> states) {
+  ///       return states.contains(MaterialState.focused) ? null : Colors.transparent;
+  ///     },
+  ///   ),
+  ///   ...
+  /// )
+  /// ```
+  final InteractiveInkFeatureFactory? splashFactory;
+
+  /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
+  ///
+  /// This can be useful to match the [BoxDecoration.borderRadius] provided as [indicator].
+  /// ```dart
+  /// TabBar(
+  ///   indicator: BoxDecoration(
+  ///     borderRadius: BorderRadius.circular(40),
+  ///   ),
+  ///   splashBorderRadius: BorderRadius.circular(40),
+  ///   ...
+  /// )
+  /// ```
+  ///
+  /// If this property is null, it is interpreted as [BorderRadius.zero].
+  final BorderRadius? splashBorderRadius;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -982,11 +1034,11 @@ class _TabBarState extends State<TabBar> {
       _initIndicatorPainter();
     }
 
-    if (widget.tabs.length > oldWidget.tabs.length) {
-      final int delta = widget.tabs.length - oldWidget.tabs.length;
+    if (widget.tabs.length > _tabKeys.length) {
+      final int delta = widget.tabs.length - _tabKeys.length;
       _tabKeys.addAll(List<GlobalKey>.generate(delta, (int n) => GlobalKey()));
-    } else if (widget.tabs.length < oldWidget.tabs.length) {
-      _tabKeys.removeRange(widget.tabs.length, oldWidget.tabs.length);
+    } else if (widget.tabs.length < _tabKeys.length) {
+      _tabKeys.removeRange(widget.tabs.length, _tabKeys.length);
     }
   }
 
@@ -1183,11 +1235,21 @@ class _TabBarState extends State<TabBar> {
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
+      final Set<MaterialState> states = <MaterialState>{
+        if (index == _currentIndex) MaterialState.selected,
+      };
+
+      final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? tabBarTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateMouseCursor.clickable.resolve(states);
+
       wrappedTabs[index] = InkWell(
-        mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
+        mouseCursor: effectiveMouseCursor,
         onTap: () { _handleTap(index); },
         enableFeedback: widget.enableFeedback ?? true,
-        overlayColor: widget.overlayColor,
+        overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor,
+        splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory,
+        borderRadius: widget.splashBorderRadius,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
@@ -1266,6 +1328,7 @@ class TabBarView extends StatefulWidget {
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.viewportFraction = 1.0,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1295,6 +1358,9 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.widgets.pageview.viewportFraction}
+  final double viewportFraction;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1349,7 +1415,10 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    _pageController = PageController(initialPage: _currentIndex!);
+    _pageController = PageController(
+      initialPage: _currentIndex!,
+      viewportFraction: widget.viewportFraction,
+    );
   }
 
   @override
@@ -1358,7 +1427,9 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller) {
       _updateTabController();
       _currentIndex = _controller!.index;
+      _warpUnderwayCount += 1;
       _pageController.jumpToPage(_currentIndex!);
+      _warpUnderwayCount -= 1;
     }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
@@ -1490,7 +1561,8 @@ class _TabBarViewState extends State<TabBarView> {
   }
 }
 
-/// Displays a single circle with the specified border and background colors.
+/// Displays a single circle with the specified size, border style, border color
+/// and background colors.
 ///
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
@@ -1502,6 +1574,7 @@ class TabPageSelectorIndicator extends StatelessWidget {
     required this.backgroundColor,
     required this.borderColor,
     required this.size,
+    this.borderStyle = BorderStyle.solid,
   }) : assert(backgroundColor != null),
        assert(borderColor != null),
        assert(size != null),
@@ -1516,6 +1589,11 @@ class TabPageSelectorIndicator extends StatelessWidget {
   /// The indicator circle's diameter.
   final double size;
 
+  /// The indicator circle's border style.
+  ///
+  /// Defaults to [BorderStyle.solid] if value is not specified.
+  final BorderStyle borderStyle;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -1524,14 +1602,17 @@ class TabPageSelectorIndicator extends StatelessWidget {
       margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
         color: backgroundColor,
-        border: Border.all(color: borderColor),
+        border: Border.all(color: borderColor, style: borderStyle),
         shape: BoxShape.circle,
       ),
     );
   }
 }
 
-/// Displays a row of small circular indicators, one per tab.
+/// Uses [TabPageSelectorIndicator] to display a row of small circular
+/// indicators, one per tab.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Q628ue9Cq7U}
 ///
 /// The selected tab's indicator is highlighted. Often used in conjunction with
 /// a [TabBarView].
@@ -1546,6 +1627,7 @@ class TabPageSelector extends StatelessWidget {
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
+    this.borderStyle,
   }) : assert(indicatorSize != null && indicatorSize > 0.0),
        super(key: key);
 
@@ -1569,6 +1651,11 @@ class TabPageSelector extends StatelessWidget {
   /// If this parameter is null, then the indicator is filled with the theme's
   /// [ColorScheme.secondary].
   final Color? selectedColor;
+
+  /// The indicator circle's border style.
+  ///
+  /// Defaults to [BorderStyle.solid] if value is not specified.
+  final BorderStyle? borderStyle;
 
   Widget _buildTabIndicator(
     int tabIndex,
@@ -1604,6 +1691,7 @@ class TabPageSelector extends StatelessWidget {
       backgroundColor: background,
       borderColor: selectedColorTween.end!,
       size: indicatorSize,
+      borderStyle: borderStyle ?? BorderStyle.solid,
     );
   }
 

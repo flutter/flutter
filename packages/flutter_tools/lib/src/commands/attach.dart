@@ -18,6 +18,7 @@ import '../base/io.dart';
 import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
+import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
@@ -235,8 +236,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final Daemon daemon = boolArg('machine')
       ? Daemon(
-          stdinCommandStream,
-          stdoutCommandResponse,
+          DaemonConnection(
+            daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
+            logger: globals.logger,
+          ),
           notifyingLogger: (globals.logger is NotifyingLogger)
             ? globals.logger as NotifyingLogger
             : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),

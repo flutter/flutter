@@ -257,7 +257,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(hasPixels);
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.");
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks, "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.");
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
@@ -379,7 +379,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     _impliedVelocity = value - pixels;
     _pixels = value;
     notifyListeners();
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       _impliedVelocity = 0;
     });
   }
@@ -927,7 +927,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Dispatches a notification that the [ScrollMetrics] have changed.
   void didUpdateScrollMetrics() {
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     assert(_haveScheduledUpdateNotification);
     _haveScheduledUpdateNotification = false;
     if (context.notificationContext != null)

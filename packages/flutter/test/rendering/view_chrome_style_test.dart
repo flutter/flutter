@@ -16,11 +16,11 @@ void main() {
     const double deviceWidth = 480.0;
     const double devicePixelRatio = 2.0;
 
-    void setupTestDevice() {
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-      const FakeWindowPadding padding = FakeWindowPadding(
+    void setupTestDevice({ double bottomPadding = navigationBarHeight * devicePixelRatio }) {
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      final FakeWindowPadding padding = FakeWindowPadding(
         top: statusBarHeight * devicePixelRatio,
-        bottom: navigationBarHeight * devicePixelRatio,
+        bottom: bottomPadding,
       );
 
       binding.window
@@ -94,8 +94,35 @@ void main() {
         variant: TargetPlatformVariant.mobile(),
       );
 
+      testWidgets("statusBarColor isn't set on desktop platforms",
+        (WidgetTester tester) async {
+          setupTestDevice();
+          const double moreThanHalfOfTheStatusBarHeight =
+              statusBarHeight / 2.0 + 1;
+          await tester.pumpWidget(const Align(
+            alignment: Alignment.topCenter,
+            child: AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.blue,
+              ),
+              child: SizedBox(
+                width: 100,
+                height: moreThanHalfOfTheStatusBarHeight,
+              ),
+            ),
+          ));
+          await tester.pumpAndSettle();
+
+          expect(
+            SystemChrome.latestStyle?.statusBarColor,
+            isNull,
+          );
+        },
+        variant: TargetPlatformVariant.desktop(),
+      );
+
       testWidgets(
-        'statusBarColor is set when view covers more than half of tye system status bar',
+        'statusBarColor is set when view covers more than half of the system status bar',
         (WidgetTester tester) async {
           setupTestDevice();
           const double moreThanHalfOfTheStatusBarHeight =
@@ -228,6 +255,28 @@ void main() {
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
     });
+
+    testWidgets('systemNavigationBarColor is not set when there is no window padding', (WidgetTester tester) async {
+      setupTestDevice(bottomPadding: 0);
+      await tester.pumpWidget(const Align(
+        alignment: Alignment.bottomCenter,
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            systemNavigationBarColor: Colors.blue,
+          ),
+          child: SizedBox(
+            width: 100,
+            height: 100
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        SystemChrome.latestStyle?.systemNavigationBarColor,
+        null,
+      );
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 }
 

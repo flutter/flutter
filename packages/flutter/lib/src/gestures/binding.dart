@@ -73,7 +73,7 @@ class _Resampler {
   // Add `event` for resampling or dispatch it directly if
   // not a touch event.
   void addOrDispatch(PointerEvent event) {
-    final SchedulerBinding? scheduler = SchedulerBinding.instance;
+    final SchedulerBinding scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
     // Add touch event to resampler or dispatch pointer event directly.
     if (event.kind == PointerDeviceKind.touch) {
@@ -94,9 +94,10 @@ class _Resampler {
   //
   // The `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
+  //
   // The `samplingClock` is the clock used to determine frame time age.
   void sample(Duration samplingOffset, SamplingClock clock) {
-    final SchedulerBinding? scheduler = SchedulerBinding.instance;
+    final SchedulerBinding scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
 
     // Initialize `_frameTime` if needed. This will be used for periodic
@@ -156,7 +157,7 @@ class _Resampler {
       // Add a post frame callback as this avoids producing unnecessary
       // frames but ensures that sampling phase is adjusted to frame
       // time when frames are produced.
-      scheduler?.addPostFrameCallback((_) {
+      scheduler.addPostFrameCallback((_) {
         _frameCallbackScheduled = false;
         // We use `currentSystemFrameTimeStamp` here as it's critical that
         // sample time is in the same clock as the event time stamps, and
@@ -179,6 +180,7 @@ class _Resampler {
     }
     _resamplers.clear();
     _frameTime = Duration.zero;
+    _timer?.cancel();
   }
 
   void _onSampleTimeChanged() {
@@ -256,18 +258,22 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onPointerDataPacket = _handlePointerDataPacket;
+    platformDispatcher.onPointerDataPacket = _handlePointerDataPacket;
   }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static GestureBinding get instance => BindingBase.checkInstance(_instance);
+  static GestureBinding? _instance;
 
   @override
   void unlocked() {
     super.unlocked();
     _flushPointerEventQueue();
   }
-
-  /// The singleton instance of this object.
-  static GestureBinding? get instance => _instance;
-  static GestureBinding? _instance;
 
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 
@@ -407,9 +413,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           library: 'gesture library',
           context: ErrorDescription('while dispatching a non-hit-tested pointer event'),
           event: event,
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-          },
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+          ],
         ));
       }
       return;
@@ -425,10 +431,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           context: ErrorDescription('while dispatching a pointer event'),
           event: event,
           hitTestEntry: entry,
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-            yield DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty);
-          },
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty),
+          ],
         ));
       }
     }

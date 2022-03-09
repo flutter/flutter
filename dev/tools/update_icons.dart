@@ -42,7 +42,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 };
 
 // Rewrite certain Flutter IDs (numbers) using prefix matching.
-const Map<String, String> identifierPrefixRewrites = <String, String>{
+const Map<String, String> _identifierPrefixRewrites = <String, String>{
   '1': 'one_',
   '2': 'two_',
   '3': 'three_',
@@ -77,7 +77,7 @@ const Map<String, String> identifierPrefixRewrites = <String, String>{
 };
 
 // Rewrite certain Flutter IDs (reserved keywords) using exact matching.
-const Map<String, String> identifierExactRewrites = <String, String>{
+const Map<String, String> _identifierExactRewrites = <String, String>{
   'class': 'class_',
   'new': 'new_',
   'switch': 'switch_',
@@ -191,10 +191,10 @@ void main(List<String> args) {
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = stringToTokenPairMap(oldCodepointsString);
 
   stderr.writeln('Performing safety checks');
   final bool isSuperset = testIsSuperset(newTokenPairMap, oldTokenPairMap);
@@ -251,7 +251,7 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-Map<String, String> _stringToTokenPairMap(String codepointData) {
+Map<String, String> stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
@@ -275,10 +275,10 @@ String _regenerateIconsFile(
     String fontFamily,
     bool enforceSafetyChecks,
   ) {
-  final List<_Icon> newIcons = tokenPairMap.entries
-      .map((MapEntry<String, String> entry) => _Icon(entry, fontFamily))
+  final List<Icon> newIcons = tokenPairMap.entries
+      .map((MapEntry<String, String> entry) => Icon(entry, fontFamily))
       .toList();
-  newIcons.sort((_Icon a, _Icon b) => a._compareTo(b));
+  newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
   bool generating = false;
@@ -296,13 +296,13 @@ String _regenerateIconsFile(
         // Automatically finds and generates all icon declarations.
         for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
-            final _Icon agnosticIcon = newIcons.firstWhere(
-                (_Icon icon) => icon.id == '${ids[0]}$style',
+            final Icon agnosticIcon = newIcons.firstWhere(
+                (Icon icon) => icon.id == '${ids[0]}$style',
                 orElse: () => throw ids[0]);
-            final _Icon iOSIcon = newIcons.firstWhere(
-                (_Icon icon) => icon.id == '${ids[1]}$style',
+            final Icon iOSIcon = newIcons.firstWhere(
+                (Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
-            platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
+            platformAdaptiveDeclarations.add(Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
             );
           } catch (e) {
             if (style == '') {
@@ -327,7 +327,7 @@ String _regenerateIconsFile(
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join();
+      final String iconDeclarationsString = newIcons.map((Icon icon) => icon.fullDeclaration).join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -388,9 +388,9 @@ void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTo
   oldCodepointsFile.writeAsStringSync(buf.toString());
 }
 
-class _Icon {
+class Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
-  _Icon(MapEntry<String, String> tokenPair, this.fontFamily) {
+  Icon(MapEntry<String, String> tokenPair, this.fontFamily) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
@@ -463,7 +463,7 @@ class _Icon {
   $declaration
 ''';
 
-  static String platformAdaptiveDeclaration(String fullFlutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
+  static String platformAdaptiveDeclaration(String fullFlutterId, Icon agnosticIcon, Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
@@ -473,7 +473,7 @@ class _Icon {
   String toString() => id;
 
   /// Analogous to [String.compareTo]
-  int _compareTo(_Icon b) {
+  int _compareTo(Icon b) {
     if (shortId == b.shortId) {
       // Sort a regular icon before its variants.
       return id.length - b.id.length;
@@ -500,24 +500,28 @@ class _Icon {
   static String generateFlutterId(String id) {
     String flutterId = id;
     // Exact identifier rewrites.
-    for (final MapEntry<String, String> rewritePair in identifierExactRewrites.entries) {
-      final String shortId = _Icon._generateShortId(id);
+    for (final MapEntry<String, String> rewritePair in _identifierExactRewrites.entries) {
+      final String shortId = Icon._generateShortId(id);
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(
           rewritePair.key,
-          identifierExactRewrites[rewritePair.key]!,
+          _identifierExactRewrites[rewritePair.key]!,
         );
       }
     }
     // Prefix identifier rewrites.
-    for (final MapEntry<String, String> rewritePair in identifierPrefixRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in _identifierPrefixRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
         flutterId = id.replaceFirst(
           rewritePair.key,
-          identifierPrefixRewrites[rewritePair.key]!,
+          _identifierPrefixRewrites[rewritePair.key]!,
         );
       }
     }
+
+    // Prevent double underscores.
+    flutterId = flutterId.replaceAll('__', '_');
+
     return flutterId;
   }
 }

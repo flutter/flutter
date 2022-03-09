@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues, TextAffinity, TextPosition, TextRange;
+import 'dart:ui' show TextAffinity, TextPosition, TextRange;
 
 import 'package:flutter/foundation.dart';
 
@@ -156,11 +156,11 @@ class TextSelection extends TextRange {
   @override
   int get hashCode {
     if (!isValid) {
-      return hashValues(-1.hashCode, -1.hashCode, TextAffinity.downstream.hashCode);
+      return Object.hash(-1.hashCode, -1.hashCode, TextAffinity.downstream.hashCode);
     }
 
     final int affinityHash = isCollapsed ? affinity.hashCode : TextAffinity.downstream.hashCode;
-    return hashValues(baseOffset.hashCode, extentOffset.hashCode, affinityHash, isDirectional.hashCode);
+    return Object.hash(baseOffset.hashCode, extentOffset.hashCode, affinityHash, isDirectional.hashCode);
   }
 
 
@@ -238,8 +238,8 @@ class TextSelection extends TextRange {
   /// [TextSelection.extentOffset] to the given [TextPosition].
   ///
   /// In some cases, the [TextSelection.baseOffset] and
-  /// [TextSelection.extentOffset] may flip during this operation, or the size
-  /// of the selection may shrink.
+  /// [TextSelection.extentOffset] may flip during this operation, and/or the
+  /// size of the selection may shrink.
   ///
   /// ## Difference with [expandTo]
   /// In contrast with this method, [expandTo] is strictly growth; the

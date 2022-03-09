@@ -104,7 +104,7 @@ void main() {
       testUsingContext('finds observatory port and forwards', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -133,7 +133,7 @@ void main() {
       testUsingContext('Fails with tool exit on bad Observatory uri', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           fakeLogReader.dispose();
           return fakeLogReader;
         };
@@ -148,7 +148,7 @@ void main() {
       testUsingContext('accepts filesystem parameters', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -223,7 +223,7 @@ void main() {
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -596,6 +596,18 @@ class StreamLogger extends Logger {
     bool wrap,
   }) {
     _log('[stdout] $message');
+  }
+
+  @override
+  void printBox(
+    String message, {
+    String title,
+  }) {
+    if (title == null) {
+      _log('[stdout] $message');
+    } else {
+      _log('[stdout] $title: $message');
+    }
   }
 
   @override

@@ -100,7 +100,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
-       assert(!(controller != null && primary == true),
+       assert(!(controller != null && (primary ?? false)),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.',
        ),
@@ -109,7 +109,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(semanticChildCount == null || semanticChildCount >= 0),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
-       physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
+       physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
@@ -237,6 +237,8 @@ abstract class ScrollView extends StatelessWidget {
   /// scroll view needs to be recomputed whenever the scroll position changes.
   ///
   /// Defaults to false.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=LUqDNnv_dh0}
   /// {@endtemplate}
   final bool shrinkWrap;
 
@@ -1008,6 +1010,13 @@ abstract class BoxScrollView extends ScrollView {
 /// example of how a caller might wire up basic item selection, see
 /// [ListTile.selected].
 ///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [ListView] or [GridView].
+/// Long press any ListTile to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -1696,6 +1705,13 @@ class ListView extends BoxScrollView {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [GridView] or [ListView].
+/// Long press any ListTile to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -479,20 +479,18 @@ class SliverConstraints extends Constraints {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      axisDirection,
-      growthDirection,
-      scrollOffset,
-      overlap,
-      remainingPaintExtent,
-      crossAxisExtent,
-      crossAxisDirection,
-      viewportMainAxisExtent,
-      remainingCacheExtent,
-      cacheOrigin,
-    );
-  }
+  int get hashCode => Object.hash(
+    axisDirection,
+    growthDirection,
+    scrollOffset,
+    overlap,
+    remainingPaintExtent,
+    crossAxisExtent,
+    crossAxisDirection,
+    viewportMainAxisExtent,
+    remainingCacheExtent,
+    cacheOrigin,
+  );
 
   @override
   String toString() {
@@ -870,7 +868,7 @@ class SliverHitTestResult extends HitTestResult {
 ///
 /// The coordinate system used by this hit test entry is relative to the
 /// [AxisDirection] of the target sliver.
-class SliverHitTestEntry extends HitTestEntry {
+class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   /// Creates a sliver hit test entry.
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
@@ -881,9 +879,6 @@ class SliverHitTestEntry extends HitTestEntry {
   }) : assert(mainAxisPosition != null),
        assert(crossAxisPosition != null),
        super(target);
-
-  @override
-  RenderSliver get target => super.target as RenderSliver;
 
   /// The distance in the [AxisDirection] from the edge of the sliver's painted
   /// area (as given by the [SliverConstraints.scrollOffset]) to the hit point.
@@ -1203,9 +1198,9 @@ abstract class RenderSliver extends RenderObject {
   @override
   void debugAssertDoesMeetConstraints() {
     assert(geometry!.debugAssertIsValid(
-      informationCollector: () sync* {
-        yield describeForError('The RenderSliver that returned the offending geometry was');
-      },
+      informationCollector: () => <DiagnosticsNode>[
+        describeForError('The RenderSliver that returned the offending geometry was'),
+      ],
     ));
     assert(() {
       if (geometry!.paintOrigin + geometry!.paintExtent > constraints.remainingPaintExtent) {

@@ -79,13 +79,11 @@ class BottomAppBarTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      elevation,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    elevation,
+    shape,
+  );
 
   @override
   bool operator ==(Object other) {

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -41,7 +41,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   /// The current [ServicesBinding], if one has been created.
-  static ServicesBinding? get instance => _instance;
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static ServicesBinding get instance => BindingBase.checkInstance(_instance);
   static ServicesBinding? _instance;
 
   /// The global singleton instance of [HardwareKeyboard], which can be used to
@@ -57,7 +61,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    window.onKeyData = _keyEventManager.handleKeyData;
+    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
     SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
   }
 
@@ -144,49 +148,36 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     LicenseRegistry.addLicense(_addLicenses);
   }
 
-  Stream<LicenseEntry> _addLicenses() async* {
-    // Using _something_ here to break
-    // this into two parts is important because isolates take a while to copy
-    // data at the moment, and if we receive the data in the same event loop
-    // iteration as we send the data to the next isolate, we are definitely
-    // going to miss frames. Another solution would be to have the work all
-    // happen in one isolate, and we may go there eventually, but first we are
-    // going to see if isolate communication can be made cheaper.
-    // See: https://github.com/dart-lang/sdk/issues/31959
-    //      https://github.com/dart-lang/sdk/issues/31960
-    // TODO(ianh): Remove this complexity once these bugs are fixed.
-    final Completer<String> rawLicenses = Completer<String>();
-    scheduleTask(() async {
-      rawLicenses.complete(
-        kIsWeb
-            // NOTICES for web isn't compressed since we don't have access to
-            // dart:io on the client side and it's already compressed between
-            // the server and client.
-            ? rootBundle.loadString('NOTICES', cache: false)
-            : () async {
-              // The compressed version doesn't have a more common .gz extension
-              // because gradle for Android non-transparently manipulates .gz files.
-              final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
-              List<int> bytes = licenseBytes.buffer.asUint8List();
-              bytes = gzip.decode(bytes);
-              return utf8.decode(bytes);
-            }(),
-      );
-    }, Priority.animation);
-    await rawLicenses.future;
-    final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
-    scheduleTask(() async {
-      parsedLicenses.complete(compute<String, List<LicenseEntry>>(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
-    }, Priority.animation);
-    await parsedLicenses.future;
-    yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
+  Stream<LicenseEntry> _addLicenses() {
+    late final StreamController<LicenseEntry> controller;
+    controller = StreamController<LicenseEntry>(
+      onListen: () async {
+        late final String rawLicenses;
+        if (kIsWeb) {
+          // NOTICES for web isn't compressed since we don't have access to
+          // dart:io on the client side and it's already compressed between
+          // the server and client.
+          rawLicenses = await rootBundle.loadString('NOTICES', cache: false);
+        } else {
+          // The compressed version doesn't have a more common .gz extension
+          // because gradle for Android non-transparently manipulates .gz files.
+          final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
+          final List<int> unzippedBytes = await compute<List<int>, List<int>>(gzip.decode, licenseBytes.buffer.asUint8List(), debugLabel: 'decompressLicenses');
+          rawLicenses = await compute<List<int>, String>(utf8.decode, unzippedBytes, debugLabel: 'utf8DecodeLicenses');
+        }
+        final List<LicenseEntry> licenses = await compute<String, List<LicenseEntry>>(_parseLicenses, rawLicenses, debugLabel: 'parseLicenses');
+        licenses.forEach(controller.add);
+        await controller.close();
+      },
+    );
+    return controller.stream;
   }
 
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
-    final String _licenseSeparator = '\n${'-' * 80}\n';
+    final String licenseSeparator = '\n${'-' * 80}\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
-    final List<String> licenses = rawLicenses.split(_licenseSeparator);
+    final List<String> licenses = rawLicenses.split(licenseSeparator);
     for (final String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
@@ -234,11 +225,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // App life cycle
 
   /// Initializes the [lifecycleState] with the
-  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState].
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState].
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState] may already be
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be
   /// stale and it no longer makes sense to use the initial state at dart vm
   /// startup as the current state anymore.
   ///
@@ -249,7 +240,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }

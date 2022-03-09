@@ -160,8 +160,10 @@ void main() {
     final List<String> playedSystemSounds = <String>[];
     try {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'SystemSound.play')
+        if (methodCall.method == 'SystemSound.play') {
           playedSystemSounds.add(methodCall.arguments as String);
+	}
+        return null;
       });
 
       final Widget subject = Stack(
@@ -241,6 +243,39 @@ void main() {
 
     // Release the pointer; the barrier should be dismissed
     await gesture.up();
+    await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
+    expect(
+      find.byKey(const ValueKey<String>('barrier')),
+      findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.',
+    );
+  });
+
+  testWidgets('ModalBarrier pops the Navigator when dismissed by tap cancel', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const FirstWidget(),
+      '/modal': (BuildContext context) => const SecondWidget(),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+    // Tapping on X routes to the barrier
+    await tester.tap(find.text('X'));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    // Press the barrier; it shouldn't dismiss yet
+    final TestGesture gesture = await tester.press(
+      find.byKey(const ValueKey<String>('barrier')),
+    );
+    await tester.pumpAndSettle(); // begin transition
+    expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget);
+
+    // Cancel the pointer; the barrier should be dismissed
+    await gesture.cancel();
     await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
     expect(
       find.byKey(const ValueKey<String>('barrier')),
@@ -478,7 +513,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }
 

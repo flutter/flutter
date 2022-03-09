@@ -44,7 +44,14 @@ typedef ScrollableWidgetBuilder = Widget Function(
 ///
 /// The controller's methods cannot be used until after the controller has been
 /// passed into a [DraggableScrollableSheet] and the sheet has run initState.
-class DraggableScrollableController {
+///
+/// A [DraggableScrollableController] is a [Listenable]. It notifies its
+/// listeners whenever an attached sheet changes sizes. It does not notify its
+/// listeners when a sheet is first attached or when an attached sheet's
+/// parameters change without affecting the sheet's current size. It does not
+/// fire when [pixels] changes without [size] changing. For example, if the
+/// constraints provided to an attached sheet change.
+class DraggableScrollableController extends ChangeNotifier {
   _DraggableScrollableSheetScrollController? _attachedController;
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
@@ -110,7 +117,7 @@ class DraggableScrollableController {
         animationController.stop();
       }
     });
-    CurvedAnimation(parent: animationController, curve: curve).addListener(() {
+    animationController.addListener(() {
       _attachedController!.extent.updateSize(
         animationController.value,
         _attachedController!.position.context.notificationContext!,
@@ -121,7 +128,7 @@ class DraggableScrollableController {
         animationController.stop(canceled: false);
       }
     });
-    await animationController.animateTo(size, duration: duration);
+    await animationController.animateTo(size, duration: duration, curve: curve);
   }
 
   /// Jumps the attached sheet from its current size to the given [size], a
@@ -160,9 +167,23 @@ class DraggableScrollableController {
   void _attach(_DraggableScrollableSheetScrollController scrollController) {
     assert(_attachedController == null, 'Draggable scrollable controller is already attached to a sheet.');
     _attachedController = scrollController;
+    _attachedController!.extent._currentSize.addListener(notifyListeners);
+  }
+
+  void _onExtentReplaced(_DraggableSheetExtent previousExtent) {
+    // When the extent has been replaced, the old extent is already disposed and
+    // the controller will point to a new extent. We have to add our listener to
+    // the new extent.
+    _attachedController!.extent._currentSize.addListener(notifyListeners);
+    if (previousExtent.currentSize != _attachedController!.extent.currentSize) {
+      // The listener won't fire for a change in size between two extent
+      // objects so we have to fire it manually here.
+      notifyListeners();
+    }
   }
 
   void _detach() {
+    _attachedController?.extent._currentSize.removeListener(notifyListeners);
     _attachedController = null;
   }
 }
@@ -635,6 +656,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   void _replaceExtent() {
+    final _DraggableSheetExtent previousExtent = _extent;
     _extent.dispose();
     _extent = _extent.copyWith(
       minSize: widget.minChildSize,
@@ -647,12 +669,15 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     // Modify the existing scroll controller instead of replacing it so that
     // developers listening to the controller do not have to rebuild their listeners.
     _scrollController.extent = _extent;
+    // If an external facing controller was provided, let it know that the
+    // extent has been replaced.
+    widget.controller?._onExtentReplaced(previousExtent);
     if (widget.snap) {
       // Trigger a snap in case snap or snapSizes has changed. We put this in a
       // post frame callback so that `build` can update `_extent.availablePixels`
       // before this runs-we can't use the previous extent's available pixels as
       // it may have changed when the widget was updated.
-      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _scrollController.position.goBallistic(0);
       });
     }

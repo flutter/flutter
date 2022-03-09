@@ -337,7 +337,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   int depthOf(TextSpan node) {
-    if (node.children == null || node.children?.isEmpty == true)
+    if (node.children == null || (node.children?.isEmpty ?? false))
       return 0;
     int result = 0;
     for (final TextSpan child in node.children!.cast<TextSpan>())
@@ -959,7 +959,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       }
       _text = buffer.toString();
     });
-    SchedulerBinding.instance?.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');

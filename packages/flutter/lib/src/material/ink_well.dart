@@ -295,6 +295,7 @@ class InkResponse extends StatelessWidget {
     this.child,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
@@ -336,6 +337,10 @@ class InkResponse extends StatelessWidget {
 
   /// Called when the user taps down this part of the material.
   final GestureTapDownCallback? onTapDown;
+
+  /// Called when the user releases a tap that was started on this part of the
+  /// material. [onTap] is called immediately after.
+  final GestureTapUpCallback? onTapUp;
 
   /// Called when the user cancels a tap that was started on this part of the
   /// material.
@@ -483,11 +488,12 @@ class InkResponse extends StatelessWidget {
   /// Defines the ink response focus, hover, and splash colors.
   ///
   /// This default null property can be used as an alternative to
-  /// [focusColor], [hoverColor], and [splashColor]. If non-null,
-  /// it is resolved against one of [MaterialState.focused],
-  /// [MaterialState.hovered], and [MaterialState.pressed]. It's
-  /// convenient to use when the parent widget can pass along its own
-  /// MaterialStateProperty value for the overlay color.
+  /// [focusColor], [hoverColor], [highlightColor], and
+  /// [splashColor]. If non-null, it is resolved against one of
+  /// [MaterialState.focused], [MaterialState.hovered], and
+  /// [MaterialState.pressed]. It's convenient to use when the parent
+  /// widget can pass along its own MaterialStateProperty value for
+  /// the overlay color.
   ///
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
@@ -582,6 +588,7 @@ class InkResponse extends StatelessWidget {
     return _InkResponseStateWidget(
       onTap: onTap,
       onTapDown: onTapDown,
+      onTapUp: onTapUp,
       onTapCancel: onTapCancel,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
@@ -632,6 +639,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.child,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
@@ -668,6 +676,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final Widget? child;
   final GestureTapCallback? onTap;
   final GestureTapDownCallback? onTapDown;
+  final GestureTapUpCallback? onTapUp;
   final GestureTapCallback? onTapCancel;
   final GestureTapCallback? onDoubleTap;
   final GestureLongPressCallback? onLongPress;
@@ -706,6 +715,7 @@ class _InkResponseStateWidget extends StatefulWidget {
       if (onDoubleTap != null) 'double tap',
       if (onLongPress != null) 'long press',
       if (onTapDown != null) 'tap down',
+      if (onTapUp != null) 'tap up',
       if (onTapCancel != null) 'tap cancel',
     ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
@@ -799,19 +809,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get wantKeepAlive => highlightsExist || (_splashes != null && _splashes!.isNotEmpty);
 
   Color getHighlightColorForType(_HighlightType type) {
+    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
     const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
     const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
 
+    final ThemeData theme = Theme.of(context);
     switch (type) {
       // The pressed state triggers a ripple (ink splash), per the current
       // Material Design spec. A separate highlight is no longer used.
       // See https://material.io/design/interaction/states.html#pressed
       case _HighlightType.pressed:
-        return widget.highlightColor ?? Theme.of(context).highlightColor;
+        return widget.overlayColor?.resolve(pressed) ?? widget.highlightColor ?? theme.highlightColor;
       case _HighlightType.focus:
-        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context).focusColor;
+        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? theme.focusColor;
       case _HighlightType.hover:
-        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context).hoverColor;
+        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? theme.hoverColor;
     }
   }
 
@@ -960,6 +972,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onTapDown?.call(details);
   }
 
+  void _handleTapUp(TapUpDetails details) {
+    widget.onTapUp?.call(details);
+  }
+
   void _startSplash({TapDownDetails? details, BuildContext? context}) {
     assert(details != null || context != null);
 
@@ -1032,7 +1048,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
-    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
+    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null || widget.onTapDown != null;
   }
 
   bool get enabled => _isWidgetEnabled(widget);
@@ -1084,6 +1100,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (_hasFocus) MaterialState.focused,
       },
     );
+
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(
@@ -1102,6 +1119,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : _simulateLongPress,
               child: GestureDetector(
                 onTapDown: enabled ? _handleTapDown : null,
+                onTapUp: enabled ? _handleTapUp : null,
                 onTap: enabled ? _handleTap : null,
                 onTapCancel: enabled ? _handleTapCancel : null,
                 onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
@@ -1159,6 +1177,18 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// ancestor to the ink well). The [MaterialType.transparency] material
 /// kind can be used for this purpose.
 ///
+/// ### InkWell isn't clipping properly
+///
+/// If you want to clip an InkWell or any [Ink] widgets you need to keep in mind
+/// that the [Material] that the Ink will be printed on is responsible for clipping.
+/// This means you can't wrap the [Ink] widget in a clipping widget directly,
+/// since this will leave the [Material] not clipped (and by extension the printed
+/// [Ink] widgets as well).
+///
+/// An easy solution is to deliberately wrap the [Ink] widgets you want to clip
+/// in a [Material], and wrap that in a clipping widget instead. See [Ink] for
+/// an example.
+///
 /// ### The ink splashes don't track the size of an animated container
 /// If the size of an InkWell's [Material] ancestor changes while the InkWell's
 /// splashes are expanding, you may notice that the splashes aren't clipped
@@ -1198,6 +1228,7 @@ class InkWell extends InkResponse {
     GestureTapCallback? onDoubleTap,
     GestureLongPressCallback? onLongPress,
     GestureTapDownCallback? onTapDown,
+    GestureTapUpCallback? onTapUp,
     GestureTapCancelCallback? onTapCancel,
     ValueChanged<bool>? onHighlightChanged,
     ValueChanged<bool>? onHover,
@@ -1224,6 +1255,7 @@ class InkWell extends InkResponse {
     onDoubleTap: onDoubleTap,
     onLongPress: onLongPress,
     onTapDown: onTapDown,
+    onTapUp: onTapUp,
     onTapCancel: onTapCancel,
     onHighlightChanged: onHighlightChanged,
     onHover: onHover,

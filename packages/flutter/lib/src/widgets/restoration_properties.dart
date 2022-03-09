@@ -135,10 +135,10 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
 // _RestorablePrimitiveValue and its subclasses are non-nullable.
 // See [_RestorablePrimitiveValueN] for the nullable version of this class.
 class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
-  _RestorablePrimitiveValue(T _defaultValue)
-    : assert(_defaultValue != null),
-      assert(debugIsSerializableForRestoration(_defaultValue)),
-      super(_defaultValue);
+  _RestorablePrimitiveValue(T defaultValue)
+    : assert(defaultValue != null),
+      assert(debugIsSerializableForRestoration(defaultValue)),
+      super(defaultValue);
 
   @override
   set value(T value) {

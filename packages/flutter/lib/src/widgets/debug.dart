@@ -94,9 +94,18 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 
 /// Adds [Timeline] events for every Widget built.
 ///
-/// For details on how to use [Timeline] events in the Dart Observatory to
-/// optimize your app, see https://flutter.dev/docs/testing/debugging#tracing-any-dart-code-performance
-/// and https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md
+/// The timing information this flag exposes is not representative of the actual
+/// cost of building, because the overhead of adding timeline events is
+/// significant relative to the time each object takes to build. However, it can
+/// expose unexpected widget behavior in the timeline.
+///
+/// In debug builds, additional information is included in the trace (such as
+/// the properties of widgets being built). Collecting this data is
+/// expensive and further makes these traces non-representative of actual
+/// performance. This data is omitted in profile builds.
+///
+/// For more information about performance debugging in Flutter, see
+/// <https://flutter.dev/docs/perf/rendering>.
 ///
 /// See also:
 ///

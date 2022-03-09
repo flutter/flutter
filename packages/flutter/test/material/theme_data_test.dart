@@ -156,10 +156,10 @@ void main() {
     expect(theme.colorScheme.errorContainer, const Color(0xffffdad4));
     expect(theme.colorScheme.onErrorContainer, const Color(0xff410001));
     expect(theme.colorScheme.outline, const Color(0xff73777f));
-    expect(theme.colorScheme.background, const Color(0xffe2e2e6));
+    expect(theme.colorScheme.background, const Color(0xfffdfcff));
     expect(theme.colorScheme.onBackground, const Color(0xff1b1b1b));
     expect(theme.colorScheme.surface, const Color(0xfffdfcff));
-    expect(theme.colorScheme.onSurface, const Color(0xff000000));
+    expect(theme.colorScheme.onSurface, const Color(0xff1b1b1b));
     expect(theme.colorScheme.surfaceVariant, const Color(0xffdfe2eb));
     expect(theme.colorScheme.onSurfaceVariant, const Color(0xff42474e));
     expect(theme.colorScheme.inverseSurface, const Color(0xff2f3033));
@@ -192,25 +192,25 @@ void main() {
 
     expect(theme.colorScheme.primary, const Color(0xff9ccaff));
     expect(theme.colorScheme.onPrimary, const Color(0xff00325a));
-    expect(theme.colorScheme.primaryContainer, const Color(0xff60b0ff));
-    expect(theme.colorScheme.onPrimaryContainer, const Color(0xff001d36));
+    expect(theme.colorScheme.primaryContainer, const Color(0xff00497f));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xffd0e4ff));
     expect(theme.colorScheme.secondary, const Color(0xffbbc8db));
     expect(theme.colorScheme.onSecondary, const Color(0xff253140));
-    expect(theme.colorScheme.secondaryContainer, const Color(0xff9facbf));
-    expect(theme.colorScheme.onSecondaryContainer, const Color(0xff101c2b));
+    expect(theme.colorScheme.secondaryContainer, const Color(0xff3c4858));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xffd6e3f7));
     expect(theme.colorScheme.tertiary, const Color(0xffd6bee4));
     expect(theme.colorScheme.onTertiary, const Color(0xff3b2948));
-    expect(theme.colorScheme.tertiaryContainer, const Color(0xffbba3c9));
-    expect(theme.colorScheme.onTertiaryContainer, const Color(0xff251432));
+    expect(theme.colorScheme.tertiaryContainer, const Color(0xff523f5f));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xfff3daff));
     expect(theme.colorScheme.error, const Color(0xffffb4a9));
     expect(theme.colorScheme.onError, const Color(0xff680003));
-    expect(theme.colorScheme.errorContainer, const Color(0xffff897a));
-    expect(theme.colorScheme.onErrorContainer, const Color(0xff410001));
+    expect(theme.colorScheme.errorContainer, const Color(0xff930006));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xffffb4a9));
     expect(theme.colorScheme.outline, const Color(0xff8d9199));
     expect(theme.colorScheme.background, const Color(0xff1b1b1b));
     expect(theme.colorScheme.onBackground, const Color(0xffe2e2e6));
     expect(theme.colorScheme.surface, const Color(0xff1b1b1b));
-    expect(theme.colorScheme.onSurface, const Color(0xffffffff));
+    expect(theme.colorScheme.onSurface, const Color(0xffe2e2e6));
     expect(theme.colorScheme.surfaceVariant, const Color(0xff42474e));
     expect(theme.colorScheme.onSurfaceVariant, const Color(0xffc3c7d0));
     expect(theme.colorScheme.inverseSurface, const Color(0xffe2e2e6));
@@ -430,6 +430,7 @@ void main() {
       sliderTheme: sliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       tooltipTheme: const TooltipThemeData(height: 100),
+      expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       cardTheme: const CardTheme(color: Colors.black),
       chipTheme: chipTheme,
       platform: TargetPlatform.iOS,
@@ -529,6 +530,7 @@ void main() {
       sliderTheme: otherSliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.white),
       tooltipTheme: const TooltipThemeData(height: 100),
+      expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       cardTheme: const CardTheme(color: Colors.white),
       chipTheme: otherChipTheme,
       platform: TargetPlatform.android,
@@ -841,6 +843,7 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
+      'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'useTextSelectionTheme',
       'textSelectionColor',

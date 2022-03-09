@@ -11,10 +11,10 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -371,17 +371,6 @@ void main() {
 
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
   });
-}
-
-class FakePlistParser extends Fake implements PlistParser {
-  FakePlistParser(this.values);
-
-  final Map<String, String> values;
-
-  @override
-  String? getValueFromFile(String plistFilePath, String key) {
-    return values[key];
-  }
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {

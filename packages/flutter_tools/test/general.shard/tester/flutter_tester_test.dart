@@ -36,7 +36,6 @@ void main() {
     final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
 
     expect(app.name, 'my_project');
-    expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
   });
 
   group('FlutterTesterDevices', () {
@@ -155,7 +154,7 @@ void main() {
         completer: completer,
         stdout:
         '''
-Observatory listening on $observatoryUri
+The Dart VM service is listening on $observatoryUri
 Hello!
 ''',
       ));

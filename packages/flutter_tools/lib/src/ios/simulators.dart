@@ -473,7 +473,8 @@ class IOSSimulator extends Device {
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
         if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
+        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
+        if (route != null) '--route=$route'
       ],
     ];
 
@@ -495,7 +496,7 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String? bundleIdentifier = globals.plistParser.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+      final String? bundleIdentifier = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
       if (bundleIdentifier == null) {
         globals.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
         return LaunchResult.failed();
@@ -545,6 +546,7 @@ class IOSSimulator extends Device {
       deviceID: id,
     );
     if (!buildResult.success) {
+      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger);
       throwToolExit('Could not build the application for the simulator.');
     }
 
@@ -756,8 +758,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   // Match the log prefix (in order to shorten it):
-  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
+  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
   static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---

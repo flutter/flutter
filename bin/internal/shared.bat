@@ -69,6 +69,14 @@ GOTO :after_subroutine
   PUSHD "%flutter_root%"
   FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
   POPD
+  SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
+
+  REM Invalidate cache if:
+  REM  * SNAPSHOT_PATH is not a file, or
+  REM  * STAMP_PATH is not a file, or
+  REM  * STAMP_PATH is an empty file, or
+  REM  * Contents of STAMP_PATH is not what we are going to compile, or
+  REM  * pubspec.yaml last modified after pubspec.lock
 
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
@@ -80,7 +88,7 @@ GOTO :after_subroutine
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
-  IF !stamp_value! NEQ !revision! GOTO do_snapshot
+  IF !stamp_value! NEQ !compilekey! GOTO do_snapshot
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
@@ -164,7 +172,7 @@ GOTO :after_subroutine
       SET exit_code=%ERRORLEVEL%
       GOTO :final_exit
     )
-    >"%stamp_path%" ECHO %revision%
+    >"%stamp_path%" ECHO %compilekey%
 
   REM Exit Subroutine
   EXIT /B

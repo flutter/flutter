@@ -14,7 +14,6 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
     required this.maxExtent,
     required this.child,
     this.vsync = const TestVSync(),
-    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
 
   final Widget child;
@@ -29,7 +28,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final TickerProvider? vsync;
 
   @override
-  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration();
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;

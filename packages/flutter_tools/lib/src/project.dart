@@ -223,7 +223,7 @@ class FlutterProject {
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant => dartTool
     .childDirectory('flutter_build')
-    .childFile('generated_main.dart');
+    .childFile('dart_plugin_registrant.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
@@ -310,7 +310,7 @@ class FlutterProject {
     bool winUwpPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (!directory.existsSync() || hasExampleApp || isPlugin) {
+    if (!directory.existsSync() || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
@@ -543,15 +543,25 @@ class AndroidProject extends FlutterProjectPlatform {
         'projectName': parent.manifest.appName,
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
+        'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
+        'gradleVersion': gradle.templateDefaultGradleVersion,
       },
       printStatusWhenWriting: false,
     );
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (deprecationBehavior == DeprecationBehavior.none) {
+      return;
+    }
+
     final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
-    if (result.version == AndroidEmbeddingVersion.v1) {
-      globals.printStatus(
+    if (result.version != AndroidEmbeddingVersion.v1) {
+      return;
+    }
+
+    globals.printStatus(
 '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Warning
@@ -570,21 +580,15 @@ The detected reason was:
 
   ${result.reason}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'''
-      );
-      switch (deprecationBehavior) {
-        case DeprecationBehavior.none:
-          break;
-        case DeprecationBehavior.ignore:
-          BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          break;
-        case DeprecationBehavior.exit:
-          BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          throwToolExit(
-            'Build failed due to use of deprecated Android v1 embedding.',
-            exitCode: 1,
-          );
-      }
+''');
+    if (deprecationBehavior == DeprecationBehavior.ignore) {
+      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+    } else { // DeprecationBehavior.exit
+        BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+        throwToolExit(
+          'Build failed due to use of deprecated Android v1 embedding.',
+          exitCode: 1,
+        );
     }
   }
 
@@ -621,7 +625,7 @@ The detected reason was:
     for (final XmlElement application in document.findAllElements('application')) {
       final String? applicationName = application.getAttribute('android:name');
       if (applicationName == 'io.flutter.app.FlutterApplication') {
-        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FutterApplication"`');
+        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FlutterApplication"`');
       }
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {

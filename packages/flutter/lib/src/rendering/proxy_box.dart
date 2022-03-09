@@ -1429,13 +1429,13 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] must not be null or [Clip.none].
+  /// The [clipBehavior] must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipRect({
     RenderBox? child,
     CustomClipper<Rect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1455,15 +1455,20 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        _clip!,
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: layer as ClipRectLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        _updateClip();
+        layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipRectLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -1495,14 +1500,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipRRect({
     RenderBox? child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1541,14 +1546,21 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipRRect(
-        needsCompositing,
-        offset,
-        _clip!.outerRect,
-        _clip!,
-        super.paint, clipBehavior: clipBehavior, oldLayer: layer as ClipRRectLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        _updateClip();
+        layer = context.pushClipRRect(
+          needsCompositing,
+          offset,
+          _clip!.outerRect,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipRRectLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -1578,13 +1590,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipOval({
     RenderBox? child,
     CustomClipper<Rect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect? _cachedRect;
@@ -1620,16 +1632,21 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipPath(
-        needsCompositing,
-        offset,
-        _clip!,
-        _getClipPath(_clip!),
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: layer as ClipPathLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        _updateClip();
+        layer = context.pushClipPath(
+          needsCompositing,
+          offset,
+          _clip!,
+          _getClipPath(_clip!),
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipPathLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -1667,13 +1684,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipPath({
     RenderBox? child,
     CustomClipper<Path>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1693,16 +1710,21 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipPath(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        _clip!,
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: layer as ClipPathLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        _updateClip();
+        layer = context.pushClipPath(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipPathLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -2398,8 +2420,10 @@ class RenderTransform extends RenderProxyBox {
           layer = null;
         }
       } else {
+        final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+          ..multiply(transform)..translate(-offset.dx, -offset.dy);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
-          transform.storage,
+          effectiveTransform.storage,
           filterQuality: filterQuality!,
         );
         if (layer is ImageFilterLayer) {
@@ -2677,7 +2701,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    if (size.isEmpty || child?.size.isEmpty == true)
+    if (size.isEmpty || (child?.size.isEmpty ?? false))
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -4727,11 +4751,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     assert(
-      (scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      ((scopesRoute ?? false) && explicitChildNodes) || !(scopesRoute ?? false),
       'explicitChildNodes must be set to true if scopes route is true',
     );
     assert(
-      !(toggled == true && checked == true),
+      !((toggled ?? false) && (checked ?? false)),
       'A semantics node cannot be toggled and checked at the same time',
     );
 
@@ -5287,7 +5311,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     // Disables the hit testing if this render object is hidden.
-    if (!link.leaderConnected && !showWhenUnlinked)
+    if (link.leader == null && !showWhenUnlinked)
       return false;
     // RenderFollowerLayer objects don't check if they are
     // themselves hit, because it's confusing to think about
@@ -5311,8 +5335,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (!link.leaderConnected || leaderAnchor == Alignment.topLeft),
-      '$link: layer is linked to ${link.debugLeader} but a valid leaderSize is not set. '
+      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
+      '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );

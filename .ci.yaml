@@ -42,12 +42,32 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "curl"},
           {"dependency": "open_jdk"}
         ]
       os: Linux
       device_os: "N"
+  linux_samsung_s10:
+    properties:
+      caches: >-
+        [
+          {"name":"builder_linux_devicelab","path":"builder"},
+          {"name":"android_sdk","path":"android"},
+          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"flutter_sdk","path":"flutter sdk"},
+          {"name":"gradle","path":"gradle"},
+          {"name":"openjdk","path":"java"},
+          {"name":"pub_cache","path":".pub-cache"}
+        ]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "curl"},
+          {"dependency": "open_jdk"}
+        ]
+      os: Linux
+      device_os: "R"
   mac:
     properties:
       caches: >-
@@ -57,16 +77,16 @@ platform_properties:
           {"name":"chrome_and_driver","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
-          {"name":"osx_sdk","path":"osx_sdk"},
+          {"name":"osx_sdk_13a233","path":"osx_sdk"},
           {"name":"pub_cache","path":".pub-cache"},
           {"name":"xcode_binary","path":"xcode_binary"}
         ]
       dependencies: >-
         []
-      os: Mac-10.15
+      os: Mac-12
       device_type: none
       mac_model: Macmini8,1
-      xcode: 12c33
+      xcode: 13a233
   mac_android:
     properties:
       caches: >-
@@ -81,11 +101,11 @@ platform_properties:
           ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"}
         ]
-      os: Mac-12.0
+      os: Mac-12
       device_os: N
   mac_ios:
     properties:
@@ -98,7 +118,7 @@ platform_properties:
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
             {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk","path":"osx_sdk"}
+            {"name":"osx_sdk_13a233","path":"osx_sdk"}
           ]
       dependencies: >-
         [
@@ -106,31 +126,9 @@ platform_properties:
           {"dependency": "gems"},
           {"dependency": "ios_signing"}
         ]
-      os: Mac-12.0
+      os: Mac-12
       device_os: iOS-15.1
       xcode: 13a233
-  mac_ios32:
-    properties:
-      caches: >-
-          [
-            {"name":"builder_mac_devicelab","path":"builder"},
-            {"name":"chrome_and_driver","path":"chrome"},
-            {"name":"flutter_sdk","path":"flutter sdk"},
-            {"name":"gradle","path":"gradle"},
-            {"name":"openjdk","path":"java"},
-            {"name":"pub_cache","path":".pub-cache"},
-            {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk","path":"osx_sdk"}
-          ]
-      dependencies: >-
-        [
-          {"dependency": "xcode"},
-          {"dependency": "gems"},
-          {"dependency": "ios_signing"}
-        ]
-      os: Mac-12.0
-      device_os: iOS-9.3.6
-      xcode: 12c33
   windows:
     properties:
       caches: >-
@@ -163,7 +161,7 @@ platform_properties:
           ]
       dependencies: >-
           [
-            {"dependency": "android_sdk", "version": "version:29.0"},
+            {"dependency": "android_sdk", "version": "version:31v8"},
             {"dependency": "certs"},
             {"dependency": "chrome_and_driver", "version": "version:84"},
             {"dependency": "open_jdk"}
@@ -193,7 +191,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -212,7 +210,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -232,7 +230,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -317,7 +315,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
         ["firebaselab"]
@@ -330,7 +328,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
         ["firebaselab"]
@@ -343,7 +341,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
         ["firebaselab"]
@@ -353,9 +351,6 @@ targets:
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     timeout: 60
-    enabled_branches:
-      - main
-      - master
     properties:
       shard: flutter_plugins
       subshard: analyze
@@ -385,7 +380,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -398,7 +393,9 @@ targets:
           {"dependency": "goldctl"},
           {"dependency": "clang"},
           {"dependency": "cmake"},
-          {"dependency": "ninja"}
+          {"dependency": "ninja"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
       subshard: misc
@@ -414,7 +411,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -440,7 +437,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -464,7 +461,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -486,7 +483,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -508,7 +505,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -530,7 +527,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -552,7 +549,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -574,7 +571,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -597,7 +594,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -620,7 +617,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -643,7 +640,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -666,7 +663,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -709,12 +706,13 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
       task_name: technical_debt__cost
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux test_ownership
@@ -736,7 +734,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -761,7 +759,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -786,7 +784,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -811,7 +809,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -836,7 +834,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -857,7 +855,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -882,12 +880,13 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
       task_name: web_benchmarks_canvaskit
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux web_benchmarks_html
@@ -900,12 +899,13 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab"]
       task_name: web_benchmarks_html
+      benchmark: "true"
     scheduler: luci
     runIf:
       - dev/**
@@ -918,7 +918,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -939,7 +939,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -960,7 +960,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -981,7 +981,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1002,7 +1002,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1023,7 +1023,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1044,7 +1044,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1065,7 +1065,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1086,7 +1086,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1107,7 +1107,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1128,7 +1128,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1149,7 +1149,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1170,7 +1170,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1191,7 +1191,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1211,7 +1211,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1231,7 +1231,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1251,7 +1251,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1271,7 +1271,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1291,7 +1291,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1311,7 +1311,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1331,7 +1331,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1351,7 +1351,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -1375,6 +1375,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: analyzer_benchmark
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android android_defines_test
@@ -1397,6 +1398,17 @@ targets:
       task_name: android_obfuscate_test
     scheduler: luci
 
+  - name: Linux_android android_semantics_integration_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/74522
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_semantics_integration_test
+    scheduler: luci
+
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1405,6 +1417,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_stack_size_test
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android android_view_scroll_perf__timeline_summary
@@ -1415,6 +1428,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_view_scroll_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android animated_image_gc_perf
@@ -1425,6 +1439,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: animated_image_gc_perf
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android animated_placeholder_perf__e2e_summary
@@ -1435,6 +1450,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: animated_placeholder_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android backdrop_filter_perf__e2e_summary
@@ -1445,6 +1461,29 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: backdrop_filter_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: backdrop_filter_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: backdrop_filter_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android basic_material_app_android__compile
@@ -1455,6 +1494,17 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: basic_material_app_android__compile
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android channels_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: channels_integration_test
     scheduler: luci
 
   - name: Linux_android color_filter_and_fade_perf__e2e_summary
@@ -1465,6 +1515,18 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: color_filter_and_fade_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android color_filter_and_fade_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: color_filter_and_fade_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android complex_layout_android__compile
@@ -1483,6 +1545,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android complex_layout_android__scroll_smoothness
@@ -1501,6 +1564,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__devtools_memory
@@ -1519,6 +1583,64 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android complex_layout_scroll_perf__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: complex_layout_scroll_perf__memory
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android complex_layout_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: complex_layout_scroll_perf__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: complex_layout_scroll_perf__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android complex_layout_semantics_perf
@@ -1537,6 +1659,27 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android complex_layout__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/98999
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: complex_layout__start_up
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
@@ -1547,6 +1690,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: cubic_bezier_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
@@ -1557,6 +1701,40 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android cubic_bezier_perf_sksl_warmup__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android cubic_bezier_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: cubic_bezier_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: cubic_bezier_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android cull_opacity_perf__e2e_summary
@@ -1567,6 +1745,29 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: cull_opacity_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android cull_opacity_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: cull_opacity_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: cull_opacity_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android devtools_profile_start_test
@@ -1579,6 +1780,47 @@ targets:
       task_name: devtools_profile_start_test
     scheduler: luci
 
+  - name: Linux_android drive_perf_debug_warning
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: drive_perf_debug_warning
+    scheduler: luci
+
+  - name: Linux_android embedded_android_views_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: embedded_android_views_integration_test
+    scheduler: luci
+
+  - name: Linux_android external_ui_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: external_ui_integration_test
+    scheduler: luci
+
+  - name: Linux_android fading_child_animation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fading_child_animation_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
   - name: Linux_android fast_scroll_heavy_gridview__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1587,6 +1829,28 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: fast_scroll_heavy_gridview__memory
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android fast_scroll_large_images__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fast_scroll_large_images__memory
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android flavors_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: flavors_test
     scheduler: luci
 
   - name: Linux_android flutter_engine_group_performance
@@ -1597,10 +1861,10 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_engine_group_performance
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1608,6 +1872,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery__back_button_memory
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery__image_cache_memory
@@ -1618,6 +1883,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery__image_cache_memory
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery__memory_nav
@@ -1628,6 +1894,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery__memory_nav
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery__start_up
@@ -1638,6 +1905,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery__start_up
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery__start_up_delayed
@@ -1648,6 +1916,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery__start_up_delayed
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery_android__compile
@@ -1658,6 +1927,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery_android__compile
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_gallery_v2_chrome_run_test
@@ -1678,6 +1948,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_gallery_v2_web_compile_test
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android flutter_test_performance
@@ -1688,6 +1959,17 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: flutter_test_performance
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android flutter_view__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: flutter_view__start_up
     scheduler: luci
 
   - name: Linux_android frame_policy_delay_test_android
@@ -1698,6 +1980,62 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: frame_policy_delay_test_android
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android fullscreen_textfield_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fullscreen_textfield_perf
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android fullscreen_textfield_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fullscreen_textfield_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android fullscreen_textfield_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fullscreen_textfield_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android hello_world__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: hello_world__memory
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: home_scroll_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
@@ -1707,8 +2045,19 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
+      benchmark: "true"
     runIf:
       - dev/**
+    scheduler: luci
+
+  - name: Linux_android hybrid_android_views_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: hybrid_android_views_integration_test
     scheduler: luci
 
   - name: Linux_android image_list_jit_reported_duration
@@ -1719,10 +2068,32 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: image_list_jit_reported_duration
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android imagefiltered_transform_animation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: imagefiltered_transform_animation_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 imagefiltered_transform_animation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: imagefiltered_transform_animation_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android image_list_reported_duration
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94034
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1730,6 +2101,47 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: image_list_reported_duration
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android integration_ui_driver
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: integration_ui_driver
+    scheduler: luci
+
+  - name: Linux_android integration_ui_keyboard_resize
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: integration_ui_keyboard_resize
+    scheduler: luci
+
+  - name: Linux_android integration_ui_screenshot
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: integration_ui_screenshot
+    scheduler: luci
+
+  - name: Linux_android integration_ui_textfield
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: integration_ui_textfield
     scheduler: luci
 
   - name: Linux_android large_image_changer_perf_android
@@ -1740,6 +2152,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: large_image_changer_perf_android
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android linux_chrome_dev_mode
@@ -1750,6 +2163,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: linux_chrome_dev_mode
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android multi_widget_construction_perf__e2e_summary
@@ -1760,6 +2174,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: multi_widget_construction_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android new_gallery__crane_perf
@@ -1770,6 +2185,29 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: new_gallery__crane_perf
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: new_gallery__transition_perf
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: new_gallery__transition_perf
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android picture_cache_perf__e2e_summary
@@ -1780,6 +2218,39 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: picture_cache_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android picture_cache_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: picture_cache_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: picture_cache_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
     scheduler: luci
 
   - name: Linux_android platform_channels_benchmarks
@@ -1790,6 +2261,27 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: platform_channels_benchmarks
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android platform_channel_sample_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: platform_channel_sample_test
+    scheduler: luci
+
+  - name: Linux_android platform_interaction_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: platform_interaction_test
     scheduler: luci
 
   - name: Linux_android platform_views_scroll_perf__timeline_summary
@@ -1800,6 +2292,28 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: platform_views_scroll_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 platform_views_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: platform_views_scroll_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android platform_view__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: platform_view__start_up
     scheduler: luci
 
   - name: Linux_android routing_test
@@ -1812,6 +2326,18 @@ targets:
       task_name: routing_test
     scheduler: luci
 
+  - name: Linux_android service_extensions_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      runtime_versions: >
+        ["ios-13-0", "ios-15-0"]
+      task_name: service_extensions_test
+    scheduler: luci
+
   - name: Linux_android textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1820,6 +2346,48 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: textfield_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android textfield_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: textfield_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_samsung_s10 textfield_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux","samsung","s10"]
+      task_name: textfield_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android tiles_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: tiles_scroll_perf__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android web_size__compile_test
@@ -1833,24 +2401,27 @@ targets:
     scheduler: luci
 
   - name: Linux android views
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/99001
     recipe: flutter/android_views
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "android_virtual_device", "version": "31"}
         ]
       tags: >
         ["framework","hostonly"]
+      benchmark: "true"
     timeout: 60
     scheduler: luci
 
   - name: Linux deferred components
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
     recipe: flutter/deferred_components
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "android_virtual_device", "version": "31"},
           {"dependency": "curl"}
         ]
@@ -1867,6 +2438,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_one_rect_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
@@ -1877,6 +2449,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_col_of_rows_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
@@ -1887,6 +2460,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
@@ -1897,6 +2471,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
@@ -1907,6 +2482,51 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android android_choreographer_do_frame_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_choreographer_do_frame_test
+    scheduler: luci
+
+  - name: Linux_android android_lifecycles_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_lifecycles_test
     scheduler: luci
 
   - name: Mac build_aar_module_test
@@ -1920,7 +2540,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "gems"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"}
@@ -1945,7 +2565,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -1967,8 +2587,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -1987,8 +2607,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2007,8 +2627,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2027,8 +2647,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2074,6 +2694,30 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac entrypoint_dart_registrant
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
+      dependencies: >-
+        [
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: entrypoint_dart_registrant
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
     timeout: 60
@@ -2096,7 +2740,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/**
       - packages/flutter_test/**
       - packages/flutter_goldens/**
-      - packages/flutter_tools/lib/src/test/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -2108,7 +2752,9 @@ targets:
         [
           {"dependency": "goldctl"},
           {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "gems"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2124,7 +2770,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/**
       - packages/flutter_test/**
       - packages/flutter_goldens/**
-      - packages/flutter_tools/lib/src/test/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -2150,7 +2796,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/**
       - packages/flutter_test/**
       - packages/flutter_goldens/**
-      - packages/flutter_tools/lib/src/test/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -2164,7 +2810,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2188,7 +2834,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2212,7 +2858,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2236,7 +2882,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2261,7 +2907,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2286,7 +2932,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2311,7 +2957,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2336,7 +2982,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2361,7 +3007,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2387,7 +3033,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2412,7 +3058,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2434,8 +3080,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2445,6 +3091,7 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2459,8 +3106,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2470,6 +3117,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2484,8 +3132,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2495,8 +3143,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
-      runtime_versions: >
-        ["ios-13-0", "ios-15-0"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2511,8 +3158,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2522,6 +3169,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2536,7 +3184,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -2552,7 +3200,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -2590,8 +3238,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "goldctl"}
@@ -2607,221 +3255,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_android android_semantics_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94730
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: android_semantics_integration_test
-    scheduler: luci
-
-  - name: Mac_android backdrop_filter_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: backdrop_filter_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android channels_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: channels_integration_test
-    scheduler: luci
-
-  - name: Mac_android color_filter_and_fade_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: color_filter_and_fade_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android complex_layout__start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: complex_layout__start_up
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
-    scheduler: luci
-
-  - name: Mac_android complex_layout_scroll_perf__memory
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: complex_layout_scroll_perf__memory
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
-    scheduler: luci
-
-  - name: Mac_android complex_layout_scroll_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: complex_layout_scroll_perf__timeline_summary
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
-    scheduler: luci
-
-  - name: Mac_android cubic_bezier_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: cubic_bezier_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android cull_opacity_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: cull_opacity_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android drive_perf_debug_warning
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: drive_perf_debug_warning
-    scheduler: luci
-
-  - name: Mac_android embedded_android_views_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: embedded_android_views_integration_test
-    scheduler: luci
-
-  - name: Mac_android external_ui_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: external_ui_integration_test
-    scheduler: luci
-
-  - name: Mac_android fading_child_animation_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: fading_child_animation_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android fast_scroll_large_images__memory
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: fast_scroll_large_images__memory
-    scheduler: luci
-
-  - name: Mac_android flavors_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: flavors_test
-    scheduler: luci
-
-  - name: Mac_android flutter_view__start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: flutter_view__start_up
-    scheduler: luci
-
-  - name: Mac_android fullscreen_textfield_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: fullscreen_textfield_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android hello_world__memory
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: hello_world__memory
-    scheduler: luci
-
   - name: Mac_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2830,16 +3263,7 @@ targets:
       tags: >
         ["devicelab","android","mac"]
       task_name: hello_world_android__compile
-    scheduler: luci
-
-  - name: Mac_android home_scroll_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: home_scroll_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
@@ -2850,26 +3274,7 @@ targets:
       tags: >
         ["devicelab","android","mac"]
       task_name: hot_mode_dev_cycle__benchmark
-    scheduler: luci
-
-  - name: Mac_android hybrid_android_views_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: hybrid_android_views_integration_test
-    scheduler: luci
-
-  - name: Mac_android imagefiltered_transform_animation_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: imagefiltered_transform_animation_perf__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_android integration_test_test
@@ -2882,16 +3287,6 @@ targets:
       task_name: integration_test_test
     scheduler: luci
 
-  - name: Mac_android integration_ui_driver
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: integration_ui_driver
-    scheduler: luci
-
   - name: Mac_android integration_ui_frame_number
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2902,36 +3297,6 @@ targets:
       task_name: integration_ui_frame_number
     scheduler: luci
 
-  - name: Mac_android integration_ui_keyboard_resize
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: integration_ui_keyboard_resize
-    scheduler: luci
-
-  - name: Mac_android integration_ui_screenshot
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: integration_ui_screenshot
-    scheduler: luci
-
-  - name: Mac_android integration_ui_textfield
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: integration_ui_textfield
-    scheduler: luci
-
   - name: Mac_android microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2940,62 +3305,13 @@ targets:
       tags: >
         ["devicelab","android","mac"]
       task_name: microbenchmarks
-    scheduler: luci
-
-  - name: Mac_android new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: new_gallery__transition_perf
-    scheduler: luci
-
-  - name: Mac_android picture_cache_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: picture_cache_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android platform_channel_sample_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: platform_channel_sample_test
-    scheduler: luci
-
-  - name: Mac_android platform_interaction_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: platform_interaction_test
-    scheduler: luci
-
-  - name: Mac_android platform_view__start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: platform_view__start_up
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
-    presubmit: false
+    runIf:
+      - dev/**
     timeout: 60
     properties:
       tags: >
@@ -3003,52 +3319,15 @@ targets:
       task_name: run_release_test
     scheduler: luci
 
-  - name: Mac_android service_extensions_test
+  - name: Mac_android flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","android","mac"]
-      task_name: service_extensions_test
-    scheduler: luci
-
-  - name: Mac_android smoke_catalina_start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: smoke_catalina_start_up
-    scheduler: luci
-
-  - name: Mac_android textfield_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: textfield_perf__timeline_summary
-    scheduler: luci
-
-  - name: Mac_android tiles_scroll_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: tiles_scroll_perf__timeline_summary
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
+      task_name: flutter_gallery_mac__start_up
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
@@ -3059,6 +3338,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
@@ -3069,6 +3349,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios basic_material_app_ios__compile
@@ -3079,6 +3360,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: basic_material_app_ios__compile
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios channels_integration_test_ios
@@ -3107,6 +3389,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
@@ -3125,6 +3408,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
@@ -3143,6 +3427,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
@@ -3153,6 +3438,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios external_ui_integration_test_ios
@@ -3163,6 +3449,17 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: external_ui_integration_test_ios
+    scheduler: luci
+
+  - name: Mac_ios routing_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","ios","mac"]
+      task_name: routing_test
     scheduler: luci
 
   - name: Mac_ios flavors_test_ios
@@ -3183,6 +3480,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios__compile
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__start_up
@@ -3193,9 +3491,11 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios__start_up
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/98419
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3213,6 +3513,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: hello_world_ios__compile
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
@@ -3222,6 +3523,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
+      benchmark: "true"
     runIf:
       - dev/**
     scheduler: luci
@@ -3277,6 +3579,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96787
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3334,6 +3637,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: large_image_changer_perf_ios
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios macos_chrome_dev_mode
@@ -3344,6 +3648,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: macos_chrome_dev_mode
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios microbenchmarks_ios
@@ -3354,9 +3659,11 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: microbenchmarks_ios
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios new_gallery_ios__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3364,6 +3671,18 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: new_gallery_ios__transition_perf
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","ios","mac"]
+      task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
@@ -3394,6 +3713,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: platform_channels_benchmarks_ios
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios platform_interaction_test_ios
@@ -3424,6 +3744,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
@@ -3434,6 +3755,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
@@ -3444,16 +3766,19 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: simple_animation_perf_ios
+      benchmark: "true"
     scheduler: luci
 
-  - name: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+  - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95582
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","ios","mac"]
-      task_name: smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+      task_name: hot_mode_dev_cycle_ios__benchmark
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
@@ -3464,32 +3789,12 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
-    scheduler: luci
-
-  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 90
-    properties:
-      tags: >
-        ["devicelab","ios32","mac"]
-      task_name: flutter_gallery__transition_perf_e2e_ios32
-    scheduler: luci
-
-  - name: Mac_ios32 native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 90
-    properties:
-      tags: >
-        ["devicelab","ios32","mac"]
-      task_name: native_ui_tests_ios
+      benchmark: "true"
     scheduler: luci
 
   - name: Mac_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95193
     presubmit: false
     timeout: 60
     properties:
@@ -3528,7 +3833,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3549,7 +3854,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -3568,7 +3873,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -3587,7 +3892,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -3632,7 +3937,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -3643,7 +3948,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3659,7 +3966,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -3685,7 +3992,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -3699,7 +4006,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3723,7 +4030,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3733,6 +4040,7 @@ targets:
     scheduler: luci
 
   - name: Windows gradle_plugin_light_apk_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/97956
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3742,7 +4050,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3771,15 +4079,17 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
+      benchmark: "true"
     scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96790
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3803,7 +4113,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3818,6 +4128,7 @@ targets:
       - .ci.yaml
 
   - name: Windows module_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96792
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3827,7 +4138,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3851,7 +4162,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3875,7 +4186,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3889,23 +4200,24 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_5
+  - name: Windows tool_integration_tests_1_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_5"
+      subshard: "1_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -3913,23 +4225,24 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_2_5
+  - name: Windows tool_integration_tests_2_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "2_5"
+      subshard: "2_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -3937,23 +4250,24 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_3_5
+  - name: Windows tool_integration_tests_3_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_5"
+      subshard: "3_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -3961,23 +4275,24 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_4_5
+  - name: Windows tool_integration_tests_4_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_5"
+      subshard: "4_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -3985,23 +4300,49 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_5_5
+  - name: Windows tool_integration_tests_5_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_5"
+      subshard: "5_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows tool_integration_tests_6_6
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "open_jdk"},
+          {"dependency": "goldctl"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_integration_tests
+      subshard: "6_6"
+      tags: >
+        ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4016,7 +4357,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -4037,7 +4378,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -4057,7 +4398,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -4073,6 +4414,21 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows windows_home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_home_scroll_perf__timeline_summary
+      benchmark: "true"
+    scheduler: luci
+
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4081,6 +4437,7 @@ targets:
       tags: >
         ["devicelab","android","windows"]
       task_name: basic_material_app_win__compile
+      benchmark: "true"
     scheduler: luci
 
   - name: Windows_android channels_integration_test_win
@@ -4109,6 +4466,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+      benchmark: "true"
     scheduler: luci
 
   - name: Windows_android flavors_test_win
@@ -4129,6 +4487,7 @@ targets:
       tags: >
         ["devicelab","android","windows"]
       task_name: flutter_gallery_win__compile
+      benchmark: "true"
     scheduler: luci
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
@@ -4139,6 +4498,7 @@ targets:
       tags: >
         ["devicelab","android","windows"]
       task_name: hot_mode_dev_cycle_win__benchmark
+      benchmark: "true"
     scheduler: luci
 
   - name: Windows_android windows_chrome_dev_mode
@@ -4149,4 +4509,13 @@ targets:
       tags: >
         ["devicelab","android","windows"]
       task_name: windows_chrome_dev_mode
+      benchmark: "true"
     scheduler: luci
+
+  - name: google_test
+    bringup: true
+    presubmit: false
+    scheduler: google_internal
+    properties:
+      tags: >
+          ["framework","hostonly","shard"]

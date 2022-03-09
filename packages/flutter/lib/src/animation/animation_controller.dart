@@ -566,7 +566,7 @@ class AnimationController extends Animation<double>
 
   TickerFuture _animateToInternal(double target, { Duration? duration, Curve curve = Curves.linear }) {
     double scale = 1.0;
-    if (SemanticsBinding.instance!.disableAnimations) {
+    if (SemanticsBinding.instance.disableAnimations) {
       switch (animationBehavior) {
         case AnimationBehavior.normal:
           // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
@@ -689,7 +689,7 @@ class AnimationController extends Animation<double>
                                          : upperBound + _kFlingTolerance.distance;
     double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
-    if (SemanticsBinding.instance!.disableAnimations) {
+    if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
           // TODO(zanderso): determine a better process for setting velocity.
@@ -898,9 +898,9 @@ class _RepeatingSimulation extends Simulation {
 
     final double totalTimeInSeconds = timeInSeconds + _initialT;
     final double t = (totalTimeInSeconds / _periodInSeconds) % 1.0;
-    final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds).isOdd;
+    final bool isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds).isOdd;
 
-    if (reverse && _isPlayingReverse) {
+    if (reverse && isPlayingReverse) {
       directionSetter(_AnimationDirection.reverse);
       return ui.lerpDouble(max, min, t)!;
     } else {

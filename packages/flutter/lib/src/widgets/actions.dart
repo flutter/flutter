@@ -345,13 +345,13 @@ abstract class Action<T extends Intent> with Diagnosticable {
     for (final ActionListenerCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<Action<T>>(
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<Action<T>>(
             'The $runtimeType sending notification was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
-          );
-        };
+          ),
+        ];
         return true;
       }());
       try {
@@ -1064,6 +1064,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.descendantsAreFocusable = true,
+    this.descendantsAreTraversable = true,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
@@ -1094,6 +1095,9 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
   final bool descendantsAreFocusable;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
+  final bool descendantsAreTraversable;
 
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
@@ -1137,7 +1141,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
     });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
@@ -1226,7 +1230,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
     final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
     final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
@@ -1247,7 +1251,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void didUpdateWidget(FocusableActionDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
       });
     }
@@ -1281,6 +1285,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         descendantsAreFocusable: widget.descendantsAreFocusable,
+        descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,
@@ -1489,7 +1494,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   }
 
   @override
-  Object? invoke(PrioritizedIntents intent) {
+  void invoke(PrioritizedIntents intent) {
     assert(_selectedAction != null);
     assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);

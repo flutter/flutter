@@ -263,13 +263,13 @@ Material _railMaterial(WidgetTester tester) {
 }
 
 
-BoxDecoration? _indicatorDecoration(WidgetTester tester) {
+ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(NavigationIndicator),
       matching: find.byType(Container),
     ),
-  ).decoration as BoxDecoration?;
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {

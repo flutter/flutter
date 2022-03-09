@@ -101,22 +101,6 @@ class NextContext extends Context {
             upstreamRemote: upstream,
             previousCheckoutLocation: state.engine.checkoutPath,
         );
-        // check if the candidate branch is enabled in .ci.yaml
-        final CiYaml engineCiYaml = await engine.ciYaml;
-        if (!engineCiYaml.enabledBranches.contains(state.engine.candidateBranch)) {
-          engineCiYaml.enableBranch(state.engine.candidateBranch);
-          // commit
-          final String revision = await engine.commit(
-              'add branch ${state.engine.candidateBranch} to enabled_branches in .ci.yaml',
-              addFirst: true,
-          );
-          // append to list of cherrypicks so we know a PR is required
-          state.engine.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
-        }
-
         if (!state_import.requiresEnginePR(state)) {
           stdio.printStatus(
               'This release has no engine cherrypicks. No Engine PR is necessary.\n',
@@ -212,21 +196,6 @@ class NextContext extends Context {
           upstreamRemote: upstream,
           previousCheckoutLocation: state.framework.checkoutPath,
         );
-
-        // Check if the current candidate branch is enabled
-        if (!(await framework.ciYaml).enabledBranches.contains(state.framework.candidateBranch)) {
-          (await framework.ciYaml).enableBranch(state.framework.candidateBranch);
-          // commit
-          final String revision = await framework.commit(
-              'add branch ${state.framework.candidateBranch} to enabled_branches in .ci.yaml',
-              addFirst: true,
-          );
-          // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
-        }
 
         stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
         final bool needsCommit = await framework.updateEngineRevision(engineRevision);

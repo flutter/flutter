@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';
@@ -90,7 +92,6 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   @override
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
-    final String flutterToolPath = fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
     final bool debug = !(args.noDebug ?? false);
     final String? program = args.program;
@@ -100,6 +101,14 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       '--machine',
       if (debug) '--start-paused',
     ];
+
+    // Handle customTool and deletion of any arguments for it.
+    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final int? removeArgs = args.customToolReplacesArgs;
+    if (args.customTool != null && removeArgs != null) {
+      toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
+    }
+
     final List<String> processArgs = <String>[
       ...toolArgs,
       ...?args.toolArgs,
@@ -107,28 +116,19 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       ...?args.args,
     ];
 
-    // Find the package_config file for this script. This is used by the
-    // debugger to map package: URIs to file paths to check whether they're in
-    // the editors workspace (args.cwd/args.additionalProjectPaths) so they can
-    // be correctly classes as "my code", "sdk" or "external packages".
-    // TODO(dantup): Remove this once https://github.com/dart-lang/sdk/issues/45530
-    // is done as it will not be necessary.
-    final String? possibleRoot = program == null
-        ? args.cwd
-        : fileSystem.path.isAbsolute(program)
-            ? fileSystem.path.dirname(program)
-            : fileSystem.path.dirname(
-                fileSystem.path.normalize(fileSystem.path.join(args.cwd ?? '', args.program)));
-    if (possibleRoot != null) {
-      final File? packageConfig = findPackageConfigFile(possibleRoot);
-      if (packageConfig != null) {
-        usePackageConfigFile(packageConfig);
-      }
-    }
+    await launchAsProcess(executable, processArgs);
 
-    logger?.call('Spawning $flutterToolPath with $processArgs in ${args.cwd}');
+    // Delay responding until the debugger is connected.
+    if (debug) {
+      await debuggerInitialized;
+    }
+  }
+
+  @visibleForOverriding
+  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
+    logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
-      flutterToolPath,
+      executable,
       processArgs,
       workingDirectory: args.cwd,
     );
@@ -138,11 +138,6 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     process.stdout.transform(ByteToLineTransformer()).listen(_handleStdout);
     process.stderr.listen(_handleStderr);
     unawaited(process.exitCode.then(_handleExitCode));
-
-    // Delay responding until the debugger is connected.
-    if (debug) {
-      await debuggerInitialized;
-    }
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).

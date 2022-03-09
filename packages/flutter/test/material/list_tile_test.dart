@@ -71,6 +71,7 @@ void main() {
     expect(themeData.minVerticalPadding, null);
     expect(themeData.minLeadingWidth, null);
     expect(themeData.enableFeedback, null);
+    expect(themeData.mouseCursor, null);
   });
 
   testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
@@ -101,6 +102,7 @@ void main() {
       minVerticalPadding: 300,
       minLeadingWidth: 400,
       enableFeedback: true,
+      mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -121,7 +123,8 @@ void main() {
       'horizontalTitleGap: 200.0',
       'minVerticalPadding: 300.0',
       'minLeadingWidth: 400.0',
-      'enableFeedback: true'
+      'enableFeedback: true',
+      'mouseCursor: MaterialStateMouseCursor(clickable)',
     ]);
   });
 
@@ -145,6 +148,7 @@ void main() {
             minVerticalPadding: 300,
             minLeadingWidth: 400,
             enableFeedback: true,
+            mouseCursor: MaterialStateMouseCursor.clickable,
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
@@ -171,6 +175,7 @@ void main() {
     expect(theme.minVerticalPadding, 300);
     expect(theme.minLeadingWidth, 400);
     expect(theme.enableFeedback, true);
+    expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
   });
 
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
@@ -379,6 +384,11 @@ void main() {
     expect(output, isEmpty);
   });
 
+  testWidgets('ListTile.divideTiles with single item list', (WidgetTester tester) async {
+    final Iterable<Widget> output = ListTile.divideTiles(tiles: const <Widget>[SizedBox()], color: Colors.grey);
+    expect(output.single, isA<SizedBox>());
+  });
+
   testWidgets('ListTile.divideTiles only runs the generator once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78879
     int callCount = 0;
@@ -419,6 +429,13 @@ void main() {
                 selectedColor: selectedColor,
                 iconColor: iconColor,
                 textColor: textColor,
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return SystemMouseCursors.forbidden;
+                  }
+
+                  return SystemMouseCursors.click;
+                }),
               ),
               child: Builder(
                 builder: (BuildContext context) {
@@ -494,6 +511,16 @@ void main() {
     // A selected ListTile's InkWell gets the ListTileTheme's shape
     await tester.pumpWidget(buildFrame(selected: true, shape: roundedShape));
     expect(inkWellBorder(), roundedShape);
+
+    // Cursor updates when hovering disabled ListTile
+    await tester.pumpWidget(buildFrame(enabled: false));
+    final Offset listTile = tester.getCenter(find.byKey(titleKey));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(listTile);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
   testWidgets('ListTile semantics', (WidgetTester tester) async {
@@ -1683,7 +1710,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1701,7 +1728,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1719,7 +1746,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test default cursor when onTap or onLongPress is null
     await tester.pumpWidget(
@@ -1735,7 +1762,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -2065,6 +2092,34 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile.mouseCursor overrides ListTileTheme.mouseCursor', (WidgetTester tester) async {
+      final Key tileKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTileTheme(
+              data: const ListTileThemeData(mouseCursor: MaterialStateMouseCursor.clickable),
+              child: ListTile(
+                key: tileKey,
+                mouseCursor: MaterialStateMouseCursor.textable,
+                title: const Text('Title'),
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset listTile = tester.getCenter(find.byKey(tileKey));
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(listTile);
+      await tester.pumpAndSettle();
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     });
   });
 

@@ -52,7 +52,7 @@ String? _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake }
+enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake, windows }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -71,6 +71,8 @@ abstract class DeviceDiscovery {
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.windows:
+        return WindowsDeviceDiscovery();
       case DeviceOperatingSystem.fake:
         print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
@@ -123,6 +125,9 @@ abstract class Device {
 
   /// Send the device to sleep mode.
   Future<void> sendToSleep();
+
+  /// Emulates pressing the home button.
+  Future<void> home();
 
   /// Emulates pressing the power button, toggling the device's on/off state.
   Future<void> togglePower();
@@ -329,6 +334,41 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 }
 
+class WindowsDeviceDiscovery implements DeviceDiscovery {
+  factory WindowsDeviceDiscovery() {
+    return _instance ??= WindowsDeviceDiscovery._();
+  }
+
+  WindowsDeviceDiscovery._();
+
+  static WindowsDeviceDiscovery? _instance;
+
+  static const WindowsDevice _device = WindowsDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async { }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['windows'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async { }
+
+  @override
+  Future<Device> get workingDevice  async => _device;
+
+}
+
 class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   factory FuchsiaDeviceDiscovery() {
     return _instance ??= FuchsiaDeviceDiscovery._();
@@ -443,6 +483,7 @@ class AndroidDevice extends Device {
   @override
   final String deviceId;
   String deviceInfo = '';
+  int apiLevel = 0;
 
   /// Whether the device is awake.
   @override
@@ -468,6 +509,12 @@ class AndroidDevice extends Device {
   Future<void> sendToSleep() async {
     if (!(await isAsleep()))
       await togglePower();
+  }
+
+  /// Sends `KEYCODE_HOME` (3), which causes the device to go to the home screen.
+  @override
+  Future<void> home() async {
+    await shellExec('input', const <String>['keyevent', '3']);
   }
 
   /// Sends `KEYCODE_POWER` (26), which causes the device to toggle its mode
@@ -496,7 +543,10 @@ class AndroidDevice extends Device {
   /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
   Future<String> _getWakefulness() async {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
-    final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
+    // A motoG4 phone returns `mWakefulness=Awake`.
+    // A Samsung phone returns `getWakefullnessLocked()=Awake`.
+    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
+    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
   }
 
@@ -527,13 +577,15 @@ class AndroidDevice extends Device {
     }
     final List<String> list = info.split('\n');
     if (list.length == 3) {
-      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: ${list[2]}';
+      apiLevel = int.parse(list[2]);
+      deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: $apiLevel';
     } else {
+      apiLevel = 0;
       deviceInfo = '';
     }
   }
 
-  /// Executes [command] on `adb shell` and returns its exit code.
+  /// Executes [command] on `adb shell`.
   Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     await adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
@@ -625,7 +677,7 @@ class AndroidDevice extends Device {
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
-        await adb(<String>['logcat', '--clear']);
+        await adb(<String>['logcat', '-c']);
         final Process process = await startProcess(
           adbPath,
           // Make logcat less chatty by filtering down to just ActivityManager
@@ -896,6 +948,9 @@ class IosDevice extends Device {
   Future<void> sendToSleep() async {}
 
   @override
+  Future<void> home() async {}
+
+  @override
   Future<void> togglePower() async {}
 
   @override
@@ -925,6 +980,55 @@ class IosDevice extends Device {
   }
 }
 
+class WindowsDevice extends Device {
+  const WindowsDevice();
+
+  @override
+  String get deviceId => 'windows';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async { }
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> reboot() async { }
+
+  @override
+  Future<void> sendToSleep() async { }
+
+  @override
+  Future<void> stop(String packageName) async { }
+
+  @override
+  Future<void> tap(int x, int y) async { }
+
+  @override
+  Future<void> togglePower() async { }
+
+  @override
+  Future<void> unlock() async { }
+
+  @override
+  Future<void> wakeUp() async { }
+}
+
 /// Fuchsia device.
 class FuchsiaDevice extends Device {
   const FuchsiaDevice({ required this.deviceId });
@@ -944,6 +1048,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> home() async {}
 
   @override
   Future<void> togglePower() async {}
@@ -1010,6 +1117,9 @@ class FakeDevice extends Device {
 
   @override
   Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> home() async {}
 
   @override
   Future<void> togglePower() async {}

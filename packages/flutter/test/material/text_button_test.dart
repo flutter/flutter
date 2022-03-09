@@ -395,11 +395,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: TextButton(
-            child: Container(),
-            onPressed: () { /* to make sure the button is enabled */ },
-          ),
+        child: TextButton(
+          child: Container(),
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
@@ -420,14 +418,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: TextButton(
-            style: ButtonStyle(
-              overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
-            ),
-            child: Container(),
-            onPressed: () { /* to make sure the button is enabled */ },
+        child: TextButton(
+          style: ButtonStyle(
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
+          child: Container(),
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
@@ -465,7 +461,7 @@ void main() {
       ),
     );
 
-    WidgetsBinding.instance!.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
@@ -478,18 +474,16 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: TextButton(
-              style: ButtonStyle(
-                // Specifying minimumSize to mimic the original minimumSize for
-                // RaisedButton so that the semantics tree's rect and transform
-                // match the original version of this test.
-                minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
-              ),
-              onPressed: () { },
-              child: const Text('ABC'),
+        child: Center(
+          child: TextButton(
+            style: ButtonStyle(
+              // Specifying minimumSize to mimic the original minimumSize for
+              // RaisedButton so that the semantics tree's rect and transform
+              // match the original version of this test.
+              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
             ),
+            onPressed: () { },
+            child: const Text('ABC'),
           ),
         ),
       ),
@@ -524,14 +518,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Center(
-              child: TextButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Center(
+            child: TextButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -545,14 +537,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
-            child: Center(
-              child: TextButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 1.3),
+          child: Center(
+            child: TextButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -570,14 +560,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 3.0),
-            child: Center(
-              child: TextButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 3.0),
+          child: Center(
+            child: TextButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -599,13 +587,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: tapTargetSize),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: TextButton(
-                key: key,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: TextButton(
+              key: key,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),
@@ -701,20 +687,18 @@ void main() {
     final GlobalKey childKey = GlobalKey();
     bool hovering = false;
     await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SizedBox(
-            width: 100,
-            height: 100,
-            child: TextButton(
-              autofocus: true,
-              onPressed: () {},
-              onLongPress: () {},
-              onHover: (bool value) { hovering = value; },
-              focusNode: focusNode,
-              child: SizedBox(key: childKey),
-            ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: TextButton(
+            autofocus: true,
+            onPressed: () {},
+            onLongPress: () {},
+            onHover: (bool value) { hovering = value; },
+            focusNode: focusNode,
+            child: SizedBox(key: childKey),
           ),
         ),
       ),
@@ -729,18 +713,16 @@ void main() {
     expect(hovering, isTrue);
 
     await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SizedBox(
-            width: 100,
-            height: 100,
-            child: TextButton(
-              focusNode: focusNode,
-              onHover: (bool value) { hovering = value; },
-              onPressed: null,
-              child: SizedBox(key: childKey),
-            ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: TextButton(
+            focusNode: focusNode,
+            onHover: (bool value) { hovering = value; },
+            onPressed: null,
+            child: SizedBox(key: childKey),
           ),
         ),
       ),
@@ -755,21 +737,19 @@ void main() {
     late bool hover;
 
     Widget buildFrame({ required bool enabled }) {
-      return Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: TextButton(
-                onPressed: enabled ? () { } : null,
-                onHover: (bool value) {
-                  onHoverCount += 1;
-                  hover = value;
-                },
-                child: const Text('TextButton'),
-              ),
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: TextButton(
+              onPressed: enabled ? () { } : null,
+              onHover: (bool value) {
+                onHoverCount += 1;
+                hover = value;
+              },
+              child: const Text('TextButton'),
             ),
           ),
         ),
@@ -819,15 +799,13 @@ void main() {
     final FocusNode node = FocusNode(debugLabel: 'TextButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: TextButton(
-            focusNode: node,
-            onFocusChange: (bool focused) => gotFocus = focused,
-            onPressed: () {  },
-            child: const SizedBox(),
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TextButton(
+          focusNode: node,
+          onFocusChange: (bool focused) => gotFocus = focused,
+          onPressed: () {  },
+          child: const SizedBox(),
         ),
       ),
     );
@@ -850,15 +828,13 @@ void main() {
     final FocusNode node = FocusNode(debugLabel: 'TextButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: TextButton(
-            focusNode: node,
-            onFocusChange: (bool focused) => gotFocus = focused,
-            onPressed: null,
-            child: const SizedBox(),
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TextButton(
+          focusNode: node,
+          onFocusChange: (bool focused) => gotFocus = focused,
+          onPressed: null,
+          child: const SizedBox(),
         ),
       ),
     );
@@ -1391,6 +1367,84 @@ void main() {
     expect(tester.getSize(find.widgetWithText(TextButton, '200,200')), const Size(200, 200));
   });
 
+  testWidgets('TextButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              enabledMouseCursor: SystemMouseCursors.text,
+              disabledMouseCursor: SystemMouseCursors.grab,
+            ),
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test cursor when disabled
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              enabledMouseCursor: SystemMouseCursors.text,
+              disabledMouseCursor: SystemMouseCursors.grab,
+            ),
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: TextButton(
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: TextButton(
+            onPressed: null,
+            child: Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

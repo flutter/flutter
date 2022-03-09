@@ -24,8 +24,14 @@ import 'utils.dart';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String flutterPackages = path.join(flutterRoot, 'packages');
-final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+final String flutterExamples = path.join(flutterRoot, 'examples');
+
+/// The path to the `dart` executable; set at the top of `main`
+late final String dart;
+
+/// The path to the `pub` executable; set at the top of `main`
+late final String pub;
+
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -35,6 +41,12 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
+  final String dartSdk = path.join(
+    Directory.current.absolute.path,
+    _getDartSdkFromArguments(arguments) ?? path.join(flutterRoot, 'bin', 'cache', 'dart-sdk'),
+  );
+  dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+  pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
   print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
@@ -44,12 +56,44 @@ Future<void> main(List<String> arguments) async {
   print('$clock ${bold}Analysis successful.$reset');
 }
 
+/// Scans [arguments] for an argument of the form `--dart-sdk` or
+/// `--dart-sdk=...` and returns the configured SDK, if any.
+String? _getDartSdkFromArguments(List<String> arguments) {
+  String? result;
+  for (int i = 0; i < arguments.length; i += 1) {
+    if (arguments[i] == '--dart-sdk') {
+      if (result != null) {
+        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+      }
+      if (i + 1 < arguments.length) {
+        result = arguments[i + 1];
+      } else {
+        exitWithError(<String>['--dart-sdk must be followed by a path.']);
+      }
+    }
+    if (arguments[i].startsWith('--dart-sdk=')) {
+      if (result != null) {
+        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+      }
+      result = arguments[i].substring('--dart-sdk='.length);
+    }
+  }
+  return result;
+}
+
 Future<void> run(List<String> arguments) async {
   bool assertsEnabled = false;
   assert(() { assertsEnabled = true; return true; }());
   if (!assertsEnabled) {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
+
+  print('$clock All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
+
+  print('$clock No sync*/async*');
+  await verifyNoSyncAsyncStar(flutterPackages);
+  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
 
   print('$clock No runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
@@ -92,6 +136,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
+
+  print('$clock null initialized debug fields...');
+  await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
   print('$clock Package dependencies...');
@@ -152,6 +199,92 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+/// Verify tool test files end in `_test.dart`.
+///
+/// The test runner will only recognize files ending in `_test.dart` as tests to
+/// be run: https://github.com/dart-lang/test/tree/master/pkgs/test#running-tests
+Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
+  final String toolsTestPath = path.join(
+    workingDirectory,
+    'packages',
+    'flutter_tools',
+    'test',
+  );
+  final List<String> violations = <String>[];
+
+  // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
+  final RegExp callsTestFunctionPattern = RegExp(r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))');
+
+  await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
+    final bool isValidTestFile = file.path.endsWith('_test.dart');
+    if (isValidTestFile) {
+      continue;
+    }
+
+    final bool isTestData = file.path.contains(r'test_data');
+    if (isTestData) {
+      continue;
+    }
+
+    final bool isInTestShard = file.path.contains(r'.shard/');
+    if (!isInTestShard) {
+      continue;
+    }
+
+    final bool callsTestFunction = file.readAsStringSync().contains(callsTestFunctionPattern);
+    if (!callsTestFunction) {
+      continue;
+    }
+
+    violations.add(file.path);
+  }
+  if (violations.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
+      ...violations,
+    ]);
+  }
+}
+
+Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
+  final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
+  final RegExp ignorePattern = RegExp(r'^\s*?// The following uses a?sync\* because:? ');
+  final RegExp commentPattern = RegExp(r'^\s*?//');
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    if (file.path.contains('test')) {
+      continue;
+    }
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
+      if (line.startsWith(commentPattern)) {
+        continue;
+      }
+      if (line.contains(syncPattern)) {
+        int lookBehindIndex = index - 1;
+        bool hasExplanation = false;
+        while (lookBehindIndex >= 0 && lines[lookBehindIndex].startsWith(commentPattern)) {
+          if (lines[lookBehindIndex].startsWith(ignorePattern)) {
+            hasExplanation = true;
+            break;
+          }
+          lookBehindIndex -= 1;
+        }
+        if (!hasExplanation) {
+          errors.add('${file.path}:$index: sync*/async* without an explanation.');
+        }
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
+      ...errors,
+    ]);
+  }
+}
 
 final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
 final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
@@ -323,42 +456,62 @@ String _generateLicense(String prefix) {
 
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
   final int? overrideMinimumMatches = checkMinimums ? null : 0;
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n${_generateLicense('REM ')}');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->');
+  int failed = 0;
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, _generateLicense('# '), header: r'#!/usr/bin/env bash\n',);
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, _generateLicense('REM '), header: r'@ECHO off\n');
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
+  if (failed > 0) {
+    exitWithError(<String>['License check failed.']);
+  }
 }
 
-Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, int minimumMatches, String license, { bool trailingBlank = true }) async {
+Future<int> _verifyNoMissingLicenseForExtension(
+  String workingDirectory,
+  String extension,
+  int minimumMatches,
+  String license, {
+  bool trailingBlank = true,
+  // The "header" is a regular expression matching the header that comes before
+  // the license in some files.
+  String header = '',
+}) async {
   assert(!license.endsWith('\n'));
-  final String licensePattern = '$license\n${trailingBlank ? '\n' : ''}';
+  final String licensePattern = RegExp.escape('$license\n${trailingBlank ? '\n' : ''}');
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty)
       continue; // let's not go down the /bin/true rabbit hole
-    if (!contents.startsWith(licensePattern))
+    if (!contents.startsWith(RegExp(header + licensePattern)))
       errors.add(file.path);
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    final String s = errors.length == 1 ? ' does' : 's do';
-    exitWithError(<String>[
-      '${bold}The following ${errors.length} file$s not have the right license header:$reset',
-      ...errors,
+    final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
+    final String fileDoes = errors.length == 1 ? 'file does' : '${errors.length} files do';
+    print(<String>[
+      redLine,
+      '${bold}The following $fileDoes not have the right license header for $extension files:$reset',
+      ...errors.map<String>((String error) => '  $error'),
       'The expected license header is:',
+      if (header.isNotEmpty) 'A header matching the regular expression "$header",',
+      if (header.isNotEmpty) 'followed by the following license text:',
       license,
       if (trailingBlank) '...followed by a blank line.',
-    ]);
+      redLine,
+    ].join('\n'));
+    return 1;
   }
+  return 0;
 }
 
 class _TestSkip {
@@ -752,7 +905,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   final Set<String> suggestions = <String>{};
   final List<File> files = await _gitFiles(workingDirectory);
   for (final File file in files) {
-    if (path.basename(file.path).endsWith('_test.dart'))
+    if (path.basename(file.path).endsWith('_test.dart') || path.basename(file.path) == 'analyze.dart')
       continue; // Skip tests, they're not public-facing.
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
@@ -1412,24 +1565,50 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
-  final ProcessResult result = await Process.run(flutter, <String>[
-    'update-packages',
-    '--transitive-closure',
-    '--consumer-only',
-  ]);
-  if (result.exitCode != 0) {
-    print(result.stdout as Object);
-    print(result.stderr as Object);
-    exit(result.exitCode);
-  }
+  const List<String> kCorePackages = <String>[
+    'flutter',
+    'flutter_test',
+    'flutter_driver',
+    'flutter_localizations',
+    'integration_test',
+    'fuchsia_remote_debug_protocol',
+  ];
   final Set<String> dependencies = <String>{};
-  for (final String line in result.stdout.toString().split('\n')) {
-    if (!line.contains('->')) {
-      continue;
+
+  // Parse the output of pub deps --json to determine all of the
+  // current packages used by the core set of flutter packages.
+  for (final String package in kCorePackages) {
+    final ProcessResult result = await Process.run(flutter, <String>[
+      'pub',
+      'deps',
+      '--json',
+      '--directory=${path.join(flutterRoot, 'packages', package)}'
+    ]);
+    if (result.exitCode != 0) {
+      print(result.stdout as Object);
+      print(result.stderr as Object);
+      exit(result.exitCode);
     }
-    final List<String> parts = line.split('->');
-    final String name = parts[0].trim();
-    dependencies.add(name);
+    final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
+    final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
+      for (final Map<String, Object?> package in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())
+        package['name']! as String : package,
+    };
+    final List<Map<String, Object?>> workset = <Map<String, Object?>>[];
+    workset.add(dependencyTree[package]!);
+
+    while (workset.isNotEmpty) {
+      final Map<String, Object?> currentPackage = workset.removeLast();
+      if (currentPackage['kind'] == 'dev') {
+        continue;
+      }
+      dependencies.add(currentPackage['name']! as String);
+
+      final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
+      for (final String dependency in currentDependencies) {
+        workset.add(dependencyTree[dependency]!);
+      }
+    }
   }
 
   final Set<String> removed = kCorePackageAllowList.difference(dependencies);
@@ -1455,6 +1634,40 @@ Future<void> _checkConsumerDependencies() async {
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
       'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
       'Thanks!',
+    ]);
+  }
+}
+
+const String _kDebugOnlyAnnotation = '@_debugOnly';
+final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w\<\> ,{}()]+ : null;');
+
+Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, {int minimumMatches = 400}) async {
+  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final List<File> files = await _allFiles(flutterLib, 'dart', minimumMatches: minimumMatches)
+    .toList();
+  final List<String> errors = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int i = 0; i < lines.length; i += 1) {
+      final String line = lines[i];
+      if (!line.contains(_kDebugOnlyAnnotation)) {
+        continue;
+      }
+      final String nextLine = lines[i + 1];
+      if (_nullInitializedField.firstMatch(nextLine) == null) {
+        errors.add('${file.path} L$i');
+      }
+    }
+  }
+
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+     '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
+     'to ensure both the field and initializer are removed from profile/release mode.',
+     'These fields should be written as:\n',
+     'field = kDebugMode ? <DebugValue> : null;\n',
+     'Errors were found in the following files:',
+      ...errors,
     ]);
   }
 }

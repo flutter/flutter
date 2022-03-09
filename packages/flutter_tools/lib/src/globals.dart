@@ -50,7 +50,7 @@ import 'version.dart';
 String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
 Artifacts? get artifacts => context.get<Artifacts>();
-BuildSystem? get buildSystem => context.get<BuildSystem>();
+BuildSystem get buildSystem => context.get<BuildSystem>()!;
 Cache get cache => context.get<Cache>()!;
 CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
@@ -66,6 +66,7 @@ AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 FuchsiaArtifacts? get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
+FuchsiaSdk? get fuchsiaSdk => context.get<FuchsiaSdk>();
 Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
@@ -204,6 +205,23 @@ void printStatus(
   );
 }
 
+
+/// Display the [message] inside a box.
+///
+/// For example, this is the generated output:
+///
+///   ┌─ [title] ─┐
+///   │ [message] │
+///   └───────────┘
+///
+/// If a terminal is attached, the lines in [message] are automatically wrapped based on
+/// the available columns.
+void printBox(String message, {
+  String? title,
+}) {
+  logger.printBox(message, title: title);
+}
+
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.
 void printTrace(String message) => logger.printTrace(message);
@@ -260,3 +278,10 @@ FlutterProjectFactory get projectFactory {
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
+
+// TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
+const String kDefaultFrameworkChannel = 'master';
+
+// Used to build RegExp instances which can detect the VM service message.
+const String kServicePrefixRegExp = '(?:Observatory|The Dart VM service is)';
+final RegExp kVMServiceMessageRegExp = RegExp(kServicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');

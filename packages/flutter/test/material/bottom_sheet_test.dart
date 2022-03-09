@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1202,6 +1204,175 @@ void main() {
 
     // Double dispose will throw.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/93717
+    PersistentBottomSheetController<void>? sheetController1;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(builder: (BuildContext context) {
+          return SafeArea(
+            child: Column(
+              children: <Widget>[
+                ElevatedButton(
+                  child: const Text('show 1'),
+                  onPressed: () {
+                    sheetController1 = Scaffold.of(context).showBottomSheet<void>(
+                      (BuildContext context) => const Text('BottomSheet 1'),
+                    );
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('show 2'),
+                  onPressed: () {
+                    Scaffold.of(context).showBottomSheet<void>(
+                      (BuildContext context) => const Text('BottomSheet 2'),
+                    );
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('close 1'),
+                  onPressed: (){
+                    sheetController1!.close();
+                  },
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('show 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 1'), findsOneWidget);
+
+    await tester.tap(find.text('show 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 2'), findsOneWidget);
+
+    // This will throw an assertion if regressed
+    await tester.tap(find.text('close 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 2'), findsOneWidget);
+    });
+
+  group('Modal BottomSheet avoids overlapping display features', () {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // This is RTL, so it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
+    });
+
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
+    });
   });
 
   group('constraints', () {

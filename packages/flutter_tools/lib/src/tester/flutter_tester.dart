@@ -36,9 +36,6 @@ class FlutterTesterApp extends ApplicationPackage {
 
   @override
   String get name => _directory.basename;
-
-  @override
-  File get packagesFile => _directory.childFile('.packages');
 }
 
 /// The device interface for running on the flutter_tester shell.

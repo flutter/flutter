@@ -58,9 +58,6 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> widget) : super(widget);
 
   @override
-  ConstrainedLayoutBuilder<ConstraintType> get widget => super.widget as ConstrainedLayoutBuilder<ConstraintType>;
-
-  @override
   RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
 
   Element? _child;
@@ -119,7 +116,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     void layoutCallback() {
       Widget built;
       try {
-        built = widget.builder(this, constraints);
+        built = (widget as ConstrainedLayoutBuilder<ConstraintType>).builder(this, constraints);
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         built = ErrorWidget.builder(
@@ -127,9 +124,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(this));
-            },
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode)
+                DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
       }
@@ -142,9 +140,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(this));
-            },
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode)
+                DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
         _child = updateChild(null, built, slot);

@@ -2,11 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:conductor_core/src/proto/conductor_state.pbenum.dart';
 import 'package:conductor_core/src/version.dart';
 
-import './common.dart';
+import 'common.dart';
 
 void main() {
+  group('Version.fromString()', () {
+    test('parses commits past a tagged stable', () {
+      const String versionString = '2.8.0-1-g2ef5ad67fe';
+      final Version version;
+      try {
+        version = Version.fromString(versionString);
+      } on Exception catch (exception) {
+        fail('Failed parsing "$versionString" with:\n$exception');
+      }
+      expect(version.x, 2);
+      expect(version.y, 8);
+      expect(version.z, 0);
+      expect(version.m, isNull);
+      expect(version.n, isNull);
+      expect(version.commits, 1);
+      expect(version.type, VersionType.gitDescribe);
+    });
+  });
   group('Version.increment()', () {
     test('throws exception on nonsensical `level`', () {
       final List<String> levels = <String>['f', '0', 'xyz'];
@@ -88,7 +107,7 @@ void main() {
       const String candidateBranch = 'flutter-3.2-candidate.4';
       final Version version = Version.fromString(versionString);
       expect(
-        () => version.ensureValid(candidateBranch, 'n'),
+        () => version.ensureValid(candidateBranch, ReleaseType.BETA_HOTFIX),
         throwsExceptionWith(
           'Parsed version $versionString has a different x value than '
           'candidate branch $candidateBranch',
@@ -101,7 +120,7 @@ void main() {
       const String candidateBranch = 'flutter-1.15-candidate.4';
       final Version version = Version.fromString(versionString);
       expect(
-        () => version.ensureValid(candidateBranch, 'm'),
+        () => version.ensureValid(candidateBranch, ReleaseType.BETA_INITIAL),
         throwsExceptionWith(
           'Parsed version $versionString has a different y value than '
           'candidate branch $candidateBranch',
@@ -114,7 +133,7 @@ void main() {
       const String candidateBranch = 'flutter-1.2-candidate.0';
       final Version version = Version.fromString(versionString);
       expect(
-        () => version.ensureValid(candidateBranch, 'n'),
+        () => version.ensureValid(candidateBranch, ReleaseType.BETA_HOTFIX),
         throwsExceptionWith(
           'Parsed version $versionString has a different m value than '
           'candidate branch $candidateBranch',
@@ -127,7 +146,7 @@ void main() {
       const String candidateBranch = 'flutter-1.2-candidate.98';
       final Version version = Version.fromString(versionString);
       expect(
-        () => version.ensureValid(candidateBranch, 'n'),
+        () => version.ensureValid(candidateBranch, ReleaseType.STABLE_HOTFIX),
         isNot(throwsException),
       );
     });
@@ -137,20 +156,10 @@ void main() {
       const String candidateBranch = 'stable';
       final Version version = Version.fromString(versionString);
       expect(
-        () => version.ensureValid(candidateBranch, 'z'),
+        () => version.ensureValid(candidateBranch, ReleaseType.STABLE_HOTFIX),
         throwsExceptionWith(
           'Candidate branch $candidateBranch does not match the pattern',
         ),
-      );
-    });
-
-    test('does not validate m if incrementLetter is m', () {
-      const String versionString = '1.2.0-0.0.pre';
-      const String candidateBranch = 'flutter-1.2-candidate.42';
-      final Version version = Version.fromString(versionString);
-      expect(
-        () => version.ensureValid(candidateBranch, 'm'),
-        isNot(throwsException),
       );
     });
   });

@@ -66,7 +66,7 @@ void main() {
         )).style;
       }
 
-      final List<bool> _isSelected = <bool>[false, true];
+      final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         Material(
@@ -76,10 +76,10 @@ void main() {
                 child: ToggleButtons(
                   onPressed: (int index) {
                     setState(() {
-                      _isSelected[index] = !_isSelected[index];
+                      isSelected[index] = !isSelected[index];
                     });
                   },
-                  isSelected: _isSelected,
+                  isSelected: isSelected,
                   children: const <Widget>[
                     Text('First child'),
                     Text('Second child'),
@@ -91,8 +91,8 @@ void main() {
         ),
       );
 
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isTrue);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.87),
@@ -105,8 +105,8 @@ void main() {
       await tester.tap(find.text('Second child'));
       await tester.pumpAndSettle();
 
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isFalse);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isFalse);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.87),
@@ -127,14 +127,14 @@ void main() {
           matching: find.byType(DefaultTextStyle),
         )).style;
       }
-      final List<bool> _isSelected = <bool>[false, true];
+      final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         Material(
           child: boilerplate(
             child: ToggleButtons(
-              isSelected: _isSelected,
+              isSelected: isSelected,
               children: const <Widget>[
                 Text('First child'),
                 Text('Second child'),
@@ -144,8 +144,8 @@ void main() {
         ),
       );
 
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isTrue);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.38),
@@ -159,8 +159,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Nothing should change
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isTrue);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.38),
@@ -1819,7 +1819,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1840,7 +1840,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1860,7 +1860,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('ToggleButtons focus, hover, and highlight elevations are 0', (WidgetTester tester) async {

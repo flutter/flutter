@@ -27,7 +27,6 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -65,25 +64,6 @@ public class MainActivity extends FlutterActivity {
             }
             AccessibilityNodeInfo node = provider.createAccessibilityNodeInfo(id);
             result.success(convertSemantics(node, id));
-            return;
-        }
-        if (methodCall.method.equals("sendSemanticsFocus")) {
-            Map<String, Object> data = methodCall.arguments();
-            @SuppressWarnings("unchecked")
-            Integer id = (Integer) data.get("id");
-            if (id == null) {
-                result.error("No ID provided", "", null);
-                return;
-            }
-            if (provider == null) {
-                result.error("Semantics not enabled", "", null);
-                return;
-            }
-            AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-            event.setPackageName(flutterView.getContext().getPackageName());
-            event.setSource(flutterView, id);
-            flutterView.getParent().requestSendAccessibilityEvent(flutterView, event);
-            result.success(null);
             return;
         }
         result.notImplemented();

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'android/android_studio_validator.dart';
@@ -10,6 +11,7 @@ import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
@@ -22,6 +24,7 @@ import 'doctor_validator.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
+import 'http_host_validator.dart';
 import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -127,11 +130,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         NoIdeValidator(),
       if (proxyValidator.shouldShow)
         proxyValidator,
-      if (globals.deviceManager?.canListAnything == true)
+      if (globals.deviceManager?.canListAnything ?? false)
         DeviceValidator(
           deviceManager: globals.deviceManager,
           userMessages: globals.userMessages,
         ),
+      HttpHostValidator(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+        httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
+      ),
     ];
     return _validators!;
   }
@@ -145,11 +153,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows!.add(globals.iosWorkflow!);
       }
 
-      if (androidWorkflow?.appliesToHostPlatform == true) {
+      if (androidWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(androidWorkflow!);
       }
 
-      if (fuchsiaWorkflow?.appliesToHostPlatform == true) {
+      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(fuchsiaWorkflow!);
       }
 
@@ -161,7 +169,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows!.add(macOSWorkflow);
       }
 
-      if (windowsWorkflow?.appliesToHostPlatform == true) {
+      if (windowsWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(windowsWorkflow!);
       }
 
@@ -283,11 +291,17 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
+  ///
+  /// To exclude personally identifiable information like device names and
+  /// paths, set [showPii] to false.
   Future<bool> diagnose({
     bool androidLicenses = false,
     bool verbose = true,
     bool showColor = true,
     AndroidLicenseValidator? androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool sendEvent = true,
   }) async {
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
@@ -299,7 +313,7 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (final ValidatorTask validatorTask in startValidatorTasks()) {
+    for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner();
       ValidationResult result;
@@ -327,8 +341,9 @@ class Doctor {
         case ValidationType.installed:
           break;
       }
-
-      DoctorResultEvent(validator: validator, result: result).send();
+      if (sendEvent) {
+        DoctorResultEvent(validator: validator, result: result).send();
+      }
 
       final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
       if (result.statusInfo != null) {
@@ -344,7 +359,7 @@ class Doctor {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
-          for (final String line in '$indicator ${message.message}'.split('\n')) {
+          for (final String line in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split('\n')) {
             _logger.printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
@@ -520,7 +535,7 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await _deviceManager.getAllConnectedDevices();
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = await Device.descriptions(devices)
+      installedMessages = (await Device.descriptions(devices))
           .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
@@ -547,6 +562,37 @@ class DeviceValidator extends DoctorValidator {
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );
+    }
+  }
+}
+
+/// Wrapper for doctor to run multiple times with PII and without, running the validators only once.
+class DoctorText {
+  DoctorText(
+    BufferLogger logger, {
+    @visibleForTesting Doctor? doctor,
+  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
+
+  final BufferLogger _logger;
+  final Doctor _doctor;
+  bool _sendDoctorEvent = true;
+
+  late final Future<String> text = _runDiagnosis(true);
+  late final Future<String> piiStrippedText = _runDiagnosis(false);
+
+  // Start the validator tasks only once.
+  late final List<ValidatorTask> _validatorTasks = _doctor.startValidatorTasks();
+
+  Future<String> _runDiagnosis(bool showPii) async {
+    try {
+      await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, showPii: showPii, sendEvent: _sendDoctorEvent);
+      // Do not send the doctor event a second time.
+      _sendDoctorEvent = false;
+      final String text = _logger.statusText;
+      _logger.clear();
+      return text;
+    } on Exception catch (error, trace) {
+      return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
     }
   }
 }

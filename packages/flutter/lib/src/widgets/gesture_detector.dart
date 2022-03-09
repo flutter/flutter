@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 
 export 'package:flutter/gestures.dart' show
   DragDownDetails,
@@ -114,6 +115,8 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// If this widget has a child, it defers to that child for its sizing behavior.
 /// If it does not have a child, it grows to fit the parent instead.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
+///
 /// By default a GestureDetector with an invisible child ignores touches;
 /// this behavior can be controlled with [behavior].
 ///
@@ -167,6 +170,8 @@ class GestureDetector extends StatelessWidget {
   /// Horizontal and vertical drag callbacks cannot be used simultaneously
   /// because a combination of a horizontal and vertical drag is a pan. Simply
   /// use the pan callbacks instead.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
   ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
@@ -953,6 +958,7 @@ class GestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -980,7 +986,8 @@ class GestureDetector extends StatelessWidget {
             ..onSecondaryTapCancel = onSecondaryTapCancel
             ..onTertiaryTapDown = onTertiaryTapDown
             ..onTertiaryTapUp = onTertiaryTapUp
-            ..onTertiaryTapCancel = onTertiaryTapCancel;
+            ..onTertiaryTapCancel = onTertiaryTapCancel
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -992,7 +999,8 @@ class GestureDetector extends StatelessWidget {
           instance
             ..onDoubleTapDown = onDoubleTapDown
             ..onDoubleTap = onDoubleTap
-            ..onDoubleTapCancel = onDoubleTapCancel;
+            ..onDoubleTapCancel = onDoubleTapCancel
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1042,7 +1050,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryLongPressStart = onTertiaryLongPressStart
             ..onTertiaryLongPressMoveUpdate = onTertiaryLongPressMoveUpdate
             ..onTertiaryLongPressUp = onTertiaryLongPressUp
-            ..onTertiaryLongPressEnd = onTertiaryLongPressEnd;
+            ..onTertiaryLongPressEnd = onTertiaryLongPressEnd
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1061,7 +1070,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onVerticalDragUpdate
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1080,7 +1090,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onHorizontalDragUpdate
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1099,7 +1110,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onPanUpdate
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1112,7 +1124,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onScaleStart
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1128,7 +1141,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onForcePressStart
             ..onPeak = onForcePressPeak
             ..onUpdate = onForcePressUpdate
-            ..onEnd = onForcePressEnd;
+            ..onEnd = onForcePressEnd
+            ..gestureSettings = gestureSettings;
         },
       );
     }

@@ -14,6 +14,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     // The first call is a cache miss and will queue a microtask
@@ -71,6 +72,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
@@ -89,6 +91,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
@@ -107,6 +110,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
+      return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
@@ -121,6 +125,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
@@ -137,6 +142,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
@@ -165,6 +171,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.top]);
@@ -181,6 +188,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setSystemUIChangeCallback(null);

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor_validator.dart';
 
@@ -43,7 +44,7 @@ class ProxyValidator extends DoctorValidator {
       else
         ...<ValidationMessage>[
           ValidationMessage('NO_PROXY is $_noProxy'),
-          for (String host in const <String>['127.0.0.1', 'localhost'])
+          for (final String host in await _getLoopbackAddresses())
             if (_noProxy.contains(host))
               ValidationMessage('NO_PROXY contains $host')
             else
@@ -58,5 +59,22 @@ class ProxyValidator extends DoctorValidator {
       hasIssues ? ValidationType.partial : ValidationType.installed,
       messages,
     );
+  }
+
+  Future<List<String>> _getLoopbackAddresses() async {
+    final List<String> loopBackAddresses = <String>['localhost'];
+
+    final List<NetworkInterface> networkInterfaces =
+      await listNetworkInterfaces(includeLinkLocal: true, includeLoopback: true);
+
+    for (final NetworkInterface networkInterface in networkInterfaces) {
+      for (final InternetAddress internetAddress in networkInterface.addresses) {
+        if (internetAddress.isLoopback) {
+          loopBackAddresses.add(internetAddress.address);
+        }
+      }
+    }
+
+    return loopBackAddresses;
   }
 }

@@ -20,14 +20,18 @@ import 'task_result.dart';
 String cwd = Directory.current.path;
 
 /// The local engine to use for [flutter] and [evalFlutter], if any.
-String? get localEngine {
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localEngineFromEnv {
   const bool isDefined = bool.hasEnvironment('localEngine');
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
-String? get localEngineSrcPath {
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localEngineSrcPathFromEnv {
   const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
@@ -45,9 +49,9 @@ class ProcessInfo {
   @override
   String toString() {
     return '''
-  command : $command
-  started : $startTime
-  pid     : ${process.pid}
+  command: $command
+  started: $startTime
+  pid    : ${process.pid}
 '''
         .trim();
   }
@@ -275,7 +279,7 @@ Future<Process> startProcess(
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
-  print('\nExecuting: $command in $finalWorkingDirectory with environment $newEnvironment');
+  print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
   final Process process = await _processManager.start(
     <String>[executable, ...?arguments],
     environment: newEnvironment,
@@ -285,7 +289,6 @@ Future<Process> startProcess(
   _runningProcesses.add(processInfo);
 
   unawaited(process.exitCode.then<void>((int exitCode) {
-    print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
   }));
 
@@ -303,7 +306,7 @@ Future<void> forceQuitRunningProcesses() async {
   for (final ProcessInfo p in _runningProcesses) {
     print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
-      print('Failed to force quit process');
+      print('Failed to force quit process.');
     }
   }
   _runningProcesses.clear();
@@ -349,7 +352,7 @@ Future<int> _execute(
     stderr: stderr,
     printStdout: printStdout,
     printStderr: printStderr,
-    );
+  );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -373,23 +376,23 @@ Future<void> forwardStandardStreams(
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStdout) {
-          print('stdout: $line');
-        }
-        output?.writeln(line);
-      }, onDone: () { stdoutDone.complete(); });
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) {
+      if (printStdout) {
+        print('stdout: $line');
+      }
+      output?.writeln(line);
+    }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStderr) {
-          print('stderr: $line');
-        }
-        stderr?.writeln(line);
-      }, onDone: () { stderrDone.complete(); });
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) {
+      if (printStderr) {
+        print('stderr: $line');
+      }
+      stderr?.writeln(line);
+    }, onDone: () { stderrDone.complete(); });
 
   return Future.wait<void>(<Future<void>>[
     stdoutDone.future,
@@ -436,6 +439,8 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     'run',
     'screenshot',
   };
+  final String? localEngine = localEngineFromEnv;
+  final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -448,8 +453,8 @@ List<String> flutterCommandArgs(String command, List<String> options) {
       '--screenshot',
       hostAgent.dumpDirectory!.path,
     ],
-    if (localEngine != null) ...<String>['--local-engine', localEngine!],
-    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath!],
+    if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
   ];
 }

@@ -198,72 +198,45 @@ class ColorScheme with Diagnosticable {
     Color? inversePrimary,
     Color? shadow,
   }) {
-    final CorePalette palette = CorePalette.of(seedColor.value);
+    final Scheme scheme;
     switch (brightness) {
       case Brightness.light:
-        return ColorScheme(
-          primary: primary ?? Color(palette.primary.get(40)),
-          onPrimary: onPrimary ?? Color(palette.primary.get(100)),
-          primaryContainer: primaryContainer ?? Color(palette.primary.get(90)),
-          onPrimaryContainer: onPrimaryContainer ?? Color(palette.primary.get(10)),
-          secondary: secondary ?? Color(palette.secondary.get(40)),
-          onSecondary: onSecondary ?? Color(palette.secondary.get(100)),
-          secondaryContainer: secondaryContainer ?? Color(palette.secondary.get(90)),
-          onSecondaryContainer: onSecondaryContainer ?? Color(palette.secondary.get(10)),
-          tertiary: tertiary ?? Color(palette.tertiary.get(40)),
-          onTertiary: onTertiary ?? Color(palette.tertiary.get(100)),
-          tertiaryContainer: tertiaryContainer ?? Color(palette.tertiary.get(90)),
-          onTertiaryContainer: onTertiaryContainer ?? Color(palette.tertiary.get(10)),
-          error: error ?? Color(palette.error.get(40)),
-          onError: onError ?? Color(palette.error.get(100)),
-          errorContainer: errorContainer ?? Color(palette.error.get(90)),
-          onErrorContainer: onErrorContainer ?? Color(palette.error.get(10)),
-          outline: outline ?? Color(palette.neutralVariant.get(50)),
-          background: background ?? Color(palette.neutral.get(90)),
-          onBackground: onBackground ?? Color(palette.neutral.get(10)),
-          surface: surface ?? Color(palette.neutral.get(99)),
-          onSurface: onSurface ?? Color(palette.neutral.get(0)),
-          surfaceVariant: surfaceVariant ?? Color(palette.neutralVariant.get(90)),
-          onSurfaceVariant: onSurfaceVariant ?? Color(palette.neutralVariant.get(30)),
-          inverseSurface: inverseSurface ?? Color(palette.neutral.get(20)),
-          onInverseSurface: onInverseSurface ?? Color(palette.neutral.get(95)),
-          inversePrimary: inversePrimary ?? Color(palette.primary.get(80)),
-          shadow: shadow ?? Color(palette.neutral.get(0)),
-          brightness: brightness,
-        );
-
+        scheme = Scheme.light(seedColor.value);
+        break;
       case Brightness.dark:
-        return ColorScheme(
-          primary: primary ?? Color(palette.primary.get(80)),
-          onPrimary: onPrimary ?? Color(palette.primary.get(20)),
-          primaryContainer: primaryContainer ?? Color(palette.primary.get(70)),
-          onPrimaryContainer: onPrimaryContainer ?? Color(palette.primary.get(10)),
-          secondary: secondary ?? Color(palette.secondary.get(80)),
-          onSecondary: onSecondary ?? Color(palette.secondary.get(20)),
-          secondaryContainer: secondaryContainer ?? Color(palette.secondary.get(70)),
-          onSecondaryContainer: onSecondaryContainer ?? Color(palette.secondary.get(10)),
-          tertiary: tertiary ?? Color(palette.tertiary.get(80)),
-          onTertiary: onTertiary ?? Color(palette.tertiary.get(20)),
-          tertiaryContainer: tertiaryContainer ?? Color(palette.tertiary.get(70)),
-          onTertiaryContainer: onTertiaryContainer ?? Color(palette.tertiary.get(10)),
-          error: error ?? Color(palette.error.get(80)),
-          onError: onError ?? Color(palette.error.get(20)),
-          errorContainer: errorContainer ?? Color(palette.error.get(70)),
-          onErrorContainer: onErrorContainer ?? Color(palette.error.get(10)),
-          outline: outline ?? Color(palette.neutralVariant.get(60)),
-          background: background ?? Color(palette.neutral.get(10)),
-          onBackground: onBackground ?? Color(palette.neutral.get(90)),
-          surface: surface ?? Color(palette.neutral.get(10)),
-          onSurface: onSurface ?? Color(palette.neutral.get(100)),
-          surfaceVariant: surfaceVariant ?? Color(palette.neutralVariant.get(30)),
-          onSurfaceVariant: onSurfaceVariant ?? Color(palette.neutralVariant.get(80)),
-          inverseSurface: inverseSurface ?? Color(palette.neutral.get(90)),
-          onInverseSurface: onInverseSurface ?? Color(palette.neutral.get(20)),
-          inversePrimary: inversePrimary ?? Color(palette.primary.get(40)),
-          shadow: shadow ?? Color(palette.neutral.get(0)),
-          brightness: brightness,
-        );
+        scheme = Scheme.dark(seedColor.value);
+        break;
     }
+    return ColorScheme(
+      primary: primary ?? Color(scheme.primary),
+      onPrimary: onPrimary ?? Color(scheme.onPrimary),
+      primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      secondary: secondary ?? Color(scheme.secondary),
+      onSecondary: onSecondary ?? Color(scheme.onSecondary),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      tertiary: tertiary ?? Color(scheme.tertiary),
+      onTertiary: onTertiary ?? Color(scheme.onTertiary),
+      tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      error: error ?? Color(scheme.error),
+      onError: onError ?? Color(scheme.onError),
+      errorContainer: errorContainer ?? Color(scheme.errorContainer),
+      onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
+      outline: outline ?? Color(scheme.outline),
+      background: background ?? Color(scheme.background),
+      onBackground: onBackground ?? Color(scheme.onBackground),
+      surface: surface ?? Color(scheme.surface),
+      onSurface: onSurface ?? Color(scheme.onSurface),
+      surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
+      onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
+      inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
+      onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
+      inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
+      shadow: shadow ?? Color(scheme.shadow),
+      brightness: brightness,
+    );
   }
 
   /// Create a ColorScheme based on a purple primary color that matches the
@@ -927,27 +900,27 @@ class ColorScheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<Object?>[
-      brightness,
-      primary,
-      onPrimary,
-      primaryContainer,
-      onPrimaryContainer,
-      secondary,
-      onSecondary,
-      secondaryContainer,
-      onSecondaryContainer,
-      tertiary,
-      onTertiary,
-      tertiaryContainer,
-      onTertiaryContainer,
-      error,
-      onError,
-      errorContainer,
-      onErrorContainer,
-      background,
-      onBackground,
+  int get hashCode => Object.hash(
+    brightness,
+    primary,
+    onPrimary,
+    primaryContainer,
+    onPrimaryContainer,
+    secondary,
+    onSecondary,
+    secondaryContainer,
+    onSecondaryContainer,
+    tertiary,
+    onTertiary,
+    tertiaryContainer,
+    onTertiaryContainer,
+    error,
+    onError,
+    errorContainer,
+    onErrorContainer,
+    background,
+    onBackground,
+    Object.hash(
       surface,
       onSurface,
       surfaceVariant,
@@ -959,8 +932,8 @@ class ColorScheme with Diagnosticable {
       inversePrimary,
       primaryVariant,
       secondaryVariant,
-    ]);
-  }
+    ),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

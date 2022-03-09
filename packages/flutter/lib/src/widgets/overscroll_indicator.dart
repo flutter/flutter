@@ -526,6 +526,11 @@ class _GlowController extends ChangeNotifier {
     canvas.drawCircle(center, radius, paint);
     canvas.restore();
   }
+
+  @override
+  String toString() {
+    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
+  }
 }
 
 class _GlowingOverscrollIndicatorPainter extends CustomPainter {
@@ -594,6 +599,11 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_GlowingOverscrollIndicatorPainter oldDelegate) {
     return oldDelegate.leadingController != leadingController
         || oldDelegate.trailingController != trailingController;
+  }
+
+  @override
+  String toString() {
+    return '_GlowingOverscrollIndicatorPainter($leadingController, $trailingController)';
   }
 }
 
@@ -697,7 +707,15 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
-            _stretchController.pull(notification.overscroll.abs() / notification.metrics.viewportDimension);
+            // We clamp the overscroll amount relative to the length of the viewport,
+            // which is the furthest distance a single pointer could pull on the
+            // screen. This is because more than one pointer will multiply the
+            // amount of overscroll - https://github.com/flutter/flutter/issues/11884
+            final double viewportDimension = notification.metrics.viewportDimension;
+            final double distanceForPull =
+              (notification.overscroll.abs() / viewportDimension) + _stretchController.pullDistance;
+            final double clampedOverscroll = distanceForPull.clamp(0, 1.0);
+            _stretchController.pull(clampedOverscroll);
           }
         }
       }
@@ -775,10 +793,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           // Only clip if the viewport dimension is smaller than that of the
           // screen size in the main axis. If the viewport takes up the whole
           // screen, overflow from transforming the viewport is irrelevant.
-          if (stretch != 0.0 && viewportDimension != mainAxisSize) {
-            return ClipRect(child: transform);
-          }
-          return transform;
+          return ClipRect(
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
+              ? Clip.hardEdge : Clip.none,
+            child: transform,
+          );
         },
       ),
     );
@@ -807,6 +826,8 @@ class _StretchController extends ChangeNotifier {
   late final Animation<double> _stretchSize;
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
+
+  double get pullDistance => _pullDistance;
   double _pullDistance = 0.0;
 
   // Constants from Android.
@@ -837,7 +858,7 @@ class _StretchController extends ChangeNotifier {
   /// in the main axis.
   void pull(double normalizedOverscroll) {
     assert(normalizedOverscroll >= 0.0);
-    _pullDistance = normalizedOverscroll + _pullDistance;
+    _pullDistance = normalizedOverscroll;
     _stretchSizeTween.begin = _stretchSize.value;
     final double linearIntensity =_stretchIntensity * _pullDistance;
     final double exponentialIntensity = _stretchIntensity * (1 - math.exp(-_pullDistance * _exponentialScalar));
@@ -891,6 +912,9 @@ class _StretchController extends ChangeNotifier {
     _stretchController.dispose();
     super.dispose();
   }
+
+  @override
+  String toString() => '_StretchController()';
 }
 
 /// A notification that either a [GlowingOverscrollIndicator] or a

@@ -46,7 +46,6 @@ export 'package:flutter/rendering.dart' show
   MouseCursor,
   SystemMouseCursors,
   MultiChildLayoutDelegate,
-  Overflow,
   PaintingContext,
   PointerCancelEvent,
   PointerCancelEventListener,
@@ -662,10 +661,15 @@ class ClipRect extends SingleChildRenderObjectWidget {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
-  const ClipRect({ Key? key, this.clipper, this.clipBehavior = Clip.hardEdge, Widget? child })
-      : assert(clipBehavior != null),
-        super(key: key, child: child);
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
+  const ClipRect({
+    Key? key,
+    this.clipper,
+    this.clipBehavior = Clip.hardEdge,
+    Widget? child,
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect>? clipper;
@@ -677,13 +681,11 @@ class ClipRect extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipRect createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
     return RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -723,7 +725,8 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   const ClipRRect({
     Key? key,
     this.borderRadius = BorderRadius.zero,
@@ -752,13 +755,15 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipRRect createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
-    return RenderClipRRect(borderRadius: borderRadius!, clipper: clipper, clipBehavior: clipBehavior);
+    return RenderClipRRect(
+      borderRadius: borderRadius!,
+      clipper: clipper,
+      clipBehavior: clipBehavior,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..borderRadius = borderRadius!
       ..clipBehavior = clipBehavior
@@ -793,10 +798,15 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
-  const ClipOval({Key? key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget? child})
-      : assert(clipBehavior != null),
-        super(key: key, child: child);
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
+  const ClipOval({
+    Key? key,
+    this.clipper,
+    this.clipBehavior = Clip.antiAlias,
+    Widget? child,
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -816,13 +826,11 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipOval createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
     return RenderClipOval(clipper: clipper, clipBehavior: clipBehavior);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -866,7 +874,8 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   const ClipPath({
     Key? key,
     this.clipper,
@@ -886,7 +895,6 @@ class ClipPath extends SingleChildRenderObjectWidget {
     Widget? child,
   }) {
     assert(clipBehavior != null);
-    assert(clipBehavior != Clip.none);
     assert(shape != null);
     return Builder(
       key: key,
@@ -917,13 +925,11 @@ class ClipPath extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipPath createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
     return RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -1014,7 +1020,8 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
       shape: shape,
       clipBehavior: clipBehavior,
       borderRadius: borderRadius,
-      elevation: elevation, color: color,
+      elevation: elevation,
+      color: color,
       shadowColor: shadowColor,
     );
   }
@@ -2138,6 +2145,15 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 /// Each child must be wrapped in a [LayoutId] widget to identify the widget for
 /// the delegate.
 ///
+/// {@tool dartpad}
+/// This example shows a [CustomMultiChildLayout] widget being used to lay out
+/// colored blocks from start to finish in a cascade that has some overlap.
+///
+/// It responds to changes in [Directionality] by re-laying out its children.
+///
+/// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [MultiChildLayoutDelegate], for details about how to control the layout of
@@ -3115,11 +3131,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   _OffstageElement(Offstage widget) : super(widget);
 
   @override
-  Offstage get widget => super.widget as Offstage;
-
-  @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!widget.offstage)
+    if (!(widget as Offstage).offstage)
       super.debugVisitOnstageChildren(visitor);
   }
 }
@@ -3344,6 +3357,8 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 /// contain the child. If [baseline] is less than the distance from
 /// the top of the child to the baseline of the child, then the child
 /// is top-aligned instead.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=8ZaFk0yvNlI}
 ///
 /// See also:
 ///
@@ -3695,11 +3710,6 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
-    @Deprecated(
-      'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-      'This feature was deprecated after v1.22.0-12.0.pre.',
-    )
-    this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
@@ -3740,24 +3750,6 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  /// Whether overflowing children should be clipped. See [Overflow].
-  ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  ///
-  /// When set to [Overflow.visible], the visible overflow area will not accept
-  /// hit testing.
-  ///
-  /// This overrides [clipBehavior] for now due to a staged roll out.
-  /// We will remove it and only use [clipBehavior] soon.
-  ///
-  /// Deprecated. Use [clipBehavior] instead.
-  @Deprecated(
-    'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-    'This feature was deprecated after v1.22.0-12.0.pre.',
-  )
-  final Overflow overflow;
-
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -3782,7 +3774,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
       fit: fit,
-      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3793,7 +3785,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..fit = fit
-      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -4822,6 +4814,8 @@ class Row extends Flex {
 /// child: what size should the inner children really be? The solution in this
 /// case is typically to remove the [Expanded] or [Flexible] widgets from around
 /// the inner children.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=jckqXR5CrPI}
 ///
 /// For more discussion about constraints, see [BoxConstraints].
 ///
@@ -6135,6 +6129,7 @@ class Listener extends SingleChildRenderObjectWidget {
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
+      if (onPointerHover != null) 'hover',
       if (onPointerCancel != null) 'cancel',
       if (onPointerSignal != null) 'signal',
     ];
@@ -6144,6 +6139,8 @@ class Listener extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that tracks the movement of mice.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1oF3pI5umck}
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is
@@ -6171,7 +6168,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    has buttons pressed.
-class MouseRegion extends StatefulWidget {
+class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
   /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
@@ -6183,10 +6180,10 @@ class MouseRegion extends StatefulWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
-    this.child,
+    Widget? child,
   }) : assert(cursor != null),
        assert(opaque != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// Triggered when a mouse pointer has entered this widget.
   ///
@@ -6333,13 +6330,26 @@ class MouseRegion extends StatefulWidget {
   /// This defaults to true.
   final bool opaque;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    return RenderMouseRegion(
+      onEnter: onEnter,
+      onHover: onHover,
+      onExit: onExit,
+      cursor: cursor,
+      opaque: opaque,
+    );
+  }
 
   @override
-  State<MouseRegion> createState() => _MouseRegionState();
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    renderObject
+      ..onEnter = onEnter
+      ..onHover = onHover
+      ..onExit = onExit
+      ..cursor = cursor
+      ..opaque = opaque;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -6354,51 +6364,6 @@ class MouseRegion extends StatefulWidget {
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
-  }
-}
-
-class _MouseRegionState extends State<MouseRegion> {
-  void handleExit(PointerExitEvent event) {
-    if (widget.onExit != null && mounted)
-      widget.onExit!(event);
-  }
-
-  PointerExitEventListener? getHandleExit() {
-    return widget.onExit == null ? null : handleExit;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _RawMouseRegion(this);
-  }
-}
-
-class _RawMouseRegion extends SingleChildRenderObjectWidget {
-  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
-
-  final _MouseRegionState owner;
-
-  @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    final MouseRegion widget = owner.widget;
-    return RenderMouseRegion(
-      onEnter: widget.onEnter,
-      onHover: widget.onHover,
-      onExit: owner.getHandleExit(),
-      cursor: widget.cursor,
-      opaque: widget.opaque,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    final MouseRegion widget = owner.widget;
-    renderObject
-      ..onEnter = widget.onEnter
-      ..onHover = widget.onHover
-      ..onExit = owner.getHandleExit()
-      ..cursor = widget.cursor
-      ..opaque = widget.opaque;
   }
 }
 

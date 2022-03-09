@@ -464,10 +464,10 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
       nextState = RefreshIndicatorMode.done;
       // Either schedule the RenderSliver to re-layout on the next frame
       // when not currently in a frame or schedule it on the next frame.
-      if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
         setState(() => hasSliverLayoutExtent = false);
       } else {
-        SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
           setState(() => hasSliverLayoutExtent = false);
         });
       }
@@ -493,7 +493,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
             // Call onRefresh after this frame finished since the function is
             // user supplied and we're always here in the middle of the sliver's
             // performLayout.
-            SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+            SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
               refreshTask = widget.onRefresh!()..whenComplete(() {
                 if (mounted) {
                   setState(() => refreshTask = null);

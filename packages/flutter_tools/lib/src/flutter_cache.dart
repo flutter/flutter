@@ -74,7 +74,7 @@ class PubDependencies extends ArtifactSet {
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
-       super(DevelopmentArtifact.universal);
+       super(DevelopmentArtifact.web);
 
   final String Function() _flutterRoot;
   final Logger _logger;
@@ -870,10 +870,13 @@ const List<List<String>> _windowsUwpDesktopBinaryDirs = <List<String>>[
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
   <String>['darwin-x64', 'darwin-x64/FlutterMacOS.framework.zip'],
+  <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/FlutterMacOS.framework.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/artifacts.zip'],
+  <String>['darwin-x64-profile', 'darwin-x64-profile/gen_snapshot.zip'],
   <String>['darwin-x64-release', 'darwin-x64-release/FlutterMacOS.framework.zip'],
   <String>['darwin-x64-release', 'darwin-x64-release/artifacts.zip'],
+  <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
 ];
 
 const List<List<String>> _osxBinaryDirs = <List<String>>[

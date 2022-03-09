@@ -13,6 +13,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await DeferredComponent.installDeferredComponent(componentName: 'testComponentName');
@@ -29,6 +30,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await DeferredComponent.uninstallDeferredComponent(componentName: 'testComponentName');

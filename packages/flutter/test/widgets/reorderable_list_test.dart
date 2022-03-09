@@ -467,6 +467,130 @@ void main() {
     expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
   });
 
+  testWidgets('SliverReorderableList calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(8, (int index) => index);
+    int? startIndex, endIndex;
+    final Finder item0 = find.textContaining('item 0');
+
+    await tester.pumpWidget(TestList(
+      items: items,
+      onReorderStart: (int index) {
+        startIndex = index;
+      },
+      onReorderEnd: (int index) {
+        endIndex = index;
+      },
+    ));
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(0));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 0 to index 3
+    await drag.moveBy(const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(3));
+
+    startIndex = null;
+    endIndex = null;
+
+    drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(2));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 2 to index 0
+    await drag.moveBy(const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(0));
+  });
+
+  testWidgets('ReorderableList calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(8, (int index) => index);
+    int? startIndex, endIndex;
+    final Finder item0 = find.textContaining('item 0');
+
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: ReorderableList(
+        itemCount: items.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            key: ValueKey<int>(items[index]),
+            height: 100,
+            child: ReorderableDelayedDragStartListener(
+              index: index,
+              child: Text('item ${items[index]}'),
+            ),
+          );
+        },
+        onReorder: handleReorder,
+        onReorderStart: (int index) {
+          startIndex = index;
+        },
+        onReorderEnd: (int index) {
+          endIndex = index;
+        },
+      ),
+    ));
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kLongPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(0));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 0 to index 3
+    await drag.moveBy(const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(3));
+
+    startIndex = null;
+    endIndex = null;
+
+    drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kLongPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(2));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 2 to index 0
+    await drag.moveBy(const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(0));
+  });
+
+
+
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
     expect(() => ReorderableList(
@@ -641,7 +765,7 @@ void main() {
       expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
     });
 
-    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+    testWidgets('It should not allow the item to be dragged when enabled is false', (WidgetTester tester) async {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
@@ -679,7 +803,7 @@ void main() {
       await tester.pump(kLongPressTimeout);
 
       // Drag enough to move down the first item
-      await drag.moveBy(const Offset(0, 150));
+      await drag.moveBy(const Offset(0, 50));
       await tester.pump();
       await drag.up();
       await tester.pumpAndSettle();
@@ -737,7 +861,7 @@ void main() {
       expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
     });
 
-    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+    testWidgets('It should not allow the item to be dragged when enabled is false', (WidgetTester tester) async {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
@@ -794,6 +918,8 @@ class TestList extends StatefulWidget {
     this.proxyDecorator,
     required this.items,
     this.reverse = false,
+    this.onReorderStart,
+    this.onReorderEnd,
   }) : super(key: key);
 
   final List<int> items;
@@ -801,6 +927,7 @@ class TestList extends StatefulWidget {
   final Color? iconColor;
   final ReorderItemProxyDecorator? proxyDecorator;
   final bool reverse;
+  final void Function(int)? onReorderStart, onReorderEnd;
 
   @override
   State<TestList> createState() => _TestListState();
@@ -849,6 +976,8 @@ class _TestListState extends State<TestList> {
                         });
                       },
                       proxyDecorator: widget.proxyDecorator,
+                      onReorderStart: widget.onReorderStart,
+                      onReorderEnd: widget.onReorderEnd,
                     ),
                   ],
                 );

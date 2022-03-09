@@ -96,12 +96,12 @@ abstract class Pub {
   /// Defaults to true.
   Future<void> get({
     required PubContext context,
-    String directory,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
@@ -122,11 +122,11 @@ abstract class Pub {
   Future<void> batch(
     List<String> arguments, {
     required PubContext context,
-    String directory,
-    MessageFilter filter,
+    String? directory,
+    MessageFilter? filter,
     String failureMessage = 'pub failed',
     required bool retry,
-    bool showTraceForErrors,
+    bool? showTraceForErrors,
   });
 
   /// Runs pub in 'interactive' mode.
@@ -135,7 +135,7 @@ abstract class Pub {
   /// stdout/stderr stream of pub to the corresponding streams of this process.
   Future<void> interactively(
     List<String> arguments, {
-    String directory,
+    String? directory,
     required io.Stdio stdio,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,

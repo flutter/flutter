@@ -29,7 +29,9 @@ void main() {
     NavigationBarThemeData(
       height: 200.0,
       backgroundColor: const Color(0x00000099),
+      elevation: 20.0,
       indicatorColor: const Color(0x00000098),
+      indicatorShape: const CircleBorder(),
       labelTextStyle: MaterialStateProperty.all(const TextStyle(fontSize: 7.0)),
       iconTheme: MaterialStateProperty.all(const IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
@@ -42,20 +44,24 @@ void main() {
 
     expect(description[0], 'height: 200.0');
     expect(description[1], 'backgroundColor: Color(0x00000099)');
-    expect(description[2], 'indicatorColor: Color(0x00000098)');
-    expect(description[3], 'labelTextStyle: MaterialStateProperty.all(TextStyle(inherit: true, size: 7.0))');
+    expect(description[2], 'elevation: 20.0');
+    expect(description[3], 'indicatorColor: Color(0x00000098)');
+    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
+    expect(description[5], 'labelTextStyle: MaterialStateProperty.all(TextStyle(inherit: true, size: 7.0))');
 
     // Ignore instance address for IconThemeData.
-    expect(description[4].contains('iconTheme: MaterialStateProperty.all(IconThemeData'), isTrue);
-    expect(description[4].contains('(color: Color(0x00000097))'), isTrue);
+    expect(description[6].contains('iconTheme: MaterialStateProperty.all(IconThemeData'), isTrue);
+    expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
 
-    expect(description[5], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
+    expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
   testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
+    const double elevation = 42.0;
     const Color indicatorColor = Color(0x00000002);
+    const ShapeBorder indicatorShape = CircleBorder();
     const double selectedIconSize = 25.0;
     const double unselectedIconSize = 23.0;
     const Color selectedIconColor = Color(0x00000003);
@@ -73,7 +79,9 @@ void main() {
             data: NavigationBarThemeData(
               height: height,
               backgroundColor: backgroundColor,
+              elevation: elevation,
               indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
               iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const IconThemeData(
@@ -106,7 +114,9 @@ void main() {
 
     expect(_barHeight(tester), height);
     expect(_barMaterial(tester).color, backgroundColor);
+    expect(_barMaterial(tester).elevation, elevation);
     expect(_indicator(tester)?.color, indicatorColor);
+    expect(_indicator(tester)?.shape, indicatorShape);
     expect(_selectedIconTheme(tester).size, selectedIconSize);
     expect(_selectedIconTheme(tester).color, selectedIconColor);
     expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
@@ -121,6 +131,7 @@ void main() {
   testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
+    const double elevation = 42.0;
     const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
 
     await tester.pumpWidget(
@@ -129,11 +140,13 @@ void main() {
           bottomNavigationBar: NavigationBarTheme(
             data: const NavigationBarThemeData(
               height: 100.0,
+              elevation: 18.0,
               backgroundColor: Color(0x00000099),
               labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
             ),
             child: NavigationBar(
               height: height,
+              elevation: elevation,
               backgroundColor: backgroundColor,
               labelBehavior: labelBehavior,
               destinations: _destinations(),
@@ -145,6 +158,7 @@ void main() {
 
     expect(_barHeight(tester), height);
     expect(_barMaterial(tester).color, backgroundColor);
+    expect(_barMaterial(tester).elevation, elevation);
     expect(_labelBehavior(tester), labelBehavior);
   });
 }
@@ -179,13 +193,13 @@ Material _barMaterial(WidgetTester tester) {
   );
 }
 
-BoxDecoration? _indicator(WidgetTester tester) {
+ShapeDecoration? _indicator(WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(FadeTransition),
       matching: find.byType(Container),
     ),
-  ).decoration as BoxDecoration?;
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {

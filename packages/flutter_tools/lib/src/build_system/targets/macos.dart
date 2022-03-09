@@ -36,7 +36,7 @@ abstract class UnpackMacOS extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/FlutterMacOS'),
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
   ];
 
   @override
@@ -67,7 +67,11 @@ abstract class UnpackMacOS extends Target {
       );
     }
 
-    final File frameworkBinary = environment.outputDir.childDirectory('FlutterMacOS.framework').childFile('FlutterMacOS');
+    final File frameworkBinary = environment.outputDir
+      .childDirectory('FlutterMacOS.framework')
+      .childDirectory('Versions')
+      .childDirectory('A')
+      .childFile('FlutterMacOS');
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');

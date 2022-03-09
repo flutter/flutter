@@ -48,7 +48,7 @@ class ViewConfiguration {
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio);
+  int get hashCode => Object.hash(size, devicePixelRatio);
 
   @override
   String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
@@ -220,7 +220,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    Timeline.startSync('Compositing', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    if (!kReleaseMode) {
+      Timeline.startSync('COMPOSITING', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
@@ -234,7 +236,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         return true;
       }());
     } finally {
-      Timeline.finishSync();
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 
@@ -261,30 +265,49 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     //    |                        |
     //    ++++++++++++++++++++++++++ <- bounds.bottom
     final Rect bounds = paintBounds;
-    // Center of the status bar
-    final Offset top = Offset(
-      // Horizontal center of the screen
-      bounds.center.dx,
-      // The vertical center of the system status bar. The system status bar
-      // height is kept as top window padding.
-      _window.padding.top / 2.0,
-    );
-    // Center of the navigation bar
-    final Offset bottom = Offset(
-      // Horizontal center of the screen
-      bounds.center.dx,
-      // Vertical center of the system navigation bar. The system navigation bar
-      // height is kept as bottom window padding. The "1" needs to be subtracted
-      // from the bottom because available pixels are in (0..bottom) range.
-      // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
-      // bottom drawn pixel is at 1919 position.
-      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
-    );
-    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
-    // Only android has a customizable system navigation bar.
+
+    // Only Android / iOS / Fuchsia have a customizable status bar.
+    SystemUiOverlayStyle? upperOverlayStyle;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        // Center of the status bar
+        final Offset top = Offset(
+          // Horizontal center of the screen
+          bounds.center.dx,
+          // The vertical center of the system status bar. The system status bar
+          // height is kept as top window padding.
+          _window.padding.top / 2.0,
+        );
+        upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    // Only Android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        // If there is no bottom view padding, then there is no navigation bar
+        // and the hit test can be skipped.
+        if (_window.viewPadding.bottom == 0.0) {
+          break;
+        }
+        // Center of the navigation bar
+        final Offset bottom = Offset(
+          // Horizontal center of the screen
+          bounds.center.dx,
+          // Vertical center of the system navigation bar. The system navigation bar
+          // height is kept as bottom window padding. The "1" needs to be subtracted
+          // from the bottom because available pixels are in (0..bottom) range.
+          // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
+          // bottom drawn pixel is at 1919 position.
+          bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+        );
         lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
         break;
       case TargetPlatform.fuchsia:

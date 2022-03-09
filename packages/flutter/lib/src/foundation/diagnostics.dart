@@ -870,12 +870,12 @@ class _PrefixedStringBuilder {
   ///
   /// This method wraps a sequence of text where only some spans of text can be
   /// used as wrap boundaries.
-  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
+  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) {
     if (message.length + startOffset < width) {
       // Nothing to do. The line doesn't wrap.
-      yield message;
-      return;
+      return <String>[message];
     }
+    final List<String> wrappedLine = <String>[];
     int startForLengthCalculations = -startOffset;
     bool addPrefix = false;
     int index = 0;
@@ -920,10 +920,10 @@ class _PrefixedStringBuilder {
               lastWordEnd = index;
             }
             final String line = message.substring(start, lastWordEnd);
-            yield line;
+            wrappedLine.add(line);
             addPrefix = true;
             if (lastWordEnd >= message.length)
-              return;
+              return wrappedLine;
             // just yielded a line
             if (lastWordEnd == index) {
               // we broke at current position
@@ -1265,7 +1265,7 @@ class TextTreeRenderer {
     // we should not place a separator between the name and the value.
     // Essentially in this case the properties are treated a bit like a value.
     if ((properties.isNotEmpty || children.isNotEmpty || node.emptyBodyDescription != null) &&
-        (node.showSeparator || description?.isNotEmpty == true)) {
+        (node.showSeparator || description.isNotEmpty)) {
       builder.write(config.afterDescriptionIfBody);
     }
 
@@ -1474,7 +1474,7 @@ abstract class DiagnosticsNode {
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
-  String? toDescription({ TextTreeConfiguration? parentConfiguration });
+  String toDescription({ TextTreeConfiguration? parentConfiguration });
 
   /// Whether to show a separator between [name] and description.
   ///
@@ -1544,6 +1544,44 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
+  /// Converts the properties ([getProperties]) of this node to a form useful
+  /// for [Timeline] event arguments (as in [Timeline.startSync]).
+  ///
+  /// The properties specified by [timelineArgumentsIndicatingLandmarkEvent] are
+  /// included in the result.
+  ///
+  /// Children ([getChildren]) are omitted.
+  ///
+  /// This method is only valid in debug builds. In profile builds, this method
+  /// throws an exception. In release builds, it returns a copy of
+  /// [timelineArgumentsIndicatingLandmarkEvent] with no arguments added.
+  ///
+  /// See also:
+  ///
+  ///  * [toJsonMap], which converts this node to a structured form intended for
+  ///    data exchange (e.g. with an IDE).
+  Map<String, String> toTimelineArguments() {
+    final Map<String, String> result = Map<String, String>.of(timelineArgumentsIndicatingLandmarkEvent);
+    if (!kReleaseMode) {
+      // We don't throw in release builds, to avoid hurting users. We also don't do anything useful.
+      if (kProfileMode) {
+        throw FlutterError(
+          // Parts of this string are searched for verbatim by a test in dev/bots/test.dart.
+          '$DiagnosticsNode.toTimelineArguments used in non-debug build.\n'
+          'The $DiagnosticsNode.toTimelineArguments API is expensive and causes timeline traces '
+          'to be non-representative. As such, it should not be used in profile builds. However, '
+          'this application is compiled in profile mode and yet still invoked the method.'
+        );
+      }
+      for (final DiagnosticsNode property in getProperties()) {
+        if (property.name != null) {
+          result[property.name!] = property.toDescription(parentConfiguration: singleLineTextConfiguration);
+        }
+      }
+    }
+    return result;
+  }
+
   /// Serialize the node to a JSON map according to the configuration provided
   /// in the [DiagnosticsSerializationDelegate].
   ///
@@ -1579,7 +1617,7 @@ abstract class DiagnosticsNode {
           'allowTruncate': allowTruncate,
         if (hasChildren)
           'hasChildren': hasChildren,
-        if (linePrefix?.isNotEmpty == true)
+        if (linePrefix?.isNotEmpty ?? false)
           'linePrefix': linePrefix,
         if (!allowWrap)
           'allowWrap': allowWrap,
@@ -1655,7 +1693,7 @@ abstract class DiagnosticsNode {
       if (_isSingleLine(style)) {
         result = toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
       } else {
-        final String description = toDescription(parentConfiguration: parentConfiguration)!;
+        final String description = toDescription(parentConfiguration: parentConfiguration);
 
         if (name == null || name!.isEmpty || !showName) {
           result = description;
@@ -2171,7 +2209,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    if (value == true) {
+    if (value ?? false) {
       if (ifTrue != null)
         return ifTrue!;
     } else if (value == false) {
@@ -2183,7 +2221,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   bool get showName {
-    if (value == null || (value == true && ifTrue == null) || (value == false && ifFalse == null)) {
+    if (value == null || ((value ?? false) && ifTrue == null) || (!(value ?? true) && ifFalse == null)) {
       // We are missing a description for the flag value so we need to show the
       // flag name. The property will have DiagnosticLevel.hidden for this case
       // so users will not see this the property in this case unless they are
@@ -2195,7 +2233,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   DiagnosticLevel get level {
-    if (value == true) {
+    if (value ?? false) {
       if (ifTrue == null)
         return DiagnosticLevel.hidden;
     }
@@ -2552,12 +2590,10 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   //
   // For a null value, it is omitted unless `includeEmpty` is true and
   // [ifEntryNull] contains a corresponding description.
-  Iterable<String> _formattedValues() sync* {
-    for (final MapEntry<String, T?> entry in value.entries) {
-      if (entry.value != null) {
-        yield entry.key;
-      }
-    }
+  Iterable<String> _formattedValues() {
+    return value.entries
+        .where((MapEntry<String, T?> entry) => entry.value != null)
+        .map((MapEntry<String, T?> entry) => entry.key);
   }
 }
 
@@ -3558,7 +3594,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
     this.allowTruncate = false,
     List<DiagnosticsNode> children = const<DiagnosticsNode>[],
     List<DiagnosticsNode> properties = const <DiagnosticsNode>[],
-  }) : _description = description,
+  }) : _description = description ?? '',
        _children = children,
        _properties = properties,
     super(
@@ -3575,7 +3611,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
   @override
   final DiagnosticLevel level;
 
-  final String? _description;
+  final String _description;
 
   @override
   final Object? value;
@@ -3590,7 +3626,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
   List<DiagnosticsNode> getProperties() => _properties;
 
   @override
-  String? toDescription({TextTreeConfiguration? parentConfiguration}) => _description;
+  String toDescription({TextTreeConfiguration? parentConfiguration}) => _description;
 }
 
 /// A delegate that configures how a hierarchy of [DiagnosticsNode]s should be

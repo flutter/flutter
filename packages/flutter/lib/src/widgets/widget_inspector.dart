@@ -688,7 +688,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 ///
 /// Calls to this object are typically made from GUI tools such as the [Flutter
 /// IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
-/// using the [Dart VM Service protocol](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md).
+/// using the [Dart VM Service](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md).
 /// This class uses its own object id and manages object lifecycles itself
 /// instead of depending on the [object ids](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getobject)
 /// specified by the VM Service Protocol because the VM Service Protocol ids
@@ -906,7 +906,7 @@ mixin WidgetInspectorService {
   /// This is expensive and should not be called except during development.
   @protected
   Future<void> forceRebuild() {
-    final WidgetsBinding binding = WidgetsBinding.instance!;
+    final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.renderViewElement != null) {
       binding.buildOwner!.reassemble(binding.renderViewElement!, null);
       return binding.endOfFrame;
@@ -989,7 +989,7 @@ mixin WidgetInspectorService {
       return true;
     }());
 
-    SchedulerBinding.instance!.addPersistentFrameCallback(_onFrameStart);
+    SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
@@ -1056,7 +1056,7 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject root = RendererBinding.instance!.renderView;
+            final RenderObject root = RendererBinding.instance.renderView;
             markTreeNeedsPaint(root);
           } else {
             debugOnProfilePaint = null;
@@ -1279,7 +1279,7 @@ mixin WidgetInspectorService {
   @protected
   bool isWidgetTreeReady([ String? groupName ]) {
     return WidgetsBinding.instance != null &&
-           WidgetsBinding.instance!.debugDidSendFirstFrameEvent;
+           WidgetsBinding.instance.debugDidSendFirstFrameEvent;
   }
 
   /// Returns the Dart object associated with a reference id.
@@ -1383,12 +1383,12 @@ mixin WidgetInspectorService {
         developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
           selectionChangedCallback!();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          SchedulerBinding.instance!.scheduleTask(
+          SchedulerBinding.instance.scheduleTask(
             selectionChangedCallback!,
             Priority.touch,
           );
@@ -1419,7 +1419,7 @@ mixin WidgetInspectorService {
 
     final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
       queryParameters: <String, dynamic>{
-        'uri': connectedVmServiceUri!,
+        'uri': connectedVmServiceUri,
         'inspectorRef': inspectorRef,
       },
     );
@@ -1685,7 +1685,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1696,7 +1696,7 @@ mixin WidgetInspectorService {
 
   Map<String, Object?>? _getRootWidgetSummaryTree(String groupName) {
     return _nodeToJson(
-      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(groupName: groupName, subtreeDepth: 1000000, summaryTree: true, service: this),
     );
   }
@@ -1709,7 +1709,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1901,7 +1901,7 @@ mixin WidgetInspectorService {
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
-    SchedulerBinding.instance!.addPostFrameCallback(_onFrameEnd);
+    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd);
   }
 
   void _onFrameEnd(Duration timeStamp) {
@@ -2358,7 +2358,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // on the edge of the display. If the pointer is being dragged off the edge
     // of the display we do not want to select anything. A user can still select
     // a widget that is only at the exact screen margin by tapping.
-    final Rect bounds = (Offset.zero & (WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio)).deflate(_kOffScreenMargin);
+    final Rect bounds = (Offset.zero & (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
       setState(() {
         selection.clear();
@@ -2473,7 +2473,7 @@ class InspectorSelection {
 
   Element? _currentElement;
   set currentElement(Element? element) {
-    if (element?.debugIsDefunct == true) {
+    if (element?.debugIsDefunct ?? false) {
       _currentElement = null;
       _current = null;
       return;
@@ -2574,7 +2574,7 @@ class _TransformedRect {
   }
 
   @override
-  int get hashCode => hashValues(rect, transform);
+  int get hashCode => Object.hash(rect, transform);
 }
 
 /// State describing how the inspector overlay should be rendered.
@@ -2609,7 +2609,7 @@ class _InspectorOverlayRenderState {
   }
 
   @override
-  int get hashCode => hashValues(overlayRect, selected, hashList(candidates), tooltip);
+  int get hashCode => Object.hash(overlayRect, selected, Object.hashAll(candidates), tooltip);
 }
 
 const int _kMaxTooltipLines = 5;
@@ -2869,6 +2869,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
+    // ignore: unused_element
     this.name,
   });
 
@@ -2916,9 +2917,9 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 /// in [WidgetsBinding.initInstances].
 ///
 /// This is meant to be called only in debug mode. In other modes, it yields an empty list.
-Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) {
   if (!kDebugMode) {
-    return;
+    return <DiagnosticsNode>[];
   }
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
   ErrorSummary? errorSummary;
@@ -2929,20 +2930,22 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
     }
   }
   bool foundStackTrace = false;
+  final List<DiagnosticsNode> result = <DiagnosticsNode>[];
   for (final DiagnosticsNode node in properties) {
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node, errorSummary);
+      result.addAll(_parseDiagnosticsNode(node, errorSummary));
     } else {
       if (foundStackTrace) {
         pending.add(node);
       } else {
-        yield node;
+        result.add(node);
       }
     }
   }
-  yield* pending;
+  result.addAll(pending);
+  return result;
 }
 
 /// Transform the input [DiagnosticsNode].
@@ -2951,23 +2954,24 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
 Iterable<DiagnosticsNode> _parseDiagnosticsNode(
   DiagnosticsNode node,
   ErrorSummary? errorSummary,
-) sync* {
+) {
   assert(_isDebugCreator(node));
   try {
     final DebugCreator debugCreator = node.value! as DebugCreator;
     final Element element = debugCreator.element;
-    yield* _describeRelevantUserCode(element, errorSummary);
+    return _describeRelevantUserCode(element, errorSummary);
   } catch (error, stack) {
     scheduleMicrotask(() {
       FlutterError.reportError(FlutterErrorDetails(
         exception: error,
         stack: stack,
         library: 'widget inspector',
-        informationCollector: () sync* {
-          yield DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.');
-        }
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.'),
+        ],
       ));
     });
+    return <DiagnosticsNode>[];
   }
 }
 

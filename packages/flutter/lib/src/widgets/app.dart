@@ -1272,16 +1272,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // If window.defaultRouteName isn't '/', we should assume it was set
   // intentionally via `setInitialRoute`, and should override whatever is in
   // [widget.initialRoute].
-  String get _initialRouteName => WidgetsBinding.instance!.window.defaultRouteName != Navigator.defaultRouteName
-    ? WidgetsBinding.instance!.window.defaultRouteName
-    : widget.initialRoute ?? WidgetsBinding.instance!.window.defaultRouteName;
+  String get _initialRouteName => WidgetsBinding.instance.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
+    ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+    : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
   @override
   void initState() {
     super.initState();
     _updateRouting();
-    _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
-    WidgetsBinding.instance!.addObserver(this);
+    _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -1292,7 +1292,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _defaultRouteInformationProvider?.dispose();
     super.dispose();
   }
@@ -1333,7 +1333,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   bool get _usesRouter => widget.routerDelegate != null;
-  bool get _usesNavigator => widget.home != null || widget.routes?.isNotEmpty == true || widget.onGenerateRoute != null || widget.onUnknownRoute != null;
+  bool get _usesNavigator => widget.home != null
+      || (widget.routes?.isNotEmpty ?? false)
+      || widget.onGenerateRoute != null
+      || widget.onUnknownRoute != null;
 
   // ROUTER
 
@@ -1472,10 +1475,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // of a particular LocalizationsDelegate.type is loaded so the
   // localizationsDelegate parameter can be used to override
   // WidgetsLocalizations.delegate.
-  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
-      yield* widget.localizationsDelegates!;
-    yield DefaultWidgetsLocalizations.delegate;
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
+    return <LocalizationsDelegate<dynamic>>[
+      if (widget.localizationsDelegates != null)
+        ...widget.localizationsDelegates!,
+      DefaultWidgetsLocalizations.delegate,
+    ];
   }
 
   // BUILDER
@@ -1496,33 +1501,33 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       FlutterError.reportError(FlutterErrorDetails(
         exception: "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
         library: 'widgets',
-        informationCollector: () sync* {
-          for (final Type unsupportedType in unsupportedTypes) {
-            yield ErrorDescription(
+        informationCollector: () => <DiagnosticsNode>[
+          for (final Type unsupportedType in unsupportedTypes)
+            ErrorDescription(
               '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
-            );
-          }
-          yield ErrorSpacer();
-          if (unsupportedTypes.length == 1 && unsupportedTypes.single.toString() == 'CupertinoLocalizations') {
+            ),
+          ErrorSpacer(),
+          if (unsupportedTypes.length == 1 && unsupportedTypes.single.toString() == 'CupertinoLocalizations')
             // We previously explicitly avoided checking for this class so it's not uncommon for applications
             // to have omitted importing the required delegate.
-            yield ErrorHint(
-              'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
-              'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
-              'the appropriate Cupertino localizations.'
-            );
-            yield ErrorSpacer();
-          }
-          yield ErrorHint(
+            ...<DiagnosticsNode>[
+              ErrorHint(
+                'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
+                'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
+                'the appropriate Cupertino localizations.'
+              ),
+              ErrorSpacer(),
+            ],
+          ErrorHint(
             'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}'
-          );
-          yield ErrorSpacer();
-          yield ErrorDescription(
+          ),
+          ErrorSpacer(),
+          ErrorDescription(
             'See https://flutter.dev/tutorials/internationalization/ for more '
             "information about configuring an app's locale, supportedLocales, "
             'and localizationsDelegates parameters.',
-          );
-        },
+          ),
+        ],
       ));
       return true;
     }());

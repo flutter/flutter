@@ -55,7 +55,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
 /// [SliverOverlapAbsorber]/[SliverOverlapInjector] pair to make the inner lists
@@ -110,7 +110,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// configuration, the flexible space of the app bar will open and collapse,
 /// while the primary portion of the app bar remains pinned.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
 /// floating behavior is coordinated between the outer and inner [Scrollable]s,
@@ -140,7 +140,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// for the nested "inner" scroll view below to end up under the [SliverAppBar]
 /// even when the inner scroll view thinks it has not been scrolled.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
 /// e.g [NestedScrollView.floatHeaderSlivers], the [SliverAppBar] will animate
@@ -428,7 +428,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollPhysics _scrollPhysics = widget.physics?.applyTo(const ClampingScrollPhysics())
+    final ScrollPhysics scrollPhysics = widget.physics?.applyTo(const ClampingScrollPhysics())
       ?? widget.scrollBehavior?.getScrollPhysics(context).applyTo(const ClampingScrollPhysics())
       ?? const ClampingScrollPhysics();
 
@@ -441,7 +441,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
             dragStartBehavior: widget.dragStartBehavior,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
-            physics: _scrollPhysics,
+            physics: scrollPhysics,
             scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
             controller: _coordinator!._outerController,
             slivers: widget._buildSlivers(
@@ -890,6 +890,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   void pointerScroll(double delta) {
+    // If an update is made to pointer scrolling here, consider if the same
+    // (or similar) change should be made in
+    // ScrollPositionWithSingleContext.pointerScroll.
     assert(delta != 0.0);
 
     goIdle();
@@ -897,12 +900,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
 
-    // Set the isScrollingNotifier. Even if only one position actually receives
+    // Handle notifications. Even if only one position actually receives
     // the delta, the NestedScrollView's intention is to treat multiple
     // ScrollPositions as one.
     _outerPosition!.isScrollingNotifier.value = true;
-    for (final _NestedScrollPosition position in _innerPositions)
+    _outerPosition!.didStartScroll();
+    for (final _NestedScrollPosition position in _innerPositions) {
       position.isScrollingNotifier.value = true;
+      position.didStartScroll();
+    }
 
     if (_innerPositions.isEmpty) {
       // Does not enter overscroll.
@@ -949,6 +955,11 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         if (outerDelta != 0.0)
           _outerPosition!.applyClampedPointerSignalUpdate(outerDelta);
       }
+    }
+
+    _outerPosition!.didEndScroll();
+    for (final _NestedScrollPosition position in _innerPositions) {
+      position.didEndScroll();
     }
     goBallistic(0.0);
   }
@@ -1126,16 +1137,16 @@ class _NestedScrollController extends ScrollController {
     // the position change notifications because those happen synchronously
     // during a frame, at a time where it's too late to call setState. Since the
     // result is usually animated, the lag incurred is no big deal.
-    SchedulerBinding.instance!.addPostFrameCallback(
+    SchedulerBinding.instance.addPostFrameCallback(
       (Duration timeStamp) {
         coordinator.updateShadow();
       },
     );
   }
 
-  Iterable<_NestedScrollPosition> get nestedPositions sync* {
+  Iterable<_NestedScrollPosition> get nestedPositions {
     // TODO(vegorov): use instance method version of castFrom when it is available.
-    yield* Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
+    return Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
   }
 }
 

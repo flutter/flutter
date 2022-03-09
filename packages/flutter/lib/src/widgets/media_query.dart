@@ -67,6 +67,8 @@ enum Orientation {
 /// For example, by using the viewPadding property, padding would defer to the
 /// iPhone "safe area" regardless of whether a keyboard is showing.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+///
 /// The viewInsets and viewPadding are independent values, they're
 /// measured from the edges of the MediaQuery widget's bounds. Together they
 /// inform the [padding] property. The bounds of the top level MediaQuery
@@ -105,7 +107,8 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
-    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop)
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
+    this.displayFeatures = const <ui.DisplayFeature>[],
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -121,7 +124,8 @@ class MediaQueryData {
        assert(disableAnimations != null),
        assert(boldText != null),
        assert(navigationMode != null),
-       assert(gestureSettings != null);
+       assert(gestureSettings != null),
+       assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -130,23 +134,24 @@ class MediaQueryData {
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.SingletonFlutterWindow window)
+  MediaQueryData.fromWindow(ui.FlutterView window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = window.textScaleFactor,
-      platformBrightness = window.platformBrightness,
+      textScaleFactor = window.platformDispatcher.textScaleFactor,
+      platformBrightness = window.platformDispatcher.platformBrightness,
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.accessibilityFeatures.invertColors,
-      disableAnimations = window.accessibilityFeatures.disableAnimations,
-      boldText = window.accessibilityFeatures.boldText,
-      highContrast = window.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = window.platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(window);
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
+      displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -351,6 +356,17 @@ class MediaQueryData {
   /// gesture behavior over the framework constants.
   final DeviceGestureSettings gestureSettings;
 
+  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.DisplayFeatureType], which lists the different types of
+  ///  display features and explains the differences between them.
+  ///  * [dart:ui.DisplayFeatureState], which lists the possible states for
+  ///  folding features ([dart:ui.DisplayFeatureType.fold] and
+  ///  [dart:ui.DisplayFeatureType.hinge]).
+  final List<ui.DisplayFeature> displayFeatures;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -376,6 +392,7 @@ class MediaQueryData {
     bool? boldText,
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
+    List<ui.DisplayFeature>? displayFeatures,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -394,6 +411,7 @@ class MediaQueryData {
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
+      displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
 
@@ -445,6 +463,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -494,6 +513,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -543,6 +563,56 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
+    );
+  }
+
+  /// Creates a copy of this media query data by removing [displayFeatures] that
+  /// are completely outside the given sub-screen and adjusting the [padding],
+  /// [viewInsets] and [viewPadding] to be zero on the sides that are not
+  /// included in the sub-screen.
+  ///
+  /// Returns unmodified [MediaQueryData] if the sub-screen coincides with the
+  /// available screen space.
+  ///
+  /// Asserts in debug mode, if the given sub-screen is outside the available
+  /// screen space.
+  ///
+  /// See also:
+  ///
+  ///  * [DisplayFeatureSubScreen], which removes the display features that
+  ///    split the screen, from the [MediaQuery] and adds a [Padding] widget to
+  ///    position the child to match the selected sub-screen.
+  MediaQueryData removeDisplayFeatures(Rect subScreen) {
+    assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
+        subScreen.right <= size.width && subScreen.bottom <= size.height,
+        "'subScreen' argument cannot be outside the bounds of the screen");
+    if (subScreen.size == size && subScreen.topLeft == Offset.zero)
+      return this;
+    final double rightInset = size.width - subScreen.right;
+    final double bottomInset = size.height - subScreen.bottom;
+    return copyWith(
+      padding: EdgeInsets.only(
+        left: math.max(0.0, padding.left - subScreen.left),
+        top: math.max(0.0, padding.top - subScreen.top),
+        right: math.max(0.0, padding.right - rightInset),
+        bottom: math.max(0.0, padding.bottom - bottomInset),
+      ),
+      viewPadding: EdgeInsets.only(
+        left: math.max(0.0, viewPadding.left - subScreen.left),
+        top: math.max(0.0, viewPadding.top - subScreen.top),
+        right: math.max(0.0, viewPadding.right - rightInset),
+        bottom: math.max(0.0, viewPadding.bottom - bottomInset),
+      ),
+      viewInsets: EdgeInsets.only(
+        left: math.max(0.0, viewInsets.left - subScreen.left),
+        top: math.max(0.0, viewInsets.top - subScreen.top),
+        right: math.max(0.0, viewInsets.right - rightInset),
+        bottom: math.max(0.0, viewInsets.bottom - bottomInset),
+      ),
+      displayFeatures: displayFeatures.where(
+        (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds)
+      ).toList(),
     );
   }
 
@@ -565,29 +635,29 @@ class MediaQueryData {
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
         && other.navigationMode == navigationMode
-        && other.gestureSettings == gestureSettings;
+        && other.gestureSettings == gestureSettings
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      size,
-      devicePixelRatio,
-      textScaleFactor,
-      platformBrightness,
-      padding,
-      viewPadding,
-      viewInsets,
-      alwaysUse24HourFormat,
-      highContrast,
-      disableAnimations,
-      invertColors,
-      accessibleNavigation,
-      boldText,
-      navigationMode,
-      gestureSettings,
-    );
-  }
+  int get hashCode => Object.hash(
+    size,
+    devicePixelRatio,
+    textScaleFactor,
+    platformBrightness,
+    padding,
+    viewPadding,
+    viewInsets,
+    alwaysUse24HourFormat,
+    highContrast,
+    disableAnimations,
+    invertColors,
+    accessibleNavigation,
+    boldText,
+    navigationMode,
+    gestureSettings,
+    Object.hashAll(displayFeatures),
+  );
 
   @override
   String toString() {
@@ -607,6 +677,7 @@ class MediaQueryData {
       'boldText: $boldText',
       'navigationMode: ${navigationMode.name}',
       'gestureSettings: $gestureSettings',
+      'displayFeatures: $displayFeatures',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -976,7 +1047,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   // ACCESSIBILITY
@@ -1020,7 +1091,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     if (!kReleaseMode) {
       data = data.copyWith(platformBrightness: debugBrightnessOverride);
     }
@@ -1032,7 +1103,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
