@@ -200,11 +200,11 @@ class TestScrollPhysics extends ScrollPhysics {
   final List<double> scrollSimulationXList;
 
   @override
-  ScrollSimulation? createBallisticSimulation(
+  Simulation? createBallisticSimulation(
     ScrollMetrics position,
     double velocity,
   ) {
-    final ScrollSimulation? scrollSimulation =
+    final Simulation? scrollSimulation =
         super.createBallisticSimulation(position, velocity);
     if (scrollSimulation != null && scrollSimulationXList != null) {
       return TestScrollScrollSimulation(
@@ -222,13 +222,13 @@ class TestScrollPhysics extends ScrollPhysics {
   }
 }
 
-class TestScrollScrollSimulation extends ScrollSimulation {
+class TestScrollScrollSimulation extends Simulation with ScrollSimulationMixin {
   TestScrollScrollSimulation(
     this.innerScrollSimulation,
     this.scrollSimulationXList,
   );
 
-  final ScrollSimulation innerScrollSimulation;
+  final Simulation innerScrollSimulation;
 
   final List<double> scrollSimulationXList;
 
