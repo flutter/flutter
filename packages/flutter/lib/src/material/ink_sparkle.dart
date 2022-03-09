@@ -79,7 +79,7 @@ class InkSparkle extends InteractiveInkFeature {
   /// If [containedInkWell] is false, then [rectCallback] should be null.
   /// The ink ripple is clipped only to the edges of the [Material].
   /// This is the default.
-  /// 
+  ///
   /// Clipping can happen in 3 different ways:
   ///  1. If [customBorder] is provided, it is used to determine the path for
   ///     clipping.
@@ -388,7 +388,7 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// [clipCallback] is the callback used to obtain the [Rect] used for clipping
   /// the ink effect.
-  /// 
+  ///
   /// If [clipCallback] is null, no clipping is performed on the ink circle.
   ///
   /// [textDirection] is used by [customBorder] if it is non-null. This allows
