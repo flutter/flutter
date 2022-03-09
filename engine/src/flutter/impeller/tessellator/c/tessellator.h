@@ -7,7 +7,11 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/tessellator/tessellator.h"
 
+#ifdef _WIN32
+#define IMPELLER_API __declspec(dllexport)
+#else
 #define IMPELLER_API __attribute__((visibility("default")))
+#endif
 
 extern "C" {
 
@@ -36,7 +40,11 @@ IMPELLER_API void CubicTo(PathBuilder* builder,
 
 IMPELLER_API void Close(PathBuilder* builder);
 
-IMPELLER_API struct Vertices* Tessellate(PathBuilder* builder);
+IMPELLER_API struct Vertices* Tessellate(PathBuilder* builder,
+                                         int fill_type,
+                                         Scalar scale,
+                                         Scalar angle_tolerance,
+                                         Scalar cusp_limit);
 
 IMPELLER_API void DestroyVertices(Vertices* vertices);
 

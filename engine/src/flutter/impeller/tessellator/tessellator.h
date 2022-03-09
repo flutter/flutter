@@ -26,28 +26,26 @@ enum class WindingOrder {
 ///
 class Tessellator {
  public:
-  explicit Tessellator(FillType type);
+  Tessellator();
 
   ~Tessellator();
 
-  WindingOrder GetFrontFaceWinding() const;
-
   using VertexCallback = std::function<void(Point)>;
   //----------------------------------------------------------------------------
-  /// @brief      Generates triangles from the polyline. A callback is invoked
-  ///             for each vertex of the triangle.
+  /// @brief      Generates filled triangles from the polyline. A callback is
+  ///             invoked for each vertex of the triangle.
   ///
+  /// @param[in]  fill_type The fill rule to use when filling.
   /// @param[in]  polyline  The polyline
   /// @param[in]  callback  The callback
   ///
   /// @return If tessellation was successful.
   ///
-  bool Tessellate(const Path::Polyline& polyline,
+  bool Tessellate(FillType fill_type,
+                  const Path::Polyline& polyline,
                   VertexCallback callback) const;
 
  private:
-  const FillType fill_type_ = FillType::kNonZero;
-
   FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);
 };
 
