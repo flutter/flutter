@@ -60,7 +60,7 @@ vars = {
   'dart_webkit_inspection_protocol_rev': 'dd6fb5d8b536e19cedb384d0bbf1f5631923f1e8',
   'dart_yaml_edit_rev': 'df1452bfe1653286277a1a8f34dddf3e4fbedd9e',
 
-  'ocmock_tag': 'v3.7.1',
+  'ocmock_rev': 'c4ec0e3a7a9f56cfdbd0aa01f4f97bb4b75c5ef8', # v3.7.1
 
   # Download a prebuilt Dart SDK by default
   'download_dart_sdk': True,
@@ -381,7 +381,7 @@ deps = {
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/ocmock':
-   Var('ocmock_git') + '@' +  Var('ocmock_tag'),
+   Var('ocmock_git') + '@' +  Var('ocmock_rev'),
 
   'src/third_party/libjpeg-turbo':
    Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
@@ -390,7 +390,7 @@ deps = {
    Var('flutter_git') + '/third_party/libpng' + '@' + '45c760458b4a83d567cc42d21bd79a3b3fe21815',
 
   'src/third_party/libwebp':
-   Var('chromium_git') + '/webm/libwebp.git' + '@' + '1.2.0',
+   Var('chromium_git') + '/webm/libwebp.git' + '@' + '7dfde712a477e420968732161539011e0fd446cf', # 1.2.0
 
   'src/third_party/wuffs':
    Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
@@ -421,7 +421,7 @@ deps = {
 
    # Upstream Khronos Vulkan Headers (v1.1.130)
    'src/third_party/vulkan-headers':
-   Var('github_git') + '/KhronosGroup/Vulkan-Headers.git' + '@' + 'v1.1.130',
+   Var('github_git') + '/KhronosGroup/Vulkan-Headers.git' + '@' + '0e57fc1cfa56a203efe43e4dfb9b3c9e9b105593',
 
    # Downstream Fuchsia Vulkan Headers (v1.2.198)
   'src/third_party/fuchsia-vulkan':
@@ -441,7 +441,7 @@ deps = {
 
    # Dart packages
   'src/third_party/pkg/archive':
-  Var('github_git') + '/brendan-duncan/archive.git' + '@' + '3.1.2',
+  Var('github_git') + '/brendan-duncan/archive.git' + '@' + '9de7a0544457c6aba755ccb65abb41b0dc1db70d', # 3.1.2
 
   'src/third_party/pkg/equatable':
   Var('github_git') + '/felangel/equatable.git' + '@' + '0ba67c72db8bed75877fc1caafa74112ee0bd921', # 2.0.2
@@ -471,7 +471,7 @@ deps = {
   Var('github_git') + '/google/quiver-dart.git' + '@' + '66f473cca1332496e34a783ba4527b04388fd561', # 2.1.5
 
   'src/third_party/pkg/vector_math':
-  Var('github_git') + '/google/vector_math.dart.git' + '@' + 'v2.1.0',
+  Var('github_git') + '/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
 
   'src/third_party/imgui':
   Var('github_git') + '/ocornut/imgui.git' + '@' + '29d462ebce0275345a6ce4621d8fff0ded57c9e5',
