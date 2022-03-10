@@ -393,6 +393,8 @@ class ThemeData with Diagnosticable {
     platform ??= defaultTargetPlatform;
     switch (platform) {
       case TargetPlatform.android:
+        useInkSparkle = !kIsWeb;
+        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         materialTapTargetSize ??= MaterialTapTargetSize.padded;
@@ -405,9 +407,9 @@ class ThemeData with Diagnosticable {
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    splashFactory ??= InkSplash.splashFactory;
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
+    splashFactory ??= (useMaterial3 && useInkSparkle) ? InkSparkle.splashFactory : InkSplash.splashFactory;
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
