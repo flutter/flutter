@@ -784,7 +784,15 @@ abstract class AndroidViewController extends PlatformViewController {
   /// be bigger than zero.
   ///
   /// The first time a size is set triggers the creation of the Android view.
-  Future<void> setSize(Size size);
+  ///
+  /// Returns the buffer size where the platform view pixels are written to, or the size of
+  /// the platform view in logical pixels.
+  Future<Size> setSize(Size size);
+
+  /// Sets the offset of the platform view.
+  ///
+  /// `off` is the view's new offset in logical pixel.
+  Future<void> setOffset(Offset off);
 
   /// Returns the texture entry id that the Android view is rendering into.
   ///
@@ -975,7 +983,12 @@ class SurfaceAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> setSize(Size size) {
+  Future<Size> setSize(Size size) {
+    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
     throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
   }
 }
@@ -1012,25 +1025,53 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   int? get textureId => _textureId;
 
-  late Size _size;
+  late Size _initialSize;
+
+  /// The current offset of the platform view.
+  Offset _off = Offset.zero;
 
   @override
-  Future<void> setSize(Size size) async {
+  Future<Size> setSize(Size size) async {
     assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $viewId');
 
     assert(size != null);
     assert(!size.isEmpty);
 
     if (_state == _AndroidViewState.waitingForSize) {
-      _size = size;
-      return create();
+      _initialSize = size;
+      await create();
+      return _initialSize;
     }
 
-    await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic>{
-      'id': viewId,
-      'width': size.width,
-      'height': size.height,
-    });
+    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
+      'resize',
+      <String, dynamic>{
+        'id': viewId,
+        'width': size.width,
+        'height': size.height,
+      },
+    );
+    assert(meta != null);
+    assert(meta!.containsKey('width'));
+    assert(meta!.containsKey('height'));
+    return Size(meta!['width']! as double, meta['height']! as double);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) async {
+    if (off == _off || _state != _AndroidViewState.created)
+      return;
+
+    _off = off;
+
+    await SystemChannels.platform_views.invokeMethod<void>(
+      'offset',
+      <String, dynamic>{
+        'id': viewId,
+        'top': off.dy,
+        'left': off.dx,
+      },
+    );
   }
 
   /// Creates the Android View.
@@ -1043,13 +1084,13 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendCreateMessage() async {
-    assert(!_size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    assert(!_initialSize.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': _size.width,
-      'height': _size.height,
+      'width': _initialSize.width,
+      'height': _initialSize.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
     if (_creationParams != null) {

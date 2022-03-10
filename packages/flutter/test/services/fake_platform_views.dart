@@ -83,7 +83,12 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> setSize(Size size) {
+  Future<Size> setSize(Size size) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
     throw UnimplementedError();
   }
 
