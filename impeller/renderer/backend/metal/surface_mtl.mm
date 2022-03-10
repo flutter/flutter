@@ -12,6 +12,9 @@
 
 namespace impeller {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunguarded-availability-new"
+
 std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     std::shared_ptr<Context> context,
     CAMetalLayer* layer) {
@@ -114,5 +117,6 @@ bool SurfaceMTL::Present() const {
   [drawable_ present];
   return true;
 }
+#pragma GCC diagnostic pop
 
 }  // namespace impeller
