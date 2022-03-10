@@ -1096,7 +1096,7 @@ class ThemeData with Diagnosticable {
   /// some properties will adjust. However, just copying a [ThemeData] with
   /// [useMaterial3] set to true will not change any of the propertiers above
   /// of the resulting ThemeData. The properties that adjust are:
-  /// - The default [typography] will be [Typography.material2021]. Otherwise 
+  /// - The default [typography] will be [Typography.material2021]. Otherwise,
   ///   it will be [Typography.material2014].
   /// - The default [splashFactory] will be [InkSparkle] if and only if the
   /// platform is Android and the app is not running on the web. Otherwise,

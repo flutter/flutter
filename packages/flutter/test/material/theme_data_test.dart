@@ -269,7 +269,7 @@ void main() {
   });
 
   testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.fallback().copyWith(useMaterial3: true);
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     // Basic check that this theme is in fact using material 3.
     expect(theme.useMaterial3, true);
@@ -288,8 +288,7 @@ void main() {
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
   testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (WidgetTester tester) async {
-    // Currently, useMaterial3 defaults to false.
-    final ThemeData theme = ThemeData.fallback();
+    final ThemeData theme = ThemeData(useMaterial3: false);
 
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
