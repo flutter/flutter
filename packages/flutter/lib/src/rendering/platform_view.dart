@@ -208,7 +208,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   // location on the screen as the platform view widget in the Flutter framework.
   //
   // It also allows platform code to obtain the correct position of the Android
-  // native view on the screen
+  // native view on the screen.
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
