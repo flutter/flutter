@@ -1091,15 +1091,15 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// If a [ThemeData] is constructed with [useMaterial3] set to true, the
-  /// some properties will adjust. However, just copying a [ThemeData] with
-  /// [useMaterial3] set to true will not change any of the propertiers above
-  /// of the resulting ThemeData. The properties that adjust are:
-  /// - The default [typography] will be [Typography.material2021]. Otherwise,
-  ///   it will be [Typography.material2014].
-  /// - The default [splashFactory] will be [InkSparkle] if and only if the
-  /// platform is Android and the app is not running on the web. Otherwise,
-  ///   it will be [InkSplash].
+  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
+  /// some properties will get special defaults. However, just copying a [ThemeData]
+  /// with [useMaterial3] set to true will not change any of these properties in the
+  /// resulting [ThemeData]. These properties are:
+  /// | Property | [useMaterial3] default | fallback default |
+  /// |:---|:---|:---|
+  /// | [typography] | [Typography.material2021] | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* | [InkSplash] |
+  /// *if and only if the target platform is Android and the app is not running on the web.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
