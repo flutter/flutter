@@ -32,6 +32,7 @@ def GetDiaDll():
     '2015': 'msdia140.dll',
     '2017': 'msdia140.dll',
     '2019': 'msdia140.dll',
+    '2022': 'msdia140.dll',
   }
 
   # Don't let vs_toolchain overwrite our environment.
