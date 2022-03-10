@@ -592,9 +592,6 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     TargetPlatform platform = Theme.of(context).platform;
 
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
-      platform = TargetPlatform.iOS;
-
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
