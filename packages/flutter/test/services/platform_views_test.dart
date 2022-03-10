@@ -219,11 +219,11 @@ void main() {
       );
     });
 
-    test("set Android view's offset", () async {
+    test("set Android view's offset if view is created", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
       PlatformViewsService.initAndroidView(id: 7, viewType: 'webview', layoutDirection: TextDirection.ltr);
-      await viewController.setSize(const Size(100.0, 100.0));
+      await viewController.setSize(const Size(100.0, 100.0)); // Creates view.
       await viewController.setOffset(const Offset(10, 20));
       expect(
         viewsController.offsets,
@@ -231,6 +231,14 @@ void main() {
           7: const Offset(10, 20),
         }),
       );
+    });
+
+    test("doesn't set Android view's offset if view isn't created", () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController viewController =
+      PlatformViewsService.initAndroidView(id: 7, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.setOffset(const Offset(10, 20));
+      expect(viewsController.offsets, equals(<int, Offset>{}));
     });
 
     test('synchronizeToNativeViewHierarchy', () async {
