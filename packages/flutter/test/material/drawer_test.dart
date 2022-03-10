@@ -448,16 +448,10 @@ void main() {
 
   testWidgets('Drawer width defaults to Material spec',
       (WidgetTester tester) async {
-    const Key containerKey = Key('container');
-
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: Drawer(
-            child: Container(
-              key: containerKey,
-            ),
-          ),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -468,22 +462,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    final RenderBox box = tester.renderObject(find.byKey(containerKey));
+    final RenderBox box = tester.renderObject(find.byType(Drawer));
     expect(box.size.width, equals(304.0));
   });
 
-  testWidgets('Drawer width can be customized', (WidgetTester tester) async {
-    const Key containerKey = Key('container');
+  testWidgets('Drawer width can be customized by parameter', (WidgetTester tester) async {
     const double smallWidth = 200;
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           drawer: Drawer(
             width: smallWidth,
-            child: Container(
-              key: containerKey,
-            ),
           ),
         ),
       ),
@@ -494,7 +484,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final RenderBox box = tester.renderObject(find.byKey(containerKey));
+    final RenderBox box = tester.renderObject(find.byType(Drawer));
     expect(box.size.width, equals(smallWidth));
   });
 }

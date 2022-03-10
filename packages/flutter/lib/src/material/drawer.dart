@@ -143,7 +143,7 @@ class Drawer extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
-    this.width = _kWidth,
+    this.width,
     this.child,
     this.semanticLabel,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -174,8 +174,9 @@ class Drawer extends StatelessWidget {
 
   /// The width of the drawer.
   ///
-  /// Defaults to the Material spec.
-  final double width;
+  /// If this is null, then [DrawerThemeData.width] is used. If that is also
+  /// null, then it falls back to the Material spec's default (304.0).
+  final double? width;
 
   /// The widget below this widget in the tree.
   ///
@@ -217,7 +218,7 @@ class Drawer extends StatelessWidget {
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: BoxConstraints.expand(width: width),
+        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
         child: Material(
           color: backgroundColor ?? drawerTheme.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,
