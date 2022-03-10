@@ -1094,7 +1094,7 @@ class ThemeData with Diagnosticable {
   ///
   /// If true, the default Typography will be [Typography.material2021],
   /// otherwise it will default to [Typography.material2014].
-  /// 
+  ///
   /// If a [ThemeData] is constructed with [useMaterial3] set to true,
   /// the default [typography] will be [Typography.material2021],
   /// otherwise it will be [Typography.material2014].
@@ -1105,7 +1105,7 @@ class ThemeData with Diagnosticable {
   /// If true, the default [splashFactory] will be [InkSparkle] if and only if
   /// the platform is Android and the app is compiled to run on the web.
   /// Otherwise, it will default to [InkSplash].
-  /// 
+  ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
   /// before others and typography changes will be coming in stages.
