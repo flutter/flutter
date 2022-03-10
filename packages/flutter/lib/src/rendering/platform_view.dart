@@ -215,15 +215,6 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     });
   }
 
-  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
-
-  @override
-  void dispose() {
-    _isDisposed = true;
-    _clipRectLayer.layer = null;
-    super.dispose();
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_viewController.textureId == null)
@@ -250,6 +241,15 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     }
     _clipRectLayer.layer = null;
     _paintTexture(context, offset);
+  }
+
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _clipRectLayer.layer = null;
+    super.dispose();
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
