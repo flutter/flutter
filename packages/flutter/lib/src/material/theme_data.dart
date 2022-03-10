@@ -19,6 +19,7 @@ import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
@@ -391,6 +392,7 @@ class ThemeData with Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
+    bool useInkSparkle = false;
     switch (platform) {
       case TargetPlatform.android:
         useInkSparkle = !kIsWeb;
@@ -1143,6 +1145,10 @@ class ThemeData with Diagnosticable {
   ///
   /// If true, the default Typography will be [Typography.material2021],
   /// otherwise it will default to [Typography.material2014].
+  /// 
+  /// If true, the default [splashFactory] will be [InkSparkle] if and only if
+  /// the platform is Android and the app is compiled to run on the web.
+  /// Otherwise, it will default to [InkSplash].
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
