@@ -205,4 +205,56 @@ void main() {
     await tester.pumpAndSettle();
     expect(builtCount, 1);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('android can use CupertinoPageTransitionsBuilder', (WidgetTester tester) async {
+    int builtCount = 0;
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          builtCount++; // Increase [builtCount] each time the widget build
+          return TextButton(
+            child: const Text('pop'),
+            onPressed: () { Navigator.pop(context); },
+          );
+        },
+      ),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+              // iOS uses different PageTransitionsBuilder
+              TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    // No matter push or pop was called, the child widget should built only once.
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(builtCount, 1);
+
+    if (Theme.of(tester.element(find.text('pop'))).platform == TargetPlatform.iOS) {
+        await tester.tap(find.text('pop'));
+    } else {
+        final Size size = tester.getSize(find.byType(MaterialApp));
+        await tester.flingFrom(Offset(0, size.height / 2), Offset(size.width * 2 / 3, 0), 500);
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('push'), findsOneWidget);
+    expect(builtCount, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS}));
 }
