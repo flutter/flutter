@@ -29,7 +29,7 @@ import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
-import 'ink_sparkle.dart';
+import 'ink_sparkle.dart' show InkSparkle;
 import 'input_decorator.dart';
 import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
@@ -373,12 +373,8 @@ class ThemeData with Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
-    bool useInkSparkle = false;
     switch (platform) {
       case TargetPlatform.android:
-        useInkSparkle = !kIsWeb;
-        materialTapTargetSize ??= MaterialTapTargetSize.padded;
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         materialTapTargetSize ??= MaterialTapTargetSize.padded;
@@ -393,6 +389,7 @@ class ThemeData with Diagnosticable {
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
+    final bool useInkSparkle = (platform == TargetPlatform.android && !kIsWeb);
     splashFactory ??= (useMaterial3 && useInkSparkle) ? InkSparkle.splashFactory : InkSplash.splashFactory;
 
     // COLOR
@@ -1056,6 +1053,8 @@ class ThemeData with Diagnosticable {
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
   ///    more aggressively than the default.
+  ///  * [InkSparkle.splashFactory], which defines a more aggressive and organic
+  ///    splash with sparkle effects.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// The density value for specifying the compactness of various UI components.
