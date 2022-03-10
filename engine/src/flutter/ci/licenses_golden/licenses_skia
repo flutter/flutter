@@ -1,4 +1,4 @@
-Signature: 4875861e5859fc33e9d58552a38c4bab
+Signature: 90fef1e8cf0c47274670b889cca02cb3
 
 UNUSED LICENSES:
 
@@ -754,16 +754,6 @@ FILE: ../../../third_party/skia/experimental/tskit/package.json
 FILE: ../../../third_party/skia/experimental/tskit/tsconfig.json
 FILE: ../../../third_party/skia/experimental/wasm-hello-world/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/wasm-hello-world/hello_world.html
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/cpu.js
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/anim.mskp
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/index.html
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/sample.skp
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/externs.js
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/fonts/NotoMono-Regular.ttf
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/gpu.js
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/helper.js
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/example/index.html
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/BUILD
 FILE: ../../../third_party/skia/gm/BUILD.bazel
@@ -3336,7 +3326,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/BulkRectBench.cpp
 FILE: ../../../third_party/skia/bench/DDLRecorderBench.cpp
 FILE: ../../../third_party/skia/bench/SkSLBench.cpp
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp
 FILE: ../../../third_party/skia/gm/asyncrescaleandread.cpp
 FILE: ../../../third_party/skia/gm/crbug_908646.cpp
 FILE: ../../../third_party/skia/gm/crbug_946965.cpp
