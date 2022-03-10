@@ -397,7 +397,6 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
   for (const auto& command : commands_) {
     if (command.index_count == 0u) {
-      VALIDATION_LOG << "Zero index count in render pass command.";
       continue;
     }
 
@@ -503,6 +502,12 @@ bool RenderPassMTL::AddCommand(Command command) {
                         "of the render target.";
       return false;
     }
+  }
+
+  if (command.index_count == 0u) {
+    // Essentially a no-op. Don't record the command but this is not necessary
+    // an error either.
+    return true;
   }
 
   commands_.emplace_back(std::move(command));

@@ -30,7 +30,9 @@ impeller_component("compiler_lib") {
   ]
 }
 
-executable("impellerc") {
+impeller_component("impellerc") {
+  target_type = "executable"
+
   sources = [ "impellerc_main.cc" ]
 
   deps = [ ":compiler_lib" ]
