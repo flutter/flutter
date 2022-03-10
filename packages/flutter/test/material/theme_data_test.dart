@@ -268,6 +268,37 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
+  testWidgets('splashFactory returns InkSparkle for Android non-web only when useMaterial3 is true', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+        expect(material3Theme.spashFactory, equals(kIsWeb ? InkSplash.splashFactory : InkSparkle.splashFactory));
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(material3Theme.spashFactory, equals(InkSplash.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('splashFactory returns InkSplash for every platform and compilation target, including Android web, when useMaterial3 is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.light(useMaterial3: false);
+
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(theme.spashFactory, equals(InkSplash.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+
+
   testWidgets('VisualDensity.adaptivePlatformDensity returns adaptive values', (WidgetTester tester) async {
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
