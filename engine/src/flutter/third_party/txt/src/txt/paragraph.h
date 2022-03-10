@@ -20,6 +20,7 @@
 
 #include "line_metrics.h"
 #include "paragraph_style.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 class SkCanvas;
 
