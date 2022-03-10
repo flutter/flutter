@@ -203,8 +203,12 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   }
 
   // Sets the offset of the underlaying platform view on the platform side.
-  // When a PlatformViewLayer is used, the offset can be inferred from the
-  // transform stack provided by the layer tree.
+  //
+  // This allows the Android native view to draw the a11y highlights in the same
+  // location on the screen as the platform view widget in the Flutter framework.
+  //
+  // It also allows platform code to obtain the correct position of the Android
+  // native view on the screen
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
