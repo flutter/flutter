@@ -136,7 +136,6 @@ Future<void> runWebServiceWorkerTest({
     });
 
     expectRequestCounts(<String, int>{
-      '': 1,
       // Even though the server is caching index.html is downloaded twice,
       // once by the initial page load, and once by the service worker.
       // Other resources are loaded once only by the service worker.
