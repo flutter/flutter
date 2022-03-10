@@ -130,10 +130,8 @@ void main() {
   }
 
   // Related issue: https://github.com/flutter/flutter/issues/98115
-  testWidgets('test editable text scheduleShowCaretOnScreen with no animation when the window changes its metrics',
-          (WidgetTester tester)
+  testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester)
       async {
-
     final ScrollController scrollController = ScrollController();
     final Widget widget = MaterialApp(
       home: Scaffold(
@@ -143,11 +141,12 @@ void main() {
             children: <Widget>[
               Column(
                 children: List<Widget>.generate(
-                    5,
-                        (_) => Container(
-                      height: 1200.0,
-                      color: Colors.black12,
-                    )),
+                  5,
+                      (_) => Container(
+                    height: 1200.0,
+                    color: Colors.black12,
+                  ),
+                ),
               ),
               SizedBox(
                   height: 20,
@@ -157,23 +156,20 @@ void main() {
                     focusNode: focusNode,
                     style: const TextStyle(),
                     cursorColor: Colors.red,
-                  )),
+                  ),
+              ),
             ],
           ),
         ),
       ),
     );
-
-    await tester.pumpWidget(
-        widget
-    );
+    await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText));
     TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
     await tester.pump();
     final double offsetAfter = scrollController.offset;
-
     // The offset of the scrollController should change immediately after window changes its metrics
-    expect(0,isNot(equals(offsetAfter)));
+    expect(offsetAfter, isNot(0.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34538.

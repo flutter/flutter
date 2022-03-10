@@ -2526,7 +2526,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
 
-      if(withAnimation){
+      if (withAnimation) {
         _scrollController.animateTo(
           targetOffset.offset,
           duration: _caretAnimationDuration,
@@ -2537,7 +2537,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
-      }else{
+      } else {
         _scrollController.jumpTo(targetOffset.offset);
         renderEditable.showOnScreen(
           rect: caretPadding.inflateRect(targetOffset.rect),
@@ -2556,7 +2556,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       if (_lastBottomViewInset < WidgetsBinding.instance.window.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
-        // (On Both iOS and Android). So we don't need to show caret with animation.
+        // (on Both iOS and Android). So we don't need to show caret with animation.
         _scheduleShowCaretOnScreen(withAnimation: false);
       }
     }
