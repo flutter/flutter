@@ -20,13 +20,15 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
 
   Timeline.timeSync('$debugLabel: start', _void, flow: flow);
 
-  // We need to be explicit about which variables the closure captures because
-  // it may inadvertently capture Flow which cannot be sent over a SendPort
-  final R result = await Isolate.run(_fn(callback, message, flowId, debugLabel));
-
-  Timeline.timeSync('$debugLabel: end', _void, flow: Flow.end(flowId));
-
-  return result;
+  try {
+    // We need to be explicit about which variables the closure captures because
+    // it may inadvertently capture Flow which cannot be sent over a SendPort.
+    //
+    // We also need to await the future, so we time the end correctly.
+    return await Isolate.run(_fn(callback, message, flowId, debugLabel));
+  } finally {
+    Timeline.timeSync('$debugLabel: end', _void, flow: Flow.end(flowId));
+  }
 }
 
 FutureOr<R> Function() _fn<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, int flowId, String debugLabel) {
