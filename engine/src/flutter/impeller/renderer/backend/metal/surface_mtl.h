@@ -14,6 +14,12 @@ namespace impeller {
 
 class SurfaceMTL final : public Surface {
  public:
+#pragma GCC diagnostic push
+  // Disable the diagnostic for iOS Simulators. Metal without emulation isn't
+  // available prior to iOS 13 and that's what the simulator headers say when
+  // support for CAMetalLayer begins. CAMetalLayer is available on iOS 8.0 and
+  // above which is well below Flutters support level.
+#pragma GCC diagnostic ignored "-Wunguarded-availability-new"
   //----------------------------------------------------------------------------
   /// @brief      Wraps the current drawable of the given Metal layer to create
   ///             a surface Impeller can render to. The surface must be created
@@ -29,6 +35,7 @@ class SurfaceMTL final : public Surface {
   static std::unique_ptr<Surface> WrapCurrentMetalLayerDrawable(
       std::shared_ptr<Context> context,
       CAMetalLayer* layer);
+#pragma GCC diagnostic pop
 
   // |Surface|
   ~SurfaceMTL() override;
