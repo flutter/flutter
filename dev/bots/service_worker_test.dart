@@ -136,7 +136,6 @@ Future<void> runWebServiceWorkerTest({
     });
 
     expectRequestCounts(<String, int>{
-      '': 1,
       // Even though the server is caching index.html is downloaded twice,
       // once by the initial page load, and once by the service worker.
       // Other resources are loaded once only by the service worker.
@@ -183,7 +182,6 @@ Future<void> runWebServiceWorkerTest({
     expectRequestCounts(<String, int>{
       'index.html': 2,
       'flutter_service_worker.js': 2,
-      '': 1,
       'main.dart.js': 1,
       'assets/NOTICES': 1,
       'assets/AssetManifest.json': 1,
@@ -210,7 +208,6 @@ Future<void> runWebServiceWorkerTest({
     });
 
     expectRequestCounts(<String, int>{
-      '': 1,
       'index.html': 2,
       // We still download some resources multiple times if the server is non-caching.
       'main.dart.js': 2,
@@ -260,7 +257,6 @@ Future<void> runWebServiceWorkerTest({
       'flutter_service_worker.js': 1,
     });
     expectRequestCounts(<String, int>{
-      '': 1,
       'index.html': 2,
       'flutter_service_worker.js': 2,
       'main.dart.js': 2,
