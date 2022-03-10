@@ -1067,7 +1067,13 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setOffset(Offset off) async {
-    if (off == _off || _state != _AndroidViewState.created)
+    if (off == _off)
+      return;
+
+    // Don't set the offset unless the Android view has been created.
+    // The implementation of this method channel throws if the Android view for this viewId
+    // isn't addressable.
+    if (_state != _AndroidViewState.created)
       return;
 
     _off = off;
