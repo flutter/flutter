@@ -40,7 +40,7 @@ using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
-  Entity::BlendMode blend_mode = Entity::BlendMode::kSource;
+  Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
