@@ -19,10 +19,10 @@ Future<void> main() async {
     final Completer<void> childReadyCompleter = Completer<void>();
     String stdout = '';
     final Process process = await processManager.start(
-      <String>[
-        dartBash.path,
-        listenForSigtermScript.path,
-      ],
+        <String>[
+          dartBash.path,
+          listenForSigtermScript.path,
+        ],
     );
     final Future<Object?> stdoutFuture = process.stdout
         .transform<String>(utf8.decoder)
@@ -40,14 +40,14 @@ Future<void> main() async {
     await stdoutFuture;
     // Ensure child exited successfully
     expect(
-      await process.exitCode,
-      0,
-      reason: 'child process exited with code ${await process.exitCode}, and '
+        await process.exitCode,
+        0,
+        reason: 'child process exited with code ${await process.exitCode}, and '
         'stdout:\n$stdout',
     );
     expect(stdout, contains('Successfully received SIGTERM!'));
-    // Windows does not use the bash entrypoint
-  }, skip: platform.isWindows);
+  },
+  skip: platform.isWindows); // [intended] Windows does not use the bash entrypoint
 }
 
 // A test Dart app that will run until it receives SIGTERM
