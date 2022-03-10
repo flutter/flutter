@@ -2556,7 +2556,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       if (_lastBottomViewInset < WidgetsBinding.instance.window.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
-        // (on Both iOS and Android). So we don't need to show caret with animation.
+        // (on both iOS and Android). So we don't need to show caret with animation.
         _scheduleShowCaretOnScreen(withAnimation: false);
       }
     }
