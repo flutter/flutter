@@ -75,7 +75,7 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
     return entities_coverage;
   }
 
-  // If the delete tells us the coverage is smaller than it needs to be, then
+  // If the delegate tells us the coverage is smaller than it needs to be, then
   // great. OTOH, if the delegate is being wasteful, limit coverage to what is
   // actually needed.
   return entities_coverage->Intersection(delegate_coverage.value());

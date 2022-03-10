@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/filter_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
@@ -521,6 +522,9 @@ TEST_F(EntityTest, BlendingModeOptions) {
       case Entity::BlendMode::kDestinationOver:
         blend_mode_names.push_back("DestinationOver");
         blend_mode_values.push_back(Entity::BlendMode::kDestinationOver);
+      case Entity::BlendMode::kPlus:
+        blend_mode_names.push_back("Plus");
+        blend_mode_values.push_back(Entity::BlendMode::kPlus);
     };
   }
 
@@ -616,9 +620,33 @@ TEST_F(EntityTest, BezierCircleScaled) {
                   .Close()
                   .TakePath();
   entity.SetPath(path);
-  entity.SetTransformation(Matrix::MakeScale({20.0, 20.0, 1.0}).Translate({-80, -15, 0}));
+  entity.SetTransformation(
+      Matrix::MakeScale({20.0, 20.0, 1.0}).Translate({-80, -15, 0}));
   entity.SetContents(SolidColorContents::Make(Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
+TEST_F(EntityTest, Filters) {
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+  auto boston = CreateTextureForFixture("boston.jpg");
+  auto kalimba = CreateTextureForFixture("kalimba.jpg");
+  ASSERT_TRUE(bridge && boston && kalimba);
+
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    // Draws kalimba and overwrites it with boston.
+    auto blend0 = FilterContents::MakeBlend(
+        Entity::BlendMode::kSourceOver, {kalimba, boston});
+
+    // Adds bridge*3 to boston.
+    auto blend1 = FilterContents::MakeBlend(
+        Entity::BlendMode::kPlus, {bridge, bridge, blend0, bridge});
+
+    Entity entity;
+    entity.SetPath(PathBuilder{}.AddRect({100, 100, 300, 300}).TakePath());
+    entity.SetContents(blend1);
+    return entity.Render(context, pass);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
