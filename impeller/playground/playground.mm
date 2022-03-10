@@ -107,10 +107,29 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   ImGui::StyleColorsDark();
   ImGui::GetIO().IniFilename = nullptr;
 
-  if (::glfwInit() != GLFW_TRUE) {
-    return false;
+  // This guard is a hack to work around a problem where glfwCreateWindow
+  // hangs when opening a second window after GLFW has been reinitialized (for
+  // example, when flipping through multiple playground tests).
+  //
+  // Explanation:
+  //  * glfwCreateWindow calls [NSApp run], which begins running the event loop
+  //    on the current thread.
+  //  * GLFW then immediately stops the loop when applicationDidFinishLaunching
+  //    is fired.
+  //  * applicationDidFinishLaunching is only ever fired once during the
+  //    application's lifetime, so subsequent calls to [NSApp run] will always
+  //    hang with this setup.
+  //  * glfwInit resets the flag that guards against [NSApp run] being
+  //    called a second time, which causes the subsequent `glfwCreateWindow` to
+  //    hang indefinitely in the event loop, because
+  //    applicationDidFinishLaunching is never fired.
+  static bool first_run = true;
+  if (first_run) {
+    first_run = false;
+    if (::glfwInit() != GLFW_TRUE) {
+      return false;
+    }
   }
-  fml::ScopedCleanupClosure terminate([]() { ::glfwTerminate(); });
 
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
