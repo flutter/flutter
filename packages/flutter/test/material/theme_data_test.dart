@@ -268,7 +268,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
-  testWidgets('splashFactory returns InkSparkle for Android non-web only when useMaterial3 is true', (WidgetTester tester) async {
+  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light().copyWith(useMaterial3: true);
 
     switch (debugDefaultTargetPlatformOverride!) {
@@ -288,8 +288,8 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('splashFactory returns InkSplash for every platform and compilation target, including Android web, when useMaterial3 is false', (WidgetTester tester) async {
-    // Currently useMaterial3 is default to false;
+  testWidgets('splashFactory is InkSplash for every platform scenario, including Android web, when useMaterial3 is false', (WidgetTester tester) async {
+    // Currently, useMaterial3 defaults to false.
     final ThemeData theme = ThemeData.light();
 
     switch (debugDefaultTargetPlatformOverride!) {
