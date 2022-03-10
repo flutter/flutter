@@ -1240,7 +1240,7 @@ void main() {
       );
 
       await tester.pump();
-      expect(viewsController.offsets, equals(<int, Offset>{0: const Offset(10, 20)}));
+      expect(viewsController.offsets.values, equals(<Offset>[const Offset(10, 20)]));
     });
   });
 
