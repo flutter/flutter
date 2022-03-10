@@ -285,7 +285,7 @@ void main() {
       case TargetPlatform.windows:
         expect(theme.splashFactory, equals(InkSplash.splashFactory));
     }
-  }, 
+  },
     skip: kIsWeb, // Only checks for InkSparkle when not running on web.
     variant: TargetPlatformVariant.all(),
   );
