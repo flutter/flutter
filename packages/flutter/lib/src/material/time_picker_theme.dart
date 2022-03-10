@@ -49,6 +49,7 @@ class TimePickerThemeData with Diagnosticable {
     this.dayPeriodShape,
     this.dayPeriodBorderSide,
     this.inputDecorationTheme,
+    this.hourMinuteBorderSide,
   });
 
   /// The background color of a time picker.
@@ -191,6 +192,22 @@ class TimePickerThemeData with Diagnosticable {
   /// ```
   final BorderSide? dayPeriodBorderSide;
 
+  /// When using Material 3, this property is used for color and weight of the hour
+  /// and minute's outline.
+  ///
+  /// If this is null, the time picker defaults to:
+  /// ```
+  /// return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+  ///   return states.contains(MaterialState.selected)
+  ///     ? BorderSide(
+  ///         width: 2,
+  ///         color: _colorScheme.primary,
+  ///       )
+  ///     : BorderSide.none;
+  /// });
+  /// ```
+  final BorderSide? hourMinuteBorderSide;
+
   /// The input decoration theme for the [TextField]s in the time picker.
   ///
   /// If this is null, the time picker provides its own defaults.
@@ -215,6 +232,7 @@ class TimePickerThemeData with Diagnosticable {
     ShapeBorder? hourMinuteShape,
     OutlinedBorder? dayPeriodShape,
     BorderSide? dayPeriodBorderSide,
+    BorderSide? hourMinuteBorderSide,
     InputDecorationTheme? inputDecorationTheme,
   }) {
     return TimePickerThemeData(
@@ -234,6 +252,7 @@ class TimePickerThemeData with Diagnosticable {
       hourMinuteShape: hourMinuteShape ?? this.hourMinuteShape,
       dayPeriodShape: dayPeriodShape ?? this.dayPeriodShape,
       dayPeriodBorderSide: dayPeriodBorderSide ?? this.dayPeriodBorderSide,
+      hourMinuteBorderSide: hourMinuteBorderSide ?? this.hourMinuteBorderSide,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
     );
   }
@@ -247,15 +266,25 @@ class TimePickerThemeData with Diagnosticable {
     assert(t != null);
 
     // Workaround since BorderSide's lerp does not allow for null arguments.
-    BorderSide? lerpedBorderSide;
+    BorderSide? lerpedDayBorderSide;
     if (a?.dayPeriodBorderSide == null && b?.dayPeriodBorderSide == null) {
-      lerpedBorderSide = null;
+      lerpedDayBorderSide = null;
     } else if (a?.dayPeriodBorderSide == null) {
-      lerpedBorderSide = b?.dayPeriodBorderSide;
+      lerpedDayBorderSide = b?.dayPeriodBorderSide;
     } else if (b?.dayPeriodBorderSide == null) {
-      lerpedBorderSide = a?.dayPeriodBorderSide;
+      lerpedDayBorderSide = a?.dayPeriodBorderSide;
     } else {
-      lerpedBorderSide = BorderSide.lerp(a!.dayPeriodBorderSide!, b!.dayPeriodBorderSide!, t);
+      lerpedDayBorderSide = BorderSide.lerp(a!.dayPeriodBorderSide!, b!.dayPeriodBorderSide!, t);
+    }
+    BorderSide? lerpedHourMinuteBorderSide;
+    if (a?.hourMinuteBorderSide == null && b?.hourMinuteBorderSide == null) {
+      lerpedHourMinuteBorderSide = null;
+    } else if (a?.dayPeriodBorderSide == null) {
+      lerpedHourMinuteBorderSide = b?.hourMinuteBorderSide;
+    } else if (b?.dayPeriodBorderSide == null) {
+      lerpedHourMinuteBorderSide = a?.dayPeriodBorderSide;
+    } else {
+      lerpedHourMinuteBorderSide = BorderSide.lerp(a!.hourMinuteBorderSide!, b!.hourMinuteBorderSide!, t);
     }
     return TimePickerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -273,7 +302,8 @@ class TimePickerThemeData with Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       hourMinuteShape: ShapeBorder.lerp(a?.hourMinuteShape, b?.hourMinuteShape, t),
       dayPeriodShape: ShapeBorder.lerp(a?.dayPeriodShape, b?.dayPeriodShape, t) as OutlinedBorder?,
-      dayPeriodBorderSide: lerpedBorderSide,
+      dayPeriodBorderSide: lerpedDayBorderSide,
+      hourMinuteBorderSide: lerpedHourMinuteBorderSide,
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
     );
   }
@@ -296,6 +326,7 @@ class TimePickerThemeData with Diagnosticable {
     hourMinuteShape,
     dayPeriodShape,
     dayPeriodBorderSide,
+    hourMinuteBorderSide,
     inputDecorationTheme,
   );
 
@@ -322,6 +353,7 @@ class TimePickerThemeData with Diagnosticable {
         && other.hourMinuteShape == hourMinuteShape
         && other.dayPeriodShape == dayPeriodShape
         && other.dayPeriodBorderSide == dayPeriodBorderSide
+        && other.hourMinuteBorderSide == hourMinuteBorderSide
         && other.inputDecorationTheme == inputDecorationTheme;
   }
 
@@ -344,6 +376,7 @@ class TimePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('hourMinuteShape', hourMinuteShape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('dayPeriodShape', dayPeriodShape, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('dayPeriodBorderSide', dayPeriodBorderSide, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderSide>('hourMinuteBorderSide', hourMinuteBorderSide, defaultValue: null));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
   }
 }
