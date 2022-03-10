@@ -78,8 +78,7 @@ zip_bundle("flutter_patched_sdk") {
 if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   copy("dart_sdk_archive") {
     sources = [ prebuilt_dart_sdk_archive ]
-    outputs =
-        [ "$root_out_dir/zip_archives/dart-sdk-$prebuilt_dart_sdk_config.zip" ]
+    outputs = [ "$root_out_dir/zip_archives/dart-sdk-$full_platform_name.zip" ]
   }
 }
 
