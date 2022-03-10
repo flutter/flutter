@@ -792,6 +792,9 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Sets the offset of the platform view.
   ///
   /// `off` is the view's new offset in logical pixel.
+  ///
+  /// On Android, this allows the Android native view to draw the a11y highlights in the same
+  /// location on the screen as the platform view widget in the Flutter framework.
   Future<void> setOffset(Offset off);
 
   /// Returns the texture entry id that the Android view is rendering into.
