@@ -1087,8 +1087,12 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// If true, the default Typography will be [Typography.material2021],
-  /// otherwise it will default to [Typography.material2014].
+  /// If a [ThemeData] is constructed with [useMaterial3] set to true,
+  /// the default [typography] will be [Typography.material2021],
+  /// otherwise it will be [Typography.material2014].
+  ///
+  /// However, just copying a [ThemeData] with [useMaterial3] set to true will
+  /// not change the typography of the resulting ThemeData.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
@@ -1102,10 +1106,11 @@ class ThemeData with Diagnosticable {
   ///
   /// Components that have been migrated to Material 3 are:
   ///
+  ///   * [AlertDialog]
+  ///   * [Dialog]
   ///   * [FloatingActionButton]
   ///   * [NavigationBar]
-  ///   * [Dialog]
-  ///   * [AlertDialog]
+  ///   * [NavigationRail]
   ///
   /// See also:
   ///
