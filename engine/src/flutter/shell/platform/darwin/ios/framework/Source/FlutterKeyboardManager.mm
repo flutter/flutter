@@ -7,7 +7,6 @@
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 
 static constexpr CFTimeInterval kDistantFuture = 1.0e10;
-static constexpr CFTimeInterval kReasonableInterval = 2.0;
 
 @interface FlutterKeyboardManager ()
 
@@ -115,14 +114,7 @@ static constexpr CFTimeInterval kReasonableInterval = 2.0;
       //
       // We need to run in this mode so that UIKit doesn't give us new
       // events until we are done processing this one.
-      CFRunLoopRunResult result = CFRunLoopRunInMode(
-          fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode, kReasonableInterval, NO);
-      if (result == kCFRunLoopRunTimedOut) {
-        NSLog(@"Flutter framework failed to process a key event in a reasonable time. Continuing "
-              @"to wait.");
-        CFRunLoopRunInMode(fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode, kDistantFuture, NO);
-        NSLog(@"Flutter framework finally responded. Exiting nested event loop.");
-      }
+      CFRunLoopRunInMode(fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode, kDistantFuture, NO);
       break;
     }
     case UIPressPhaseChanged:
