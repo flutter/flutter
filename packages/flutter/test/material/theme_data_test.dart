@@ -276,7 +276,11 @@ void main() {
 
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
-        expect(theme.splashFactory, equals(InkSparkle.splashFactory));
+        if (kIsWeb) {
+          expect(theme.splashFactory, equals(InkSplash.splashFactory));
+        } else {
+          expect(theme.splashFactory, equals(InkSparkle.splashFactory));
+        }
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
@@ -284,11 +288,8 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(theme.splashFactory, equals(InkSplash.splashFactory));
-    }
-  },
-    skip: kIsWeb, // Only checks for InkSparkle when not running on web.
-    variant: TargetPlatformVariant.all(),
-  );
+     }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
