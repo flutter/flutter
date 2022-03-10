@@ -706,7 +706,7 @@ const char* getEventString(NSString* characters) {
   FlutterKeyEvent flutterEvent = {
       .struct_size = sizeof(FlutterKeyEvent),
       .timestamp = GetFlutterTimestampFrom(event.timestamp),
-      .type = isARepeat ? kFlutterKeyEventTypeRepeat : kFlutterKeyEventTypeDown,
+      .type = pressedLogicalKey == nil ? kFlutterKeyEventTypeDown : kFlutterKeyEventTypeRepeat,
       .physical = physicalKey,
       .logical = pressedLogicalKey == nil ? logicalKey : [pressedLogicalKey unsignedLongLongValue],
       .character = getEventString(event.characters),
