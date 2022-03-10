@@ -264,6 +264,7 @@ class FakeAndroidPlatformViewsController {
     final int id = args['id'] as int;
     final double top = args['top'] as double;
     final double left = args['left'] as double;
+    assert(!offsets.containsKey(id), 'offset already set for view id: $id');
     offsets[id] = Offset(left, top);
     return Future<dynamic>.sync(() => null);
   }
