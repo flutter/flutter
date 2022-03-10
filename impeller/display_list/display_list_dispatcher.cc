@@ -539,17 +539,7 @@ void DisplayListDispatcher::drawDisplayList(
 void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                          SkScalar x,
                                          SkScalar y) {
-  if (!blob) {
-    return;
-  }
-
-  auto bounds = blob->bounds();
-  bounds.fLeft += x;
-  bounds.fTop += y;
-
-  impeller::Paint paint;
-  paint.color = impeller::Color::Random().WithAlpha(0.2);
-  canvas_.DrawRect(ToRect(bounds), paint);
+  UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|

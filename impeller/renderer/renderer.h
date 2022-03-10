@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <dispatch/dispatch.h>
-
 #include <functional>
 #include <memory>
 
