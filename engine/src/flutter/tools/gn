@@ -414,7 +414,8 @@ def to_gn_args(args):
         gn_args['fuchsia_target_api_level'] = int(f.read().strip())
 
     # Impeller flags.
-    gn_args['impeller_enable_playground'] = args.enable_impeller_playground
+    if args.enable_impeller_playground:
+      gn_args['impeller_enable_playground'] = args.enable_impeller_playground
 
     return gn_args
 
