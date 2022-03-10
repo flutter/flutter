@@ -1003,8 +1003,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
 
 /// Controls an Android view that is rendered to a texture.
 ///
-/// This is typically used by [AndroidView] to display an Android View in a
-/// [VirtualDisplay](https://developer.android.com/reference/android/hardware/display/VirtualDisplay).
+/// This is typically used by [AndroidView] to display an Android View in the Android view hierarchy.
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {

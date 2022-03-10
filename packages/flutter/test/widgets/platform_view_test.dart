@@ -1087,9 +1087,6 @@ void main() {
 
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], currentViewId + 1);
-
-      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), true);
-      expect(lastPlatformViewTextClient['usesVirtualDisplay'], true);
     });
 
     testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
@@ -2633,8 +2630,6 @@ void main() {
       expect(focusNode.hasFocus, true);
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], viewId);
-
-      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), false);
     });
   });
 
