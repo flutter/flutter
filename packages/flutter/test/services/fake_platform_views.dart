@@ -145,6 +145,8 @@ class FakeAndroidPlatformViewsController {
 
   bool synchronizeToNativeViewHierarchy = true;
 
+  Map<int, Offset> offsets = <int, Offset>{};
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -170,6 +172,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'offset':
+        return _offset(call);
       case 'synchronizeToNativeViewHierarchy':
         return _synchronizeToNativeViewHierarchy(call);
     }
@@ -253,6 +257,15 @@ class FakeAndroidPlatformViewsController {
     _views[id] = _views[id]!.copyWith(size: Size(width, height));
 
     return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
+  }
+
+  Future<dynamic> _offset(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final double top = args['top'] as double;
+    final double left = args['left'] as double;
+    offsets[id] = Offset(left, top);
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _touch(MethodCall call) {

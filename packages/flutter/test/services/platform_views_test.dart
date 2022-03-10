@@ -219,6 +219,20 @@ void main() {
       );
     });
 
+    test("set Android view's offset", () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController viewController =
+      PlatformViewsService.initAndroidView(id: 7, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.setSize(const Size(100.0, 100.0));
+      await viewController.setOffset(const Offset(10, 20));
+      expect(
+        viewsController.offsets,
+        equals(<int, Offset>{
+          7: const Offset(10, 20),
+        }),
+      );
+    });
+
     test('synchronizeToNativeViewHierarchy', () async {
       await PlatformViewsService.synchronizeToNativeViewHierarchy(false);
       expect(viewsController.synchronizeToNativeViewHierarchy, false);
