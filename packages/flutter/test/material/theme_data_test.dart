@@ -269,22 +269,28 @@ void main() {
   });
 
   testWidgets('splashFactory returns InkSparkle for Android non-web only when useMaterial3 is true', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData.light().copyWith(useMaterial3: true);
+
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
-        expect(material3Theme.spashFactory, equals(kIsWeb ? InkSplash.splashFactory : InkSparkle.splashFactory));
+        if (kIsWeb) {
+          expect(theme.splashFactory, equals(InkSplash.splashFactory));
+        } else {
+          expect(theme.splashFactory, equals(InkSparkle.splashFactory));
+        }
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        expect(material3Theme.spashFactory, equals(InkSplash.splashFactory));
+        expect(theme.splashFactory, equals(InkSplash.splashFactory));
     }
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('splashFactory returns InkSplash for every platform and compilation target, including Android web, when useMaterial3 is false', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.light(useMaterial3: false);
+    // Currently useMaterial3 is default to false;
+    final ThemeData theme = ThemeData.light();
 
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
@@ -293,7 +299,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        expect(theme.spashFactory, equals(InkSplash.splashFactory));
+        expect(theme.splashFactory, equals(InkSplash.splashFactory));
     }
   }, variant: TargetPlatformVariant.all());
 
