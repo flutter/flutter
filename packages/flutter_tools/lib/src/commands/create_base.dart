@@ -23,7 +23,6 @@ import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
-import '../migrate/migrate_config.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -585,14 +584,21 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['fuchsia'] == true) {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
-    await MigrateConfig.parseOrCreateMigrateConfigs(
-      platforms: platformsForMigrateConfig,
-      projectDirectory: directory,
-      create: true,
-      currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
-      createRevision: globals.flutterVersion.frameworkRevision,
-      logger: globals.logger,
-    );
+    final File metadataFile = globals.fs
+        .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
+    print(platformsForMigrateConfig);
+    FlutterProjectMetadata(metadataFile, globals.logger)
+      ..populate(
+        platforms: platformsForMigrateConfig,
+        projectDirectory: directory,
+        create: true,
+        update: false,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        createRevision: globals.flutterVersion.frameworkRevision,
+        logger: globals.logger,
+      )
+      ..writeFile();
+
     return generatedCount;
   }
 
