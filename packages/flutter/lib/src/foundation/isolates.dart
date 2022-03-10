@@ -55,13 +55,11 @@ typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q
 /// method should be used to execute parallel tasks that reduce the risk of
 /// skipping frames.
 ///
-/// [compute] internally uses [Isolate.run] and provides additional timing
-/// information. If you don't want or need the additional timing information,
-/// you might be interested in using [Isolate.run] directly.
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=5AxWC49ZMzs}
 ///
 /// See also:
 ///
 ///   * [ComputeImpl], for function parameters and usage details.
+///   * [Isolate.run], for an alternative version of this function without
+///                    tracting information
 const ComputeImpl compute = isolates.compute;
