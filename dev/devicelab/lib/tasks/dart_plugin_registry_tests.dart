@@ -142,36 +142,57 @@ class ApluginPlatformInterfaceMacOS {
 
       section('Flutter run for macos');
 
+      late Process run;
       await inDirectory(path.join(tempDir.path, 'app'), () async {
-        final Process run = await startProcess(
+        run = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           flutterCommandArgs('run', <String>['-d', 'macos', '-v']),
         );
-        Completer<void> registryExecutedCompleter = Completer<void>();
-        final StreamSubscription<void> subscription = run.stdout
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String line) {
-          if (line.contains(
-              'ApluginPlatformInterfaceMacOS.registerWith() was called')) {
+      });
+
+      Completer<void> registryExecutedCompleter = Completer<void>();
+      final StreamSubscription<void> stdoutSub = run.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          if (line.contains('ApluginPlatformInterfaceMacOS.registerWith() was called')) {
             registryExecutedCompleter.complete();
           }
           print('stdout: $line');
         });
 
-        section('Wait for registry execution');
-        await registryExecutedCompleter.future;
+      final StreamSubscription<void> stderrSub = run.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('stderr: $line');
+        });
 
-        // Hot restart.
-        run.stdin.write('R');
-        registryExecutedCompleter = Completer<void>();
+      Future<void> waitOrExit(Future<void> future) async {
+        final dynamic result = await Future.any<dynamic>(
+          <Future<dynamic>>[
+            future,
+            run.exitCode,
+          ],
+        );
+        if (result is int) {
+          throw 'process exited with code $result';
+        }
+      }
 
-        section('Wait for registry execution after hot restart');
-        await registryExecutedCompleter.future;
+      section('Wait for registry execution');
+      await waitOrExit(registryExecutedCompleter.future);
 
-        unawaited(subscription.cancel());
-        run.kill();
-      });
+      // Hot restart.
+      run.stdin.write('R');
+      registryExecutedCompleter = Completer<void>();
+
+      section('Wait for registry execution after hot restart');
+      await waitOrExit(registryExecutedCompleter.future);
+
+      unawaited(stdoutSub.cancel());
+      unawaited(stderrSub.cancel());
+      run.kill();
       return TaskResult.success(null);
     } finally {
       rmTree(tempDir);
