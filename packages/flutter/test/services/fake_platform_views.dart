@@ -252,7 +252,7 @@ class FakeAndroidPlatformViewsController {
     }
     _views[id] = _views[id]!.copyWith(size: Size(width, height));
 
-    return Future<dynamic>.sync(() => null);
+    return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
   }
 
   Future<dynamic> _touch(MethodCall call) {

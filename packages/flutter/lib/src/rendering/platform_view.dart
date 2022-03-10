@@ -237,14 +237,19 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     // To prevent unwanted scaling artifacts while resizing, clip the texture.
     // This guarantees that the size of the texture frame we're painting is always
     // _currentAndroidViewSize.
-    _clipRectLayer.layer = context.pushClipRect(
-      true,
-      offset,
-      offset & size,
-      _paintTexture,
-      clipBehavior: clipBehavior,
-      oldLayer: _clipRectLayer.layer,
-    );
+    if ((size.width < _currentAndroidViewSize!.width || size.height < _currentAndroidViewSize!.height) && clipBehavior != Clip.none) {
+      _clipRectLayer.layer = context.pushClipRect(
+        true,
+        offset,
+        offset & size,
+        _paintTexture,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer.layer,
+      );
+      return;
+    }
+    _clipRectLayer.layer = null;
+    _paintTexture(context, offset);
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
