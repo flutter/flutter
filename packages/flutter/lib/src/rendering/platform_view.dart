@@ -228,7 +228,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     if (_viewController.textureId == null)
       return;
-    
+
     // As resizing the Android view happens asynchronously we don't know exactly when is a
     // texture frame with the new size is ready for consumption.
     // TextureLayer is unaware of the texture frame's size and always maps it to the
@@ -250,7 +250,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   void _paintTexture(PaintingContext context, Offset offset) {
     if (_currentAndroidViewSize == null)
       return;
-    
+
     context.addLayer(TextureLayer(
       rect: offset & _currentAndroidViewSize!,
       textureId: viewController.textureId!,
