@@ -96,7 +96,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
 
-  Size? _currentAndroidViewSize;
+  Size? _currentAndroidTextureSize;
 
   bool _isDisposed = false;
 
@@ -192,7 +192,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     Size targetSize;
     do {
       targetSize = size;
-      _currentAndroidViewSize = await _viewController.setSize(targetSize);
+      _currentAndroidTextureSize = await _viewController.setSize(targetSize);
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -227,8 +227,8 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     // size the texture frame will be scaled.
     // To prevent unwanted scaling artifacts while resizing, clip the texture.
     // This guarantees that the size of the texture frame we're painting is always
-    // _currentAndroidViewSize.
-    if ((size.width < _currentAndroidViewSize!.width || size.height < _currentAndroidViewSize!.height) && clipBehavior != Clip.none) {
+    // _currentAndroidTextureSize.
+    if ((size.width < _currentAndroidTextureSize!.width || size.height < _currentAndroidTextureSize!.height) && clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         true,
         offset,
@@ -253,11 +253,11 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
-    if (_currentAndroidViewSize == null)
+    if (_currentAndroidTextureSize == null)
       return;
 
     context.addLayer(TextureLayer(
-      rect: offset & _currentAndroidViewSize!,
+      rect: offset & _currentAndroidTextureSize!,
       textureId: viewController.textureId!,
     ));
   }
