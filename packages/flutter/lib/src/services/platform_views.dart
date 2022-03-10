@@ -780,18 +780,23 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Sizes the Android View.
   ///
-  /// `size` is the view's new size in logical pixel, it must not be null and must
+  /// [size] is the view's new size in logical pixel, it must not be null and must
   /// be bigger than zero.
   ///
   /// The first time a size is set triggers the creation of the Android view.
   ///
-  /// Returns the buffer size where the platform view pixels are written to, or the size of
-  /// the platform view in logical pixels.
+  /// Returns the buffer size in logical pixel that backs the texture where the platform
+  /// view pixels are written to.
+  ///
+  /// The buffer size may or may not be the same as [size].
+  ///
+  /// As a result, consumers are expected to clip the texture using [size], while using
+  /// the return value to size the texture.
   Future<Size> setSize(Size size);
 
   /// Sets the offset of the platform view.
   ///
-  /// `off` is the view's new offset in logical pixel.
+  /// [off] is the view's new offset in logical pixel.
   ///
   /// On Android, this allows the Android native view to draw the a11y highlights in the same
   /// location on the screen as the platform view widget in the Flutter framework.
