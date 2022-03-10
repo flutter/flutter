@@ -377,6 +377,7 @@ class ThemeData with Diagnosticable {
     switch (platform) {
       case TargetPlatform.android:
         useInkSparkle = !kIsWeb;
+        materialTapTargetSize ??= MaterialTapTargetSize.padded;
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
