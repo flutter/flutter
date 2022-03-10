@@ -1224,6 +1224,24 @@ void main() {
       clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
       expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 50.0));
     });
+
+    testWidgets('offset is sent to the platform', (WidgetTester tester) async {
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 20, 0, 0),
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(viewsController.offsets, equals(<int, Offset>{0: const Offset(10, 20)}));
+    });
   });
 
   group('AndroidViewSurface', () {
