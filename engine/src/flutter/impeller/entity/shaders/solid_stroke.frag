@@ -8,6 +8,5 @@ in float v_pen_down;
 out vec4 frag_color;
 
 void main() {
-  frag_color = stroke_color;
-  frag_color.a *= floor(v_pen_down);
+  frag_color = stroke_color * floor(v_pen_down);
 }
