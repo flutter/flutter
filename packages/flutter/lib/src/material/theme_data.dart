@@ -29,6 +29,7 @@ import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
+import 'ink_sparkle.dart';
 import 'input_decorator.dart';
 import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
