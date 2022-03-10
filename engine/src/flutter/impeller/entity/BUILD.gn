@@ -29,6 +29,8 @@ impeller_component("entity") {
     "contents/content_context.h",
     "contents/contents.cc",
     "contents/contents.h",
+    "contents/filter_contents.cc",
+    "contents/filter_contents.h",
     "contents/linear_gradient_contents.cc",
     "contents/linear_gradient_contents.h",
     "contents/solid_color_contents.cc",
@@ -54,7 +56,6 @@ impeller_component("entity") {
     "../renderer",
     "../typographer",
   ]
-
 
   deps = [
     "//flutter/fml",

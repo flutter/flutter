@@ -27,6 +27,7 @@ class Entity {
     kDestination,
     kSourceOver,
     kDestinationOver,
+    kPlus,
   };
 
   Entity();
@@ -57,7 +58,7 @@ class Entity {
 
   uint32_t GetStencilDepth() const;
 
-  bool Render(ContentContext& renderer, RenderPass& parent_pass) const;
+  bool Render(const ContentContext& renderer, RenderPass& parent_pass) const;
 
  private:
   Matrix transformation_;

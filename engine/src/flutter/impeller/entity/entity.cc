@@ -65,7 +65,8 @@ void Entity::IncrementStencilDepth(uint32_t increment) {
   stencil_depth_ += increment;
 }
 
-bool Entity::Render(ContentContext& renderer, RenderPass& parent_pass) const {
+bool Entity::Render(const ContentContext& renderer,
+                    RenderPass& parent_pass) const {
   if (!contents_) {
     return true;
   }
