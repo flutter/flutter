@@ -19,7 +19,6 @@ import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
-import 'constants.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
@@ -27,9 +26,9 @@ import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'ink_sparkle.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
-import 'ink_sparkle.dart' show InkSparkle;
 import 'input_decorator.dart';
 import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
@@ -389,7 +388,7 @@ class ThemeData with Diagnosticable {
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
-    final bool useInkSparkle = (platform == TargetPlatform.android && !kIsWeb);
+    final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= (useMaterial3 && useInkSparkle) ? InkSparkle.splashFactory : InkSplash.splashFactory;
 
     // COLOR
