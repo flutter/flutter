@@ -168,6 +168,13 @@ class ApluginPlatformInterfaceMacOS {
           print('stderr: $line');
         });
 
+      final Future<void> stdoutDone = stdoutSub.asFuture<void>();
+      final Future<void> stderrDone = stderrSub.asFuture<void>();
+
+      Future<void> waitForStreams() {
+        return Future.wait<void>(<Future<void>>[stdoutDone, stderrDone]);
+      }
+
       Future<void> waitOrExit(Future<void> future) async {
         final dynamic result = await Future.any<dynamic>(
           <Future<dynamic>>[
@@ -176,6 +183,7 @@ class ApluginPlatformInterfaceMacOS {
           ],
         );
         if (result is int) {
+          await waitForStreams();
           throw 'process exited with code $result';
         }
       }
@@ -190,9 +198,13 @@ class ApluginPlatformInterfaceMacOS {
       section('Wait for registry execution after hot restart');
       await waitOrExit(registryExecutedCompleter.future);
 
+      run.kill();
+
+      await waitForStreams();
+
       unawaited(stdoutSub.cancel());
       unawaited(stderrSub.cancel());
-      run.kill();
+
       return TaskResult.success(null);
     } finally {
       rmTree(tempDir);
