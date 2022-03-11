@@ -461,19 +461,6 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
                                                             : kTextAffinityDownstream;
 }
 
-#pragma mark -
-#pragma mark FlutterKeySecondaryResponder
-
-/**
- * Handles key down events received from the view controller, responding YES if
- * the event was handled.
- *
- * Note, the Apple docs suggest that clients should override essentially all the
- * mouse and keyboard event-handling methods of NSResponder. However, experimentation
- * indicates that only key events are processed by the native layer; Flutter processes
- * mouse events. Additionally, processing both keyUp and keyDown results in duplicate
- * processing of the same keys.
- */
 - (BOOL)handleKeyEvent:(NSEvent*)event {
   if (event.type == NSEventTypeKeyUp ||
       (event.type == NSEventTypeFlagsChanged && event.modifierFlags < _previouslyPressedFlags)) {
