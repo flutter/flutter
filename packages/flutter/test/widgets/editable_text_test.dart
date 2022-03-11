@@ -141,7 +141,7 @@ void main() {
               Column(
                 children: List<Widget>.generate(
                   5,
-                      (_) => Container(
+                  (_) => Container(
                     height: 1200.0,
                     color: Colors.black12,
                   ),
