@@ -170,8 +170,9 @@ TEST(RasterizerTest,
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
     latch.Signal();
@@ -229,8 +230,9 @@ TEST(
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
     latch.Signal();
@@ -294,8 +296,9 @@ TEST(
   auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
   auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                 /*device_pixel_ratio=*/2.0f);
-  bool result = pipeline->Produce().Complete(std::move(layer_tree));
-  EXPECT_TRUE(result);
+  PipelineProduceResult result =
+      pipeline->Produce().Complete(std::move(layer_tree));
+  EXPECT_TRUE(result.success);
   auto no_discard = [](LayerTree&) { return false; };
   rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
 }
@@ -361,8 +364,9 @@ TEST(RasterizerTest,
   auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
   auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                 /*device_pixel_ratio=*/2.0f);
-  bool result = pipeline->Produce().Complete(std::move(layer_tree));
-  EXPECT_TRUE(result);
+  PipelineProduceResult result =
+      pipeline->Produce().Complete(std::move(layer_tree));
+  EXPECT_TRUE(result.success);
   auto no_discard = [](LayerTree&) { return false; };
 
   // The Draw() will respectively call BeginFrame(), SubmitFrame() and
@@ -405,8 +409,9 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNoSurfaceIsSet) {
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
     latch.Signal();
@@ -498,8 +503,9 @@ TEST(RasterizerTest,
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
     latch.Signal();
@@ -549,8 +555,9 @@ TEST(
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     RasterStatus status =
         rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
@@ -601,8 +608,9 @@ TEST(
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     RasterStatus status =
         rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
@@ -652,8 +660,9 @@ TEST(
     auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
-    bool result = pipeline->Produce().Complete(std::move(layer_tree));
-    EXPECT_TRUE(result);
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree));
+    EXPECT_TRUE(result.success);
     auto no_discard = [](LayerTree&) { return false; };
     RasterStatus status =
         rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
