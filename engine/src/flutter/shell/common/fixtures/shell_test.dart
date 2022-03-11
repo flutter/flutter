@@ -264,7 +264,7 @@ void canReceiveArgumentsWhenEngineSpawn(List<String> args) {
 }
 
 @pragma('vm:entry-point')
-void canScheduleFrameFromPlatform() {
+void onBeginFrameWithNotifyNativeMain() {
   PlatformDispatcher.instance.onBeginFrame = (Duration beginTime) {
     nativeOnBeginFrame(beginTime.inMicroseconds);
   };

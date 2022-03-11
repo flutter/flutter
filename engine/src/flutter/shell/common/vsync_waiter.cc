@@ -154,8 +154,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
   }
 
   for (auto& secondary_callback : secondary_callbacks) {
-    task_runners_.GetUITaskRunner()->PostTaskForTime(
-        std::move(secondary_callback), frame_start_time);
+    task_runners_.GetUITaskRunner()->PostTask(std::move(secondary_callback));
   }
 }
 
