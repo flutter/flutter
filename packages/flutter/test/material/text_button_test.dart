@@ -1532,6 +1532,27 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
+  testWidgets("TextButton's debugFillProperties", (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const TextButton(
+      onPressed: null,
+      autofocus: true,
+      clipBehavior: Clip.hardEdge,
+      child: Text('A'),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'disabled',
+      'autofocus: true',
+      'clipBehavior: Clip.hardEdge',
+    ]);
+  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

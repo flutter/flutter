@@ -62,7 +62,7 @@ import 'theme_data.dart';
 ///  * [ElevatedButton], a filled Material Design button with a shadow.
 ///  * [TextButton], a Material Design button without a shadow.
 ///  * <https://material.io/design/components/buttons.html>
-class OutlinedButton extends ButtonStyleButton {
+class OutlinedButton extends ButtonStyleButton with Diagnosticable {
   /// Create an OutlinedButton.
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
@@ -315,6 +315,18 @@ class OutlinedButton extends ButtonStyleButton {
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
     return OutlinedButtonTheme.of(context).style;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<VoidCallback>('onLongPress', onLongPress, defaultValue: null));
+    properties.add(DiagnosticsProperty<ValueChanged<bool>>('onHover', onHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<ValueChanged<bool>>('onFocusChange', onFocusChange, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
   }
 }
 

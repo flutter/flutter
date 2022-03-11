@@ -62,7 +62,7 @@ import 'theme_data.dart';
 ///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons.html>
-class TextButton extends ButtonStyleButton {
+class TextButton extends ButtonStyleButton with Diagnosticable {
   /// Create a TextButton.
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
@@ -328,6 +328,18 @@ class TextButton extends ButtonStyleButton {
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
     return TextButtonTheme.of(context).style;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<VoidCallback>('onLongPress', onLongPress, defaultValue: null));
+    properties.add(DiagnosticsProperty<ValueChanged<bool>>('onHover', onHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<ValueChanged<bool>>('onFocusChange', onFocusChange, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
   }
 }
 
