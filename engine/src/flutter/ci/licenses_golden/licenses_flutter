@@ -1582,10 +1582,10 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCom
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeySecondaryResponder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManagerUnittests.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardViewDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMacOSExternalTexture.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.mm

@@ -4,12 +4,17 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderKeyResponder.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
+
 @interface FlutterKeyboardManager ()
 
 /**
- * The owner set by initWithOwner.
+ * The text input plugin set by initialization.
  */
-@property(nonatomic, weak) NSResponder* owner;
+@property(nonatomic) id<FlutterKeyboardViewDelegate> viewDelegate;
 
 /**
  * The primary responders added by addPrimaryResponder.
@@ -17,32 +22,47 @@
 @property(nonatomic) NSMutableArray<id<FlutterKeyPrimaryResponder>>* primaryResponders;
 
 /**
- * The secondary responders added by addSecondaryResponder.
+ * Add a primary responder, which asynchronously decides whether to handle an
+ * event.
  */
-@property(nonatomic) NSMutableArray<id<FlutterKeySecondaryResponder>>* secondaryResponders;
+- (void)addPrimaryResponder:(nonnull id<FlutterKeyPrimaryResponder>)responder;
 
 - (void)dispatchToSecondaryResponders:(NSEvent*)event;
 
 @end
 
-@implementation FlutterKeyboardManager
+@implementation FlutterKeyboardManager {
+  NextResponderProvider _getNextResponder;
+}
 
-- (nonnull instancetype)initWithOwner:(NSResponder*)weakOwner {
+- (nonnull instancetype)initWithViewDelegate:(nonnull id<FlutterKeyboardViewDelegate>)viewDelegate {
   self = [super init];
   if (self != nil) {
-    _owner = weakOwner;
+    _viewDelegate = viewDelegate;
+
     _primaryResponders = [[NSMutableArray alloc] init];
-    _secondaryResponders = [[NSMutableArray alloc] init];
+    [self addPrimaryResponder:[[FlutterEmbedderKeyResponder alloc]
+                                  initWithSendEvent:^(const FlutterKeyEvent& event,
+                                                      FlutterKeyEventCallback callback,
+                                                      void* userData) {
+                                    [_viewDelegate sendKeyEvent:event
+                                                       callback:callback
+                                                       userData:userData];
+                                  }]];
+    [self
+        addPrimaryResponder:[[FlutterChannelKeyResponder alloc]
+                                initWithChannel:[FlutterBasicMessageChannel
+                                                    messageChannelWithName:@"flutter/keyevent"
+                                                           binaryMessenger:[_viewDelegate
+                                                                               getBinaryMessenger]
+                                                                     codec:[FlutterJSONMessageCodec
+                                                                               sharedInstance]]]];
   }
   return self;
 }
 
 - (void)addPrimaryResponder:(nonnull id<FlutterKeyPrimaryResponder>)responder {
   [_primaryResponders addObject:responder];
-}
-
-- (void)addSecondaryResponder:(nonnull id<FlutterKeySecondaryResponder>)responder {
-  [_secondaryResponders addObject:responder];
 }
 
 - (void)handleEvent:(nonnull NSEvent*)event {
@@ -77,25 +97,27 @@
 #pragma mark - Private
 
 - (void)dispatchToSecondaryResponders:(NSEvent*)event {
-  for (id<FlutterKeySecondaryResponder> responder in _secondaryResponders) {
-    if ([responder handleKeyEvent:event]) {
-      return;
-    }
+  if ([_viewDelegate onTextInputKeyEvent:event]) {
+    return;
+  }
+  NSResponder* nextResponder = _viewDelegate.nextResponder;
+  if (nextResponder == nil) {
+    return;
   }
   switch (event.type) {
     case NSEventTypeKeyDown:
-      if ([_owner.nextResponder respondsToSelector:@selector(keyDown:)]) {
-        [_owner.nextResponder keyDown:event];
+      if ([nextResponder respondsToSelector:@selector(keyDown:)]) {
+        [nextResponder keyDown:event];
       }
       break;
     case NSEventTypeKeyUp:
-      if ([_owner.nextResponder respondsToSelector:@selector(keyUp:)]) {
-        [_owner.nextResponder keyUp:event];
+      if ([nextResponder respondsToSelector:@selector(keyUp:)]) {
+        [nextResponder keyUp:event];
       }
       break;
     case NSEventTypeFlagsChanged:
-      if ([_owner.nextResponder respondsToSelector:@selector(flagsChanged:)]) {
-        [_owner.nextResponder flagsChanged:event];
+      if ([nextResponder respondsToSelector:@selector(flagsChanged:)]) {
+        [nextResponder flagsChanged:event];
       }
       break;
     default:

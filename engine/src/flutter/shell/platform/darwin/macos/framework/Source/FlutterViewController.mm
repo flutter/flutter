@@ -9,8 +9,6 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
@@ -448,23 +446,7 @@ static void CommonInit(FlutterViewController* controller) {
 - (void)initializeKeyboard {
   __weak FlutterViewController* weakSelf = self;
   _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:weakSelf];
-  _keyboardManager = [[FlutterKeyboardManager alloc] initWithOwner:weakSelf];
-  [_keyboardManager addPrimaryResponder:[[FlutterEmbedderKeyResponder alloc]
-                                            initWithSendEvent:^(const FlutterKeyEvent& event,
-                                                                FlutterKeyEventCallback callback,
-                                                                void* userData) {
-                                              [weakSelf.engine sendKeyEvent:event
-                                                                   callback:callback
-                                                                   userData:userData];
-                                            }]];
-  [_keyboardManager
-      addPrimaryResponder:[[FlutterChannelKeyResponder alloc]
-                              initWithChannel:[FlutterBasicMessageChannel
-                                                  messageChannelWithName:@"flutter/keyevent"
-                                                         binaryMessenger:_engine.binaryMessenger
-                                                                   codec:[FlutterJSONMessageCodec
-                                                                             sharedInstance]]]];
-  [_keyboardManager addSecondaryResponder:_textInputPlugin];
+  _keyboardManager = [[FlutterKeyboardManager alloc] initWithViewDelegate:weakSelf];
 }
 
 - (void)addInternalPlugins {
@@ -675,6 +657,22 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (id<FlutterPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
   return [_engine registrarForPlugin:pluginName];
+}
+
+#pragma mark - FlutterKeyboardViewDelegate
+
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(nullable FlutterKeyEventCallback)callback
+            userData:(nullable void*)userData {
+  [_engine sendKeyEvent:event callback:callback userData:userData];
+}
+
+- (id<FlutterBinaryMessenger>)getBinaryMessenger {
+  return _engine.binaryMessenger;
+}
+
+- (BOOL)onTextInputKeyEvent:(nonnull NSEvent*)event {
+  return [_textInputPlugin handleKeyEvent:event];
 }
 
 #pragma mark - NSResponder
