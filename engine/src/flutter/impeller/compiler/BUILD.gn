@@ -23,7 +23,6 @@ impeller_component("compiler_lib") {
     "../base",
     "../geometry",
     "//flutter/fml",
-    "//flutter/runtime:libdart",
     "//third_party/inja",
     "//third_party/shaderc_flutter",
     "//third_party/spirv_cross_flutter",
@@ -35,7 +34,13 @@ impeller_component("impellerc") {
 
   sources = [ "impellerc_main.cc" ]
 
-  deps = [ ":compiler_lib" ]
+  deps = [
+    ":compiler_lib",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
+  ]
 }
 
 group("compiler") {

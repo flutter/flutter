@@ -37,5 +37,9 @@ executable("impeller_unittests") {
     "playground",
     "renderer:renderer_unittests",
     "typographer:typographer_unittests",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
   ]
 }
