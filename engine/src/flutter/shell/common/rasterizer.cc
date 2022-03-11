@@ -198,9 +198,9 @@ RasterStatus Rasterizer::Draw(
   bool should_resubmit_frame = ShouldResubmitFrame(raster_status);
   if (should_resubmit_frame) {
     auto front_continuation = pipeline->ProduceIfEmpty();
-    bool result =
+    PipelineProduceResult result =
         front_continuation.Complete(std::move(resubmitted_layer_tree_));
-    if (result) {
+    if (result.success) {
       consume_result = PipelineConsumeResult::MoreAvailable;
     }
   } else if (raster_status == RasterStatus::kEnqueuePipeline) {
