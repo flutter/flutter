@@ -16,7 +16,10 @@ static struct {
     {ATK_STATE_CHECKABLE, kFlutterSemanticsFlagHasCheckedState, FALSE},
     {ATK_STATE_FOCUSABLE, kFlutterSemanticsFlagIsFocusable, FALSE},
     {ATK_STATE_FOCUSED, kFlutterSemanticsFlagIsFocused, FALSE},
-    {ATK_STATE_CHECKED, kFlutterSemanticsFlagIsChecked, FALSE},
+    {ATK_STATE_CHECKED,
+     static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsChecked |
+                                       kFlutterSemanticsFlagIsToggled),
+     FALSE},
     {ATK_STATE_SELECTED, kFlutterSemanticsFlagIsSelected, FALSE},
     {ATK_STATE_ENABLED, kFlutterSemanticsFlagIsEnabled, FALSE},
     {ATK_STATE_READ_ONLY, kFlutterSemanticsFlagIsReadOnly, FALSE},
