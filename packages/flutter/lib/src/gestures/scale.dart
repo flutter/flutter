@@ -493,7 +493,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _update();
 
     if (!didChangeConfiguration || _reconfigure(event.pointer))
-      _advanceStateMachine(shouldStartIfAccepted, event);
+      _advanceStateMachine(shouldStartIfAccepted, event.kind);
     stopTrackingIfPointerNoLongerDown(event);
   }
 
@@ -523,7 +523,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _delta = _localFocalPoint - localPreviousFocalPoint;
     }
 
-
     final int count = _pointerLocations.keys.length;
 
     Offset pointerFocalPoint = Offset.zero;
@@ -548,7 +547,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _currentVerticalSpan = count > 0 ? totalVerticalDeviation / count : 0.0;
   }
 
-  /// Updates [_initialLine] and [_currentLine] accordingly to the situation off
+  /// Updates [_initialLine] and [_currentLine] accordingly to the situation of
   /// the registered pointers.
   void _updateLines() {
     final int count = _pointerLocations.keys.length;
@@ -587,8 +586,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_pointerPanZooms.isEmpty) {
       _initialPanZoomScaleFactor = 1.0;
       _initialPanZoomRotationFactor = 0.0;
-    }
-    else {
+    } else {
       _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
       _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
     }
@@ -612,14 +610,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     return true;
   }
 
-  void _advanceStateMachine(bool shouldStartIfAccepted, PointerEvent event) {
+  void _advanceStateMachine(bool shouldStartIfAccepted, PointerDeviceKind pointerDeviceKind) {
     if (_state == _ScaleState.ready)
       _state = _ScaleState.possible;
 
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
       final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
-      if (spanDelta > computeScaleSlop(event.kind) || focalPointDelta > computePanSlop(event.kind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05)
+      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05)
         resolve(GestureDisposition.accepted);
     } else if (_state.index >= _ScaleState.accepted.index) {
       resolve(GestureDisposition.accepted);
@@ -671,8 +669,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         if (_pointerPanZooms.isEmpty) {
           _initialPanZoomScaleFactor = 1.0;
           _initialPanZoomRotationFactor = 0.0;
-        }
-        else {
+        } else {
           _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
           _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
         }

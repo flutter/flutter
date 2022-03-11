@@ -1438,7 +1438,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
     assert(_recognizers != null);
     for (final GestureRecognizer recognizer in _recognizers!.values) {
-  	  recognizer.addPointerPanZoom(event);
+      recognizer.addPointerPanZoom(event);
     }
   }
 

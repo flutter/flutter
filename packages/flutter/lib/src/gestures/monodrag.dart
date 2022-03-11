@@ -261,14 +261,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     return super.isPointerAllowed(event as PointerDownEvent);
   }
 
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
+  void _addPointer(PointerEvent event) {
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-      _initialButtons = event.buttons;
       _pendingDragOffset = OffsetPair.zero;
       _globalDistanceMoved = 0.0;
       _lastPendingEventTimestamp = event.timeStamp;
@@ -280,22 +277,22 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    if (_state == _DragState.ready) {
+      _initialButtons = event.buttons;
+    }
+    _addPointer(event);
+  }
+
+  @override
   void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
     super.addAllowedPointerPanZoom(event);
     startTrackingPointer(event.pointer, event.transform);
-    _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
-      _state = _DragState.possible;
-      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       _initialButtons = kPrimaryButton;
-      _pendingDragOffset = OffsetPair.zero;
-      _globalDistanceMoved = 0.0;
-      _lastPendingEventTimestamp = event.timeStamp;
-      _lastTransform = event.transform;
-      _checkDown();
-    } else if (_state == _DragState.accepted) {
-      resolve(GestureDisposition.accepted);
     }
+    _addPointer(event);
   }
 
   @override
@@ -310,11 +307,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       assert(tracker != null);
       if (event is PointerPanZoomStartEvent) {
         tracker.addPosition(event.timeStamp, Offset.zero);
-      }
-      else if (event is PointerPanZoomUpdateEvent) {
+      } else if (event is PointerPanZoomUpdateEvent) {
         tracker.addPosition(event.timeStamp, event.pan);
-      }
-      else {
+      } else {
         tracker.addPosition(event.timeStamp, event.localPosition);
       }
     }
@@ -356,8 +351,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           globalPosition: event.position + event.pan,
           localPosition: event.localPosition + event.pan
         );
-      }
-      else {
+      } else {
         _pendingDragOffset += OffsetPair(local: event.panDelta, global: event.panDelta);
         _lastPendingEventTimestamp = event.timeStamp;
         _lastTransform = event.transform;

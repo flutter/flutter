@@ -1381,6 +1381,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1398,6 +1400,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1415,6 +1419,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
@@ -1441,6 +1447,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
@@ -1467,6 +1475,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1484,6 +1494,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });

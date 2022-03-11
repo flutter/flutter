@@ -103,7 +103,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// pan, zoom, and rotate data from a multi-finger trackpad gesture.
   ///
   /// The owner of this gesture recognizer calls addPointerPanZoom() with the
-  /// PointerDownEvent of each pointer that should be considered for
+  /// PointerPanZoomStartEvent of each pointer that should be considered for
   /// this gesture.
   ///
   /// It's the GestureRecognizer's responsibility to then add itself
