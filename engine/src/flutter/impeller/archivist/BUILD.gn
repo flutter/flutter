@@ -33,10 +33,6 @@ impeller_component("archivist") {
 
   deps = [
     "//flutter/fml",
-
-    # FML depends on the Dart VM for tracing and getting the current
-    # timepoint.
-    "//flutter/runtime:libdart",
     "//third_party/sqlite",
   ]
 }

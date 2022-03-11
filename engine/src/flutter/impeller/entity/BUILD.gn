@@ -57,13 +57,7 @@ impeller_component("entity") {
     "../typographer",
   ]
 
-  deps = [
-    "//flutter/fml",
-
-    # FML depends on the Dart VM for tracing and getting the current
-    # timepoint.
-    "//flutter/runtime:libdart",
-  ]
+  deps = [ "//flutter/fml" ]
 }
 
 impeller_component("entity_unittests") {
