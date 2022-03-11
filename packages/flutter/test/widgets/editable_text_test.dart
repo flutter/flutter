@@ -166,8 +166,9 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
     await tester.pump();
-    final double offsetAfter = scrollController.offset;
+
     // The offset of the scrollController should change immediately after window changes its metrics
+    final double offsetAfter = scrollController.offset;
     expect(offsetAfter, isNot(0.0));
   });
 
