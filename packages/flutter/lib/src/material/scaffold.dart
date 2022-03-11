@@ -2402,7 +2402,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           return;
         }
         assert(_currentBottomSheet!._widget == bottomSheet);
-        _removeEntryIfNeeded();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -2410,6 +2409,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             _dismissedBottomSheets.remove(bottomSheet);
           });
         }
+        setState(() {
+          _currentBottomSheet = null;
+        });
       },
       onDispose: () {
         _removeEntryIfNeeded();
