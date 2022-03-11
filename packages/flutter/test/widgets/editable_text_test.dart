@@ -130,8 +130,7 @@ void main() {
   }
 
   // Related issue: https://github.com/flutter/flutter/issues/98115
-  testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester)
-      async {
+  testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     final Widget widget = MaterialApp(
       home: Scaffold(
@@ -149,14 +148,14 @@ void main() {
                 ),
               ),
               SizedBox(
-                  height: 20,
-                  child: EditableText(
-                    controller: TextEditingController(),
-                    backgroundCursorColor: Colors.grey,
-                    focusNode: focusNode,
-                    style: const TextStyle(),
-                    cursorColor: Colors.red,
-                  ),
+                height: 20,
+                child: EditableText(
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(),
+                  cursorColor: Colors.red,
+                ),
               ),
             ],
           ),
