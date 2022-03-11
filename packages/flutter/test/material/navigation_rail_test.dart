@@ -2031,6 +2031,8 @@ void main() {
 
     await tester.tap(find.text('Ghi'));
     expect(selectedIndex, 2);
+
+    tester.pumpAndSettle();
   });
 
   testWidgets('onDestinationSelected is not called if null', (WidgetTester tester) async {
