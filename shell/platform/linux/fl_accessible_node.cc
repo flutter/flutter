@@ -207,7 +207,7 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
     return ATK_ROLE_IMAGE;
   }
 
-  return ATK_ROLE_FRAME;
+  return ATK_ROLE_PANEL;
 }
 
 // Implements AtkObject::ref_state_set.

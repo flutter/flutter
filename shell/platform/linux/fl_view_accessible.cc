@@ -56,7 +56,7 @@ static AtkObject* fl_view_accessible_ref_child(AtkObject* accessible, gint i) {
 
 // Implements AtkObject::get_role
 static AtkRole fl_view_accessible_get_role(AtkObject* accessible) {
-  return ATK_ROLE_FRAME;
+  return ATK_ROLE_PANEL;
 }
 
 static void fl_view_accessible_class_init(FlViewAccessibleClass* klass) {
