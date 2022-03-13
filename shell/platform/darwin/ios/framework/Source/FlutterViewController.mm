@@ -421,16 +421,24 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   _scrollView.reset(scrollView);
 }
 
+- (flutter::PointerData)generatePointerDataForFake {
+  flutter::PointerData pointer_data;
+  pointer_data.Clear();
+  pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
+  // `UITouch.timestamp` is defined as seconds since system startup. Synthesized events can get this
+  // time with `NSProcessInfo.systemUptime`. See
+  // https://developer.apple.com/documentation/uikit/uitouch/1618144-timestamp?language=objc
+  pointer_data.time_stamp = [[NSProcessInfo processInfo] systemUptime] * kMicrosecondsPerSecond;
+  return pointer_data;
+}
+
 static void SendFakeTouchEvent(FlutterEngine* engine,
                                CGPoint location,
                                flutter::PointerData::Change change) {
   const CGFloat scale = [UIScreen mainScreen].scale;
-  flutter::PointerData pointer_data;
-  pointer_data.Clear();
+  flutter::PointerData pointer_data = [[engine viewController] generatePointerDataForFake];
   pointer_data.physical_x = location.x * scale;
   pointer_data.physical_y = location.y * scale;
-  pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
-  pointer_data.time_stamp = [[NSDate date] timeIntervalSince1970] * kMicrosecondsPerSecond;
   auto packet = std::make_unique<flutter::PointerDataPacket>(/*count=*/1);
   pointer_data.change = change;
   packet->SetPointerData(0, pointer_data);
@@ -759,14 +767,9 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
     // touches to the framework so nothing gets orphaned.
     for (NSNumber* device in _ongoingTouches.get()) {
       // Create fake PointerData to balance out each previously started one for the framework.
-      flutter::PointerData pointer_data;
-      pointer_data.Clear();
-
-      // Use current time.
-      pointer_data.time_stamp = [[NSDate date] timeIntervalSince1970] * kMicrosecondsPerSecond;
+      flutter::PointerData pointer_data = [self generatePointerDataForFake];
 
       pointer_data.change = flutter::PointerData::Change::kCancel;
-      pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
       pointer_data.device = device.longLongValue;
       pointer_data.pointer_identifier = 0;
 
