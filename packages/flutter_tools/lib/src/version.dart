@@ -426,17 +426,18 @@ class VersionUpstreamValidator {
   VersionUpstreamValidator({
     required this.version,
     required this.platform,
-  }) : _flutterGit = platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+  });
 
-  final FlutterVersion version;
   final Platform platform;
-  final String _flutterGit;
+  final FlutterVersion version;
 
   /// Performs the validation against the tracking remote of the [version].
   ///
   /// Throws [VersionCheckError] if the tracking remote is not standard.
   void run(){
+    final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
     final String? repositoryUrl = version.repositoryUrl;
+
     if (repositoryUrl == null) {
       throw VersionCheckError(
         'The tool could not determine the remote upstream which is being '
@@ -446,7 +447,8 @@ class VersionUpstreamValidator {
 
     // Strip `.git` suffix before comparing the remotes
     final List<String> sanitizedStandardRemotes = <String>[
-      _flutterGit,
+      if (flutterGit != null) flutterGit,
+      'https://github.com/flutter/flutter.git',
       'git@github.com:flutter/flutter.git',
     ].map((String remote) => stripDotGit(remote)).toList();
 
@@ -459,7 +461,7 @@ class VersionUpstreamValidator {
         // tracking remote.
         throw VersionCheckError(
           'The Flutter SDK is tracking "$repositoryUrl" but "FLUTTER_GIT_URL" '
-          'is set to "$_flutterGit".\n'
+          'is set to "$flutterGit".\n'
           'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
           '"$repositoryUrl". '
           'If this is intentional, it is recommended to use "git" directly to '
