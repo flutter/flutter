@@ -92,11 +92,18 @@ class FlutterProjectMetadata {
 
       final Object? platformsYaml = migrationYamlMap['platforms'];
       final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
+      print(platformsYaml);
       if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
         for (final Object? platform in platformsYaml) {
-          if (platform != null && platform is YamlMap && platform.containsKey('platform') && platform.containsKey('createRevision') && platform.containsKey('baseRevision')) {
+          if (platform != null &&
+              platform is YamlMap &&
+              platform.containsKey('platform') &&
+              platform.containsKey('createRevision') &&
+              platform.containsKey('baseRevision')) {
             final YamlMap platformYamlMap = platform;
-            final SupportedPlatform platformString = SupportedPlatform.values.firstWhere((SupportedPlatform platform) => platform.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}');
+            final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
+              (SupportedPlatform platform) => platform.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
+            );
             platformConfigs[platformString] = MigratePlatformConfig(
               createRevision: platform['createRevision'] as String?,
               baseRevision: platform['baseRevision'] as String?,
@@ -123,8 +130,8 @@ class FlutterProjectMetadata {
   /// Creates a MigrateConfig by explicitly providing all values.
   FlutterProjectMetadata.explicit({
     required File file,
-    required String? versionChannel,
     required String? versionRevision,
+    required String? versionChannel,
     required this.migrateConfig,
     required Logger logger,
   }) : _logger = logger,
@@ -135,11 +142,11 @@ class FlutterProjectMetadata {
   /// The name of the config file.
   static const String kFileName = '.metadata';
 
-  String? _versionChannel;
-  String? get versionChannel => _versionChannel;
-
   String? _versionRevision;
   String? get versionRevision => _versionRevision;
+
+  String? _versionChannel;
+  String? get versionChannel => _versionChannel;
 
   FlutterProjectType? _projectType;
   FlutterProjectType? get projectType => _projectType;
@@ -184,17 +191,6 @@ class FlutterProjectMetadata {
   /// We write the file manually instead of with a template because this
   /// needs to be able to write the .migrate_config file into legacy apps.
   void writeFile() {
-    String unmanagedFilesString = '';
-    for (final String path in migrateConfig.unmanagedFiles) {
-      unmanagedFilesString += "\n    - '$path'";
-    }
-    String platformsString = '';
-    print(migrateConfig.platformConfigs.keys);
-    for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry in migrateConfig.platformConfigs.entries) {
-      print('building string platforms: ${entry.key}');
-      platformsString += '\n    - platform: ${entry.key.toString().split('.').last}\n.      createRevision: ${entry.value.createRevision == null ? 'null' : "'${entry.value.createRevision}}'"}\n      baseRevision: ${entry.value.baseRevision == null ? 'null' : "'${entry.value.baseRevision}}'"}';
-    }
-
     _metadataFile
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -208,20 +204,7 @@ version:
   channel: $_versionChannel
 
 project_type: ${projectType.toString().split('.').last}
-
-# Tracks the revisions
-migration:
-  platforms:$platformsString
-
-  # User provided section
-
-  # List of Local paths (relative to this file) that should be
-  # ignored by the migrate tool.
-  #
-  # Files that are not part of the templates will be ignored by default.
-  unmanagedFiles:$unmanagedFilesString
-
-''',
+${migrateConfig.getOutputFileString()}''',
     flush: true);
   }
 
@@ -257,9 +240,9 @@ migration:
 
 class MigrateConfig {
   MigrateConfig({
-    this.platformConfigs = const <SupportedPlatform, MigratePlatformConfig>{},
+    Map<SupportedPlatform, MigratePlatformConfig>? platformConfigs,
     this.unmanagedFiles = _kDefaultUnmanagedFiles
-  });
+  }) : platformConfigs = platformConfigs ?? <SupportedPlatform, MigratePlatformConfig>{};
 
   /// A mapping of the files that are unmanaged by defult for each platform.
   static const List<String> _kDefaultUnmanagedFiles = <String>[
@@ -275,6 +258,7 @@ class MigrateConfig {
   /// These files are typically user-owned files that should not be changed.
   final List<String> unmanagedFiles;
 
+  bool get isEmpty => platformConfigs.isEmpty && (unmanagedFiles.isEmpty || unmanagedFiles == _kDefaultUnmanagedFiles);
 
   void populate({
     List<SupportedPlatform>? platforms,
@@ -288,20 +272,46 @@ class MigrateConfig {
     final FlutterProject flutterProject = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
 
-    final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
+    // final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
     for (final SupportedPlatform platform in platforms) {
       if (platformConfigs.containsKey(platform)) {
         if (update) {
-          print('updating $platform');
           platformConfigs[platform]!.baseRevision = currentRevision;
         }
       } else {
         if (create) {
-          print('creating $platform');
           platformConfigs[platform] = MigratePlatformConfig(createRevision: createRevision, baseRevision: currentRevision);
         }
       }
     }
+  }
+
+  String getOutputFileString() {
+    String unmanagedFilesString = '';
+    for (final String path in unmanagedFiles) {
+      unmanagedFilesString += "\n    - '$path'";
+    }
+
+    String platformsString = '';
+    for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry in platformConfigs.entries) {
+      platformsString += '\n    - platform: ${entry.key.toString().split('.').last}\n      createRevision: ${entry.value.createRevision == null ? 'null' : "${entry.value.createRevision}"}\n      baseRevision: ${entry.value.baseRevision == null ? 'null' : "${entry.value.baseRevision}"}';
+    }
+
+    String migrationString = isEmpty ? '' : '''
+
+# Tracks metadata for the flutter migrate command
+migration:
+  platforms:$platformsString
+
+  # User provided section
+
+  # List of Local paths (relative to this file) that should be
+  # ignored by the migrate tool.
+  #
+  # Files that are not part of the templates will be ignored by default.
+  unmanagedFiles:$unmanagedFilesString
+''';
+    return migrationString;
   }
 }
 

@@ -587,17 +587,24 @@ abstract class CreateBase extends FlutterCommand {
     final File metadataFile = globals.fs
         .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
     print(platformsForMigrateConfig);
-    FlutterProjectMetadata(metadataFile, globals.logger)
-      ..populate(
-        platforms: platformsForMigrateConfig,
-        projectDirectory: directory,
-        create: true,
-        update: false,
-        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
-        createRevision: globals.flutterVersion.frameworkRevision,
-        logger: globals.logger,
-      )
-      ..writeFile();
+          // 'flutterRevision': globals.flutterVersion.frameworkRevision,
+      // 'flutterChannel': globals.flutterVersion.channel,
+    FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
+      file: metadataFile,
+      versionRevision: globals.flutterVersion.frameworkRevision,
+      versionChannel: globals.flutterVersion.channel,
+      migrateConfig: MigrateConfig(),
+      logger: globals.logger);
+    metadata.populate(
+      platforms: platformsForMigrateConfig,
+      projectDirectory: directory,
+      create: true,
+      update: false,
+      currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+      createRevision: globals.flutterVersion.frameworkRevision,
+      logger: globals.logger,
+    );
+    metadata.writeFile();
 
     return generatedCount;
   }

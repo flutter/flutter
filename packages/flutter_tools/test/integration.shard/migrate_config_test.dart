@@ -6,7 +6,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/migrate/migrate_config.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
@@ -33,166 +33,172 @@ void main() {
   });
 
   testWithoutContext('parse simple config file', () async {
-    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    final MigrateProject project = MigrateProject('version:1.22.6_stable');
-    await project.setUpIn(tempDir);
-
-    final File configFile = tempDir.childFile('.migrate_config');
-    configFile.createSync(recursive: true);
-    configFile.writeAsStringSync('''
-# Generated section.
-platform: 'root'
-createRevision: 'abcdefg1234567'
-baseRevision: 'abcdefg1234567base'
-
-# User provided section
-
-# List of Local paths (relative to this file) that should be
-# ignored by the migrate tool.
+    final File metadataFile = tempDir.childFile('.metadata');
+    metadataFile.createSync(recursive: true);
+    metadataFile.writeAsStringSync('''
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# Files that are not part of the templates will be ignored by default.
-unmanagedFiles:
-  - 'lib/main.dart'
+# This file should be version controlled.
 
+version:
+  revision: fj19vkla9vnlka9vni3n808v3nch8cd
+  channel: stable
+
+project_type: app
+
+# Tracks metadata for the flutter migrate command
+migration:
+  platforms:
+    - platform: root
+      createRevision: fj19vkla9vnlka9vni3n808v3nch8cd
+      baseRevision: 93kf9v3njfa90vnidfjvn39nvi3vnie
+    - platform: android
+      createRevision: abfj19vkla9vnlka9vni3n808v3nch8cd
+      baseRevision: ab93kf9v3njfa90vnidfjvn39nvi3vnie
+
+  # User provided section
+
+  # List of Local paths (relative to this file) that should be
+  # ignored by the migrate tool.
+  #
+  # Files that are not part of the templates will be ignored by default.
+  unmanagedFiles:
+    - lib/main.dart
+    - ios/Runner.xcodeproj/project.pbxproj
+    - lib/file1/etc.dart
+    - android/my_file.java
 ''', flush: true);
-    MigrateConfig config = MigrateConfig.fromFile(configFile, logger);
+    FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
 
-    expect(config.platform, equals(SupportedPlatform.root));
-    expect(config.createRevision, equals('abcdefg1234567'));
-    expect(config.baseRevision, equals('abcdefg1234567base'));
-    expect(config.unmanagedFiles[0], equals('lib/main.dart'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
-    configFile.writeAsStringSync('''
-# Generated section.
-platform: 'root'
-createRevision: null
-baseRevision: null
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
-# User provided section
+    expect(metadata.migrateConfig.unmanagedFiles[0], equals('lib/main.dart'));
+    expect(metadata.migrateConfig.unmanagedFiles[1], equals('ios/Runner.xcodeproj/project.pbxproj'));
+    expect(metadata.migrateConfig.unmanagedFiles[2], equals('lib/file1/etc.dart'));
+    expect(metadata.migrateConfig.unmanagedFiles[3], equals('android/my_file.java'));
 
-# List of Local paths (relative to this file) that should be
-# ignored by the migrate tool.
+    metadataFile.writeAsStringSync('''
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# Files that are not part of the templates will be ignored by default.
-unmanagedFiles:
+# This file should be version controlled.
 
+version:
+  revision: fj19vkla9vnlka9vni3n808v3nch8cd
+  channel: stable
+
+project_type: app
 ''', flush: true);
 
-    config = MigrateConfig.fromFile(configFile, logger);
+    metadata = FlutterProjectMetadata(metadataFile, logger);
 
-    expect(config.platform, equals(SupportedPlatform.root));
-    expect(config.createRevision, equals(null));
-    expect(config.baseRevision, equals(null));
-    expect(config.unmanagedFiles.isEmpty, true);
+    expect(metadata.migrateConfig.isEmpty, equals(true));
+    expect(metadata.versionRevision, equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.versionChannel, equals('stable'));
   });
 
   testUsingContext('write simple config file', () async {
-    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    final MigrateProject project = MigrateProject('version:1.22.6_stable');
-    await project.setUpIn(tempDir);
-
     MigrateConfig config = MigrateConfig(
-      platform: SupportedPlatform.root,
-      unmanagedFiles: <String>[],
-      logger: logger
+      platformConfigs: <SupportedPlatform, MigratePlatformConfig>{
+        SupportedPlatform.android: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
+        SupportedPlatform.ios: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
+        SupportedPlatform.root: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
+        SupportedPlatform.windows: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
+      },
+      unmanagedFiles: <String>[
+        'lib/main.dart',
+        'ios/Runner.xcodeproj/project.pbxproj',
+        'lib/file1/etc.dart',
+      ],
     );
-    config.writeFile(projectDirectory: tempDir);
-    File configFile = tempDir.childFile('.migrate_config');
-    expect(configFile.readAsStringSync(), equals('''
-# Generated section.
-platform: 'root'
-createRevision: null
-baseRevision: null
+    String outputString = config.getOutputFileString();
+    expect(outputString, equals('''
 
-# User provided section
+# Tracks metadata for the flutter migrate command
+migration:
+  platforms:
+    - platform: android
+      createRevision: test_create_revision
+      baseRevision: test_base_revision
+    - platform: ios
+      createRevision: test_create_revision
+      baseRevision: test_base_revision
+    - platform: root
+      createRevision: test_create_revision
+      baseRevision: test_base_revision
+    - platform: windows
+      createRevision: test_create_revision
+      baseRevision: test_base_revision
 
-# List of Local paths (relative to this file) that should be
-# ignored by the migrate tool.
-#
-# Files that are not part of the templates will be ignored by default.
-unmanagedFiles:
+  # User provided section
 
+  # List of Local paths (relative to this file) that should be
+  # ignored by the migrate tool.
+  #
+  # Files that are not part of the templates will be ignored by default.
+  unmanagedFiles:
+    - 'lib/main.dart'
+    - 'ios/Runner.xcodeproj/project.pbxproj'
+    - 'lib/file1/etc.dart'
 '''));
 
-    config = MigrateConfig(
-      platform: SupportedPlatform.android,
-      createRevision: 'abcd',
-      baseRevision: '1234',
-      unmanagedFiles: <String>['test1/test.dart', 'file/two.txt'],
-      logger: logger,
-    );
-    config.writeFile(projectDirectory: tempDir);
-    configFile = tempDir.childDirectory('android').childFile('.migrate_config');
-    expect(configFile.readAsStringSync(), equals('''
-# Generated section.
-platform: 'android'
-createRevision: 'abcd'
-baseRevision: '1234'
-
-# User provided section
-
-# List of Local paths (relative to this file) that should be
-# ignored by the migrate tool.
-#
-# Files that are not part of the templates will be ignored by default.
-unmanagedFiles:
-  - 'test1/test.dart'
-  - 'file/two.txt'
-
-'''));
+    config = MigrateConfig();
+    outputString = config.getOutputFileString();
+    expect(outputString, equals(''));
   });
 
-  testUsingContext('parse project', () async {
+  testUsingContext('populate migrate config', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);
 
-    File configFile = tempDir.childFile('.migrate_config');
-    configFile.createSync(recursive: true);
-    configFile.writeAsStringSync('''
-# Generated section.
-platform: 'root'
-createRevision: 'abcdefg1234567'
-baseRevision: 'abcdefg1234567base'
-
-# User provided section
-
-# List of Local paths (relative to this file) that should be
-# ignored by the migrate tool.
+    File metadataFile = tempDir.childFile('.metadata');
+    metadataFile.createSync(recursive: true);
+    metadataFile.writeAsStringSync('''
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# Files that are not part of the templates will be ignored by default.
-unmanagedFiles:
-  - 'lib/main.dart'
+# This file should be version controlled.
 
+version:
+  revision: fj19vkla9vnlka9vni3n808v3nch8cd
+  channel: stable
+
+project_type: app
 ''', flush: true);
 
-    configFile = tempDir.childDirectory('android').childFile('.migrate_config');
-    configFile.writeAsStringSync('''
-# Generated section.
-platform: 'android'
-createRevision: 'abcdefg1234567'
-baseRevision: 'abcdefg1234567'
+    const String currentRevision = 'test_base_revision';
+    const String createRevision = 'test_create_revision';
 
-# User provided section
+    FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
+    metadata.migrateConfig.populate(
+      projectDirectory: tempDir,
+      currentRevision: currentRevision,
+      createRevision: createRevision,
+      create: true,
+      update: true,
+      logger: logger,
+    );
 
-# List of Local paths (relative to this file) that should be
-# ignored by the migrate tool.
-#
-# Files that are not part of the templates will be ignored by default.
-unmanagedFiles:
+    expect(metadata.migrateConfig.platformConfigs.length, equals(3));
 
-''', flush: true);
+    final List<SupportedPlatform> keyList = List<SupportedPlatform>.from(metadata.migrateConfig.platformConfigs.keys);
 
-    const String currentRevision = 'newlygenerated';
-    final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(projectDirectory: tempDir, currentRevision: currentRevision, logger: logger);
+    expect(keyList[0], equals(SupportedPlatform.root));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals(currentRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals(createRevision));
 
-    expect(configs.length, equals(3));
-    expect(configs[0].platform, equals(SupportedPlatform.root));
-    expect(configs[0].baseRevision, equals('abcdefg1234567base'));
-    expect(configs[1].platform, equals(SupportedPlatform.android));
-    expect(configs[1].baseRevision, equals('abcdefg1234567'));
-    expect(configs[2].platform, equals(SupportedPlatform.ios));
-    expect(configs[2].baseRevision, equals(currentRevision));
-    expect(configs[2].createRevision, equals(null));
+    expect(keyList[1], equals(SupportedPlatform.android));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals(currentRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals(createRevision));
+
+    expect(keyList[2], equals(SupportedPlatform.ios));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].baseRevision, equals(currentRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].createRevision, equals(createRevision));
   });
 }
