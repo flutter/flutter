@@ -1,4 +1,4 @@
-Signature: a07a673451b5ad6413349fcdfeaff66f
+Signature: 80ac7a3b149c4cac0af4058b3b4a4bb6
 
 UNUSED LICENSES:
 
@@ -10138,7 +10138,11 @@ FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
 FILE: ../../../third_party/dart/runtime/bin/snapshot_utils_test.cc
 FILE: ../../../third_party/dart/runtime/bin/test_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/test_utils.h
+FILE: ../../../third_party/dart/runtime/bin/thread_absl.cc
+FILE: ../../../third_party/dart/runtime/bin/thread_absl.h
 FILE: ../../../third_party/dart/runtime/platform/mach_o.h
+FILE: ../../../third_party/dart/runtime/vm/os_thread_absl.cc
+FILE: ../../../third_party/dart/runtime/vm/os_thread_absl.h
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
