@@ -838,7 +838,7 @@ void main() {
 
     // Center, which is within the text area
     final Offset center = tester.getCenter(find.byType(TextFormField));
-    // Top left, which is not the text area
+    // Top left, which is also within the area
     final Offset edge = tester.getTopLeft(find.byType(TextFormField)) + const Offset(1, 1);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
