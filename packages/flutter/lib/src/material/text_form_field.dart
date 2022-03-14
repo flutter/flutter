@@ -237,7 +237,7 @@ class TextFormField extends FormField<String> {
                autofillHints: autofillHints,
                scrollController: scrollController,
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
-               mouseCursor:mouseCursor,
+               mouseCursor: mouseCursor,
              ),
            );
          },
