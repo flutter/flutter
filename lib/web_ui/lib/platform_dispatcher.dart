@@ -91,6 +91,11 @@ abstract class PlatformDispatcher {
   VoidCallback? get onPlatformBrightnessChanged;
   set onPlatformBrightnessChanged(VoidCallback? callback);
 
+  String? get systemFontFamily => configuration.systemFontFamily;
+
+  VoidCallback? get onSystemFontFamilyChanged;
+  set onSystemFontFamilyChanged(VoidCallback? callback);
+
   bool get semanticsEnabled => configuration.semanticsEnabled;
 
   VoidCallback? get onSemanticsEnabledChanged;
@@ -116,6 +121,7 @@ class PlatformConfiguration {
     this.textScaleFactor = 1.0,
     this.locales = const <Locale>[],
     this.defaultRouteName = '/',
+    this.systemFontFamily,
   });
 
   PlatformConfiguration copyWith({
@@ -126,6 +132,7 @@ class PlatformConfiguration {
     double? textScaleFactor,
     List<Locale>? locales,
     String? defaultRouteName,
+    String? systemFontFamily,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -135,6 +142,7 @@ class PlatformConfiguration {
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
+      systemFontFamily: systemFontFamily ?? this.systemFontFamily,
     );
   }
 
@@ -145,6 +153,7 @@ class PlatformConfiguration {
   final double textScaleFactor;
   final List<Locale> locales;
   final String defaultRouteName;
+  final String? systemFontFamily;
 }
 
 class ViewConfiguration {
