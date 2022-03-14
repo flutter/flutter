@@ -22,7 +22,6 @@ namespace flutter_runner {
 
 namespace {
 
-constexpr int kGrCacheMaxCount = 8192;
 // Tuning advice:
 // If you see the following 3 things happening simultaneously in a trace:
 //   * Over budget ("flutter", "GPURasterizer::Draw") durations
@@ -150,7 +149,7 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   }
 
   // Use local limits specified in this file above instead of flutter defaults.
-  context_->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
+  context_->setResourceCacheLimit(kGrCacheMaxByteSize);
 
   surface_pool_ =
       std::make_unique<VulkanSurfacePool>(*this, context_, scenic_session);

@@ -123,7 +123,7 @@ bool VulkanWindow::CreateSkiaGrContext() {
     return false;
   }
 
-  context->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
+  context->setResourceCacheLimit(kGrCacheMaxByteSize);
 
   skia_gr_context_ = context;
 
