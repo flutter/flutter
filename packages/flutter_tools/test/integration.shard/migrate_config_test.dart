@@ -159,7 +159,7 @@ migration:
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);
 
-    File metadataFile = tempDir.childFile('.metadata');
+    final File metadataFile = tempDir.childFile('.metadata');
     metadataFile.createSync(recursive: true);
     metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.

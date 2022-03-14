@@ -586,10 +586,7 @@ abstract class CreateBase extends FlutterCommand {
     }
     final File metadataFile = globals.fs
         .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
-    print(platformsForMigrateConfig);
-          // 'flutterRevision': globals.flutterVersion.frameworkRevision,
-      // 'flutterChannel': globals.flutterVersion.channel,
-    FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
+    final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
       file: metadataFile,
       versionRevision: globals.flutterVersion.frameworkRevision,
       versionChannel: globals.flutterVersion.channel,
