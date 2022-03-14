@@ -1911,4 +1911,31 @@ void main() {
 
     await hoverGesture.removePointer();
   });
+
+  testWidgets('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/97302
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            tapTargetSize: MaterialTapTargetSize.padded,
+            isSelected: const <bool>[false, false, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Icon(Icons.check),
+              Icon(Icons.access_alarm),
+              Icon(Icons.cake),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Rect firstRect = tester.getRect(find.byType(TextButton).at(0));
+    expect(firstRect.height, 48.0);
+    final Rect secondRect = tester.getRect(find.byType(TextButton).at(1));
+    expect(secondRect.height, 48.0);
+    final Rect thirdRect = tester.getRect(find.byType(TextButton).at(2));
+    expect(thirdRect.height, 48.0);
+  });
 }
