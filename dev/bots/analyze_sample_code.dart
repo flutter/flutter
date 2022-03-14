@@ -451,6 +451,7 @@ class SampleChecker {
       print(<String>[
         Platform.resolvedExecutable,
         'pub',
+        '-v',
         'global',
         'run',
         'snippets',
