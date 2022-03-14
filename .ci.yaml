@@ -17,7 +17,7 @@ platform_properties:
         [
           {"name":"builder_linux_framework","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
           {"name":"pub_cache","path":".pub-cache"}
@@ -34,7 +34,7 @@ platform_properties:
         [
           {"name":"builder_linux_devicelab","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"},
@@ -54,7 +54,7 @@ platform_properties:
         [
           {"name":"builder_linux_devicelab","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"},
@@ -74,7 +74,7 @@ platform_properties:
         [
           {"name":"builder_mac_framework","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
           {"name":"osx_sdk_13a233","path":"osx_sdk"},
@@ -93,7 +93,7 @@ platform_properties:
           [
             {"name":"builder_mac_devicelab","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -112,7 +112,7 @@ platform_properties:
       caches: >-
           [
             {"name":"builder_mac_devicelab","path":"builder"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -135,7 +135,7 @@ platform_properties:
           [
             {"name":"builder_win_framework","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
@@ -153,7 +153,7 @@ platform_properties:
           [
             {"name":"builder_win_devicelab","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
