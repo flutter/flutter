@@ -881,6 +881,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
+  /// The setting indicating the current system font of the host platform.
+  @override
+  String? get systemFontFamily => configuration.systemFontFamily;
+
   /// Reference to css media query that indicates the user theme preference on the web.
   final html.MediaQueryList _brightnessMediaQuery =
       html.window.matchMedia('(prefers-color-scheme: dark)');
@@ -938,6 +942,32 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Otherwise zones won't work properly.
   void invokeOnPlatformBrightnessChanged() {
     invoke(_onPlatformBrightnessChanged, _onPlatformBrightnessChangedZone);
+  }
+
+  /// A callback that is invoked whenever [systemFontFamily] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  @override
+  ui.VoidCallback? get onSystemFontFamilyChanged =>
+      _onSystemFontFamilyChanged;
+  ui.VoidCallback? _onSystemFontFamilyChanged;
+  Zone? _onSystemFontFamilyChangedZone;
+  @override
+  set onSystemFontFamilyChanged(ui.VoidCallback? callback) {
+    _onSystemFontFamilyChanged = callback;
+    _onSystemFontFamilyChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnSystemFontFamilyChanged() {
+    invoke(_onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
   }
 
   /// Whether the user has requested that [updateSemantics] be called when

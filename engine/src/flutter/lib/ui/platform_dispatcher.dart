@@ -864,6 +864,26 @@ class PlatformDispatcher {
     _onPlatformBrightnessChangedZone = Zone.current;
   }
 
+  /// The setting indicating the current system font of the host platform.
+  String? get systemFontFamily => configuration.systemFontFamily;
+
+  /// A callback that is invoked whenever [systemFontFamily] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the callback
+  /// was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  VoidCallback? get onSystemFontFamilyChanged => _onSystemFontFamilyChanged;
+  VoidCallback? _onSystemFontFamilyChanged;
+  Zone _onSystemFontFamilyChangedZone = Zone.root;
+  set onSystemFontFamilyChanged(VoidCallback? callback) {
+    _onSystemFontFamilyChanged = callback;
+    _onSystemFontFamilyChangedZone = Zone.current;
+  }
+
   // Called from the engine, via hooks.dart
   void _updateUserSettingsData(String jsonData) {
     final Map<String, Object?> data = json.decode(jsonData) as Map<String, Object?>;
@@ -880,19 +900,23 @@ class PlatformDispatcher {
     }
     final Brightness platformBrightness =
     data['platformBrightness']! as String == 'dark' ? Brightness.dark : Brightness.light;
+    final String? systemFontFamily = data['systemFontFamily'] as String?;
     final PlatformConfiguration previousConfiguration = configuration;
     final bool platformBrightnessChanged =
         previousConfiguration.platformBrightness != platformBrightness;
     final bool textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
     final bool alwaysUse24HourFormatChanged =
         previousConfiguration.alwaysUse24HourFormat != alwaysUse24HourFormat;
-    if (!platformBrightnessChanged && !textScaleFactorChanged && !alwaysUse24HourFormatChanged) {
+    final bool systemFontFamilyChanged =
+        previousConfiguration.systemFontFamily != systemFontFamily;
+    if (!platformBrightnessChanged && !textScaleFactorChanged && !alwaysUse24HourFormatChanged && !systemFontFamilyChanged) {
       return;
     }
     _configuration = previousConfiguration.copyWith(
       textScaleFactor: textScaleFactor,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       platformBrightness: platformBrightness,
+      systemFontFamily: systemFontFamily,
     );
     _invoke(onPlatformConfigurationChanged, _onPlatformConfigurationChangedZone);
     if (textScaleFactorChanged) {
@@ -900,6 +924,9 @@ class PlatformDispatcher {
     }
     if (platformBrightnessChanged) {
       _invoke(onPlatformBrightnessChanged, _onPlatformBrightnessChangedZone);
+    }
+    if (systemFontFamilyChanged) {
+      _invoke(onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
     }
   }
 
@@ -1032,6 +1059,7 @@ class PlatformConfiguration {
     this.textScaleFactor = 1.0,
     this.locales = const <Locale>[],
     this.defaultRouteName,
+    this.systemFontFamily,
   });
 
   /// Copy a [PlatformConfiguration] with some fields replaced.
@@ -1043,6 +1071,7 @@ class PlatformConfiguration {
     double? textScaleFactor,
     List<Locale>? locales,
     String? defaultRouteName,
+    String? systemFontFamily,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1052,6 +1081,7 @@ class PlatformConfiguration {
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
+      systemFontFamily: systemFontFamily ?? this.systemFontFamily,
     );
   }
 
@@ -1080,6 +1110,9 @@ class PlatformConfiguration {
   /// The route or path that the embedder requested when the application was
   /// launched.
   final String? defaultRouteName;
+
+  /// The system-reported default font family.
+  final String? systemFontFamily;
 }
 
 /// An immutable view configuration.
