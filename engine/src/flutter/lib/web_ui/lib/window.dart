@@ -64,6 +64,13 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
     platformDispatcher.onPlatformBrightnessChanged = callback;
   }
 
+  String? get systemFontFamily => platformDispatcher.systemFontFamily;
+
+  VoidCallback? get onSystemFontFamilyChanged => platformDispatcher.onSystemFontFamilyChanged;
+  set onSystemFontFamilyChanged(VoidCallback? callback) {
+    platformDispatcher.onSystemFontFamilyChanged = callback;
+  }
+
   FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
   set onBeginFrame(FrameCallback? callback) {
     platformDispatcher.onBeginFrame = callback;
