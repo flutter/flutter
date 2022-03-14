@@ -6,6 +6,7 @@
 
 #include "flutter/fml/shared_thread_merger.h"
 
+#include <algorithm>
 #include <set>
 
 namespace fml {
