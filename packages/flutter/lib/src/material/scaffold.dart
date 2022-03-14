@@ -2388,8 +2388,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     void _removeEntryIfNeeded() {
       if (!isPersistent && !removedEntry) {
         assert(entry != null);
-        entry!.remove();
         removedEntry = true;
+        entry!.remove();
       }
     }
 
@@ -2408,6 +2408,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           setState(() {
             _dismissedBottomSheets.remove(bottomSheet);
           });
+        }
+        if (_currentBottomSheet == null) {
+          return;
         }
         setState(() {
           _currentBottomSheet = null;
