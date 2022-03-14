@@ -20,6 +20,10 @@ source_set("shaderc_util_flutter") {
 
   defines = [ "ENABLE_HLSL=1" ]
 
+  if (is_clang) {
+    cflags_cc = [ "-Wno-deprecated-copy" ]
+  }
+
   sources = [
     "$shaderc_base/libshaderc_util/include/libshaderc_util/counting_includer.h",
     "$shaderc_base/libshaderc_util/include/libshaderc_util/exceptions.h",
