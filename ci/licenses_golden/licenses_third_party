@@ -1,4 +1,4 @@
-Signature: b7d7cb2fa4e4a0066b4ceef1a3b83693
+Signature: a07a673451b5ad6413349fcdfeaff66f
 
 UNUSED LICENSES:
 
@@ -9871,6 +9871,7 @@ FILE: ../../../third_party/dart/benchmarks/StringPool/dart/version2.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool100.dart
 FILE: ../../../third_party/dart/runtime/bin/abstract_socket_test.cc
+FILE: ../../../third_party/dart/runtime/bin/analyze_snapshot.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.mm
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils_test.cc
@@ -9879,6 +9880,8 @@ FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_posix.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_win.cc
+FILE: ../../../third_party/dart/runtime/include/analyze_snapshot_api.h
+FILE: ../../../third_party/dart/runtime/vm/analyze_snapshot_api_impl.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_riscv.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_riscv_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_riscv.cc
@@ -10132,6 +10135,10 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/Iterators.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/data.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
+FILE: ../../../third_party/dart/runtime/bin/snapshot_utils_test.cc
+FILE: ../../../third_party/dart/runtime/bin/test_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/test_utils.h
+FILE: ../../../third_party/dart/runtime/platform/mach_o.h
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
