@@ -77,7 +77,7 @@ class PlatformViewsService {
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
 
 
-  /// Creates a [TextureAndroidViewController] for a new Android view.
+  /// Creates an [AndroidViewController] for a new Android view.
   ///
   /// The view is created after calling [TextureAndroidViewController.setSize].
   ///
@@ -103,7 +103,7 @@ class PlatformViewsService {
   ///
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
-  static TextureAndroidViewController initAndroidView({
+  static AndroidViewController initAndroidView({
     required int id,
     required String viewType,
     required TextDirection layoutDirection,
@@ -128,33 +128,8 @@ class PlatformViewsService {
     return controller;
   }
 
-  /// Creates a [SurfaceAndroidViewController] for a new Android view.
-  ///
-  /// The view is created after calling [AndroidViewController.create].
-  ///
-  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
-  ///
-  /// `viewType` is the identifier of the Android view type to be created, a
-  /// factory for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
-  /// Plugins can register a platform view factory with
-  /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
-  ///
-  /// `creationParams` will be passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
-  ///
-  /// `creationParamsCodec` is the codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
-  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
-  ///
-  /// `onFocus` is a callback that will be invoked when the Android View asks to get the
-  /// input focus.
-  ///
-  /// The Android view will only be created after [AndroidViewController.setSize] is called for the
-  /// first time.
-  ///
-  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
-  static SurfaceAndroidViewController initSurfaceAndroidView({
+  /// Alias for [initAndroidView].
+  static AndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
     required TextDirection layoutDirection,
@@ -162,21 +137,14 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    assert(id != null);
-    assert(viewType != null);
-    assert(layoutDirection != null);
-    assert(creationParams == null || creationParamsCodec != null);
-
-    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
-      viewId: id,
+    return initAndroidView(
+      id: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
       creationParams: creationParams,
       creationParamsCodec: creationParamsCodec,
+      onFocus: onFocus,
     );
-
-    _instance._focusCallbacks[id] = onFocus ?? () {};
-    return controller;
   }
 
   /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
@@ -189,13 +157,11 @@ class PlatformViewsService {
   /// This flag allows disabling this conversion.
   ///
   /// Defaults to true.
-  static Future<void> synchronizeToNativeViewHierarchy(bool yes) {
-    assert(defaultTargetPlatform == TargetPlatform.android);
-    return SystemChannels.platform_views.invokeMethod<void>(
-      'synchronizeToNativeViewHierarchy',
-      yes,
-    );
-  }
+  @Deprecated(
+    'This API is no longer relevant. '
+    'This feature was deprecated after 2.12.0-0.1.pre.',
+  )
+  static Future<void> synchronizeToNativeViewHierarchy(bool yes) async {}
 
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.

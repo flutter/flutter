@@ -240,11 +240,6 @@ void main() {
       await viewController.setOffset(const Offset(10, 20));
       expect(viewsController.offsets, equals(<int, Offset>{}));
     });
-
-    test('synchronizeToNativeViewHierarchy', () async {
-      await PlatformViewsService.synchronizeToNativeViewHierarchy(false);
-      expect(viewsController.synchronizeToNativeViewHierarchy, false);
-    });
   });
 
   group('iOS', () {
