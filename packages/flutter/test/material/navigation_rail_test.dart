@@ -55,6 +55,19 @@ void main() {
     expect(actualUnselectedIconTheme.fontSize, equals(unselectedIconTheme.size));
   });
 
+  testWidgets('No selected destination when selectedIndex is null', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        destinations: _destinations(),
+      ),
+    );
+
+    final Iterable<Semantics> semantics = tester.widgetList<Semantics>(find.byType(Semantics));
+    expect(semantics.where((Semantics s) => s.properties.selected ?? false), isEmpty);
+  });
+
   testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
@@ -2113,6 +2126,116 @@ void main() {
     expect(_labelOpacity(tester, 'Ghi'), equals(0.5));
     await tester.pumpAndSettle();
     expect(_labelOpacity(tester, 'Ghi'), equals(1.0));
+  });
+
+  testWidgets('Changing destinations animate for selectedIndex=null', (WidgetTester tester) async {
+    int? selectedIndex = 0;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    destinations: _destinations(),
+                    selectedIndex: selectedIndex,
+                    labelType: NavigationRailLabelType.selected,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Unset the selected index.
+    stateSetter(() {
+      selectedIndex = null;
+    });
+
+    // The first destination animates out.
+    expect(_labelOpacity(tester, 'Abc'), equals(1.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(_labelOpacity(tester, 'Abc'), equals(0.5));
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Abc'), equals(0.0));
+
+    // Set the selected index to the first destination.
+    stateSetter(() {
+      selectedIndex = 0;
+    });
+
+    // The first destination animates in.
+    expect(_labelOpacity(tester, 'Abc'), equals(0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(_labelOpacity(tester, 'Abc'), equals(0.5));
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Abc'), equals(1.0));
+  });
+
+  testWidgets('Changing destinations animate when selectedIndex=null during transition', (WidgetTester tester) async {
+    int? selectedIndex = 0;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    destinations: _destinations(),
+                    selectedIndex: selectedIndex,
+                    labelType: NavigationRailLabelType.selected,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    stateSetter(() {
+      selectedIndex = 1;
+    });
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 175));
+
+    // Interrupt while animating from index 0 to 1.
+    stateSetter(() {
+      selectedIndex = null;
+    });
+
+    expect(_labelOpacity(tester, 'Abc'), equals(0));
+    expect(_labelOpacity(tester, 'Def'), equals(1));
+
+    await tester.pump();
+    // Create very close to 0, but non-zero, animation value.
+    await tester.pump(const Duration(milliseconds: 1));
+    // Ensure the opacity is animated back towards 0.
+    expect(_labelOpacity(tester, 'Def'), lessThan(0.5));
+    expect(_labelOpacity(tester, 'Def'), closeTo(0.5, 0.03));
+
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Abc'), equals(0.0));
+    expect(_labelOpacity(tester, 'Def'), equals(0.0));
   });
 
   testWidgets('Semantics - labelType=[none]', (WidgetTester tester) async {
