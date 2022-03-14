@@ -47,6 +47,31 @@ FlutterProjectType? stringToProjectType(String value) {
   return result;
 }
 
+  /// Verifies the expected yaml keys are present in the file.
+  bool _validateMetadataMap(Object? yamlRoot, Map<String, Type> validations, Logger logger) {
+    if (yamlRoot != null && yamlRoot is! YamlMap) {
+      return false;
+    }
+    final YamlMap map = yamlRoot! as YamlMap;
+    bool isValid = true;
+    for (final MapEntry<String, Object> entry in validations.entries) {
+      if (!map.keys.contains(entry.key)) {
+        isValid = false;
+        print('The key ${entry.key} was not found');
+        logger.printError('The key ${entry.key} was not found');
+        break;
+      }
+      if (map[entry.key] != null && (map[entry.key] as Object).runtimeType != entry.value) {
+        isValid = false;
+        print('The value of key ${entry.key} was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
+        logger.printError('The value of key ${entry.key} was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
+        break;
+      }
+    }
+    return isValid;
+  }
+
+
 /// Represents one .migrate_config file.
 ///
 /// Each platform and the root project directory includes one .migrate_config file.
@@ -71,59 +96,30 @@ class FlutterProjectMetadata {
     } on YamlException {
       // Handled in _validate below.
     }
-    if (!_validate(yamlRoot)) {
-      _logger.printError('Invalid .metadata yaml file found at ${_metadataFile.path}');
-      return;
-    }
-    final YamlMap map = yamlRoot! as YamlMap;
-    final Object? versionYaml = map['version'];
-    if (versionYaml == null || versionYaml is! YamlMap) {
-      _logger.printTrace('.metadata version is malformed.');
+    if (_validateMetadataMap(yamlRoot, <String, Type>{
+          'version': YamlMap,
+          'project_type': String,
+        }, _logger)) {
+      final YamlMap map = yamlRoot! as YamlMap;
+      final Object? versionYaml = map['version'];
+      if (_validateMetadataMap(versionYaml, <String, Type>{
+            'revision': String,
+            'channel': String,
+          }, _logger)) {
+        final YamlMap versionYamlMap = versionYaml as YamlMap;
+        _versionRevision = versionYamlMap['revision'] as String?;
+        _versionChannel = versionYamlMap['channel'] as String?;
+      } else {
+        _logger.printTrace('.metadata version is malformed.');
+      }
+      _projectType = stringToProjectType(map['project_type'] as String);
+
+      final Object? migrationYaml = map['migration'];
+      if (migrationYaml != null && migrationYaml is YamlMap) {
+        migrateConfig.parseYaml(map['migration'] as YamlMap, _logger);
+      }
     } else {
-      final YamlMap versionYamlMap = versionYaml;
-      _versionRevision = versionYamlMap['revision'] as String?;
-      _versionChannel = versionYamlMap['channel'] as String?;
-      _projectType = stringToProjectType(versionYamlMap['projectType'] as String);
-    }
-
-    final Object? migrationYaml = map['migration'];
-    if (map['migration'] is YamlMap) {
-      final YamlMap migrationYamlMap = migrationYaml! as YamlMap;
-
-      final Object? platformsYaml = migrationYamlMap['platforms'];
-      final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
-      print(platformsYaml);
-      if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
-        for (final Object? platform in platformsYaml) {
-          if (platform != null &&
-              platform is YamlMap &&
-              platform.containsKey('platform') &&
-              platform.containsKey('createRevision') &&
-              platform.containsKey('baseRevision')) {
-            final YamlMap platformYamlMap = platform;
-            final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
-              (SupportedPlatform platform) => platform.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
-            );
-            platformConfigs[platformString] = MigratePlatformConfig(
-              createRevision: platform['createRevision'] as String?,
-              baseRevision: platform['baseRevision'] as String?,
-            );
-          } else {
-            // malformed platform entry
-            continue;
-          }
-        }
-      }
-
-      final Object? unmanagedFilesYaml = migrationYamlMap['unmanagedFiles'];
-      List<String> unmanagedFiles = <String>[];
-      if (unmanagedFilesYaml is YamlList && unmanagedFilesYaml.isNotEmpty) {
-        unmanagedFiles = List<String>.from(unmanagedFilesYaml.value.cast<String>());
-      }
-      migrateConfig = MigrateConfig(
-        platformConfigs: platformConfigs,
-        unmanagedFiles: unmanagedFiles,
-      );
+      _logger.printError('Invalid .metadata yaml file found at ${_metadataFile.path}');
     }
   }
 
@@ -157,34 +153,6 @@ class FlutterProjectMetadata {
   final Logger _logger;
 
   final File _metadataFile;
-
-  /// Verifies the expected yaml keys are present in the file.
-  bool _validate(Object? yamlRoot) {
-    final Map<String, Type> validations = <String, Type>{
-      // 'versionChannel': String,
-      // 'versionRevision': String,
-      // 'migration': YamlMap,
-    };
-    if (yamlRoot != null && yamlRoot is! YamlMap) {
-      return false;
-    }
-    final YamlMap map = yamlRoot! as YamlMap;
-    bool isValid = true;
-    for (final MapEntry<String, Object> entry in validations.entries) {
-      if (!map.keys.contains(entry.key)) {
-        isValid = false;
-        _logger.printError('The key ${entry.key} was not found');
-        break;
-      }
-      if (map[entry.key] != null && (map[entry.key] as Object).runtimeType != entry.value) {
-        isValid = false;
-        _logger.printError('The value of key ${entry.key} was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
-        break;
-      }
-    }
-    return isValid;
-  }
-
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
   ///
@@ -256,7 +224,7 @@ class MigrateConfig {
   /// A list of paths relative to this file the migrate tool should ignore.
   ///
   /// These files are typically user-owned files that should not be changed.
-  final List<String> unmanagedFiles;
+  List<String> unmanagedFiles;
 
   bool get isEmpty => platformConfigs.isEmpty && (unmanagedFiles.isEmpty || unmanagedFiles == _kDefaultUnmanagedFiles);
 
@@ -294,7 +262,7 @@ class MigrateConfig {
 
     String platformsString = '';
     for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry in platformConfigs.entries) {
-      platformsString += '\n    - platform: ${entry.key.toString().split('.').last}\n      createRevision: ${entry.value.createRevision == null ? 'null' : "${entry.value.createRevision}"}\n      baseRevision: ${entry.value.baseRevision == null ? 'null' : "${entry.value.baseRevision}"}';
+      platformsString += '\n    - platform: ${entry.key.toString().split('.').last}\n      create_revision: ${entry.value.createRevision == null ? 'null' : "${entry.value.createRevision}"}\n      base_revision: ${entry.value.baseRevision == null ? 'null' : "${entry.value.baseRevision}"}';
     }
 
     String migrationString = isEmpty ? '' : '''
@@ -309,9 +277,45 @@ migration:
   # ignored by the migrate tool.
   #
   # Files that are not part of the templates will be ignored by default.
-  unmanagedFiles:$unmanagedFilesString
+  unmanaged_files:$unmanagedFilesString
 ''';
     return migrationString;
+  }
+
+  void parseYaml(YamlMap map, Logger logger) {
+    final Object? platformsYaml = map['platforms'];
+    if (!_validateMetadataMap(map, <String, Type>{
+          'platforms': YamlList,
+          'unmanaged_files': YamlList,
+        }, logger)) {
+      return;
+    }
+    if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
+      for (final Object? platform in platformsYaml) {
+        if (_validateMetadataMap(platform, <String, Type>{
+              'platform': String,
+              'create_revision': String,
+              'base_revision': String,
+            }, logger)) {
+          final YamlMap platformYamlMap = platform as YamlMap;
+          final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
+            (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
+          );
+          platformConfigs[platformString] = MigratePlatformConfig(
+            createRevision: platformYamlMap['create_revision'] as String?,
+            baseRevision: platformYamlMap['base_revision'] as String?,
+          );
+        } else {
+          // malformed platform entry
+          continue;
+        }
+      }
+    }
+
+    final Object? unmanagedFilesYaml = map['unmanaged_files'];
+    if (unmanagedFilesYaml is YamlList && unmanagedFilesYaml.isNotEmpty) {
+      unmanagedFiles = List<String>.from(unmanagedFilesYaml.value.cast<String>());
+    }
   }
 }
 

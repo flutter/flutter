@@ -51,11 +51,11 @@ project_type: app
 migration:
   platforms:
     - platform: root
-      createRevision: fj19vkla9vnlka9vni3n808v3nch8cd
-      baseRevision: 93kf9v3njfa90vnidfjvn39nvi3vnie
+      create_revision: fj19vkla9vnlka9vni3n808v3nch8cd
+      base_revision: 93kf9v3njfa90vnidfjvn39nvi3vnie
     - platform: android
-      createRevision: abfj19vkla9vnlka9vni3n808v3nch8cd
-      baseRevision: ab93kf9v3njfa90vnidfjvn39nvi3vnie
+      create_revision: abfj19vkla9vnlka9vni3n808v3nch8cd
+      base_revision: ab93kf9v3njfa90vnidfjvn39nvi3vnie
 
   # User provided section
 
@@ -63,7 +63,7 @@ migration:
   # ignored by the migrate tool.
   #
   # Files that are not part of the templates will be ignored by default.
-  unmanagedFiles:
+  unmanaged_files:
     - lib/main.dart
     - ios/Runner.xcodeproj/project.pbxproj
     - lib/file1/etc.dart
@@ -103,12 +103,14 @@ project_type: app
   });
 
   testUsingContext('write simple config file', () async {
+    const String testCreateRevision = 'testmc9skl32nlnf23lnakcs9njr3';
+    const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
     MigrateConfig config = MigrateConfig(
       platformConfigs: <SupportedPlatform, MigratePlatformConfig>{
-        SupportedPlatform.android: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
-        SupportedPlatform.ios: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
-        SupportedPlatform.root: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
-        SupportedPlatform.windows: MigratePlatformConfig(createRevision: 'test_create_revision', baseRevision: 'test_base_revision'),
+        SupportedPlatform.android: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.ios: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.root: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.windows: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
       },
       unmanagedFiles: <String>[
         'lib/main.dart',
@@ -123,17 +125,17 @@ project_type: app
 migration:
   platforms:
     - platform: android
-      createRevision: test_create_revision
-      baseRevision: test_base_revision
+      create_revision: $testCreateRevision
+      base_revision: $testBaseRevision
     - platform: ios
-      createRevision: test_create_revision
-      baseRevision: test_base_revision
+      create_revision: $testCreateRevision
+      base_revision: $testBaseRevision
     - platform: root
-      createRevision: test_create_revision
-      baseRevision: test_base_revision
+      create_revision: $testCreateRevision
+      base_revision: $testBaseRevision
     - platform: windows
-      createRevision: test_create_revision
-      baseRevision: test_base_revision
+      create_revision: $testCreateRevision
+      base_revision: $testBaseRevision
 
   # User provided section
 
@@ -141,7 +143,7 @@ migration:
   # ignored by the migrate tool.
   #
   # Files that are not part of the templates will be ignored by default.
-  unmanagedFiles:
+  unmanaged_files:
     - 'lib/main.dart'
     - 'ios/Runner.xcodeproj/project.pbxproj'
     - 'lib/file1/etc.dart'
@@ -175,7 +177,7 @@ project_type: app
     const String currentRevision = 'test_base_revision';
     const String createRevision = 'test_create_revision';
 
-    FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
+    final FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
     metadata.migrateConfig.populate(
       projectDirectory: tempDir,
       currentRevision: currentRevision,
@@ -200,5 +202,42 @@ project_type: app
     expect(keyList[2], equals(SupportedPlatform.ios));
     expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].baseRevision, equals(currentRevision));
     expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].createRevision, equals(createRevision));
+
+    metadata.writeFile();
+    expect(metadataFile.readAsStringSync(), equals('''
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
+#
+# This file should be version controlled.
+
+version:
+  revision: fj19vkla9vnlka9vni3n808v3nch8cd
+  channel: stable
+
+project_type: app
+
+# Tracks metadata for the flutter migrate command
+migration:
+  platforms:
+    - platform: root
+      create_revision: $createRevision
+      base_revision: $currentRevision
+    - platform: android
+      create_revision: $createRevision
+      base_revision: $currentRevision
+    - platform: ios
+      create_revision: $createRevision
+      base_revision: $currentRevision
+
+  # User provided section
+
+  # List of Local paths (relative to this file) that should be
+  # ignored by the migrate tool.
+  #
+  # Files that are not part of the templates will be ignored by default.
+  unmanaged_files:
+    - 'lib/main.dart'
+    - 'ios/Runner.xcodeproj/project.pbxproj'
+'''));
   });
 }
