@@ -158,8 +158,8 @@ class PlatformViewsService {
   ///
   /// Defaults to true.
   @Deprecated(
-    'This API is no longer relevant. '
-    'This feature was deprecated after 2.12.0-0.1.pre.',
+    'No longer necessary to improve performance. '
+    'This feature was deprecated after 2.11.0-0.1.pre.',
   )
   static Future<void> synchronizeToNativeViewHierarchy(bool yes) async {}
 
