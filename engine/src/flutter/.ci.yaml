@@ -132,7 +132,6 @@ targets:
       upload_packages: "true"
       clobber: "true"
     timeout: 60
-    scheduler: luci
 
   - name: Linux Benchmarks
     enabled_branches:
@@ -218,7 +217,6 @@ targets:
     properties:
       config_name: linux_host_engine
       environment: Staging
-    scheduler: luci
 
   - name: Linux Web Engine
     recipe: engine/web_engine
@@ -334,7 +332,6 @@ targets:
         [
           {"dependency": "jazzy", "version": "0.14.1"}
         ]
-    scheduler: luci
 
   - name:  Mac mac_ios_engine_profile
     recipe: engine_v2/engine_v2
@@ -343,7 +340,6 @@ targets:
     properties:
       config_name: mac_ios_engine_profile
       environment: Staging
-    scheduler: luci
 
   - name:  Mac mac_ios_engine_release
     recipe: engine_v2/engine_v2
@@ -352,7 +348,6 @@ targets:
     properties:
       config_name: mac_ios_engine_release
       environment: Staging
-    scheduler: luci
 
   - name: Windows Android AOT Engine
     recipe: engine/engine
@@ -378,7 +373,6 @@ targets:
     properties:
       config_name: windows_android_aot_engine
       environment: Staging
-    scheduler: luci
 
   - name: Windows windows_host_engine
     recipe: engine_v2/engine_v2
@@ -387,7 +381,6 @@ targets:
     properties:
       config_name: windows_host_engine
       environment: Staging
-    scheduler: luci
 
   - name: Windows Unopt
     recipe: engine/engine_unopt
