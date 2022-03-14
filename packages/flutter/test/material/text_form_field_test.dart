@@ -836,7 +836,7 @@ void main() {
       ),
     );
 
-    // Center, which is within the text area
+    // Center, which is within the area
     final Offset center = tester.getCenter(find.byType(TextFormField));
     // Top left, which is also within the area
     final Offset edge = tester.getTopLeft(find.byType(TextFormField)) + const Offset(1, 1);
