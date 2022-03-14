@@ -27,7 +27,15 @@ class Entity {
     kDestination,
     kSourceOver,
     kDestinationOver,
+    kSourceIn,
+    kDestinationIn,
+    kSourceOut,
+    kDestinationOut,
+    kSourceATop,
+    kDestinationATop,
+    kXor,
     kPlus,
+    kModulate,
   };
 
   Entity();

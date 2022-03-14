@@ -159,11 +159,60 @@ class ContentContext {
         color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
         color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
         break;
-      case Entity::BlendMode::kPlus:
+      case Entity::BlendMode::kSourceIn:
+        color0.dst_alpha_blend_factor = BlendFactor::kZero;
+        color0.dst_color_blend_factor = BlendFactor::kZero;
+        color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
+        color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
+        break;
+      case Entity::BlendMode::kDestinationIn:
+        color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kZero;
+        color0.src_color_blend_factor = BlendFactor::kZero;
+        break;
+      case Entity::BlendMode::kSourceOut:
+        color0.dst_alpha_blend_factor = BlendFactor::kZero;
+        color0.dst_color_blend_factor = BlendFactor::kZero;
+        color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        break;
+      case Entity::BlendMode::kDestinationOut:
         color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kZero;
+        color0.src_color_blend_factor = BlendFactor::kZero;
+        break;
+      case Entity::BlendMode::kSourceATop:
+        color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
+        color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
+        break;
+      case Entity::BlendMode::kDestinationATop:
+        color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        break;
+      case Entity::BlendMode::kXor:
+        color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
+        break;
+      case Entity::BlendMode::kPlus:
+        color0.dst_alpha_blend_factor = BlendFactor::kOne;
         color0.dst_color_blend_factor = BlendFactor::kOne;
-        color0.src_alpha_blend_factor = BlendFactor::kSourceAlpha;
+        color0.src_alpha_blend_factor = BlendFactor::kOne;
         color0.src_color_blend_factor = BlendFactor::kOne;
+        break;
+      case Entity::BlendMode::kModulate:
+        // kSourceColor and kDestinationColor override the alpha blend factor.
+        color0.dst_alpha_blend_factor = BlendFactor::kZero;
+        color0.dst_color_blend_factor = BlendFactor::kSourceColor;
+        color0.src_alpha_blend_factor = BlendFactor::kZero;
+        color0.src_color_blend_factor = BlendFactor::kZero;
         break;
     }
     desc.SetColorAttachmentDescriptor(0u, std::move(color0));
