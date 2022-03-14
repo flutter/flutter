@@ -146,7 +146,7 @@ class TextFormField extends FormField<String> {
     ScrollController? scrollController,
     String? restorationId,
     bool enableIMEPersonalizedLearning = true,
-    MouseCursor? mouseCursor = SystemMouseCursors.text,
+    MouseCursor? mouseCursor,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),

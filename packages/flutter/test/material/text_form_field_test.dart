@@ -817,19 +817,15 @@ void main() {
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.scrollController, scrollController);
   });
-  
+
   testWidgets('TextFormField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TextFormField(
               mouseCursor: SystemMouseCursors.grab,
-              decoration: InputDecoration(
-                // Add an icon so that the left edge is not the text area
-                icon: Icon(Icons.person),
-              ),
             ),
           ),
         ),
@@ -851,15 +847,11 @@ void main() {
 
     // Test default cursor
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
-            child: TextFormField(
-              decoration: InputDecoration(
-                icon: Icon(Icons.person),
-              ),
-            ),
+            child: TextFormField(),
           ),
         ),
       ),
@@ -872,15 +864,12 @@ void main() {
 
     // Test default cursor when disabled
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TextFormField(
               enabled: false,
-              decoration: InputDecoration(
-                icon: Icon(Icons.person),
-              ),
             ),
           ),
         ),
