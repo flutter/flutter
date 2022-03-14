@@ -306,6 +306,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtons(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             constraints: const BoxConstraints(
               minWidth: 50.0,
               minHeight: 60.0,
@@ -337,6 +338,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtons(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             constraints: const BoxConstraints(
               maxWidth: 20.0,
               maxHeight: 10.0,
@@ -1614,7 +1616,7 @@ void main() {
 
     final Key key1 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
-    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 50.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
@@ -1643,7 +1645,7 @@ void main() {
 
     final Key key1 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
-    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 50.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
@@ -1673,7 +1675,7 @@ void main() {
 
     final Key key1 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
-    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 100.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(50.0, 148.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));

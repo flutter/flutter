@@ -171,6 +171,7 @@ void main() {
               ),
             ),
             child: ToggleButtons(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               isSelected: const <bool>[false, false, false],
               onPressed: (int index) {},
               children: const <Widget>[
@@ -206,6 +207,7 @@ void main() {
               ),
             ),
             child: ToggleButtons(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               isSelected: const <bool>[false, false, false],
               onPressed: (int index) {},
               children: const <Widget>[
