@@ -23,7 +23,7 @@ sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
   if (auto context = GrDirectContext::MakeGL(gl_interface, options)) {
     // Do not cache textures created by the image decoder.  These textures
     // should be deleted when they are no longer referenced by an SkImage.
-    context->setResourceCacheLimits(0, 0);
+    context->setResourceCacheLimit(0);
     return context;
   }
 #endif
