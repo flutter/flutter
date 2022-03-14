@@ -746,7 +746,7 @@ class ToggleButtons extends StatelessWidget {
                 splashColor: splashColor ?? toggleButtonsTheme.splashColor,
               ),
               elevation: MaterialStateProperty.all<double>(0),
-              textStyle:  MaterialStateProperty.all<TextStyle?>(currentTextStyle.copyWith(
+              textStyle: MaterialStateProperty.all<TextStyle?>(currentTextStyle.copyWith(
                 color: currentColor,
               )),
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
