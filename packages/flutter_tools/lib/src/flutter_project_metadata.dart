@@ -242,7 +242,6 @@ class MigrateConfig {
     final FlutterProject flutterProject = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
 
-    // final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
     for (final SupportedPlatform platform in platforms) {
       if (platformConfigs.containsKey(platform)) {
         if (update) {
