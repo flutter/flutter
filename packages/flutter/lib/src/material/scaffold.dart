@@ -2357,6 +2357,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     late _StandardBottomSheet bottomSheet;
 
     bool removedEntry = false;
+    bool doingDispose = false;
     void _removeCurrentBottomSheet() {
       removedEntry = true;
       if (_currentBottomSheet == null) {
@@ -2374,12 +2375,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       if (animationController.status != AnimationStatus.dismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
+      completer.complete();
     }
 
     final LocalHistoryEntry? entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet) {
+          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
             _removeCurrentBottomSheet();
           }
         });
@@ -2387,8 +2389,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     void _removeEntryIfNeeded() {
       if (!isPersistent && !removedEntry) {
         assert(entry != null);
-        removedEntry = true;
         entry!.remove();
+        removedEntry = true;
       }
     }
 
@@ -2401,7 +2403,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           return;
         }
         assert(_currentBottomSheet!._widget == bottomSheet);
-        completer.complete();
+        _removeEntryIfNeeded();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -2409,14 +2411,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             _dismissedBottomSheets.remove(bottomSheet);
           });
         }
-        if (_currentBottomSheet == null) {
-          return;
-        }
-        setState(() {
-          _currentBottomSheet = null;
-        });
       },
       onDispose: () {
+        doingDispose = true;
         _removeEntryIfNeeded();
         if (shouldDisposeAnimationController) {
           animationController.dispose();
