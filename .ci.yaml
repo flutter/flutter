@@ -34,7 +34,6 @@ platform_properties:
         [
           {"name":"builder_linux_devicelab","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"},
@@ -54,7 +53,6 @@ platform_properties:
         [
           {"name":"builder_linux_devicelab","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"},
@@ -93,7 +91,6 @@ platform_properties:
           [
             {"name":"builder_mac_devicelab","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -102,7 +99,6 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk"}
         ]
       os: Mac-12
@@ -112,7 +108,6 @@ platform_properties:
       caches: >-
           [
             {"name":"builder_mac_devicelab","path":"builder"},
-            {"name":"chrome_and_driver","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -153,7 +148,6 @@ platform_properties:
           [
             {"name":"builder_win_devicelab","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -163,7 +157,6 @@ platform_properties:
           [
             {"dependency": "android_sdk", "version": "version:31v8"},
             {"dependency": "certs"},
-            {"dependency": "chrome_and_driver", "version": "version:84"},
             {"dependency": "open_jdk"}
           ]
       os: Windows-10
