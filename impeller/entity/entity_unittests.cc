@@ -522,9 +522,33 @@ TEST_F(EntityTest, BlendingModeOptions) {
       case Entity::BlendMode::kDestinationOver:
         blend_mode_names.push_back("DestinationOver");
         blend_mode_values.push_back(Entity::BlendMode::kDestinationOver);
+      case Entity::BlendMode::kSourceIn:
+        blend_mode_names.push_back("SourceIn");
+        blend_mode_values.push_back(Entity::BlendMode::kSourceIn);
+      case Entity::BlendMode::kDestinationIn:
+        blend_mode_names.push_back("DestinationIn");
+        blend_mode_values.push_back(Entity::BlendMode::kDestinationIn);
+      case Entity::BlendMode::kSourceOut:
+        blend_mode_names.push_back("SourceOut");
+        blend_mode_values.push_back(Entity::BlendMode::kSourceOut);
+      case Entity::BlendMode::kDestinationOut:
+        blend_mode_names.push_back("DestinationOut");
+        blend_mode_values.push_back(Entity::BlendMode::kDestinationOut);
+      case Entity::BlendMode::kSourceATop:
+        blend_mode_names.push_back("SourceATop");
+        blend_mode_values.push_back(Entity::BlendMode::kSourceATop);
+      case Entity::BlendMode::kDestinationATop:
+        blend_mode_names.push_back("DestinationATop");
+        blend_mode_values.push_back(Entity::BlendMode::kDestinationATop);
+      case Entity::BlendMode::kXor:
+        blend_mode_names.push_back("Xor");
+        blend_mode_values.push_back(Entity::BlendMode::kXor);
       case Entity::BlendMode::kPlus:
         blend_mode_names.push_back("Plus");
         blend_mode_values.push_back(Entity::BlendMode::kPlus);
+      case Entity::BlendMode::kModulate:
+        blend_mode_names.push_back("Modulate");
+        blend_mode_values.push_back(Entity::BlendMode::kModulate);
     };
   }
 
