@@ -374,17 +374,17 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
   auto bind_stage_resources = [&allocator, &pass_bindings](
                                   const Bindings& bindings,
                                   ShaderStage stage) -> bool {
-    for (const auto buffer : bindings.buffers) {
+    for (const auto& buffer : bindings.buffers) {
       if (!Bind(pass_bindings, allocator, stage, buffer.first, buffer.second)) {
         return false;
       }
     }
-    for (const auto texture : bindings.textures) {
+    for (const auto& texture : bindings.textures) {
       if (!Bind(pass_bindings, stage, texture.first, *texture.second)) {
         return false;
       }
     }
-    for (const auto sampler : bindings.samplers) {
+    for (const auto& sampler : bindings.samplers) {
       if (!Bind(pass_bindings, stage, sampler.first, *sampler.second)) {
         return false;
       }
