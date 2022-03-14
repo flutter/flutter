@@ -2374,7 +2374,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       if (animationController.status != AnimationStatus.dismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
-      completer.complete();
     }
 
     final LocalHistoryEntry? entry = isPersistent
@@ -2402,6 +2401,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           return;
         }
         assert(_currentBottomSheet!._widget == bottomSheet);
+        completer.complete();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
