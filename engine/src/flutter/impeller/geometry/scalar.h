@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cfloat>
+#include <type_traits>
 #include <valarray>
 
 #include "impeller/geometry/constants.h"
@@ -13,10 +14,15 @@ namespace impeller {
 
 using Scalar = float;
 
+template <class T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
+constexpr T Absolute(const T& val) {
+  return val >= T{} ? val : -val;
+}
+
 constexpr inline bool ScalarNearlyEqual(Scalar x,
                                         Scalar y,
                                         Scalar tolerance = 1e-3) {
-  return std::abs(x - y) <= tolerance;
+  return Absolute(x - y) <= tolerance;
 }
 
 struct Degrees;

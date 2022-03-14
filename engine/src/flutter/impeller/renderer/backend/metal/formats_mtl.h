@@ -294,7 +294,7 @@ constexpr MTLSamplerAddressMode ToMTLSamplerAddressMode(
   return MTLSamplerAddressModeClampToEdge;
 }
 
-constexpr MTLClearColor ToMTLClearColor(const Color& color) {
+inline MTLClearColor ToMTLClearColor(const Color& color) {
   return MTLClearColorMake(color.red, color.green, color.blue, color.alpha);
 }
 

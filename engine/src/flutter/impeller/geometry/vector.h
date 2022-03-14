@@ -41,7 +41,7 @@ struct Vector3 {
    *
    *  @return the calculated length.
    */
-  constexpr Scalar Length() const { return sqrt(x * x + y * y + z * z); }
+  Scalar Length() const { return sqrt(x * x + y * y + z * z); }
 
   constexpr Vector3 Normalize() const {
     const auto len = Length();
@@ -125,7 +125,7 @@ struct Vector4 {
 
   constexpr Vector4(const Point& p) : x(p.x), y(p.y) {}
 
-  constexpr Vector4 Normalize() const {
+  Vector4 Normalize() const {
     const Scalar inverse = 1.0 / sqrt(x * x + y * y + z * z + w * w);
     return Vector4(x * inverse, y * inverse, z * inverse, w * inverse);
   }
