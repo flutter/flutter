@@ -125,8 +125,7 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
     return false;
   }
 
-  context->setResourceCacheLimits(vulkan::kGrCacheMaxCount,
-                                  vulkan::kGrCacheMaxByteSize);
+  context->setResourceCacheLimit(vulkan::kGrCacheMaxByteSize);
 
   context_ = context;
 

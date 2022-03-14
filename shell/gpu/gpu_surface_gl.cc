@@ -25,9 +25,6 @@
 
 namespace flutter {
 
-// Default maximum number of budgeted resources in the cache.
-static const int kGrCacheMaxCount = 8192;
-
 // Default maximum number of bytes of GPU memory of budgeted resources in the
 // cache.
 // The shell will dynamically increase or decrease this cache based on the
@@ -54,7 +51,7 @@ sk_sp<GrDirectContext> GPUSurfaceGL::MakeGLContext(
     return nullptr;
   }
 
-  context->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
+  context->setResourceCacheLimit(kGrCacheMaxByteSize);
 
   PersistentCache::GetCacheForProcess()->PrecompileKnownSkSLs(context.get());
 

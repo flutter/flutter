@@ -60,7 +60,7 @@ FLUTTER_ASSERT_ARC
       return nil;
     }
 
-    _resourceContext->setResourceCacheLimits(0u, 0u);
+    _resourceContext->setResourceCacheLimit(0u);
   }
   return self;
 }
