@@ -107,8 +107,8 @@ void DisplayListDispatcher::setColorSource(const flutter::DlColorSource* source)
       const flutter::DlLinearGradientColorSource* linear = source->asLinearGradient();
       FML_DCHECK(linear);
       auto contents = std::make_shared<LinearGradientContents>();
-      contents->SetEndPoints(ToPoint(linear->p0()),
-                             ToPoint(linear->p1()));
+      contents->SetEndPoints(ToPoint(linear->start_point()),
+                             ToPoint(linear->end_point()));
       std::vector<Color> colors;
       for (auto i = 0; i < linear->stop_count(); i++) {
         colors.emplace_back(ToColor(linear->colors()[i]));
