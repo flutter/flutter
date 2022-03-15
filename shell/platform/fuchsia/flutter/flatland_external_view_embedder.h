@@ -7,6 +7,7 @@
 
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
+#include <lib/fit/function.h>
 #include <lib/ui/scenic/cpp/view_ref_pair.h>
 
 #include <cstdint>  // For uint32_t & uint64_t
@@ -161,6 +162,7 @@ class FlatlandExternalViewEmbedder final
     fuchsia::ui::composition::ContentId viewport_id;
     ViewMutators mutators;
     SkSize size = SkSize::MakeEmpty();
+    fit::callback<void(const SkSize&)> pending_create_viewport_callback;
   };
 
   struct FlatlandLayer {
