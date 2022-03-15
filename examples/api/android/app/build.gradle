@@ -69,15 +69,9 @@ flutter {
 }
 
 dependencies {
-    // adds multidex support
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    // adds the coordinator-layout dependency so we can use CoordinatorLayout
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
-
-    // adds the material dependency so we can use the FAB
     implementation 'com.google.android.material:material:1.5.0'
 }
