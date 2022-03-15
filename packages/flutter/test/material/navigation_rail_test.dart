@@ -2045,6 +2045,7 @@ void main() {
     await tester.tap(find.text('Ghi'));
     expect(selectedIndex, 2);
 
+    // Wait for any pending shader compilation.
     tester.pumpAndSettle();
   });
 
@@ -2061,6 +2062,9 @@ void main() {
 
     await tester.tap(find.text('Def'));
     expect(selectedIndex, 0);
+
+    // Wait for any pending shader compilation.
+    tester.pumpAndSettle();
   });
 
   testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
