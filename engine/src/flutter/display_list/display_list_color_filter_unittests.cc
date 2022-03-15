@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/display_list_attributes_testing.h"
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_color_filter.h"
 #include "flutter/display_list/types.h"
-#include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
@@ -15,6 +16,18 @@ static const float matrix[20] = {
     11, 12, 13, 14, 15,  //
     16, 17, 18, 19, 20,  //
 };
+
+TEST(DisplayListColorFilter, BuilderSetGet) {
+  DlBlendColorFilter filter(SK_ColorRED, SkBlendMode::kDstATop);
+  DisplayListBuilder builder;
+  ASSERT_EQ(builder.getColorFilter(), nullptr);
+  builder.setColorFilter(&filter);
+  ASSERT_NE(builder.getColorFilter(), nullptr);
+  ASSERT_TRUE(
+      Equals(builder.getColorFilter(), static_cast<DlColorFilter*>(&filter)));
+  builder.setColorFilter(nullptr);
+  ASSERT_EQ(builder.getColorFilter(), nullptr);
+}
 
 TEST(DisplayListColorFilter, FromSkiaNullFilter) {
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(nullptr);
@@ -28,11 +41,11 @@ TEST(DisplayListColorFilter, FromSkiaBlendFilter) {
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
   DlBlendColorFilter dl_filter(SK_ColorRED, SkBlendMode::kDstATop);
   ASSERT_EQ(filter->type(), DlColorFilterType::kBlend);
-  ASSERT_NE(filter->asBlend(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
   ASSERT_EQ(*filter->asBlend(), dl_filter);
   ASSERT_EQ(filter->asBlend()->color(), SK_ColorRED);
   ASSERT_EQ(filter->asBlend()->mode(), SkBlendMode::kDstATop);
+
+  ASSERT_EQ(filter->asMatrix(), nullptr);
 }
 
 TEST(DisplayListColorFilter, FromSkiaMatrixFilter) {
@@ -40,19 +53,20 @@ TEST(DisplayListColorFilter, FromSkiaMatrixFilter) {
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
   DlMatrixColorFilter dl_filter(matrix);
   ASSERT_EQ(filter->type(), DlColorFilterType::kMatrix);
-  ASSERT_EQ(filter->asBlend(), nullptr);
-  ASSERT_NE(filter->asMatrix(), nullptr);
   ASSERT_EQ(*filter->asMatrix(), dl_filter);
   const DlMatrixColorFilter* matrix_filter = filter->asMatrix();
   for (int i = 0; i < 20; i++) {
     ASSERT_EQ((*matrix_filter)[i], matrix[i]);
   }
+
+  ASSERT_EQ(filter->asBlend(), nullptr);
 }
 
 TEST(DisplayListColorFilter, FromSkiaSrgbToLinearFilter) {
   sk_sp<SkColorFilter> sk_filter = SkColorFilters::SRGBToLinearGamma();
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
   ASSERT_EQ(filter->type(), DlColorFilterType::kSrgbToLinearGamma);
+
   ASSERT_EQ(filter->asBlend(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
 }
@@ -61,6 +75,7 @@ TEST(DisplayListColorFilter, FromSkiaLinearToSrgbFilter) {
   sk_sp<SkColorFilter> sk_filter = SkColorFilters::LinearToSRGBGamma();
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
   ASSERT_EQ(filter->type(), DlColorFilterType::kLinearToSrgbGamma);
+
   ASSERT_EQ(filter->asBlend(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
 }
@@ -74,9 +89,10 @@ TEST(DisplayListColorFilter, FromSkiaUnrecognizedFilter) {
       SkColorFilters::Compose(sk_inputA, sk_inputB);
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
   ASSERT_EQ(filter->type(), DlColorFilterType::kUnknown);
+  ASSERT_EQ(filter->skia_object(), sk_filter);
+
   ASSERT_EQ(filter->asBlend(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->skia_object(), sk_filter);
 }
 
 TEST(DisplayListColorFilter, BlendConstructor) {
@@ -104,24 +120,15 @@ TEST(DisplayListColorFilter, BlendContents) {
 TEST(DisplayListColorFilter, BlendEquals) {
   DlBlendColorFilter filter1(SK_ColorRED, SkBlendMode::kDstATop);
   DlBlendColorFilter filter2(SK_ColorRED, SkBlendMode::kDstATop);
-  ASSERT_TRUE(filter1 == filter2);
-  ASSERT_TRUE(filter2 == filter1);
-  ASSERT_FALSE(filter1 != filter2);
-  ASSERT_FALSE(filter2 != filter1);
-  ASSERT_EQ(filter1, filter2);
+  TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListColorFilter, BlendNotEquals) {
   DlBlendColorFilter filter1(SK_ColorRED, SkBlendMode::kDstATop);
   DlBlendColorFilter filter2(SK_ColorBLUE, SkBlendMode::kDstATop);
   DlBlendColorFilter filter3(SK_ColorRED, SkBlendMode::kDstIn);
-  ASSERT_FALSE(filter1 == filter2);
-  ASSERT_FALSE(filter2 == filter1);
-  ASSERT_TRUE(filter1 != filter2);
-  ASSERT_TRUE(filter2 != filter1);
-  ASSERT_NE(filter1, filter2);
-  ASSERT_NE(filter2, filter3);
-  ASSERT_NE(filter3, filter1);
+  TestNotEquals(filter1, filter2, "Color differs");
+  TestNotEquals(filter1, filter3, "Blend mode differs");
 }
 
 TEST(DisplayListColorFilter, NopBlendShouldNotCrash) {
@@ -171,7 +178,7 @@ TEST(DisplayListColorFilter, MatrixContents) {
 TEST(DisplayListColorFilter, MatrixEquals) {
   DlMatrixColorFilter filter1(matrix);
   DlMatrixColorFilter filter2(matrix);
-  ASSERT_EQ(filter1, filter2);
+  TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListColorFilter, MatrixNotEquals) {
@@ -180,7 +187,7 @@ TEST(DisplayListColorFilter, MatrixNotEquals) {
   DlMatrixColorFilter filter1(matrix_);
   matrix_[4] += 101;
   DlMatrixColorFilter filter2(matrix_);
-  ASSERT_NE(filter1, filter2);
+  TestNotEquals(filter1, filter2, "Matrix differs");
 }
 
 TEST(DisplayListColorFilter, NopMatrixShouldNotCrash) {
@@ -207,12 +214,8 @@ TEST(DisplayListColorFilter, SrgbToLinearShared) {
 TEST(DisplayListColorFilter, SrgbToLinearEquals) {
   DlSrgbToLinearGammaColorFilter filter1;
   DlSrgbToLinearGammaColorFilter filter2;
-  ASSERT_TRUE(filter1 == filter2);
-  ASSERT_TRUE(filter2 == filter1);
-  ASSERT_FALSE(filter1 != filter2);
-  ASSERT_FALSE(filter2 != filter1);
-  ASSERT_EQ(filter1, filter2);
-  ASSERT_EQ(filter1, *DlSrgbToLinearGammaColorFilter::instance);
+  TestEquals(filter1, filter2);
+  TestEquals(filter1, *DlSrgbToLinearGammaColorFilter::instance);
 }
 
 TEST(DisplayListColorFilter, LinearToSrgbConstructor) {
@@ -228,12 +231,8 @@ TEST(DisplayListColorFilter, LinearToSrgbShared) {
 TEST(DisplayListColorFilter, LinearToSrgbEquals) {
   DlLinearToSrgbGammaColorFilter filter1;
   DlLinearToSrgbGammaColorFilter filter2;
-  ASSERT_TRUE(filter1 == filter2);
-  ASSERT_TRUE(filter2 == filter1);
-  ASSERT_FALSE(filter1 != filter2);
-  ASSERT_FALSE(filter2 != filter1);
-  ASSERT_EQ(filter1, filter2);
-  ASSERT_EQ(filter1, *DlLinearToSrgbGammaColorFilter::instance);
+  TestEquals(filter1, filter2);
+  TestEquals(filter1, *DlLinearToSrgbGammaColorFilter::instance);
 }
 
 TEST(DisplayListColorFilter, UnknownConstructor) {
@@ -257,11 +256,7 @@ TEST(DisplayListColorFilter, UnknownEquals) {
   sk_sp<SkColorFilter> sk_filter = SkColorFilters::LinearToSRGBGamma();
   DlUnknownColorFilter filter1(sk_filter);
   DlUnknownColorFilter filter2(sk_filter);
-  ASSERT_TRUE(filter1 == filter2);
-  ASSERT_TRUE(filter2 == filter1);
-  ASSERT_FALSE(filter1 != filter2);
-  ASSERT_FALSE(filter2 != filter1);
-  ASSERT_EQ(filter1, filter2);
+  TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListColorFilter, UnknownNotEquals) {
@@ -272,11 +267,7 @@ TEST(DisplayListColorFilter, UnknownNotEquals) {
       SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kDstATop));
   DlUnknownColorFilter filter2(
       SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kDstATop));
-  ASSERT_TRUE(filter1 != filter2);
-  ASSERT_TRUE(filter2 != filter1);
-  ASSERT_FALSE(filter1 == filter2);
-  ASSERT_FALSE(filter2 == filter1);
-  ASSERT_NE(filter1, filter2);
+  TestNotEquals(filter1, filter2, "SkColorFilter instance differs");
 }
 
 }  // namespace testing

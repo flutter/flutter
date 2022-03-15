@@ -17,6 +17,8 @@ source_set("display_list") {
     "display_list_canvas_recorder.h",
     "display_list_color_filter.cc",
     "display_list_color_filter.h",
+    "display_list_color_source.cc",
+    "display_list_color_source.h",
     "display_list_complexity.cc",
     "display_list_complexity.h",
     "display_list_complexity_gl.cc",
@@ -31,6 +33,7 @@ source_set("display_list") {
     "display_list_mask_filter.h",
     "display_list_ops.cc",
     "display_list_ops.h",
+    "display_list_tile_mode.h",
     "display_list_utils.cc",
     "display_list_utils.h",
     "types.h",
@@ -48,9 +51,12 @@ source_set("unittests") {
   testonly = true
 
   sources = [
+    "display_list_attributes_testing.h",
     "display_list_canvas_unittests.cc",
     "display_list_color_filter_unittests.cc",
+    "display_list_color_source_unittests.cc",
     "display_list_complexity_unittests.cc",
+    "display_list_enum_unittests.cc",
     "display_list_mask_filter_unittests.cc",
     "display_list_test_utils.cc",
     "display_list_test_utils.h",

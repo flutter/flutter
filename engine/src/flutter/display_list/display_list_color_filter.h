@@ -107,8 +107,8 @@ class DlBlendColorFilter final : public DlColorFilter {
  protected:
   bool equals_(DlColorFilter const& other) const override {
     FML_DCHECK(other.type() == DlColorFilterType::kBlend);
-    auto that = static_cast<DlBlendColorFilter const&>(other);
-    return color_ == that.color_ && mode_ == that.mode_;
+    auto that = static_cast<DlBlendColorFilter const*>(&other);
+    return color_ == that->color_ && mode_ == that->mode_;
   }
 
  private:
@@ -166,8 +166,8 @@ class DlMatrixColorFilter final : public DlColorFilter {
  protected:
   bool equals_(const DlColorFilter& other) const override {
     FML_DCHECK(other.type() == DlColorFilterType::kMatrix);
-    auto that = static_cast<DlMatrixColorFilter const&>(other);
-    return memcmp(matrix_, that.matrix_, sizeof(matrix_)) == 0;
+    auto that = static_cast<DlMatrixColorFilter const*>(&other);
+    return memcmp(matrix_, that->matrix_, sizeof(matrix_)) == 0;
   }
 
  private:
@@ -273,8 +273,8 @@ class DlUnknownColorFilter final : public DlColorFilter {
  protected:
   bool equals_(const DlColorFilter& other) const override {
     FML_DCHECK(other.type() == DlColorFilterType::kUnknown);
-    auto that = static_cast<DlUnknownColorFilter const&>(other);
-    return sk_filter_ == that.sk_filter_;
+    auto that = static_cast<DlUnknownColorFilter const*>(&other);
+    return sk_filter_ == that->sk_filter_;
   }
 
  private:

@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_color_filter.h"
+#include "flutter/display_list/display_list_color_source.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 
 namespace flutter {
@@ -37,7 +38,7 @@ class Dispatcher {
   virtual void setStrokeMiter(SkScalar limit) = 0;
   virtual void setStrokeCap(SkPaint::Cap cap) = 0;
   virtual void setStrokeJoin(SkPaint::Join join) = 0;
-  virtual void setShader(sk_sp<SkShader> shader) = 0;
+  virtual void setColorSource(const DlColorSource* source) = 0;
   virtual void setColorFilter(const DlColorFilter* filter) = 0;
   // setInvertColors does not exist in SkPaint, but is a quick way to set
   // a ColorFilter that inverts the rgb values of all rendered colors.

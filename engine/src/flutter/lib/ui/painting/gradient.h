@@ -5,10 +5,9 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_GRADIENT_H_
 #define FLUTTER_LIB_UI_PAINTING_GRADIENT_H_
 
-#include "flutter/lib/ui/dart_wrapper.h"
+#include "flutter/display_list/display_list_color_source.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
 namespace tonic {
@@ -62,15 +61,15 @@ class CanvasGradient : public Shader {
                            SkTileMode tile_mode,
                            const tonic::Float64List& matrix4);
 
-  sk_sp<SkShader> shader(SkSamplingOptions) override {
-    return sk_shader_.skia_object();
+  std::shared_ptr<DlColorSource> shader(SkSamplingOptions& sampling) override {
+    return dl_shader_->with_sampling(sampling);
   }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   CanvasGradient();
-  flutter::SkiaGPUObject<SkShader> sk_shader_;
+  std::shared_ptr<DlColorSource> dl_shader_;
 };
 
 }  // namespace flutter

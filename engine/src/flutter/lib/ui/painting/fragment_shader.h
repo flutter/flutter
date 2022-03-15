@@ -32,14 +32,14 @@ class FragmentShader : public Shader {
   static fml::RefPtr<FragmentShader> Create(Dart_Handle dart_handle,
                                             sk_sp<SkShader> shader);
 
-  sk_sp<SkShader> shader(SkSamplingOptions) override;
+  std::shared_ptr<DlColorSource> shader(SkSamplingOptions&) override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit FragmentShader(sk_sp<SkShader> shader);
 
-  sk_sp<SkShader> shader_;
+  std::shared_ptr<DlColorSource> source_;
 };
 
 }  // namespace flutter
