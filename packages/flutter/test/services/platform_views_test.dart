@@ -36,7 +36,17 @@ void main() {
           layoutDirection: TextDirection.ltr,
         ).create();
       } catch (e) {
-        expect(false, isTrue, reason: 'did not expected any exception, but got $e');
+        expect(false, isTrue, reason: 'did not expected any exception, but instead got `$e`');
+      }
+
+      try {
+        await PlatformViewsService.initAndroidView(
+          id: 0,
+          viewType: 'web',
+          layoutDirection: TextDirection.ltr,
+        ).create();
+      } catch (e) {
+        expect(false, isTrue, reason: 'did not expected any exception, but instead got `$e`');
       }
     });
 
