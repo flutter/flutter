@@ -84,9 +84,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
       onSetBlender(std::move(blender));
     }
   }
-  void setShader(sk_sp<SkShader> shader) override {
-    if (current_shader_ != shader) {
-      onSetShader(std::move(shader));
+  void setColorSource(const DlColorSource* source) override {
+    if (NotEquals(current_color_source_, source)) {
+      onSetColorSource(source);
     }
   }
   void setImageFilter(sk_sp<SkImageFilter> filter) override {
@@ -118,7 +118,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
   SkScalar getStrokeMiter() const { return current_stroke_miter_; }
   SkPaint::Cap getStrokeCap() const { return current_stroke_cap_; }
   SkPaint::Join getStrokeJoin() const { return current_stroke_join_; }
-  sk_sp<SkShader> getShader() const { return current_shader_; }
+  std::shared_ptr<const DlColorSource> getColorSource() const {
+    return current_color_source_;
+  }
   std::shared_ptr<const DlColorFilter> getColorFilter() const {
     return current_color_filter_;
   }
@@ -376,7 +378,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   void onSetColor(SkColor color);
   void onSetBlendMode(SkBlendMode mode);
   void onSetBlender(sk_sp<SkBlender> blender);
-  void onSetShader(sk_sp<SkShader> shader);
+  void onSetColorSource(const DlColorSource* source);
   void onSetImageFilter(sk_sp<SkImageFilter> filter);
   void onSetColorFilter(const DlColorFilter* filter);
   void onSetPathEffect(sk_sp<SkPathEffect> effect);
@@ -396,7 +398,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   // If |current_blender_| is set then |current_blend_mode_| should be ignored
   SkBlendMode current_blend_mode_ = SkBlendMode::kSrcOver;
   sk_sp<SkBlender> current_blender_;
-  sk_sp<SkShader> current_shader_;
+  std::shared_ptr<const DlColorSource> current_color_source_;
   std::shared_ptr<const DlColorFilter> current_color_filter_;
   sk_sp<SkImageFilter> current_image_filter_;
   sk_sp<SkPathEffect> current_path_effect_;

@@ -175,7 +175,6 @@ struct SetBlendModeOp final : DLOp {
     }                                                                          \
   };
 DEFINE_SET_CLEAR_SKREF_OP(Blender, blender)
-DEFINE_SET_CLEAR_SKREF_OP(Shader, shader)
 DEFINE_SET_CLEAR_SKREF_OP(ImageFilter, filter)
 DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
 #undef DEFINE_SET_CLEAR_SKREF_OP
@@ -189,7 +188,7 @@ DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
 // SetSk: 4 byte header + an sk_sp (ptr) uses 16 bytes due to the
 //        alignment of the ptr.
 //        (4 bytes unused)
-#define DEFINE_SET_CLEAR_DLATTR_OP(name, field)                             \
+#define DEFINE_SET_CLEAR_DLATTR_OP(name, sk_name, field)                    \
   struct Clear##name##Op final : DLOp {                                     \
     static const auto kType = DisplayListOpType::kClear##name;              \
                                                                             \
@@ -199,10 +198,10 @@ DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
       dispatcher.set##name(nullptr);                                        \
     }                                                                       \
   };                                                                        \
-  struct Set##name##Op final : DLOp {                                       \
-    static const auto kType = DisplayListOpType::kSet##name;                \
+  struct SetPod##name##Op final : DLOp {                                    \
+    static const auto kType = DisplayListOpType::kSetPod##name;             \
                                                                             \
-    Set##name##Op() {}                                                      \
+    SetPod##name##Op() {}                                                   \
                                                                             \
     void dispatch(Dispatcher& dispatcher) const {                           \
       const Dl##name* filter = reinterpret_cast<const Dl##name*>(this + 1); \
@@ -212,18 +211,38 @@ DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
   struct SetSk##name##Op final : DLOp {                                     \
     static const auto kType = DisplayListOpType::kSetSk##name;              \
                                                                             \
-    SetSk##name##Op(sk_sp<Sk##name> field) : field(field) {}                \
+    SetSk##name##Op(sk_sp<Sk##sk_name> field) : field(field) {}             \
                                                                             \
-    sk_sp<Sk##name> field;                                                  \
+    sk_sp<Sk##sk_name> field;                                               \
                                                                             \
     void dispatch(Dispatcher& dispatcher) const {                           \
       DlUnknown##name dl_filter(field);                                     \
       dispatcher.set##name(&dl_filter);                                     \
     }                                                                       \
   };
-DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, filter)
-DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, ColorFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, MaskFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(ColorSource, Shader, source)
 #undef DEFINE_SET_CLEAR_DLATTR_OP
+
+// 4 byte header + 80 bytes for the embedded DlImageColorSource
+// uses 84 total bytes (4 bytes unused)
+struct SetImageColorSourceOp : DLOp {
+  static const auto kType = DisplayListOpType::kSetImageColorSource;
+
+  SetImageColorSourceOp(const DlImageColorSource* source)
+      : source(source->image(),
+               source->horizontal_tile_mode(),
+               source->vertical_tile_mode(),
+               source->sampling(),
+               source->matrix_ptr()) {}
+
+  const DlImageColorSource source;
+
+  void dispatch(Dispatcher& dispatcher) const {
+    dispatcher.setColorSource(&source);
+  }
+};
 
 // 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)
 struct SaveOp final : DLOp {
