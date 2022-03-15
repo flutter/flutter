@@ -45,7 +45,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setStrokeJoin(SkPaint::Join join) override;
 
   // |flutter::Dispatcher|
-  void setShader(sk_sp<SkShader> shader) override;
+  void setColorSource(const flutter::DlColorSource* source) override;
 
   // |flutter::Dispatcher|
   void setColorFilter(const flutter::DlColorFilter* filter) override;
