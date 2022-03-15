@@ -1031,6 +1031,7 @@ FILE: ../../../flutter/shell/common/canvas_spy.h
 FILE: ../../../flutter/shell/common/canvas_spy_unittests.cc
 FILE: ../../../flutter/shell/common/context_options.cc
 FILE: ../../../flutter/shell/common/context_options.h
+FILE: ../../../flutter/shell/common/context_options_unittests.cc
 FILE: ../../../flutter/shell/common/dart_native_benchmarks.cc
 FILE: ../../../flutter/shell/common/display.cc
 FILE: ../../../flutter/shell/common/display.h
