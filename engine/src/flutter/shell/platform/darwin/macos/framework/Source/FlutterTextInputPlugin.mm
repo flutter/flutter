@@ -436,6 +436,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 
   [_channel invokeMethod:kUpdateEditStateWithDeltasResponseMethod
                arguments:@[ self.clientID, deltas ]];
+  [self updateTextAndSelection];
 }
 
 - (void)updateTextAndSelection {
