@@ -514,7 +514,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
       final Future<DaemonEventData> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
       unawaited(disconnectFuture.then((_) {
         socket.close();
-      }).catchError((error) {
+      }).catchError((_) {
         // The event is not guaranteed to be sent if we initiated the disconnection.
         // Do nothing here.
       }));
