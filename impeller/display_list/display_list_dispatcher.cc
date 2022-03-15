@@ -9,7 +9,6 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkShader.h"
 
 namespace impeller {
 
@@ -90,40 +89,41 @@ static Color ToColor(const SkColor& color) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setShader(sk_sp<SkShader> shader) {
-  if (!shader) {
+void DisplayListDispatcher::setColorSource(const flutter::DlColorSource* source) {
+  if (!source) {
+    paint_.contents = nullptr;
     return;
   }
 
-  {
-    SkShader::GradientInfo info = {};
-    constexpr auto kColorsArrayCount = 2u;
-    info.fColorCount = kColorsArrayCount;
-    SkColor sk_colors[kColorsArrayCount];
-    info.fColors = sk_colors;
-    auto gradient_type = shader->asAGradient(&info);
-    switch (gradient_type) {
-      case SkShader::kLinear_GradientType: {
-        auto contents = std::make_shared<LinearGradientContents>();
-        contents->SetEndPoints(ToPoint(info.fPoint[0]),
-                               ToPoint(info.fPoint[1]));
-        std::vector<Color> colors;
-        for (auto i = 0; i < info.fColorCount; i++) {
-          colors.emplace_back(ToColor(sk_colors[i]));
-        }
-        contents->SetColors(std::move(colors));
-        paint_.contents = std::move(contents);
-        return;
-      } break;
-      case SkShader::kNone_GradientType:
-      case SkShader::kColor_GradientType:
-      case SkShader::kRadial_GradientType:
-      case SkShader::kSweep_GradientType:
-      case SkShader::kConical_GradientType:
-      default:
-        UNIMPLEMENTED;
-        break;
+  switch(source->type()) {
+    case flutter::DlColorSourceType::kColor: {
+      const flutter::DlColorColorSource* color = source->asColor();
+      paint_.contents = nullptr;
+      setColor(color->color());
+      FML_DCHECK(color);
+      return;
     }
+    case flutter::DlColorSourceType::kLinearGradient: {
+      const flutter::DlLinearGradientColorSource* linear = source->asLinearGradient();
+      FML_DCHECK(linear);
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints(ToPoint(linear->p0()),
+                             ToPoint(linear->p1()));
+      std::vector<Color> colors;
+      for (auto i = 0; i < linear->stop_count(); i++) {
+        colors.emplace_back(ToColor(linear->colors()[i]));
+      }
+      contents->SetColors(std::move(colors));
+      paint_.contents = std::move(contents);
+      return;
+    }
+    case flutter::DlColorSourceType::kImage:
+    case flutter::DlColorSourceType::kRadialGradient:
+    case flutter::DlColorSourceType::kConicalGradient:
+    case flutter::DlColorSourceType::kSweepGradient:
+    case flutter::DlColorSourceType::kUnknown:
+      UNIMPLEMENTED;
+      break;
   }
 
   // Needs https://github.com/flutter/flutter/issues/95434
