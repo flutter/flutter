@@ -129,6 +129,7 @@ class PlatformViewsService {
   }
 
   /// Alias for [initAndroidView].
+  /// When possible, use [initAndroidView] directly.
   static AndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
@@ -642,7 +643,6 @@ abstract class AndroidViewController extends PlatformViewController {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
-    bool waitingForSize = false,
   })  : assert(viewId != null),
         assert(viewType != null),
         assert(layoutDirection != null),
@@ -650,10 +650,7 @@ abstract class AndroidViewController extends PlatformViewController {
         _viewType = viewType,
         _layoutDirection = layoutDirection,
         _creationParams = creationParams,
-        _creationParamsCodec = creationParamsCodec,
-        _state = waitingForSize
-            ? _AndroidViewState.waitingForSize
-            : _AndroidViewState.creating;
+        _creationParamsCodec = creationParamsCodec;
 
   /// Action code for when a primary pointer touched the screen.
   ///
@@ -703,7 +700,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
   TextDirection _layoutDirection;
 
-  _AndroidViewState _state;
+  _AndroidViewState _state = _AndroidViewState.waitingForSize;
 
   final dynamic _creationParams;
 
@@ -985,7 +982,6 @@ class TextureAndroidViewController extends AndroidViewController {
           layoutDirection: layoutDirection,
           creationParams: creationParams,
           creationParamsCodec: creationParamsCodec,
-          waitingForSize: true,
         );
 
   /// The texture entry id into which the Android view is rendered.
@@ -998,7 +994,8 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   int? get textureId => _textureId;
 
-  late Size _initialSize;
+  /// The size used to create the platform view.
+  Size? _initialSize;
 
   /// The current offset of the platform view.
   Offset _off = Offset.zero;
@@ -1013,7 +1010,7 @@ class TextureAndroidViewController extends AndroidViewController {
     if (_state == _AndroidViewState.waitingForSize) {
       _initialSize = size;
       await create();
-      return _initialSize;
+      return size;
     }
 
     final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
@@ -1059,17 +1056,21 @@ class TextureAndroidViewController extends AndroidViewController {
   ///
   /// Throws an [AssertionError] if view was already disposed.
   @override
-  Future<void> create() => super.create();
+  Future<void> create() async {
+    if (_initialSize != null)
+      return super.create();
+  }
 
   @override
   Future<void> _sendCreateMessage() async {
-    assert(!_initialSize.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    assert(_initialSize != null, 'trying to create $TextureAndroidViewController without setting an initial size.');
+    assert(!_initialSize!.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': _initialSize.width,
-      'height': _initialSize.height,
+      'width': _initialSize!.width,
+      'height': _initialSize!.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
     if (_creationParams != null) {
