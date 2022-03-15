@@ -330,7 +330,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          generateMetadata: false,
         );
         break;
       case FlutterProjectType.module:

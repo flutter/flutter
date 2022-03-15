@@ -495,6 +495,7 @@ abstract class CreateBase extends FlutterCommand {
     bool overwrite = false,
     bool pluginExampleApp = false,
     bool printStatusWhenWriting = true,
+    bool generateMetadata = true,
     FlutterProjectType projectType,
   }) async {
     int generatedCount = 0;
@@ -585,25 +586,27 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['fuchsia'] == true) {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
-    final File metadataFile = globals.fs
-        .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
-    final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
-      file: metadataFile,
-      versionRevision: globals.flutterVersion.frameworkRevision,
-      versionChannel: globals.flutterVersion.channel,
-      projectType: projectType,
-      migrateConfig: MigrateConfig(),
-      logger: globals.logger);
-    metadata.populate(
-      platforms: platformsForMigrateConfig,
-      projectDirectory: directory,
-      create: true,
-      update: false,
-      currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
-      createRevision: globals.flutterVersion.frameworkRevision,
-      logger: globals.logger,
-    );
-    metadata.writeFile();
+    if (generateMetadata) {
+      final File metadataFile = globals.fs
+          .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
+        file: metadataFile,
+        versionRevision: globals.flutterVersion.frameworkRevision,
+        versionChannel: globals.flutterVersion.channel,
+        projectType: projectType,
+        migrateConfig: MigrateConfig(),
+        logger: globals.logger);
+      metadata.populate(
+        platforms: platformsForMigrateConfig,
+        projectDirectory: directory,
+        create: true,
+        update: false,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        createRevision: globals.flutterVersion.frameworkRevision,
+        logger: globals.logger,
+      );
+      metadata.writeFile();
+    }
 
     return generatedCount;
   }
