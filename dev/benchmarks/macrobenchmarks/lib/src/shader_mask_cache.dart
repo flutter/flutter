@@ -21,15 +21,14 @@ class _ShaderMaskCachePageState extends State<ShaderMaskCachePage>
   void initState() {
     super.initState();
     _controller.addListener(() {
-      if (_controller.offset < 20) {
-        _controller.animateTo(150, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
-      } else if (_controller.offset > 130) {
+      if (_controller.offset < 10) {
+        _controller.animateTo(100, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      } else if (_controller.offset > 90) {
         _controller.animateTo(0, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       }
     });
-    Timer(const Duration(milliseconds: 1000), () {
-      _controller.animateTo(150,
-          duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+    Timer(const Duration(milliseconds: 500), () {
+      _controller.animateTo(100, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
     });
   }
 
@@ -40,36 +39,35 @@ class _ShaderMaskCachePageState extends State<ShaderMaskCachePage>
       body: ListView(
         controller: _controller,
         children: <Widget>[
-          const SizedBox(height: 150),
-          buildShaderMask(),
+          const SizedBox(height: 100),
+          buildShaderMask(0),
           const SizedBox(height: 10),
-          buildShaderMask(),
+          buildShaderMask(1),
           const SizedBox(height: 1000),
         ],
       ),
     );
   }
 
-  Widget buildShaderMask() {
+  Widget buildShaderMask(int index) {
     return ShaderMask(
       shaderCallback: (Rect bounds) {
         return const RadialGradient(
           center: Alignment.topLeft,
           radius: 1.0,
-          colors: <Color>[Colors.yellow, Colors.deepOrange],
+          colors: <Color>[Colors.yellow, Colors.red],
           tileMode: TileMode.mirror,
         ).createShader(bounds);
       },
-      blendMode: BlendMode.luminosity,
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: const BoxDecoration(boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.red,
+            color: Colors.white,
             blurRadius: 5.0,
           ),
         ]),
-        child: const ListItem(index: 1),
+        child: ListItem(index: index),
       ),
     );
   }
