@@ -15,7 +15,7 @@ import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
 ///
-/// Requires Android API level 20 or greater.
+/// Requires Android API level 23 or greater.
 ///
 /// Embedding Android views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
