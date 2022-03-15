@@ -313,54 +313,33 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         tracker.addPosition(event.timeStamp, event.localPosition);
       }
     }
-
-    if (event is PointerMoveEvent) {
-      if (event.buttons != _initialButtons) {
-        _giveUpPointer(event.pointer);
-        return;
-      }
-      if (_state == _DragState.accepted) {
-        _checkUpdate(
-          sourceTimeStamp: event.timeStamp,
-          delta: _getDeltaForDetails(event.localDelta),
-          primaryDelta: _getPrimaryValueFromOffset(event.localDelta),
-          globalPosition: event.position,
-          localPosition: event.localPosition,
-        );
-      } else {
-        _pendingDragOffset += OffsetPair(local: event.localDelta, global: event.delta);
-        _lastPendingEventTimestamp = event.timeStamp;
-        _lastTransform = event.transform;
-        final Offset movedLocally = _getDeltaForDetails(event.localDelta);
-        final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
-        _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
-          transform: localToGlobalTransform,
-          untransformedDelta: movedLocally,
-          untransformedEndPosition: event.localPosition,
-        ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop))
-          resolve(GestureDisposition.accepted);
-      }
+    if (event is PointerMoveEvent && event.buttons != _initialButtons) {
+      _giveUpPointer(event.pointer);
+      return;
     }
-    if (event is PointerPanZoomUpdateEvent) {
+    if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
+      final Offset delta = (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
+      final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
+      final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
+      final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
       if (_state == _DragState.accepted) {
         _checkUpdate(
           sourceTimeStamp: event.timeStamp,
-          delta: _getDeltaForDetails(event.panDelta),
-          primaryDelta: _getPrimaryValueFromOffset(event.panDelta),
-          globalPosition: event.position + event.pan,
-          localPosition: event.localPosition + event.pan
+          delta: _getDeltaForDetails(localDelta),
+          primaryDelta: _getPrimaryValueFromOffset(localDelta),
+          globalPosition: position,
+          localPosition: localPosition,
         );
       } else {
-        _pendingDragOffset += OffsetPair(local: event.panDelta, global: event.panDelta);
+        _pendingDragOffset += OffsetPair(local: localDelta, global: delta);
         _lastPendingEventTimestamp = event.timeStamp;
         _lastTransform = event.transform;
-        final Offset movedLocally = _getDeltaForDetails(event.panDelta);
+        final Offset movedLocally = _getDeltaForDetails(localDelta);
         final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
         _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedLocally,
-          untransformedEndPosition: event.localPosition + event.pan
+          untransformedEndPosition: localPosition
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop))
           resolve(GestureDisposition.accepted);

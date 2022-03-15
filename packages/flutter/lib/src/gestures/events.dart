@@ -2080,8 +2080,12 @@ class _TransformedPointerPanZoomStartEvent extends _TransformedPointerEvent with
 mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
   /// The total pan offset of the pan/zoom
   Offset get pan;
+  /// The total pan offset of the pan/zoom, transformed into local coordinates
+  Offset get localPan;
   /// The amount the pan offset changed since the last event
   Offset get panDelta;
+  /// The amount the pan offset changed since the last event, transformed into local coordinates
+  Offset get localPanDelta;
   /// The scale (zoom factor) of the pan/zoom
   double get scale;
   /// The amount the pan/zoom has rotated in radians so far
@@ -2112,7 +2116,9 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
     bool? synthesized,
     int? embedderId,
     Offset? pan,
+    Offset? localPan,
     Offset? panDelta,
+    Offset? localPanDelta,
     double? scale,
     double? rotation,
   }) {
@@ -2168,7 +2174,11 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
   @override
   final Offset pan;
   @override
+  Offset get localPan => pan;
+  @override
   final Offset panDelta;
+  @override
+  Offset get localPanDelta => panDelta;
   @override
   final double scale;
   @override
@@ -2191,7 +2201,18 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent wit
   Offset get pan => original.pan;
 
   @override
+  late final Offset localPan = PointerEvent.transformPosition(transform, pan);
+
+  @override
   Offset get panDelta => original.panDelta;
+
+  @override
+  late final Offset localPanDelta = PointerEvent.transformDeltaViaPositions(
+    transform: transform,
+    untransformedDelta: panDelta,
+    untransformedEndPosition: pan,
+    transformedEndPosition: localPan,
+  );
 
   @override
   double get scale => original.scale;
