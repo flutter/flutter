@@ -211,6 +211,16 @@ abstract class ShortcutActivator {
   ///    modifier key is pressed when the side variation is not important.
   bool accepts(RawKeyEvent event, RawKeyboard state);
 
+  /// Returns true if the event and keyboard state would cause this
+  /// [ShortcutActivator] to be activated.
+  ///
+  /// If the keyboard `state` isn't supplied, then it defaults to using
+  /// [RawKeyboard.instance].
+  bool isActivatedBy(RawKeyEvent event, [RawKeyboard? state]) {
+    return (triggers?.contains(event.logicalKey) ?? true)
+        && accepts(event, state ?? RawKeyboard.instance);
+  }
+
   /// Returns a description of the key set that is short and readable.
   ///
   /// Intended to be used in debug mode for logging purposes.
@@ -282,6 +292,11 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
       && collapsedRequired.length == collapsedPressed.length;
     return keysEqual;
+  }
+
+  @override
+  bool isActivatedBy(RawKeyEvent event, [RawKeyboard? state]) {
+    return triggers.contains(event.logicalKey) && accepts(event, state ?? RawKeyboard.instance);
   }
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -497,6 +512,11 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   }
 
   @override
+  bool isActivatedBy(RawKeyEvent event, [RawKeyboard? state]) {
+    return event.logicalKey == trigger && accepts(event, state ?? RawKeyboard.instance);
+  }
+
+  @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
@@ -586,6 +606,11 @@ class CharacterActivator with Diagnosticable implements ShortcutActivator {
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     return event is RawKeyDownEvent
         && event.character == character;
+  }
+
+  @override
+  bool isActivatedBy(RawKeyEvent event, [RawKeyboard? state]) {
+    return accepts(event, state ?? RawKeyboard.instance);
   }
 
   @override
@@ -1016,11 +1041,9 @@ class CallbackShortcuts extends StatelessWidget {
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
   bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (activator.triggers?.contains(event.logicalKey) ?? true) {
-      if (activator.accepts(event, RawKeyboard.instance)) {
-        bindings[activator]!.call();
-        return true;
-      }
+    if (activator.isActivatedBy(event, RawKeyboard.instance)) {
+      bindings[activator]!.call();
+      return true;
     }
     return false;
   }
