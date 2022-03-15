@@ -83,7 +83,7 @@ static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display) {
       EGL_BLUE_SIZE,       8,
       EGL_ALPHA_SIZE,      8,
       EGL_DEPTH_SIZE,      0,
-      EGL_STENCIL_SIZE,    0,
+      EGL_STENCIL_SIZE,    8,
       EGL_NONE,            // termination sentinel
       // clang-format on
   };

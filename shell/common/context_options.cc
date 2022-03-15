@@ -19,8 +19,6 @@ GrContextOptions MakeDefaultContextOptions(ContextType type,
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
 
   if (api.has_value() && api.value() == GrBackendApi::kOpenGL) {
-    options.fAvoidStencilBuffers = true;
-
     // To get video playback on the widest range of devices, we limit Skia to
     // ES2 shading language when the ES3 external image extension is missing.
     options.fPreferExternalImagesOverES3 = true;
