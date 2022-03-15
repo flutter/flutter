@@ -92,7 +92,7 @@ class FlutterProjectMetadata {
     if (yamlRoot == null || yamlRoot is! YamlMap) {
       return;
     }
-    final YamlMap map = yamlRoot as YamlMap;
+    final YamlMap map = yamlRoot;
     if (_validateMetadataMap(yamlRoot, <String, Type>{'version': YamlMap}, _logger)) {
       final Object? versionYaml = map['version'];
       if (_validateMetadataMap(versionYaml, <String, Type>{
