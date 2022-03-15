@@ -141,10 +141,12 @@ void main() {
               Column(
                 children: List<Widget>.generate(
                   5,
-                  (_) => Container(
-                    height: 1200.0,
-                    color: Colors.black12,
-                  ),
+                  (_) {
+                    return Container(
+                      height: 1200.0,
+                      color: Colors.black12,
+                    );
+                  },
                 ),
               ),
               SizedBox(
