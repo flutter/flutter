@@ -63,6 +63,13 @@ class MigrateProject extends Project {
         '/E',
         '/mov',
       ]);
+      // Add full access permissions to Users
+      await processManager.run(<String>[
+        'icacls',
+        tempDir.path,
+        '/grant',
+        'Users:F',
+      ]);
     } else {
       await processManager.run(<String>[
         'cp',
