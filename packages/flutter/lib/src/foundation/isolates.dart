@@ -16,6 +16,8 @@ import '_isolates_io.dart'
 /// sendable between isolates or an instance methods which instance properties
 /// are also sendable.
 ///
+/// {@macro flutter.foundation.compute.closure.note}
+///
 /// {@macro flutter.foundation.compute.limitations}
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
@@ -38,6 +40,13 @@ typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 /// The `callback` must be sendable between isolates i.e. a top-level function,
 /// static method or a closure that only captures objects sendable between
 /// isolates or an instance method which instance properties are also sendable.
+///
+/// {@template flutter.foundation.compute.closure.note}
+/// However, using arbitrary closures should be done with great care because
+/// it may be that the closure captures more variables than initially thought.
+/// See the underlying [dart-lang/sdk#36983](https://github.com/dart-lang/sdk/issues/36983)
+/// issue.
+/// {@endtemplate}
 ///
 /// {@template flutter.foundation.compute.limitations}
 /// There are limitations on the values that can be sent and received to and
