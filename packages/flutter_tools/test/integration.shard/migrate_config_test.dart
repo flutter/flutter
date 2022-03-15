@@ -160,19 +160,6 @@ migration:
     await project.setUpIn(tempDir);
 
     final File metadataFile = tempDir.childFile('.metadata');
-    metadataFile.createSync(recursive: true);
-    metadataFile.writeAsStringSync('''
-# This file tracks properties of this Flutter project.
-# Used by Flutter tool to assess capabilities and perform upgrades etc.
-#
-# This file should be version controlled.
-
-version:
-  revision: fj19vkla9vnlka9vni3n808v3nch8cd
-  channel: stable
-
-project_type: app
-''', flush: true);
 
     const String currentRevision = 'test_base_revision';
     const String createRevision = 'test_create_revision';
@@ -211,8 +198,8 @@ project_type: app
 # This file should be version controlled.
 
 version:
-  revision: fj19vkla9vnlka9vni3n808v3nch8cd
-  channel: stable
+  revision: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+  channel: unknown
 
 project_type: app
 
