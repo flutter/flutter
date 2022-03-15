@@ -28,10 +28,19 @@ TextInputModel::TextInputModel() = default;
 
 TextInputModel::~TextInputModel() = default;
 
-void TextInputModel::SetText(const std::string& text) {
+bool TextInputModel::SetText(const std::string& text,
+                             const TextRange& selection,
+                             const TextRange& composing_range) {
   text_ = fml::Utf8ToUtf16(text);
-  selection_ = TextRange(0);
-  composing_range_ = TextRange(0);
+  if (!text_range().Contains(selection) ||
+      !text_range().Contains(composing_range)) {
+    return false;
+  }
+
+  selection_ = selection;
+  composing_range_ = composing_range;
+  composing_ = !composing_range.collapsed();
+  return true;
 }
 
 bool TextInputModel::SetSelection(const TextRange& range) {
