@@ -130,7 +130,7 @@ class PlatformViewsService {
 
   /// Alias for [initAndroidView].
   /// When possible, use [initAndroidView] directly.
-  static AndroidViewController initSurfaceAndroidView({
+  static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
     required TextDirection layoutDirection,
@@ -138,14 +138,21 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    return initAndroidView(
-      id: id,
+    assert(id != null);
+    assert(viewType != null);
+    assert(layoutDirection != null);
+    assert(creationParams == null || creationParamsCodec != null);
+
+    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
+      viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
       creationParams: creationParams,
       creationParamsCodec: creationParamsCodec,
-      onFocus: onFocus,
     );
+
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
   }
 
   /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
@@ -903,9 +910,11 @@ abstract class AndroidViewController extends PlatformViewController {
 
 /// Controls an Android view by rendering to an [AndroidViewSurface].
 ///
-/// Typically created with [PlatformViewsService.initAndroidView].
-class SurfaceAndroidViewController extends AndroidViewController {
-  SurfaceAndroidViewController._({
+/// Typically created with [PlatformViewsService.initSurfaceAndroidView].
+///
+/// This is an alias for [TextureAndroidViewController].
+class SurfaceAndroidViewController extends TextureAndroidViewController{
+    SurfaceAndroidViewController._({
     required int viewId,
     required String viewType,
     required TextDirection layoutDirection,
@@ -918,50 +927,6 @@ class SurfaceAndroidViewController extends AndroidViewController {
           creationParams: creationParams,
           creationParamsCodec: creationParamsCodec,
         );
-
-  @override
-  Future<void> _sendCreateMessage() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': _viewType,
-      'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
-      'hybrid': true,
-    };
-    if (_creationParams != null) {
-      final ByteData paramsByteData =
-          _creationParamsCodec!.encodeMessage(_creationParams)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
-    }
-    return SystemChannels.platform_views.invokeMethod<void>('create', args);
-  }
-
-  @override
-  int get textureId {
-    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
-  }
-
-  @override
-  Future<void> _sendDisposeMessage() {
-    return SystemChannels.platform_views
-        .invokeMethod<void>('dispose', <String, dynamic>{
-      'id': viewId,
-      'hybrid': true,
-    });
-  }
-
-  @override
-  Future<Size> setSize(Size size) {
-    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
-  }
-
-  @override
-  Future<void> setOffset(Offset off) {
-    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
-  }
 }
 
 /// Controls an Android view that is rendered to a texture.
