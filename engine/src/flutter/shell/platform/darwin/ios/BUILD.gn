@@ -138,12 +138,16 @@ source_set("flutter_framework_source") {
 
   if (shell_enable_metal) {
     sources += [
-      "ios_context_metal.h",
-      "ios_context_metal.mm",
+      "ios_context_metal_impeller.h",
+      "ios_context_metal_impeller.mm",
+      "ios_context_metal_skia.h",
+      "ios_context_metal_skia.mm",
       "ios_external_texture_metal.h",
       "ios_external_texture_metal.mm",
-      "ios_surface_metal.h",
-      "ios_surface_metal.mm",
+      "ios_surface_metal_impeller.h",
+      "ios_surface_metal_impeller.mm",
+      "ios_surface_metal_skia.h",
+      "ios_surface_metal_skia.mm",
     ]
 
     deps += [ "//flutter/shell/platform/darwin/graphics" ]

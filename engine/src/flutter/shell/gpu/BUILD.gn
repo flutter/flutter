@@ -22,7 +22,7 @@ source_set("gpu_surface_software") {
     "gpu_surface_software_delegate.h",
   ]
 
-  deps = gpu_common_deps
+  public_deps = gpu_common_deps
 }
 
 source_set("gpu_surface_gl") {
@@ -33,7 +33,7 @@ source_set("gpu_surface_gl") {
     "gpu_surface_gl_delegate.h",
   ]
 
-  deps = gpu_common_deps
+  public_deps = gpu_common_deps
 }
 
 source_set("gpu_surface_vulkan") {
@@ -43,18 +43,21 @@ source_set("gpu_surface_vulkan") {
     "gpu_surface_vulkan_delegate.cc",
     "gpu_surface_vulkan_delegate.h",
   ]
-  deps = [ "//flutter/shell/platform/embedder:embedder_headers" ]
-  deps += gpu_common_deps
-  public_deps = [ "//flutter/vulkan" ]
+  public_deps = gpu_common_deps + [
+                  "//flutter/shell/platform/embedder:embedder_headers",
+                  "//flutter/vulkan",
+                ]
 }
 
 source_set("gpu_surface_metal") {
   sources = [
-    "gpu_surface_metal.h",
-    "gpu_surface_metal.mm",
     "gpu_surface_metal_delegate.cc",
     "gpu_surface_metal_delegate.h",
+    "gpu_surface_metal_impeller.h",
+    "gpu_surface_metal_impeller.mm",
+    "gpu_surface_metal_skia.h",
+    "gpu_surface_metal_skia.mm",
   ]
 
-  deps = gpu_common_deps
+  public_deps = gpu_common_deps + [ "//flutter/impeller" ]
 }

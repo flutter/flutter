@@ -93,6 +93,10 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     metrics_ = metrics;
   }
   // |flutter::PlatformView::Delegate|
+  const flutter::Settings& OnPlatformViewGetSettings() const {
+    return settings_;
+  }
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) {
     message_ = std::move(message);
@@ -167,6 +171,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   std::vector<std::unique_ptr<flutter::PointerDataPacket>> pointer_packets_;
   int32_t semantics_features_ = 0;
   bool semantics_enabled_ = false;
+  flutter::Settings settings_;
 };
 
 class MockResponse : public flutter::PlatformMessageResponse {

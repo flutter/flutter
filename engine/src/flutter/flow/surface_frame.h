@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "flutter/common/graphics/gl_context_switch.h"
+#include "flutter/display_list/display_list_canvas_recorder.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -20,7 +21,7 @@ namespace flutter {
 class SurfaceFrame {
  public:
   using SubmitCallback =
-      std::function<bool(const SurfaceFrame& surface_frame, SkCanvas* canvas)>;
+      std::function<bool(SurfaceFrame& surface_frame, SkCanvas* canvas)>;
 
   // Information about the underlying framebuffer
   struct FramebufferInfo {
@@ -48,12 +49,8 @@ class SurfaceFrame {
 
   SurfaceFrame(sk_sp<SkSurface> surface,
                FramebufferInfo framebuffer_info,
-               const SubmitCallback& submit_callback);
-
-  SurfaceFrame(sk_sp<SkSurface> surface,
-               FramebufferInfo framebuffer_info,
                const SubmitCallback& submit_callback,
-               std::unique_ptr<GLContextResult> context_result);
+               std::unique_ptr<GLContextResult> context_result = nullptr);
 
   ~SurfaceFrame();
 
@@ -76,9 +73,9 @@ class SurfaceFrame {
 
   bool IsSubmitted() const;
 
-  SkCanvas* SkiaCanvas();
-
   sk_sp<SkSurface> SkiaSurface() const;
+
+  SkCanvas* SkiaCanvas();
 
   const FramebufferInfo& framebuffer_info() const { return framebuffer_info_; }
 
@@ -87,9 +84,14 @@ class SurfaceFrame {
   }
   const SubmitInfo& submit_info() const { return submit_info_; }
 
+  sk_sp<DisplayList> BuildDisplayList();
+
  private:
   bool submitted_ = false;
+
+  sk_sp<DisplayListCanvasRecorder> dl_recorder_;
   sk_sp<SkSurface> surface_;
+  SkCanvas* canvas_ = nullptr;
   FramebufferInfo framebuffer_info_;
   SubmitInfo submit_info_;
   SubmitCallback submit_callback_;

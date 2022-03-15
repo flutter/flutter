@@ -33,7 +33,7 @@ class DisplayListCanvasRecorder
   sk_sp<DisplayList> Build();
 
   void didConcat44(const SkM44&) override;
-  void didSetM44(const SkM44&) override { FML_DCHECK(false); }
+  void didSetM44(const SkM44&) override;
   void didTranslate(SkScalar, SkScalar) override;
   void didScale(SkScalar, SkScalar) override;
 
@@ -52,7 +52,7 @@ class DisplayListCanvasRecorder
   void didRestore() override;
 
   void onDrawPaint(const SkPaint& paint) override;
-  void onDrawBehind(const SkPaint&) override { FML_DCHECK(false); }
+  void onDrawBehind(const SkPaint&) override;
   void onDrawRect(const SkRect& rect, const SkPaint& paint) override;
   void onDrawRRect(const SkRRect& rrect, const SkPaint& paint) override;
   void onDrawDRRect(const SkRRect& outer,
@@ -65,9 +65,7 @@ class DisplayListCanvasRecorder
                  bool useCenter,
                  const SkPaint& paint) override;
   void onDrawPath(const SkPath& path, const SkPaint& paint) override;
-  void onDrawRegion(const SkRegion& region, const SkPaint& paint) override {
-    FML_DCHECK(false);
-  }
+  void onDrawRegion(const SkRegion& region, const SkPaint& paint) override;
 
   void onDrawTextBlob(const SkTextBlob* blob,
                       SkScalar x,
@@ -78,9 +76,7 @@ class DisplayListCanvasRecorder
                    const SkColor colors[4],
                    const SkPoint texCoords[4],
                    SkBlendMode mode,
-                   const SkPaint& paint) override {
-    FML_DCHECK(false);
-  }
+                   const SkPaint& paint) override;
   void onDrawPoints(SkCanvas::PointMode mode,
                     size_t count,
                     const SkPoint pts[],
@@ -119,20 +115,14 @@ class DisplayListCanvasRecorder
                         const SkPoint clip[4],
                         SkCanvas::QuadAAFlags aaFlags,
                         const SkColor4f& color,
-                        SkBlendMode mode) override {
-    FML_DCHECK(0);
-  }
+                        SkBlendMode mode) override;
 
   void onDrawAnnotation(const SkRect& rect,
                         const char key[],
-                        SkData* value) override {
-    FML_DCHECK(false);
-  }
+                        SkData* value) override;
   void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
-  void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
-    FML_DCHECK(false);
-  }
+  void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override;
   void onDrawPicture(const SkPicture* picture,
                      const SkMatrix* matrix,
                      const SkPaint* paint) override;

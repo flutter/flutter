@@ -6,8 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/gpu/gpu_surface_metal.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
+#include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 

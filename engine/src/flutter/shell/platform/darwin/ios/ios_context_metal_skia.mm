@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/ios/ios_context_metal.h"
+#import "flutter/shell/platform/darwin/ios/ios_context_metal_skia.h"
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/logging.h"
@@ -12,7 +12,7 @@
 
 namespace flutter {
 
-IOSContextMetal::IOSContextMetal() {
+IOSContextMetalSkia::IOSContextMetalSkia() {
   darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
       [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice]};
 
@@ -36,33 +36,37 @@ IOSContextMetal::IOSContextMetal() {
   texture_cache_.Reset(texture_cache_raw);
 }
 
-IOSContextMetal::~IOSContextMetal() = default;
+IOSContextMetalSkia::~IOSContextMetalSkia() = default;
 
-fml::scoped_nsobject<FlutterDarwinContextMetal> IOSContextMetal::GetDarwinContext() const {
+fml::scoped_nsobject<FlutterDarwinContextMetal> IOSContextMetalSkia::GetDarwinContext() const {
   return darwin_context_metal_;
 }
 
-sk_sp<GrDirectContext> IOSContextMetal::GetMainContext() const {
+IOSRenderingBackend IOSContextMetalSkia::GetBackend() const {
+  return IOSRenderingBackend::kSkia;
+}
+
+sk_sp<GrDirectContext> IOSContextMetalSkia::GetMainContext() const {
   return darwin_context_metal_.get().mainContext;
 }
 
-sk_sp<GrDirectContext> IOSContextMetal::GetResourceContext() const {
+sk_sp<GrDirectContext> IOSContextMetalSkia::GetResourceContext() const {
   return darwin_context_metal_.get().resourceContext;
 }
 
 // |IOSContext|
-sk_sp<GrDirectContext> IOSContextMetal::CreateResourceContext() {
+sk_sp<GrDirectContext> IOSContextMetalSkia::CreateResourceContext() {
   return darwin_context_metal_.get().resourceContext;
 }
 
 // |IOSContext|
-std::unique_ptr<GLContextResult> IOSContextMetal::MakeCurrent() {
+std::unique_ptr<GLContextResult> IOSContextMetalSkia::MakeCurrent() {
   // This only makes sense for context that need to be bound to a specific thread.
   return std::make_unique<GLContextDefaultResult>(true);
 }
 
 // |IOSContext|
-std::unique_ptr<Texture> IOSContextMetal::CreateExternalTexture(
+std::unique_ptr<Texture> IOSContextMetalSkia::CreateExternalTexture(
     int64_t texture_id,
     fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
   return std::make_unique<IOSExternalTextureMetal>(

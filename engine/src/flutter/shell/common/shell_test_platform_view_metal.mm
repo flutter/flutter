@@ -7,7 +7,7 @@
 #import <Metal/Metal.h>
 
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/shell/gpu/gpu_surface_metal.h"
+#include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 
 namespace flutter {
@@ -91,7 +91,7 @@ PointerDataDispatcherMaker ShellTestPlatformViewMetal::GetDispatcherMaker() {
 
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformViewMetal::CreateRenderingSurface() {
-  return std::make_unique<GPUSurfaceMetal>(this, [metal_context_->context() mainContext]);
+  return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext]);
 }
 
 // |GPUSurfaceMetalDelegate|

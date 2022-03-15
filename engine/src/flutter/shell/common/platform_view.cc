@@ -187,4 +187,8 @@ PlatformView::GetPlatformMessageHandler() const {
   return nullptr;
 }
 
+const Settings& PlatformView::GetSettings() const {
+  return delegate_.OnPlatformViewGetSettings();
+}
+
 }  // namespace flutter

@@ -39,18 +39,25 @@ class IOSContext {
   ///             In case the engine does not support the specified client
   ///             rendering API, this a `nullptr` may be returned.
   ///
-  /// @param[in]  rendering_api  A client rendering API supported by the
-  ///                            engine/platform.
+  /// @param[in]  api       A client rendering API supported by the
+  ///                       engine/platform.
   ///
   /// @return     A valid context on success. `nullptr` on failure.
   ///
-  static std::unique_ptr<IOSContext> Create(IOSRenderingAPI rendering_api);
+  static std::unique_ptr<IOSContext> Create(IOSRenderingAPI api, IOSRenderingBackend backend);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the context object. This must happen on the thread on
   ///             which this object was created.
   ///
   virtual ~IOSContext();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Get the rendering backend used by this context.
+  ///
+  /// @return     The rendering backend.
+  ///
+  virtual IOSRenderingBackend GetBackend() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Create a resource context for use on the IO task runner. This

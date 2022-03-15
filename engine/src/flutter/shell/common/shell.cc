@@ -1079,6 +1079,11 @@ void Shell::OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {
       });
 }
 
+// |PlatformView::Delegate|
+const Settings& Shell::OnPlatformViewGetSettings() const {
+  return settings_;
+}
+
 // |Animator::Delegate|
 void Shell::OnAnimatorBeginFrame(fml::TimePoint frame_target_time,
                                  uint64_t frame_number) {

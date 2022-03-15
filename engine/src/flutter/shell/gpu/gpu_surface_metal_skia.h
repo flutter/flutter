@@ -13,14 +13,14 @@
 
 namespace flutter {
 
-class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
+class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetalSkia : public Surface {
  public:
-  GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate,
-                  sk_sp<GrDirectContext> context,
-                  bool render_to_surface = true);
+  GPUSurfaceMetalSkia(GPUSurfaceMetalDelegate* delegate,
+                      sk_sp<GrDirectContext> context,
+                      bool render_to_surface = true);
 
   // |Surface|
-  ~GPUSurfaceMetal();
+  ~GPUSurfaceMetalSkia();
 
   // |Surface|
   bool IsValid() override;
@@ -34,7 +34,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
   // external view embedder may want to render to the root surface. This is a
   // hack to make avoid allocating resources for the root surface when an
   // external view embedder is present.
-  bool render_to_surface_;
+  bool render_to_surface_ = true;
 
   // Accumulated damage for each framebuffer; Key is address of underlying
   // MTLTexture for each drawable
@@ -63,7 +63,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
 
   void PrecompileKnownSkSLsIfNecessary();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceMetal);
+  FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceMetalSkia);
 };
 
 }  // namespace flutter

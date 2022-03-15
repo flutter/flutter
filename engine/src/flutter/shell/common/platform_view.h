@@ -308,6 +308,15 @@ class PlatformView {
     virtual void UpdateAssetResolverByType(
         std::unique_ptr<AssetResolver> updated_asset_resolver,
         AssetResolver::AssetResolverType type) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Called by the platform view on the platform thread to get
+    ///             the settings object associated with the platform view
+    ///             instance.
+    ///
+    /// @return     The settings.
+    ///
+    virtual const Settings& OnPlatformViewGetSettings() const = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -807,6 +816,13 @@ class PlatformView {
   /// threads should be returing a thread-safe PlatformMessageHandler instead.
   virtual std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
       const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Get the settings for this platform view instance.
+  ///
+  /// @return     The settings.
+  ///
+  const Settings& GetSettings() const;
 
  protected:
   // This is the only method called on the raster task runner.
