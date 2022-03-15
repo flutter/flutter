@@ -67,6 +67,9 @@ class MigrateProject extends Project {
       await processManager.run(<String>[
         'icacls',
         tempDir.path,
+        '/q',
+        '/c',
+        '/t',
         '/grant',
         'Users:F',
       ]);
