@@ -25,6 +25,7 @@ import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
+import 'src/shader_mask_cache.dart';
 import 'src/stack_size.dart';
 import 'src/text.dart';
 
@@ -55,6 +56,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
+        kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
@@ -164,6 +166,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter and Fade'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterAndFadeRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kShaderMaskCacheRouteName),
+            child: const Text('Shader Mask Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kShaderMaskCacheRouteName);
             },
           ),
           ElevatedButton(
