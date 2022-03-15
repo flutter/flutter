@@ -1041,13 +1041,13 @@ class AndroidViewSurface extends PlatformViewSurface {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final AndroidViewController androidController = controller as AndroidViewController;
+    final AndroidViewController viewController = controller as AndroidViewController;
     final RenderAndroidView renderObject = RenderAndroidView(
-      viewController: androidController,
+      viewController: viewController,
       gestureRecognizers: gestureRecognizers,
       hitTestBehavior: hitTestBehavior,
     );
-    androidController.pointTransformer =
+    viewController.pointTransformer =
         (Offset position) => renderObject.globalToLocal(position);
     return renderObject;
   }
