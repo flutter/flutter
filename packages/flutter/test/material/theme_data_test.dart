@@ -612,6 +612,7 @@ void main() {
       sliderTheme: otherTheme.sliderTheme,
       tabBarTheme: otherTheme.tabBarTheme,
       tooltipTheme: otherTheme.tooltipTheme,
+      expansionTileTheme: otherTheme.expansionTileTheme,
       cardTheme: otherTheme.cardTheme,
       chipTheme: otherTheme.chipTheme,
       platform: otherTheme.platform,
@@ -689,6 +690,7 @@ void main() {
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
+    expect(themeDataCopy.expansionTileTheme, equals(otherTheme.expansionTileTheme));
     expect(themeDataCopy.cardTheme, equals(otherTheme.cardTheme));
     expect(themeDataCopy.chipTheme, equals(otherTheme.chipTheme));
     expect(themeDataCopy.platform, equals(otherTheme.platform));
