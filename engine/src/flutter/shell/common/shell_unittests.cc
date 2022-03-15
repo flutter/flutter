@@ -86,6 +86,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD1(OnPlatformViewMarkTextureFrameAvailable,
                void(int64_t texture_id));
 
+  MOCK_METHOD(const Settings&,
+              OnPlatformViewGetSettings,
+              (),
+              (const, override));
+
   MOCK_METHOD3(LoadDartDeferredLibrary,
                void(intptr_t loading_unit_id,
                     std::unique_ptr<const fml::Mapping> snapshot_data,

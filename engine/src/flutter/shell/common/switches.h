@@ -223,7 +223,10 @@ DEF_SWITCH(OldGenHeapSize,
 DEF_SWITCH(EnableSkParagraph,
            "enable-skparagraph",
            "Selects the SkParagraph implementation of the text layout engine.")
-
+DEF_SWITCH(EnableImpeller,
+           "enable-impeller",
+           "Enable the Impeller renderer on supported platforms. Ignored if "
+           "Impeller is not supported on the platform.")
 DEF_SWITCH(LeakVM,
            "leak-vm",
            "When the last shell shuts down, the shared VM is leaked by default "

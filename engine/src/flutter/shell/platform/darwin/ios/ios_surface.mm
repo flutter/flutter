@@ -10,7 +10,8 @@
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 #if SHELL_ENABLE_METAL
-#import "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
+#import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
+#import "flutter/shell/platform/darwin/ios/ios_surface_metal_skia.h"
 #endif  // SHELL_ENABLE_METAL
 
 namespace flutter {
@@ -31,11 +32,21 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
 #if SHELL_ENABLE_METAL
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
     if ([layer.get() isKindOfClass:[CAMetalLayer class]]) {
-      return std::make_unique<IOSSurfaceMetal>(
-          fml::scoped_nsobject<CAMetalLayer>(
-              reinterpret_cast<CAMetalLayer*>([layer.get() retain])),  // Metal layer
-          std::move(context)                                           // context
-      );
+      switch (context->GetBackend()) {
+        case IOSRenderingBackend::kSkia:
+          return std::make_unique<IOSSurfaceMetalSkia>(
+              fml::scoped_nsobject<CAMetalLayer>(
+                  reinterpret_cast<CAMetalLayer*>([layer.get() retain])),  // Metal layer
+              std::move(context)                                           // context
+          );
+          break;
+        case IOSRenderingBackend::kImpeller:
+          return std::make_unique<IOSSurfaceMetalImpeller>(
+              fml::scoped_nsobject<CAMetalLayer>(
+                  reinterpret_cast<CAMetalLayer*>([layer.get() retain])),  // Metal layer
+              std::move(context)                                           // context
+          );
+      }
     }
   }
 #endif  // SHELL_ENABLE_METAL

@@ -558,6 +558,9 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override;
 
   // |PlatformView::Delegate|
+  const Settings& OnPlatformViewGetSettings() const override;
+
+  // |PlatformView::Delegate|
   void LoadDartDeferredLibrary(
       intptr_t loading_unit_id,
       std::unique_ptr<const fml::Mapping> snapshot_data,

@@ -421,6 +421,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       FlagForSwitch(Switch::EnableSkParagraph), "");
   settings.enable_skparagraph = enable_skparagraph != "false";
 
+  settings.enable_impeller =
+      command_line.HasOption(FlagForSwitch(Switch::EnableImpeller));
+
   settings.prefetched_default_font_manager = command_line.HasOption(
       FlagForSwitch(Switch::PrefetchedDefaultFontManager));
 
