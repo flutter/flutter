@@ -39,6 +39,7 @@ platform_properties:
         ]
       device_type: none
       os: Linux
+      cores: "8"
   mac:
     properties:
       build_host: "false"
@@ -199,6 +200,7 @@ targets:
     recipe: engine/engine_lint
     properties:
       add_recipes_cq: "true"
+      cores: "32"
     timeout: 60
     scheduler: luci
 
