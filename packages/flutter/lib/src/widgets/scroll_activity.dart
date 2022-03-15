@@ -528,7 +528,7 @@ class DragScrollActivity extends ScrollActivity {
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
   ///
-  /// The [delegate], [simulationw], and [vsync] arguments must not be null.
+  /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     ScrollActivityDelegate delegate,
     Simulation simulation,
