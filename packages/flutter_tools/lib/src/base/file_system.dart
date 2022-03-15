@@ -62,9 +62,11 @@ class FileSystemUtils {
 
   /// Escapes [path].
   ///
-  /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
-  /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
+  /// On Windows it replaces all '\' with '\\' and ':' with '\:'.
+  /// On other platforms, it returns the path unchanged.
+  String escapePath(String path) => _platform.isWindows
+      ? path.replaceAll(r'\', r'\\').replaceAll(':', r'\:')
+      : path;
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].

@@ -128,9 +128,9 @@ void main() {
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
       );
-      expect(fsUtils.escapePath(r'C:\foo\bar\cool.dart'), r'C:\\foo\\bar\\cool.dart');
+      expect(fsUtils.escapePath(r'C:\foo\bar\cool.dart'), r'C\:\\foo\\bar\\cool.dart');
       expect(fsUtils.escapePath(r'foo\bar\cool.dart'), r'foo\\bar\\cool.dart');
-      expect(fsUtils.escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath('C:/foo/bar/cool.dart'), r'C\:/foo/bar/cool.dart');
     });
 
     testWithoutContext('on Linux', () {
