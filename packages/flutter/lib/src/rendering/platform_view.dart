@@ -86,10 +86,11 @@ class RenderAndroidView extends PlatformViewRenderBox {
        assert(gestureRecognizers != null),
        assert(clipBehavior != null),
        _clipBehavior = clipBehavior,
-        super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
-    viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
+       _viewController = viewController,
+       super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
+    _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
-    viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     this.hitTestBehavior = hitTestBehavior;
     _setOffset();
   }
@@ -101,20 +102,27 @@ class RenderAndroidView extends PlatformViewRenderBox {
   bool _isDisposed = false;
 
   /// The Android view controller for the Android view associated with this render object.
-  AndroidViewController get viewController => controller as AndroidViewController;
+  @override
+  AndroidViewController get controller => _viewController;
+
+  AndroidViewController _viewController;
 
   /// Sets a new Android view controller.
-  ///
-  /// `viewController` must not be null.
-  set viewController(AndroidViewController viewController) {
-    if (viewController == controller)
+  @override
+  set controller(AndroidViewController controller) {
+    assert(_viewController != null);
+    assert(controller != null);
+    if (_viewController == controller)
       return;
-
-    (controller as AndroidViewController).removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
-    controller = viewController;
-    viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
-    viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    super.controller = controller;
+    _viewController = controller;
+    _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     _sizePlatformView();
+    if (_viewController.isCreated) {
+      markNeedsSemanticsUpdate();
+    }
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
   }
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -159,9 +167,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
-    if (_state == _PlatformViewState.resizing || size.isEmpty) {
+    if (_state == _PlatformViewState.resizing || size.isEmpty)
       return;
-    }
 
     _state = _PlatformViewState.resizing;
     markNeedsPaint();
@@ -169,7 +176,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
     Size targetSize;
     do {
       targetSize = size;
-      _currentTextureSize = await viewController.setSize(targetSize);
+      _currentTextureSize = await _viewController.setSize(targetSize);
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -189,7 +196,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        await viewController.setOffset(localToGlobal(Offset.zero));
+        await _viewController.setOffset(localToGlobal(Offset.zero));
         // Schedule a new post frame callback.
         _setOffset();
       }
@@ -198,7 +205,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (viewController.textureId == null)
+    if (_viewController.textureId == null || _currentTextureSize == null)
       return;
 
     // As resizing the Android view happens asynchronously we don't know exactly when is a
@@ -241,18 +248,19 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
     context.addLayer(TextureLayer(
       rect: offset & _currentTextureSize!,
-      textureId: viewController.textureId!,
+      textureId: _viewController.textureId!,
     ));
   }
 
   @override
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    // Don't call the super implementation since `platformViewId` should
+    // be set only when the platform view is created, but the concept of
+    // a "created" platform view belongs to this subclass.
     config.isSemanticBoundary = true;
 
-    if (viewController.isCreated) {
-      config.platformViewId = viewController.viewId;
+    if (_viewController.isCreated) {
+      config.platformViewId = _viewController.viewId;
     }
   }
 }
@@ -630,11 +638,11 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   PlatformViewController get controller => _controller;
   PlatformViewController _controller;
   /// This value must not be null, and setting it to a new value will result in a repaint.
-  set controller(PlatformViewController controller) {
+  set controller(covariant PlatformViewController controller) {
     assert(controller != null);
     assert(controller.viewId != null && controller.viewId > -1);
 
-    if ( _controller == controller) {
+    if (_controller == controller) {
       return;
     }
     final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
@@ -687,7 +695,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   }
 
   @override
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     assert(_controller.viewId != null);
     config.isSemanticBoundary = true;

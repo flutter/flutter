@@ -681,7 +681,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
-    renderObject.viewController = controller;
+    renderObject.controller = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
     renderObject.clipBehavior = clipBehavior;
@@ -1055,7 +1055,7 @@ class AndroidViewSurface extends PlatformViewSurface {
   @override
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
     renderObject
-      ..viewController = controller as AndroidViewController
+      ..controller = controller as AndroidViewController
       ..hitTestBehavior = hitTestBehavior
       ..updateGestureRecognizers(gestureRecognizers);
   }
