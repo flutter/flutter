@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.join(script_dir, '..', 'tools'))
 MSVS_VERSIONS = collections.OrderedDict([
   ('2017', '15.0'),
   ('2019', '16.0'),
+  ('2022', '17.0'),
 ])
 
 
@@ -164,6 +165,8 @@ def GetVisualStudioVersion():
     for path in (
         os.environ.get('vs%s_install' % version),
         os.path.expandvars('%ProgramFiles(x86)%' +
+                           '/Microsoft Visual Studio/%s' % version),
+        os.path.expandvars('%ProgramFiles%' +
                            '/Microsoft Visual Studio/%s' % version)):
       if path and os.path.exists(path):
         available_versions.append(version)
@@ -187,20 +190,13 @@ def DetectVisualStudioPath():
   # the registry. For details see:
   # https://blogs.msdn.microsoft.com/heaths/2016/09/15/changes-to-visual-studio-15-setup/
   # For now we use a hardcoded default with an environment variable override.
+  possible_install_paths = (
+      os.path.expandvars('%s/Microsoft Visual Studio/%s/%s' %
+                         (program_path_var, version_as_year, product))
+      for program_path_var in ('%ProgramFiles%', '%ProgramFiles(x86)%')
+      for product in ('Enterprise', 'Professional', 'Community', 'Preview'))
   for path in (
-      os.environ.get('vs%s_install' % version_as_year),
-      os.path.expandvars('%ProgramFiles(x86)%' +
-                         '/Microsoft Visual Studio/%s/Enterprise' %
-                         version_as_year),
-      os.path.expandvars('%ProgramFiles(x86)%' +
-                         '/Microsoft Visual Studio/%s/Professional' %
-                         version_as_year),
-      os.path.expandvars('%ProgramFiles(x86)%' +
-                         '/Microsoft Visual Studio/%s/Community' %
-                         version_as_year),
-      os.path.expandvars('%ProgramFiles(x86)%' +
-                         '/Microsoft Visual Studio/%s/Preview' %
-                         version_as_year)):
+      os.environ.get('vs%s_install' % version_as_year), *possible_install_paths):
     if path and os.path.exists(path):
       return path
 
