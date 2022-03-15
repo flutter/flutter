@@ -24,8 +24,8 @@ class NotifyMaterial extends StatelessWidget {
 
 Widget buildMaterial({
   double elevation = 0.0,
-  Color? surfaceTintColor,
   Color shadowColor = const Color(0xFF00FF00),
+  Color? surfaceTintColor,
   Color color = const Color(0xFF0000FF),
 }) {
   return Center(
@@ -34,8 +34,8 @@ Widget buildMaterial({
       width: 100.0,
       child: Material(
         color: color,
-        surfaceTintColor: surfaceTintColor,
         shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
         elevation: elevation,
         shape: const CircleBorder(),
       ),

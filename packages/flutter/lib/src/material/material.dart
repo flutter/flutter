@@ -255,11 +255,11 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
-  /// When [ThemeData.useMaterial3] is true, if this is null then no drop
-  /// shadow will be rendered for this material. If it is non-null then this
-  /// color will be render a drop shadow below the material.
+  /// When [ThemeData.useMaterial3] is true, and this is null, then no drop
+  /// shadow will be rendered for this material. If it is non-null, then this
+  /// color will be used to render a drop shadow below the material.
   ///
-  /// When [ThemeData.useMaterial3] is false, if this is null then
+  /// When [ThemeData.useMaterial3] is false, and this is null, then
   /// [ThemeData.shadowColor] is used, which defaults to fully opaque black.
   ///
   /// See also:

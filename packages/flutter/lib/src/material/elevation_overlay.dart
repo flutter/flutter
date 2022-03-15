@@ -33,9 +33,10 @@ class ElevationOverlay {
     return color;
   }
 
-  // Calculates the opacity from the elevation by looking it up in the
-  // token generated table of opacities, interpolating between values as
-  // needed.
+  // Calculates the opacity of the surface tint color from the elevation by
+  // looking it up in the token generated table of opacities, interpolating
+  // between values as needed. If the elevation is outside the range of values
+  // in the table it will clamp to the smallest or largest opacity.
   static double _surfaceTintOpacityForElevation(double elevation) {
     if (elevation < _surfaceTintElevationOpacities[0].elevation) {
       // Elevation less than the first entry, so just clamp it to the first one.
