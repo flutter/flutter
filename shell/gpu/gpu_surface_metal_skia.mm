@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/gpu/gpu_surface_metal.h"
+#include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
@@ -37,22 +37,22 @@ sk_sp<SkSurface> CreateSurfaceFromMetalTexture(GrDirectContext* context,
 }
 }  // namespace
 
-GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate,
-                                 sk_sp<GrDirectContext> context,
-                                 bool render_to_surface)
+GPUSurfaceMetalSkia::GPUSurfaceMetalSkia(GPUSurfaceMetalDelegate* delegate,
+                                         sk_sp<GrDirectContext> context,
+                                         bool render_to_surface)
     : delegate_(delegate),
       render_target_type_(delegate->GetRenderTargetType()),
       context_(std::move(context)),
       render_to_surface_(render_to_surface) {}
 
-GPUSurfaceMetal::~GPUSurfaceMetal() = default;
+GPUSurfaceMetalSkia::~GPUSurfaceMetalSkia() = default;
 
 // |Surface|
-bool GPUSurfaceMetal::IsValid() {
+bool GPUSurfaceMetalSkia::IsValid() {
   return context_ != nullptr;
 }
 
-void GPUSurfaceMetal::PrecompileKnownSkSLsIfNecessary() {
+void GPUSurfaceMetalSkia::PrecompileKnownSkSLsIfNecessary() {
   auto* current_context = GetContext();
   if (current_context == precompiled_sksl_context_) {
     // Known SkSLs have already been prepared in this context.
@@ -63,7 +63,7 @@ void GPUSurfaceMetal::PrecompileKnownSkSLsIfNecessary() {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& frame_size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrame(const SkISize& frame_size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Metal surface was invalid.";
     return nullptr;
@@ -94,7 +94,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& frame
   return nullptr;
 }
 
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromCAMetalLayer(
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     const SkISize& frame_info) {
   auto layer = delegate_->GetCAMetalLayer(frame_info);
   if (!layer) {
@@ -167,7 +167,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromCAMetalLayer(
   return std::make_unique<SurfaceFrame>(std::move(surface), framebuffer_info, submit_callback);
 }
 
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
     const SkISize& frame_info) {
   GPUMTLTextureInfo texture = delegate_->GetMTLTexture(frame_info);
   id<MTLTexture> mtl_texture = (id<MTLTexture>)(texture.texture);
@@ -210,19 +210,19 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceMetal::GetRootTransformation() const {
+SkMatrix GPUSurfaceMetalSkia::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};
 }
 
 // |Surface|
-GrDirectContext* GPUSurfaceMetal::GetContext() {
+GrDirectContext* GPUSurfaceMetalSkia::GetContext() {
   return context_.get();
 }
 
 // |Surface|
-std::unique_ptr<GLContextResult> GPUSurfaceMetal::MakeRenderContextCurrent() {
+std::unique_ptr<GLContextResult> GPUSurfaceMetalSkia::MakeRenderContextCurrent() {
   // A context may either be necessary to render to the surface or to snapshot an offscreen
   // surface. Either way, SkSL precompilation must be attempted.
   PrecompileKnownSkSLsIfNecessary();
@@ -231,7 +231,7 @@ std::unique_ptr<GLContextResult> GPUSurfaceMetal::MakeRenderContextCurrent() {
   return std::make_unique<GLContextDefaultResult>(true);
 }
 
-bool GPUSurfaceMetal::AllowsDrawingWhenGpuDisabled() const {
+bool GPUSurfaceMetalSkia::AllowsDrawingWhenGpuDisabled() const {
   return delegate_->AllowsDrawingWhenGpuDisabled();
 }
 

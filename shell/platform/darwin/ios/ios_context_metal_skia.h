@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_METAL_H_
-#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_METAL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_METAL_SKIA_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_METAL_SKIA_H_
 
 #include <Metal/Metal.h>
 
@@ -16,13 +16,16 @@
 
 namespace flutter {
 
-class IOSContextMetal final : public IOSContext {
+class IOSContextMetalSkia final : public IOSContext {
  public:
-  IOSContextMetal();
+  IOSContextMetalSkia();
 
-  ~IOSContextMetal();
+  ~IOSContextMetalSkia();
 
   fml::scoped_nsobject<FlutterDarwinContextMetal> GetDarwinContext() const;
+
+  // |IOSContext|
+  IOSRenderingBackend GetBackend() const override;
 
   // |IOSContext|
   sk_sp<GrDirectContext> GetMainContext() const override;
@@ -45,9 +48,9 @@ class IOSContextMetal final : public IOSContext {
       int64_t texture_id,
       fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(IOSContextMetal);
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSContextMetalSkia);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_METAL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_METAL_SKIA_H_

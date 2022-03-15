@@ -211,13 +211,6 @@ void DisplayListCanvasRecorder::onDrawTextBlob(const SkTextBlob* blob,
   builder_->setAttributesFromPaint(paint, kDrawTextBlobFlags);
   builder_->drawTextBlob(sk_ref_sp(blob), x, y);
 }
-void DisplayListCanvasRecorder::onDrawShadowRec(const SkPath& path,
-                                                const SkDrawShadowRec& rec) {
-  // Skia does not expose the SkDrawShadowRec structure in a public
-  // header file so we cannot record this operation.
-  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
-  FML_DCHECK(false);
-}
 
 void DisplayListCanvasRecorder::onDrawPicture(const SkPicture* picture,
                                               const SkMatrix* matrix,
@@ -226,6 +219,62 @@ void DisplayListCanvasRecorder::onDrawPicture(const SkPicture* picture,
     builder_->setAttributesFromPaint(*paint, kDrawPictureWithPaintFlags);
   }
   builder_->drawPicture(sk_ref_sp(picture), matrix, paint != nullptr);
+}
+
+void DisplayListCanvasRecorder::onDrawShadowRec(const SkPath& path,
+                                                const SkDrawShadowRec& rec) {
+  // Skia does not expose the SkDrawShadowRec structure in a public
+  // header file so we cannot record this operation.
+  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::didSetM44(const SkM44&) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::onDrawBehind(const SkPaint&) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::onDrawRegion(const SkRegion& region,
+                                             const SkPaint& paint) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::onDrawPatch(const SkPoint cubics[12],
+                                            const SkColor colors[4],
+                                            const SkPoint texCoords[4],
+                                            SkBlendMode mode,
+                                            const SkPaint& paint) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::onDrawEdgeAAQuad(const SkRect& rect,
+                                                 const SkPoint clip[4],
+                                                 SkCanvas::QuadAAFlags aaFlags,
+                                                 const SkColor4f& color,
+                                                 SkBlendMode mode) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::onDrawAnnotation(const SkRect& rect,
+                                                 const char key[],
+                                                 SkData* value) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
+}
+
+void DisplayListCanvasRecorder::onDrawDrawable(SkDrawable* drawable,
+                                               const SkMatrix* matrix) {
+  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
+                  << __FUNCTION__;
 }
 
 }  // namespace flutter
