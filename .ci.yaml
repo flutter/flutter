@@ -2847,30 +2847,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac gradle_plugin_light_apk_test
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: gradle_plugin_light_apk_test
-    scheduler: luci
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
