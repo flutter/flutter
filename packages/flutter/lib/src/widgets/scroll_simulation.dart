@@ -151,6 +151,7 @@ class ClampingScrollSimulation extends Simulation {
        super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _initialVelocityPenetration).abs();
+    print('chenxiao1 velocity:${velocity}; _duration:${_duration}; _distance:${_distance}');
   }
 
   /// The position of the particle at the beginning of the simulation.
@@ -215,6 +216,7 @@ class ClampingScrollSimulation extends Simulation {
   @override
   double x(double time) {
     final double t = (time / _duration).clamp(0.0, 1.0);
+    print('chenxiao2 ${t}');
     return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 

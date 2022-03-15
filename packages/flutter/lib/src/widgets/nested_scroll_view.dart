@@ -1085,6 +1085,11 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @override
   String toString() => '${objectRuntimeType(this, '_NestedScrollCoordinator')}(outer=$_outerController; inner=$_innerController)';
+
+  @override
+  Simulation? updateBallistic(double velocity, double initPosition) {
+    return null;
+  }
 }
 
 class _NestedScrollController extends ScrollController {
@@ -1429,6 +1434,11 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     return coordinator.drag(details, dragCancelCallback);
+  }
+
+  @override
+  Simulation? updateBallistic(double velocity, double initPosition) {
+    return null;
   }
 }
 

@@ -750,6 +750,10 @@ class AnimationController extends Animation<double>
     return result;
   }
 
+  void updateSimulation(Simulation simulation){
+    _simulation = simulation;
+  }
+
   /// Stops running this animation.
   ///
   /// This does not trigger any notifications. The animation stops in its

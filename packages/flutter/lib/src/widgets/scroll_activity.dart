@@ -49,6 +49,8 @@ abstract class ScrollActivityDelegate {
   /// Terminate the current activity and start a ballistic activity with the
   /// given velocity.
   void goBallistic(double velocity);
+
+  Simulation? updateBallistic(double velocity, double initPosition);
 }
 
 /// Base class for scrolling activities like dragging and flinging.
@@ -522,11 +524,14 @@ class DragScrollActivity extends ScrollActivity {
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
   ///
-  /// The [delegate], [simulation], and [vsync] arguments must not be null.
+  /// The [delegate], [simulationw], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     ScrollActivityDelegate delegate,
     Simulation simulation,
-    TickerProvider vsync,
+    TickerProvider vsync,{
+      this.initVelocity = 0.0,
+      this.initPosition = 0.0,
+      }
   ) : super(delegate) {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
@@ -539,6 +544,9 @@ class BallisticScrollActivity extends ScrollActivity {
 
   late AnimationController _controller;
 
+  double initVelocity;
+  double initPosition;
+
   @override
   void resetActivity() {
     delegate.goBallistic(velocity);
@@ -546,7 +554,10 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    delegate.goBallistic(velocity);
+    final Simulation? newSimulation = delegate.updateBallistic(initVelocity,initPosition);
+    if (newSimulation != null) {
+      _controller.updateSimulation(newSimulation);
+    }
   }
 
   void _tick() {
