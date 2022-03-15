@@ -196,7 +196,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        await _viewController.setOffset(localToGlobal(Offset.zero));
+        if (attached)
+          await _viewController.setOffset(localToGlobal(Offset.zero));
         // Schedule a new post frame callback.
         _setOffset();
       }
