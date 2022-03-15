@@ -89,11 +89,11 @@ class FlutterProjectMetadata {
     } on YamlException {
       // Handled in _validate below.
     }
-    if (_validateMetadataMap(yamlRoot, <String, Type>{
-          'version': YamlMap,
-          'project_type': String,
-        }, _logger)) {
-      final YamlMap map = yamlRoot! as YamlMap;
+    if (yamlRoot == null || yamlRoot is! YamlMap) {
+      return;
+    }
+    final YamlMap map = yamlRoot as YamlMap;
+    if (_validateMetadataMap(yamlRoot, <String, Type>{'version': YamlMap}, _logger)) {
       final Object? versionYaml = map['version'];
       if (_validateMetadataMap(versionYaml, <String, Type>{
             'revision': String,
@@ -105,14 +105,13 @@ class FlutterProjectMetadata {
       } else {
         _logger.printTrace('.metadata version is malformed.');
       }
+    }
+    if (_validateMetadataMap(yamlRoot, <String, Type>{'project_type': String}, _logger)) {
       _projectType = stringToProjectType(map['project_type'] as String);
-
-      final Object? migrationYaml = map['migration'];
-      if (migrationYaml != null && migrationYaml is YamlMap) {
-        migrateConfig.parseYaml(map['migration'] as YamlMap, _logger);
-      }
-    } else {
-      _logger.printError('Invalid .metadata yaml file found at ${_metadataFile.path}');
+    }
+    final Object? migrationYaml = map['migration'];
+    if (migrationYaml != null && migrationYaml is YamlMap) {
+      migrateConfig.parseYaml(map['migration'] as YamlMap, _logger);
     }
   }
 
@@ -121,11 +120,13 @@ class FlutterProjectMetadata {
     required File file,
     required String? versionRevision,
     required String? versionChannel,
+    required FlutterProjectType? projectType,
     required this.migrateConfig,
     required Logger logger,
   }) : _logger = logger,
        _versionChannel = versionChannel,
        _versionRevision = versionRevision,
+       _projectType = projectType,
        _metadataFile = file;
 
   /// The name of the config file.

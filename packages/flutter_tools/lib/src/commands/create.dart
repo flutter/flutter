@@ -320,6 +320,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
       case FlutterProjectType.skeleton:
@@ -329,6 +330,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
       case FlutterProjectType.module:
@@ -353,6 +355,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
       case FlutterProjectType.ffiPlugin:
@@ -361,6 +364,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
     }
@@ -495,6 +499,7 @@ Your $application code is in $relativeAppMain.
     Map<String, dynamic> templateContext, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
@@ -561,6 +566,8 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
+
     );
     return generatedCount;
   }
@@ -570,6 +577,7 @@ Your $application code is in $relativeAppMain.
     Map<String, dynamic> templateContext, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
@@ -637,6 +645,7 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
     );
     return generatedCount;
   }

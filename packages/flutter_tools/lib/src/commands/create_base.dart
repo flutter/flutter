@@ -220,6 +220,7 @@ abstract class CreateBase extends FlutterCommand {
     final FlutterProjectMetadata projectMetadata =
         FlutterProjectMetadata(metadataFile, globals.logger);
     if (projectMetadata.projectType != null) {
+      print('found type: ${projectMetadata.projectType}');
       return projectMetadata.projectType;
     }
 
@@ -236,10 +237,12 @@ abstract class CreateBase extends FlutterCommand {
     if (exists(<String>['android', 'app']) ||
         exists(<String>['ios', 'Runner']) ||
         exists(<String>['ios', 'Flutter'])) {
+      print('found type: APP');
       return FlutterProjectType.app;
     }
     // Since we can't really be definitive on nearly-empty directories, err on
     // the side of prudence and just say we don't know.
+    print('found type: NULL');
     return null;
   }
 
@@ -495,6 +498,7 @@ abstract class CreateBase extends FlutterCommand {
     bool overwrite = false,
     bool pluginExampleApp = false,
     bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
   }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
@@ -590,6 +594,7 @@ abstract class CreateBase extends FlutterCommand {
       file: metadataFile,
       versionRevision: globals.flutterVersion.frameworkRevision,
       versionChannel: globals.flutterVersion.channel,
+      projectType: projectType,
       migrateConfig: MigrateConfig(),
       logger: globals.logger);
     metadata.populate(
