@@ -76,10 +76,8 @@ class PlatformViewsService {
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
 
-
-  /// Creates an [AndroidViewController] for a new Android view.
-  ///
-  /// The view is created after calling [TextureAndroidViewController.setSize].
+  /// {@template flutter.services.PlatformViewsService.initAndroidView}
+  /// Creates a controller for a new Android view.
   ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
@@ -103,6 +101,7 @@ class PlatformViewsService {
   ///
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  /// {@endtemplate}
   static AndroidViewController initAndroidView({
     required int id,
     required String viewType,
@@ -128,8 +127,9 @@ class PlatformViewsService {
     return controller;
   }
 
-  /// Alias for [initAndroidView].
-  /// When possible, use [initAndroidView] directly.
+  /// {@macro flutter.services.PlatformViewsService.initAndroidView}
+  ///
+  /// Alias for [initAndroidView]. When possible, use [initAndroidView] directly.
   static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,

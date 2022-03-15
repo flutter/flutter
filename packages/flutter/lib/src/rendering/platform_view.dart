@@ -325,7 +325,7 @@ class RenderUiKitView extends RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
+  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
     assert(
@@ -654,6 +654,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     }
   }
 
+  /// {@template flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   /// Updates which gestures should be forwarded to the platform view.
   ///
   /// Gesture recognizers created by factories in this set participate in the gesture arena for each
@@ -665,6 +666,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   ///
   /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
   /// set has no effect, because the factories' constructors would have already been called with the previous set.
+  /// {@endtemplate}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
