@@ -85,8 +85,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
        assert(clipBehavior != null),
-       _clipBehavior = clipBehavior,
        _viewController = viewController,
+       _clipBehavior = clipBehavior,
        super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
