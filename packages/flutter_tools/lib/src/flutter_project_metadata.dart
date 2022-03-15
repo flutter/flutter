@@ -60,12 +60,12 @@ FlutterProjectType? stringToProjectType(String value) {
     for (final MapEntry<String, Object> entry in validations.entries) {
       if (!map.keys.contains(entry.key)) {
         isValid = false;
-        logger.printError('The key ${entry.key} was not found');
+        logger.printTrace('The key `${entry.key}` was not found');
         break;
       }
       if (map[entry.key] != null && (map[entry.key] as Object).runtimeType != entry.value) {
         isValid = false;
-        logger.printError('The value of key ${entry.key} was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
+        logger.printTrace('The value of key `${entry.key}` in .metadata was expected to be ${entry.value} but was ${(map[entry.key] as Object).runtimeType}');
         break;
       }
     }
@@ -79,8 +79,8 @@ class FlutterProjectMetadata {
                                                      _logger = logger,
                                                      migrateConfig = MigrateConfig() {
     if (!_metadataFile.existsSync()) {
-      _logger.printError('No .metadata file found at ${_metadataFile.path}');
-      // Create a default metadata.
+      _logger.printTrace('No .metadata file found at ${_metadataFile.path}.');
+      // Create a default empty metadata.
       return;
     }
     Object? yamlRoot;
@@ -90,6 +90,7 @@ class FlutterProjectMetadata {
       // Handled in _validate below.
     }
     if (yamlRoot == null || yamlRoot is! YamlMap) {
+      _logger.printTrace('.metadata file at ${_metadataFile.path} was empty or malformed.');
       return;
     }
     final YamlMap map = yamlRoot;
@@ -102,8 +103,6 @@ class FlutterProjectMetadata {
         final YamlMap versionYamlMap = versionYaml! as YamlMap;
         _versionRevision = versionYamlMap['revision'] as String?;
         _versionChannel = versionYamlMap['channel'] as String?;
-      } else {
-        _logger.printTrace('.metadata version is malformed.');
       }
     }
     if (_validateMetadataMap(yamlRoot, <String, Type>{'project_type': String}, _logger)) {
