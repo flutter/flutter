@@ -12,10 +12,10 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
+import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
-import 'scroll_metrics.dart';
 
 /// A scroll position that manages scroll activities for a single
 /// [ScrollContext].
