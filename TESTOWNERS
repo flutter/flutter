@@ -21,6 +21,7 @@
 /dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/codegen_integration.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf__devtools_memory.dart @zanderso @flutter/engine
