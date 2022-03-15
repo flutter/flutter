@@ -243,7 +243,7 @@ struct PassBindingsCache {
       }
       return true;
     }
-    buffers_map[index] = {buffer, offset};
+    buffers_map[index] = {buffer, static_cast<size_t>(offset)};
     switch (stage) {
       case ShaderStage::kVertex:
         [encoder_ setVertexBuffer:buffer offset:offset atIndex:index];
