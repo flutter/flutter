@@ -115,6 +115,41 @@ void main() {
       expect(output, contains('Exited (1)'));
     });
 
+      /// Helper that tests exception output in either debug or noDebug mode.
+    Future<void> testExceptionOutput({required bool noDebug}) async {
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
+        await project.setUpIn(tempDir);
+
+        final List<OutputEventBody> outputEvents =
+            await dap.client.collectAllOutput(launch: () {
+          // Terminate the app after we see the exception because otherwise
+          // it will keep running and `collectAllOutput` won't end.
+          dap.client.output
+              .firstWhere((String output) => output.contains(endOfErrorOutputMarker))
+              .then((_) => dap.client.terminate());
+          return dap.client.launch(
+            noDebug: noDebug,
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          );
+        });
+
+        final String output = _uniqueOutputLines(outputEvents);
+        expect(output, contains('''
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+The following _Exception was thrown building App(dirty):
+Exception: c
+
+The relevant error-causing widget was:
+  App
+  App:${Uri.file(project.dir.path)}/lib/main.dart:24:12
+'''));
+    }
+
+    testWithoutContext('correctly outputs exceptions in debug mode', () => testExceptionOutput(noDebug: false));
+
+    testWithoutContext('correctly outputs exceptions in noDebug mode', () => testExceptionOutput(noDebug: true));
+
     testWithoutContext('can hot reload', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
