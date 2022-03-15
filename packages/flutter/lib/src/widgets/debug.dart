@@ -92,6 +92,9 @@ bool debugPrintScheduleBuildForStacks = false;
 /// This can help track down framework bugs relating to the [GlobalKey] logic.
 bool debugPrintGlobalKeyedWidgetLifecycle = false;
 
+/// Adds [Timeline] events for [SliverCustomExtentListAssistant].
+bool debugProfileSliverCustomExtentListAssistantEnabled = false;
+
 /// Adds [Timeline] events for every Widget built.
 ///
 /// The timing information this flag exposes is not representative of the actual
