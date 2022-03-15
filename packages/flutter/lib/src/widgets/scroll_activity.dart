@@ -50,7 +50,11 @@ abstract class ScrollActivityDelegate {
   /// given velocity.
   void goBallistic(double velocity);
 
-  Simulation? updateBallistic(double velocity, double initPosition);
+  /// Update the ballistic animation when layout is change.
+  /// Instead of restarting the animation while fling.
+  /// [initVelocity] is the velocity when ballistic animation start
+  /// [initPosition] is the position when ballistic animation start
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition);
 }
 
 /// Base class for scrolling activities like dragging and flinging.
@@ -528,11 +532,12 @@ class BallisticScrollActivity extends ScrollActivity {
   BallisticScrollActivity(
     ScrollActivityDelegate delegate,
     Simulation simulation,
-    TickerProvider vsync,{
-      this.initVelocity = 0.0,
-      this.initPosition = 0.0,
-      }
-  ) : super(delegate) {
+    TickerProvider vsync, {
+    double initVelocity = 0.0,
+    double initPosition = 0.0,
+  }) : super(delegate) {
+    _initVelocity = initVelocity;
+    _initPosition = initPosition;
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
       vsync: vsync,
@@ -544,8 +549,9 @@ class BallisticScrollActivity extends ScrollActivity {
 
   late AnimationController _controller;
 
-  double initVelocity;
-  double initPosition;
+  late double _initVelocity;
+
+  late double _initPosition;
 
   @override
   void resetActivity() {
@@ -554,7 +560,10 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    final Simulation? newSimulation = delegate.updateBallistic(initVelocity,initPosition);
+    final Simulation? newSimulation = delegate.updateBallisticAnimation(
+      _initVelocity,
+      _initPosition,
+    );
     if (newSimulation != null) {
       _controller.updateSimulation(newSimulation);
     }
