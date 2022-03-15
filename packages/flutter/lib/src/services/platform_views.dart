@@ -818,9 +818,15 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Removes a callback added with [addOnPlatformViewCreatedListener].
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    assert(listener != null);
     assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.remove(listener);
   }
+
+  /// The created callbacks that are invoked after the platform view has been
+  /// created.
+  @visibleForTesting
+  List<PlatformViewCreatedCallback> get createdCallbacks => _platformViewCreatedCallbacks;
 
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
