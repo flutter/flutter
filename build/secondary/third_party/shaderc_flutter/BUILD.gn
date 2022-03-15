@@ -21,7 +21,10 @@ source_set("shaderc_util_flutter") {
   defines = [ "ENABLE_HLSL=1" ]
 
   if (is_clang) {
-    cflags_cc = [ "-Wno-deprecated-copy" ]
+    cflags_cc = [
+      "-Wno-deprecated-copy",
+      "-Wno-unknown-warning-option",
+    ]
   }
 
   sources = [
