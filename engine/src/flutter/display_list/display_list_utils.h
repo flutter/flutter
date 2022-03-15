@@ -54,7 +54,7 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setColor(SkColor color) override {}
   void setBlendMode(SkBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
-  void setShader(sk_sp<SkShader> shader) override {}
+  void setColorSource(const DlColorSource* source) override {}
   void setImageFilter(sk_sp<SkImageFilter> filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
   void setPathEffect(sk_sp<SkPathEffect> effect) override {}
@@ -177,7 +177,7 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setStrokeMiter(SkScalar limit) override;
   void setStrokeCap(SkPaint::Cap cap) override;
   void setStrokeJoin(SkPaint::Join join) override;
-  void setShader(sk_sp<SkShader> shader) override;
+  void setColorSource(const DlColorSource* source) override;
   void setColorFilter(const DlColorFilter* filter) override;
   void setInvertColors(bool invert) override;
   void setBlendMode(SkBlendMode mode) override;

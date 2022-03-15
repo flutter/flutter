@@ -37,6 +37,7 @@ FILE: ../../../flutter/common/task_runners.h
 FILE: ../../../flutter/display_list/display_list.cc
 FILE: ../../../flutter/display_list/display_list.h
 FILE: ../../../flutter/display_list/display_list_attributes.h
+FILE: ../../../flutter/display_list/display_list_attributes_testing.h
 FILE: ../../../flutter/display_list/display_list_benchmarks.cc
 FILE: ../../../flutter/display_list/display_list_benchmarks.h
 FILE: ../../../flutter/display_list/display_list_benchmarks_canvas_provider.h
@@ -56,6 +57,9 @@ FILE: ../../../flutter/display_list/display_list_canvas_unittests.cc
 FILE: ../../../flutter/display_list/display_list_color_filter.cc
 FILE: ../../../flutter/display_list/display_list_color_filter.h
 FILE: ../../../flutter/display_list/display_list_color_filter_unittests.cc
+FILE: ../../../flutter/display_list/display_list_color_source.cc
+FILE: ../../../flutter/display_list/display_list_color_source.h
+FILE: ../../../flutter/display_list/display_list_color_source_unittests.cc
 FILE: ../../../flutter/display_list/display_list_comparable.h
 FILE: ../../../flutter/display_list/display_list_complexity.cc
 FILE: ../../../flutter/display_list/display_list_complexity.h
@@ -67,6 +71,7 @@ FILE: ../../../flutter/display_list/display_list_complexity_metal.h
 FILE: ../../../flutter/display_list/display_list_complexity_unittests.cc
 FILE: ../../../flutter/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/display_list/display_list_dispatcher.h
+FILE: ../../../flutter/display_list/display_list_enum_unittests.cc
 FILE: ../../../flutter/display_list/display_list_flags.cc
 FILE: ../../../flutter/display_list/display_list_flags.h
 FILE: ../../../flutter/display_list/display_list_mask_filter.cc
@@ -76,6 +81,7 @@ FILE: ../../../flutter/display_list/display_list_ops.cc
 FILE: ../../../flutter/display_list/display_list_ops.h
 FILE: ../../../flutter/display_list/display_list_test_utils.cc
 FILE: ../../../flutter/display_list/display_list_test_utils.h
+FILE: ../../../flutter/display_list/display_list_tile_mode.h
 FILE: ../../../flutter/display_list/display_list_unittests.cc
 FILE: ../../../flutter/display_list/display_list_utils.cc
 FILE: ../../../flutter/display_list/display_list_utils.h

@@ -33,10 +33,11 @@ void FragmentShader::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({});
 }
 
-sk_sp<SkShader> FragmentShader::shader(SkSamplingOptions sampling) {
+std::shared_ptr<DlColorSource> FragmentShader::shader(
+    SkSamplingOptions& sampling) {
   // Sampling options are ignored, since sampling options don't make sense for
   // generative shaders.
-  return shader_;
+  return source_;
 }
 
 fml::RefPtr<FragmentShader> FragmentShader::Create(Dart_Handle dart_handle,
@@ -47,7 +48,7 @@ fml::RefPtr<FragmentShader> FragmentShader::Create(Dart_Handle dart_handle,
 }
 
 FragmentShader::FragmentShader(sk_sp<SkShader> shader)
-    : shader_(std::move(shader)) {}
+    : source_(DlColorSource::From(shader)) {}
 
 FragmentShader::~FragmentShader() = default;
 

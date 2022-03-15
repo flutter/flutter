@@ -28,35 +28,42 @@ bool Equals(const T* a, const T* b) {
 
 template <class T>
 bool Equals(std::shared_ptr<const T> a, const T* b) {
-  if (!a) {
-    return !b;
-  }
-  if (!b) {
-    return false;
-  }
-  if (a.get() == b) {
-    return true;
-  }
-  return *a.get() == *b;
+  return Equals(a.get(), b);
+}
+
+template <class T>
+bool Equals(std::shared_ptr<T> a, const T* b) {
+  return Equals(a.get(), b);
 }
 
 template <class T>
 bool Equals(const T* a, std::shared_ptr<const T> b) {
-  return Equals(b, a);
+  return Equals(a, b.get());
+}
+
+template <class T>
+bool Equals(const T* a, std::shared_ptr<T> b) {
+  return Equals(a, b.get());
 }
 
 template <class T>
 bool Equals(std::shared_ptr<const T> a, std::shared_ptr<const T> b) {
-  if (!a) {
-    return !b;
-  }
-  if (!b) {
-    return false;
-  }
-  if (a.get() == b.get()) {
-    return true;
-  }
-  return *a.get() == *b.get();
+  return Equals(a.get(), b.get());
+}
+
+template <class T>
+bool Equals(std::shared_ptr<T> a, std::shared_ptr<const T> b) {
+  return Equals(a.get(), b.get());
+}
+
+template <class T>
+bool Equals(std::shared_ptr<const T> a, std::shared_ptr<T> b) {
+  return Equals(a.get(), b.get());
+}
+
+template <class T>
+bool Equals(std::shared_ptr<T> a, std::shared_ptr<T> b) {
+  return Equals(a.get(), b.get());
 }
 
 template <class T>
@@ -66,17 +73,42 @@ bool NotEquals(const T* a, const T* b) {
 
 template <class T>
 bool NotEquals(std::shared_ptr<const T> a, const T* b) {
-  return !Equals<T>(a, b);
+  return !Equals(a.get(), b);
+}
+
+template <class T>
+bool NotEquals(std::shared_ptr<T> a, const T* b) {
+  return !Equals(a.get(), b);
 }
 
 template <class T>
 bool NotEquals(const T* a, std::shared_ptr<const T> b) {
-  return !Equals<T>(b, a);
+  return !Equals(a, b.get());
+}
+
+template <class T>
+bool NotEquals(const T* a, std::shared_ptr<T> b) {
+  return !Equals(a, b.get());
 }
 
 template <class T>
 bool NotEquals(std::shared_ptr<const T> a, std::shared_ptr<const T> b) {
-  return !Equals(a, b);
+  return !Equals(a.get(), b.get());
+}
+
+template <class T>
+bool NotEquals(std::shared_ptr<T> a, std::shared_ptr<const T> b) {
+  return !Equals(a.get(), b.get());
+}
+
+template <class T>
+bool NotEquals(std::shared_ptr<const T> a, std::shared_ptr<T> b) {
+  return !Equals(a.get(), b.get());
+}
+
+template <class T>
+bool NotEquals(std::shared_ptr<T> a, std::shared_ptr<T> b) {
+  return !Equals(a.get(), b.get());
 }
 
 }  // namespace flutter

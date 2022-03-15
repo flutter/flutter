@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/display_list_attributes_testing.h"
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_comparable.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 #include "flutter/display_list/types.h"
@@ -9,6 +11,18 @@
 
 namespace flutter {
 namespace testing {
+
+TEST(DisplayListMaskFilter, BuilderSetGet) {
+  DlBlurMaskFilter filter(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
+  DisplayListBuilder builder;
+  ASSERT_EQ(builder.getMaskFilter(), nullptr);
+  builder.setMaskFilter(&filter);
+  ASSERT_NE(builder.getMaskFilter(), nullptr);
+  ASSERT_TRUE(
+      Equals(builder.getMaskFilter(), static_cast<DlMaskFilter*>(&filter)));
+  builder.setMaskFilter(nullptr);
+  ASSERT_EQ(builder.getMaskFilter(), nullptr);
+}
 
 TEST(DisplayListMaskFilter, FromSkiaNullFilter) {
   std::shared_ptr<DlMaskFilter> filter = DlMaskFilter::From(nullptr);
@@ -21,6 +35,7 @@ TEST(DisplayListMaskFilter, FromSkiaBlurFilter) {
       SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
   std::shared_ptr<DlMaskFilter> filter = DlMaskFilter::From(sk_filter);
   ASSERT_EQ(filter->type(), DlMaskFilterType::kUnknown);
+  // We cannot recapture the blur parameters from an SkBlurMaskFilter
   ASSERT_EQ(filter->asBlur(), nullptr);
   ASSERT_EQ(filter->skia_object(), sk_filter);
 }
@@ -50,24 +65,15 @@ TEST(DisplayListMaskFilter, BlurContents) {
 TEST(DisplayListMaskFilter, BlurEquals) {
   DlBlurMaskFilter filter1(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
   DlBlurMaskFilter filter2(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
-  ASSERT_TRUE(filter1 == filter2);
-  ASSERT_TRUE(filter2 == filter1);
-  ASSERT_FALSE(filter1 != filter2);
-  ASSERT_FALSE(filter2 != filter1);
-  ASSERT_EQ(filter1, filter2);
+  TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListMaskFilter, BlurNotEquals) {
   DlBlurMaskFilter filter1(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
   DlBlurMaskFilter filter2(SkBlurStyle::kInner_SkBlurStyle, 5.0);
   DlBlurMaskFilter filter3(SkBlurStyle::kNormal_SkBlurStyle, 6.0);
-  ASSERT_FALSE(filter1 == filter2);
-  ASSERT_FALSE(filter2 == filter1);
-  ASSERT_TRUE(filter1 != filter2);
-  ASSERT_TRUE(filter2 != filter1);
-  ASSERT_NE(filter1, filter2);
-  ASSERT_NE(filter2, filter3);
-  ASSERT_NE(filter3, filter1);
+  TestNotEquals(filter1, filter2, "Blur style differs");
+  TestNotEquals(filter1, filter3, "blur radius differs");
 }
 
 TEST(DisplayListMaskFilter, UnknownConstructor) {
@@ -95,11 +101,7 @@ TEST(DisplayListMaskFilter, UnknownEquals) {
       SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
   DlUnknownMaskFilter filter1(sk_filter);
   DlUnknownMaskFilter filter2(sk_filter);
-  ASSERT_TRUE(filter1 == filter2);
-  ASSERT_TRUE(filter2 == filter1);
-  ASSERT_FALSE(filter1 != filter2);
-  ASSERT_FALSE(filter2 != filter1);
-  ASSERT_EQ(filter1, filter2);
+  TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListMaskFilter, UnknownNotEquals) {
@@ -110,11 +112,7 @@ TEST(DisplayListMaskFilter, UnknownNotEquals) {
       SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0));
   DlUnknownMaskFilter filter2(
       SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0));
-  ASSERT_TRUE(filter1 != filter2);
-  ASSERT_TRUE(filter2 != filter1);
-  ASSERT_FALSE(filter1 == filter2);
-  ASSERT_FALSE(filter2 == filter1);
-  ASSERT_NE(filter1, filter2);
+  TestNotEquals(filter1, filter2, "SkMaskFilter instance differs");
 }
 
 void testEquals(DlMaskFilter* a, DlMaskFilter* b) {

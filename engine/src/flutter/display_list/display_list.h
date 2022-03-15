@@ -74,19 +74,22 @@ namespace flutter {
                                     \
   V(SetBlender)                     \
   V(ClearBlender)                   \
-  V(SetShader)                      \
-  V(ClearShader)                    \
   V(SetImageFilter)                 \
   V(ClearImageFilter)               \
   V(SetPathEffect)                  \
   V(ClearPathEffect)                \
                                     \
   V(ClearColorFilter)               \
-  V(SetColorFilter)                 \
+  V(SetPodColorFilter)              \
   V(SetSkColorFilter)               \
                                     \
+  V(ClearColorSource)               \
+  V(SetPodColorSource)              \
+  V(SetSkColorSource)               \
+  V(SetImageColorSource)            \
+                                    \
   V(ClearMaskFilter)                \
-  V(SetMaskFilter)                  \
+  V(SetPodMaskFilter)               \
   V(SetSkMaskFilter)                \
                                     \
   V(Save)                           \

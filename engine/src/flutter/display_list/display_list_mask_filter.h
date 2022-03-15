@@ -84,8 +84,8 @@ class DlBlurMaskFilter final : public DlMaskFilter {
  protected:
   bool equals_(DlMaskFilter const& other) const override {
     FML_DCHECK(other.type() == DlMaskFilterType::kBlur);
-    auto that = static_cast<DlBlurMaskFilter const&>(other);
-    return style_ == that.style_ && sigma_ == that.sigma_;
+    auto that = static_cast<DlBlurMaskFilter const*>(&other);
+    return style_ == that->style_ && sigma_ == that->sigma_;
   }
 
  private:
