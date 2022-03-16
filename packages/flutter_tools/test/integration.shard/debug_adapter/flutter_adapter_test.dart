@@ -134,14 +134,15 @@ void main() {
           );
         });
 
-        final List<String> outputLines = _uniqueOutputLines(outputEvents).split('\n');
+        final String output = _uniqueOutputLines(outputEvents);
+        final List<String> outputLines = output.split('\n');
         expect( outputLines, containsAllInOrder(<String>[
             '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════',
             'The following _Exception was thrown building App(dirty):',
             'Exception: c',
             'The relevant error-causing widget was:',
-            'App:${Uri.file(project.dir.path)}/lib/main.dart:24:12',
         ]));
+        expect(output, contains('App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'));
     }
 
     testWithoutContext('correctly outputs exceptions in debug mode', () => testExceptionOutput(noDebug: false));
