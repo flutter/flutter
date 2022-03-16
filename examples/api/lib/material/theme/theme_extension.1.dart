@@ -84,20 +84,20 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
-        extensions: const <ThemeExtension<dynamic>>[
-          MyColors(
+        extensions: const <Object, ThemeExtension<dynamic>>{
+          MyColors: MyColors(
             blue: Color(0xFF1E88E5),
             red: Color(0xFFE53935),
           ),
-        ],
+        },
       ),
       darkTheme: ThemeData.dark().copyWith(
-        extensions: const <ThemeExtension<dynamic>>[
-           MyColors(
+        extensions: const <Object, ThemeExtension<dynamic>>{
+          MyColors: MyColors(
             blue: Color(0xFF90CAF9),
             red: Color(0xFFEF9A9A),
           ),
-        ],
+        },
       ),
       themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
       home: Home(
