@@ -1951,7 +1951,7 @@ class ThemeData with Diagnosticable {
     // Add [b]-only extensions.
     newExtensions.addEntries(b.extensions.entries.where(
       (MapEntry<Object, ThemeExtension<dynamic>> entry) =>
-          newExtensions.containsKey(entry.key)));
+          !a.extensions.containsKey(entry.key)));
 
     return newExtensions;
   }
