@@ -96,7 +96,7 @@ class WebEntrypointTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String? targetFile = environment.defines[kTargetFile];
-    final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
+    final bool hasWebPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(zanderso): support configuration of this file.
     const String packageFile = '.packages';
@@ -120,48 +120,54 @@ class WebEntrypointTarget extends Target {
     // By construction, this will only be null if the .packages file does not
     // have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
-    final String mainImport = packageConfig.toPackageUri(importUri)?.toString()
+    final String importedEntrypoint = packageConfig.toPackageUri(importUri)?.toString()
       ?? importUri.toString();
 
-    String contents;
-    if (hasPlugins) {
+    String? generatedImport;
+    if (hasWebPlugins) {
       final Uri generatedUri = environment.projectDir
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
         .absolute
         .uri;
-      final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
+      generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
         ?? generatedUri.toString();
-      contents = '''
-// @dart=${languageVersion.major}.${languageVersion.minor}
-
-import 'dart:ui' as ui;
-
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-
-import '$generatedImport';
-import '$mainImport' as entrypoint;
-
-Future<void> main() async {
-  registerPlugins(webPluginRegistrar);
-  await ui.webOnlyInitializePlatform();
-  entrypoint.main();
-}
-''';
-    } else {
-      contents = '''
-// @dart=${languageVersion.major}.${languageVersion.minor}
-
-import 'dart:ui' as ui;
-
-import '$mainImport' as entrypoint;
-
-Future<void> main() async {
-  await ui.webOnlyInitializePlatform();
-  entrypoint.main();
-}
-''';
     }
+
+    final String contents = <String>[
+        '// @dart=${languageVersion.major}.${languageVersion.minor}',
+        '// Flutter web bootstrap script for $importedEntrypoint.',
+        '',
+        "import 'dart:ui' as ui;",
+        "import 'dart:async';",
+        '',
+        "import '$importedEntrypoint' as entrypoint;",
+        if (hasWebPlugins)
+          "import 'package:flutter_web_plugins/flutter_web_plugins.dart';",
+        if (hasWebPlugins)
+          "import '$generatedImport';",
+        '',
+        'typedef _UnaryFunction = dynamic Function(List<String> args);',
+        'typedef _NullaryFunction = dynamic Function();',
+        '',
+        'Future<void> main() async {',
+        '  await ui.webOnlyWarmupEngine(',
+        '    runApp: () {',
+        '      if (entrypoint.main is _UnaryFunction) {',
+        '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
+        '      }',
+        '      return (entrypoint.main as _NullaryFunction)();',
+        '    },',
+        if (hasWebPlugins) ...<String>[
+        '    registerPlugins: () {',
+        '      registerPlugins(webPluginRegistrar);',
+        '    },',
+        ],
+        '  );',
+        '}',
+        '',
+      ].join('\n');
+
     environment.buildDir.childFile('main.dart')
       .writeAsStringSync(contents);
   }
