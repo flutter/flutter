@@ -60,6 +60,9 @@ def get_out_dir(args):
     if args.macos_enable_metal:
       target_dir.append('metal')
 
+    if args.target_dir != '':
+      target_dir = [args.target_dir]
+
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
@@ -494,7 +497,10 @@ def parse_args(args):
 
   parser.add_argument('--coverage', default=False, action='store_true')
 
-  parser.add_argument('--out-dir', default='', type=str)
+  parser.add_argument('--out-dir', default='', type=str,
+                      help='Root out directory. Target specific gn files will be generated in ${out-dir}/')
+  parser.add_argument('--target-dir', default='', type=str,
+                      help='Use the specified name for target out directory. By default this tool determines one.')
 
   parser.add_argument('--full-dart-sdk', default=False, action='store_true',
                       help='include trained dart2js and dartdevc snapshots. Enable only on steps that create an SDK')
