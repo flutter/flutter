@@ -570,7 +570,9 @@ void main() {
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-      extensions: const <Object, ThemeExtension<dynamic>>{},
+      extensions: const <Object, ThemeExtension<dynamic>>{
+        MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
+      },
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -649,6 +651,7 @@ void main() {
       drawerTheme: otherTheme.drawerTheme,
       listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
+      extensions: otherTheme.extensions,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -726,6 +729,7 @@ void main() {
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
+    expect(themeDataCopy.extensions, equals(otherTheme.extensions));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -773,6 +777,7 @@ void main() {
       'androidOverscrollIndicator',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
+      'extensions',
       'inputDecorationTheme',
       'materialTapTargetSize',
       'pageTransitionsTheme',
