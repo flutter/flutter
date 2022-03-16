@@ -8,7 +8,6 @@ body:
     attributes:
       label: issue_link
       description: What is the link to the issue this cherry-pick is addressing?
-      placeholder: https://github.com/flutter/flutter/issues/12345
     validations:
       required: true
   - type: input
@@ -16,7 +15,6 @@ body:
     attributes:
       label: Commit Hash
       description: What is the shortened commit hash that has been merged to master/main?
-      placeholder: fabfeed
     validations:
       required: true
   - type: input
@@ -24,7 +22,6 @@ body:
     attributes:
       label: Impacted Users
       description: Approximately who will hit this issue (ex. all Flutter devs, Windows developers, all end-customers, apps using X framework feature)?
-      placeholder: All Flutter devs
     validations:
       required: true
   - type: textarea
@@ -32,7 +29,6 @@ body:
     attributes:
       label: Impact Description
       description: What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)
-      placeholder: Android apps cannot compile without this fix.
     validations:
       required: true
   - type: textarea
@@ -40,7 +36,6 @@ body:
     attributes:
       label: Workaround
       description: Is there a workaround for this issue?
-      placeholder: Relaunch the app
     validations:
       required: true
   - type: dropdown
@@ -69,4 +64,3 @@ body:
     attributes:
       label: Validation Steps
       description: What are the steps to validate that this fix works?
-      placeholder: Step 1. `flutter run` the app on Android...
