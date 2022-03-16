@@ -10,8 +10,8 @@ import 'package:flutter/scheduler.dart';
 @immutable
 class MyColors extends ThemeExtension<MyColors> {
   const MyColors({
-    this.blue,
-    this.red,
+    required this.blue,
+    required this.red,
   });
 
   final Color? blue;
