@@ -43,7 +43,7 @@ class ElevationOverlay {
       return _surfaceTintElevationOpacities[0].opacity;
     }
 
-    // Find the nearest opacity for the elevation
+    // Walk the opacity list and find the closest match(es) for the elevation.
     int index = 0;
     while (elevation >= _surfaceTintElevationOpacities[index].elevation) {
       // If we found it exactly or walked off the end of the list just return it.
@@ -51,7 +51,7 @@ class ElevationOverlay {
           index + 1 == _surfaceTintElevationOpacities.length) {
         return _surfaceTintElevationOpacities[index].opacity;
       }
-      index++;
+      index += 1;
     }
 
     // Interpolate between the two opacity values

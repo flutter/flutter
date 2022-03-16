@@ -241,7 +241,7 @@ class Material extends StatefulWidget {
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
   ///
-  /// If [ThemeData.useMaterial3] is true then a new optional [surfaceTintColor]
+  /// If [ThemeData.useMaterial3] is true then an optional [surfaceTintColor]
   /// overlay may be applied on top of this color to indicate elevation.
   ///
   /// If [ThemeData.useMaterial3] is false and [ThemeData.applyElevationOverlayColor]
