@@ -2698,6 +2698,33 @@ void main() {
 
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
   });
+
+  testWidgets("PopupMenuButton icon inherits IconTheme's size", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          iconTheme: const IconThemeData(
+            size: 50.0,
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final IconButton iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    expect(iconButton.iconSize, 50.0);
+  });
 }
 
 class TestApp extends StatefulWidget {
