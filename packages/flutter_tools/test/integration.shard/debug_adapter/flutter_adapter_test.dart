@@ -140,7 +140,7 @@ void main() {
             'The following _Exception was thrown building App(dirty):',
             'Exception: c',
             'The relevant error-causing widget was:',
-            '  App:${Uri.file(project.dir.path)}/lib/main.dart:24:12',
+            'App:${Uri.file(project.dir.path)}/lib/main.dart:24:12',
         ]));
     }
 
