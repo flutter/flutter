@@ -287,37 +287,34 @@ migration:
   /// Parses and validates the `migration` section of the .metadata file.
   void parseYaml(YamlMap map, Logger logger) {
     final Object? platformsYaml = map['platforms'];
-    if (!_validateMetadataMap(map, <String, Type>{
-          'platforms': YamlList,
-          'unmanaged_files': YamlList,
-        }, logger)) {
-      return;
-    }
-    if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
-      for (final Object? platform in platformsYaml) {
-        if (_validateMetadataMap(platform, <String, Type>{
-              'platform': String,
-              'create_revision': String,
-              'base_revision': String,
-            }, logger)) {
-          final YamlMap platformYamlMap = platform! as YamlMap;
-          final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
-            (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
-          );
-          platformConfigs[platformString] = MigratePlatformConfig(
-            createRevision: platformYamlMap['create_revision'] as String?,
-            baseRevision: platformYamlMap['base_revision'] as String?,
-          );
-        } else {
-          // malformed platform entry
-          continue;
+    if (_validateMetadataMap(map, <String, Type>{'platforms': YamlList}, logger)) {
+      if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
+        for (final Object? platform in platformsYaml) {
+          if (_validateMetadataMap(platform, <String, Type>{
+                'platform': String,
+                'create_revision': String,
+                'base_revision': String,
+              }, logger)) {
+            final YamlMap platformYamlMap = platform! as YamlMap;
+            final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
+              (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
+            );
+            platformConfigs[platformString] = MigratePlatformConfig(
+              createRevision: platformYamlMap['create_revision'] as String?,
+              baseRevision: platformYamlMap['base_revision'] as String?,
+            );
+          } else {
+            // malformed platform entry
+            continue;
+          }
         }
       }
     }
-
-    final Object? unmanagedFilesYaml = map['unmanaged_files'];
-    if (unmanagedFilesYaml is YamlList && unmanagedFilesYaml.isNotEmpty) {
-      unmanagedFiles = List<String>.from(unmanagedFilesYaml.value.cast<String>());
+    if (_validateMetadataMap(map, <String, Type>{'unmanaged_files': YamlList}, logger)) {
+      final Object? unmanagedFilesYaml = map['unmanaged_files'];
+      if (unmanagedFilesYaml is YamlList && unmanagedFilesYaml.isNotEmpty) {
+        unmanagedFiles = List<String>.from(unmanagedFilesYaml.value.cast<String>());
+      }
     }
   }
 }

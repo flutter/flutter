@@ -567,7 +567,6 @@ Your $application code is in $relativeAppMain.
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
       projectType: projectType,
-
     );
     return generatedCount;
   }
