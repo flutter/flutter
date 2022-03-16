@@ -8,8 +8,8 @@ namespace flutter {
 namespace testing {
 
 Win32Message WmKeyDownInfo::Build(LRESULT expected_result) {
-  uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
-                    (prev_state << 30);
+  LPARAM lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
+                  (prev_state << 30);
   return Win32Message{
       .message = WM_KEYDOWN,
       .wParam = key,
@@ -19,9 +19,9 @@ Win32Message WmKeyDownInfo::Build(LRESULT expected_result) {
 }
 
 Win32Message WmKeyUpInfo::Build(LRESULT expected_result) {
-  uint32_t lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
-                    (extended << 24) | (!overwrite_prev_state_0 << 30) |
-                    (1 /* transition */ << 31);
+  LPARAM lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
+                  (extended << 24) | (!overwrite_prev_state_0 << 30) |
+                  (1 /* transition */ << 31);
   return Win32Message{
       .message = WM_KEYUP,
       .wParam = key,
@@ -31,9 +31,9 @@ Win32Message WmKeyUpInfo::Build(LRESULT expected_result) {
 }
 
 Win32Message WmCharInfo::Build(LRESULT expected_result) {
-  uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
-                    (bit25 << 25) | (context << 29) | (prev_state << 30) |
-                    (transition << 31);
+  LPARAM lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
+                  (bit25 << 25) | (context << 29) | (prev_state << 30) |
+                  (transition << 31);
   return Win32Message{
       .message = WM_CHAR,
       .wParam = char_code,
@@ -43,9 +43,9 @@ Win32Message WmCharInfo::Build(LRESULT expected_result) {
 }
 
 Win32Message WmSysKeyDownInfo::Build(LRESULT expected_result) {
-  uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
-                    (context << 29) | (prev_state << 30) |
-                    (0 /* transition */ << 31);
+  LPARAM lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
+                  (context << 29) | (prev_state << 30) |
+                  (0 /* transition */ << 31);
   return Win32Message{
       .message = WM_SYSKEYDOWN,
       .wParam = key,
@@ -55,9 +55,9 @@ Win32Message WmSysKeyDownInfo::Build(LRESULT expected_result) {
 }
 
 Win32Message WmSysKeyUpInfo::Build(LRESULT expected_result) {
-  uint32_t lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
-                    (extended << 24) | (context << 29) |
-                    (1 /* prev_state */ << 30) | (1 /* transition */ << 31);
+  LPARAM lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
+                  (extended << 24) | (context << 29) |
+                  (1 /* prev_state */ << 30) | (1 /* transition */ << 31);
   return Win32Message{
       .message = WM_SYSKEYUP,
       .wParam = key,
@@ -67,8 +67,8 @@ Win32Message WmSysKeyUpInfo::Build(LRESULT expected_result) {
 }
 
 Win32Message WmDeadCharInfo::Build(LRESULT expected_result) {
-  uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
-                    (context << 30) | (prev_state << 30) | (transition << 31);
+  LPARAM lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
+                  (context << 30) | (prev_state << 30) | (transition << 31);
   return Win32Message{
       .message = WM_DEADCHAR,
       .wParam = char_code,

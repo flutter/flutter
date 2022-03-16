@@ -42,7 +42,11 @@ inline unsigned int clz_win(unsigned int num) {
 
 inline unsigned int clzl_win(unsigned long num) {
   unsigned long r = 0;
+#if defined(_WIN64)
   _BitScanReverse64(&r, num);
+#else
+  _BitScanReverse(&r, num);
+#endif
   return r;
 }
 
