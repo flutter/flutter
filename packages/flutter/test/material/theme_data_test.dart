@@ -485,6 +485,82 @@ void main() {
       expect(theme.extension<MyThemeExtensionA>()!.color1, Colors.blue);
       expect(theme.extension<MyThemeExtensionA>()!.color2, Colors.amber);
     });
+
+    testWidgets('can lerp', (WidgetTester tester) async {
+      const MyThemeExtensionA extensionA1 = MyThemeExtensionA(
+        color1: Colors.black,
+        color2: Colors.amber,
+      );
+      const MyThemeExtensionA extensionA2 = MyThemeExtensionA(
+        color1: Colors.white,
+        color2: Colors.blue,
+      );
+      const MyThemeExtensionB extensionB1 = MyThemeExtensionB(
+        textStyle: TextStyle(fontSize: 50),
+      );
+      const MyThemeExtensionB extensionB2 = MyThemeExtensionB(
+        textStyle: TextStyle(fontSize: 100),
+      );
+
+      // Both ThemeDatas include both extensions
+      ThemeData lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <Object, ThemeExtension<dynamic>>{
+            MyThemeExtensionA: extensionA1,
+            MyThemeExtensionB: extensionB1,
+          },
+        ),
+        ThemeData(
+          extensions: const <Object, ThemeExtension<dynamic>>{
+            MyThemeExtensionA: extensionA2,
+            MyThemeExtensionB: extensionB2,
+          },
+        ),
+        0.5,
+      );
+
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
+
+      // Missing from 2nd ThemeData
+      lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <Object, ThemeExtension<dynamic>>{
+            MyThemeExtensionA: extensionA1,
+            MyThemeExtensionB: extensionB1,
+          },
+        ),
+        ThemeData(
+          extensions: const <Object, ThemeExtension<dynamic>>{
+            MyThemeExtensionB: extensionB2,
+          },
+        ),
+        0.5,
+      );
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, Colors.black); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, Colors.amber); // Not lerped
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
+
+      // Missing from 1st ThemeData
+      lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <Object, ThemeExtension<dynamic>>{
+            MyThemeExtensionA: extensionA1,
+          },
+        ),
+        ThemeData(
+          extensions: const <Object, ThemeExtension<dynamic>>{
+            MyThemeExtensionA: extensionA2,
+            MyThemeExtensionB: extensionB2,
+          },
+        ),
+        0.5,
+      );
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
+    });
   });
 
   test('copyWith, ==, hashCode basics', () {
