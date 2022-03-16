@@ -192,15 +192,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   @override
   Future<void> debuggerConnected(vm.VM vmInfo) async {
-    // Capture the PID from the VM Service so that we can terminate it when
-    // cleaning up. Terminating the process might not be enough as it could be
-    // just a shell script (e.g. flutter.bat on Windows) and may not pass the
-    // signal on correctly.
-    // See: https://github.com/Dart-Code/Dart-Code/issues/907
-    final int? pid = vmInfo.pid;
-    if (pid != null) {
-      pidsToTerminate.add(pid);
-    }
+    // Usually we'd capture the pid from the VM here and record it for
+    // terminating, however for Flutter apps it may be running on a remove
+    // device so it's not valid to terminate a process with that pid locally.
+    // For attach, pids should never be collected as terminateRequest() should
+    // not terminate the debugee.
   }
 
   /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).

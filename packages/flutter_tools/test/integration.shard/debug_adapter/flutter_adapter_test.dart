@@ -354,6 +354,36 @@ void main() {
 
       await dap.client.terminate();
     });
+
+   testWithoutContext('can attach to an already-running Flutter app and detach', () async {
+      final Uri vmServiceUri = await testProcess.vmServiceUri;
+      bool debugeeTerminated = false;
+      unawaited(testProcess.process.exitCode.then((_) => debugeeTerminated = true));
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere(
+            (String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
+          ),
+        ),
+      ], eagerError: true);
+
+      // Send a terminate request which should terminate the debugger, but not
+      // terminate the debugee
+      await Future.wait(<Future<void>>[
+        dap.client.event('terminated'),
+        dap.client.terminate(),
+      ]);
+
+      // Wait a short amount before checking to ensure it really didn't quit.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      expect(debugeeTerminated, isFalse);
+    });
   });
 }
 
