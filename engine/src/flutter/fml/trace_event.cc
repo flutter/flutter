@@ -19,7 +19,7 @@ namespace tracing {
 
 namespace {
 AsciiTrie gAllowlist;
-TimelineEventHandler gTimelineEventHandler;
+std::atomic<TimelineEventHandler> gTimelineEventHandler;
 
 inline void FlutterTimelineEvent(const char* label,
                                  int64_t timestamp0,
@@ -28,9 +28,11 @@ inline void FlutterTimelineEvent(const char* label,
                                  intptr_t argument_count,
                                  const char** argument_names,
                                  const char** argument_values) {
-  if (gTimelineEventHandler && gAllowlist.Query(label)) {
-    gTimelineEventHandler(label, timestamp0, timestamp1_or_async_id, type,
-                          argument_count, argument_names, argument_values);
+  TimelineEventHandler handler =
+      gTimelineEventHandler.load(std::memory_order_relaxed);
+  if (handler && gAllowlist.Query(label)) {
+    handler(label, timestamp0, timestamp1_or_async_id, type, argument_count,
+            argument_names, argument_values);
   }
 }
 }  // namespace
