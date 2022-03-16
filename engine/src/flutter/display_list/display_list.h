@@ -103,6 +103,7 @@ namespace flutter {
   V(Skew)                           \
   V(Transform2DAffine)              \
   V(TransformFullPerspective)       \
+  V(TransformReset)                 \
                                     \
   V(ClipIntersectRect)              \
   V(ClipIntersectRRect)             \

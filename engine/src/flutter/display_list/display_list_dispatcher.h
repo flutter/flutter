@@ -168,8 +168,10 @@ class Dispatcher {
       SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
       SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
       SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) = 0;
-
   // clang-format on
+
+  // Clears the transformation stack.
+  virtual void transformReset() = 0;
 
   virtual void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) = 0;
   virtual void clipRRect(const SkRRect& rrect,

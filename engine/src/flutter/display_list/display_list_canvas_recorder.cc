@@ -28,6 +28,10 @@ void DisplayListCanvasRecorder::didConcat44(const SkM44& m44) {
       m44.rc(3, 0), m44.rc(3, 1), m44.rc(3, 2), m44.rc(3, 3));
 }
 // clang-format on
+void DisplayListCanvasRecorder::didSetM44(const SkM44& matrix) {
+  builder_->transformReset();
+  didConcat44(matrix);
+}
 void DisplayListCanvasRecorder::didTranslate(SkScalar tx, SkScalar ty) {
   builder_->translate(tx, ty);
 }
@@ -226,11 +230,6 @@ void DisplayListCanvasRecorder::onDrawShadowRec(const SkPath& path,
   // Skia does not expose the SkDrawShadowRec structure in a public
   // header file so we cannot record this operation.
   // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
-  FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
-                  << __FUNCTION__;
-}
-
-void DisplayListCanvasRecorder::didSetM44(const SkM44&) {
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }

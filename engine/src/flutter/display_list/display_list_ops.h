@@ -382,6 +382,15 @@ struct TransformFullPerspectiveOp final : DLOp {
   }
 };
 
+// 4 byte header with no payload.
+struct TransformResetOp final : DLOp {
+  static const auto kType = DisplayListOpType::kTransformReset;
+
+  TransformResetOp() = default;
+
+  void dispatch(Dispatcher& dispatcher) const { dispatcher.transformReset(); }
+};
+
 // 4 byte header + 4 byte common payload packs into minimum 8 bytes
 // SkRect is 16 more bytes, which packs efficiently into 24 bytes total
 // SkRRect is 52 more bytes, which rounds up to 56 bytes (4 bytes unused)

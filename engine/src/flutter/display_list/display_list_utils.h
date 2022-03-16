@@ -88,6 +88,7 @@ class IgnoreTransformDispatchHelper : public virtual Dispatcher {
       SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
       SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override {}
   // clang-format on
+  void transformReset() override {}
 };
 
 class IgnoreDrawDispatchHelper : public virtual Dispatcher {
@@ -272,6 +273,8 @@ class SkMatrixDispatchHelper : public virtual Dispatcher,
       SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
 
   // clang-format on
+
+  void transformReset() override;
 
   void save() override;
   void restore() override;
