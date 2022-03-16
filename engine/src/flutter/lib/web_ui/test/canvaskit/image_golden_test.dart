@@ -529,6 +529,13 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
       await disposePlatformView(0);
     });
+
+    test('can detect JPEG from just magic number', () async {
+      expect(
+        detectContentType(
+          Uint8List.fromList(<int>[0xff, 0xd8, 0xff, 0xe2, 0x0c, 0x58, 0x49, 0x43, 0x43, 0x5f])),
+        'image/jpeg');
+    });
   });
 }
 
