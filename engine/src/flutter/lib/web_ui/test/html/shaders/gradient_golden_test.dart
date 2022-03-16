@@ -430,6 +430,40 @@ Future<void> testMain() async {
     canvas.restore();
     await _checkScreenshot(canvas, 'linear_gradient_rect_clamp_rotated');
   });
+
+  test('Paints linear gradient properly when within svg context', () async {
+    final RecordingCanvas canvas =
+    RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 240));
+    canvas.save();
+
+    canvas.renderStrategy.isInsideSvgFilterTree = true;
+
+    final SurfacePaint borderPaint = SurfacePaint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = const Color(0xFF000000);
+
+    const List<Color> colors = <Color>[
+      Color(0xFFFF0000),
+      Color(0xFF0000FF),
+    ];
+
+    final GradientLinear linearGradient = GradientLinear(const Offset(125, 75),
+        const Offset(175, 125),
+        colors, null, TileMode.clamp,
+        Matrix4.identity().storage);
+
+    const double kBoxWidth = 150;
+    const double kBoxHeight = 100;
+    // Gradient with default center.
+    const Rect rectBounds = Rect.fromLTWH(100, 50, kBoxWidth, kBoxHeight);
+    canvas.drawRect(rectBounds,
+        SurfacePaint()..shader = engineLinearGradientToShader(linearGradient, rectBounds));
+    canvas.drawRect(rectBounds, borderPaint);
+
+    canvas.restore();
+    await _checkScreenshot(canvas, 'linear_gradient_in_svg_context');
+  });
 }
 
 Shader engineGradientToShader(GradientSweep gradient, Rect rect) {
