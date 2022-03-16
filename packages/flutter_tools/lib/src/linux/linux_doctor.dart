@@ -169,8 +169,7 @@ class LinuxDoctorValidator extends DoctorValidator {
       ]);
     } on ArgumentError {
       // ignore error.
-    }
-    on ProcessException {
+    } on ProcessException {
       // ignore error.
     }
     if (result == null || result.exitCode != 0) {
