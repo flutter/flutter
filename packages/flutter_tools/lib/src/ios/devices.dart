@@ -655,9 +655,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Sometimes (race condition?) we try to send a log after the controller has
   // been closed. See https://github.com/flutter/flutter/issues/99021 for more
   // context.
-  void _addToLinesController(String event) {
+  void _addToLinesController(String message) {
     if (!linesController.isClosed) {
-      linesController.add(event);
+      linesController.add(message);
     }
   }
 
