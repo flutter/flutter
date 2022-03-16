@@ -151,6 +151,38 @@ void main() {
     // Passes if no crashes.
   });
 
+  test('created callback is reset when controller is changed', () {
+    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    viewsController.registerViewType('webview');
+    final AndroidViewController firstController = PlatformViewsService.initAndroidView(
+      id: 0,
+      viewType: 'webview',
+      layoutDirection: TextDirection.rtl,
+    );
+    final RenderAndroidView renderBox = RenderAndroidView(
+      viewController: firstController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    layout(renderBox);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    expect(firstController.createdCallbacks, isNotEmpty);
+    expect(firstController.createdCallbacks.length, 1);
+
+    final AndroidViewController secondController = PlatformViewsService.initAndroidView(
+      id: 0,
+      viewType: 'webview',
+      layoutDirection: TextDirection.rtl,
+    );
+    // Reset controller.
+    renderBox.controller = secondController;
+
+    expect(firstController.createdCallbacks, isEmpty);
+    expect(secondController.createdCallbacks, isNotEmpty);
+    expect(secondController.createdCallbacks.length, 1);
+  });
+
   test('render object changed its visual appearance after texture is created', () {
     FakeAsync().run((FakeAsync async) {
       final AndroidViewController viewController =

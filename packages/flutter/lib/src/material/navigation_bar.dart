@@ -1216,7 +1216,7 @@ class _Defaults extends NavigationBarThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_88
+// Generated version v0_90
 class _TokenDefaultsM3 extends NavigationBarThemeData {
   _TokenDefaultsM3(BuildContext context)
       : _theme = Theme.of(context),
