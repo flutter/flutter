@@ -45,7 +45,7 @@ class MyColors extends ThemeExtension<MyColors> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MyColors 
+    return other is MyColors
         && other.blue == blue
         && other.red == red;
   }

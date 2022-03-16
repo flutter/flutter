@@ -68,7 +68,7 @@ export 'package:flutter/services.dart' show Brightness;
 abstract class ThemeExtension<T extends ThemeExtension<T>> {
   /// Enable const constructor for subclasses.
   const ThemeExtension();
-  
+
   /// The extension's type.
   Object get id => T;
 
@@ -1106,7 +1106,7 @@ class ThemeData with Diagnosticable {
   /// Used to obtain a particular [ThemeExtension] from [extensions].
   ///
   /// Obtain with `Theme.of(context).extension<MyThemeExtension>`.
-  /// 
+  ///
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T;
 
@@ -1950,7 +1950,7 @@ class ThemeData with Diagnosticable {
       });
     // Add [b]-only extensions.
     newExtensions.addEntries(b.extensions.entries.where(
-      (MapEntry<Object, ThemeExtension<dynamic>> entry) => 
+      (MapEntry<Object, ThemeExtension<dynamic>> entry) =>
           newExtensions.containsKey(entry.key)));
 
     return newExtensions;
