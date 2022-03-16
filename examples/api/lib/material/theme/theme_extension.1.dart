@@ -5,6 +5,7 @@
 // Flutter code sample for ThemeExtension
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 @immutable
 class MyColors extends ThemeExtension<MyColors> {
@@ -60,6 +61,8 @@ class MyColors extends ThemeExtension<MyColors> {
 }
 
 void main() {
+  // Slow down time to see lerping.
+  timeDilation = 5.0;
   runApp(const MyApp());
 }
 
