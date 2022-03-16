@@ -328,7 +328,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ),
         useSyslog: false,
       );
-      Object badStateError;
+      Object exception;
+      StackTrace trace;
       await asyncGuard(
           () async {
             await logReader.linesController.close();
@@ -339,12 +340,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
             await logLines;
           },
-          onError: (Object err, StackTrace stack) {
-            badStateError = err;
-            print(stack);
+          onError: (Object err, StackTrace stackTrace) {
+            exception = err;
+            trace = stackTrace;
           }
       );
-      expect(badStateError, isNull);
+      expect(
+        exception,
+        isNull,
+        reason: trace.toString(),
+      );
     });
   });
 }
