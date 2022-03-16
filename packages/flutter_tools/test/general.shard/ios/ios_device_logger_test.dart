@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -308,6 +309,42 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
       logReader.dispose();
       expect(iosDeployDebugger.detached, true);
+    });
+
+    testWithoutContext('Does not throw if debuggerStream set after logReader closed', () async {
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
+        '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
+        'stderr from dart',
+        '',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        useSyslog: false,
+      );
+      Object badStateError;
+      await asyncGuard(
+          () async {
+            await logReader.linesController.close();
+            final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+            iosDeployDebugger.logLines = debuggingLogs;
+            logReader.debuggerStream = iosDeployDebugger;
+            final Future<List<String>> logLines = logReader.logLines.toList();
+
+            await logLines;
+          },
+          onError: (Object err, StackTrace stack) {
+            badStateError = err;
+            print(stack);
+          }
+      );
+      expect(badStateError, isNull);
     });
   });
 }
