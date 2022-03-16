@@ -132,7 +132,6 @@ class SkiaGoldClient {
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
-      '--passfail',
     ];
 
     if (imgtestInitCommand.contains(null)) {
@@ -223,6 +222,9 @@ class SkiaGoldClient {
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
+      // This is running in pre-submit so it's okay for the `goldctl` commands
+      // to fail when the images don't match. But during post-submit
+      // (in `_imgtestInit`) we shouldn't let the command fail.
       '--passfail',
       '--crs', 'github',
       '--patchset_id', commitHash,
