@@ -2074,7 +2074,7 @@ class ThemeData with Diagnosticable {
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
-        other.extensions == extensions &&
+        mapEquals(other.extensions, extensions) &&
         other.inputDecorationTheme == inputDecorationTheme &&
         other.materialTapTargetSize == materialTapTargetSize &&
         other.pageTransitionsTheme == pageTransitionsTheme &&
@@ -2172,7 +2172,8 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
-      extensions,
+      hashList(extensions.keys),
+      hashList(extensions.values),
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
