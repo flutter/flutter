@@ -21,6 +21,7 @@ if (pluginsFile.exists()) {
     object.plugins.android.each { androidPlugin ->
         assert androidPlugin.name instanceof String
         assert androidPlugin.path instanceof String
+        // save plugin's name for modifying it's buildDir location. see issue #92252 for detail.
         pluginsNames.add(androidPlugin.name)
         // Skip plugins that have no native build (such as a Dart-only
         // implementation of a federated plugin).
@@ -45,6 +46,8 @@ gradle.getGradle().projectsLoaded { g ->
                     //make dir if not exist.
                     androidPluginBuildOutputDir.mkdirs()
                 }
+                // only the project object here can modify the `buildDir`.
+                // {@see https://github.com/flutter/flutter/pull/94645/files/7c77d3653709ccd1e2b45268b209f00f36d8470d#r819224682}
                 sp.buildDir = androidPluginBuildOutputDir
             }
         }
