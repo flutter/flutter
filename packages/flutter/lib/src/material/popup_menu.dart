@@ -849,10 +849,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 
   Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
-    return mediaQuery.displayFeatures
-        .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds)
-        .where((Rect element) => element.shortestSide > 0)
-        .toSet();
+    return DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet();
   }
 }
 
