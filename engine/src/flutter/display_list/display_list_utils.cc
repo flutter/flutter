@@ -152,6 +152,11 @@ void SkMatrixDispatchHelper::transformFullPerspective(
 
 // clang-format on
 
+void SkMatrixDispatchHelper::transformReset() {
+  matrix_ = {};
+  matrix33_ = {};
+}
+
 void SkMatrixDispatchHelper::save() {
   saved_.push_back(matrix_);
 }

@@ -427,8 +427,10 @@ void DisplayListBuilder::transformFullPerspective(
                                      mwx, mwy, mwz, mwt);
   }
 }
-
 // clang-format on
+void DisplayListBuilder::transformReset() {
+  Push<TransformResetOp>(0, 0);
+}
 
 void DisplayListBuilder::clipRect(const SkRect& rect,
                                   SkClipOp clip_op,
