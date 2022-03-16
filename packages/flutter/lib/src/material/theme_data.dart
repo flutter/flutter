@@ -239,7 +239,6 @@ class ThemeData with Diagnosticable {
   ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // GENERAL CONFIGURATION
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     InputDecorationTheme? inputDecorationTheme,
@@ -386,6 +385,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -557,7 +561,6 @@ class ThemeData with Diagnosticable {
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator: androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       inputDecorationTheme: inputDecorationTheme,
@@ -645,6 +648,7 @@ class ThemeData with Diagnosticable {
       buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
+      androidOverscrollIndicator: androidOverscrollIndicator,
     );
   }
 
@@ -660,7 +664,6 @@ class ThemeData with Diagnosticable {
     // operator == and in the Object.hash method and in the order of fields
     // in this class, and in the lerp() method.
     // GENERAL CONFIGURATION
-    required this.androidOverscrollIndicator,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
     required this.inputDecorationTheme,
@@ -803,6 +806,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     required this.primaryColorBrightness,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    required this.androidOverscrollIndicator,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(inputDecorationTheme != null),
@@ -992,12 +1000,19 @@ class ThemeData with Diagnosticable {
   /// [MaterialScrollBehavior.androidOverscrollIndicator] is
   /// [AndroidOverscrollIndicator.glow].
   ///
+  /// This property is deprecated. Use the [useMaterial3] flag instead, or
+  /// override [ScrollBehavior.buildOverscrollIndicator].
+  ///
   /// See also:
   ///
   ///   * [StretchingOverscrollIndicator], a material design edge effect
   ///     that transforms the contents of a scrollable when overscrolled.
   ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
   ///     over the contents of a scrollable when overscrolled.
+  @Deprecated(
+    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+    'This feature was deprecated after v2.13.0-0.0.pre.'
+  )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
   /// Apply a semi-transparent overlay color on Material surfaces to indicate
@@ -1570,7 +1585,6 @@ class ThemeData with Diagnosticable {
   /// The [brightness] value is applied to the [colorScheme].
   ThemeData copyWith({
     // GENERAL CONFIGURATION
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     InputDecorationTheme? inputDecorationTheme,
@@ -1714,11 +1728,15 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
@@ -1806,6 +1824,7 @@ class ThemeData with Diagnosticable {
       buttonColor: buttonColor ?? this.buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
 
@@ -1888,7 +1907,6 @@ class ThemeData with Diagnosticable {
     // the class and in the lerp() method.
     return ThemeData.raw(
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       inputDecorationTheme:t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
@@ -1976,6 +1994,7 @@ class ThemeData with Diagnosticable {
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
+      androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
     );
   }
 
@@ -1988,7 +2007,6 @@ class ThemeData with Diagnosticable {
     // the class and in the lerp() method.
     return other is ThemeData &&
         // GENERAL CONFIGURATION
-        other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
         other.inputDecorationTheme == inputDecorationTheme &&
@@ -2075,7 +2093,8 @@ class ThemeData with Diagnosticable {
         other.accentIconTheme == accentIconTheme &&
         other.buttonColor == buttonColor &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
-        other.primaryColorBrightness == primaryColorBrightness;
+        other.primaryColorBrightness == primaryColorBrightness &&
+        other.androidOverscrollIndicator == androidOverscrollIndicator;
   }
 
   @override
@@ -2085,7 +2104,6 @@ class ThemeData with Diagnosticable {
     // and in the order of fields in the class and in the lerp() method.
     final List<Object?> values = <Object?>[
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
       inputDecorationTheme,
@@ -2173,6 +2191,7 @@ class ThemeData with Diagnosticable {
       buttonColor,
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
+      androidOverscrollIndicator,
     ];
     return Object.hashAll(values);
   }
@@ -2182,7 +2201,6 @@ class ThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
     // GENERAL CONFIGURATION
-    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, level: DiagnosticLevel.debug));
@@ -2270,6 +2288,7 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
