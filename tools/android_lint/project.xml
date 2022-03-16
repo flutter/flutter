@@ -67,6 +67,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/util/ViewUtils.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/Predicate.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/PathUtils.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/util/TraceSection.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyboardManager.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterPlayStoreSplitApplication.java" />

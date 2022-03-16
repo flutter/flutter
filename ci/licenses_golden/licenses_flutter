@@ -1281,6 +1281,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/Platfor
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/PathUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Preconditions.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Predicate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/util/TraceSection.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/ViewUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java

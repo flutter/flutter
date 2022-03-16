@@ -18,12 +18,12 @@ import android.os.SystemClock;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.tracing.Trace;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.PathUtils;
+import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
 import java.util.*;
@@ -149,8 +149,7 @@ public class FlutterLoader {
       throw new IllegalStateException("startInitialization must be called on the main thread");
     }
 
-    Trace.beginSection("FlutterLoader#startInitialization");
-
+    TraceSection.begin("FlutterLoader#startInitialization");
     try {
       // Ensure that the context is actually the application context.
       final Context appContext = applicationContext.getApplicationContext();
@@ -179,8 +178,7 @@ public class FlutterLoader {
           new Callable<InitResult>() {
             @Override
             public InitResult call() {
-              Trace.beginSection("FlutterLoader initTask");
-
+              TraceSection.begin("FlutterLoader initTask");
               try {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
@@ -200,13 +198,13 @@ public class FlutterLoader {
                     PathUtils.getCacheDirectory(appContext),
                     PathUtils.getDataDirectory(appContext));
               } finally {
-                Trace.endSection();
+                TraceSection.end();
               }
             }
           };
       initResultFuture = executorService.submit(initTask);
     } finally {
-      Trace.endSection();
+      TraceSection.end();
     }
   }
 
@@ -231,8 +229,8 @@ public class FlutterLoader {
       throw new IllegalStateException(
           "ensureInitializationComplete must be called after startInitialization");
     }
-    Trace.beginSection("FlutterLoader#ensureInitializationComplete");
 
+    TraceSection.begin("FlutterLoader#ensureInitializationComplete");
     try {
       InitResult result = initResultFuture.get();
 
@@ -332,7 +330,7 @@ public class FlutterLoader {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
     } finally {
-      Trace.endSection();
+      TraceSection.end();
     }
   }
 
