@@ -89,13 +89,14 @@ static Color ToColor(const SkColor& color) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setColorSource(const flutter::DlColorSource* source) {
+void DisplayListDispatcher::setColorSource(
+    const flutter::DlColorSource* source) {
   if (!source) {
     paint_.contents = nullptr;
     return;
   }
 
-  switch(source->type()) {
+  switch (source->type()) {
     case flutter::DlColorSourceType::kColor: {
       const flutter::DlColorColorSource* color = source->asColor();
       paint_.contents = nullptr;
@@ -104,7 +105,8 @@ void DisplayListDispatcher::setColorSource(const flutter::DlColorSource* source)
       return;
     }
     case flutter::DlColorSourceType::kLinearGradient: {
-      const flutter::DlLinearGradientColorSource* linear = source->asLinearGradient();
+      const flutter::DlLinearGradientColorSource* linear =
+          source->asLinearGradient();
       FML_DCHECK(linear);
       auto contents = std::make_shared<LinearGradientContents>();
       contents->SetEndPoints(ToPoint(linear->start_point()),
@@ -327,13 +329,13 @@ static Path ToPath(const SkPath& path) {
         builder.MoveTo(ToPoint(data.points[0]));
         break;
       case SkPath::kLine_Verb:
-        builder.AddLine(ToPoint(data.points[0]), ToPoint(data.points[1]));
+        builder.LineTo(ToPoint(data.points[0]));
+        builder.LineTo(ToPoint(data.points[1]));
         break;
       case SkPath::kQuad_Verb:
-        builder.AddQuadraticCurve(ToPoint(data.points[0]),  // p1
-                                  ToPoint(data.points[1]),  // cp
-                                  ToPoint(data.points[2])   // p2
-        );
+        builder.LineTo(ToPoint(data.points[0]));
+        builder.QuadraticCurveTo(ToPoint(data.points[1]),
+                                 ToPoint(data.points[2]));
         break;
       case SkPath::kConic_Verb: {
         constexpr auto kPow2 = 1;  // Only works for sweeps up to 90 degrees.
@@ -352,18 +354,15 @@ static Path ToPath(const SkPath& path) {
              curve_index < curve_count;             //
              curve_index++, point_index += 2        //
         ) {
-          builder.AddQuadraticCurve(ToPoint(points[point_index + 0]),  // p1
-                                    ToPoint(points[point_index + 1]),  // cp
-                                    ToPoint(points[point_index + 2])   // p2
-          );
+          builder.LineTo(ToPoint(points[point_index + 0]));
+          builder.QuadraticCurveTo(ToPoint(points[point_index + 1]),
+                                   ToPoint(points[point_index + 2]));
         }
       } break;
       case SkPath::kCubic_Verb:
-        builder.AddCubicCurve(ToPoint(data.points[0]),  // p1
-                              ToPoint(data.points[1]),  // cp1
-                              ToPoint(data.points[2]),  // cp2
-                              ToPoint(data.points[3])   // p2
-        );
+        builder.LineTo(ToPoint(data.points[0]));
+        builder.CubicCurveTo(ToPoint(data.points[1]), ToPoint(data.points[2]),
+                             ToPoint(data.points[3]));
         break;
       case SkPath::kClose_Verb:
         builder.Close();
