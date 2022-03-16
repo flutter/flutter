@@ -1,4 +1,4 @@
-Signature: 5309762ea288cb4eef683d42906e96f8
+Signature: cee34b8e57afcef9eaaa1f43d6c097ae
 
 UNUSED LICENSES:
 
@@ -1298,6 +1298,7 @@ FILE: ../../../third_party/skia/src/xps/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/file_map_for_bazel.json
 FILE: ../../../third_party/skia/toolchain/BUILD.bazel
+FILE: ../../../third_party/skia/toolchain/IWYU_mapping.imp
 FILE: ../../../third_party/skia/toolchain/build_toolchain.bzl
 FILE: ../../../third_party/skia/toolchain/clang_toolchain_config.bzl
 ----------------------------------------------------------------------------------------------------
