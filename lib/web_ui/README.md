@@ -265,6 +265,59 @@ environment variable:
 FELT_USE_SNAPSHOT=false felt <command>
 ```
 
+## Building CanvasKit
+
+To build CanvasKit locally, you must first set up your gclient config to
+activate the Emscripten SDK, which is the toolchain used to build CanvasKit.
+To do this, replace the contents of your .gclient file at the root of the
+project (i.e. in the parent directory of the `src` directory) with:
+
+```
+solutions = [
+  {
+    "managed": False,
+    "name": "src/flutter",
+    "url": "git@github.com:<your_username_here>/engine.git",
+    "custom_deps": {},
+    "deps_file": "DEPS",
+    "safesync_url": "",
+    "custom_vars": {
+      "download_emsdk": True,
+    },
+  },
+]
+```
+
+Now run `gclient sync` and it should pull in the Emscripten SDK and activate it.
+
+To build CanvasKit with `felt`, run:
+
+```
+felt build --build-canvaskit
+```
+
+This will build CanvasKit in `out/wasm_debug`. If you now run
+
+```
+felt test
+```
+
+it will detect that you have built CanvasKit and use that instead of the one
+from CIPD to run the tests against.
+
+### Upgrading the Emscripten SDK for the CanvasKit build
+
+The version of the Emscripten SDK should be kept up to date with the version
+used in the Skia build. That version can be found in
+`third_party/skia/bin/activate-emsdk`. It will probably also be necessary to
+roll the dependency on `third_party/emsdk` in DEPS to the same version as in
+`third_party/skia/DEPS`.
+
+Once you know the version for the Emscripten SDK, change the line in
+`tools/activate_emsdk.py` which defines `EMSDK_VERSION` to match Skia.
+
+
+
 [1]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
 [2]: https://github.com/flutter/engine/blob/main/lib/web_ui/dev/browser_lock.yaml
 [4]: https://chrome-infra-packages.appspot.com/p/flutter_internal

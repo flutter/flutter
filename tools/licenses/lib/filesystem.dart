@@ -130,6 +130,7 @@ FileType identifyFile(String name, Reader reader) {
     // Giant data files
     case 'icudtl_dat.S':
     case 'icudtl.dat':
+    case 'icudtl.dat.hash':
       return FileType.binary;
   }
   switch (path.extension(name)) {
