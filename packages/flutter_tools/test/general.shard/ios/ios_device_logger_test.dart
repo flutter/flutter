@@ -336,9 +336,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
             iosDeployDebugger.logLines = debuggingLogs;
             logReader.debuggerStream = iosDeployDebugger;
-            final Future<List<String>> logLines = logReader.logLines.toList();
-
-            await logLines;
+            await logReader.logLines.drain<void>();
           },
           onError: (Object err, StackTrace stackTrace) {
             exception = err;
