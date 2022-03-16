@@ -58,6 +58,10 @@ class MyColors extends ThemeExtension<MyColors> {
       red,
     ]);
   }
+
+  // Optional
+  @override
+  String toString() => 'MyColors(blue: $blue, red: $red)';
 }
 
 void main() {
