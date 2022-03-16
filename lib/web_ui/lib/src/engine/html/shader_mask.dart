@@ -108,8 +108,13 @@ class PersistedShaderMask extends PersistedContainerSurface
   void _applyGradientShader() {
     if (shader is EngineGradient) {
       final EngineGradient gradientShader = shader as EngineGradient;
+
+      // The gradient shader's bounds are in the context of the element itself,
+      // rather than the global position, so translate it back to the origin.
+      final ui.Rect translatedRect =
+          maskRect.translate(-maskRect.left, -maskRect.top);
       final String imageUrl =
-          gradientShader.createImageBitmap(maskRect, 1, true) as String;
+          gradientShader.createImageBitmap(translatedRect, 1, true) as String;
       ui.BlendMode blendModeTemp = blendMode;
       switch (blendModeTemp) {
         case ui.BlendMode.clear:
