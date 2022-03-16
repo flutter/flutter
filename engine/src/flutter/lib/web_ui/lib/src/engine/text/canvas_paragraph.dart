@@ -157,37 +157,15 @@ class CanvasParagraph implements ui.Paragraph {
     cssStyle
       ..position = 'absolute'
       // Prevent the browser from doing any line breaks in the paragraph. We want
-      // to insert our own <BR> breaks based on layout results.
+      // to have full control of the paragraph layout.
       ..whiteSpace = 'pre';
-
-    if (width > longestLine) {
-      // In this case, we set the width so that the CSS text-align property
-      // works correctly.
-      // When `longestLine` is >= `paragraph.width` that means the DOM element
-      // will automatically size itself to fit the longest line, so there's no
-      // need to set an explicit width.
-      cssStyle.width = '${width}px';
-    }
-
-    if (paragraphStyle.maxLines != null || paragraphStyle.ellipsis != null) {
-      cssStyle
-        ..overflowY = 'hidden'
-        ..height = '${height}px';
-    }
 
     // 2. Append all spans to the paragraph.
 
-    FlatTextSpan? span;
-
-    html.HtmlElement element = rootElement;
+    html.HtmlElement? lastSpanElement;
     final List<EngineLineMetrics> lines = computeLineMetrics();
 
     for (int i = 0; i < lines.length; i++) {
-      // Insert a <BR> element before each line except the first line.
-      if (i > 0) {
-        element.append(html.document.createElement('br'));
-      }
-
       final EngineLineMetrics line = lines[i];
       final List<RangeBox> boxes = line.boxes;
       final StringBuffer buffer = StringBuffer();
@@ -195,47 +173,28 @@ class CanvasParagraph implements ui.Paragraph {
       int j = 0;
       while (j < boxes.length) {
         final RangeBox box = boxes[j++];
-        if (box is SpanBox && box.span == span) {
-          buffer.write(box.toText());
-          continue;
-        }
-
-        if (buffer.isNotEmpty) {
-          element.appendText(buffer.toString());
-          buffer.clear();
-        }
 
         if (box is SpanBox) {
-          span = box.span;
-          element = html.document.createElement('span') as html.HtmlElement;
+          lastSpanElement = html.document.createElement('span') as html.HtmlElement;
           applyTextStyleToElement(
-            element: element,
+            element: lastSpanElement,
             style: box.span.style,
             isSpan: true,
           );
-          rootElement.append(element);
+          _positionSpanElement(lastSpanElement, line, box);
+          lastSpanElement.appendText(box.toText());
+          rootElement.append(lastSpanElement);
           buffer.write(box.toText());
         } else if (box is PlaceholderBox) {
-          span = null;
-          // If there's a line-end after this placeholder, we want the <BR> to
-          // be inserted in the root paragraph element.
-          element = rootElement;
-          rootElement.append(
-            createPlaceholderElement(placeholder: box.placeholder),
-          );
+          lastSpanElement = null;
         } else {
           throw UnimplementedError('Unknown box type: ${box.runtimeType}');
         }
       }
 
-      if (buffer.isNotEmpty) {
-        element.appendText(buffer.toString());
-        buffer.clear();
-      }
-
       final String? ellipsis = line.ellipsis;
       if (ellipsis != null) {
-        element.appendText(ellipsis);
+        (lastSpanElement ?? rootElement).appendText(ellipsis);
       }
     }
 
@@ -307,6 +266,9 @@ void _applyNecessaryParagraphStyles({
 }) {
   final html.CssStyleDeclaration cssStyle = element.style;
 
+  // TODO(mdebbar): Now that we absolutely position each span inside the
+  //                paragraph, do we still need these style on <p>?
+
   if (style.textAlign != null) {
     cssStyle.textAlign = textAlignToCssValue(
         style.textAlign, style.textDirection ?? ui.TextDirection.ltr);
@@ -350,6 +312,14 @@ void _applySpanStylesToParagraph({
   if (fontFamily != null) {
     cssStyle.fontFamily = canonicalizeFontFamily(fontFamily);
   }
+}
+
+void _positionSpanElement(html.Element element, EngineLineMetrics line, RangeBox box) {
+  final ui.TextBox textBox = box.toTextBox(line);
+  element.style
+    ..position = 'absolute'
+    ..top = '${textBox.top}px'
+    ..left = '${textBox.left}px';
 }
 
 /// A common interface for all types of spans that make up a paragraph.
