@@ -298,8 +298,6 @@ struct Settings {
   /// on the clock used by the Dart timeline APIs. This timestamp is used
   /// to log a timeline event that tracks the latency of engine startup.
   std::chrono::microseconds engine_start_timestamp = {};
-
-  std::string ToString() const;
 };
 
 }  // namespace flutter
