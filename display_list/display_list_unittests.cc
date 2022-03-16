@@ -1370,6 +1370,18 @@ TEST(DisplayList, DisplayListFullPerspectiveTransformHandling) {
   }
 }
 
+TEST(DisplayList, DisplayListTransformResetHandling) {
+  DisplayListBuilder builder;
+  builder.scale(20.0, 20.0);
+  builder.transformReset();
+  auto list = builder.Build();
+  ASSERT_NE(list, nullptr);
+  sk_sp<SkSurface> surface = SkSurface::MakeRasterN32Premul(10, 10);
+  SkCanvas* canvas = surface->getCanvas();
+  list->RenderTo(canvas);
+  ASSERT_TRUE(canvas->getTotalMatrix().isIdentity());
+}
+
 TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
   auto run_tests = [](std::string name,
                       void build(DisplayListBuilder & builder),
