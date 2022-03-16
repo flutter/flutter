@@ -16,12 +16,18 @@ import 'utils.dart';
 class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {
     argParser.addFlag(
-        'watch',
-        defaultsTo: false,
-        abbr: 'w',
-        help: 'Run the build in watch mode so it rebuilds whenever a change'
-            'is made. Disabled by default.',
-      );
+      'watch',
+      defaultsTo: false,
+      abbr: 'w',
+      help: 'Run the build in watch mode so it rebuilds whenever a change is '
+          'made. Disabled by default.',
+    );
+    argParser.addFlag(
+      'build-canvaskit',
+      defaultsTo: false,
+      help: 'Build CanvasKit locally instead of getting it from CIPD. Disabled '
+          'by default.',
+    );
   }
 
   @override
@@ -32,12 +38,14 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
   bool get isWatchMode => boolArg('watch');
 
+  bool get buildCanvasKit => boolArg('build-canvaskit');
+
   @override
   FutureOr<bool> run() async {
     final FilePath libPath = FilePath.fromWebUi('lib');
     final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[
-      GnPipelineStep(),
-      NinjaPipelineStep(),
+      GnPipelineStep(buildCanvasKit),
+      NinjaPipelineStep(buildCanvasKit),
     ]);
     await buildPipeline.run();
 
@@ -60,16 +68,21 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 /// Not safe to interrupt as it may leave the `out/` directory in a corrupted
 /// state. GN is pretty quick though, so it's OK to not support interruption.
 class GnPipelineStep extends ProcessStep {
+  GnPipelineStep(this.buildCanvasKit);
+
   @override
   String get description => 'gn';
 
   @override
   bool get isSafeToInterrupt => false;
 
+  /// Whether or not to build CanvasKit.
+  final bool buildCanvasKit;
+
   @override
   Future<ProcessManager> createProcess() {
     print('Running gn...');
-    return startProcess(
+    Future<ProcessManager> gnProcess = startProcess(
       path.join(environment.flutterDirectory.path, 'tools', 'gn'),
       <String>[
         '--unopt',
@@ -77,6 +90,17 @@ class GnPipelineStep extends ProcessStep {
         '--full-dart-sdk',
       ],
     );
+    if (buildCanvasKit) {
+      gnProcess = gnProcess.then((_) {
+        return startProcess(
+          path.join(environment.flutterDirectory.path, 'tools', 'gn'),
+          <String>[
+            '--wasm',
+          ],
+        );
+      });
+    }
+    return gnProcess;
   }
 }
 
@@ -84,21 +108,38 @@ class GnPipelineStep extends ProcessStep {
 ///
 /// Can be safely interrupted.
 class NinjaPipelineStep extends ProcessStep {
+  NinjaPipelineStep(this.buildCanvasKit);
+
   @override
   String get description => 'ninja';
 
   @override
   bool get isSafeToInterrupt => true;
 
+  /// Whether or not to build CanvasKit.
+  final bool buildCanvasKit;
+
   @override
   Future<ProcessManager> createProcess() {
     print('Running autoninja...');
-    return startProcess(
+    Future<ProcessManager> ninjaProcess = startProcess(
       'autoninja',
       <String>[
         '-C',
         environment.hostDebugUnoptDir.path,
       ],
     );
+    if (buildCanvasKit) {
+      ninjaProcess = ninjaProcess.then((_) {
+        return startProcess(
+          'autoninja',
+          <String>[
+            '-C',
+            environment.canvasKitOutDir.path,
+          ],
+        );
+      });
+    }
+    return ninjaProcess;
   }
 }

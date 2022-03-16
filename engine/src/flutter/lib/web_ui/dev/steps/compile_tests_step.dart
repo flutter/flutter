@@ -122,30 +122,58 @@ Future<void> copySkiaTestImages() async {
 }
 
 Future<void> copyCanvasKitFiles() async {
-  final io.Directory canvasKitDir = io.Directory(pathlib.join(
-    environment.engineSrcDir.path,
-    'third_party',
-    'web_dependencies',
-    'canvaskit',
-  ));
-
-  final Iterable<io.File> canvasKitFiles = canvasKitDir
-    .listSync(recursive: true, followLinks: true)
-    .whereType<io.File>();
+  // If CanvasKit has been built locally, use that instead of the CIPD version.
+  final io.File localCanvasKitWasm =
+      io.File(pathlib.join(environment.canvasKitOutDir.path, 'canvaskit.wasm'));
+  final bool builtLocalCanvasKit = localCanvasKitWasm.existsSync();
 
   final io.Directory targetDir = io.Directory(pathlib.join(
     environment.webUiBuildDir.path,
     'canvaskit',
   ));
 
-  for (final io.File file in canvasKitFiles) {
-    final String relativePath = pathlib.relative(file.path, from: canvasKitDir.path);
-    final io.File targetFile = io.File(pathlib.join(
-      targetDir.path,
-      relativePath,
+  if (builtLocalCanvasKit) {
+    final List<io.File> canvasKitFiles = <io.File>[
+      localCanvasKitWasm,
+      io.File(pathlib.join(environment.canvasKitOutDir.path, 'canvaskit.js')),
+    ];
+    for (final io.File file in canvasKitFiles) {
+      final io.File normalTargetFile = io.File(pathlib.join(
+        targetDir.path,
+        pathlib.basename(file.path),
+      ));
+      final io.File profileTargetFile = io.File(pathlib.join(
+        targetDir.path,
+        'profiling',
+        pathlib.basename(file.path),
+      ));
+      await normalTargetFile.create(recursive: true);
+      await profileTargetFile.create(recursive: true);
+      await file.copy(normalTargetFile.path);
+      await file.copy(profileTargetFile.path);
+    }
+  } else {
+    final io.Directory canvasKitDir = io.Directory(pathlib.join(
+      environment.engineSrcDir.path,
+      'third_party',
+      'web_dependencies',
+      'canvaskit',
     ));
-    await targetFile.create(recursive: true);
-    await file.copy(targetFile.path);
+
+    final Iterable<io.File> canvasKitFiles = canvasKitDir
+        .listSync(recursive: true, followLinks: true)
+        .whereType<io.File>();
+
+    for (final io.File file in canvasKitFiles) {
+      final String relativePath =
+          pathlib.relative(file.path, from: canvasKitDir.path);
+      final io.File targetFile = io.File(pathlib.join(
+        targetDir.path,
+        relativePath,
+      ));
+      await targetFile.create(recursive: true);
+      await file.copy(targetFile.path);
+    }
   }
 }
 
@@ -221,7 +249,7 @@ Future<void> _compileTestsInParallel({
 /// directory before test are build. See [_copyFilesFromTestToBuild].
 ///
 /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
-Future<bool> compileUnitTest(FilePath input, { required bool forCanvasKit }) async {
+Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit}) async {
   final String targetFileName = pathlib.join(
     environment.webUiBuildDir.path,
     '${input.relativeToWebUi}.browser_test.dart.js',
@@ -340,7 +368,7 @@ Future<void> buildHostPage() async {
   if (exitCode != 0) {
     throw ToolExit(
       'Failed to compile ${hostDartFile.path}. Compiler '
-        'exited with exit code $exitCode',
+      'exited with exit code $exitCode',
       exitCode: exitCode,
     );
   }
