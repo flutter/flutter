@@ -1865,17 +1865,9 @@
     "names": {
       "web": [
         "Super"
-      ],
-      "gtk": [
-        "Super_L",
-        "Super_R"
       ]
     },
     "values": {
-      "gtk": [
-        65515,
-        65516
-      ],
       "fuchsia": [
         77309411345
       ]
@@ -8065,6 +8057,7 @@
         "AltLeft"
       ],
       "gtk": [
+        "Meta_L",
         "Alt_L"
       ],
       "windows": [
@@ -8085,6 +8078,7 @@
         226
       ],
       "gtk": [
+        65511,
         65513
       ],
       "windows": [
@@ -8161,7 +8155,8 @@
         "MetaLeft"
       ],
       "gtk": [
-        "Meta_L"
+        "Super_L",
+        "Super_R"
       ],
       "windows": [
         "LWIN"
@@ -8181,7 +8176,8 @@
         227
       ],
       "gtk": [
-        65511
+        65515,
+        65516
       ],
       "windows": [
         91
