@@ -5,9 +5,7 @@
 @Timeout(Duration(seconds: 600))
 
 import 'dart:io';
-// import 'package:flutter_tools/src/base/io.dart';
 import 'package:file/file.dart';
-// import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../test_utils.dart';
@@ -53,7 +51,6 @@ class MigrateProject extends Project {
       tempDir.path,
     ], workingDirectory: dir.path);
 
-    // This cp command changes the symlinks to real files so the tool can edit them.
     if (Platform.isWindows) {
       await processManager.run(<String>[
         'robocopy',
@@ -74,6 +71,7 @@ class MigrateProject extends Project {
         'Users:F',
       ]);
     } else {
+      // This cp command changes the symlinks to real files so the tool can edit them.
       await processManager.run(<String>[
         'cp',
         '-R',

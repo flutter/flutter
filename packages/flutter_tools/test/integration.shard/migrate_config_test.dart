@@ -190,8 +190,9 @@ migration:
     expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].baseRevision, equals(currentRevision));
     expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].createRevision, equals(createRevision));
 
-    metadata.writeFile();
-    expect(metadataFile.readAsStringSync(), equals('''
+    final File metadataFileOutput = tempDir.childFile('.metadata_output');
+    metadata.writeFile(outputFile: metadataFileOutput);
+    expect(metadataFileOutput.readAsStringSync(), equals('''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
 #

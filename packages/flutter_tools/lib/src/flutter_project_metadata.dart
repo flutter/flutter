@@ -151,8 +151,9 @@ class FlutterProjectMetadata {
   ///
   /// We write the file manually instead of with a template because this
   /// needs to be able to write the .migrate_config file into legacy apps.
-  void writeFile() {
-    _metadataFile
+  void writeFile({File? outputFile}) {
+    outputFile = outputFile ?? _metadataFile;
+    outputFile
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 # This file tracks properties of this Flutter project.
@@ -228,7 +229,7 @@ class MigrateConfig {
 
   bool get isEmpty => platformConfigs.isEmpty && (unmanagedFiles.isEmpty || unmanagedFiles == _kDefaultUnmanagedFiles);
 
-  /// Parses the project for all supported platforms and populates the MigrateConfig
+  /// Parses the project for all supported platforms and populates the [MigrateConfig]
   /// to reflect the project.
   void populate({
     List<SupportedPlatform>? platforms,
