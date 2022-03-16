@@ -839,6 +839,7 @@ class ThemeData with Diagnosticable {
     required this.primaryColorBrightness,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
+       assert(extensions != null),
        assert(inputDecorationTheme != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
