@@ -651,6 +651,16 @@ class IOSDeviceLogReader extends DeviceLogReader {
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
+
+  // Sometimes (race condition?) we try to send a log after the controller has
+  // been closed. See https://github.com/flutter/flutter/issues/99021 for more
+  // context.
+  void _addToLinesController(String event) {
+    if (!linesController.isClosed) {
+      linesController.add(event);
+    }
+  }
+
   final List<StreamSubscription<void>> _loggingSubscriptions = <StreamSubscription<void>>[];
 
   @override
@@ -694,7 +704,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
-        linesController.add(message);
+        _addToLinesController(message);
       }
     }
 
@@ -717,11 +727,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
     // Add the debugger logs to the controller created on initialization.
     _loggingSubscriptions.add(debugger.logLines.listen(
-      (String line) {
-        if (!linesController.isClosed) {
-          linesController.add(_debuggerLineHandler(line));
-        }
-      },
+      (String line) => _addToLinesController(_debuggerLineHandler(line)),
       onError: linesController.addError,
       onDone: linesController.close,
       cancelOnError: true,
@@ -765,7 +771,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return (String line) {
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
-          linesController.add(decodeSyslog(line));
+          _addToLinesController(decodeSyslog(line));
           return;
         }
 
@@ -777,7 +783,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       if (match != null) {
         final String logLine = line.substring(match.end);
         // Only display the log line after the initial device and executable information.
-        linesController.add(decodeSyslog(logLine));
+        _addToLinesController(decodeSyslog(logLine));
 
         printing = true;
       }
