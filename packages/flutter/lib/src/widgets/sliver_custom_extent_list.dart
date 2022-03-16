@@ -210,7 +210,7 @@ class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
       // as that the extent assistant to calculate maybe cost time.
       childParentData.layoutOffset = layoutOffsetOfLeadingChildWithLayout == null ?
           _indexToLayoutOffset(index) : layoutOffsetOfLeadingChildWithLayout - paintExtentOf(firstChild!);
-      assert(childParentData.layoutOffset == _indexToLayoutOffset(index),
+      assert((childParentData.layoutOffset! - _indexToLayoutOffset(index)).abs() < precisionErrorTolerance,
           'Layout offset of child $index resolved by _RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
           'is not equal to assistant`s calculating result(${_indexToLayoutOffset(index)}).');
       assert(childParentData.index == index);
@@ -249,7 +249,7 @@ class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = layoutOffsetOfTrailingChildWithLayout! + paintExtentOf(trailingChildWithLayout);
-      assert(childParentData.layoutOffset == _indexToLayoutOffset(index),
+      assert((childParentData.layoutOffset! - _indexToLayoutOffset(index)).abs() < precisionErrorTolerance,
           'Layout offset of child $index resolved by _RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
           'is not equal to assistant`s calculating result(${_indexToLayoutOffset(index)}).');
       layoutOffsetOfTrailingChildWithLayout = childParentData.layoutOffset;
@@ -267,7 +267,7 @@ class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
       }
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = layoutOffsetOfLeadingChildWithLayout! - paintExtentOf(firstChild!);
-      assert(childParentData.layoutOffset == _indexToLayoutOffset(index),
+      assert((childParentData.layoutOffset! - _indexToLayoutOffset(index)).abs() < precisionErrorTolerance,
           'Layout offset of child $index resolved by _RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
           'is not equal to assistant`s calculating result(${_indexToLayoutOffset(index)}).');
       assert(childParentData.index == index);
