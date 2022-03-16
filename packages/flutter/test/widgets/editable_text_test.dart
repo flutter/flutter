@@ -169,7 +169,7 @@ void main() {
     TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
     await tester.pump();
 
-    // The offset of the scrollController should change immediately after window changes its metrics
+    // The offset of the scrollController should change immediately after window changes its metrics.
     final double offsetAfter = scrollController.offset;
     expect(offsetAfter, isNot(0.0));
   });
