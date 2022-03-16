@@ -75,7 +75,7 @@ def to_command_line(gn_args):
     return [merge(x, y) for x, y in gn_args.items()]
 
 def cpu_for_target_arch(arch):
-  if arch in ['ia32', 'arm', 'armv6', 'armv5te', 'mips',
+  if arch in ['ia32', 'x86', 'arm', 'armv6', 'armv5te', 'mips',
               'simarm', 'simarmv6', 'simarmv5te', 'simmips', 'simdbc',
               'armsimdbc']:
     return 'x86'
@@ -208,7 +208,7 @@ def to_gn_args(args):
     if runtime_mode == 'debug':
         gn_args['dart_runtime_mode'] = 'develop'
     elif runtime_mode == 'jit_release':
-        gn_args['dart_runtime_mode'] = 'release';
+        gn_args['dart_runtime_mode'] = 'release'
     else:
         gn_args['dart_runtime_mode'] = runtime_mode
 
@@ -446,11 +446,12 @@ def parse_args(args):
   parser.add_argument('--simulator', action='store_true', default=False)
   parser.add_argument('--linux', dest='target_os', action='store_const', const='linux')
   parser.add_argument('--fuchsia', dest='target_os', action='store_const', const='fuchsia')
+  parser.add_argument('--windows', dest='target_os', action='store_const', const='win')
   parser.add_argument('--winuwp', dest='target_os', action='store_const', const='winuwp')
 
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
-  parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
+  parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default = 'x64')
   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
   parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
 

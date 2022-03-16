@@ -40,7 +40,11 @@ static bool IsProcResolverOpenGLES(
 #define GPU_GL_VERSION 0x1F02
   constexpr char kGLESVersionPrefix[] = "OpenGL ES";
 
+#ifdef WIN32
+  using GLGetStringProc = const char*(__stdcall*)(uint32_t);
+#else
   using GLGetStringProc = const char* (*)(uint32_t);
+#endif
 
   GLGetStringProc gl_get_string =
       reinterpret_cast<GLGetStringProc>(proc_resolver("glGetString"));

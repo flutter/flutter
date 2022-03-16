@@ -284,8 +284,8 @@ class MockKeyboardManagerWin32Delegate
           forged_message_expectations_.front();
       forged_message_expectations_.pop_front();
       EXPECT_EQ(expectation.message.message, Msg);
-      EXPECT_EQ(expectation.message.wParam, wParam & 0xffffffff);
-      EXPECT_EQ(expectation.message.lParam, lParam & 0xffffffff);
+      EXPECT_EQ(expectation.message.wParam, wParam);
+      EXPECT_EQ(expectation.message.lParam, lParam);
       if (expectation.message.expected_result != kWmResultDontCheck) {
         EXPECT_EQ(expectation.message.expected_result,
                   handled ? kWmResultZero : kWmResultDefault);
