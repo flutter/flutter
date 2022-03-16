@@ -50,4 +50,14 @@
  */
 - (BOOL)onTextInputKeyEvent:(nonnull NSEvent*)event;
 
+/**
+ * Whether this FlutterKeyboardViewDelegate is actively taking provisional user text input.
+ *
+ * This is typically true when a Flutter text field is focused, and the user is entering composing
+ * text into the text field.
+ */
+// TODO (LongCatIsLooong): remove this method and implement a long-term fix for
+// https://github.com/flutter/flutter/issues/85328.
+- (BOOL)isComposing;
+
 @end
