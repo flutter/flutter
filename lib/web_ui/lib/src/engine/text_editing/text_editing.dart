@@ -1389,6 +1389,17 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   Timer? _positionInputElementTimer;
   static const Duration _delayBeforePlacement = Duration(milliseconds: 100);
 
+  /// This interval between the blur subscription and callback is considered to
+  /// be fast.
+  ///
+  /// This is only used for iOS. The blur callback may trigger as soon as the
+  /// creation of the subscription. Occasionally in this case, the virtual
+  /// keyboard will quickly show and hide again.
+  ///
+  /// Less than this interval allows the virtual keyboard to keep showing up
+  /// instead of hiding rapidly.
+  static const Duration _blurFastCallbackInterval = Duration(milliseconds: 200);
+
   /// Whether or not the input element can be positioned at this point in time.
   ///
   /// This is currently only used in iOS. It's set to false before focusing the
@@ -1453,6 +1464,9 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     _addTapListener();
 
+    // Record start time of blur subscription.
+    final Stopwatch blurWatch = Stopwatch()..start();
+
     // On iOS, blur is trigerred in the following cases:
     //
     // 1. The browser app is sent to the background (or the tab is changed). In
@@ -1464,8 +1478,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     //    programmatically, so we end up refocusing the input field. This is
     //    okay because the virtual keyboard will hide, and as soon as the user
     //    taps the text field again, the virtual keyboard will come up.
+    // 4. Safari sometimes sends a blur event immediately after activating the
+    //    input field. In this case, we want to keep the focus on the input field.
+    //    In order to detect this, we measure how much time has passed since the
+    //    input field was activated. If the time is too short, we re-focus the
+    //    input element.
     subscriptions.add(activeDomElement.onBlur.listen((_) {
-      if (windowHasFocus) {
+      final bool isFastCallback = blurWatch.elapsed < _blurFastCallbackInterval;
+      if (windowHasFocus && isFastCallback) {
         activeDomElement.focus();
       } else {
         owner.sendTextConnectionClosedToFrameworkIfAny();
