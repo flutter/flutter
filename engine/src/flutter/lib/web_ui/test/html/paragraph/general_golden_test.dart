@@ -371,7 +371,7 @@ Future<void> testMain() async {
   });
 
   void testFontFeatures(EngineCanvas canvas) {
-    const String text = 'Aa Bb Dd Ee Ff Difficult';
+    const String text = 'Bb Difficult ';
     const FontFeature enableSmallCaps = FontFeature('smcp');
     const FontFeature disableSmallCaps = FontFeature('smcp', 0);
 
@@ -446,7 +446,7 @@ Future<void> testMain() async {
             enableOnum,
           ],
         ));
-        builder.addText('$text - $numeric');
+        builder.addText('$text  $numeric');
         builder.pop(); // enableSmallCaps, enableOnum
       },
     )..layout(constrain(double.infinity));
