@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../engine_canvas.dart';
-import '../html_image_codec.dart';
 import '../text/canvas_paragraph.dart';
 import '../util.dart';
 import '../vector_math.dart';
@@ -19,6 +18,7 @@ import 'painting.dart';
 import 'path/path.dart';
 import 'path/path_to_svg.dart';
 import 'shaders/image_shader.dart';
+import 'shaders/shader.dart';
 
 /// A canvas that renders to DOM elements and CSS properties.
 class DomCanvas extends EngineCanvas with SaveElementStackTracking {
@@ -162,7 +162,6 @@ ui.Color blurColor(ui.Color color, double sigma) {
 
 html.HtmlElement buildDrawRectElement(
     ui.Rect rect, SurfacePaintData paint, String tagName, Matrix4 transform) {
-  assert(paint.shader == null);
   final html.HtmlElement rectangle =
       html.document.createElement(tagName) as html.HtmlElement;
   assert(() {
@@ -226,19 +225,28 @@ html.HtmlElement buildDrawRectElement(
     style
       ..width = '${right - left}px'
       ..height = '${bottom - top}px'
-      ..backgroundColor = cssColor;
-
-    if (paint.shader != null && paint.shader is EngineImageShader) {
-      _applyImageShaderToElement(rectangle, paint.shader! as EngineImageShader);
-    }
+      ..backgroundColor = cssColor
+      ..backgroundImage = _getBackgroundImageCssValue(paint.shader, rect);
   }
   return rectangle;
 }
 
-void _applyImageShaderToElement(html.HtmlElement targetElement,
-    EngineImageShader imageShader) {
-  final HtmlImage image = imageShader.image;
-  targetElement.style.backgroundImage = image.imgElement.src;
+String _getBackgroundImageCssValue(ui.Shader? shader, ui.Rect bounds) {
+  final String url = _getBackgroundImageUrl(shader, bounds);
+  return (url != '') ? "url('$url'": '';
+}
+
+String _getBackgroundImageUrl(ui.Shader? shader, ui.Rect bounds) {
+  if(shader != null) {
+    if(shader is EngineImageShader) {
+      return shader.image.imgElement.src ?? '';
+    }
+
+    if(shader is EngineGradient) {
+      return shader.createImageBitmap(bounds, 1, true) as String;
+    }
+  }
+  return '';
 }
 
 void applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
