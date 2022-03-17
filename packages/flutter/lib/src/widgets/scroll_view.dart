@@ -83,7 +83,7 @@ abstract class ScrollView extends StatelessWidget {
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.controller,
-    bool? primary,
+    this.primary,
     ScrollPhysics? physics,
     this.scrollBehavior,
     this.shrinkWrap = false,
@@ -108,7 +108,6 @@ abstract class ScrollView extends StatelessWidget {
        assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(semanticChildCount == null || semanticChildCount >= 0),
-       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
 
@@ -169,8 +168,10 @@ abstract class ScrollView extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// Defaults to true when [scrollDirection] is [Axis.vertical] and
-  /// [controller] is null.
-  final bool primary;
+  /// [controller] is null on [TargetPlatformVariant.mobile()]. When using
+  /// [TargetPlatformVariant.desktop()], primary will only be true when
+  /// explicitly set.
+  final bool? primary;
 
   /// {@template flutter.widgets.scroll_view.physics}
   /// How the scroll view should respond to user input.
@@ -389,9 +390,20 @@ abstract class ScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
+    final bool effectivePrimary = primary ?? () {
+      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+          return controller == null && identical(scrollDirection, Axis.vertical);
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          return false;
+    }}();
 
     final ScrollController? scrollController =
-        primary ? PrimaryScrollController.of(context) : controller;
+      effectivePrimary ? PrimaryScrollController.of(context) : controller;
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
@@ -404,7 +416,7 @@ abstract class ScrollView extends StatelessWidget {
         return buildViewport(context, offset, axisDirection, slivers);
       },
     );
-    final Widget scrollableResult = primary && scrollController != null
+    final Widget scrollableResult = effectivePrimary && scrollController != null
         ? PrimaryScrollController.none(child: scrollable)
         : scrollable;
 
