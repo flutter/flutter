@@ -1277,12 +1277,14 @@ TEST_F(ShellTest,
   DestroyShell(std::move(shell));
 }
 
+// TODO(https://github.com/flutter/flutter/issues/100273): Disabled due to
+// flakiness.
 // TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
 TEST_F(ShellTest,
 #if defined(OS_FUCHSIA)
        DISABLED_ResubmitFrame
 #else
-       ResubmitFrame
+       DISABLED_ResubmitFrame
 #endif
 ) {
   auto settings = CreateSettingsForFixture();
@@ -2392,7 +2394,9 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, DiscardLayerTreeOnResize) {
+// TODO(https://github.com/flutter/flutter/issues/100273): Disabled due to
+// flakiness.
+TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
   auto settings = CreateSettingsForFixture();
 
   SkISize wrong_size = SkISize::Make(400, 100);
@@ -2442,7 +2446,9 @@ TEST_F(ShellTest, DiscardLayerTreeOnResize) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, DiscardResubmittedLayerTreeOnResize) {
+// TODO(https://github.com/flutter/flutter/issues/100273): Disabled due to
+// flakiness.
+TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
   auto settings = CreateSettingsForFixture();
 
   SkISize origin_size = SkISize::Make(400, 100);
