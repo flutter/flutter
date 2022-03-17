@@ -397,12 +397,15 @@ void DisplayListDispatcher::clipPath(const SkPath& path,
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawColor(SkColor color, SkBlendMode mode) {
-  UNIMPLEMENTED;
+  Paint paint;
+  paint.color = ToColor(color);
+  FML_LOG(ERROR) << "Blend mode on drawColor ignored.";
+  canvas_.DrawPaint(paint);
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawPaint() {
-  UNIMPLEMENTED;
+  canvas_.DrawPaint(paint_);
 }
 
 // |flutter::Dispatcher|

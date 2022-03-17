@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/aiks/paint_pass_delegate.h"
+#include "impeller/entity/contents/clear_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -109,6 +110,16 @@ void Canvas::DrawPath(Path path, Paint paint) {
   entity.SetPath(std::move(path));
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetContents(paint.CreateContentsForEntity());
+
+  GetCurrentPass().AddEntity(std::move(entity));
+}
+
+void Canvas::DrawPaint(Paint paint) {
+  Entity entity;
+  entity.SetTransformation(GetCurrentTransformation());
+  entity.SetStencilDepth(GetStencilDepth());
+  entity.SetContents(
+      std::make_shared<ClearContents>(paint.CreateContentsForEntity()));
 
   GetCurrentPass().AddEntity(std::move(entity));
 }

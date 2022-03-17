@@ -59,6 +59,8 @@ class Canvas {
 
   void DrawPath(Path path, Paint paint);
 
+  void DrawPaint(Paint paint);
+
   void DrawRect(Rect rect, Paint paint);
 
   void DrawCircle(Point center, Scalar radius, Paint paint);
