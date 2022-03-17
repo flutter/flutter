@@ -91,7 +91,8 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "TextureFill";
-  cmd.pipeline = renderer.GetTexturePipeline(OptionsFromPass(pass));
+  cmd.pipeline =
+      renderer.GetTexturePipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));

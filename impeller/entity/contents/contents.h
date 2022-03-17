@@ -20,6 +20,9 @@ class RenderPass;
 
 ContentContextOptions OptionsFromPass(const RenderPass& pass);
 
+ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
+                                               const Entity& entity);
+
 class Contents {
  public:
   Contents();

@@ -149,7 +149,8 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   Command cmd;
   cmd.primitive_type = PrimitiveType::kTriangleStrip;
   cmd.label = "SolidStroke";
-  cmd.pipeline = renderer.GetSolidStrokePipeline(OptionsFromPass(pass));
+  cmd.pipeline =
+      renderer.GetSolidStrokePipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(CreateSolidStrokeVertices(
       entity.GetPath(), pass.GetTransientsBuffer(), cap_proc_, join_proc_,
