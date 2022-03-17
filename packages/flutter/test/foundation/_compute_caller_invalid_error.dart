@@ -8,20 +8,25 @@ import 'dart:isolate';
 
 import 'package:flutter/src/foundation/_isolates_io.dart';
 
-int getLength(ReceivePort s) {
-  return 0;
+int getLength(String s) {
+  final ReceivePort r = ReceivePort();
+  try {
+    throw r;
+  } finally {
+    r.close();
+  }
 }
 
 Future<void> main() async {
-  final ReceivePort s = ReceivePort();
+  const String s = 'hello world';
 
   bool wasError = false;
   try {
     await compute(getLength, s);
-  } on Object {
+  } on RemoteError {
     wasError = true;
   }
-  s.close();
-
-  assert(wasError);
+  if (!wasError) {
+    throw Exception('compute threw bad result');
+  }
 }

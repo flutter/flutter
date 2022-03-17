@@ -4,24 +4,19 @@
 
 // A test script that invokes compute() to start an isolate.
 
-import 'dart:isolate';
-
 import 'package:flutter/src/foundation/_isolates_io.dart';
 
-int getLength(ReceivePort s) {
-  return 0;
+int getLength(String s) {
+  throw 10;
 }
 
 Future<void> main() async {
-  final ReceivePort s = ReceivePort();
-
-  bool wasError = false;
+  const String s = 'hello world';
   try {
     await compute(getLength, s);
-  } on Object {
-    wasError = true;
+  } catch (e) {
+    if (e != 10) {
+      throw Exception('compute threw bad result');
+    }
   }
-  s.close();
-
-  assert(wasError);
 }
