@@ -18,6 +18,8 @@ impeller_shaders("entity_shaders") {
     "shaders/texture_blend.vert",
     "shaders/texture_blend_screen.frag",
     "shaders/texture_blend_screen.vert",
+    "shaders/gaussian_blur.frag",
+    "shaders/gaussian_blur.vert",
     "shaders/texture_fill.frag",
     "shaders/texture_fill.vert",
     "shaders/glyph_atlas.frag",

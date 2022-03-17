@@ -4,6 +4,8 @@
 
 #include "filter_contents.h"
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <optional>
 #include <variant>
@@ -16,7 +18,9 @@
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
@@ -57,6 +61,28 @@ std::shared_ptr<FilterContents> FilterContents::MakeBlend(
   FML_UNREACHABLE();
 }
 
+std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
+    InputVariant input_texture,
+    Scalar radius,
+    Vector2 direction,
+    bool clip_border) {
+  auto blur = std::make_shared<DirectionalGaussianBlurFilterContents>();
+  blur->SetInputTextures({input_texture});
+  blur->SetRadius(radius);
+  blur->SetDirection(direction);
+  blur->SetClipBorder(clip_border);
+  return blur;
+}
+
+std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
+    InputVariant input_texture,
+    Scalar radius,
+    bool clip_border) {
+  auto x_blur = MakeDirectionalGaussianBlur(input_texture, radius, Point(1, 0),
+                                            clip_border);
+  return MakeDirectionalGaussianBlur(x_blur, radius, Point(0, 1), false);
+}
+
 FilterContents::FilterContents() = default;
 
 FilterContents::~FilterContents() = default;
@@ -90,7 +116,7 @@ std::optional<std::shared_ptr<Texture>> FilterContents::RenderFilterToTexture(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  auto output_size = GetOutputSize();
+  auto output_size = GetOutputSize(input_textures_);
   if (output_size.IsZero()) {
     return std::nullopt;
   }
@@ -155,14 +181,17 @@ ISize FilterContents::GetOutputSize() const {
   if (input_textures_.empty()) {
     return {};
   }
+  return GetOutputSize(input_textures_);
+}
 
+ISize FilterContents::GetOutputSize(const InputTextures& input_textures) const {
   if (auto filter =
-          std::get_if<std::shared_ptr<FilterContents>>(&input_textures_[0])) {
-    return filter->get()->GetOutputSize();
+          std::get_if<std::shared_ptr<FilterContents>>(&input_textures[0])) {
+    return filter->get()->GetOutputSize(input_textures);
   }
 
   if (auto texture =
-          std::get_if<std::shared_ptr<Texture>>(&input_textures_[0])) {
+          std::get_if<std::shared_ptr<Texture>>(&input_textures[0])) {
     return texture->get()->GetSize();
   }
 
@@ -346,6 +375,98 @@ bool BlendFilterContents::RenderFilter(
   }
 
   FML_UNREACHABLE();
+}
+
+/*******************************************************************************
+ ******* DirectionalGaussianBlurFilterContents
+ ******************************************************************************/
+
+DirectionalGaussianBlurFilterContents::DirectionalGaussianBlurFilterContents() =
+    default;
+
+DirectionalGaussianBlurFilterContents::
+    ~DirectionalGaussianBlurFilterContents() = default;
+
+void DirectionalGaussianBlurFilterContents::SetRadius(Scalar radius) {
+  radius_ = std::max(radius, 1e-3f);
+}
+
+void DirectionalGaussianBlurFilterContents::SetDirection(Vector2 direction) {
+  direction_ = direction.Normalize();
+}
+
+void DirectionalGaussianBlurFilterContents::SetClipBorder(bool clip) {
+  clip_ = clip;
+}
+
+bool DirectionalGaussianBlurFilterContents::RenderFilter(
+    const std::vector<std::shared_ptr<Texture>>& input_textures,
+    const ContentContext& renderer,
+    RenderPass& pass) const {
+  using VS = GaussianBlurPipeline::VertexShader;
+  using FS = GaussianBlurPipeline::FragmentShader;
+
+  auto& host_buffer = pass.GetTransientsBuffer();
+
+  ISize size = FilterContents::GetOutputSize();
+  Point uv_offset = clip_ ? (Point(radius_, radius_) / size) : Point();
+  // LTRB
+  Scalar uv[4] = {
+      -uv_offset.x,
+      -uv_offset.y,
+      1 + uv_offset.x,
+      1 + uv_offset.y,
+  };
+
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+  vtx_builder.AddVertices({
+      {Point(0, 0), Point(uv[0], uv[1])},
+      {Point(size.width, 0), Point(uv[2], uv[1])},
+      {Point(size.width, size.height), Point(uv[2], uv[3])},
+      {Point(0, 0), Point(uv[0], uv[1])},
+      {Point(size.width, size.height), Point(uv[2], uv[3])},
+      {Point(0, size.height), Point(uv[0], uv[3])},
+  });
+  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
+
+  VS::FrameInfo frame_info;
+  frame_info.mvp = Matrix::MakeOrthographic(size);
+  frame_info.texture_size = Point(size);
+  frame_info.blur_radius = radius_;
+  frame_info.blur_direction = direction_;
+
+  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
+  auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+
+  Command cmd;
+  cmd.label = "Gaussian Blur Filter";
+  auto options = OptionsFromPass(pass);
+  options.blend_mode = Entity::BlendMode::kSource;
+  cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+  cmd.BindVertices(vtx_buffer);
+  VS::BindFrameInfo(cmd, uniform_view);
+  for (const auto& texture : input_textures) {
+    FS::BindTextureSampler(cmd, texture, sampler);
+    pass.AddCommand(cmd);
+  }
+
+  return true;
+}
+
+ISize DirectionalGaussianBlurFilterContents::GetOutputSize(
+    const InputTextures& input_textures) const {
+  ISize size;
+  if (auto filter =
+          std::get_if<std::shared_ptr<FilterContents>>(&input_textures[0])) {
+    size = filter->get()->GetOutputSize();
+  } else if (auto texture =
+                 std::get_if<std::shared_ptr<Texture>>(&input_textures[0])) {
+    size = texture->get()->GetSize();
+  } else {
+    FML_UNREACHABLE();
+  }
+
+  return size + (clip_ ? ISize(radius_ * 2, radius_ * 2) : ISize());
 }
 
 }  // namespace impeller
