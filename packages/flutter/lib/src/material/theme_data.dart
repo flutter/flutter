@@ -437,7 +437,7 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor ??= colorScheme.background;
       indicatorColor ??= onPrimarySurfaceColor;
       errorColor ??= colorScheme.error;
-      applyElevationOverlayColor ??= isDark;
+      applyElevationOverlayColor ??= brightness == Brightness.dark;
     }
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
@@ -922,6 +922,7 @@ class ThemeData with Diagnosticable {
   factory ThemeData.from({
     required ColorScheme colorScheme,
     TextTheme? textTheme,
+    bool? useMaterial3,
   }) {
     final bool isDark = colorScheme.brightness == Brightness.dark;
 
@@ -947,6 +948,7 @@ class ThemeData with Diagnosticable {
       errorColor: colorScheme.error,
       textTheme: textTheme,
       applyElevationOverlayColor: isDark,
+      useMaterial3: useMaterial3,
     );
   }
 
@@ -1002,6 +1004,11 @@ class ThemeData with Diagnosticable {
 
   /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
+  ///
+  /// If [useMaterial3] is true, then this flag is ignored as there is a new
+  /// [Material.surfaceTintColor] used to create an overlay for Material 3.
+  /// This flag is meant only for the Material 2 elevation overlay for dark
+  /// themes.
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
@@ -1161,6 +1168,7 @@ class ThemeData with Diagnosticable {
   ///   * [AlertDialog]
   ///   * [Dialog]
   ///   * [FloatingActionButton]
+  ///   * [Material]
   ///   * [NavigationBar]
   ///   * [NavigationRail]
   ///

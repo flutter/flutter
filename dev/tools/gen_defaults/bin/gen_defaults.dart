@@ -21,6 +21,7 @@ import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
+import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
@@ -70,9 +71,10 @@ Future<void> main(List<String> args) async {
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
+  DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
   NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
   NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens).updateFile();
+  SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens).updateFile();
   TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
-  DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
 }
