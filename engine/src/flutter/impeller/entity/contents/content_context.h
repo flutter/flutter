@@ -9,6 +9,8 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "fml/logging.h"
+#include "impeller/base/validation.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
@@ -21,6 +23,10 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/renderer/formats.h"
+#include "texture_blend.frag.h"
+#include "texture_blend.vert.h"
+#include "texture_blend_screen.frag.h"
+#include "texture_blend_screen.vert.h"
 
 namespace impeller {
 
@@ -28,6 +34,10 @@ using GradientFillPipeline =
     PipelineT<GradientFillVertexShader, GradientFillFragmentShader>;
 using SolidFillPipeline =
     PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
+using TextureBlendPipeline =
+    PipelineT<TextureBlendVertexShader, TextureBlendFragmentShader>;
+using TextureBlendScreenPipeline =
+    PipelineT<TextureBlendScreenVertexShader, TextureBlendScreenFragmentShader>;
 using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
 using SolidStrokePipeline =
@@ -75,6 +85,16 @@ class ContentContext {
     return GetPipeline(solid_fill_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline> GetTextureBlendPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(texture_blend_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline> GetTextureBlendScreenPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(texture_blend_screen_pipelines_, opts);
+  }
+
   std::shared_ptr<Pipeline> GetTexturePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(texture_pipelines_, opts);
@@ -115,6 +135,8 @@ class ContentContext {
   // map.
   mutable Variants<GradientFillPipeline> gradient_fill_pipelines_;
   mutable Variants<SolidFillPipeline> solid_fill_pipelines_;
+  mutable Variants<TextureBlendPipeline> texture_blend_pipelines_;
+  mutable Variants<TextureBlendScreenPipeline> texture_blend_screen_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
   mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
@@ -123,12 +145,24 @@ class ContentContext {
 
   static void ApplyOptionsToDescriptor(PipelineDescriptor& desc,
                                        const ContentContextOptions& options) {
+    auto blend_mode = options.blend_mode;
+    if (blend_mode > Entity::BlendMode::kLastPipelineBlendMode) {
+      VALIDATION_LOG << "Cannot use blend mode "
+                     << static_cast<int>(options.blend_mode)
+                     << " as a pipeline blend.";
+      blend_mode = Entity::BlendMode::kSourceOver;
+    }
+
     desc.SetSampleCount(options.sample_count);
 
     ColorAttachmentDescriptor color0 = *desc.GetColorAttachmentDescriptor(0u);
     color0.alpha_blend_op = BlendOperation::kAdd;
     color0.color_blend_op = BlendOperation::kAdd;
-    switch (options.blend_mode) {
+
+    static_assert(Entity::BlendMode::kLastPipelineBlendMode ==
+                  Entity::BlendMode::kModulate);
+
+    switch (blend_mode) {
       case Entity::BlendMode::kClear:
         color0.dst_alpha_blend_factor = BlendFactor::kZero;
         color0.dst_color_blend_factor = BlendFactor::kZero;
@@ -214,6 +248,8 @@ class ContentContext {
         color0.src_alpha_blend_factor = BlendFactor::kZero;
         color0.src_color_blend_factor = BlendFactor::kZero;
         break;
+      default:
+        FML_UNREACHABLE();
     }
     desc.SetColorAttachmentDescriptor(0u, std::move(color0));
   }
