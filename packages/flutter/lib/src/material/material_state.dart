@@ -95,6 +95,33 @@ enum MaterialState {
   error,
 }
 
+/// Adds helper accessors to `Set`s of [MaterialState]s.
+extension SetMaterialState on Set<MaterialState> {
+  /// Whether or not this `Set` contains the value [MaterialState.hovered].
+  bool get isHovered => contains(MaterialState.hovered);
+
+  /// Whether or not this `Set` contains the value [MaterialState.focused].
+  bool get isFocused => contains(MaterialState.focused);
+
+  /// Whether or not this `Set` contains the value [MaterialState.pressed].
+  bool get isPressed => contains(MaterialState.pressed);
+
+  /// Whether or not this `Set` contains the value [MaterialState.dragged].
+  bool get isDragged => contains(MaterialState.dragged);
+
+  /// Whether or not this `Set` contains the value [MaterialState.selected].
+  bool get isSelected => contains(MaterialState.selected);
+
+  /// Whether or not this `Set` contains the value [MaterialState.scrolledUnder].
+  bool get isScrolledUnder => contains(MaterialState.scrolledUnder);
+
+  /// Whether or not this `Set` contains the value [MaterialState.disabled].
+  bool get isDisabled => contains(MaterialState.disabled);
+
+  /// Whether or not this `Set` contains the value [MaterialState.error].
+  bool get isErrored => contains(MaterialState.error);
+}
+
 /// Signature for the function that returns a value of type `T` based on a given
 /// set of states.
 typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);

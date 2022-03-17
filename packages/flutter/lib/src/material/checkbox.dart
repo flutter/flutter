@@ -369,10 +369,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.isDisabled) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.isSelected) {
         return widget.activeColor;
       }
       return null;
@@ -382,10 +382,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   MaterialStateProperty<Color> get _defaultFillColor {
     final ThemeData themeData = Theme.of(context);
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.isDisabled) {
         return themeData.disabledColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.isSelected) {
         return themeData.toggleableActiveColor;
       }
       return themeData.unselectedWidgetColor;
@@ -395,7 +395,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide)
       return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
-    if (!states.contains(MaterialState.selected))
+    if (!states.isSelected)
       return side;
     return null;
   }
@@ -485,8 +485,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..focusColor = effectiveFocusOverlayColor
           ..splashRadius = widget.splashRadius ?? checkboxTheme.splashRadius ?? kRadialReactionRadius
           ..downPosition = downPosition
-          ..isFocused = states.contains(MaterialState.focused)
-          ..isHovered = states.contains(MaterialState.hovered)
+          ..isFocused = states.isFocused
+          ..isHovered = states.isHovered
           ..activeColor = effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
           ..checkColor = effectiveCheckColor

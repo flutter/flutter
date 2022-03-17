@@ -136,28 +136,28 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Getter for whether this class considers [MaterialState.disabled] to be active.
-  bool get isDisabled => materialStates.contains(MaterialState.disabled);
+  bool get isDisabled => materialStates.isDisabled;
 
   /// Getter for whether this class considers [MaterialState.dragged] to be active.
-  bool get isDragged => materialStates.contains(MaterialState.dragged);
+  bool get isDragged => materialStates.isDragged;
 
   /// Getter for whether this class considers [MaterialState.error] to be active.
-  bool get isErrored => materialStates.contains(MaterialState.error);
+  bool get isErrored => materialStates.isErrored;
 
   /// Getter for whether this class considers [MaterialState.focused] to be active.
-  bool get isFocused => materialStates.contains(MaterialState.focused);
+  bool get isFocused => materialStates.isFocused;
 
   /// Getter for whether this class considers [MaterialState.hovered] to be active.
-  bool get isHovered => materialStates.contains(MaterialState.hovered);
+  bool get isHovered => materialStates.isHovered;
 
   /// Getter for whether this class considers [MaterialState.pressed] to be active.
-  bool get isPressed => materialStates.contains(MaterialState.pressed);
+  bool get isPressed => materialStates.isPressed;
 
   /// Getter for whether this class considers [MaterialState.scrolledUnder] to be active.
-  bool get isScrolledUnder => materialStates.contains(MaterialState.scrolledUnder);
+  bool get isScrolledUnder => materialStates.isScrolledUnder;
 
   /// Getter for whether this class considers [MaterialState.selected] to be active.
-  bool get isSelected => materialStates.contains(MaterialState.selected);
+  bool get isSelected => materialStates.isSelected;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
