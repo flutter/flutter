@@ -144,7 +144,9 @@ class SkiaGoldClient {
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
-      '--passfail',
+      // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
+      // is resolved.
+      //'--passfail',
     ];
 
     if (imgtestInitCommand.contains(null)) {
@@ -214,7 +216,11 @@ class SkiaGoldClient {
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+      // Temporarily print logs for issue diagnosis
+      print(buf.toString());
+      // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
+      // is resolved.
+      // throw Exception(buf.toString());
     }
 
     return true;
