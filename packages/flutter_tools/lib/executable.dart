@@ -17,6 +17,7 @@ import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
+import 'src/commands/analyze_project.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
@@ -146,6 +147,7 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts,
   ),
+  AnalyzeProjectCommand(verbose: verbose),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
   BuildCommand(verboseHelp: verboseHelp),
