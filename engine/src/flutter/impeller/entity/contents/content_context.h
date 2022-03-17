@@ -12,6 +12,8 @@
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/gaussian_blur.frag.h"
+#include "impeller/entity/gaussian_blur.vert.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
 #include "impeller/entity/gradient_fill.frag.h"
@@ -20,13 +22,13 @@
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/entity/solid_stroke.frag.h"
 #include "impeller/entity/solid_stroke.vert.h"
+#include "impeller/entity/texture_blend.frag.h"
+#include "impeller/entity/texture_blend.vert.h"
+#include "impeller/entity/texture_blend_screen.frag.h"
+#include "impeller/entity/texture_blend_screen.vert.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/renderer/formats.h"
-#include "texture_blend.frag.h"
-#include "texture_blend.vert.h"
-#include "texture_blend_screen.frag.h"
-#include "texture_blend_screen.vert.h"
 
 namespace impeller {
 
@@ -40,6 +42,8 @@ using TextureBlendScreenPipeline =
     PipelineT<TextureBlendScreenVertexShader, TextureBlendScreenFragmentShader>;
 using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
+using GaussianBlurPipeline =
+    PipelineT<GaussianBlurVertexShader, GaussianBlurFragmentShader>;
 using SolidStrokePipeline =
     PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
 using GlyphAtlasPipeline =
@@ -100,6 +104,11 @@ class ContentContext {
     return GetPipeline(texture_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline> GetGaussianBlurPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(gaussian_blur_pipelines_, opts);
+  }
+
   std::shared_ptr<Pipeline> GetSolidStrokePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(solid_stroke_pipelines_, opts);
@@ -138,6 +147,7 @@ class ContentContext {
   mutable Variants<TextureBlendPipeline> texture_blend_pipelines_;
   mutable Variants<TextureBlendScreenPipeline> texture_blend_screen_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
+  mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<ClipPipeline> clip_restoration_pipelines_;
