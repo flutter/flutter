@@ -104,7 +104,8 @@ class RuntimeController : public PlatformConfigurationClient {
       const fml::closure& isolate_shutdown_callback,
       std::shared_ptr<const fml::Mapping> persistent_isolate_data,
       fml::WeakPtr<IOManager> io_manager,
-      fml::WeakPtr<ImageDecoder> image_decoder) const;
+      fml::WeakPtr<ImageDecoder> image_decoder,
+      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry) const;
 
   // |PlatformConfigurationClient|
   ~RuntimeController() override;
@@ -553,6 +554,10 @@ class RuntimeController : public PlatformConfigurationClient {
 
   const fml::WeakPtr<SnapshotDelegate>& GetSnapshotDelegate() const {
     return context_.snapshot_delegate;
+  }
+
+  std::weak_ptr<const DartIsolate> GetRootIsolate() const {
+    return root_isolate_;
   }
 
  protected:
