@@ -475,20 +475,25 @@ class KeyboardConverter {
 
     // After updating _pressingRecords, synchronize modifier states. The
     // `event.***Key` fields can be used to reduce some omitted modifier key
-    // events. We can deduce key cancel events if they are false. Key sync
-    // events can not be deduced since we don't know which physical key they
+    // events. We can synthesize key up events if they are false. Key down
+    // events can not be synthesized since we don't know which physical key they
     // represent.
-    _kLogicalKeyToModifierGetter.forEach((int logicalKey, _ModifierGetter getModifier) {
-      if (_pressingRecords.containsValue(logicalKey) && !getModifier(event)) {
+    _kLogicalKeyToModifierGetter.forEach((int testeeLogicalKey, _ModifierGetter getModifier) {
+      // Do not synthesize for the key of the current event. The event is the
+      // ground truth.
+      if (logicalKey == testeeLogicalKey) {
+        return;
+      }
+      if (_pressingRecords.containsValue(testeeLogicalKey) && !getModifier(event)) {
         _pressingRecords.removeWhere((int physicalKey, int logicalRecord) {
-          if (logicalRecord != logicalKey)
+          if (logicalRecord != testeeLogicalKey)
             return false;
 
           _dispatchKeyData!(ui.KeyData(
             timeStamp: timeStamp,
             type: ui.KeyEventType.up,
             physical: physicalKey,
-            logical: logicalKey,
+            logical: testeeLogicalKey,
             character: null,
             synthesized: true,
           ));
