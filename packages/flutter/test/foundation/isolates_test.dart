@@ -170,6 +170,6 @@ void main() {
     });
     test('with invalid message', () async {
       await expectFileClosesAllPorts('_compute_caller_invalid_message.dart');
-    }, skip: true); // Blocked by: https://github.com/dart-lang/sdk/issues/48516
+    });
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 }
