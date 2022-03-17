@@ -10108,7 +10108,7 @@ void main() {
     expect(find.text('Copy'), findsNothing);
 
     final TestGesture gesture = await tester.startGesture(
-      Offset(10.0, 0.0) + textOffsetToPosition(tester, controller.text.length),
+      const Offset(10.0, 0.0) + textOffsetToPosition(tester, controller.text.length),
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
