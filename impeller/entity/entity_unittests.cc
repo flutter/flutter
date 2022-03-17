@@ -671,5 +671,49 @@ TEST_F(EntityTest, Filters) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_F(EntityTest, GaussianBlurFilter) {
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+  auto boston = CreateTextureForFixture("boston.jpg");
+  auto kalimba = CreateTextureForFixture("kalimba.jpg");
+  ASSERT_TRUE(bridge && boston && kalimba);
+
+  bool first_frame = true;
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({450, 150});
+      ImGui::SetNextWindowPos({200, 450});
+    }
+
+    ImGui::Begin("Controls");
+    static float offset[2] = {500, 400};
+    ImGui::SliderFloat2("Position offset", &offset[0], 0, 1000);
+    static float scale = 1;
+    ImGui::SliderFloat("Scale", &scale, 0, 1);
+    static float blur_radius = 20;
+    ImGui::SliderFloat("Blur radius", &blur_radius, 0, 200);
+    static bool clip_border = true;
+    ImGui::Checkbox("Clip", &clip_border);
+
+    auto blend = FilterContents::MakeBlend(Entity::BlendMode::kPlus,
+                                           {boston, bridge, bridge});
+
+    auto blur =
+        FilterContents::MakeGaussianBlur(blend, blur_radius, clip_border);
+
+    auto output_size = Size(blur->GetOutputSize());
+    Rect bounds(Point(offset[0], offset[1]) - output_size / 2 * scale,
+                output_size * scale);
+
+    ImGui::End();
+
+    Entity entity;
+    entity.SetPath(PathBuilder{}.AddRect(bounds).TakePath());
+    entity.SetContents(blur);
+    return entity.Render(context, pass);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
