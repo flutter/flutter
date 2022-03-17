@@ -4,6 +4,8 @@
 
 #include "impeller/display_list/display_list_dispatcher.h"
 
+#include <optional>
+
 #include "flutter/fml/trace_event.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/entity.h"
@@ -157,51 +159,36 @@ void DisplayListDispatcher::setInvertColors(bool invert) {
   UNIMPLEMENTED;
 }
 
-// |flutter::Dispatcher|
-void DisplayListDispatcher::setBlendMode(SkBlendMode mode) {
+std::optional<Entity::BlendMode> ToBlendMode(SkBlendMode mode) {
   switch (mode) {
     case SkBlendMode::kClear:
-      paint_.blend_mode = Entity::BlendMode::kClear;
-      break;
+      return Entity::BlendMode::kClear;
     case SkBlendMode::kSrc:
-      paint_.blend_mode = Entity::BlendMode::kSource;
-      break;
+      return Entity::BlendMode::kSource;
     case SkBlendMode::kDst:
-      paint_.blend_mode = Entity::BlendMode::kDestination;
-      break;
+      return Entity::BlendMode::kDestination;
     case SkBlendMode::kSrcOver:
-      paint_.blend_mode = Entity::BlendMode::kSourceOver;
-      break;
+      return Entity::BlendMode::kSourceOver;
     case SkBlendMode::kDstOver:
-      paint_.blend_mode = Entity::BlendMode::kDestinationOver;
-      break;
+      return Entity::BlendMode::kDestinationOver;
     case SkBlendMode::kSrcIn:
-      paint_.blend_mode = Entity::BlendMode::kSourceIn;
-      break;
+      return Entity::BlendMode::kSourceIn;
     case SkBlendMode::kDstIn:
-      paint_.blend_mode = Entity::BlendMode::kDestinationIn;
-      break;
+      return Entity::BlendMode::kDestinationIn;
     case SkBlendMode::kSrcOut:
-      paint_.blend_mode = Entity::BlendMode::kSourceOut;
-      break;
+      return Entity::BlendMode::kSourceOut;
     case SkBlendMode::kDstOut:
-      paint_.blend_mode = Entity::BlendMode::kDestinationOut;
-      break;
+      return Entity::BlendMode::kDestinationOut;
     case SkBlendMode::kSrcATop:
-      paint_.blend_mode = Entity::BlendMode::kSourceATop;
-      break;
+      return Entity::BlendMode::kSourceATop;
     case SkBlendMode::kDstATop:
-      paint_.blend_mode = Entity::BlendMode::kDestinationATop;
-      break;
+      return Entity::BlendMode::kDestinationATop;
     case SkBlendMode::kXor:
-      paint_.blend_mode = Entity::BlendMode::kXor;
-      break;
+      return Entity::BlendMode::kXor;
     case SkBlendMode::kPlus:
-      paint_.blend_mode = Entity::BlendMode::kPlus;
-      break;
+      return Entity::BlendMode::kPlus;
     case SkBlendMode::kModulate:
-      paint_.blend_mode = Entity::BlendMode::kModulate;
-      break;
+      return Entity::BlendMode::kModulate;
     case SkBlendMode::kScreen:
     case SkBlendMode::kOverlay:
     case SkBlendMode::kDarken:
@@ -217,10 +204,18 @@ void DisplayListDispatcher::setBlendMode(SkBlendMode mode) {
     case SkBlendMode::kSaturation:
     case SkBlendMode::kColor:
     case SkBlendMode::kLuminosity:
-      // Non-pipeline-friendly blend modes are not supported by setBlendMode
-      // yet.
-      UNIMPLEMENTED;
-      break;
+      return std::nullopt;
+  }
+
+  return std::nullopt;
+}
+
+// |flutter::Dispatcher|
+void DisplayListDispatcher::setBlendMode(SkBlendMode sk_mode) {
+  if (auto mode = ToBlendMode(sk_mode); mode.has_value()) {
+    paint_.blend_mode = mode.value();
+  } else {
+    UNIMPLEMENTED;
   }
 }
 
@@ -459,10 +454,14 @@ void DisplayListDispatcher::clipPath(const SkPath& path,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawColor(SkColor color, SkBlendMode mode) {
+void DisplayListDispatcher::drawColor(SkColor color, SkBlendMode sk_mode) {
   Paint paint;
   paint.color = ToColor(color);
-  FML_LOG(ERROR) << "Blend mode on drawColor ignored.";
+  if (auto mode = ToBlendMode(sk_mode); mode.has_value()) {
+    paint.blend_mode = mode.value();
+  } else {
+    FML_DLOG(ERROR) << "Unimplemented blend mode in " << __FUNCTION__;
+  }
   canvas_.DrawPaint(paint);
 }
 
