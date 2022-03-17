@@ -870,6 +870,7 @@ targets:
 
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
+    bringup: true # rolling to Chrome 96: https://github.com/flutter/flutter/issues/98723
     presubmit: false
     timeout: 60
     properties:
