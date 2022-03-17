@@ -119,16 +119,16 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*font_collection=*/font_collection_,
       /*runtime_controller=*/nullptr);
   result->runtime_controller_ = runtime_controller_->Spawn(
-      *result,                              // runtime delegate
-      settings.advisory_script_uri,         // advisory script uri
-      settings.advisory_script_entrypoint,  // advisory script entrypoint
-      settings.idle_notification_callback,  // idle notification callback
-      settings.isolate_create_callback,     // isolate create callback
-      settings.isolate_shutdown_callback,   // isolate shutdown callback
-      settings.persistent_isolate_data,     // persistent isolate data
-      io_manager,                           // io_manager
-      result->GetImageDecoderWeakPtr()      // imageDecoder
-  );
+      /*p_client=*/*result,
+      /*advisory_script_uri=*/settings.advisory_script_uri,
+      /*advisory_script_entrypoint=*/settings.advisory_script_entrypoint,
+      /*idle_notification_callback=*/settings.idle_notification_callback,
+      /*isolate_create_callback=*/settings.isolate_create_callback,
+      /*isolate_shutdown_callback=*/settings.isolate_shutdown_callback,
+      /*persistent_isolate_data=*/settings.persistent_isolate_data,
+      /*io_manager=*/io_manager,
+      /*image_decoder=*/result->GetImageDecoderWeakPtr(),
+      /*image_generator_registry=*/result->GetImageGeneratorRegistry());
   result->initial_route_ = initial_route;
   return result;
 }
