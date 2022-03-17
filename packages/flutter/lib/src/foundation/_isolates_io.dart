@@ -71,7 +71,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
     // native error; see Isolate.addErrorListener
     case 2:
       await Future<Never>.error(RemoteError(
-        response[0] as String, 
+        response[0] as String,
         response[1] as String,
       ));
 
