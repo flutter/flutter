@@ -193,7 +193,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   Future<void> debuggerConnected(vm.VM vmInfo) async {
     // Usually we'd capture the pid from the VM here and record it for
-    // terminating, however for Flutter apps it may be running on a remove
+    // terminating, however for Flutter apps it may be running on a remote
     // device so it's not valid to terminate a process with that pid locally.
     // For attach, pids should never be collected as terminateRequest() should
     // not terminate the debugee.
