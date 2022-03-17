@@ -469,6 +469,10 @@ FILE: ../../../flutter/impeller/entity/shaders/solid_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.vert
+FILE: ../../../flutter/impeller/entity/shaders/texture_blend.frag
+FILE: ../../../flutter/impeller/entity/shaders/texture_blend.vert
+FILE: ../../../flutter/impeller/entity/shaders/texture_blend_screen.frag
+FILE: ../../../flutter/impeller/entity/shaders/texture_blend_screen.vert
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
 FILE: ../../../flutter/impeller/fixtures/airplane.jpg
