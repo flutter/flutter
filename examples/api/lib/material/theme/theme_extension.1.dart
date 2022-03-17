@@ -38,29 +38,6 @@ class MyColors extends ThemeExtension<MyColors> {
 
   // Optional
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is MyColors
-        && other.blue == blue
-        && other.red == red;
-  }
-
-  // Optional
-  @override
-  int get hashCode {
-    return hashList(<Object?>[
-      blue,
-      red,
-    ]);
-  }
-
-  // Optional
-  @override
   String toString() => 'MyColors(blue: $blue, red: $red)';
 }
 
@@ -91,16 +68,16 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
-        extensions: const <Object, ThemeExtension<dynamic>>{
-          MyColors: MyColors(
+        extensions: <ThemeExtension<dynamic>>{
+          const MyColors(
             blue: Color(0xFF1E88E5),
             red: Color(0xFFE53935),
           ),
         },
       ),
       darkTheme: ThemeData.dark().copyWith(
-        extensions: const <Object, ThemeExtension<dynamic>>{
-          MyColors: MyColors(
+        extensions: <ThemeExtension<dynamic>>{
+          const MyColors(
             blue: Color(0xFF90CAF9),
             red: Color(0xFFEF9A9A),
           ),

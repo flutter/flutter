@@ -70,7 +70,7 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
   const ThemeExtension();
 
   /// The extension's type.
-  Object get id => T;
+  Object get type => T;
 
   /// Creates a copy of this theme extension scheme with the given fields
   /// replaced by the non-null parameter values.
@@ -272,7 +272,7 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
-    Map<Object, ThemeExtension<dynamic>>? extensions,
+    Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -420,7 +420,7 @@ class ThemeData with Diagnosticable {
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    extensions ??= <Object, ThemeExtension<dynamic>>{};
+    extensions ??= <ThemeExtension<dynamic>>[];
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -592,7 +592,7 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
-      extensions: extensions,
+      extensions: _themeExtensionIterableToMap(extensions),
       inputDecorationTheme: inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
@@ -1639,7 +1639,7 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
-    Map<Object, ThemeExtension<dynamic>>? extensions,
+    Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -1788,7 +1788,7 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
-      extensions: extensions ?? this.extensions,
+      extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
@@ -1959,6 +1959,15 @@ class ThemeData with Diagnosticable {
           !a.extensions.containsKey(entry.key)));
 
     return newExtensions;
+  }
+
+  /// Convert the [extensionsIterable] passed to [ThemeData.new] or [copyWith]
+  /// to the stored [extensions] map, where each entry's key consists of the extension's type.
+  static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<ThemeExtension<dynamic>> extensionsIterable) {
+    return <Object, ThemeExtension<dynamic>>{
+      // Strangely, the cast is necessary for tests to run.
+      for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>
+    };
   }
 
   /// Linearly interpolate between two themes.

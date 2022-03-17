@@ -34,29 +34,6 @@ class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
       color2: Color.lerp(color2, other.color2, t),
     );
   }
-
-  // Optional
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is MyThemeExtensionA &&
-        other.color1 == color1 &&
-        other.color2 == color2;
-  }
-
-  // Optional
-  @override
-  int get hashCode {
-    return hashList(<Object?>[
-      color1,
-      color2,
-    ]);
-  }
 }
 
 @immutable
@@ -422,30 +399,16 @@ void main() {
   group('Theme extensions', () {
     const Key containerKey = Key('container');
 
-    test('copyWith, ==, hashCode basics', () {
-      const MyThemeExtensionA extensionA = MyThemeExtensionA(
-        color1: Colors.black,
-        color2: Colors.amber,
-      );
-      expect(extensionA, extensionA.copyWith());
-      expect(extensionA.hashCode, extensionA.copyWith().hashCode);
-
-      const MyThemeExtensionB extensionB = MyThemeExtensionB(textStyle: TextStyle(fontSize: 50));
-      // Since MyThemeExtensionB doesn't override operator == or hashCode
-      expect(extensionB, isNot(extensionB.copyWith()));
-      expect(extensionB.hashCode, isNot(extensionB.copyWith().hashCode));
-    });
-
     testWidgets('can be obtained', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            extensions: const <Object, ThemeExtension<dynamic>>{
-              MyThemeExtensionA: MyThemeExtensionA(
+            extensions: const <ThemeExtension<dynamic>>{
+              MyThemeExtensionA(
                 color1: Colors.black,
                 color2: Colors.amber,
               ),
-              MyThemeExtensionB: MyThemeExtensionB(
+              MyThemeExtensionB(
                 textStyle: TextStyle(fontSize: 50),
               )
             },
@@ -467,8 +430,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            extensions: <Object, ThemeExtension<dynamic>>{
-              MyThemeExtensionA: const MyThemeExtensionA(
+            extensions: <ThemeExtension<dynamic>>{
+              const MyThemeExtensionA(
                 color1: Colors.black,
                 color2: Colors.amber,
               ).copyWith(color1: Colors.blue),
@@ -505,15 +468,15 @@ void main() {
       // Both ThemeDatas include both extensions
       ThemeData lerped = ThemeData.lerp(
         ThemeData(
-          extensions: const <Object, ThemeExtension<dynamic>>{
-            MyThemeExtensionA: extensionA1,
-            MyThemeExtensionB: extensionB1,
-          },
+          extensions: const <ThemeExtension<dynamic>>[
+            extensionA1,
+            extensionB1,
+          ],
         ),
         ThemeData(
-          extensions: const <Object, ThemeExtension<dynamic>>{
-            MyThemeExtensionA: extensionA2,
-            MyThemeExtensionB: extensionB2,
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA2,
+            extensionB2,
           },
         ),
         0.5,
@@ -526,14 +489,14 @@ void main() {
       // Missing from 2nd ThemeData
       lerped = ThemeData.lerp(
         ThemeData(
-          extensions: const <Object, ThemeExtension<dynamic>>{
-            MyThemeExtensionA: extensionA1,
-            MyThemeExtensionB: extensionB1,
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA1,
+            extensionB1,
           },
         ),
         ThemeData(
-          extensions: const <Object, ThemeExtension<dynamic>>{
-            MyThemeExtensionB: extensionB2,
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionB2,
           },
         ),
         0.5,
@@ -545,14 +508,14 @@ void main() {
       // Missing from 1st ThemeData
       lerped = ThemeData.lerp(
         ThemeData(
-          extensions: const <Object, ThemeExtension<dynamic>>{
-            MyThemeExtensionA: extensionA1,
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA1,
           },
         ),
         ThemeData(
-          extensions: const <Object, ThemeExtension<dynamic>>{
-            MyThemeExtensionA: extensionA2,
-            MyThemeExtensionB: extensionB2,
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA2,
+            extensionB2,
           },
         ),
         0.5,
@@ -874,7 +837,7 @@ void main() {
       drawerTheme: otherTheme.drawerTheme,
       listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
-      extensions: otherTheme.extensions,
+      extensions: otherTheme.extensions.values,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
