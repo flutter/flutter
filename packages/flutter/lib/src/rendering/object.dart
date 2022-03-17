@@ -1629,16 +1629,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
       return;
     }
-    if (_relayoutBoundary == null) {
-      _needsLayout = true;
-      if (parent != null) {
-        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
-        // Conservatively mark everything dirty until it reaches the closest
-        // known relayout boundary.
-        markParentNeedsLayout();
-      }
-      return;
-    }
+    assert(_relayoutBoundary != null);
     if (_relayoutBoundary != this) {
       markParentNeedsLayout();
     } else {
@@ -1692,29 +1683,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _cleanRelayoutBoundary() {
     if (_relayoutBoundary != this) {
       _relayoutBoundary = null;
+      _needsLayout = true;
       visitChildren(_cleanChildRelayoutBoundary);
-    }
-  }
-
-  void _propagateRelayoutBoundary() {
-    if (_relayoutBoundary == this) {
-      return;
-    }
-    final RenderObject? parentRelayoutBoundary = (parent as RenderObject?)?._relayoutBoundary;
-    assert(parentRelayoutBoundary != null);
-    if (parentRelayoutBoundary != _relayoutBoundary) {
-      _relayoutBoundary = parentRelayoutBoundary;
-      visitChildren(_propagateRelayoutBoundaryToChild);
     }
   }
 
   // Reduces closure allocation for visitChildren use cases.
   static void _cleanChildRelayoutBoundary(RenderObject child) {
     child._cleanRelayoutBoundary();
-  }
-
-  static void _propagateRelayoutBoundaryToChild(RenderObject child) {
-    child._propagateRelayoutBoundary();
   }
 
   /// Bootstrap the rendering pipeline by scheduling the very first layout.
@@ -1838,14 +1814,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
-    final bool isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
-    final RenderObject relayoutBoundary = isRelayoutBoundary ? this : (parent! as RenderObject)._relayoutBoundary!;
+    RenderObject? relayoutBoundary;
+    if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject) {
+      relayoutBoundary = this;
+    } else {
+      relayoutBoundary = (parent! as RenderObject)._relayoutBoundary;
+    }
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     }());
-
-    if (!_needsLayout && constraints == _constraints) {
+    if (!_needsLayout && constraints == _constraints && relayoutBoundary == _relayoutBoundary) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
         // to itself, so it has the right internal debug values.
@@ -1859,11 +1838,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
-
-      if (relayoutBoundary != _relayoutBoundary) {
-        _relayoutBoundary = relayoutBoundary;
-        visitChildren(_propagateRelayoutBoundaryToChild);
-      }
 
       if (!kReleaseMode && debugProfileLayoutsEnabled)
         Timeline.finishSync();

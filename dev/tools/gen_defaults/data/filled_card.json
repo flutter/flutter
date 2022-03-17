@@ -1,11 +1,13 @@
 {
-  "version": "v0_88",
+  "version": "v0_90",
 
   "md.comp.filled-card.container.color": "surfaceVariant",
   "md.comp.filled-card.container.elevation": "md.sys.elevation.level0",
   "md.comp.filled-card.container.shadow-color": "shadow",
   "md.comp.filled-card.container.shape": "md.sys.shape.corner.medium",
-  "md.comp.filled-card.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.filled-card.disabled.container.color": "surfaceVariant",
+  "md.comp.filled-card.disabled.container.elevation": "md.sys.elevation.level0",
+  "md.comp.filled-card.disabled.container.opacity": 0.38,
   "md.comp.filled-card.dragged.container.elevation": "md.sys.elevation.level3",
   "md.comp.filled-card.dragged.state-layer.color": "onSurface",
   "md.comp.filled-card.dragged.state-layer.opacity": "md.sys.state.dragged.state-layer-opacity",

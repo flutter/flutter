@@ -32,7 +32,6 @@ void main() {
         extentOffset: 3,
         affinity: TextAffinity.upstream,
       ),
-      onSelectionChanged: (_, __, ___) { },
     );
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
 
