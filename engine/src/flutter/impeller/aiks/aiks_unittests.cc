@@ -390,5 +390,13 @@ TEST_F(AiksTest, CanRenderEmojiTextFrame) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanDrawPaint) {
+  Paint paint;
+  paint.color = Color::MediumTurquoise();
+  Canvas canvas;
+  canvas.DrawPaint(paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
