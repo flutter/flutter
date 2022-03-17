@@ -250,7 +250,7 @@ class MigrateConfig {
         }
       } else {
         if (create) {
-          platformConfigs[platform] = MigratePlatformConfig(createRevision: createRevision, baseRevision: currentRevision);
+          platformConfigs[platform] = MigratePlatformConfig(platform: platform, createRevision: createRevision, baseRevision: currentRevision);
         }
       }
     }
@@ -296,10 +296,11 @@ migration:
                 'base_revision': String,
               }, logger)) {
             final YamlMap platformYamlMap = platform! as YamlMap;
-            final SupportedPlatform platformString = SupportedPlatform.values.firstWhere(
+            final SupportedPlatform platformValue = SupportedPlatform.values.firstWhere(
               (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
             );
-            platformConfigs[platformString] = MigratePlatformConfig(
+            platformConfigs[platformValue] = MigratePlatformConfig(
+              platform: platformValue,
               createRevision: platformYamlMap['create_revision'] as String?,
               baseRevision: platformYamlMap['base_revision'] as String?,
             );
@@ -321,7 +322,14 @@ migration:
 
 /// Holds the revisions for a single platform for use by the flutter migrate command.
 class MigratePlatformConfig {
-  MigratePlatformConfig({this.createRevision, this.baseRevision});
+  MigratePlatformConfig({
+    required this.platform,
+    this.createRevision,
+    this.baseRevision
+  });
+
+  /// The platform this config describes.
+  SupportedPlatform platform;
 
   /// The Flutter SDK revision this platform was created by.
   ///

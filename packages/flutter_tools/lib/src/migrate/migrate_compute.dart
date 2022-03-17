@@ -7,12 +7,12 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
+import '../cache.dart';
+import '../commands/migrate.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../cache.dart';
-import '../commands/migrate.dart';
-import 'migrate_config.dart';
+import '../version.dart';
 import 'migrate_manifest.dart';
 import 'migrate_utils.dart';
 
@@ -29,10 +29,15 @@ const List<String> _skippedDirectories = const <String>[
   '.git', // ignore the git metadata
   'lib', // Files here are always user owned and we don't want to overwrite their apps.
   'test', // Files here are typically user owned and flutter-side changes are not relevant.
+  'assets', // Common directory for user assets.
 ];
 
 const List<String> _skippedMergeFileExt = const <String>[
+  // Don't merge image files
   '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
 ];
 
 bool _skipped(String localPath) {
@@ -145,24 +150,24 @@ Future<MigrateResult?> computeMigration({
   }
   Status statusTicker = logger.startProgress('Computing migration');
 
-  final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: false);
+  final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'));
+  final MigrateConfig config = metadata.migrateConfig;
 
-  if (verbose) logger.printStatus('Parsing .migrate_config files');
-  final String fallbackRevision = await MigrateConfig.getFallbackBaseRevision();
+  final String fallbackRevision = await getFallbackBaseRevision(metadata, FlutterVersion(workingDirectory: flutterProject.directory.absolute.path));
   String rootBaseRevision = '';
-  Map<String, List<MigrateConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
+  Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
   Set<String> revisions = Set<String>();
   if (baseRevision == null) {
-    for (MigrateConfig config in configs) {
-      String effectiveRevision = config.baseRevision == null ? fallbackRevision : config.baseRevision!;
-      if (config.platform == 'root') {
+    for (MigratePlaformConfig platform in config.platformConfigs) {
+      String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
+      if (platform.platform == SupportedPlatform.root) {
         rootBaseRevision = effectiveRevision;
       }
       revisions.add(effectiveRevision);
       if (revisionToConfigs[effectiveRevision] == null) {
-        revisionToConfigs[effectiveRevision] = <MigrateConfig>[];
+        revisionToConfigs[effectiveRevision] = <MigratePlatformConfig>[];
       }
-      revisionToConfigs[effectiveRevision]!.add(config);
+      revisionToConfigs[effectiveRevision]!.add(platform);
     }
   } else {
     rootBaseRevision = baseRevision;
@@ -436,6 +441,13 @@ Future<MigrateResult?> computeMigration({
     migrateResult.tempDirectories.addAll(migrateResult.sdkDirs.values);
   }
   return migrateResult;
+}
+
+String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
+    if (metadataFile.versionRevision != null) {
+      return metadata.versionRevision!;
+    }
+    return version.flutterRevision;
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
