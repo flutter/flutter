@@ -75,7 +75,7 @@ class MigrateStartCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    FlutterProject project = FlutterProject.current();
+    final FlutterProject project = FlutterProject.current();
     if (project.isModule || project.isPlugin) {
       globals.logger.printError('Migrate tool only supports app projects. This project is a ${project.isModule ? 'module' : 'plugin'}');
       return const FlutterCommandResult(ExitStatus.fail);
@@ -89,6 +89,7 @@ class MigrateStartCommand extends FlutterCommand {
       baseRevision: stringArg('base-revision'),
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
+      flutterVersion: version,
     );
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);
