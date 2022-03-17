@@ -35,7 +35,8 @@ bool ClipContents::Render(const ContentContext& renderer,
   VS::FrameInfo info;
   // The color really doesn't matter.
   info.color = Color::SkyBlue();
-  info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+  info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+             entity.GetTransformation();
 
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 

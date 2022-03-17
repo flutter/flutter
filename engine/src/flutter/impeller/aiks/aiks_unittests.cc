@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
@@ -119,6 +120,26 @@ TEST_F(AiksTest, CanRenderNestedClips) {
   canvas.ClipPath(PathBuilder{}.AddCircle({600, 400}, 300).TakePath());
   canvas.ClipPath(PathBuilder{}.AddCircle({400, 600}, 300).TakePath());
   canvas.DrawRect(Rect::MakeXYWH(200, 200, 400, 400), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, ClipsUseCurrentTransform) {
+  std::array<Color, 5> colors = {Color::White(), Color::Black(),
+                                 Color::SkyBlue(), Color::Red(),
+                                 Color::Yellow()};
+  Canvas canvas;
+  Paint paint;
+
+  canvas.Translate(Vector3(300, 300));
+  for (int i = 0; i < 15; i++) {
+    canvas.Translate(-Vector3(300, 300));
+    canvas.Scale(Vector3(0.8, 0.8));
+    canvas.Translate(Vector3(300, 300));
+
+    paint.color = colors[i % colors.size()];
+    canvas.ClipPath(PathBuilder{}.AddCircle({0, 0}, 300).TakePath());
+    canvas.DrawRect(Rect(-300, -300, 600, 600), paint);
+  }
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
