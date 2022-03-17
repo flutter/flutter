@@ -1974,6 +1974,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   TextStyle _textStyleFrom(BuildContext context, [double magnification = 1.0]) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     return textStyle.copyWith(
+      color: CupertinoDynamicColor.maybeResolve(textStyle.color, context),
       fontSize: textStyle.fontSize! * magnification,
     );
   }
