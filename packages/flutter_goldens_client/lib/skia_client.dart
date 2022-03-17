@@ -191,7 +191,9 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
-      '--passfail',
+      // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
+      // is resolved.
+      //'--passfail',
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
