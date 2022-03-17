@@ -217,6 +217,7 @@ class SkiaGoldClient {
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       // Temporarily print logs for issue diagnosis
+      // ignore: avoid_print
       print(buf.toString());
       // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
       // is resolved.
