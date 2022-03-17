@@ -380,6 +380,17 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     _connectDebuggerIfReady();
   }
 
+  /// Handles the daemon.connected event, recording the pid of the flutter_tools process.
+  void _handleDaemonConnected(Map<String, Object?> params) {
+    // On Windows, the pid from the process we spawn is the shell running
+    // flutter.bat and terminating it may not be reliable, so we also take the
+    // pid provided from the VM running flutter_tools.
+    final int? pid = params['pid'] as int?;
+    if (pid != null) {
+      pidsToTerminate.add(pid);
+    }
+  }
+
   /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
   void _handleDebugPort(Map<String, Object?> params) {
     // When running in noDebug mode, Flutter may still provide us a VM Service
@@ -407,6 +418,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   void _handleJsonEvent(String event, Map<String, Object?>? params) {
     params ??= <String, Object?>{};
     switch (event) {
+      case 'daemon.connected':
+        _handleDaemonConnected(params);
+        break;
       case 'app.debugPort':
         _handleDebugPort(params);
         break;
