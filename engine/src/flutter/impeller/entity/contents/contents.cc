@@ -15,6 +15,14 @@ ContentContextOptions OptionsFromPass(const RenderPass& pass) {
   return opts;
 }
 
+ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
+                                               const Entity& entity) {
+  ContentContextOptions opts;
+  opts.sample_count = pass.GetRenderTarget().GetSampleCount();
+  opts.blend_mode = entity.GetBlendMode();
+  return opts;
+}
+
 Contents::Contents() = default;
 
 Contents::~Contents() = default;

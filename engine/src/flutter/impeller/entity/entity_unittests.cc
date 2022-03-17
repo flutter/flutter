@@ -715,5 +715,12 @@ TEST_F(EntityTest, GaussianBlurFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_F(EntityTest, SetBlendMode) {
+  Entity entity;
+  ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kSourceOver);
+  entity.SetBlendMode(Entity::BlendMode::kClear);
+  ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kClear);
+}
+
 }  // namespace testing
 }  // namespace impeller

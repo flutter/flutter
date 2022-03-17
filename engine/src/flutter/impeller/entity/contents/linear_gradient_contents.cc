@@ -66,7 +66,8 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "LinearGradientFill";
-  cmd.pipeline = renderer.GetGradientFillPipeline(OptionsFromPass(pass));
+  cmd.pipeline =
+      renderer.GetGradientFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       vertices_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));

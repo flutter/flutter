@@ -398,5 +398,24 @@ TEST_F(AiksTest, CanDrawPaint) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, PaintBlendModeIsRespected) {
+  Paint paint;
+  Canvas canvas;
+  // Default is kSourceOver.
+  paint.color = Color(1, 0, 0, 0.5);
+  canvas.DrawCircle(Point(150, 200), 100, paint);
+  paint.color = Color(0, 1, 0, 0.5);
+  canvas.DrawCircle(Point(250, 200), 100, paint);
+
+  paint.blend_mode = Entity::BlendMode::kPlus;
+  paint.color = Color::Red();
+  canvas.DrawCircle(Point(450, 250), 100, paint);
+  paint.color = Color::Green();
+  canvas.DrawCircle(Point(550, 250), 100, paint);
+  paint.color = Color::Blue();
+  canvas.DrawCircle(Point(500, 150), 100, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

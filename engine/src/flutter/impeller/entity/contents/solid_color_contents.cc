@@ -54,7 +54,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "SolidFill";
-  cmd.pipeline = renderer.GetSolidFillPipeline(OptionsFromPass(pass));
+  cmd.pipeline =
+      renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));

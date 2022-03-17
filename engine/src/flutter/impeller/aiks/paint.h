@@ -8,6 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {
@@ -21,6 +22,7 @@ struct Paint {
   Color color = Color::Black();
   Scalar stroke_width = 0.0;
   Style style = Style::kFill;
+  Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
   std::shared_ptr<Contents> contents;
 
   std::shared_ptr<Contents> CreateContentsForEntity() const;
