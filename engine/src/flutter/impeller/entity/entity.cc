@@ -4,6 +4,7 @@
 
 #include "impeller/entity/entity.h"
 
+#include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/render_pass.h"
 
@@ -63,6 +64,18 @@ uint32_t Entity::GetStencilDepth() const {
 
 void Entity::IncrementStencilDepth(uint32_t increment) {
   stencil_depth_ += increment;
+}
+
+void Entity::SetBlendMode(BlendMode blend_mode) {
+  if (blend_mode_ > BlendMode::kLastPipelineBlendMode) {
+    VALIDATION_LOG << "Non-pipeline blend modes are not supported by the "
+                      "entity blend mode setting.";
+  }
+  blend_mode_ = blend_mode;
+}
+
+Entity::BlendMode Entity::GetBlendMode() const {
+  return blend_mode_;
 }
 
 bool Entity::Render(const ContentContext& renderer,

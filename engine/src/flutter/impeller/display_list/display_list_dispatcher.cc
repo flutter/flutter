@@ -6,6 +6,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -158,7 +159,69 @@ void DisplayListDispatcher::setInvertColors(bool invert) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setBlendMode(SkBlendMode mode) {
-  UNIMPLEMENTED;
+  switch (mode) {
+    case SkBlendMode::kClear:
+      paint_.blend_mode = Entity::BlendMode::kClear;
+      break;
+    case SkBlendMode::kSrc:
+      paint_.blend_mode = Entity::BlendMode::kSource;
+      break;
+    case SkBlendMode::kDst:
+      paint_.blend_mode = Entity::BlendMode::kDestination;
+      break;
+    case SkBlendMode::kSrcOver:
+      paint_.blend_mode = Entity::BlendMode::kSourceOver;
+      break;
+    case SkBlendMode::kDstOver:
+      paint_.blend_mode = Entity::BlendMode::kDestinationOver;
+      break;
+    case SkBlendMode::kSrcIn:
+      paint_.blend_mode = Entity::BlendMode::kSourceIn;
+      break;
+    case SkBlendMode::kDstIn:
+      paint_.blend_mode = Entity::BlendMode::kDestinationIn;
+      break;
+    case SkBlendMode::kSrcOut:
+      paint_.blend_mode = Entity::BlendMode::kSourceOut;
+      break;
+    case SkBlendMode::kDstOut:
+      paint_.blend_mode = Entity::BlendMode::kDestinationOut;
+      break;
+    case SkBlendMode::kSrcATop:
+      paint_.blend_mode = Entity::BlendMode::kSourceATop;
+      break;
+    case SkBlendMode::kDstATop:
+      paint_.blend_mode = Entity::BlendMode::kDestinationATop;
+      break;
+    case SkBlendMode::kXor:
+      paint_.blend_mode = Entity::BlendMode::kXor;
+      break;
+    case SkBlendMode::kPlus:
+      paint_.blend_mode = Entity::BlendMode::kPlus;
+      break;
+    case SkBlendMode::kModulate:
+      paint_.blend_mode = Entity::BlendMode::kModulate;
+      break;
+    case SkBlendMode::kScreen:
+    case SkBlendMode::kOverlay:
+    case SkBlendMode::kDarken:
+    case SkBlendMode::kLighten:
+    case SkBlendMode::kColorDodge:
+    case SkBlendMode::kColorBurn:
+    case SkBlendMode::kHardLight:
+    case SkBlendMode::kSoftLight:
+    case SkBlendMode::kDifference:
+    case SkBlendMode::kExclusion:
+    case SkBlendMode::kMultiply:
+    case SkBlendMode::kHue:
+    case SkBlendMode::kSaturation:
+    case SkBlendMode::kColor:
+    case SkBlendMode::kLuminosity:
+      // Non-pipeline-friendly blend modes are not supported by setBlendMode
+      // yet.
+      UNIMPLEMENTED;
+      break;
+  }
 }
 
 // |flutter::Dispatcher|

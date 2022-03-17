@@ -27,7 +27,8 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "Clip";
-  cmd.pipeline = renderer.GetClipPipeline(OptionsFromPass(pass));
+  cmd.pipeline =
+      renderer.GetClipPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(SolidColorContents::CreateSolidFillVertices(
       entity.GetPath(), pass.GetTransientsBuffer()));
@@ -59,7 +60,8 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "Clip Restore";
-  cmd.pipeline = renderer.GetClipRestorePipeline(OptionsFromPass(pass));
+  cmd.pipeline =
+      renderer.GetClipRestorePipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
 
   // Create a rect that covers the whole render target.
