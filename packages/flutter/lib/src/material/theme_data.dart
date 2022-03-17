@@ -72,7 +72,7 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
   /// The extension's type.
   Object get type => T;
 
-  /// Creates a copy of this theme extension scheme with the given fields
+  /// Creates a copy of this theme extension with the given fields
   /// replaced by the non-null parameter values.
   ThemeExtension<T> copyWith();
 
@@ -1079,17 +1079,12 @@ class ThemeData with Diagnosticable {
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
 
-  /// A map containing arbitrary additions to this theme.
+  /// Arbitrary additions to this theme.
   ///
-  /// Each entry represents a different [ThemeExtension] subclass, where the key
-  /// consists of the subclass' type. For example:
-  ///
-  /// ```dart
-  /// extensions: {
-  ///   MyColors: ThemeExtension<MyColors> ... ,
-  ///   MyTextStyles: ThemeExtension<MyTextStyles> ... ,
-  /// }
-  /// ```
+  /// To define extensions, pass an [Iterable] containing one or more [ThemeExtension]
+  /// subclasses to [ThemeData.new] or [copyWith].
+  /// 
+  /// To obtain an extension, use [extension].
   ///
   /// {@tool dartpad}
   /// This sample shows how to create and use a subclass of [ThemeExtension] that
@@ -1105,7 +1100,7 @@ class ThemeData with Diagnosticable {
 
   /// Used to obtain a particular [ThemeExtension] from [extensions].
   ///
-  /// Obtain with `Theme.of(context).extension<MyThemeExtension>`.
+  /// Obtain with `Theme.of(context).extension<MyThemeExtension>()`.
   ///
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T;
