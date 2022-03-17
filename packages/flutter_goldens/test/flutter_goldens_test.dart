@@ -283,7 +283,9 @@ void main() {
           '--work-dir', '/workDirectory/temp',
           '--test-name', 'golden_file_test',
           '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
+          // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
+          // is resolved.
+          //'--passfail',
         ],
         null,
       );
