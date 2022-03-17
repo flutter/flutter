@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <variant>
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
@@ -18,10 +19,11 @@ class RenderPass;
 
 class Entity {
  public:
-  /// All pipeline blend mode presets assume that both the source (fragment
-  /// output) and destination (first color attachment) have colors with
-  /// premultiplied alpha.
+  /// All blend modes assume that both the source (fragment output) and
+  /// destination (first color attachment) have colors with premultiplied alpha.
   enum class BlendMode {
+    // The following blend modes are able to be used as pipeline blend modes or
+    // via `BlendFilterContents`.
     kClear,
     kSource,
     kDestination,
@@ -36,6 +38,14 @@ class Entity {
     kXor,
     kPlus,
     kModulate,
+
+    // The following blend modes use equations that are not available for
+    // pipelines on most graphics devices without extensions, and so they are
+    // only able to be used via `BlendFilterContents`.
+    kScreen,
+
+    kLastPipelineBlendMode = kModulate,
+    kLastAdvancedBlendMode = kScreen,
   };
 
   Entity();
