@@ -223,7 +223,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           case 'Flutter.ServiceExtensionStateChanged':
             _sendServiceExtensionStateChanged(event.extensionData);
             break;
-            case 'Flutter.Error':
+          case 'Flutter.Error':
             _handleFlutterErrorEvent(event.extensionData);
             break;
         }

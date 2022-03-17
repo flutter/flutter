@@ -115,7 +115,7 @@ void main() {
       expect(output, contains('Exited (1)'));
     });
 
-      /// Helper that tests exception output in either debug or noDebug mode.
+    /// Helper that tests exception output in either debug or noDebug mode.
     Future<void> testExceptionOutput({required bool noDebug}) async {
         final BasicProjectThatThrows project = BasicProjectThatThrows();
         await project.setUpIn(tempDir);
