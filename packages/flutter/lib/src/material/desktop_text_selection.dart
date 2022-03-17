@@ -332,6 +332,8 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
       child: TextButton(
         style: TextButton.styleFrom(
           alignment: Alignment.centerLeft,
+          enabledMouseCursor: SystemMouseCursors.basic,
+          disabledMouseCursor: SystemMouseCursors.basic,
           primary: primary,
           shape: const RoundedRectangleBorder(),
           minimumSize: const Size(kMinInteractiveDimension, 36.0),
