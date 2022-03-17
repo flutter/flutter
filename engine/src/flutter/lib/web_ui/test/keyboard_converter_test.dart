@@ -996,6 +996,60 @@ void testMain() {
       character: 'a',
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/99297.
+  //
+  // On Linux Chrome, when holding ShiftLeft and pressing MetaLeft (Win key),
+  // the MetaLeft down event has metaKey true, while the Meta up event has
+  // metaKey false. This violates the definition of metaKey, and does not happen
+  // in nearly any other cases for any other keys.
+  test('Ignore inconsistent modifier flag of the current modifier', () {
+    final List<ui.KeyData> keyDataList = <ui.KeyData>[];
+    final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
+      keyDataList.add(key);
+      return true;
+    }, onMacOs: false);
+
+    converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
+    expectKeyData(keyDataList.last,
+      type: ui.KeyEventType.down,
+      physical: kPhysicalShiftLeft,
+      logical: kLogicalShiftLeft,
+      character: null,
+    );
+    keyDataList.clear();
+
+    converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kShift /* No kMeta here! */, kLocationLeft));
+    // Only a MetaLeft down event, no synthesized MetaLeft up events.
+    expect(keyDataList, hasLength(1));
+    expectKeyData(keyDataList.first,
+      type: ui.KeyEventType.down,
+      physical: kPhysicalMetaLeft,
+      logical: kLogicalMetaLeft,
+      character: null,
+    );
+    keyDataList.clear();
+
+    converter.handleEvent(keyUpEvent('MetaLeft', 'Meta', kShift | kMeta /* Yes, kMeta here! */, kLocationLeft));
+    // Only a MetaLeft down event, no synthesized MetaLeft up events.
+    expect(keyDataList, hasLength(1));
+    expectKeyData(keyDataList.first,
+      type: ui.KeyEventType.up,
+      physical: kPhysicalMetaLeft,
+      logical: kLogicalMetaLeft,
+      character: null,
+    );
+    keyDataList.clear();
+
+    converter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', 0, kLocationLeft));
+    expectKeyData(keyDataList.last,
+      type: ui.KeyEventType.up,
+      physical: kPhysicalShiftLeft,
+      logical: kLogicalShiftLeft,
+      character: null,
+    );
+    keyDataList.clear();
+  });
 }
 
 class MockKeyboardEvent implements FlutterHtmlKeyboardEvent {
