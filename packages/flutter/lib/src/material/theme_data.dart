@@ -1083,7 +1083,7 @@ class ThemeData with Diagnosticable {
   ///
   /// To define extensions, pass an [Iterable] containing one or more [ThemeExtension]
   /// subclasses to [ThemeData.new] or [copyWith].
-  /// 
+  ///
   /// To obtain an extension, use [extension].
   ///
   /// {@tool dartpad}
