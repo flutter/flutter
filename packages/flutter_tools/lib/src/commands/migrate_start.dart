@@ -10,7 +10,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../migrate/migrate_compute.dart';
-import '../migrate/migrate_config.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 import '../cache.dart';
@@ -89,7 +88,6 @@ class MigrateStartCommand extends FlutterCommand {
       baseRevision: stringArg('base-revision'),
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
-      flutterVersion: version,
     );
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);
