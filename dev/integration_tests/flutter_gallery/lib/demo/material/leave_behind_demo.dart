@@ -131,6 +131,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     } else {
       body = Scrollbar(
         child: ListView(
+          primary: true,
           children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
             return _LeaveBehindListItem(
               confirmDismiss: _confirmDismiss,

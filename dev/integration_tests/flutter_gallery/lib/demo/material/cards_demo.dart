@@ -379,6 +379,7 @@ class _CardsDemoState extends State<CardsDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
           children: destinations.map<Widget>((TravelDestination destination) {
             Widget? child;

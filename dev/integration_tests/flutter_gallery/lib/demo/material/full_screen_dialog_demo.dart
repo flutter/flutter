@@ -163,6 +163,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         onWillPop: _onWillPop,
         child: Scrollbar(
           child: ListView(
+            primary: true,
             padding: const EdgeInsets.all(16.0),
             children: <Widget>[
               Container(

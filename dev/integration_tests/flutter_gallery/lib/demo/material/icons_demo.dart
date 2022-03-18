@@ -62,6 +62,7 @@ class IconsDemoState extends State<IconsDemo> {
           bottom: false,
           child: Scrollbar(
             child: ListView(
+              primary: true,
               padding: const EdgeInsets.all(24.0),
               children: <Widget>[
                 _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon

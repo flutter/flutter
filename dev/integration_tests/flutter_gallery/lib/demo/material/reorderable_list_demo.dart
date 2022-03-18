@@ -208,6 +208,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       ),
       body: Scrollbar(
         child: ReorderableListView(
+          primary: true,
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
                   padding: const EdgeInsets.all(8.0),

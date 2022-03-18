@@ -161,6 +161,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           ),
           body: Scrollbar(
             child: ListView(
+              primary: true,
               padding: const EdgeInsets.only(bottom: 88.0),
               children: <Widget>[
                 const _Heading('FAB Shape'),
