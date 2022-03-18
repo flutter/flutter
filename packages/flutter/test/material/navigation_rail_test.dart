@@ -2044,6 +2044,9 @@ void main() {
 
     await tester.tap(find.text('Ghi'));
     expect(selectedIndex, 2);
+
+    // Wait for any pending shader compilation.
+    tester.pumpAndSettle();
   });
 
   testWidgets('onDestinationSelected is not called if null', (WidgetTester tester) async {
@@ -2059,6 +2062,9 @@ void main() {
 
     await tester.tap(find.text('Def'));
     expect(selectedIndex, 0);
+
+    // Wait for any pending shader compilation.
+    tester.pumpAndSettle();
   });
 
   testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {

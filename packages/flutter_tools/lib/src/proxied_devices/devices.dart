@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -207,11 +209,15 @@ class ProxiedDevice extends Device {
     bool includePastLogs = false,
   }) => _ProxiedLogReader(connection, this, app);
 
-  _ProxiedPortForwarder? _proxiedPortForwarder;
-  _ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= _ProxiedPortForwarder(connection, logger: _logger);
+  ProxiedPortForwarder? _proxiedPortForwarder;
+  /// [proxiedPortForwarder] forwards a port from the remote host to local host.
+  ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= ProxiedPortForwarder(connection, logger: _logger);
 
+  DevicePortForwarder? _portForwarder;
+  /// [portForwarder] forwards a port from the remote device to remote host, and
+  /// then forward the port from remote host to local host.
   @override
-  DevicePortForwarder get portForwarder => throw UnimplementedError();
+  DevicePortForwarder get portForwarder => _portForwarder ??= ProxiedPortForwarder(connection, deviceId: id, logger: _logger);
 
   @override
   void clearLogs() => throw UnimplementedError();
@@ -390,29 +396,114 @@ class _ProxiedLogReader extends DeviceLogReader {
   }
 }
 
+/// A port forwarded by a [ProxiedPortForwarder].
+class _ProxiedForwardedPort extends ForwardedPort {
+  _ProxiedForwardedPort(this.connection, {
+    required int hostPort,
+    required int devicePort,
+    required this.remoteDevicePort,
+    required this.deviceId,
+    required this.serverSocket
+  }): super(hostPort, devicePort);
+
+  /// [DaemonConnection] used to communicate with the daemon.
+  final DaemonConnection connection;
+
+  /// The forwarded port on the remote device.
+  final int? remoteDevicePort;
+
+  /// The device identifier of the remote device.
+  final String? deviceId;
+
+  /// The [ServerSocket] that is serving the local forwarded port.
+  final ServerSocket serverSocket;
+
+  @override
+  void dispose() {
+    unforward();
+  }
+
+  /// Unforwards the remote port, and stops the local server.
+  Future<void> unforward() async {
+    await serverSocket.close();
+
+    if (remoteDevicePort != null && deviceId != null) {
+      await connection.sendRequest('device.unforward', <String, Object>{
+        'deviceId': deviceId!,
+        'devicePort': remoteDevicePort!,
+        'hostPort': devicePort,
+      });
+    }
+  }
+}
+
+typedef CreateSocketServer = Future<ServerSocket> Function(Logger logger, int? hostPort);
+
 /// A [DevicePortForwarder] for a proxied device.
-class _ProxiedPortForwarder extends DevicePortForwarder {
-  _ProxiedPortForwarder(this.connection, {
+///
+/// If [deviceId] is not null, the port forwarder forwards ports from the remote
+/// device, to the remote host, and then to the local host.
+///
+/// If [deviceId] is null, then the port forwarder only forwards ports from the
+/// remote host to the local host.
+@visibleForTesting
+class ProxiedPortForwarder extends DevicePortForwarder {
+  ProxiedPortForwarder(this.connection, {
+    String? deviceId,
     required Logger logger,
-  }) : _logger = logger;
+    @visibleForTesting CreateSocketServer createSocketServer = _defaultCreateServerSocket,
+  }) : _logger = logger,
+       _deviceId = deviceId,
+       _createSocketServer = createSocketServer;
+
+  final String? _deviceId;
 
   DaemonConnection connection;
 
   final Logger _logger;
 
+  final CreateSocketServer _createSocketServer;
+
   @override
-  final List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
+  List<ForwardedPort> get forwardedPorts => _hostPortToForwardedPorts.values.toList();
+
+  final Map<int, _ProxiedForwardedPort> _hostPortToForwardedPorts = <int, _ProxiedForwardedPort>{};
 
   final List<Socket> _connectedSockets = <Socket>[];
 
-  final Map<int, ServerSocket> _serverSockets = <int, ServerSocket>{};
-
   @override
   Future<int> forward(int devicePort, { int? hostPort }) async {
-    final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, hostPort ?? 0);
+    int? remoteDevicePort;
+    final String? deviceId = _deviceId;
 
-    _serverSockets[serverSocket.port] = serverSocket;
-    forwardedPorts.add(ForwardedPort(serverSocket.port, devicePort));
+    // If deviceId is set, we need to forward the remote device port to remote host as well.
+    // And then, forward the remote host port to a local host port.
+    if (deviceId != null) {
+      final Map<String, Object?> result = _cast<Map<String, Object?>>(
+        await connection.sendRequest('device.forward', <String, Object>{
+          'deviceId': deviceId,
+          'devicePort': devicePort,
+        }));
+      remoteDevicePort = devicePort;
+      devicePort = result['hostPort']! as int;
+    }
+
+    final ServerSocket serverSocket = await _startProxyServer(devicePort, hostPort);
+
+    _hostPortToForwardedPorts[serverSocket.port] = _ProxiedForwardedPort(
+      connection,
+      hostPort: serverSocket.port,
+      devicePort: devicePort,
+      remoteDevicePort: remoteDevicePort,
+      deviceId: deviceId,
+      serverSocket: serverSocket,
+    );
+
+    return serverSocket.port;
+  }
+
+  Future<ServerSocket> _startProxyServer(int devicePort, int? hostPort) async {
+    final ServerSocket serverSocket = await _createSocketServer(_logger, hostPort);
 
     serverSocket.listen((Socket socket) async {
       final String id = _cast<String>(await connection.sendRequest('proxy.connect', <String, Object>{
@@ -423,6 +514,9 @@ class _ProxiedPortForwarder extends DevicePortForwarder {
       final Future<DaemonEventData> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
       unawaited(disconnectFuture.then((_) {
         socket.close();
+      }).catchError((_) {
+        // The event is not guaranteed to be sent if we initiated the disconnection.
+        // Do nothing here.
       }));
       socket.listen((Uint8List data) {
         connection.sendRequest('proxy.write', <String, Object>{
@@ -446,34 +540,37 @@ class _ProxiedPortForwarder extends DevicePortForwarder {
       _logger.printWarning('Server socket error: $error');
       _logger.printTrace('Server socket error: $error, stack trace: $stackTrace');
     });
-    return serverSocket.port;
+
+    return serverSocket;
   }
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
-    if (!forwardedPorts.remove(forwardedPort)) {
-      // Not in list. Nothing to remove.
-      return;
-    }
-
-    forwardedPort.dispose();
-
-    final ServerSocket? serverSocket = _serverSockets.remove(forwardedPort.hostPort);
-    await serverSocket?.close();
+    // Look for the forwarded port entry in our own map.
+    final _ProxiedForwardedPort? proxiedForwardedPort = _hostPortToForwardedPorts.remove(forwardedPort.hostPort);
+    await proxiedForwardedPort?.unforward();
   }
 
   @override
   Future<void> dispose() async {
-    for (final ForwardedPort forwardedPort in forwardedPorts) {
-      forwardedPort.dispose();
-    }
-
-    for (final ServerSocket serverSocket in _serverSockets.values) {
-      await serverSocket.close();
+    for (final _ProxiedForwardedPort forwardedPort in _hostPortToForwardedPorts.values) {
+      await forwardedPort.unforward();
     }
 
     for (final Socket socket in _connectedSockets) {
       await socket.close();
     }
   }
+}
+
+Future<ServerSocket> _defaultCreateServerSocket(Logger logger, int? hostPort) async {
+  try {
+    return await ServerSocket.bind(InternetAddress.loopbackIPv4, hostPort ?? 0);
+  } on SocketException {
+    logger.printTrace('Bind on $hostPort failed with IPv4, retrying on IPv6');
+  }
+
+  // If binding on ipv4 failed, try binding on ipv6.
+  // Omit try catch here, let the failure fallthrough.
+  return ServerSocket.bind(InternetAddress.loopbackIPv6, hostPort ?? 0);
 }

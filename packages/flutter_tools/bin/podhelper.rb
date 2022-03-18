@@ -116,9 +116,6 @@ def flutter_additional_macos_build_settings(target)
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
 
-    # ARM not yet supported https://github.com/flutter/flutter/issues/69221
-    build_configuration.build_settings['EXCLUDED_ARCHS'] = 'arm64'
-
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'MACOSX_DEPLOYMENT_TARGET' if inherit_deployment_target

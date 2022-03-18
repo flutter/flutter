@@ -268,6 +268,43 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
+  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    // Basic check that this theme is in fact using material 3.
+    expect(theme.useMaterial3, true);
+
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+        if (kIsWeb) {
+          expect(theme.splashFactory, equals(InkSplash.splashFactory));
+        } else {
+          expect(theme.splashFactory, equals(InkSparkle.splashFactory));
+        }
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(theme.splashFactory, equals(InkSplash.splashFactory));
+     }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(theme.splashFactory, equals(InkSplash.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('VisualDensity.adaptivePlatformDensity returns adaptive values', (WidgetTester tester) async {
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
@@ -612,6 +649,7 @@ void main() {
       sliderTheme: otherTheme.sliderTheme,
       tabBarTheme: otherTheme.tabBarTheme,
       tooltipTheme: otherTheme.tooltipTheme,
+      expansionTileTheme: otherTheme.expansionTileTheme,
       cardTheme: otherTheme.cardTheme,
       chipTheme: otherTheme.chipTheme,
       platform: otherTheme.platform,
@@ -689,6 +727,7 @@ void main() {
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
+    expect(themeDataCopy.expansionTileTheme, equals(otherTheme.expansionTileTheme));
     expect(themeDataCopy.cardTheme, equals(otherTheme.cardTheme));
     expect(themeDataCopy.chipTheme, equals(otherTheme.chipTheme));
     expect(themeDataCopy.platform, equals(otherTheme.platform));

@@ -152,6 +152,14 @@ abstract class Device {
   /// with some prefix.
   Stream<String> get logcat;
 
+  /// Clears the device logs.
+  ///
+  /// This is important because benchmarks tests rely on the logs produced by
+  /// the flutter run command.
+  ///
+  /// On Android, those logs may contain logs from previous test.
+  Future<void> clearLogs();
+
   /// Whether this device supports calls to [startLoggingToSink]
   /// and [stopLoggingToSink].
   bool get canStreamLogs => false;
@@ -668,6 +676,11 @@ class AndroidDevice extends Device {
   }
 
   @override
+  Future<void> clearLogs() {
+    return adb(<String>['logcat', '-c']);
+  }
+
+  @override
   Stream<String> get logcat {
     final Completer<void> stdoutDone = Completer<void>();
     final Completer<void> stderrDone = Completer<void>();
@@ -677,7 +690,7 @@ class AndroidDevice extends Device {
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
-        await adb(<String>['logcat', '-c']);
+        await clearLogs();
         final Process process = await startProcess(
           adbPath,
           // Make logcat less chatty by filtering down to just ActivityManager
@@ -972,6 +985,9 @@ class IosDevice extends Device {
   }
 
   @override
+  Future<void> clearLogs() async {}
+
+  @override
   Future<void> stop(String packageName) async {}
 
   @override
@@ -1006,6 +1022,9 @@ class WindowsDevice extends Device {
 
   @override
   Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
 
   @override
   Future<void> reboot() async { }
@@ -1075,6 +1094,9 @@ class FuchsiaDevice extends Device {
   }
 
   @override
+  Future<void> clearLogs() async {}
+
+  @override
   Future<void> reboot() async {
     // Unsupported.
   }
@@ -1141,6 +1163,9 @@ class FakeDevice extends Device {
   Stream<String> get logcat {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> clearLogs() async {}
 
   @override
   Future<void> stop(String packageName) async {}
