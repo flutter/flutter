@@ -237,9 +237,9 @@ class BuildInfo {
         kFileSystemRoots: fileSystemRoots.join(','),
       if (fileSystemScheme != null)
         kFileSystemScheme: fileSystemScheme!,
-      if (buildName != null) 
+      if (buildName != null)
         kBuildName: buildName!,
-      if (buildNumber != null) 
+      if (buildNumber != null)
         kBuildNumber: buildNumber!,
     };
   }
