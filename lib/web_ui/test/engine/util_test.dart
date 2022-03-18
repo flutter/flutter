@@ -41,8 +41,9 @@ void testMain() {
     expect(isIdentityFloat32ListTransform(rotation2d), isFalse);
   });
 
-  test('canonicalizes font families correctly on iOS', () {
+  test('canonicalizes font families correctly on iOS (not 15)', () {
     debugOperatingSystemOverride = OperatingSystem.iOs;
+    debugIsIOS15 = false;
 
     expect(
       canonicalizeFontFamily('sans-serif'),
@@ -58,6 +59,7 @@ void testMain() {
     );
 
     debugOperatingSystemOverride = null;
+    debugIsIOS15 = null;
   });
 
   test('does not use -apple-system on iOS 15', () {
