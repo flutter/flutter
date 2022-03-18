@@ -36,6 +36,7 @@ class CardTheme with Diagnosticable {
     this.clipBehavior,
     this.color,
     this.shadowColor,
+    this.surfaceTintColor,
     this.elevation,
     this.margin,
     this.shape,
@@ -55,6 +56,11 @@ class CardTheme with Diagnosticable {
   ///
   /// If null, [Card] defaults to fully opaque black.
   final Color? shadowColor;
+
+  /// Default value for [Card.surfaceTintColor].
+  ///
+  /// If null, [Card] will not display an overlay color.
+  final Color? surfaceTintColor;
 
   /// Default value for [Card.elevation].
   ///
@@ -79,6 +85,7 @@ class CardTheme with Diagnosticable {
     Clip? clipBehavior,
     Color? color,
     Color? shadowColor,
+    Color? surfaceTintColor,
     double? elevation,
     EdgeInsetsGeometry? margin,
     ShapeBorder? shape,
@@ -87,6 +94,7 @@ class CardTheme with Diagnosticable {
       clipBehavior: clipBehavior ?? this.clipBehavior,
       color: color ?? this.color,
       shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
       margin: margin ?? this.margin,
       shape: shape ?? this.shape,
@@ -109,6 +117,7 @@ class CardTheme with Diagnosticable {
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -120,6 +129,7 @@ class CardTheme with Diagnosticable {
     clipBehavior,
     color,
     shadowColor,
+    surfaceTintColor,
     elevation,
     margin,
     shape,
@@ -135,6 +145,7 @@ class CardTheme with Diagnosticable {
         && other.clipBehavior == clipBehavior
         && other.color == color
         && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.elevation == elevation
         && other.margin == margin
         && other.shape == shape;
@@ -146,6 +157,7 @@ class CardTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
