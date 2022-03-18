@@ -193,13 +193,16 @@ class ApluginPlatformInterfaceMacOS {
 
       // Hot restart.
       run.stdin.write('R');
-      registryExecutedCompleter = Completer<void>();
+      await run.stdin.flush();
+      await run.stdin.close();
 
+      registryExecutedCompleter = Completer<void>();
       section('Wait for registry execution after hot restart');
       await waitOrExit(registryExecutedCompleter.future);
 
       run.kill();
 
+      section('Wait for stdout/stderr streams');
       await waitForStreams();
 
       unawaited(stdoutSub.cancel());
