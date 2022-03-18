@@ -26,6 +26,7 @@ import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'ink_sparkle.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
@@ -405,9 +406,10 @@ class ThemeData with Diagnosticable {
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    splashFactory ??= InkSplash.splashFactory;
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
+    final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
+    splashFactory ??= (useMaterial3 && useInkSparkle) ? InkSparkle.splashFactory : InkSplash.splashFactory;
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
@@ -1109,6 +1111,8 @@ class ThemeData with Diagnosticable {
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
   ///    more aggressively than the default.
+  ///  * [InkSparkle.splashFactory], which defines a more aggressive and organic
+  ///    splash with sparkle effects.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// The density value for specifying the compactness of various UI components.
@@ -1146,12 +1150,15 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// If a [ThemeData] is constructed with [useMaterial3] set to true,
-  /// the default [typography] will be [Typography.material2021],
-  /// otherwise it will be [Typography.material2014].
-  ///
-  /// However, just copying a [ThemeData] with [useMaterial3] set to true will
-  /// not change the typography of the resulting ThemeData.
+  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
+  /// some properties will get special defaults. However, just copying a [ThemeData]
+  /// with [useMaterial3] set to true will not change any of these properties in the
+  /// resulting [ThemeData]. These properties are:
+  /// | Property | [useMaterial3] default | fallback default |
+  /// |:---|:---|:---|
+  /// | [typography] | [Typography.material2021] | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* | [InkSplash] |
+  /// *if and only if the target platform is Android and the app is not running on the web.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
