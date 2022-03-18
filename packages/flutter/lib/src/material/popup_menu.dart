@@ -37,6 +37,7 @@ const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
+const double _kDefaultIconSize = 24.0;
 
 /// Used to configure how the [PopupMenuButton] positions its popup menu.
 enum PopupMenuPosition {
@@ -1215,7 +1216,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,
-      iconSize: widget.iconSize ?? iconTheme.size ?? 24.0,
+      iconSize: widget.iconSize ?? iconTheme.size ?? _kDefaultIconSize,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
