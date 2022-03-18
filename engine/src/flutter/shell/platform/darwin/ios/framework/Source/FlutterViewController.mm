@@ -656,13 +656,13 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
   TRACE_EVENT0("flutter", "viewDidLoad");
 
   if (_engine && _engineNeedsLaunch) {
-    // Register internal plugins before starting the engine.
-    [self addInternalPlugins];
-
     [_engine.get() launchEngine:nil libraryURI:nil entrypointArgs:nil];
     [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
   }
+
+  // Register internal plugins.
+  [self addInternalPlugins];
 
   if ([_engine.get() viewController] == self) {
     [_engine.get() attachView];
