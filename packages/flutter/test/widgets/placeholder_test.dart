@@ -36,10 +36,10 @@ void main() {
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 10.0));
   });
 
-   testWidgets('Placeholder child widget', (WidgetTester tester) async {   
+   testWidgets('Placeholder child widget', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(find.text('Label'), findsNothing);
-    await tester.pumpWidget(const MaterialApp(home:Placeholder(child:Text('Label'))));
+    await tester.pumpWidget(const MaterialApp(home: Placeholder(child: Text('Label'))));
     expect(find.text('Label'), findsOneWidget);
   });
 }
