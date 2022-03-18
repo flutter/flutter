@@ -2179,9 +2179,32 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     return hitTarget;
   }
 
-  /// The focus dropping behavior is only present on desktop platforms
+  /// The focus dropping behavior is present on supported mouse-based pointer
+  /// devices and touch-based pointer devices.
+  ///
+  /// See also:
+  ///
+  ///  * [_shouldIgnoreMouseEvents], which describes supported mouse-based
+  ///   pointer devices.
+  ///  * [_shouldIgnoreTouchEvents], which describes supported touch-based
+  ///   pointer devices.
+  bool _shouldIgnorePointerDevice(PointerDeviceKind pointerDeviceKind) {
+    switch (pointerDeviceKind) {
+      case PointerDeviceKind.mouse:
+        return _shouldIgnoreMouseEvents;
+      case PointerDeviceKind.touch:
+        return _shouldIgnoreTouchEvents;
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.trackpad:
+      case PointerDeviceKind.unknown:
+        return true;
+    }
+  }
+
+  /// The mouse focus dropping behavior is only present on desktop platforms
   /// and mobile browsers.
-  bool get _shouldIgnoreEvents {
+  bool get _shouldIgnoreMouseEvents {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -2194,13 +2217,26 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  /// The touch focus dropping behavior is only present on mobile browsers.
+  bool get _shouldIgnoreTouchEvents {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !kIsWeb;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+        return true;
+    }
+  }
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is! PointerDownEvent
       || event.buttons != kPrimaryButton
-      || event.kind != PointerDeviceKind.mouse
-      || _shouldIgnoreEvents
+      || _shouldIgnorePointerDevice(event.kind)
       || _focusScopeNode.focusedChild == null) {
       return;
     }
