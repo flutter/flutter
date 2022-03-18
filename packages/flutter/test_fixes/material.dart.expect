@@ -524,4 +524,7 @@ void main() {
   rawChip = RawChip();
   rawChip = RawChip(deleteButtonTooltipMessage: 'Delete Tooltip');
   rawChip.deleteButtonTooltipMessage;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  SelectionOverlay.fadeDuration;
 }
