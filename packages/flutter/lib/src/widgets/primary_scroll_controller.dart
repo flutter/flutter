@@ -35,14 +35,25 @@ class PrimaryScrollController extends InheritedWidget {
     Key? key,
     required ScrollController this.controller,
     required Widget child,
-  }) : assert(controller != null),
+  }) : force = false,
+       assert(controller != null),
        super(key: key, child: child);
 
   /// Creates a subtree without an associated [ScrollController].
   const PrimaryScrollController.none({
     Key? key,
     required Widget child,
-  }) : controller = null,
+  }) : force = false,
+       controller = null,
+       super(key: key, child: child);
+
+  ///
+  const PrimaryScrollController.force({
+    Key? key,
+    required ScrollController this.controller,
+    required Widget child,
+  }) : force = true,
+       assert(controller != null),
        super(key: key, child: child);
 
   /// The [ScrollController] associated with the subtree.
@@ -52,6 +63,15 @@ class PrimaryScrollController extends InheritedWidget {
   ///  * [ScrollView.controller], which discusses the purpose of specifying a
   ///    scroll controller.
   final ScrollController? controller;
+
+  ///
+  final bool force;
+
+  ///
+  static bool shouldForceInheritance(BuildContext context) {
+    final PrimaryScrollController? result = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
+    return result?.force ?? false;
+  }
 
   /// Returns the [ScrollController] most closely associated with the given
   /// context.

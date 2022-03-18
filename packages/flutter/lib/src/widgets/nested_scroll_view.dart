@@ -313,7 +313,9 @@ class NestedScrollView extends StatefulWidget {
     return <Widget>[
       ...headerSliverBuilder(context, bodyIsScrolled),
       SliverFillRemaining(
-        child: PrimaryScrollController(
+        // The inner (body) scroll view must use this scroll controller so that
+        // the independent scroll positions can be kept in sync.
+        child: PrimaryScrollController.force(
           controller: innerController,
           child: body,
         ),

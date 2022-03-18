@@ -390,20 +390,33 @@ abstract class ScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
-    final bool effectivePrimary = primary ?? () {
-      switch(ScrollConfiguration.of(context).getPlatform(context)) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
-          return controller == null && identical(scrollDirection, Axis.vertical);
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return false;
-    }}();
 
-    final ScrollController? scrollController =
-      effectivePrimary ? PrimaryScrollController.of(context) : controller;
+    late final bool effectivePrimary;
+    if (PrimaryScrollController.shouldForceInheritance(context)) {
+      assert(
+        controller == null,
+        'The PrimaryScrollController is enforcing an inherited ScrollController. '
+        'The currently assigned controller will not be used.',
+      );
+      effectivePrimary = true;
+    } else {
+      effectivePrimary = primary ?? () {
+        switch(ScrollConfiguration.of(context).getPlatform(context)) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            return controller == null && identical(scrollDirection, Axis.vertical);
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            return false;
+        }
+      }();
+    }
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.of(context)
+        : controller;
+
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
