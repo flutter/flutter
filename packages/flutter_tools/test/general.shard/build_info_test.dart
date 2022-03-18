@@ -109,6 +109,8 @@ void main() {
       codeSizeDirectory: 'foo/code-size',
       fileSystemRoots: <String>['test5', 'test6'],
       fileSystemScheme: 'scheme',
+      buildName: '122',
+      buildNumber: '22'
     );
 
     expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
@@ -124,6 +126,8 @@ void main() {
       'CodeSizeDirectory': 'foo/code-size',
       'FileSystemRoots': 'test5,test6',
       'FileSystemScheme': 'scheme',
+      'BuildName': '122',
+      'BuildNumber': '22',
     });
   });
 

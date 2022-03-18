@@ -148,6 +148,31 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
+
+  testUsingContext('Web build supports build-name and build-number', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    setupFileSystemForEndToEndTest(fileSystem);
+
+    await runner.run(<String>[
+      'build',
+      'web',
+      '--no-pub',
+      '--build-name=1.2.3',
+      '--build-number=42',
+    ]);
+
+    final BuildInfo buildInfo = await buildCommand.webCommand
+        .getBuildInfo(forcedBuildMode: BuildMode.debug);
+    expect(buildInfo.buildNumber, '42');
+    expect(buildInfo.buildName, '1.2.3');
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+  });
 }
 
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {

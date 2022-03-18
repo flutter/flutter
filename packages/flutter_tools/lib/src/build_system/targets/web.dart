@@ -334,10 +334,7 @@ class WebReleaseBundle extends Target {
       );
     }
 
-    final String versionInfo = FlutterProject.current().getVersionInfo();
-    environment.outputDir
-        .childFile('version.json')
-        .writeAsStringSync(versionInfo);
+    createVersionFile(environment, environment.defines);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -403,6 +400,25 @@ class WebReleaseBundle extends Target {
       resourceFile,
       environment.buildDir.childFile('web_resources.d'),
     );
+  }
+
+  /// Create version.json file that contains data about version for package_info
+  void createVersionFile(Environment environment, Map<String, String> defines) {
+    final Map<String, dynamic> versionInfo =
+        jsonDecode(FlutterProject.current().getVersionInfo())
+            as Map<String, dynamic>;
+
+    if (defines.containsKey(kBuildNumber)) {
+      versionInfo['build_number'] = defines[kBuildNumber];
+    }
+
+    if (defines.containsKey(kBuildName)) {
+      versionInfo['version'] = defines[kBuildName];
+    }
+
+    environment.outputDir
+        .childFile('version.json')
+        .writeAsStringSync(jsonEncode(versionInfo));
   }
 }
 

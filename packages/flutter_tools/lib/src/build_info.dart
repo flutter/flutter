@@ -237,6 +237,10 @@ class BuildInfo {
         kFileSystemRoots: fileSystemRoots.join(','),
       if (fileSystemScheme != null)
         kFileSystemScheme: fileSystemScheme!,
+      if (buildName != null) 
+        kBuildName: buildName!,
+      if (buildNumber != null) 
+        kBuildNumber: buildNumber!,
     };
   }
 
@@ -926,6 +930,12 @@ const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
+
+/// The define to pass build name
+const String kBuildName = 'BuildName';
+
+/// The define to pass build number
+const String kBuildNumber = 'BuildNumber';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

@@ -20,6 +20,8 @@ class BuildWebCommand extends BuildSubCommand {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
+    usesBuildNumberOption();
+    usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
     usesWebRendererOption();

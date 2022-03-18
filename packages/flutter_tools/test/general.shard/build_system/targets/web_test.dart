@@ -100,6 +100,22 @@ void main() {
     expect(environment.outputDir.childFile('version.json'), exists);
   }));
 
+    test('override version values', () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kBuildName] = '2.0.0';
+      environment.defines[kBuildNumber] = '22';
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await const WebReleaseBundle().build(environment);
+
+      final String versionFile = environment.outputDir
+          .childFile('version.json')
+          .readAsStringSync();
+      expect(versionFile, contains('"version":"2.0.0"'));
+      expect(versionFile, contains('"build_number":"22"'));
+    }));
+
   test('Base href is created in index.html with given base-href after release build', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kBaseHref] = '/basehreftest/';
