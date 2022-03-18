@@ -844,7 +844,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
+class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBindingObserver implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -953,6 +953,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   // Service used for spell checking if enabled.
   SpellCheckService? _spellCheckService;
+  bool? _spellCheckEnabled;
 
   @override
   void initState() {
@@ -964,7 +965,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.canRequestFocus = _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
     //TODO(camillesimon): Determine default behavior here. Might be common across text fields depending on input so may move out to static method in services/spell_check.dart.
-    _spellCheckService = widget.spellCheckService ?? MaterialSpellCheckService();
+    WidgetsBinding.instance?.addObserver(this);
+    print("---------------------defaultSpellCheckEnabled made it to TextField as:-------------------");
+    print(WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled);
+    _spellCheckEnabled = (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : true;
+    if (_spellCheckEnabled!) {
+      _spellCheckService = widget.spellCheckService ?? MaterialSpellCheckService();
+    }
   }
 
   bool get _canRequestFocus {
@@ -1038,6 +1045,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
