@@ -475,29 +475,17 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
   });
 
-  testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
+  testWidgets('User specified middle is only visible in sliver on scroll', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    final Key segmentedControlsKey = UniqueKey();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
             controller: scrollController,
             slivers: <Widget>[
-              CupertinoSliverNavigationBar(
-                middle: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200.0),
-                  child: CupertinoSegmentedControl<int>(
-                    key: segmentedControlsKey,
-                    children: const <int, Widget>{
-                      0: Text('Option A'),
-                      1: Text('Option B'),
-                    },
-                    onValueChanged: (int selected) { },
-                    groupValue: 0,
-                  ),
-                ),
-                largeTitle: const Text('Title'),
+              const CupertinoSliverNavigationBar(
+                middle: Text('Middle'),
+                largeTitle: Text('Title'),
               ),
               SliverToBoxAdapter(
                 child: Container(
@@ -513,9 +501,12 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
-
     expect(find.text('Title'), findsOneWidget);
-    expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
+    // The middle is invisible without scrolling.
+    expect(
+      tester.renderObject<RenderAnimatedOpacity>(find.widgetWithText(AnimatedOpacity, 'Middle')).opacity.value,
+      0.0,
+    );
 
     expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
@@ -524,7 +515,7 @@ void main() {
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
+    expect(tester.getCenter(find.text('Middle')).dx, 400.0);
     // The large title is invisible now.
     expect(
       tester.renderObject<RenderAnimatedOpacity>(find.widgetWithText(AnimatedOpacity, 'Title')).opacity.value,
