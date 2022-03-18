@@ -605,7 +605,7 @@ void main() {
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
   },
-    skip: !isBrowser,
+    skip: !isBrowser, // https://github.com/flutter/flutter/issues/64245
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 }
