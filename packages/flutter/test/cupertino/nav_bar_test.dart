@@ -475,7 +475,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
   });
 
-  testWidgets('User specified middle is only visible in sliver on scroll', (WidgetTester tester) async {
+  testWidgets('User specified middle is only visible in sliver if navigation bar is collapsed', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       CupertinoApp(
