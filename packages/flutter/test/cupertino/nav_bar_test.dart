@@ -501,7 +501,6 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
-
     expect(find.text('Title'), findsOneWidget);
     // The middle is invisible without scrolling.
     expect(
