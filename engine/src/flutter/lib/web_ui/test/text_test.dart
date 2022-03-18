@@ -26,7 +26,11 @@ Future<void> testMain() async {
   setUp(() {
     if (operatingSystem == OperatingSystem.macOs ||
         operatingSystem == OperatingSystem.iOs) {
-      fallback = '-apple-system, BlinkMacSystemFont';
+      if (isIOS15) {
+        fallback = 'BlinkMacSystemFont';
+      } else {
+        fallback = '-apple-system, BlinkMacSystemFont';
+      }
     } else {
       fallback = 'Arial';
     }
