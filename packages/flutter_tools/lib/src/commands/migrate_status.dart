@@ -9,7 +9,6 @@ import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../migrate/migrate_config.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 import '../cache.dart';

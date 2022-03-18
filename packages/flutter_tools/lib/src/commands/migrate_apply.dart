@@ -7,10 +7,11 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../version.dart';
 import '../runner/flutter_command.dart';
-import '../migrate/migrate_config.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 import '../cache.dart';
@@ -52,7 +53,9 @@ class MigrateApplyCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    final FlutterProject flutterProject = FlutterProject.current();
+    final Logger logger = globals.logger;
+    Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
       workingDir = globals.fs.directory(stringArg('working-directory'));
     }
@@ -108,12 +111,20 @@ class MigrateApplyCommand extends FlutterCommand {
 
     // Update the migrate config files to reflect latest migration.
     if (_verbose) globals.logger.printStatus('Updating .migrate_configs');
-    final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
-    final String currentGitHash = await MigrateUtils.getGitHash(Cache.flutterRoot!);
-    for (MigrateConfig config in configs) {
-      config.baseRevision = currentGitHash;
-      config.writeFile(projectDirectory: FlutterProject.current().directory);
-    }
+    final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
+    final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
+
+    final String currentGitHash = version.frameworkRevision;
+    metadata.migrateConfig.populate(
+      // List<SupportedPlatform>? platforms,
+      projectDirectory: flutterProject.directory,
+      currentRevision: currentGitHash,
+      logger: logger,
+    );
+    // for (MigrateConfig config in configs) {
+    //   config.baseRevision = currentGitHash;
+    //   config.writeFile(projectDirectory: FlutterProject.current().directory);
+    // }
 
     // Clean up the working directory
     workingDir.deleteSync(recursive: true);

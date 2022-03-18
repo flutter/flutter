@@ -11,7 +11,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../migrate/migrate_compute.dart';
-import '../migrate/migrate_config.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 

@@ -9,6 +9,7 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
 import '../commands/migrate.dart';
+import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -150,15 +151,15 @@ Future<MigrateResult?> computeMigration({
   }
   Status statusTicker = logger.startProgress('Computing migration');
 
-  final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'));
+  final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
   final MigrateConfig config = metadata.migrateConfig;
 
   final String fallbackRevision = await getFallbackBaseRevision(metadata, FlutterVersion(workingDirectory: flutterProject.directory.absolute.path));
   String rootBaseRevision = '';
-  Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
+  Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
   Set<String> revisions = Set<String>();
   if (baseRevision == null) {
-    for (MigratePlaformConfig platform in config.platformConfigs) {
+    for (MigratePlatformConfig platform in config.platformConfigs.values) {
       String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
       if (platform.platform == SupportedPlatform.root) {
         rootBaseRevision = effectiveRevision;
@@ -185,14 +186,12 @@ Future<MigrateResult?> computeMigration({
   if (verbose) logger.printStatus('Parsing unmanagedFiles.');
   List<String> unmanagedFiles = <String>[];
   List<String> unmanagedDirectories = <String>[];
-  for (MigrateConfig config in configs) {
-    final basePath = config.getBasePath(flutterProject.directory);
-    for (String localPath in config.unmanagedFiles) {
-      if (localPath.endsWith(globals.fs.path.separator)) {
-        unmanagedDirectories.add(globals.fs.path.join(basePath, localPath));
-      } else {
-        unmanagedFiles.add(globals.fs.path.join(basePath, localPath));
-      }
+  final String basePath = flutterProject.directory.path;
+  for (String localPath in config.unmanagedFiles) {
+    if (localPath.endsWith(globals.fs.path.separator)) {
+      unmanagedDirectories.add(globals.fs.path.join(basePath, localPath));
+    } else {
+      unmanagedFiles.add(globals.fs.path.join(basePath, localPath));
     }
   }
 
@@ -228,8 +227,8 @@ Future<MigrateResult?> computeMigration({
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
     for (String revision in revisionsList) {
       final List<String> platforms = <String>[];
-      for (MigrateConfig config in revisionToConfigs[revision]!) {
-        platforms.add(config.platform!);
+      for (MigratePlatformConfig config in revisionToConfigs[revision]!) {
+        platforms.add(config.platform.toString().split('.').last);
       }
       platforms.remove('root'); // Root does not need to be listed and is not a valid platform
 
@@ -444,10 +443,10 @@ Future<MigrateResult?> computeMigration({
 }
 
 String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
-    if (metadataFile.versionRevision != null) {
+    if (metadata.versionRevision != null) {
       return metadata.versionRevision!;
     }
-    return version.flutterRevision;
+    return version.frameworkRevision;
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
