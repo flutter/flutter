@@ -220,6 +220,11 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
+  static const MethodChannel spellCheck = OptionalMethodChannel(
+      'flutter/spellcheck',
+      JSONMethodCodec(),
+  );
+
   /// A JSON [BasicMessageChannel] for keyboard events.
   ///
   /// Each incoming message received on this channel (registered using

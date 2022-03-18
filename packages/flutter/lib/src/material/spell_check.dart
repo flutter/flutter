@@ -2,6 +2,9 @@ import 'package:flutter/src/painting/text_span.dart';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter/src/services/text_input.dart' show TextInputConnection;
+import 'package:flutter/src/services/message_codec.dart';
+import 'package:flutter/src/services/platform_channel.dart';
+import 'package:flutter/src/services/system_channels.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -10,12 +13,47 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 class MaterialSpellCheckService implements SpellCheckService {
+  // create channel, set handler and create handler
+  late MethodChannel spellCheckChannel;
   MaterialSpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = MaterialSpellCheckSuggestionsHandler();
+
+   MaterialSpellCheckService() {
+    spellCheckChannel = SystemChannels.spellCheck;    
+    spellCheckChannel.setMethodCallHandler(_handleSpellCheckInvocation);
+  }
+
+    Future<dynamic> _handleSpellCheckInvocation(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      print("---------------FETCH RETURNED----------------");
+
+    switch (method) {
+      //TODO(camillesimon): Rename all spellcheckER names to spellcheck
+      case 'TextInputClient.updateSpellCheckerResults':
+        List<String> results = args[0].cast<String>();
+        List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
+        results.forEach((String result) {
+          List<String> resultParsed = result.split(".");
+          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
+        });
+        // TODO(camillesimon): Remove support for passing text (and remove from engine).
+        updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
+        break;
+      default:
+        throw MissingPluginException();
+    }
+  }
 
   @override
   void fetchSpellCheckSuggestions(TextInputConnection? textInputConnection, Locale locale, String text) {
-    textInputConnection!.initiateSpellChecking(locale, text);
-  }
+    assert(locale != null);
+    assert(text != null);
+    print("---------------FETCH INITIATED----------------");
+    spellCheckChannel.invokeMethod<void>(
+        'SpellCheck.initiateSpellChecking',
+        <String>[ locale.toLanguageTag(), text ],
+      );  
+    }
 
   @override
   SpellCheckSuggestionsHandler? getSpellCheckSuggestionsHandler() {
