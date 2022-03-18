@@ -27,7 +27,7 @@ transforms:
     changes:
       - kind: 'replacedBy'
         newElement:
-          uris: ['widgets.dart']
+          uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
           field: 'fadeDuration'
           inClass: 'SelectionOverlay'
 
