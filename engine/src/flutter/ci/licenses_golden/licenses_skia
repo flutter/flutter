@@ -1,4 +1,4 @@
-Signature: 6bb780cd8eea04127facabc844949f6b
+Signature: 4e43d0c647d4447dab973ea6ebf62b3b
 
 UNUSED LICENSES:
 
@@ -6090,7 +6090,13 @@ FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/render/CoverBoundsRenderStep.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/render/CoverBoundsRenderStep.h
+FILE: ../../../third_party/skia/experimental/graphite/src/render/MiddleOutFanRenderStep.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/render/MiddleOutFanRenderStep.h
 FILE: ../../../third_party/skia/experimental/graphite/src/render/StencilAndCoverDSS.h
+FILE: ../../../third_party/skia/experimental/graphite/src/render/TessellateCurvesRenderStep.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/render/TessellateCurvesRenderStep.h
 FILE: ../../../third_party/skia/gm/bug12866.cpp
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
