@@ -137,6 +137,21 @@ void main() {
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
+
+  test('Loading invalid image data throws catchable error', () async {
+    final Completer<void> completer = Completer<void>();
+
+    try {
+    decodeImageFromPixels(Uint8List.fromList(<int>[10, 30, 40]), 10, 10, PixelFormat.rgba8888, (Image image) {
+      print(image);
+      completer.complete();
+    });
+    } catch (err) {
+      print(err);
+    }
+
+    await completer.future;
+  });
 }
 
 class FakeCodec implements Codec {
