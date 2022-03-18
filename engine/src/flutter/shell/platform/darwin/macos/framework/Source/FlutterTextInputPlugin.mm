@@ -470,6 +470,13 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
   if (!_shown) {
     return NO;
   }
+
+  // NSTextInputContext sometimes deactivates itself without calling
+  // deactivate. One such example is when the composing region is deleted.
+  // TODO(LongCatIsLooong): put FlutterTextInputPlugin in the view hierarchy and
+  // request/resign first responder when needed. Activate/deactivate shouldn't
+  // be called by the application.
+  [_textInputContext activate];
   return [_textInputContext handleEvent:event];
 }
 
@@ -534,6 +541,10 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 
 - (void)scrollWheel:(NSEvent*)event {
   [self.flutterViewController scrollWheel:event];
+}
+
+- (NSTextInputContext*)inputContext {
+  return _textInputContext;
 }
 
 #pragma mark -
