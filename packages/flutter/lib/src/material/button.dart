@@ -381,6 +381,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
         shape: effectiveShape,
         color: widget.fillColor,
+        // For compatibility during the M3 migration the default shadow needs to be passed.
+        shadowColor: Theme.of(context).useMaterial3 ? Theme.of(context).shadowColor : null,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
