@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list_canvas_recorder.h"
 
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
 
 namespace flutter {
@@ -147,7 +148,7 @@ void DisplayListCanvasRecorder::onDrawVerticesObject(const SkVertices* vertices,
                                                      SkBlendMode mode,
                                                      const SkPaint& paint) {
   builder_->setAttributesFromPaint(paint, kDrawVerticesFlags);
-  builder_->drawVertices(sk_ref_sp(vertices), mode);
+  builder_->drawVertices(sk_ref_sp(vertices), ToDl(mode));
 }
 
 void DisplayListCanvasRecorder::onDrawImage2(const SkImage* image,
@@ -204,7 +205,7 @@ void DisplayListCanvasRecorder::onDrawAtlas2(const SkImage* image,
   if (paint != nullptr) {
     builder_->setAttributesFromPaint(*paint, kDrawAtlasWithPaintFlags);
   }
-  builder_->drawAtlas(sk_ref_sp(image), xform, src, colors, count, mode,
+  builder_->drawAtlas(sk_ref_sp(image), xform, src, colors, count, ToDl(mode),
                       sampling, cull, paint != nullptr);
 }
 

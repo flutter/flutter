@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
@@ -52,7 +53,7 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setStrokeWidth(SkScalar width) override {}
   void setStrokeMiter(SkScalar limit) override {}
   void setColor(SkColor color) override {}
-  void setBlendMode(SkBlendMode mode) override {}
+  void setBlendMode(DlBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
   void setColorSource(const DlColorSource* source) override {}
   void setImageFilter(sk_sp<SkImageFilter> filter) override {}
@@ -97,7 +98,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
   void saveLayer(const SkRect* bounds,
                  const SaveLayerOptions options) override {}
   void restore() override {}
-  void drawColor(SkColor color, SkBlendMode mode) override {}
+  void drawColor(SkColor color, DlBlendMode mode) override {}
   void drawPaint() override {}
   void drawLine(const SkPoint& p0, const SkPoint& p1) override {}
   void drawRect(const SkRect& rect) override {}
@@ -114,7 +115,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                   uint32_t count,
                   const SkPoint points[]) override {}
   void drawVertices(const sk_sp<SkVertices> vertices,
-                    SkBlendMode mode) override {}
+                    DlBlendMode mode) override {}
   void drawImage(const sk_sp<SkImage> image,
                  const SkPoint point,
                  const SkSamplingOptions& sampling,
@@ -140,7 +141,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                  const SkRect tex[],
                  const SkColor colors[],
                  int count,
-                 SkBlendMode mode,
+                 DlBlendMode mode,
                  const SkSamplingOptions& sampling,
                  const SkRect* cull_rect,
                  bool render_with_attributes) override {}
@@ -181,7 +182,7 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setColorSource(const DlColorSource* source) override;
   void setColorFilter(const DlColorFilter* filter) override;
   void setInvertColors(bool invert) override;
-  void setBlendMode(SkBlendMode mode) override;
+  void setBlendMode(DlBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
   void setMaskFilter(const DlMaskFilter* filter) override;
@@ -398,7 +399,7 @@ class DisplayListBoundsCalculator final
   void setStyle(SkPaint::Style style) override;
   void setStrokeWidth(SkScalar width) override;
   void setStrokeMiter(SkScalar limit) override;
-  void setBlendMode(SkBlendMode mode) override;
+  void setBlendMode(DlBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
   void setColorFilter(const DlColorFilter* filter) override;
@@ -410,7 +411,7 @@ class DisplayListBoundsCalculator final
   void restore() override;
 
   void drawPaint() override;
-  void drawColor(SkColor color, SkBlendMode mode) override;
+  void drawColor(SkColor color, DlBlendMode mode) override;
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
   void drawRect(const SkRect& rect) override;
   void drawOval(const SkRect& bounds) override;
@@ -426,7 +427,7 @@ class DisplayListBoundsCalculator final
                   uint32_t count,
                   const SkPoint pts[]) override;
   void drawVertices(const sk_sp<SkVertices> vertices,
-                    SkBlendMode mode) override;
+                    DlBlendMode mode) override;
   void drawImage(const sk_sp<SkImage> image,
                  const SkPoint point,
                  const SkSamplingOptions& sampling,
@@ -452,7 +453,7 @@ class DisplayListBoundsCalculator final
                  const SkRect tex[],
                  const SkColor colors[],
                  int count,
-                 SkBlendMode mode,
+                 DlBlendMode mode,
                  const SkSamplingOptions& sampling,
                  const SkRect* cullRect,
                  bool render_with_attributes) override;
@@ -570,7 +571,7 @@ class DisplayListBoundsCalculator final
 
   static constexpr SkScalar kMinStrokeWidth = 0.01;
 
-  std::optional<SkBlendMode> blend_mode_ = SkBlendMode::kSrcOver;
+  std::optional<DlBlendMode> blend_mode_ = DlBlendMode::kSrcOver;
   std::shared_ptr<const DlColorFilter> color_filter_;
 
   SkScalar half_stroke_width_ = kMinStrokeWidth;

@@ -55,7 +55,7 @@ class DisplayListMetalComplexityCalculator
                     uint32_t count,
                     const SkPoint points[]) override;
     void drawVertices(const sk_sp<SkVertices> vertices,
-                      SkBlendMode mode) override;
+                      DlBlendMode mode) override;
     void drawImage(const sk_sp<SkImage> image,
                    const SkPoint point,
                    const SkSamplingOptions& sampling,

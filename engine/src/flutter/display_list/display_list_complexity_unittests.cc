@@ -287,7 +287,7 @@ TEST(DisplayListComplexity, DrawVertices) {
       SkVertices::MakeCopy(SkVertices::VertexMode::kTriangles_VertexMode,
                            points.size(), points.data(), nullptr, nullptr);
   DisplayListBuilder builder;
-  builder.drawVertices(vertices, SkBlendMode::kSrc);
+  builder.drawVertices(vertices, DlBlendMode::kSrc);
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();
@@ -419,7 +419,7 @@ TEST(DisplayListComplexity, DrawAtlas) {
 
   DisplayListBuilder builder;
   builder.drawAtlas(image, xforms.data(), rects.data(), nullptr, 10,
-                    SkBlendMode::kSrc, SkSamplingOptions(), nullptr, true);
+                    DlBlendMode::kSrc, SkSamplingOptions(), nullptr, true);
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();

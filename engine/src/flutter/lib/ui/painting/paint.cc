@@ -262,7 +262,7 @@ bool Paint::sync_to(DisplayListBuilder* builder,
   if (flags.applies_blend()) {
     uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
     uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
-    builder->setBlendMode(static_cast<SkBlendMode>(blend_mode));
+    builder->setBlendMode(static_cast<DlBlendMode>(blend_mode));
   }
 
   if (flags.applies_style()) {

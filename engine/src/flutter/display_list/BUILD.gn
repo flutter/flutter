@@ -9,6 +9,8 @@ source_set("display_list") {
     "display_list.cc",
     "display_list.h",
     "display_list_attributes.h",
+    "display_list_blend_mode.cc",
+    "display_list_blend_mode.h",
     "display_list_builder.cc",
     "display_list_builder.h",
     "display_list_canvas_dispatcher.cc",

@@ -5,8 +5,10 @@
 #include "flutter/display_list/display_list_utils.h"
 
 #include <math.h>
+#include <optional>
 #include <type_traits>
 
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -67,8 +69,8 @@ void SkPaintDispatchHelper::setColor(SkColor color) {
     paint_.setAlphaf(paint_.getAlphaf() * opacity());
   }
 }
-void SkPaintDispatchHelper::setBlendMode(SkBlendMode mode) {
-  paint_.setBlendMode(mode);
+void SkPaintDispatchHelper::setBlendMode(DlBlendMode mode) {
+  paint_.setBlendMode(ToSk(mode));
 }
 void SkPaintDispatchHelper::setBlender(sk_sp<SkBlender> blender) {
   paint_.setBlender(blender);
@@ -256,13 +258,18 @@ void DisplayListBoundsCalculator::setStrokeWidth(SkScalar width) {
 void DisplayListBoundsCalculator::setStrokeMiter(SkScalar limit) {
   miter_limit_ = std::max(limit, 1.0f);
 }
-void DisplayListBoundsCalculator::setBlendMode(SkBlendMode mode) {
+void DisplayListBoundsCalculator::setBlendMode(DlBlendMode mode) {
   blend_mode_ = mode;
 }
 void DisplayListBoundsCalculator::setBlender(sk_sp<SkBlender> blender) {
   SkPaint paint;
   paint.setBlender(std::move(blender));
-  blend_mode_ = paint.asBlendMode();
+  auto blend_mode = paint.asBlendMode();
+  if (blend_mode.has_value()) {
+    blend_mode_ = ToDl(blend_mode.value());
+  } else {
+    blend_mode_ = std::nullopt;
+  }
 }
 void DisplayListBoundsCalculator::setImageFilter(sk_sp<SkImageFilter> filter) {
   image_filter_ = std::move(filter);
@@ -371,7 +378,7 @@ void DisplayListBoundsCalculator::restore() {
 void DisplayListBoundsCalculator::drawPaint() {
   AccumulateUnbounded();
 }
-void DisplayListBoundsCalculator::drawColor(SkColor color, SkBlendMode mode) {
+void DisplayListBoundsCalculator::drawColor(SkColor color, DlBlendMode mode) {
   AccumulateUnbounded();
 }
 void DisplayListBoundsCalculator::drawLine(const SkPoint& p0,
@@ -443,7 +450,7 @@ void DisplayListBoundsCalculator::drawPoints(SkCanvas::PointMode mode,
   }
 }
 void DisplayListBoundsCalculator::drawVertices(const sk_sp<SkVertices> vertices,
-                                               SkBlendMode mode) {
+                                               DlBlendMode mode) {
   AccumulateOpBounds(vertices->bounds(), kDrawVerticesFlags);
 }
 void DisplayListBoundsCalculator::drawImage(const sk_sp<SkImage> image,
@@ -495,7 +502,7 @@ void DisplayListBoundsCalculator::drawAtlas(const sk_sp<SkImage> atlas,
                                             const SkRect tex[],
                                             const SkColor colors[],
                                             int count,
-                                            SkBlendMode mode,
+                                            DlBlendMode mode,
                                             const SkSamplingOptions& sampling,
                                             const SkRect* cullRect,
                                             bool render_with_attributes) {
@@ -674,43 +681,43 @@ bool DisplayListBoundsCalculator::paint_nops_on_transparency() {
     // destination pixel.
     // Mathematically, any time in the following equations where
     // the result is not d assuming source is 0
-    case SkBlendMode::kClear:     // r = 0
-    case SkBlendMode::kSrc:       // r = s
-    case SkBlendMode::kSrcIn:     // r = s * da
-    case SkBlendMode::kDstIn:     // r = d * sa
-    case SkBlendMode::kSrcOut:    // r = s * (1-da)
-    case SkBlendMode::kDstATop:   // r = d*sa + s*(1-da)
-    case SkBlendMode::kModulate:  // r = s*d
+    case DlBlendMode::kClear:     // r = 0
+    case DlBlendMode::kSrc:       // r = s
+    case DlBlendMode::kSrcIn:     // r = s * da
+    case DlBlendMode::kDstIn:     // r = d * sa
+    case DlBlendMode::kSrcOut:    // r = s * (1-da)
+    case DlBlendMode::kDstATop:   // r = d*sa + s*(1-da)
+    case DlBlendMode::kModulate:  // r = s*d
       return false;
       break;
 
     // And in these equations, the result must be d if the
     // source is 0
-    case SkBlendMode::kDst:         // r = d
-    case SkBlendMode::kSrcOver:     // r = s + (1-sa)*d
-    case SkBlendMode::kDstOver:     // r = d + (1-da)*s
-    case SkBlendMode::kDstOut:      // r = d * (1-sa)
-    case SkBlendMode::kSrcATop:     // r = s*da + d*(1-sa)
-    case SkBlendMode::kXor:         // r = s*(1-da) + d*(1-sa)
-    case SkBlendMode::kPlus:        // r = min(s + d, 1)
-    case SkBlendMode::kScreen:      // r = s + d - s*d
-    case SkBlendMode::kOverlay:     // multiply or screen, depending on dest
-    case SkBlendMode::kDarken:      // rc = s + d - max(s*da, d*sa),
+    case DlBlendMode::kDst:         // r = d
+    case DlBlendMode::kSrcOver:     // r = s + (1-sa)*d
+    case DlBlendMode::kDstOver:     // r = d + (1-da)*s
+    case DlBlendMode::kDstOut:      // r = d * (1-sa)
+    case DlBlendMode::kSrcATop:     // r = s*da + d*(1-sa)
+    case DlBlendMode::kXor:         // r = s*(1-da) + d*(1-sa)
+    case DlBlendMode::kPlus:        // r = min(s + d, 1)
+    case DlBlendMode::kScreen:      // r = s + d - s*d
+    case DlBlendMode::kOverlay:     // multiply or screen, depending on dest
+    case DlBlendMode::kDarken:      // rc = s + d - max(s*da, d*sa),
                                     // ra = kSrcOver
-    case SkBlendMode::kLighten:     // rc = s + d - min(s*da, d*sa),
+    case DlBlendMode::kLighten:     // rc = s + d - min(s*da, d*sa),
                                     // ra = kSrcOver
-    case SkBlendMode::kColorDodge:  // brighten destination to reflect source
-    case SkBlendMode::kColorBurn:   // darken destination to reflect source
-    case SkBlendMode::kHardLight:   // multiply or screen, depending on source
-    case SkBlendMode::kSoftLight:   // lighten or darken, depending on source
-    case SkBlendMode::kDifference:  // rc = s + d - 2*(min(s*da, d*sa)),
+    case DlBlendMode::kColorDodge:  // brighten destination to reflect source
+    case DlBlendMode::kColorBurn:   // darken destination to reflect source
+    case DlBlendMode::kHardLight:   // multiply or screen, depending on source
+    case DlBlendMode::kSoftLight:   // lighten or darken, depending on source
+    case DlBlendMode::kDifference:  // rc = s + d - 2*(min(s*da, d*sa)),
                                     // ra = kSrcOver
-    case SkBlendMode::kExclusion:   // rc = s + d - two(s*d), ra = kSrcOver
-    case SkBlendMode::kMultiply:    // r = s*(1-da) + d*(1-sa) + s*d
-    case SkBlendMode::kHue:         // ra = kSrcOver
-    case SkBlendMode::kSaturation:  // ra = kSrcOver
-    case SkBlendMode::kColor:       // ra = kSrcOver
-    case SkBlendMode::kLuminosity:  // ra = kSrcOver
+    case DlBlendMode::kExclusion:   // rc = s + d - two(s*d), ra = kSrcOver
+    case DlBlendMode::kMultiply:    // r = s*(1-da) + d*(1-sa) + s*d
+    case DlBlendMode::kHue:         // ra = kSrcOver
+    case DlBlendMode::kSaturation:  // ra = kSrcOver
+    case DlBlendMode::kColor:       // ra = kSrcOver
+    case DlBlendMode::kLuminosity:  // ra = kSrcOver
       return true;
       break;
   }

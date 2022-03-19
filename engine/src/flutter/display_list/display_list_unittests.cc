@@ -338,12 +338,12 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "SetBlendModeOrBlender", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kSrcIn);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kDstIn);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(DlBlendMode::kSrcIn);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(DlBlendMode::kDstIn);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender1);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender2);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender3);}},
-      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kSrcOver);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(DlBlendMode::kSrcOver);}},
       {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setBlender(nullptr);}},
     }
   },
@@ -524,9 +524,9 @@ std::vector<DisplayListInvocationGroup> allGroups = {
   },
   { "DrawColor", {
       // cv.drawColor becomes cv.drawPaint(paint)
-      {1, 16, 1, 24, [](DisplayListBuilder& b) {b.drawColor(SK_ColorBLUE, SkBlendMode::kSrcIn);}},
-      {1, 16, 1, 24, [](DisplayListBuilder& b) {b.drawColor(SK_ColorBLUE, SkBlendMode::kDstIn);}},
-      {1, 16, 1, 24, [](DisplayListBuilder& b) {b.drawColor(SK_ColorCYAN, SkBlendMode::kSrcIn);}},
+      {1, 16, 1, 24, [](DisplayListBuilder& b) {b.drawColor(SK_ColorBLUE, DlBlendMode::kSrcIn);}},
+      {1, 16, 1, 24, [](DisplayListBuilder& b) {b.drawColor(SK_ColorBLUE, DlBlendMode::kDstIn);}},
+      {1, 16, 1, 24, [](DisplayListBuilder& b) {b.drawColor(SK_ColorCYAN, DlBlendMode::kSrcIn);}},
     }
   },
   { "DrawLine", {
@@ -605,9 +605,9 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "DrawVertices", {
-      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, SkBlendMode::kSrcIn);}},
-      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, SkBlendMode::kDstIn);}},
-      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices2, SkBlendMode::kSrcIn);}},
+      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, DlBlendMode::kSrcIn);}},
+      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, DlBlendMode::kDstIn);}},
+      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices2, DlBlendMode::kSrcIn);}},
     }
   },
   { "DrawImage", {
@@ -700,51 +700,51 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, nullptr, true);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {0, 1, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 25, 30, 30} };
-        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     DisplayList::LinearSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kDstIn,
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, DlBlendMode::kDstIn,
                     DisplayList::NearestSampling, nullptr, false);}},
       {1, 56 + 32 + 32, 1, 56 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkRect cullRect = { 0, 0, 200, 200 };
-        b.drawAtlas(TestImage2, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage2, xforms, texs, nullptr, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, &cullRect, false);}},
       {1, 40 + 32 + 32 + 8, 1, 40 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkColor colors[] = { SK_ColorBLUE, SK_ColorGREEN };
-        b.drawAtlas(TestImage1, xforms, texs, colors, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, colors, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, nullptr, false);}},
       {1, 56 + 32 + 32 + 8, 1, 56 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkColor colors[] = { SK_ColorBLUE, SK_ColorGREEN };
         static SkRect cullRect = { 0, 0, 200, 200 };
-        b.drawAtlas(TestImage1, xforms, texs, colors, 2, SkBlendMode::kSrcIn,
+        b.drawAtlas(TestImage1, xforms, texs, colors, 2, DlBlendMode::kSrcIn,
                     DisplayList::NearestSampling, &cullRect, false);}},
     }
   },
@@ -930,7 +930,7 @@ TEST(DisplayList, FullRotationsAreNop) {
 
 TEST(DisplayList, AllBlendModeNops) {
   DisplayListBuilder builder;
-  builder.setBlendMode(SkBlendMode::kSrcOver);
+  builder.setBlendMode(DlBlendMode::kSrcOver);
   builder.setBlender(nullptr);
   sk_sp<DisplayList> dl = builder.Build();
   ASSERT_EQ(dl->bytes(false), sizeof(DisplayList));
@@ -1138,9 +1138,9 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   {
     // Testing behavior with an unboundable blend mode
     DisplayListBuilder builder(build_bounds);
-    builder.setBlendMode(SkBlendMode::kClear);
+    builder.setBlendMode(DlBlendMode::kClear);
     builder.saveLayer(&save_bounds, true);
-    builder.setBlendMode(SkBlendMode::kSrcOver);
+    builder.setBlendMode(DlBlendMode::kSrcOver);
     builder.drawRect(rect);
     builder.restore();
     sk_sp<DisplayList> display_list = builder.Build();
@@ -1150,9 +1150,9 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   {
     // Same as previous with no save bounds
     DisplayListBuilder builder(build_bounds);
-    builder.setBlendMode(SkBlendMode::kClear);
+    builder.setBlendMode(DlBlendMode::kClear);
     builder.saveLayer(nullptr, true);
-    builder.setBlendMode(SkBlendMode::kSrcOver);
+    builder.setBlendMode(DlBlendMode::kSrcOver);
     builder.drawRect(rect);
     builder.restore();
     sk_sp<DisplayList> display_list = builder.Build();
@@ -1401,7 +1401,7 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
       // Second test i the draw op with kSrc,
       // (usually fails group opacity)
       DisplayListBuilder builder;
-      builder.setBlendMode(SkBlendMode::kSrc);
+      builder.setBlendMode(DlBlendMode::kSrc);
       build(builder);
       auto display_list = builder.Build();
       EXPECT_EQ(display_list->can_apply_group_opacity(), expect_with_kSrc)
@@ -1420,8 +1420,8 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
       #body, [](DisplayListBuilder& builder) { body }, expect, expect)
 
   RUN_TESTS(builder.drawPaint(););
-  RUN_TESTS2(builder.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);, true);
-  RUN_TESTS2(builder.drawColor(SK_ColorRED, SkBlendMode::kSrc);, false);
+  RUN_TESTS2(builder.drawColor(SK_ColorRED, DlBlendMode::kSrcOver);, true);
+  RUN_TESTS2(builder.drawColor(SK_ColorRED, DlBlendMode::kSrc);, false);
   RUN_TESTS(builder.drawLine({0, 0}, {10, 10}););
   RUN_TESTS(builder.drawRect({0, 0, 10, 10}););
   RUN_TESTS(builder.drawOval({0, 0, 10, 10}););
@@ -1435,7 +1435,7 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
   RUN_TESTS2(builder.drawPoints(SkCanvas::kPoints_PointMode, TestPointCount,
                                 TestPoints);
              , false);
-  RUN_TESTS2(builder.drawVertices(TestVertices1, SkBlendMode::kSrc);, false);
+  RUN_TESTS2(builder.drawVertices(TestVertices1, DlBlendMode::kSrc);, false);
   RUN_TESTS(builder.drawImage(TestImage1, {0, 0}, DisplayList::LinearSampling,
                               true););
   RUN_TESTS2(
@@ -1463,11 +1463,11 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
   static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
   static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
   RUN_TESTS2(builder.drawAtlas(TestImage1, xforms, texs, nullptr, 2,
-                               SkBlendMode::kSrcIn,
+                               DlBlendMode::kSrcIn,
                                DisplayList::NearestSampling, nullptr, true);
              , false);
   RUN_TESTS2(builder.drawAtlas(TestImage1, xforms, texs, nullptr, 2,
-                               SkBlendMode::kSrcIn,
+                               DlBlendMode::kSrcIn,
                                DisplayList::NearestSampling, nullptr, false);
              , false);
   RUN_TESTS(builder.drawPicture(TestPicture1, nullptr, true););
@@ -1522,7 +1522,7 @@ TEST(DisplayList, SaveLayerTrueSupportsGroupOpacityWithOverlappingChidren) {
 
 TEST(DisplayList, SaveLayerFalseWithSrcBlendSupportsGroupOpacity) {
   DisplayListBuilder builder;
-  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.setBlendMode(DlBlendMode::kSrc);
   builder.saveLayer(nullptr, false);
   builder.drawRect({0, 0, 10, 10});
   builder.restore();
@@ -1532,7 +1532,7 @@ TEST(DisplayList, SaveLayerFalseWithSrcBlendSupportsGroupOpacity) {
 
 TEST(DisplayList, SaveLayerTrueWithSrcBlendDoesNotSupportGroupOpacity) {
   DisplayListBuilder builder;
-  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.setBlendMode(DlBlendMode::kSrc);
   builder.saveLayer(nullptr, true);
   builder.drawRect({0, 0, 10, 10});
   builder.restore();
@@ -1543,7 +1543,7 @@ TEST(DisplayList, SaveLayerTrueWithSrcBlendDoesNotSupportGroupOpacity) {
 TEST(DisplayList, SaveLayerFalseSupportsGroupOpacityWithChildSrcBlend) {
   DisplayListBuilder builder;
   builder.saveLayer(nullptr, false);
-  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.setBlendMode(DlBlendMode::kSrc);
   builder.drawRect({0, 0, 10, 10});
   builder.restore();
   auto display_list = builder.Build();
@@ -1553,7 +1553,7 @@ TEST(DisplayList, SaveLayerFalseSupportsGroupOpacityWithChildSrcBlend) {
 TEST(DisplayList, SaveLayerTrueSupportsGroupOpacityWithChildSrcBlend) {
   DisplayListBuilder builder;
   builder.saveLayer(nullptr, true);
-  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.setBlendMode(DlBlendMode::kSrc);
   builder.drawRect({0, 0, 10, 10});
   builder.restore();
   auto display_list = builder.Build();
@@ -1721,9 +1721,9 @@ TEST(DisplayList, SaveLayerSrcBlendPreventsOpacityOptimization) {
 
   DisplayListBuilder builder;
   builder.setColor(SkColorSetARGB(127, 255, 255, 255));
-  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.setBlendMode(DlBlendMode::kSrc);
   builder.saveLayer(nullptr, true);
-  builder.setBlendMode(SkBlendMode::kSrcOver);
+  builder.setBlendMode(DlBlendMode::kSrcOver);
   builder.drawRect({10, 10, 20, 20});
   builder.restore();
 
@@ -1769,7 +1769,7 @@ TEST(DisplayList, SaveLayerSrcBlendOnChildPreventsOpacityOptimization) {
   DisplayListBuilder builder;
   builder.setColor(SkColorSetARGB(127, 255, 255, 255));
   builder.saveLayer(nullptr, true);
-  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.setBlendMode(DlBlendMode::kSrc);
   builder.drawRect({10, 10, 20, 20});
   builder.restore();
 

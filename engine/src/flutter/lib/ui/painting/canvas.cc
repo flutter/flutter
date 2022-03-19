@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/painting/canvas.h"
+#include "display_list/display_list_blend_mode.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 
 #include <cmath>
@@ -254,11 +255,11 @@ void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
   }
 }
 
-void Canvas::drawColor(SkColor color, SkBlendMode blend_mode) {
+void Canvas::drawColor(SkColor color, DlBlendMode blend_mode) {
   if (display_list_recorder_) {
     builder()->drawColor(color, blend_mode);
   } else if (canvas_) {
-    canvas_->drawColor(color, blend_mode);
+    canvas_->drawColor(color, ToSk(blend_mode));
   }
 }
 
@@ -572,7 +573,7 @@ void Canvas::drawPoints(const Paint& paint,
 }
 
 void Canvas::drawVertices(const Vertices* vertices,
-                          SkBlendMode blend_mode,
+                          DlBlendMode blend_mode,
                           const Paint& paint,
                           const PaintData& paint_data) {
   if (!vertices) {
@@ -586,7 +587,7 @@ void Canvas::drawVertices(const Vertices* vertices,
     builder()->drawVertices(vertices->vertices(), blend_mode);
   } else if (canvas_) {
     SkPaint sk_paint;
-    canvas_->drawVertices(vertices->vertices(), blend_mode,
+    canvas_->drawVertices(vertices->vertices(), ToSk(blend_mode),
                           *paint.paint(sk_paint));
   }
 }
@@ -598,7 +599,7 @@ void Canvas::drawAtlas(const Paint& paint,
                        const tonic::Float32List& transforms,
                        const tonic::Float32List& rects,
                        const tonic::Int32List& colors,
-                       SkBlendMode blend_mode,
+                       DlBlendMode blend_mode,
                        const tonic::Float32List& cull_rect) {
   if (!atlas) {
     Dart_ThrowException(
@@ -628,13 +629,14 @@ void Canvas::drawAtlas(const Paint& paint,
         with_attributes);
   } else if (canvas_) {
     SkPaint sk_paint;
-    canvas_->drawAtlas(
-        skImage.get(), reinterpret_cast<const SkRSXform*>(transforms.data()),
-        reinterpret_cast<const SkRect*>(rects.data()),
-        reinterpret_cast<const SkColor*>(colors.data()),
-        rects.num_elements() / 4,  // SkRect have four floats.
-        blend_mode, sampling, reinterpret_cast<const SkRect*>(cull_rect.data()),
-        paint.paint(sk_paint));
+    canvas_->drawAtlas(skImage.get(),
+                       reinterpret_cast<const SkRSXform*>(transforms.data()),
+                       reinterpret_cast<const SkRect*>(rects.data()),
+                       reinterpret_cast<const SkColor*>(colors.data()),
+                       rects.num_elements() / 4,  // SkRect have four floats.
+                       ToSk(blend_mode), sampling,
+                       reinterpret_cast<const SkRect*>(cull_rect.data()),
+                       paint.paint(sk_paint));
   }
 }
 
