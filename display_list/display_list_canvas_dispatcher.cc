@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
 
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -130,12 +131,12 @@ void DisplayListCanvasDispatcher::drawPaint() {
   }
   canvas_->drawPaint(sk_paint);
 }
-void DisplayListCanvasDispatcher::drawColor(SkColor color, SkBlendMode mode) {
+void DisplayListCanvasDispatcher::drawColor(SkColor color, DlBlendMode mode) {
   // SkCanvas::drawColor(SkColor) does the following conversion anyway
   // We do it here manually to increase precision on applying opacity
   SkColor4f color4f = SkColor4f::FromColor(color);
   color4f.fA *= opacity();
-  canvas_->drawColor(color4f, mode);
+  canvas_->drawColor(color4f, ToSk(mode));
 }
 void DisplayListCanvasDispatcher::drawLine(const SkPoint& p0,
                                            const SkPoint& p1) {
@@ -173,8 +174,8 @@ void DisplayListCanvasDispatcher::drawPoints(SkCanvas::PointMode mode,
   canvas_->drawPoints(mode, count, pts, paint());
 }
 void DisplayListCanvasDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
-                                               SkBlendMode mode) {
-  canvas_->drawVertices(vertices, mode, paint());
+                                               DlBlendMode mode) {
+  canvas_->drawVertices(vertices, ToSk(mode), paint());
 }
 void DisplayListCanvasDispatcher::drawImage(const sk_sp<SkImage> image,
                                             const SkPoint point,
@@ -215,12 +216,12 @@ void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
                                             const SkRect tex[],
                                             const SkColor colors[],
                                             int count,
-                                            SkBlendMode mode,
+                                            DlBlendMode mode,
                                             const SkSamplingOptions& sampling,
                                             const SkRect* cullRect,
                                             bool render_with_attributes) {
-  canvas_->drawAtlas(atlas.get(), xform, tex, colors, count, mode, sampling,
-                     cullRect, safe_paint(render_with_attributes));
+  canvas_->drawAtlas(atlas.get(), xform, tex, colors, count, ToSk(mode),
+                     sampling, cullRect, safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawPicture(const sk_sp<SkPicture> picture,
                                               const SkMatrix* matrix,

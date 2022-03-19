@@ -761,9 +761,9 @@ class CanvasCompareTester {
                      b.save();
                      b.clipRect(clip, SkClipOp::kIntersect, false);
                      b.drawRect(rect);
-                     b.setBlendMode(SkBlendMode::kClear);
+                     b.setBlendMode(DlBlendMode::kClear);
                      b.drawRect(rect);
-                     b.setBlendMode(SkBlendMode::kSrcOver);
+                     b.setBlendMode(DlBlendMode::kSrcOver);
                      b.restore();
                    }));
     RenderWith(testP, env, tolerance,
@@ -1039,7 +1039,7 @@ class CanvasCompareTester {
                        p.setColor(blendableColor);
                      },
                      [=](DisplayListBuilder& b) {
-                       b.setBlendMode(SkBlendMode::kSrcIn);
+                       b.setBlendMode(DlBlendMode::kSrcIn);
                        b.setColor(blendableColor);
                      })
                      .with_bg(bg));
@@ -1051,7 +1051,7 @@ class CanvasCompareTester {
                        p.setColor(blendableColor);
                      },
                      [=](DisplayListBuilder& b) {
-                       b.setBlendMode(SkBlendMode::kDstIn);
+                       b.setBlendMode(DlBlendMode::kDstIn);
                        b.setColor(blendableColor);
                      })
                      .with_bg(bg));
@@ -2129,7 +2129,7 @@ TEST_F(DisplayListCanvas, DrawColor) {
             canvas->drawColor(SK_ColorMAGENTA);
           },
           [=](DisplayListBuilder& builder) {
-            builder.drawColor(SK_ColorMAGENTA, SkBlendMode::kSrcOver);
+            builder.drawColor(SK_ColorMAGENTA, DlBlendMode::kSrcOver);
           },
           kDrawColorFlags));
 }
@@ -2503,7 +2503,7 @@ TEST_F(DisplayListCanvas, DrawVerticesWithColors) {
             canvas->drawVertices(vertices.get(), SkBlendMode::kSrcOver, paint);
           },
           [=](DisplayListBuilder& builder) {  //
-            builder.drawVertices(vertices, SkBlendMode::kSrcOver);
+            builder.drawVertices(vertices, DlBlendMode::kSrcOver);
           },
           kDrawVerticesFlags)
           .set_draw_vertices());
@@ -2557,7 +2557,7 @@ TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
               builder.setColorSource(
                   &CanvasCompareTester::testImageColorSource);
             }
-            builder.drawVertices(vertices, SkBlendMode::kSrcOver);
+            builder.drawVertices(vertices, DlBlendMode::kSrcOver);
           },
           kDrawVerticesFlags)
           .set_draw_vertices());
@@ -2834,7 +2834,7 @@ TEST_F(DisplayListCanvas, DrawAtlasNearest) {
           },
           [=](DisplayListBuilder& builder) {
             builder.drawAtlas(image, xform, tex, colors, 4,  //
-                              SkBlendMode::kSrcOver, sampling, nullptr, true);
+                              DlBlendMode::kSrcOver, sampling, nullptr, true);
           },
           kDrawAtlasWithPaintFlags)
           .set_draw_atlas());
@@ -2874,7 +2874,7 @@ TEST_F(DisplayListCanvas, DrawAtlasNearestNoPaint) {
           },
           [=](DisplayListBuilder& builder) {
             builder.drawAtlas(image, xform, tex, colors, 4,     //
-                              SkBlendMode::kSrcOver, sampling,  //
+                              DlBlendMode::kSrcOver, sampling,  //
                               nullptr, false);
           },
           kDrawAtlasFlags)
@@ -2914,7 +2914,7 @@ TEST_F(DisplayListCanvas, DrawAtlasLinear) {
           },
           [=](DisplayListBuilder& builder) {
             builder.drawAtlas(image, xform, tex, colors, 2,  //
-                              SkBlendMode::kSrcOver, sampling, nullptr, true);
+                              DlBlendMode::kSrcOver, sampling, nullptr, true);
           },
           kDrawAtlasWithPaintFlags)
           .set_draw_atlas());

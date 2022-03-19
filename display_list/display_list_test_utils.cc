@@ -62,7 +62,7 @@ sk_sp<DisplayList> GetSampleNestedDisplayList() {
 sk_sp<DisplayList> GetSampleDisplayList(int ops) {
   DisplayListBuilder builder(SkRect::MakeWH(150, 100));
   for (int i = 0; i < ops; i++) {
-    builder.drawColor(SK_ColorRED, SkBlendMode::kSrc);
+    builder.drawColor(SK_ColorRED, DlBlendMode::kSrc);
   }
   return builder.Build();
 }
