@@ -159,51 +159,51 @@ void DisplayListDispatcher::setInvertColors(bool invert) {
   UNIMPLEMENTED;
 }
 
-std::optional<Entity::BlendMode> ToBlendMode(SkBlendMode mode) {
+std::optional<Entity::BlendMode> ToBlendMode(flutter::DlBlendMode mode) {
   switch (mode) {
-    case SkBlendMode::kClear:
+    case flutter::DlBlendMode::kClear:
       return Entity::BlendMode::kClear;
-    case SkBlendMode::kSrc:
+    case flutter::DlBlendMode::kSrc:
       return Entity::BlendMode::kSource;
-    case SkBlendMode::kDst:
+    case flutter::DlBlendMode::kDst:
       return Entity::BlendMode::kDestination;
-    case SkBlendMode::kSrcOver:
+    case flutter::DlBlendMode::kSrcOver:
       return Entity::BlendMode::kSourceOver;
-    case SkBlendMode::kDstOver:
+    case flutter::DlBlendMode::kDstOver:
       return Entity::BlendMode::kDestinationOver;
-    case SkBlendMode::kSrcIn:
+    case flutter::DlBlendMode::kSrcIn:
       return Entity::BlendMode::kSourceIn;
-    case SkBlendMode::kDstIn:
+    case flutter::DlBlendMode::kDstIn:
       return Entity::BlendMode::kDestinationIn;
-    case SkBlendMode::kSrcOut:
+    case flutter::DlBlendMode::kSrcOut:
       return Entity::BlendMode::kSourceOut;
-    case SkBlendMode::kDstOut:
+    case flutter::DlBlendMode::kDstOut:
       return Entity::BlendMode::kDestinationOut;
-    case SkBlendMode::kSrcATop:
+    case flutter::DlBlendMode::kSrcATop:
       return Entity::BlendMode::kSourceATop;
-    case SkBlendMode::kDstATop:
+    case flutter::DlBlendMode::kDstATop:
       return Entity::BlendMode::kDestinationATop;
-    case SkBlendMode::kXor:
+    case flutter::DlBlendMode::kXor:
       return Entity::BlendMode::kXor;
-    case SkBlendMode::kPlus:
+    case flutter::DlBlendMode::kPlus:
       return Entity::BlendMode::kPlus;
-    case SkBlendMode::kModulate:
+    case flutter::DlBlendMode::kModulate:
       return Entity::BlendMode::kModulate;
-    case SkBlendMode::kScreen:
-    case SkBlendMode::kOverlay:
-    case SkBlendMode::kDarken:
-    case SkBlendMode::kLighten:
-    case SkBlendMode::kColorDodge:
-    case SkBlendMode::kColorBurn:
-    case SkBlendMode::kHardLight:
-    case SkBlendMode::kSoftLight:
-    case SkBlendMode::kDifference:
-    case SkBlendMode::kExclusion:
-    case SkBlendMode::kMultiply:
-    case SkBlendMode::kHue:
-    case SkBlendMode::kSaturation:
-    case SkBlendMode::kColor:
-    case SkBlendMode::kLuminosity:
+    case flutter::DlBlendMode::kScreen:
+    case flutter::DlBlendMode::kOverlay:
+    case flutter::DlBlendMode::kDarken:
+    case flutter::DlBlendMode::kLighten:
+    case flutter::DlBlendMode::kColorDodge:
+    case flutter::DlBlendMode::kColorBurn:
+    case flutter::DlBlendMode::kHardLight:
+    case flutter::DlBlendMode::kSoftLight:
+    case flutter::DlBlendMode::kDifference:
+    case flutter::DlBlendMode::kExclusion:
+    case flutter::DlBlendMode::kMultiply:
+    case flutter::DlBlendMode::kHue:
+    case flutter::DlBlendMode::kSaturation:
+    case flutter::DlBlendMode::kColor:
+    case flutter::DlBlendMode::kLuminosity:
       return std::nullopt;
   }
 
@@ -211,8 +211,8 @@ std::optional<Entity::BlendMode> ToBlendMode(SkBlendMode mode) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setBlendMode(SkBlendMode sk_mode) {
-  if (auto mode = ToBlendMode(sk_mode); mode.has_value()) {
+void DisplayListDispatcher::setBlendMode(flutter::DlBlendMode dl_mode) {
+  if (auto mode = ToBlendMode(dl_mode); mode.has_value()) {
     paint_.blend_mode = mode.value();
   } else {
     UNIMPLEMENTED;
@@ -454,10 +454,10 @@ void DisplayListDispatcher::clipPath(const SkPath& path,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawColor(SkColor color, SkBlendMode sk_mode) {
+void DisplayListDispatcher::drawColor(SkColor color, flutter::DlBlendMode dl_mode) {
   Paint paint;
   paint.color = ToColor(color);
-  if (auto mode = ToBlendMode(sk_mode); mode.has_value()) {
+  if (auto mode = ToBlendMode(dl_mode); mode.has_value()) {
     paint.blend_mode = mode.value();
   } else {
     FML_DLOG(ERROR) << "Unimplemented blend mode in " << __FUNCTION__;
@@ -530,7 +530,7 @@ void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
-                                         SkBlendMode mode) {
+                                         flutter::DlBlendMode mode) {
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
@@ -582,7 +582,7 @@ void DisplayListDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
                                       const SkRect tex[],
                                       const SkColor colors[],
                                       int count,
-                                      SkBlendMode mode,
+                                      flutter::DlBlendMode mode,
                                       const SkSamplingOptions& sampling,
                                       const SkRect* cull_rect,
                                       bool render_with_attributes) {
