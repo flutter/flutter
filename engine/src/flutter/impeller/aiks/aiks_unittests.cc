@@ -132,9 +132,7 @@ TEST_F(AiksTest, ClipsUseCurrentTransform) {
 
   canvas.Translate(Vector3(300, 300));
   for (int i = 0; i < 15; i++) {
-    canvas.Translate(-Vector3(300, 300));
     canvas.Scale(Vector3(0.8, 0.8));
-    canvas.Translate(Vector3(300, 300));
 
     paint.color = colors[i % colors.size()];
     canvas.ClipPath(PathBuilder{}.AddCircle({0, 0}, 300).TakePath());
@@ -202,7 +200,7 @@ TEST_F(AiksTest, CanPerformSkew) {
   Paint red;
   red.color = Color::Red();
 
-  canvas.Skew(10, 125);
+  canvas.Skew(2, 5);
   canvas.DrawRect(Rect::MakeXYWH(0, 0, 100, 100), red);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
@@ -415,6 +413,44 @@ TEST_F(AiksTest, PaintBlendModeIsRespected) {
   paint.color = Color::Blue();
   canvas.DrawCircle(Point(500, 150), 100, paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, TransformMultipliesCorrectly) {
+  Canvas canvas;
+  ASSERT_MATRIX_NEAR(canvas.GetCurrentTransformation(), Matrix());
+
+  // clang-format off
+  canvas.Translate(Vector3(100, 200));
+  ASSERT_MATRIX_NEAR(
+    canvas.GetCurrentTransformation(),
+    Matrix(  1,   0,   0,   0,
+             0,   1,   0,   0,
+             0,   0,   1,   0,
+           100, 200,   0,   1));
+
+  canvas.Rotate(Radians(kPiOver2));
+  ASSERT_MATRIX_NEAR(
+    canvas.GetCurrentTransformation(),
+    Matrix(  0,   1,   0,   0,
+            -1,   0,   0,   0,
+             0,   0,   1,   0,
+           100, 200,   0,   1));
+
+  canvas.Scale(Vector3(2, 3));
+  ASSERT_MATRIX_NEAR(
+    canvas.GetCurrentTransformation(),
+    Matrix(  0,   2,   0,   0,
+            -3,   0,   0,   0,
+             0,   0,   0,   0,
+           100, 200,   0,   1));
+
+  canvas.Translate(Vector3(100, 200));
+  ASSERT_MATRIX_NEAR(
+    canvas.GetCurrentTransformation(),
+    Matrix(   0,   2,   0,   0,
+             -3,   0,   0,   0,
+              0,   0,   0,   0,
+           -500, 400,   0,   1));
 }
 
 }  // namespace testing
