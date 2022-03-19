@@ -434,6 +434,8 @@ FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.h
 FILE: ../../../flutter/impeller/display_list/display_list_unittests.cc
 FILE: ../../../flutter/impeller/docs/shader_pipeline.png
+FILE: ../../../flutter/impeller/entity/contents/clear_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/clear_contents.h
 FILE: ../../../flutter/impeller/entity/contents/clip_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/clip_contents.h
 FILE: ../../../flutter/impeller/entity/contents/content_context.cc
@@ -461,6 +463,8 @@ FILE: ../../../flutter/impeller/entity/entity_pass_delegate.h
 FILE: ../../../flutter/impeller/entity/entity_playground.cc
 FILE: ../../../flutter/impeller/entity/entity_playground.h
 FILE: ../../../flutter/impeller/entity/entity_unittests.cc
+FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.frag
+FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.vert
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas.frag
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas.vert
 FILE: ../../../flutter/impeller/entity/shaders/gradient_fill.frag
