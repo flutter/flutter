@@ -5,6 +5,7 @@
 #pragma once
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas.h"
@@ -54,7 +55,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setInvertColors(bool invert) override;
 
   // |flutter::Dispatcher|
-  void setBlendMode(SkBlendMode mode) override;
+  void setBlendMode(flutter::DlBlendMode mode) override;
 
   // |flutter::Dispatcher|
   void setBlender(sk_sp<SkBlender> blender) override;
@@ -129,7 +130,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
   // |flutter::Dispatcher|
-  void drawColor(SkColor color, SkBlendMode mode) override;
+  void drawColor(SkColor color, flutter::DlBlendMode mode) override;
 
   // |flutter::Dispatcher|
   void drawPaint() override;
@@ -168,7 +169,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
 
   // |flutter::Dispatcher|
   void drawVertices(const sk_sp<SkVertices> vertices,
-                    SkBlendMode mode) override;
+                    flutter::DlBlendMode mode) override;
 
   // |flutter::Dispatcher|
   void drawImage(const sk_sp<SkImage> image,
@@ -204,7 +205,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                  const SkRect tex[],
                  const SkColor colors[],
                  int count,
-                 SkBlendMode mode,
+                 flutter::DlBlendMode mode,
                  const SkSamplingOptions& sampling,
                  const SkRect* cull_rect,
                  bool render_with_attributes) override;
