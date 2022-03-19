@@ -229,6 +229,23 @@ class Home extends StatelessWidget {
               "${localizations.selectInString('he')}",
               "${localizations.selectWithPlaceholder('male', 'ice cream')}",
               "${localizations.selectWithPlaceholder('female', 'chocolate')}",
+              "${localizations.pluralThenString(1, 'Dart')}",
+              "${localizations.pluralThenString(2, 'Flutter')}",
+              "${localizations.multiplePlurals(1)}",
+              "${localizations.multiplePlurals(10)}",
+              "${localizations.pluralInSelect(1, 'apple')}",
+              "${localizations.pluralInSelect(3, 'banana')}",
+              "${localizations.doubleQuotes}",
+              "${localizations.escapedMessage}",
+              "${localizations.nonEscapingDoubleQuotes('World')}",
+              "${localizations.quotingInsideSelect('apple')}",
+              "${localizations.quotingInsideSelect('banana')}",
+              "${localizations.quotingInsideSelect('peach')}",
+              "${localizations.escapingInsideSelect('a')}",
+              "${localizations.escapingInsideSelect('b')}",
+              "${localizations.escapingInsideSelect('c')}",
+              "${localizations.escapingInsideSelect('d')}",
+              '${localizations.noNameCollision("pi", 3.14)}',
             ]);
           },
         ),
@@ -275,6 +292,23 @@ class Home extends StatelessWidget {
               "${localizations.doubleQuoteSelect('cabriolet')}",
               "${localizations.pluralInString(1)}",
               "${localizations.selectInString('he')}",
+              "${localizations.pluralThenString(1, 'Dart')}",
+              "${localizations.pluralThenString(2, 'Flutter')}",
+              "${localizations.multiplePlurals(1)}",
+              "${localizations.multiplePlurals(10)}",
+              "${localizations.pluralInSelect(1, 'apple')}",
+              "${localizations.pluralInSelect(3, 'banana')}",
+              "${localizations.doubleQuotes}",
+              "${localizations.escapedMessage}",
+              "${localizations.nonEscapingDoubleQuotes('World')}",
+              "${localizations.quotingInsideSelect('apple')}",
+              "${localizations.quotingInsideSelect('banana')}",
+              "${localizations.quotingInsideSelect('peach')}",
+              "${localizations.escapingInsideSelect('a')}",
+              "${localizations.escapingInsideSelect('b')}",
+              "${localizations.escapingInsideSelect('c')}",
+              "${localizations.escapingInsideSelect('d')}",
+              '${localizations.noNameCollision("pi", 3.14)}',
             ]);
           },
         ),
@@ -324,7 +358,7 @@ void main() {
 }
 ''';
 
-  final String appEn = r'''
+  final String appEn = r"""
 {
   "@@locale": "en",
 
@@ -666,9 +700,79 @@ void main() {
       "gender": {},
       "preference": {}
     }
+  },
+
+  "pluralThenString": "Indeed, {count, plural, =1 {she likes} other {they like}} {project} a lot!",
+  "@pluralThenString": {
+    "placeholders": {
+      "count": {},
+      "project": {
+        "type": "String"
+      }
+    }
+  },
+
+  "multiplePlurals": "There {count, plural, =1{is} other{are}} {count} world{count, plural, =1{} other{s}}.",
+  "@multiplePlurals": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "pluralInSelect": "I can see {fruit, select, apple{{count, plural, =0{no apple} =1{one apple} other{some apples}}} banana{{count, plural, =0{no banana} =1{one banana} other{{count} bananas}}}}.",
+  "@pluralInSelect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "fruit": {}
+    }
+  },
+
+  "doubleQuotes": "Some ''message'' with ''''quotes''''",
+  "@doubleQuotes": {
+    "description": "A message with double quotes."
+  },
+
+  "escapedMessage": "This '{isn''t}' obvious, '}is it?{'",
+  "@escapedMessage": {
+    "description": "A message with an quoted/escaped part"
+  },
+
+  "nonEscapingDoubleQuotes": "Hello quoted ''{world}''",
+  "@nonEscapingDoubleQuotes": {
+    "description": "A message with placeholder and non-escaping braces",
+    "placeholders": {
+      "world": {}
+    }
+  },
+
+  "quotingInsideSelect": "The {fruit, select, apple{quoted ''apples''} banana{braced '{bananas}'}  peach{double-quoted ''''peaches''''}}.",
+  "@quotingInsideSelect": {
+    "placeholders": {
+      "fruit": {}
+    }
+  },
+
+  "escapingInsideSelect": "'Testing {test, select, a{'A''} b{'} B {'} c{' '}' C '{' ''} d{'''{D}'''}}'",
+  "@escapingInsideSelect": {
+    "placeholders": {
+      "test": {}
+    }
+  },
+
+  "noNameCollision": "The value of {valueString} is approximately {value}",
+  "@noNameCollision": {
+    "placeholders": {
+      "valueString": {},
+      "value": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
+    }
   }
 }
-''';
+""";
 
   final String appEnCa = r'''
 {
@@ -687,7 +791,7 @@ void main() {
   /// All messages are simply the template language's message with 'ES - '
   /// appended. This makes validating test behavior easier. The interpolated
   /// messages are different where applicable.
-  final String appEs = r'''
+  final String appEs = r"""
 {
   "@@locale": "es",
   "helloWorld": "ES - Hello world",
@@ -715,9 +819,18 @@ void main() {
   "singleQuoteSelect": "{vehicleType, select, sedan{ES - Sedan's elegance} cabriolet{ES - Cabriolet' acceleration} truck{ES - truck's heavy duty} other{ES - Other's mirrors!}}",
   "doubleQuoteSelect": "{vehicleType, select, sedan{ES - Sedan has \"elegance\"} cabriolet{ES - Cabriolet has \"acceleration\"} truck{ES - truck is \"heavy duty\"} other{ES - Other have \"mirrors\"!}}",
   "pluralInString": "ES - Oh, she found {count, plural, =1 {ES - 1 item} other {ES - all {count} items} }ES - !",
-  "selectInString": "ES - Indeed, {gender, select, male {ES - he likes} female {ES - she likes} other {ES - they like} } ES - Flutter!"
+  "selectInString": "ES - Indeed, {gender, select, male {ES - he likes} female {ES - she likes} other {ES - they like} } ES - Flutter!",
+  "pluralThenString": "ES - Indeed, {count, plural, =1 {ES - she likes} other {ES - they like} } ES - {project} a lot!",
+  "multiplePlurals": "ES - There {count, plural, =1{ES - is} other{ES - are}} {count} world{count, plural, =1{ - ES} other{s - ES}}.",
+  "pluralInSelect": "ES - I can see {fruit, select, apple{{count, plural, =0{ES - no apple} =1{ES - one apple} other{ES - some apples}}} banana{{count, plural, =0{ES - no banana} =1{ES - one banana} other{ES - {count} bananas}}}}.",
+  "doubleQuotes": "ES - Some ''message'' with ''''quotes''''",
+  "escapedMessage": "ES - This '{isn''t}' obvious, '}is it?{'",
+  "nonEscapingDoubleQuotes": "ES - Hello quoted ''{world}''",
+  "quotingInsideSelect": "ES - The {fruit, select, apple{quoted ''apples''} banana{braced '{bananas}'} peach{double-quoted ''''peaches''''}}.",
+  "escapingInsideSelect": "ES - 'Testing {test, select, a{'A''} b{'} B {'} c{' '}' C '{' ''} d{'''{D}'''}}'",
+  "noNameCollision": "ES - The value of {valueString} is approximately {value}"
 }
-''';
+""";
 
   final String appEs419 = r'''
 {

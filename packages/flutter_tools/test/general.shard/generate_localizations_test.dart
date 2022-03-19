@@ -1712,10 +1712,50 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('plural messages', () {
+      testWithoutContext('should throw attempting to generate a plural message with an incorrect message', () {
+        const String pluralMessageWithoutPlaceholdersAttribute = '''
+{
+  "pluralCount": "{count, plural,}",
+  "@pluralCount": {
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(pluralMessageWithoutPlaceholdersAttribute);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            allOf(
+              contains('Incorrect plural message format for placeholder'),
+              contains('Check to see if the plural message is in the proper ICU syntax format.'),
+            ),
+          )),
+        );
+      });
+
       testWithoutContext('should throw attempting to generate a plural message without placeholders', () {
         const String pluralMessageWithoutPlaceholdersAttribute = '''
 {
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello few worlds}many{Hello all worlds}other{Hello other worlds}}",
   "@helloWorlds": {
     "description": "Improperly formatted since it has no placeholder attribute."
   }
@@ -1750,7 +1790,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       testWithoutContext('should throw attempting to generate a plural message with an empty placeholders map', () {
         const String pluralMessageWithEmptyPlaceholdersMap = '''
 {
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello few worlds}many{Hello all worlds}other{Hello other worlds}}",
   "@helloWorlds": {
     "description": "Improperly formatted since it has no placeholder attribute.",
     "placeholders": {}
@@ -2029,7 +2069,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             (L10nException e) => e.message,
             'message',
             allOf(
-              contains('Incorrect select message format for'),
+              contains('Incorrect select message format for placeholder'),
               contains('Check to see if the select message is in the proper ICU syntax format.'),
             ),
           )),
@@ -2345,27 +2385,27 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${six}m'));
       expect(localizationsFile, contains(r'$seven'));
       expect(localizationsFile, contains(r'$eight'));
-      expect(localizationsFile, contains(r'${nine}'));
+      expect(localizationsFile, contains(r'$nine'));
     });
 
     testWithoutContext('check for string interpolation rules - plurals', () {
       const String enArbCheckList = '''
 {
-  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
   "@first": {
     "description": "First set of plural messages to test.",
     "placeholders": {
       "count": {}
     }
   },
-  "second": "{count,plural, =0{test {count}} other{ {count}}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}}",
   "@second": {
     "description": "Second set of plural messages to test.",
     "placeholders": {
       "count": {}
     }
   },
-  "third": "{total,plural, =0{test {total}} other{ {total}}",
+  "third": "{total,plural, =0{test {total}} other{ {total}}}",
   "@third": {
     "description": "Third set of plural messages to test, for number.",
     "placeholders": {
@@ -2382,8 +2422,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       // generated code for use of '${variable}' vs '$variable'
       const String esArbCheckList = '''
 {
-  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
-  "second": "{count,plural, =0{test {count}} other{ {count}}"
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}}"
 }
 ''';
 
@@ -2414,7 +2454,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${count}m'));
       expect(localizationsFile, contains(r'test $count'));
       expect(localizationsFile, contains(r' $count'));
-      expect(localizationsFile, contains(r'String totalString = totalNumberFormat'));
+      expect(localizationsFile, contains(r'String totalString = intl.NumberFormat.compactLong'));
       expect(localizationsFile, contains(r'test $totalString'));
       expect(localizationsFile, contains(r' $totalString'));
     });
@@ -2491,6 +2531,279 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           contains('Resource attribute "@title" was not found'),
         )),
       );
+    });
+
+    group('invalid ICU formats', () {
+      testWithoutContext('should throw if brace is opened but not closed', () {
+        const String message = '''
+{
+  "message": "some message with { not escaped"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains("Invalid format (unbalanced braces): encountered a '{' without matching '}'"),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if brace is closed but not opened', () {
+        const String message = '''
+{
+  "message": "some message with } not escaped"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains("Invalid format (unbalanced braces): encountered a '}' without matching '{'"),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if placeholder does not exist', () {
+        const String message = '''
+{
+  "message": "Some unexisting {value}"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Check to see if the message is in the proper ICU syntax format'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if braces empty', () {
+        const String message = '''
+{
+  "message": "empty {} braces"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Check to see if the message is in the proper ICU syntax format'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if placeholder inside plural does not exist', () {
+        const String message = '''
+{
+  "welcome": "{count,plural, =0{Nobody's here} =1{Welcome {user}} other{Welcome all}}",
+  "@welcome": {
+    "description": "Welcome message",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Check to see if the message is in the proper ICU syntax format'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if placeholder inside select does not exist', () {
+        const String message = '''
+{
+  "userTitle": "{gender,select,female{Ms. {name}} male{Mr. {name}}}",
+  "@userTitle": {
+    "description": "User title",
+    "placeholders": {
+      "gender": {}
+    }
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Check to see if the message is in the proper ICU syntax format'),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if quoting/escaping mode is opened but not closed', () {
+        const String message = '''
+{
+  "message": "some message with '{ not closed"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains(
+              "Invalid format (unbalanced quotes): a \"'\" preceeding a brace starts an escaping sequence, "
+              "but no other \"'\" to close the sequence was found"
+            ),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw if invalid placeholder argument type', () {
+        const String message = '''
+{
+  "message": "{foo,bar,baz}"
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(message);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Invalid placeholder argument type'),
+          )),
+        );
+      });
     });
 
     group('checks for method/getter formatting', () {

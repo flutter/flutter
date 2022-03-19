@@ -431,6 +431,35 @@ class Message {
   }
 }
 
+// Represents part of a parsed ICU message.
+class MessageToken {
+  const MessageToken(this.literalText, this.argumentText);
+  final String literalText;
+  final String? argumentText;
+}
+
+// Represents possible argument types of an ICU placeholder.
+enum ArgumentType {
+  simple,
+  select,
+  plural,
+}
+
+// Represents a placeholder element extracted from ICU message.
+class FormattingArgument {
+  const FormattingArgument(this.type, this.name, this.params);
+  final ArgumentType type;
+  final String name;
+  final String params;
+}
+
+// Represents a generated variable to format placeholder in the final message.
+class FormattingVariable {
+  const FormattingVariable(this.name, this.argument);
+  final String name;
+  final FormattingArgument argument;
+}
+
 // Represents the contents of one ARB file.
 class AppResourceBundle {
   factory AppResourceBundle(File file) {

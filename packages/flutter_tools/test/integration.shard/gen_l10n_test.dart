@@ -125,45 +125,79 @@ void main() {
       '#l10n 70 (Indeed, they like Flutter!)\n'
       '#l10n 71 (Indeed, he likes ice cream!)\n'
       '#l10n 72 (Indeed, she likes chocolate!)\n'
-      '#l10n 73 (--- es ---)\n'
-      '#l10n 74 (ES - Hello world)\n'
-      '#l10n 75 (ES - Hello _NEWLINE_ World)\n'
-      '#l10n 76 (ES - Hola \$ Mundo)\n'
-      '#l10n 77 (ES - Hello Mundo)\n'
-      '#l10n 78 (ES - Hola Mundo)\n'
-      '#l10n 79 (ES - Hello World on viernes, 1 de enero de 1960)\n'
-      '#l10n 80 (ES - Hello world argument on 1/1/1960 at 0:00)\n'
-      '#l10n 81 (ES - Hello World from 1960 to 2020)\n'
-      '#l10n 82 (ES - Hello for 123)\n'
-      '#l10n 83 (ES - Hello)\n'
-      '#l10n 84 (ES - Hello World)\n'
-      '#l10n 85 (ES - Hello two worlds)\n'
-      '#l10n 86 (ES - Hello)\n'
-      '#l10n 87 (ES - Hello nuevo World)\n'
-      '#l10n 88 (ES - Hello two nuevo worlds)\n'
-      '#l10n 89 (ES - Hello on viernes, 1 de enero de 1960)\n'
-      '#l10n 90 (ES - Hello World, on viernes, 1 de enero de 1960)\n'
-      '#l10n 91 (ES - Hello two worlds, on viernes, 1 de enero de 1960)\n'
-      '#l10n 92 (ES - Hello other 0 worlds, with a total of 100 citizens)\n'
-      '#l10n 93 (ES - Hello World of 101 citizens)\n'
-      '#l10n 94 (ES - Hello two worlds with 102 total citizens)\n'
-      '#l10n 95 (ES - [Hola] -Mundo- #123#)\n'
-      '#l10n 96 (ES - \$!)\n'
-      '#l10n 97 (ES - One \$)\n'
-      "#l10n 98 (ES - Flutter's amazing!)\n"
-      "#l10n 99 (ES - Flutter's amazing, times 2!)\n"
-      '#l10n 100 (ES - Flutter is "amazing"!)\n'
-      '#l10n 101 (ES - Flutter is "amazing", times 2!)\n'
-      '#l10n 102 (ES - 16 wheel truck)\n'
-      "#l10n 103 (ES - Sedan's elegance)\n"
-      '#l10n 104 (ES - Cabriolet has "acceleration")\n'
-      '#l10n 105 (ES - Oh, she found ES - 1 itemES - !)\n'
-      '#l10n 106 (ES - Indeed, ES - they like ES - Flutter!)\n'
-      '#l10n 107 (--- es_419 ---)\n'
-      '#l10n 108 (ES 419 - Hello World)\n'
-      '#l10n 109 (ES 419 - Hello)\n'
-      '#l10n 110 (ES 419 - Hello World)\n'
-      '#l10n 111 (ES 419 - Hello two worlds)\n'
+      '#l10n 73 (Indeed, she likes Dart a lot!)\n'
+      '#l10n 74 (Indeed, they like Flutter a lot!)\n'
+      '#l10n 75 (There is 1 world.)\n'
+      '#l10n 76 (There are 10 worlds.)\n'
+      '#l10n 77 (I can see one apple.)\n'
+      '#l10n 78 (I can see 3 bananas.)\n'
+      "#l10n 79 (Some 'message' with ''quotes'')\n"
+      "#l10n 80 (This {isn't} obvious, }is it?{)\n"
+      "#l10n 81 (Hello quoted 'World')\n"
+      "#l10n 82 (The quoted 'apples'.)\n"
+      '#l10n 83 (The braced {bananas}.)\n'
+      "#l10n 84 (The double-quoted ''peaches''.)\n"
+      "#l10n 85 ('Testing 'A'')\n"
+      "#l10n 86 ('Testing } B {')\n"
+      "#l10n 87 ('Testing ' } C { '')\n"
+      "#l10n 88 ('Testing '{D}'')\n"
+      '#l10n 89 (The value of pi is approximately 3.14)\n'
+      '#l10n 90 (--- es ---)\n'
+      '#l10n 91 (ES - Hello world)\n'
+      '#l10n 92 (ES - Hello _NEWLINE_ World)\n'
+      '#l10n 93 (ES - Hola \$ Mundo)\n'
+      '#l10n 94 (ES - Hello Mundo)\n'
+      '#l10n 95 (ES - Hola Mundo)\n'
+      '#l10n 96 (ES - Hello World on viernes, 1 de enero de 1960)\n'
+      '#l10n 97 (ES - Hello world argument on 1/1/1960 at 0:00)\n'
+      '#l10n 98 (ES - Hello World from 1960 to 2020)\n'
+      '#l10n 99 (ES - Hello for 123)\n'
+      '#l10n 100 (ES - Hello)\n'
+      '#l10n 101 (ES - Hello World)\n'
+      '#l10n 102 (ES - Hello two worlds)\n'
+      '#l10n 103 (ES - Hello)\n'
+      '#l10n 104 (ES - Hello nuevo World)\n'
+      '#l10n 105 (ES - Hello two nuevo worlds)\n'
+      '#l10n 106 (ES - Hello on viernes, 1 de enero de 1960)\n'
+      '#l10n 107 (ES - Hello World, on viernes, 1 de enero de 1960)\n'
+      '#l10n 108 (ES - Hello two worlds, on viernes, 1 de enero de 1960)\n'
+      '#l10n 109 (ES - Hello other 0 worlds, with a total of 100 citizens)\n'
+      '#l10n 110 (ES - Hello World of 101 citizens)\n'
+      '#l10n 111 (ES - Hello two worlds with 102 total citizens)\n'
+      '#l10n 112 (ES - [Hola] -Mundo- #123#)\n'
+      '#l10n 113 (ES - \$!)\n'
+      '#l10n 114 (ES - One \$)\n'
+      "#l10n 115 (ES - Flutter's amazing!)\n"
+      "#l10n 116 (ES - Flutter's amazing, times 2!)\n"
+      '#l10n 117 (ES - Flutter is "amazing"!)\n'
+      '#l10n 118 (ES - Flutter is "amazing", times 2!)\n'
+      '#l10n 119 (ES - 16 wheel truck)\n'
+      "#l10n 120 (ES - Sedan's elegance)\n"
+      '#l10n 121 (ES - Cabriolet has "acceleration")\n'
+      '#l10n 122 (ES - Oh, she found ES - 1 itemES - !)\n'
+      '#l10n 123 (ES - Indeed, ES - they like ES - Flutter!)\n'
+      '#l10n 124 (ES - Indeed, ES - she likes ES - Dart a lot!)\n'
+      '#l10n 125 (ES - Indeed, ES - they like ES - Flutter a lot!)\n'
+      '#l10n 126 (ES - There ES - is 1 world - ES.)\n'
+      '#l10n 127 (ES - There ES - are 10 worlds - ES.)\n'
+      '#l10n 128 (ES - I can see ES - one apple.)\n'
+      '#l10n 129 (ES - I can see ES - 3 bananas.)\n'
+      "#l10n 130 (ES - Some 'message' with ''quotes'')\n"
+      "#l10n 131 (ES - This {isn't} obvious, }is it?{)\n"
+      "#l10n 132 (ES - Hello quoted 'World')\n"
+      "#l10n 133 (ES - The quoted 'apples'.)\n"
+      '#l10n 134 (ES - The braced {bananas}.)\n'
+      "#l10n 135 (ES - The double-quoted ''peaches''.)\n"
+      "#l10n 136 (ES - 'Testing 'A'')\n"
+      "#l10n 137 (ES - 'Testing } B {')\n"
+      "#l10n 138 (ES - 'Testing ' } C { '')\n"
+      "#l10n 139 (ES - 'Testing '{D}'')\n"
+      '#l10n 140 (ES - The value of pi is approximately 3,14)\n'
+      '#l10n 141 (--- es_419 ---)\n'
+      '#l10n 142 (ES 419 - Hello World)\n'
+      '#l10n 143 (ES 419 - Hello)\n'
+      '#l10n 144 (ES 419 - Hello World)\n'
+      '#l10n 145 (ES 419 - Hello two worlds)\n'
       '#l10n END\n'
     );
   }
