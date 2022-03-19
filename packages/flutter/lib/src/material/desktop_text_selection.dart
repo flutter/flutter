@@ -73,6 +73,12 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
            value.text.isNotEmpty &&
            !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {
+    super.handleSelectAll(delegate);
+    delegate.hideToolbar();
+  }
 }
 
 /// Text selection controls that loosely follows Material design conventions.
