@@ -1706,6 +1706,7 @@ void main() {
       'parentData: MISSING',
       'constraints: MISSING',
       'size: MISSING',
+      'behavior: opaque',
       'listeners: <none>',
     ]);
   });
@@ -1727,6 +1728,7 @@ void main() {
       'parentData: MISSING',
       'constraints: MISSING',
       'size: MISSING',
+      'behavior: opaque',
       'listeners: enter, hover, exit',
       'cursor: SystemMouseCursor(click)',
       'invalid for MouseTracker',
