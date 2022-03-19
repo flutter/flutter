@@ -802,7 +802,7 @@ void BM_DrawVertices(benchmark::State& state,
     sk_sp<SkVertices> vertices =
         GetTestVertices(p, radius, 50, mode, vertex_count);
     total_vertex_count += vertex_count;
-    builder.drawVertices(vertices, SkBlendMode::kSrc);
+    builder.drawVertices(vertices, DlBlendMode::kSrc);
   }
 
   state.counters["VertexCount"] = total_vertex_count;

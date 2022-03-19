@@ -47,6 +47,8 @@ FILE: ../../../flutter/display_list/display_list_benchmarks_metal.cc
 FILE: ../../../flutter/display_list/display_list_benchmarks_metal.h
 FILE: ../../../flutter/display_list/display_list_benchmarks_software.cc
 FILE: ../../../flutter/display_list/display_list_benchmarks_software.h
+FILE: ../../../flutter/display_list/display_list_blend_mode.cc
+FILE: ../../../flutter/display_list/display_list_blend_mode.h
 FILE: ../../../flutter/display_list/display_list_builder.cc
 FILE: ../../../flutter/display_list/display_list_builder.h
 FILE: ../../../flutter/display_list/display_list_canvas_dispatcher.cc

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_CANVAS_H_
 #define FLUTTER_LIB_UI_PAINTING_CANVAS_H_
 
+#include "display_list/display_list_blend_mode.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/painting/path.h"
@@ -62,7 +63,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   void clipRRect(const RRect& rrect, bool doAntiAlias = true);
   void clipPath(const CanvasPath* path, bool doAntiAlias = true);
 
-  void drawColor(SkColor color, SkBlendMode blend_mode);
+  void drawColor(SkColor color, DlBlendMode blend_mode);
   void drawLine(double x1,
                 double y1,
                 double x2,
@@ -149,7 +150,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                   const tonic::Float32List& points);
 
   void drawVertices(const Vertices* vertices,
-                    SkBlendMode blend_mode,
+                    DlBlendMode blend_mode,
                     const Paint& paint,
                     const PaintData& paint_data);
 
@@ -160,7 +161,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                  const tonic::Float32List& transforms,
                  const tonic::Float32List& rects,
                  const tonic::Int32List& colors,
-                 SkBlendMode blend_mode,
+                 DlBlendMode blend_mode,
                  const tonic::Float32List& cull_rect);
 
   void drawShadow(const CanvasPath* path,

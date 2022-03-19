@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FLOW_DISPLAY_LIST_COMPLEXITY_HELPER_H_
 #define FLUTTER_FLOW_DISPLAY_LIST_COMPLEXITY_HELPER_H_
 
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_complexity.h"
 #include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/display_list/display_list_utils.h"
@@ -106,7 +107,7 @@ class ComplexityCalculatorHelper
   void setStrokeJoin(SkPaint::Join join) override {}
   void setStrokeMiter(SkScalar limit) override {}
   void setColor(SkColor color) override {}
-  void setBlendMode(SkBlendMode mode) override {}
+  void setBlendMode(DlBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
   void setColorSource(const DlColorSource* source) override {}
   void setImageFilter(sk_sp<SkImageFilter> filter) override {}
@@ -128,7 +129,7 @@ class ComplexityCalculatorHelper
     current_paint_.setStrokeWidth(width);
   }
 
-  void drawColor(SkColor color, SkBlendMode mode) override {
+  void drawColor(SkColor color, DlBlendMode mode) override {
     if (IsComplex()) {
       return;
     }
@@ -179,7 +180,7 @@ class ComplexityCalculatorHelper
                  const SkRect tex[],
                  const SkColor colors[],
                  int count,
-                 SkBlendMode mode,
+                 DlBlendMode mode,
                  const SkSamplingOptions& sampling,
                  const SkRect* cull_rect,
                  bool render_with_attributes) override {

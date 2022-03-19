@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_CANVAS_DISPATCHER_H_
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/display_list/display_list_utils.h"
 #include "flutter/fml/macros.h"
@@ -53,7 +54,7 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
   void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
   void drawPaint() override;
-  void drawColor(SkColor color, SkBlendMode mode) override;
+  void drawColor(SkColor color, DlBlendMode mode) override;
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
   void drawRect(const SkRect& rect) override;
   void drawOval(const SkRect& bounds) override;
@@ -69,7 +70,7 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                   uint32_t count,
                   const SkPoint pts[]) override;
   void drawVertices(const sk_sp<SkVertices> vertices,
-                    SkBlendMode mode) override;
+                    DlBlendMode mode) override;
   void drawImage(const sk_sp<SkImage> image,
                  const SkPoint point,
                  const SkSamplingOptions& sampling,
@@ -95,7 +96,7 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                  const SkRect tex[],
                  const SkColor colors[],
                  int count,
-                 SkBlendMode mode,
+                 DlBlendMode mode,
                  const SkSamplingOptions& sampling,
                  const SkRect* cullRect,
                  bool render_with_attributes) override;

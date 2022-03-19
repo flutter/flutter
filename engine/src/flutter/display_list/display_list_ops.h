@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_OPS_H_
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/macros.h"
@@ -141,9 +142,9 @@ struct SetColorOp final : DLOp {
 struct SetBlendModeOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetBlendMode;
 
-  explicit SetBlendModeOp(SkBlendMode mode) : mode(mode) {}
+  explicit SetBlendModeOp(DlBlendMode mode) : mode(mode) {}
 
-  const SkBlendMode mode;
+  const DlBlendMode mode;
 
   void dispatch(Dispatcher& dispatcher) const { dispatcher.setBlendMode(mode); }
 };
@@ -458,10 +459,10 @@ struct DrawPaintOp final : DLOp {
 struct DrawColorOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawColor;
 
-  DrawColorOp(SkColor color, SkBlendMode mode) : color(color), mode(mode) {}
+  DrawColorOp(SkColor color, DlBlendMode mode) : color(color), mode(mode) {}
 
   const SkColor color;
-  const SkBlendMode mode;
+  const DlBlendMode mode;
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.drawColor(color, mode);
@@ -577,10 +578,10 @@ DEFINE_DRAW_POINTS_OP(Polygon, kPolygon_PointMode);
 struct DrawVerticesOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawVertices;
 
-  DrawVerticesOp(sk_sp<SkVertices> vertices, SkBlendMode mode)
+  DrawVerticesOp(sk_sp<SkVertices> vertices, DlBlendMode mode)
       : mode(mode), vertices(std::move(vertices)) {}
 
-  const SkBlendMode mode;
+  const DlBlendMode mode;
   const sk_sp<SkVertices> vertices;
 
   void dispatch(Dispatcher& dispatcher) const {
@@ -721,7 +722,7 @@ struct DrawImageLatticeOp final : DLOp {
 struct DrawAtlasBaseOp : DLOp {
   DrawAtlasBaseOp(const sk_sp<SkImage> atlas,
                   int count,
-                  SkBlendMode mode,
+                  DlBlendMode mode,
                   const SkSamplingOptions& sampling,
                   bool has_colors,
                   bool render_with_attributes)
@@ -747,7 +748,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
 
   DrawAtlasOp(const sk_sp<SkImage> atlas,
               int count,
-              SkBlendMode mode,
+              DlBlendMode mode,
               const SkSamplingOptions& sampling,
               bool has_colors,
               bool render_with_attributes)
@@ -763,7 +764,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
     const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
     const SkColor* colors =
         has_colors ? reinterpret_cast<const SkColor*>(tex + count) : nullptr;
-    const SkBlendMode mode = static_cast<SkBlendMode>(mode_index);
+    const DlBlendMode mode = static_cast<DlBlendMode>(mode_index);
     dispatcher.drawAtlas(atlas, xform, tex, colors, count, mode, sampling,
                          nullptr, render_with_attributes);
   }
@@ -778,7 +779,7 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
 
   DrawAtlasCulledOp(const sk_sp<SkImage> atlas,
                     int count,
-                    SkBlendMode mode,
+                    DlBlendMode mode,
                     const SkSamplingOptions& sampling,
                     bool has_colors,
                     const SkRect& cull_rect,
@@ -798,7 +799,7 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
     const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
     const SkColor* colors =
         has_colors ? reinterpret_cast<const SkColor*>(tex + count) : nullptr;
-    const SkBlendMode mode = static_cast<SkBlendMode>(mode_index);
+    const DlBlendMode mode = static_cast<DlBlendMode>(mode_index);
     dispatcher.drawAtlas(atlas, xform, tex, colors, count, mode, sampling,
                          &cull_rect, render_with_attributes);
   }
