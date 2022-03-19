@@ -205,11 +205,19 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           layoutParams.topMargin = physicalTop;
           layoutParams.leftMargin = physicalLeft;
           wrapperView.setLayoutParams(layoutParams);
-
           wrapperView.setLayoutDirection(request.direction);
-          wrapperView.addView(platformView.getView());
+
+          final View view = platformView.getView();
+          if (view == null) {
+            throw new IllegalStateException(
+                "PlatformView#getView() returned null, but an Android view reference was expected.");
+          } else if (view.getParent() != null) {
+            throw new IllegalStateException(
+                "The Android view returned from PlatformView#getView() was already added to a parent view.");
+          }
+          wrapperView.addView(view);
           wrapperView.setOnDescendantFocusChangeListener(
-              (view, hasFocus) -> {
+              (v, hasFocus) -> {
                 if (hasFocus) {
                   platformViewsChannel.invokeViewFocused(viewId);
                 } else if (textInputPlugin != null) {
@@ -226,16 +234,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         public void dispose(int viewId) {
           final PlatformView platformView = platformViews.get(viewId);
           if (platformView != null) {
-            final ViewGroup pvParent = (ViewGroup) platformView.getView().getParent();
-            if (pvParent != null) {
-              pvParent.removeView(platformView.getView());
-            }
             platformViews.remove(viewId);
             platformView.dispose();
           }
           // The platform view is displayed using a TextureLayer.
           final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
           if (viewWrapper != null) {
+            viewWrapper.removeAllViews();
             viewWrapper.release();
             viewWrapper.unsetOnDescendantFocusChangeListener();
 
@@ -251,6 +256,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // https://github.com/flutter/flutter/issues/96679
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
+            parentView.removeAllViews();
             parentView.unsetOnDescendantFocusChangeListener();
 
             final ViewGroup mutatorViewParent = (ViewGroup) parentView.getParent();
@@ -322,7 +328,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
           final float density = context.getResources().getDisplayMetrics().density;
           final MotionEvent event = toMotionEvent(density, touch);
-          platformView.getView().dispatchTouchEvent(event);
+          final View view = platformView.getView();
+          if (view == null) {
+            Log.e(TAG, "Sending touch to a null view with id: " + viewId);
+            return;
+          }
+          view.dispatchTouchEvent(event);
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -342,7 +353,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             return;
           }
           ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
-          platformViews.get(viewId).getView().setLayoutDirection(direction);
+          final View view = platformView.getView();
+          if (view == null) {
+            Log.e(TAG, "Setting direction to a null view with id: " + viewId);
+            return;
+          }
+          view.setLayoutDirection(direction);
         }
 
         @Override
@@ -352,7 +368,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             Log.e(TAG, "Clearing focus on an unknown view with id: " + viewId);
             return;
           }
-          platformView.getView().clearFocus();
+          final View view = platformView.getView();
+          if (view == null) {
+            Log.e(TAG, "Clearing focus on a null view with id: " + viewId);
+            return;
+          }
+          view.clearFocus();
         }
 
         private void ensureValidAndroidVersion(int minSdkVersion) {
