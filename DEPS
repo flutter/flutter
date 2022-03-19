@@ -662,6 +662,12 @@ deps = {
 
 hooks = [
   {
+    # Generate the Dart SDK's .dart_tool/package_confg.json file.
+    'name': 'Generate .dart_tool/package_confg.json',
+    'pattern': '.',
+    'action': ['python3', 'src/third_party/dart/tools/generate_package_config.py'],
+  },
+  {
     # Update the Windows toolchain if necessary.
     'name': 'win_toolchain',
     'condition': 'download_windows_deps',
