@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/painting/canvas.h"
-#include "display_list/display_list_blend_mode.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 
 #include <cmath>
 
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
