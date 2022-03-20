@@ -188,8 +188,13 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
-    expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
-    expect(tester.testTextInput.isVisible, isTrue);
+    if (isBrowser) {
+      expect(find.byType(TextField, skipOffstage: false), findsNothing);
+      expect(tester.testTextInput.isVisible, isFalse);
+    } else {
+      expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
+      expect(tester.testTextInput.isVisible, isTrue);
+    }
 
     focusNode.unfocus();
     await tester.pump();
@@ -227,10 +232,20 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
-    expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
+    if (isBrowser) {
+      // On the web, TextField gets blurred when focusing outside of the widget.
+      expect(find.byType(TextField, skipOffstage: false), findsNothing);
+    } else {
+      expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
+    }
     await tester.pumpWidget(makeTest('test'));
     await tester.pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
-    expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
+    if (isBrowser) {
+      // On the web, TextField gets blurred when focusing outside of the widget.
+      expect(find.byType(TextField, skipOffstage: false), findsNothing);
+    } else {
+      expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
+    }
   });
 
   testWidgets('TextField with decoration:null', (WidgetTester tester) async {

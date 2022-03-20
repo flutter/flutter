@@ -2260,6 +2260,11 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         hitCurrentFocus = true;
         break;
       }
+      if (target is _RenderFocusTrapArea && event.kind == PointerDeviceKind.touch) {
+        // Keep focusing when we switch from one TextField to another.
+        hitCurrentFocus = true;
+        break;
+      }
     }
     if (!hitCurrentFocus)
       focusNode.unfocus();
