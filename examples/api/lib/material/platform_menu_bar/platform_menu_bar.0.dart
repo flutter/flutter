@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 // Flutter code sample for PlatformMenuBar
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const SampleApp());
@@ -15,12 +17,10 @@ enum MenuSelection {
 class SampleApp extends StatelessWidget {
   const SampleApp({Key? key}) : super(key: key);
 
-  static const String _title = 'MenuBar Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
+      title: 'MenuBar Sample',
       home: Scaffold(body: MyMenuBarApp()),
     );
   }
@@ -34,42 +34,45 @@ class MyMenuBarApp extends StatefulWidget {
 }
 
 class _MyMenuBarAppState extends State<MyMenuBarApp> {
-  bool get showMessage => _showMessage;
-  bool _showMessage = false;
   String _message = 'Hello';
-  set showMessage(bool value) {
-    if (_showMessage != value) {
-      setState(() {
-        _showMessage = value;
-      });
-    }
-  }
+  bool _showMessage = false;
 
   void _handleMenuSelection(MenuSelection value) {
     switch (value) {
       case MenuSelection.about:
         showAboutDialog(
           context: context,
-          applicationName: 'MenuBar Test',
+          applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
         break;
       case MenuSelection.showMessage:
-        showMessage = !showMessage;
+        setState(() {
+          _showMessage = !_showMessage;
+        });
         break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    assert(defaultTargetPlatform == TargetPlatform.macOS, 'This sample only works on macOS');
+    // This builds a menu hierarchy that looks like this:
+    // Sample App
+    //  ├ About
+    //  ├ ────────  (group divider)
+    //  ├ Hide/Show Message
+    //  └ Messages
+    //     ├ I am not throwing away my shot.
+    //     └ There's a million things I haven't done, but just you wait.
     return PlatformMenuBar(
       children: <MenuItem>[
-        PlatformSubMenu(
-          label: 'Test App',
+        PlatformMenu(
+          label: 'Sample App',
           children: <MenuItem>[
             PlatformMenuItemGroup(
               members: <MenuItem>[
-                PlatformMenuBarItem(
+                PlatformMenuItem(
                   label: 'About',
                   onSelected: () => _handleMenuSelection(MenuSelection.about),
                 )
@@ -77,14 +80,14 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
             ),
             PlatformMenuItemGroup(
               members: <MenuItem>[
-                PlatformMenuBarItem(
+                PlatformMenuItem(
                   onSelected: () => _handleMenuSelection(MenuSelection.showMessage),
-                  label: showMessage ? 'Hide Message' : 'Show Message',
+                  label: _showMessage ? 'Hide Message' : 'Show Message',
                 ),
-                PlatformSubMenu(
+                PlatformMenu(
                   label: 'Messages',
                   children: <MenuItem>[
-                    PlatformMenuBarItem(
+                    PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
                       onSelected: () {
                         setState(() {
@@ -92,7 +95,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                         });
                       },
                     ),
-                    PlatformMenuBarItem(
+                    PlatformMenuItem(
                       label: "There's a million things I haven't done, but just you wait.",
                       onSelected: () {
                         setState(() {
@@ -109,7 +112,10 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
         ),
       ],
       body: Center(
-        child: Text(_showMessage ? _message : 'Application Body'),
+        child: Text(_showMessage
+            ? _message
+            : 'This space intentionally left blank.\n'
+              'Show a message here using the menu.'),
       ),
     );
   }

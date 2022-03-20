@@ -173,7 +173,7 @@ void main() {
       expect(tester.takeException(), isA<AssertionError>());
     });
     testWidgets('diagnostics', (WidgetTester tester) async {
-      const PlatformMenuBarItem item = PlatformMenuBarItem(
+      const PlatformMenuItem item = PlatformMenuItem(
         label: 'label2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
@@ -205,10 +205,10 @@ void main() {
   });
   group('PlatformMenuBarItem', () {
     testWidgets('diagnostics', (WidgetTester tester) async {
-      const PlatformMenuBarItem childItem = PlatformMenuBarItem(
+      const PlatformMenuItem childItem = PlatformMenuItem(
         label: 'label',
       );
-      const PlatformSubMenu item = PlatformSubMenu(
+      const PlatformMenu item = PlatformMenu(
         label: 'label',
         children: <MenuItem>[childItem],
       );
@@ -263,76 +263,76 @@ List<MenuItem> createTestMenus({
   bool includeStandard = false,
 }) {
   final List<MenuItem> result = <MenuItem>[
-    PlatformSubMenu(
+    PlatformMenu(
       label: mainMenu[0],
       onOpen: onOpen != null ? () => onOpen(mainMenu[0]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[0]) : null,
       children: <MenuItem>[
-        PlatformMenuBarItem(
+        PlatformMenuItem(
           label: subMenu0[0],
           onSelected: onActivate != null ? () => onActivate(subMenu0[0]) : null,
           shortcut: shortcuts[subMenu0[0]],
         ),
       ],
     ),
-    PlatformSubMenu(
+    PlatformMenu(
       label: mainMenu[1],
       onOpen: onOpen != null ? () => onOpen(mainMenu[1]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[1]) : null,
       children: <MenuItem>[
         PlatformMenuItemGroup(
           members: <MenuItem>[
-            PlatformMenuBarItem(
+            PlatformMenuItem(
               label: subMenu1[0],
               onSelected: onActivate != null ? () => onActivate(subMenu1[0]) : null,
               shortcut: shortcuts[subMenu1[0]],
             ),
           ],
         ),
-        PlatformSubMenu(
+        PlatformMenu(
           label: subMenu1[1],
           onOpen: onOpen != null ? () => onOpen(subMenu1[1]) : null,
           onClose: onClose != null ? () => onClose(subMenu1[1]) : null,
           children: <MenuItem>[
             PlatformMenuItemGroup(
               members: <MenuItem>[
-                PlatformMenuBarItem(
+                PlatformMenuItem(
                   label: subSubMenu10[0],
                   onSelected: onActivate != null ? () => onActivate(subSubMenu10[0]) : null,
                   shortcut: shortcuts[subSubMenu10[0]],
                 ),
               ],
             ),
-            PlatformMenuBarItem(
+            PlatformMenuItem(
               label: subSubMenu10[1],
               onSelected: onActivate != null ? () => onActivate(subSubMenu10[1]) : null,
               shortcut: shortcuts[subSubMenu10[1]],
             ),
-            PlatformMenuBarItem(
+            PlatformMenuItem(
               label: subSubMenu10[2],
               onSelected: onActivate != null ? () => onActivate(subSubMenu10[2]) : null,
               shortcut: shortcuts[subSubMenu10[2]],
             ),
-            PlatformMenuBarItem(
+            PlatformMenuItem(
               label: subSubMenu10[3],
               onSelected: onActivate != null ? () => onActivate(subSubMenu10[3]) : null,
               shortcut: shortcuts[subSubMenu10[3]],
             ),
           ],
         ),
-        PlatformMenuBarItem(
+        PlatformMenuItem(
           label: subMenu1[2],
           onSelected: onActivate != null ? () => onActivate(subMenu1[2]) : null,
           shortcut: shortcuts[subMenu1[2]],
         ),
       ],
     ),
-    PlatformSubMenu(
+    PlatformMenu(
       label: mainMenu[2],
       onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
       children: <MenuItem>[
-        PlatformMenuBarItem(
+        PlatformMenuItem(
           // Always disabled.
           label: subMenu2[0],
           shortcut: shortcuts[subMenu2[0]],

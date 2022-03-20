@@ -398,24 +398,41 @@ class SystemChannels {
   /// The following outgoing method is defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `Menu.SetMenu`: sends the configuration of the platform menu, including
+  ///  * `Menu.setMenu`: sends the configuration of the platform menu, including
   ///    labels, enable/disable information, and unique integer identifiers for
   ///    each menu item. The configuration is sent as a `List<Map<String,
-  ///    dynamic>>` encoding the list of top level menu items, which each have a
-  ///    hierarchy of `Map<String, dynamic>` containing the required data, sent
-  ///    via a StandardMessageCodec. It is typically generated from a list of
-  ///    [MenuItem]s.
+  ///    Object?>>` encoding the list of top level menu items, which each have a
+  ///    hierarchy of `Map<String, Object?>` containing the required data, sent
+  ///    via a [StandardMessageCodec]. It is typically generated from a list of
+  ///    [MenuItem]s like this example:
+  ///
+  /// ```dart
+  /// List<Map<String, Object?>> menu = <Map<String, Object?>>[
+  ///   <String, Object?>{
+  ///     'id': 1,
+  ///     'label': 'First Menu Label',
+  ///     'enabled': true,
+  ///     'children': <Map<String, Object?>>[
+  ///       <String, Object?>{
+  ///         'id': 2,
+  ///         'label': 'Sub Menu Label',
+  ///         'enabled': true,
+  ///       },
+  ///     ]
+  ///   },
+  /// ];
+  /// ```
   ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]).
   ///
-  ///  * `Menu.SelectedCallback`: Called when a menu item is selected, along
+  ///  * `Menu.selectedCallback`: Called when a menu item is selected, along
   ///    with the unique ID of the menu item selected.
   ///
-  ///  * `Menu.Opened`: Called when a submenu is opened, along with the unique
+  ///  * `Menu.opened`: Called when a submenu is opened, along with the unique
   ///    ID of the submenu.
   ///
-  ///  * `Menu.Closed`: Called when a submenu is closed, along with the unique
+  ///  * `Menu.closed`: Called when a submenu is closed, along with the unique
   ///    ID of the submenu.
   ///
   /// See also:
