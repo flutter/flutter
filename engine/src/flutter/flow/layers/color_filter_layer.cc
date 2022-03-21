@@ -7,7 +7,7 @@
 namespace flutter {
 
 ColorFilterLayer::ColorFilterLayer(sk_sp<SkColorFilter> filter)
-    : filter_(std::move(filter)) {}
+    : filter_(std::move(filter)), render_count_(1) {}
 
 void ColorFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -29,11 +29,31 @@ void ColorFilterLayer::Preroll(PrerollContext* context,
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
   ContainerLayer::Preroll(context, matrix);
+
+  if (render_count_ >= kMinimumRendersBeforeCachingFilterLayer) {
+    TryToPrepareRasterCache(context, this, matrix);
+  } else {
+    render_count_++;
+    TryToPrepareRasterCache(context, GetCacheableChild(), matrix);
+  }
 }
 
 void ColorFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
   FML_DCHECK(needs_painting(context));
+
+  if (context.raster_cache) {
+    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas)) {
+      return;
+    }
+    SkPaint paint;
+    paint.setColorFilter(filter_);
+
+    if (context.raster_cache->Draw(GetCacheableChild(),
+                                   *context.leaf_nodes_canvas, &paint)) {
+      return;
+    }
+  }
 
   SkPaint paint;
   paint.setColorFilter(filter_);

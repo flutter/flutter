@@ -213,5 +213,70 @@ TEST_F(ColorFilterLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
+TEST_F(ColorFilterLayerTest, ChildIsCached) {
+  auto layer_filter =
+      SkColorMatrixFilter::MakeLightingFilter(SK_ColorGREEN, SK_ColorYELLOW);
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  auto other_transform = SkMatrix::Scale(1.0, 2.0);
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
+  layer->Add(mock_layer);
+
+  SkMatrix cache_ctm = initial_transform;
+  SkCanvas cache_canvas;
+  cache_canvas.setMatrix(cache_ctm);
+  SkCanvas other_canvas;
+  other_canvas.setMatrix(other_transform);
+
+  use_mock_raster_cache();
+
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), other_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), cache_canvas));
+
+  layer->Preroll(preroll_context(), initial_transform);
+
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), other_canvas));
+  EXPECT_TRUE(raster_cache()->Draw(mock_layer.get(), cache_canvas));
+}
+
+TEST_F(ColorFilterLayerTest, ChildrenNotCached) {
+  auto layer_filter =
+      SkColorMatrixFilter::MakeLightingFilter(SK_ColorGREEN, SK_ColorYELLOW);
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  auto other_transform = SkMatrix::Scale(1.0, 2.0);
+  const SkPath child_path1 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  const SkPath child_path2 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer1 = std::make_shared<MockLayer>(child_path1);
+  auto mock_layer2 = std::make_shared<MockLayer>(child_path2);
+  auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
+  layer->Add(mock_layer1);
+  layer->Add(mock_layer2);
+
+  SkMatrix cache_ctm = initial_transform;
+  SkCanvas cache_canvas;
+  cache_canvas.setMatrix(cache_ctm);
+  SkCanvas other_canvas;
+  other_canvas.setMatrix(other_transform);
+
+  use_mock_raster_cache();
+
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer1.get(), other_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer1.get(), cache_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), other_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), cache_canvas));
+
+  layer->Preroll(preroll_context(), initial_transform);
+
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer1.get(), other_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer1.get(), cache_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), other_canvas));
+  EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), cache_canvas));
+}
+
 }  // namespace testing
 }  // namespace flutter

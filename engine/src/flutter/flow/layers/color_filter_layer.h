@@ -10,7 +10,7 @@
 
 namespace flutter {
 
-class ColorFilterLayer : public ContainerLayer {
+class ColorFilterLayer : public MergedContainerLayer {
  public:
   explicit ColorFilterLayer(sk_sp<SkColorFilter> filter);
 
@@ -22,6 +22,9 @@ class ColorFilterLayer : public ContainerLayer {
 
  private:
   sk_sp<SkColorFilter> filter_;
+
+  static constexpr int kMinimumRendersBeforeCachingFilterLayer = 3;
+  int render_count_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
 };
