@@ -1959,10 +1959,10 @@ class ThemeData with Diagnosticable {
   /// Convert the [extensionsIterable] passed to [ThemeData.new] or [copyWith]
   /// to the stored [extensions] map, where each entry's key consists of the extension's type.
   static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<ThemeExtension<dynamic>> extensionsIterable) {
-    return <Object, ThemeExtension<dynamic>>{
+    return Map<Object, ThemeExtension<dynamic>>.unmodifiable(<Object, ThemeExtension<dynamic>>{
       // Strangely, the cast is necessary for tests to run.
       for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>
-    };
+    });
   }
 
   /// Linearly interpolate between two themes.
