@@ -27,7 +27,7 @@ abstract class Key {
 
   /// Default constructor, used by subclasses.
   ///
-  /// Useful so that subclasses can call us, because the [new Key] factory
+  /// Useful so that subclasses can call us, because the [Key.new] factory
   /// constructor shadows the implicit constructor.
   @protected
   const Key.empty();
