@@ -90,9 +90,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
       onSetColorSource(source);
     }
   }
-  void setImageFilter(sk_sp<SkImageFilter> filter) override {
-    if (current_image_filter_ != filter) {
-      onSetImageFilter(std::move(filter));
+  void setImageFilter(const DlImageFilter* filter) override {
+    if (NotEquals(current_image_filter_, filter)) {
+      onSetImageFilter(filter);
     }
   }
   void setColorFilter(const DlColorFilter* filter) override {
@@ -141,7 +141,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
   std::shared_ptr<const DlMaskFilter> getMaskFilter() const {
     return current_mask_filter_;
   }
-  sk_sp<SkImageFilter> getImageFilter() const { return current_image_filter_; }
+  std::shared_ptr<DlImageFilter> getImageFilter() const {
+    return current_image_filter_;
+  }
 
   void save() override;
   // Only the |renders_with_attributes()| option will be accepted here. Any
@@ -380,7 +382,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   void onSetBlendMode(DlBlendMode mode);
   void onSetBlender(sk_sp<SkBlender> blender);
   void onSetColorSource(const DlColorSource* source);
-  void onSetImageFilter(sk_sp<SkImageFilter> filter);
+  void onSetImageFilter(const DlImageFilter* filter);
   void onSetColorFilter(const DlColorFilter* filter);
   void onSetPathEffect(sk_sp<SkPathEffect> effect);
   void onSetMaskFilter(const DlMaskFilter* filter);
@@ -401,7 +403,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   sk_sp<SkBlender> current_blender_;
   std::shared_ptr<const DlColorSource> current_color_source_;
   std::shared_ptr<const DlColorFilter> current_color_filter_;
-  sk_sp<SkImageFilter> current_image_filter_;
+  std::shared_ptr<DlImageFilter> current_image_filter_;
   sk_sp<SkPathEffect> current_path_effect_;
   std::shared_ptr<const DlMaskFilter> current_mask_filter_;
 };

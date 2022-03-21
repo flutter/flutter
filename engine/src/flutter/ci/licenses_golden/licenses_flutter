@@ -76,6 +76,9 @@ FILE: ../../../flutter/display_list/display_list_dispatcher.h
 FILE: ../../../flutter/display_list/display_list_enum_unittests.cc
 FILE: ../../../flutter/display_list/display_list_flags.cc
 FILE: ../../../flutter/display_list/display_list_flags.h
+FILE: ../../../flutter/display_list/display_list_image_filter.cc
+FILE: ../../../flutter/display_list/display_list_image_filter.h
+FILE: ../../../flutter/display_list/display_list_image_filter_unittests.cc
 FILE: ../../../flutter/display_list/display_list_mask_filter.cc
 FILE: ../../../flutter/display_list/display_list_mask_filter.h
 FILE: ../../../flutter/display_list/display_list_mask_filter_unittests.cc

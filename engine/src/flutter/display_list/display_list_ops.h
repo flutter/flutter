@@ -176,7 +176,6 @@ struct SetBlendModeOp final : DLOp {
     }                                                                          \
   };
 DEFINE_SET_CLEAR_SKREF_OP(Blender, blender)
-DEFINE_SET_CLEAR_SKREF_OP(ImageFilter, filter)
 DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
 #undef DEFINE_SET_CLEAR_SKREF_OP
 
@@ -222,6 +221,7 @@ DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
     }                                                                       \
   };
 DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, ColorFilter, filter)
+DEFINE_SET_CLEAR_DLATTR_OP(ImageFilter, ImageFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, MaskFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(ColorSource, Shader, source)
 #undef DEFINE_SET_CLEAR_DLATTR_OP
@@ -242,6 +242,26 @@ struct SetImageColorSourceOp : DLOp {
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.setColorSource(&source);
+  }
+};
+
+// 4 byte header + 24 bytes for the DlColorFilterImageFilter
+// uses 32 total bytes (4 bytes unused)
+struct SetSharedImageFilterOp : DLOp {
+  static const auto kType = DisplayListOpType::kSetSharedImageFilter;
+
+  SetSharedImageFilterOp(const DlImageFilter* filter)
+      : filter(filter->shared()) {}
+
+  const std::shared_ptr<DlImageFilter> filter;
+
+  void dispatch(Dispatcher& dispatcher) const {
+    dispatcher.setImageFilter(filter.get());
+  }
+
+  DisplayListCompare equals(const SetSharedImageFilterOp* other) const {
+    return Equals(filter, other->filter) ? DisplayListCompare::kEqual
+                                         : DisplayListCompare::kNotEqual;
   }
 };
 
