@@ -706,9 +706,7 @@ bool DartIsolate::RunFromLibrary(std::optional<std::string> library_name,
                                ? tonic::ToDart(entrypoint.value().c_str())
                                : tonic::ToDart("main");
 
-  if (!FindAndInvokeDartPluginRegistrant()) {
-    InvokeDartPluginRegistrantIfAvailable(library_handle);
-  }
+  InvokeDartPluginRegistrantIfAvailable(library_handle);
 
   auto user_entrypoint_function =
       ::Dart_GetField(library_handle, entrypoint_handle);
