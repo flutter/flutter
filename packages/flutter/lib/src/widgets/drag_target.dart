@@ -207,11 +207,13 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
+    this.ignoringPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
+       assert(ignoringPointer != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
@@ -309,6 +311,14 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool ignoringFeedbackSemantics;
+
+  /// Whether the [feedback] widget is ignored during hit testing.
+  ///
+  /// Regardless of whether this widget is ignored during hit testing, it will
+  /// still consume space during layout and be visible during painting.
+  ///
+  /// Defaults to true.
+  final bool ignoringPointer;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -447,6 +457,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.onDragCompleted,
     this.hapticFeedbackOnStart = true,
     super.ignoringFeedbackSemantics,
+    super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
   });
 
@@ -542,6 +553,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
+      ignoringPointer: widget.ignoringPointer,
       onDragUpdate: (DragUpdateDetails details) {
         if (mounted && widget.onDragUpdate != null) {
           widget.onDragUpdate!(details);
@@ -796,8 +808,10 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragUpdate,
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
+    required this.ignoringPointer,
   }) : assert(overlayState != null),
        assert(ignoringFeedbackSemantics != null),
+       assert(ignoringPointer != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null),
        _position = initialPosition {
@@ -815,6 +829,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final _OnDragEnd? onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
+  final bool ignoringPointer;
 
   _DragTargetState<Object>? _activeTarget;
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
@@ -937,6 +952,7 @@ class _DragAvatar<T extends Object> extends Drag {
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
       child: IgnorePointer(
+        ignoring: ignoringPointer,
         ignoringSemantics: ignoringFeedbackSemantics,
         child: feedback,
       ),
