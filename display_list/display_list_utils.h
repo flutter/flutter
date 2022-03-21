@@ -56,7 +56,7 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setBlendMode(DlBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
   void setColorSource(const DlColorSource* source) override {}
-  void setImageFilter(sk_sp<SkImageFilter> filter) override {}
+  void setImageFilter(const DlImageFilter* filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
   void setPathEffect(sk_sp<SkPathEffect> effect) override {}
   void setMaskFilter(const DlMaskFilter* filter) override {}
@@ -186,7 +186,7 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setBlender(sk_sp<SkBlender> blender) override;
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
   void setMaskFilter(const DlMaskFilter* filter) override;
-  void setImageFilter(sk_sp<SkImageFilter> filter) override;
+  void setImageFilter(const DlImageFilter* filter) override;
 
   const SkPaint& paint() { return paint_; }
 
@@ -401,7 +401,7 @@ class DisplayListBoundsCalculator final
   void setStrokeMiter(SkScalar limit) override;
   void setBlendMode(DlBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
-  void setImageFilter(sk_sp<SkImageFilter> filter) override;
+  void setImageFilter(const DlImageFilter* filter) override;
   void setColorFilter(const DlColorFilter* filter) override;
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
   void setMaskFilter(const DlMaskFilter* filter) override;
@@ -509,11 +509,11 @@ class DisplayListBoundsCalculator final
     // in use by the stream before this layer was pushed on the
     // stack and should be returned when this layer is popped off
     // the stack.
-    // Some saveLayer calls will process their bounds by an
-    // |SkImageFilter| when they are restored, but for most
+    // Some saveLayer calls will process their bounds by a
+    // |DlImageFilter| when they are restored, but for most
     // saveLayer (and all save) calls the filter will be null.
     explicit LayerData(BoundsAccumulator* outer,
-                       sk_sp<SkImageFilter> filter = nullptr)
+                       std::shared_ptr<DlImageFilter> filter = nullptr)
         : outer_(outer), filter_(filter), is_unbounded_(false) {}
     ~LayerData() = default;
 
@@ -526,7 +526,7 @@ class DisplayListBoundsCalculator final
     BoundsAccumulator* restore_accumulator() { return outer_; }
 
     // The filter to apply to the layer bounds when it is restored
-    sk_sp<SkImageFilter> filter() { return filter_; }
+    std::shared_ptr<DlImageFilter> filter() { return filter_; }
 
     // is_unbounded should be set to true if we ever encounter an operation
     // on a layer that either is unrestricted (|drawColor| or |drawPaint|)
@@ -561,7 +561,7 @@ class DisplayListBoundsCalculator final
    private:
     BoundsAccumulator layer_accumulator_;
     BoundsAccumulator* outer_;
-    sk_sp<SkImageFilter> filter_;
+    std::shared_ptr<DlImageFilter> filter_;
     bool is_unbounded_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(LayerData);
@@ -579,14 +579,14 @@ class DisplayListBoundsCalculator final
   SkPaint::Style style_ = SkPaint::Style::kFill_Style;
   bool join_is_miter_ = true;
   bool cap_is_square_ = false;
-  sk_sp<SkImageFilter> image_filter_;
+  std::shared_ptr<DlImageFilter> image_filter_;
   sk_sp<SkPathEffect> path_effect_;
   std::shared_ptr<const DlMaskFilter> mask_filter_;
 
   bool paint_nops_on_transparency();
 
   // Computes the bounds of an operation adjusted for a given ImageFilter
-  static bool ComputeFilteredBounds(SkRect& bounds, SkImageFilter* filter);
+  static bool ComputeFilteredBounds(SkRect& bounds, DlImageFilter* filter);
 
   // Adjusts the indicated bounds for the given flags and returns true if
   // the calculation was possible, or false if it could not be estimated.

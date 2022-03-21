@@ -78,8 +78,8 @@ void SkPaintDispatchHelper::setBlender(sk_sp<SkBlender> blender) {
 void SkPaintDispatchHelper::setColorSource(const DlColorSource* source) {
   paint_.setShader(source ? source->skia_object() : nullptr);
 }
-void SkPaintDispatchHelper::setImageFilter(sk_sp<SkImageFilter> filter) {
-  paint_.setImageFilter(filter);
+void SkPaintDispatchHelper::setImageFilter(const DlImageFilter* filter) {
+  paint_.setImageFilter(filter ? filter->skia_object() : nullptr);
 }
 void SkPaintDispatchHelper::setColorFilter(const DlColorFilter* filter) {
   color_filter_ = filter ? filter->shared() : nullptr;
@@ -271,8 +271,8 @@ void DisplayListBoundsCalculator::setBlender(sk_sp<SkBlender> blender) {
     blend_mode_ = std::nullopt;
   }
 }
-void DisplayListBoundsCalculator::setImageFilter(sk_sp<SkImageFilter> filter) {
-  image_filter_ = std::move(filter);
+void DisplayListBoundsCalculator::setImageFilter(const DlImageFilter* filter) {
+  image_filter_ = filter ? filter->shared() : nullptr;
 }
 void DisplayListBoundsCalculator::setColorFilter(const DlColorFilter* filter) {
   color_filter_ = filter ? filter->shared() : nullptr;
@@ -333,12 +333,11 @@ void DisplayListBoundsCalculator::restore() {
     // Before we pop_back we will get the current layer bounds from the
     // current accumulator and adjust ot as required based on the filter.
     SkRect layer_bounds = accumulator_->bounds();
-    sk_sp<SkImageFilter> filter = layer_info->filter();
+    std::shared_ptr<DlImageFilter> filter = layer_info->filter();
     if (filter) {
-      if (filter->canComputeFastBounds()) {
-        SkIRect filter_bounds =
-            filter->filterBounds(layer_bounds.roundOut(), matrix(),
-                                 SkImageFilter::kForward_MapDirection);
+      SkIRect filter_bounds;
+      if (filter->map_device_bounds(layer_bounds.roundOut(), matrix(),
+                                    filter_bounds)) {
         layer_bounds.set(filter_bounds);
 
         // We could leave the clipping to the code below that will
@@ -557,12 +556,11 @@ void DisplayListBoundsCalculator::drawShadow(const SkPath& path,
 }
 
 bool DisplayListBoundsCalculator::ComputeFilteredBounds(SkRect& bounds,
-                                                        SkImageFilter* filter) {
+                                                        DlImageFilter* filter) {
   if (filter) {
-    if (!filter->canComputeFastBounds()) {
+    if (!filter->map_local_bounds(bounds, bounds)) {
       return false;
     }
-    bounds = filter->computeFastBounds(bounds);
   }
   return true;
 }
@@ -652,7 +650,7 @@ bool DisplayListBoundsCalculator::paint_nops_on_transparency() {
   // SkImageFilter::canComputeFastBounds tests for transparency behavior
   // This test assumes that the blend mode checked down below will
   // NOP on transparent black.
-  if (image_filter_ && !image_filter_->canComputeFastBounds()) {
+  if (image_filter_ && image_filter_->modifies_transparent_black()) {
     return false;
   }
 

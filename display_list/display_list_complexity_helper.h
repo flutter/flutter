@@ -110,7 +110,7 @@ class ComplexityCalculatorHelper
   void setBlendMode(DlBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
   void setColorSource(const DlColorSource* source) override {}
-  void setImageFilter(sk_sp<SkImageFilter> filter) override {}
+  void setImageFilter(const DlImageFilter* filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
   void setPathEffect(sk_sp<SkPathEffect> effect) override {}
   void setMaskFilter(const DlMaskFilter* filter) override {}

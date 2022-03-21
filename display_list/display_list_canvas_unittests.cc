@@ -877,48 +877,45 @@ class CanvasCompareTester {
       }
     }
     {
-      sk_sp<SkImageFilter> filter = SkImageFilters::Arithmetic(
+      sk_sp<SkImageFilter> sk_filter = SkImageFilters::Arithmetic(
           0.1, 0.1, 0.1, 0.25, true, nullptr, nullptr);
+      DlUnknownImageFilter filter(sk_filter);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
                        "saveLayer ImageFilter, no bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setImageFilter(filter);
+                         save_p.setImageFilter(filter.skia_object());
                          cv->saveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DisplayListBuilder& b) {
-                         b.setImageFilter(filter);
+                         b.setImageFilter(&filter);
                          b.saveLayer(nullptr, true);
                          b.setImageFilter(nullptr);
                          b.setStrokeWidth(5.0);
                        })
                        .with_restore(cv_safe_restore, dl_safe_restore, true));
       }
-      EXPECT_TRUE(filter->unique())
-          << "saveLayer ImageFilter, no bounds Cleanup";
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
                        "saveLayer ImageFilter and bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setImageFilter(filter);
+                         save_p.setImageFilter(filter.skia_object());
                          cv->saveLayer(RenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DisplayListBuilder& b) {
-                         b.setImageFilter(filter);
+                         b.setImageFilter(&filter);
                          b.saveLayer(&RenderBounds, true);
                          b.setImageFilter(nullptr);
                          b.setStrokeWidth(5.0);
                        })
                        .with_restore(cv_safe_restore, dl_safe_restore, true));
       }
-      EXPECT_TRUE(filter->unique())
-          << "saveLayer ImageFilter and bounds Cleanup";
     }
   }
 
@@ -1093,8 +1090,7 @@ class CanvasCompareTester {
         b.setStrokeWidth(5.0);
       };
       blur_env.init_ref(cv_blur_setup, testP.cv_renderer(), dl_blur_setup);
-      sk_sp<SkImageFilter> filter =
-          SkImageFilters::Blur(5.0, 5.0, SkTileMode::kDecal, nullptr, nullptr);
+      DlBlurImageFilter filter_decal_5(5.0, 5.0, DlTileMode::kDecal);
       BoundsTolerance blur5Tolerance = tolerance.addBoundsPadding(4, 4);
       {
         RenderWith(testP, blur_env, blur5Tolerance,
@@ -1102,30 +1098,27 @@ class CanvasCompareTester {
                        "ImageFilter == Decal Blur 5",
                        [=](SkCanvas* cv, SkPaint& p) {
                          cv_blur_setup(cv, p);
-                         p.setImageFilter(filter);
+                         p.setImageFilter(filter_decal_5.skia_object());
                        },
                        [=](DisplayListBuilder& b) {
                          dl_blur_setup(b);
-                         b.setImageFilter(filter);
+                         b.setImageFilter(&filter_decal_5);
                        }));
       }
-      EXPECT_TRUE(filter->unique()) << "ImageFilter Cleanup";
-      filter =
-          SkImageFilters::Blur(5.0, 5.0, SkTileMode::kClamp, nullptr, nullptr);
+      DlBlurImageFilter filter_clamp_5(5.0, 5.0, DlTileMode::kClamp);
       {
         RenderWith(testP, blur_env, blur5Tolerance,
                    CaseParameters(
                        "ImageFilter == Clamp Blur 5",
                        [=](SkCanvas* cv, SkPaint& p) {
                          cv_blur_setup(cv, p);
-                         p.setImageFilter(filter);
+                         p.setImageFilter(filter_clamp_5.skia_object());
                        },
                        [=](DisplayListBuilder& b) {
                          dl_blur_setup(b);
-                         b.setImageFilter(filter);
+                         b.setImageFilter(&filter_clamp_5);
                        }));
       }
-      EXPECT_TRUE(filter->unique()) << "ImageFilter Cleanup";
     }
 
     {
