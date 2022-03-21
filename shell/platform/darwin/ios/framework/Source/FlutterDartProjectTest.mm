@@ -50,6 +50,17 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(settings.leak_vm, NO);
 }
 
+- (void)testEnableImpellerSettingIsCorrectlyParsed {
+  // The FLTEnableImpeller's value is defined in Info.plist
+  NSBundle* mainBundle = [NSBundle mainBundle];
+  NSNumber* enableImpeller = [mainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+  XCTAssertEqual(enableImpeller.boolValue, NO);
+
+  auto settings = FLTDefaultSettingsForBundle();
+  // Check settings.enable_impeller value is same as the value defined in Info.plist.
+  XCTAssertEqual(settings.enable_impeller, NO);
+}
+
 - (void)testEmptySettingsAreCorrect {
   XCTAssertFalse([FlutterDartProject allowsArbitraryLoads:[[NSDictionary alloc] init]]);
   XCTAssertEqualObjects(@"", [FlutterDartProject domainNetworkPolicy:[[NSDictionary alloc] init]]);

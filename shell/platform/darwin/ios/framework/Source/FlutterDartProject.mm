@@ -160,6 +160,13 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   NSNumber* enableSkParagraph = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkParagraph"];
   settings.enable_skparagraph = (enableSkParagraph != nil) ? enableSkParagraph.boolValue : true;
 
+  // Whether to enable Impeller.
+  NSNumber* enableImpeller = [mainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+  // Change the default only if the option is present.
+  if (enableImpeller != nil) {
+    settings.enable_impeller = enableImpeller.boolValue;
+  }
+
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
   NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
   // It will change the default leak_vm value in settings only if the key exists.
