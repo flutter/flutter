@@ -1178,6 +1178,8 @@ class ThemeData with Diagnosticable {
   ///   * [FloatingActionButton]
   ///   * [NavigationBar]
   ///   * [NavigationRail]
+  ///   * [StretchingOverscrollIndicator], replacing the
+  ///     [GlowingOverscrollIndicator]
   ///
   /// See also:
   ///
