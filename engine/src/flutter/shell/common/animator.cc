@@ -174,6 +174,9 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
                                 "Animator::Render");
   frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
 
+  delegate_.OnAnimatorUpdateLatestFrameTargetTime(
+      frame_timings_recorder_->GetVsyncTargetTime());
+
   // Commit the pending continuation.
   PipelineProduceResult result =
       producer_continuation_.Complete(std::move(layer_tree));
