@@ -331,7 +331,7 @@ void main() {
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
-      VersionUpstreamValidator createTestValidator({
+      VersionCheckError runUpstreamValidator({
         String versionUpstreamUrl,
         String flutterGitUrl,
       }){
@@ -341,71 +341,62 @@ void main() {
         return VersionUpstreamValidator(
           version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
           platform: testPlatform,
-        );
+        ).run();
       }
 
-      testWithoutContext('throws if repository url is null', () {
-        try {
-          createTestValidator(
-            // repositoryUrl is null by default
-          ).run();
-          fail('Expect VersionCheckError');
-        } on VersionCheckError catch (error) {
-          expect(
-            error.message,
-            contains('The tool could not determine the remote upstream which is being tracked by the SDK.'),
-          );
-        }
+      testWithoutContext('returns error if repository url is null', () {
+        final VersionCheckError error = runUpstreamValidator(
+          // repositoryUrl is null by default
+        );
+        expect(error, isNotNull);
+        expect(
+          error.message,
+          contains('The tool could not determine the remote upstream which is being tracked by the SDK.'),
+        );
       });
 
-      testWithoutContext('does not throw at standard remote url with FLUTTER_GIT_URL unset', () {
-        expect(() => createTestValidator(versionUpstreamUrl: flutterStandardUrlDotGit).run(), returnsNormally);
+      testWithoutContext('does not return error at standard remote url with FLUTTER_GIT_URL unset', () {
+        expect(runUpstreamValidator(versionUpstreamUrl: flutterStandardUrlDotGit), isNull);
       });
 
-      testWithoutContext('throws at non-standard remote url with FLUTTER_GIT_URL unset', () {
-        try {
-          createTestValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit).run();
-          fail('Expect VersionCheckError');
-        } on VersionCheckError catch (error) {
-          expect(
-            error.message,
-            contains(
-              'The Flutter SDK is tracking a non-standard remote "$flutterNonStandardUrlDotGit".\n'
-              'Set the environment variable "FLUTTER_GIT_URL" to "$flutterNonStandardUrlDotGit". '
-              'If this is intentional, it is recommended to use "git" directly to manage the SDK.'
-            ),
-          );
-        }
+      testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
+        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit);
+        expect(error, isNotNull);
+        expect(
+          error.message,
+          contains(
+            'The Flutter SDK is tracking a non-standard remote "$flutterNonStandardUrlDotGit".\n'
+            'Set the environment variable "FLUTTER_GIT_URL" to "$flutterNonStandardUrlDotGit". '
+            'If this is intentional, it is recommended to use "git" directly to manage the SDK.'
+          ),
+        );
       });
 
-      testWithoutContext('does not throw at non-standard remote url with FLUTTER_GIT_URL set', () {
-        expect(() => createTestValidator(
+      testWithoutContext('does not return error at non-standard remote url with FLUTTER_GIT_URL set', () {
+        expect(runUpstreamValidator(
           versionUpstreamUrl: flutterNonStandardUrlDotGit,
           flutterGitUrl: flutterNonStandardUrlDotGit,
-        ).run(), returnsNormally);
+        ), isNull);
       });
 
-      testWithoutContext('throws at remote url and FLUTTER_GIT_URL set to different urls', () {
-        try {
-          createTestValidator(
+      testWithoutContext('returns error at remote url and FLUTTER_GIT_URL set to different urls', () {
+        final VersionCheckError error = runUpstreamValidator(
             versionUpstreamUrl: flutterNonStandardUrlDotGit,
             flutterGitUrl: flutterStandardUrlDotGit,
-          ).run();
-          fail('Expect VersionCheckError');
-        } on VersionCheckError catch (error) {
-          expect(
-            error.message,
-            contains(
-              'The Flutter SDK is tracking "$flutterNonStandardUrlDotGit" but "FLUTTER_GIT_URL" is set to "$flutterStandardUrlDotGit".\n'
-              'Either remove "FLUTTER_GIT_URL" from the environment or set it to "$flutterNonStandardUrlDotGit". '
-              'If this is intentional, it is recommended to use "git" directly to manage the SDK.'
-            ),
-          );
-        }
+        );
+        expect(error, isNotNull);
+        expect(
+          error.message,
+          contains(
+            'The Flutter SDK is tracking "$flutterNonStandardUrlDotGit" but "FLUTTER_GIT_URL" is set to "$flutterStandardUrlDotGit".\n'
+            'Either remove "FLUTTER_GIT_URL" from the environment or set it to "$flutterNonStandardUrlDotGit". '
+            'If this is intentional, it is recommended to use "git" directly to manage the SDK.'
+          ),
+        );
       });
 
-      testWithoutContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () {
-        expect(() => createTestValidator(versionUpstreamUrl: flutterStandardSshUrlDotGit).run(), returnsNormally);
+      testWithoutContext('does not return error at standard ssh url with FLUTTER_GIT_URL unset', () {
+        expect(runUpstreamValidator(versionUpstreamUrl: flutterStandardSshUrlDotGit), isNull);
       });
 
       testWithoutContext('stripDotGit removes ".git" suffix if any', () {

@@ -240,10 +240,12 @@ class FlutterVersion {
     if (!kOfficialChannels.contains(channel)) {
       return;
     }
+    // Don't perform the update check if the tracking remote is not standard.
+    if (VersionUpstreamValidator(version: this, platform: globals.platform).run() != null) {
+      return;
+    }
     DateTime localFrameworkCommitDate;
     try {
-      // Don't perform the update check if the tracking remote is not standard.
-      VersionUpstreamValidator(version: this, platform: globals.platform).run();
       // Don't perform the update check if fetching the latest local commit failed.
       localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate());
     } on VersionCheckError {
@@ -433,13 +435,13 @@ class VersionUpstreamValidator {
 
   /// Performs the validation against the tracking remote of the [version].
   ///
-  /// Throws [VersionCheckError] if the tracking remote is not standard.
-  void run(){
+  /// Returns [VersionCheckError] if the tracking remote is not standard.
+  VersionCheckError? run(){
     final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
     final String? repositoryUrl = version.repositoryUrl;
 
     if (repositoryUrl == null) {
-      throw VersionCheckError(
+      return VersionCheckError(
         'The tool could not determine the remote upstream which is being '
         'tracked by the SDK.'
       );
@@ -459,7 +461,7 @@ class VersionUpstreamValidator {
         // If `FLUTTER_GIT_URL` is set, inform to either remove the
         // `FLUTTER_GIT_URL` environment variable or set it to the current
         // tracking remote.
-        throw VersionCheckError(
+        return VersionCheckError(
           'The Flutter SDK is tracking "$repositoryUrl" but "FLUTTER_GIT_URL" '
           'is set to "$flutterGit".\n'
           'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
@@ -469,7 +471,7 @@ class VersionUpstreamValidator {
         );
       }
       // If `FLUTTER_GIT_URL` is unset, inform to set the environment variable.
-      throw VersionCheckError(
+      return VersionCheckError(
         'The Flutter SDK is tracking a non-standard remote "$repositoryUrl".\n'
         'Set the environment variable "FLUTTER_GIT_URL" to '
         '"$repositoryUrl". '
@@ -477,6 +479,7 @@ class VersionUpstreamValidator {
         'manage the SDK.'
       );
     }
+    return null;
   }
 
   // Strips ".git" suffix from a given string, preferably an url.
