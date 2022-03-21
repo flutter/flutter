@@ -555,7 +555,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
-      ignoringPointer: widget.ignoringFeedbackPointer,
+      ignoringFeedbackPointer: widget.ignoringFeedbackPointer,
       onDragUpdate: (DragUpdateDetails details) {
         if (mounted && widget.onDragUpdate != null) {
           widget.onDragUpdate!(details);
@@ -810,10 +810,10 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragUpdate,
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
-    required this.ignoringPointer,
+    required this.ignoringFeedbackPointer,
   }) : assert(overlayState != null),
        assert(ignoringFeedbackSemantics != null),
-       assert(ignoringPointer != null),
+       assert(ignoringFeedbackPointer != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null),
        _position = initialPosition {
@@ -831,7 +831,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final _OnDragEnd? onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
-  final bool ignoringPointer;
+  final bool ignoringFeedbackPointer;
 
   _DragTargetState<Object>? _activeTarget;
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
@@ -954,7 +954,7 @@ class _DragAvatar<T extends Object> extends Drag {
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
       child: IgnorePointer(
-        ignoring: ignoringPointer,
+        ignoring: ignoringFeedbackPointer,
         ignoringSemantics: ignoringFeedbackSemantics,
         child: feedback,
       ),
