@@ -9,6 +9,7 @@
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_color_filter.h"
 #include "flutter/display_list/display_list_color_source.h"
+#include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 
 namespace flutter {
@@ -50,7 +51,7 @@ class Dispatcher {
   virtual void setBlender(sk_sp<SkBlender> blender) = 0;
   virtual void setPathEffect(sk_sp<SkPathEffect> effect) = 0;
   virtual void setMaskFilter(const DlMaskFilter* filter) = 0;
-  virtual void setImageFilter(sk_sp<SkImageFilter> filter) = 0;
+  virtual void setImageFilter(const DlImageFilter* filter) = 0;
 
   // All of the following methods are nearly 1:1 with their counterparts
   // in |SkCanvas| and have the same behavior and output.

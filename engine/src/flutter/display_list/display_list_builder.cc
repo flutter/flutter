@@ -179,10 +179,38 @@ void DisplayListBuilder::onSetColorSource(const DlColorSource* source) {
     }
   }
 }
-void DisplayListBuilder::onSetImageFilter(sk_sp<SkImageFilter> filter) {
-  (current_image_filter_ = filter)  //
-      ? Push<SetImageFilterOp>(0, 0, std::move(filter))
-      : Push<ClearImageFilterOp>(0, 0);
+void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
+  if (filter == nullptr) {
+    current_image_filter_ = nullptr;
+    Push<ClearImageFilterOp>(0, 0);
+  } else {
+    current_image_filter_ = filter->shared();
+    switch (filter->type()) {
+      case DlImageFilterType::kBlur: {
+        const DlBlurImageFilter* blur_filter = filter->asBlur();
+        FML_DCHECK(blur_filter);
+        void* pod = Push<SetPodImageFilterOp>(blur_filter->size(), 0);
+        new (pod) DlBlurImageFilter(blur_filter);
+        break;
+      }
+      case DlImageFilterType::kMatrix: {
+        const DlMatrixImageFilter* matrix_filter = filter->asMatrix();
+        FML_DCHECK(matrix_filter);
+        void* pod = Push<SetPodImageFilterOp>(matrix_filter->size(), 0);
+        new (pod) DlMatrixImageFilter(matrix_filter);
+        break;
+      }
+      case DlImageFilterType::kComposeFilter:
+      case DlImageFilterType::kColorFilter: {
+        Push<SetSharedImageFilterOp>(0, 0, filter);
+        break;
+      }
+      case DlImageFilterType::kUnknown: {
+        Push<SetSkImageFilterOp>(0, 0, filter->skia_object());
+        break;
+      }
+    }
+  }
 }
 void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
   if (filter == nullptr) {
@@ -291,7 +319,7 @@ void DisplayListBuilder::setAttributesFromPaint(
     setColorFilter(DlColorFilter::From(color_filter).get());
   }
   if (flags.applies_image_filter()) {
-    setImageFilter(sk_ref_sp(paint.getImageFilter()));
+    setImageFilter(DlImageFilter::From(paint.getImageFilter()).get());
   }
   if (flags.applies_path_effect()) {
     setPathEffect(sk_ref_sp(paint.getPathEffect()));

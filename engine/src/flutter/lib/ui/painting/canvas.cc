@@ -283,8 +283,8 @@ void Canvas::drawPaint(const Paint& paint, const PaintData& paint_data) {
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawPaintFlags);
-    sk_sp<SkImageFilter> filter = builder()->getImageFilter();
-    if (filter && !filter->asColorFilter(nullptr)) {
+    std::shared_ptr<DlImageFilter> filter = builder()->getImageFilter();
+    if (filter && !filter->asColorFilter()) {
       // drawPaint does an implicit saveLayer if an SkImageFilter is
       // present that cannot be replaced by an SkColorFilter.
       TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
