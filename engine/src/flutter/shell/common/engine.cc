@@ -557,7 +557,7 @@ void Engine::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
   }
 }
 
-const VsyncWaiter& Engine::GetVsyncWaiter() const {
+const std::weak_ptr<VsyncWaiter> Engine::GetVsyncWaiter() const {
   return animator_->GetVsyncWaiter();
 }
 

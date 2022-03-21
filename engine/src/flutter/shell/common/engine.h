@@ -870,7 +870,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     return runtime_controller_.get();
   }
 
-  const VsyncWaiter& GetVsyncWaiter() const;
+  const std::weak_ptr<VsyncWaiter> GetVsyncWaiter() const;
 
  private:
   // |RuntimeDelegate|
