@@ -543,8 +543,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// for different [TargetPlatform]s.
 ///
 /// The [MaterialPageRoute.buildTransitions] method looks up the current
-/// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-/// and delegates to [buildTransitions].
+/// [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`.
 ///
 /// If a builder with a matching platform is not found, then the
 /// [FadeUpwardsPageTransitionsBuilder] is used.
@@ -579,22 +578,11 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform]
-  /// or [FadeUpwardsPageTransitionsBuilder].
-  ///
-  /// [MaterialPageRoute.buildTransitions] delegates to this method.
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
+  /// Returns the builder that matches the current [ThemeData.platform] or
+  /// [FadeUpwardsPageTransitionsBuilder].
+  PageTransitionsBuilder getMatchingBuilder(BuildContext context){
     final TargetPlatform platform = Theme.of(context).platform;
-
-    final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
-    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+    return builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
   }
 
   // Just used to the builders Map to a list with one PageTransitionsBuilder per platform

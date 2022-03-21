@@ -77,6 +77,8 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///  * [PageTransitionsTheme], which defines the default page transitions used
 ///    by the [MaterialRouteTransitionMixin.buildTransitions].
 mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
+  PageTransitionsBuilder? _prevPageTranstionsBuilder;
+
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -123,7 +125,16 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
+
+    // The builder should be kept unchanged during an iOS-style back swipe pop gesture.
+    final PageTransitionsBuilder builder;
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(this) && _prevPageTranstionsBuilder != null) {
+      builder = _prevPageTranstionsBuilder!;
+    } else {
+      builder = _prevPageTranstionsBuilder = theme.getMatchingBuilder(context);
+    }
+
+    return builder.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
 
