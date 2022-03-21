@@ -3016,9 +3016,12 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
     }
   }
 
+  /// How to behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.opaque] if null.
   HitTestBehavior? get hitTestBehavior => behavior;
   set hitTestBehavior(HitTestBehavior? value) {
-    HitTestBehavior newValue = value ?? HitTestBehavior.opaque;
+    final HitTestBehavior newValue = value ?? HitTestBehavior.opaque;
     if (behavior != newValue) {
       behavior = newValue;
       // Trigger [MouseTracker]'s device update to recalculate mouse states.
