@@ -2446,7 +2446,7 @@ class BuildOwner {
   /// This field will default to a [FocusManager] that has registered its
   /// global input handlers via [FocusManager.registerGlobalHandlers]. Callers
   /// wishing to avoid registering those handlers (and modifying the associated
-  /// static state) can explicitly pass a focus manager to the [new BuildOwner]
+  /// static state) can explicitly pass a focus manager to the [BuildOwner.new]
   /// constructor.
   FocusManager focusManager;
 

@@ -76,11 +76,9 @@ Future<void> main() async {
       expect(
         await driver.requestData('hierarchy'),
         '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n'  // Flutter UI (hidden)
-        '  |-FlutterImageView\n' // Flutter UI (background surface)
+        '  |-FlutterSurfaceView\n' // Flutter UI
         '  |-ViewGroup\n'  // Platform View
         '    |-ViewGroup\n'
-        '  |-FlutterImageView\n'  // Flutter UI (overlay surface)
       );
 
       // Hide platform view.
@@ -101,11 +99,9 @@ Future<void> main() async {
       expect(
         await driver.requestData('hierarchy'),
         '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n' // Flutter UI (hidden)
-        '  |-FlutterImageView\n' // Flutter UI (background surface)
+        '  |-FlutterSurfaceView\n' // Flutter UI
         '  |-ViewGroup\n' // Platform View
         '    |-ViewGroup\n'
-        '  |-FlutterImageView\n' // Flutter UI (overlay surface)
       );
     }, timeout: Timeout.none);
   });

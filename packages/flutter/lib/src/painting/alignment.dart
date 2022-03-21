@@ -11,8 +11,8 @@ import 'basic_types.dart';
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [new
-/// Alignment] and its variants, or [new AlignmentDirectional].
+/// A property or argument of this type accepts classes created either with [
+/// Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.

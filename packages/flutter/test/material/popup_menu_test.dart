@@ -2698,6 +2698,51 @@ void main() {
 
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
   });
+
+  testWidgets("PopupMenuButton icon inherits IconTheme's size", (WidgetTester tester) async {
+    Widget _buildPopupMenu({double? themeIconSize, double? iconSize}) {
+      return MaterialApp(
+        theme: ThemeData(
+          iconTheme: IconThemeData(
+            size: themeIconSize,
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              iconSize: iconSize,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default icon size.
+    await tester.pumpWidget(_buildPopupMenu());
+    IconButton iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    // Default PopupMenuButton icon size is 24.0.
+    expect(iconButton.iconSize, 24.0);
+
+    // Popup menu with custom theme icon size.
+    await tester.pumpWidget(_buildPopupMenu(themeIconSize: 30.0));
+    await tester.pumpAndSettle();
+    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    // PopupMenuButton icon inherits IconTheme's size.
+    expect(iconButton.iconSize, 30.0);
+
+    // Popup menu with custom icon size.
+    await tester.pumpWidget(_buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
+    await tester.pumpAndSettle();
+    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    // PopupMenuButton icon size overrides IconTheme's size.
+    expect(iconButton.iconSize, 50.0);
+  });
 }
 
 class TestApp extends StatefulWidget {
