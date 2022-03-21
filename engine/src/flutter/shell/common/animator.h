@@ -57,7 +57,7 @@ class Animator final {
 
   void Render(std::unique_ptr<flutter::LayerTree> layer_tree);
 
-  const VsyncWaiter& GetVsyncWaiter() const;
+  const std::weak_ptr<VsyncWaiter> GetVsyncWaiter() const;
 
   //--------------------------------------------------------------------------
   /// @brief    Schedule a secondary callback to be executed right after the
