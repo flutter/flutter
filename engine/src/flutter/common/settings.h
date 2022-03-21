@@ -298,6 +298,13 @@ struct Settings {
   /// on the clock used by the Dart timeline APIs. This timestamp is used
   /// to log a timeline event that tracks the latency of engine startup.
   std::chrono::microseconds engine_start_timestamp = {};
+
+  /// The minimum number of samples to require in multipsampled anti-aliasing.
+  ///
+  /// Setting this value to 0 or 1 disables MSAA.
+  /// If it is not 0 or 1, it must be one of 2, 4, 8, or 16. However, if the
+  /// GPU does not support the requested sampling value, MSAA will be disabled.
+  uint8_t msaa_samples = 0;
 };
 
 }  // namespace flutter

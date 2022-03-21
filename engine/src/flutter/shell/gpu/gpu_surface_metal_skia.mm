@@ -112,6 +112,17 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
     return nullptr;
   }
 
+  // TODO(dnfield): Enable MSAA behind a flag if the settings say to.
+  // https://github.com/flutter/flutter/issues/100392
+  // Rough outline of steps needed:
+  // Create memoryless texture
+  // auto texture = drawable.get().texture;
+  // MTLTextureDescriptor* desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:
+  // texture.pixelFormat width: texture.width height: texture.height: mipmapped: texture.mipmapped];
+  // desc.sampleCount = 4;
+  // Type should be multisample, count 4 or 8 (4 always supported)
+  // Give the new texture to skia in this call, using the same sampleCount value
+  // Resolve texture
   auto surface = CreateSurfaceFromMetalTexture(context_.get(), drawable.get().texture,
                                                kTopLeft_GrSurfaceOrigin,  // origin
                                                1,                         // sample count
