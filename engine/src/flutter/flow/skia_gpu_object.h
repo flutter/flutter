@@ -11,6 +11,7 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
@@ -18,16 +19,40 @@ namespace flutter {
 
 // A queue that holds Skia objects that must be destructed on the given task
 // runner.
-class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
+template <class T>
+class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
  public:
-  void Unref(SkRefCnt* object);
+  using ResourceContext = T;
+
+  void Unref(SkRefCnt* object) {
+    std::scoped_lock lock(mutex_);
+    objects_.push_back(object);
+    if (!drain_pending_) {
+      drain_pending_ = true;
+      task_runner_->PostDelayedTask(
+          [strong = fml::Ref(this)]() { strong->Drain(); }, drain_delay_);
+    }
+  }
 
   // Usually, the drain is called automatically. However, during IO manager
   // shutdown (when the platform side reference to the OpenGL context is about
   // to go away), we may need to pre-emptively drain the unref queue. It is the
   // responsibility of the caller to ensure that no further unrefs are queued
   // after this call.
-  void Drain();
+  void Drain() {
+    TRACE_EVENT0("flutter", "SkiaUnrefQueue::Drain");
+    std::deque<SkRefCnt*> skia_objects;
+    {
+      std::scoped_lock lock(mutex_);
+      objects_.swap(skia_objects);
+      drain_pending_ = false;
+    }
+    DoDrain(skia_objects, context_);
+  }
+
+  void UpdateResourceContext(sk_sp<ResourceContext> context) {
+    context_ = context;
+  }
 
  private:
   const fml::RefPtr<fml::TaskRunner> task_runner_;
@@ -35,21 +60,46 @@ class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
   std::mutex mutex_;
   std::deque<SkRefCnt*> objects_;
   bool drain_pending_;
-  fml::WeakPtr<GrDirectContext> context_;
+  sk_sp<ResourceContext> context_;
 
   // The `GrDirectContext* context` is only used for signaling Skia to
   // performDeferredCleanup. It can be nullptr when such signaling is not needed
   // (e.g., in unit tests).
-  SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
-                 fml::TimeDelta delay,
-                 fml::WeakPtr<GrDirectContext> context = {});
+  UnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
+             fml::TimeDelta delay,
+             sk_sp<ResourceContext> context = nullptr)
+      : task_runner_(std::move(task_runner)),
+        drain_delay_(delay),
+        drain_pending_(false),
+        context_(context) {}
 
-  ~SkiaUnrefQueue();
+  ~UnrefQueue() {
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runner_, [objects = std::move(objects_),
+                       context = std::move(context_)]() mutable {
+          DoDrain(objects, context);
+          context.reset();
+        });
+  }
 
-  FML_FRIEND_REF_COUNTED_THREAD_SAFE(SkiaUnrefQueue);
-  FML_FRIEND_MAKE_REF_COUNTED(SkiaUnrefQueue);
-  FML_DISALLOW_COPY_AND_ASSIGN(SkiaUnrefQueue);
+  // static
+  static void DoDrain(const std::deque<SkRefCnt*>& skia_objects,
+                      sk_sp<ResourceContext> context) {
+    for (SkRefCnt* skia_object : skia_objects) {
+      skia_object->unref();
+    }
+
+    if (context && skia_objects.size() > 0) {
+      context->performDeferredCleanup(std::chrono::milliseconds(0));
+    }
+  }
+
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(UnrefQueue);
+  FML_FRIEND_MAKE_REF_COUNTED(UnrefQueue);
+  FML_DISALLOW_COPY_AND_ASSIGN(UnrefQueue);
 };
+
+using SkiaUnrefQueue = UnrefQueue<GrDirectContext>;
 
 /// An object whose deallocation needs to be performed on an specific unref
 /// queue. The template argument U need to have a call operator that returns
