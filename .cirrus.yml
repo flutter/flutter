@@ -1,7 +1,7 @@
 # CIRRUS CONFIGURATION FILE
 # https://cirrus-ci.org/guide/writing-tasks/
 
-environment:
+environment
   # For details about environment variables used in Cirrus, including how encrypted variables work,
   # see https://cirrus-ci.org/guide/writing-tasks/#environment-variables
   # We change Flutter's directory to include a space in its name (see $CIRRUS_WORKING_DIR) so that
