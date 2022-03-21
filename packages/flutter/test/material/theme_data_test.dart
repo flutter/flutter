@@ -999,7 +999,6 @@ void main() {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
       // GENERAL CONFIGURATION
-      'androidOverscrollIndicator',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
       'extensions',
@@ -1088,6 +1087,7 @@ void main() {
       'buttonColor',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
+      'androidOverscrollIndicator',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
