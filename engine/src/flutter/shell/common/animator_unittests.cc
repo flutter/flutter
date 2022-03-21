@@ -32,6 +32,9 @@ class FakeAnimatorDelegate : public Animator::Delegate {
     notify_idle_called_ = true;
   }
 
+  MOCK_METHOD1(OnAnimatorUpdateLatestFrameTargetTime,
+               void(fml::TimePoint frame_target_time));
+
   MOCK_METHOD2(
       OnAnimatorDraw,
       void(std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
@@ -222,9 +225,12 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyDelegateIfPipelineIsNotEmpty) {
           [&](fml::TimePoint frame_target_time, uint64_t frame_number) {
             begin_frame_latch.Signal();
           });
-
-  // It will only be called once even though we call the method Animator::Render
-  // twice. because it will only be called when the pipeline is empty.
+  // It must always be called when the method 'Animator::Render' is called,
+  // regardless of whether the pipeline is empty or not.
+  EXPECT_CALL(delegate, OnAnimatorUpdateLatestFrameTargetTime).Times(2);
+  // It will only be called once even though we call the method
+  // 'Animator::Render' twice. because it will only be called when the pipeline
+  // is empty.
   EXPECT_CALL(delegate, OnAnimatorDraw).Times(1);
 
   for (int i = 0; i < 2; i++) {
