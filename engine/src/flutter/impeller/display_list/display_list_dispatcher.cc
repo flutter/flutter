@@ -247,7 +247,7 @@ void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setImageFilter(sk_sp<SkImageFilter> filter) {
+void DisplayListDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   UNIMPLEMENTED;
 }
 
