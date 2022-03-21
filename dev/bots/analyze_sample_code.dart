@@ -507,8 +507,9 @@ class SampleChecker {
       process.stdout.transform(utf8.decoder).forEach(stdout.write);
     }
     process.stderr.transform(utf8.decoder).forEach(stderr.write);
-    final int exitCode = await process.exitCode.timeout(const Duration(seconds: 30), onTimeout: () {
-      stderr.writeln('Snippet script timed out.');
+    const Duration timeoutDuration = Duration(minutes: 5);
+    final int exitCode = await process.exitCode.timeout(timeoutDuration, onTimeout: () {
+      stderr.writeln('Snippet script timed out after $timeoutDuration.');
       return -1;
     });
     if (exitCode != 0) {

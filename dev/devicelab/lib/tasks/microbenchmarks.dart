@@ -19,6 +19,7 @@ TaskFunction createMicrobenchmarkTask() {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
+    await device.clearLogs();
 
     Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> _run() async {

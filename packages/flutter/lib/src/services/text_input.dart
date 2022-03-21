@@ -124,7 +124,7 @@ class TextInputType {
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
-  /// signs, can be requested using [new TextInputType.numberWithOptions].
+  /// signs, can be requested using [TextInputType.numberWithOptions].
   static const TextInputType number = TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
@@ -964,17 +964,6 @@ enum SelectionChangedCause {
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
-
-  /// Indicates that the user has requested the delegate to replace its current
-  /// text editing state with [value].
-  ///
-  /// The new [value] is treated as user input and thus may subject to input
-  /// formatting.
-  @Deprecated(
-    'Use the userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.',
-  )
-  set textEditingValue(TextEditingValue value) {}
 
   /// Indicates that the user has requested the delegate to replace its current
   /// text editing state with [value].
