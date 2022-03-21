@@ -583,6 +583,10 @@ class Shell final : public PlatformView::Delegate,
   void OnAnimatorNotifyIdle(fml::TimePoint deadline) override;
 
   // |Animator::Delegate|
+  void OnAnimatorUpdateLatestFrameTargetTime(
+      fml::TimePoint frame_target_time) override;
+
+  // |Animator::Delegate|
   void OnAnimatorDraw(
       std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override;
