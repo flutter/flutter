@@ -1788,15 +1788,15 @@ class TextInput {
         _currentConnection!._client.removeTextPlaceholder();
         break;
       //TODO(camillesimon): Rename all spellcheckER names to spellcheck
-      case 'TextInputClient.updateSpellCheckerResults':
-        List<String> results = args[1].cast<String>();
-        List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
-        results.forEach((String result) {
-          List<String> resultParsed = result.split(".");
-          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
-        });
-        // TODO(camillesimon): Remove support for passing text (and remove from engine).
-        _currentConfiguration.spellCheckConfiguration.spellCheckService!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
+      // case 'TextInputClient.updateSpellCheckerResults':
+      //   List<String> results = args[1].cast<String>();
+      //   List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
+      //   results.forEach((String result) {
+      //     List<String> resultParsed = result.split(".");
+      //     spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
+      //   });
+      //   // TODO(camillesimon): Remove support for passing text (and remove from engine).
+      //   _currentConfiguration.spellCheckConfiguration.spellCheckService!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
         break;
       default:
         throw MissingPluginException();

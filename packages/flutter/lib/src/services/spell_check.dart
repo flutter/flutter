@@ -69,7 +69,7 @@ abstract class SpellCheckService {
 
     // Updates spell check results in handler. May be used in fetchSpellCheckSuggestions if synchronous.
     //TODO(camillesimon): Provide default implementation assuming developers most likely want access to our handlers.
-    void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions);
+    // void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions);
 
     // Relates service to a handler for the results it provides.
     //TODO(camillesimon): Determine whether or not to add getter/setter instead of update method:
