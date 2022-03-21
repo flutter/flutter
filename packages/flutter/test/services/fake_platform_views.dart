@@ -83,19 +83,23 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> setSize(Size size) {
-    throw UnimplementedError();
+  Future<Size> setSize(Size size) {
+    return Future<Size>.value(size);
   }
 
   @override
-  int get textureId => throw UnimplementedError();
+  Future<void> setOffset(Offset off) async {}
 
   @override
-  bool get isCreated => throw UnimplementedError();
+  int get textureId => 0;
 
   @override
-  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) =>
-      throw UnimplementedError();
+  bool get isCreated => created;
+
+  @override
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    created = true;
+  }
 
   @override
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
@@ -113,9 +117,10 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create() async {
-    created = true;
-  }
+  Future<void> create() async {}
+
+  @override
+  List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];
 }
 
 class FakeAndroidPlatformViewsController {
@@ -138,7 +143,7 @@ class FakeAndroidPlatformViewsController {
 
   int? lastClearedFocusViewId;
 
-  bool synchronizeToNativeViewHierarchy = true;
+  Map<int, Offset> offsets = <int, Offset>{};
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -165,8 +170,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
-      case 'synchronizeToNativeViewHierarchy':
-        return _synchronizeToNativeViewHierarchy(call);
+      case 'offset':
+        return _offset(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -247,6 +252,15 @@ class FakeAndroidPlatformViewsController {
     }
     _views[id] = _views[id]!.copyWith(size: Size(width, height));
 
+    return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
+  }
+
+  Future<dynamic> _offset(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final double top = args['top'] as double;
+    final double left = args['left'] as double;
+    offsets[id] = Offset(left, top);
     return Future<dynamic>.sync(() => null);
   }
 
@@ -298,11 +312,6 @@ class FakeAndroidPlatformViewsController {
       );
 
     lastClearedFocusViewId = id;
-    return Future<dynamic>.sync(() => null);
-  }
-
-  Future<dynamic> _synchronizeToNativeViewHierarchy(MethodCall call) {
-    synchronizeToNativeViewHierarchy = call.arguments as bool;
     return Future<dynamic>.sync(() => null);
   }
 }

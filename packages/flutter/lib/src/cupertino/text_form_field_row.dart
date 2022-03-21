@@ -42,7 +42,7 @@ import 'text_field.dart';
 /// resources used by the object.
 ///
 /// For documentation about the various parameters, see the
-/// [CupertinoTextField] class and [new CupertinoTextField.borderless],
+/// [CupertinoTextField] class and [CupertinoTextField.borderless],
 /// the constructor.
 ///
 /// {@tool snippet}
@@ -96,7 +96,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// insets are intended, explicitly pass [EdgeInsets.zero] to [padding].
   ///
   /// For documentation about the various parameters, see the
-  /// [CupertinoTextField] class and [new CupertinoTextField.borderless],
+  /// [CupertinoTextField] class and [CupertinoTextField.borderless],
   /// the constructor.
   CupertinoTextFormFieldRow({
     Key? key,

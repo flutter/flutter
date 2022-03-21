@@ -52,7 +52,7 @@ class Utf8Decoder extends cnv.Utf8Decoder {
     // was malformed.
     if (reportErrors && result.contains('\u{FFFD}')) {
       throwToolExit(
-        'Bad UTF-8 encoding found while decoding string: $result. '
+        'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found while decoding string: $result. '
         'The Flutter team would greatly appreciate if you could file a bug explaining '
         'exactly what you were doing when this happened:\n'
         'https://github.com/flutter/flutter/issues/new/choose\n'

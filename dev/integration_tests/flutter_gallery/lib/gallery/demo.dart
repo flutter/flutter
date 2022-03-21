@@ -37,7 +37,7 @@ class ComponentDemoTabData {
   }
 
   @override
-  int get hashCode => hashValues(tabName, description, documentationUrl);
+  int get hashCode => Object.hash(tabName, description, documentationUrl);
 }
 
 class TabbedComponentDemoScaffold extends StatelessWidget {

@@ -123,7 +123,7 @@ class ExpansionTileThemeData with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       backgroundColor,
       collapsedBackgroundColor,
       tilePadding,

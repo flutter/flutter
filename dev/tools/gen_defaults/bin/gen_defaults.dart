@@ -17,8 +17,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
+import 'package:gen_defaults/navigation_rail_template.dart';
+import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
@@ -34,14 +37,18 @@ Future<void> main(List<String> args) async {
     'color_light.json',
     'dialog.json',
     'elevation.json',
+    'elevated_card.json',
     'fab_extended_primary.json',
     'fab_large_primary.json',
     'fab_primary.json',
     'fab_small_primary.json',
+    'filled_card.json',
     'filter_chip.json',
     'input_chip.json',
     'motion.json',
     'navigation_bar.json',
+    'navigation_rail.json',
+    'outlined_card.json',
     'palette.json',
     'shape.json',
     'slider.json',
@@ -64,7 +71,10 @@ Future<void> main(List<String> args) async {
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
+  DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
   NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
+  NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens).updateFile();
+  SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens).updateFile();
   TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
 }

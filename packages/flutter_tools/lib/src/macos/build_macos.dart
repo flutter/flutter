@@ -102,6 +102,7 @@ Future<void> buildMacOS({
       '-configuration', configuration,
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
+      '-destination', 'platform=macOS',
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       if (verboseLogging)

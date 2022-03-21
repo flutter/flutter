@@ -1087,9 +1087,6 @@ void main() {
 
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], currentViewId + 1);
-
-      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), true);
-      expect(lastPlatformViewTextClient['usesVirtualDisplay'], true);
     });
 
     testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
@@ -1223,6 +1220,24 @@ void main() {
       expect(tester.layers.whereType<ClipRectLayer>(), hasLength(1));
       clipRectLayer = tester.layers.whereType<ClipRectLayer>().first;
       expect(clipRectLayer.clipRect, const Rect.fromLTWH(0.0, 0.0, 50.0, 50.0));
+    });
+
+    testWidgets('offset is sent to the platform', (WidgetTester tester) async {
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 20, 0, 0),
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(viewsController.offsets.values, equals(<Offset>[const Offset(10, 20)]));
     });
   });
 
@@ -2297,43 +2312,6 @@ void main() {
       expect(factoryInvocationCount, 1);
     });
 
-    testWidgets(
-      'PlatformViewLink Widget init, should create a SizedBox widget before onPlatformViewCreated and a PlatformViewSurface after',
-      (WidgetTester tester) async {
-        final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-        late int createdPlatformViewId;
-
-        late PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
-
-        final PlatformViewLink platformViewLink = PlatformViewLink(
-          viewType: 'webview',
-          onCreatePlatformView: (PlatformViewCreationParams params) {
-            onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
-            createdPlatformViewId = params.id;
-            return FakePlatformViewController(params.id);
-          },
-          surfaceFactory: (BuildContext context, PlatformViewController controller) {
-            return PlatformViewSurface(
-              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-              controller: controller,
-              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-            );
-          },
-        );
-
-        await tester.pumpWidget(platformViewLink);
-        expect(() => tester.allWidgets.whereType<SizedBox>().first, returnsNormally);
-
-        onPlatformViewCreatedCallBack(createdPlatformViewId);
-
-        await tester.pump();
-
-        expect(() => tester.allWidgets.whereType<PlatformViewSurface>().first, returnsNormally);
-
-        expect(createdPlatformViewId, currentViewId + 1);
-      },
-    );
-
     testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
       late FakePlatformViewController disposedController;
       final PlatformViewLink platformViewLink = PlatformViewLink(
@@ -2615,8 +2593,6 @@ void main() {
       expect(focusNode.hasFocus, true);
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], viewId);
-
-      expect(lastPlatformViewTextClient.containsKey('usesVirtualDisplay'), false);
     });
   });
 

@@ -817,4 +817,69 @@ void main() {
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.scrollController, scrollController);
   });
+
+  testWidgets('TextFormField changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(
+              mouseCursor: SystemMouseCursors.grab,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Center, which is within the area
+    final Offset center = tester.getCenter(find.byType(TextFormField));
+    // Top left, which is also within the area
+    final Offset edge = tester.getTopLeft(find.byType(TextFormField)) + const Offset(1, 1);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: center);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(center);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(center);
+  });
+
 }
