@@ -73,7 +73,9 @@ static EGLResult<EGLContext> CreateContext(EGLDisplay display,
   return {context != EGL_NO_CONTEXT, context};
 }
 
-static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display) {
+static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display,
+                                                   uint8_t msaa_samples) {
+  EGLint sample_buffers = msaa_samples > 1 ? 1 : 0;
   EGLint attributes[] = {
       // clang-format off
       EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -84,6 +86,8 @@ static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display) {
       EGL_ALPHA_SIZE,      8,
       EGL_DEPTH_SIZE,      0,
       EGL_STENCIL_SIZE,    8,
+      EGL_SAMPLES,         static_cast<EGLint>(msaa_samples),
+      EGL_SAMPLE_BUFFERS,  sample_buffers,
       EGL_NONE,            // termination sentinel
       // clang-format on
   };
@@ -292,7 +296,8 @@ SkISize AndroidEGLSurface::GetSize() const {
 AndroidContextGL::AndroidContextGL(
     AndroidRenderingAPI rendering_api,
     fml::RefPtr<AndroidEnvironmentGL> environment,
-    const TaskRunners& task_runners)
+    const TaskRunners& task_runners,
+    uint8_t msaa_samples)
     : AndroidContext(AndroidRenderingAPI::kOpenGLES),
       environment_(environment),
       config_(nullptr),
@@ -305,7 +310,8 @@ AndroidContextGL::AndroidContextGL(
   bool success = false;
 
   // Choose a valid configuration.
-  std::tie(success, config_) = ChooseEGLConfiguration(environment_->Display());
+  std::tie(success, config_) =
+      ChooseEGLConfiguration(environment_->Display(), msaa_samples);
   if (!success) {
     FML_LOG(ERROR) << "Could not choose an EGL configuration.";
     LogLastEGLError();

@@ -98,7 +98,8 @@ class AndroidContextGL : public AndroidContext {
  public:
   AndroidContextGL(AndroidRenderingAPI rendering_api,
                    fml::RefPtr<AndroidEnvironmentGL> environment,
-                   const TaskRunners& taskRunners);
+                   const TaskRunners& taskRunners,
+                   uint8_t msaa_samples);
 
   ~AndroidContextGL();
 
@@ -150,6 +151,11 @@ class AndroidContextGL : public AndroidContext {
   /// @return     The EGLContext.
   ///
   EGLContext CreateNewContext() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      The EGLConfig for this context.
+  ///
+  EGLConfig Config() const { return config_; }
 
  private:
   fml::RefPtr<AndroidEnvironmentGL> environment_;
