@@ -2260,10 +2260,19 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         hitCurrentFocus = true;
         break;
       }
-      if (target is _RenderFocusTrapArea && event.kind == PointerDeviceKind.touch) {
-        // Keep focusing when we switch from one TextField to another.
-        hitCurrentFocus = true;
-        break;
+      if (event.kind == PointerDeviceKind.touch) {
+        if (target is _RenderFocusTrapArea) {
+          // Keep focusing when we switch from one TextField to another.
+          hitCurrentFocus = true;
+          break;
+        }
+        if (focusNode is FocusScopeNode) {
+          // If a controller is initially provided then the parent stops doing so for rebuilds,
+          // a new instance of CupertinoTabController should be created and used by the widget,
+          // while preserving the previous controller's tab index.
+          hitCurrentFocus = true;
+          break;
+        }
       }
     }
     if (!hitCurrentFocus)
