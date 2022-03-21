@@ -718,10 +718,12 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       context,                   // context
       backend_texture,           // back-end texture
       kTopLeft_GrSurfaceOrigin,  // surface origin
-      1,                         // sample count
-      kBGRA_8888_SkColorType,    // color type
-      nullptr,                   // color space
-      &surface_properties,       // surface properties
+      // TODO(dnfield): Update this when embedders support MSAA, see
+      // https://github.com/flutter/flutter/issues/100392
+      1,                       // sample count
+      kBGRA_8888_SkColorType,  // color type
+      nullptr,                 // color space
+      &surface_properties,     // surface properties
       static_cast<SkSurface::TextureReleaseProc>(
           metal->texture.destruction_callback),  // release proc
       metal->texture.user_data                   // release context
