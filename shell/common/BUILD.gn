@@ -159,7 +159,10 @@ if (enable_unittests) {
   test_fixtures("shell_unittests_fixtures") {
     dart_main = "fixtures/shell_test.dart"
 
-    fixtures = [ "fixtures/shelltest_screenshot.png" ]
+    fixtures = [
+      "fixtures/shelltest_screenshot.png",
+      "fixtures/hello_loop_2.gif",
+    ]
   }
 
   shell_host_executable("shell_benchmarks") {
@@ -293,6 +296,9 @@ if (enable_unittests) {
         "$fuchsia_sdk_root/pkg:fidl_cpp",
         "$fuchsia_sdk_root/pkg:sys_cpp",
       ]
+    } else {
+      # TODO(63837): This test is hard-coded to use a TestGLSurface so it cannot run on fuchsia.
+      sources += [ "shell_io_manager_unittests.cc" ]
     }
   }
 }
