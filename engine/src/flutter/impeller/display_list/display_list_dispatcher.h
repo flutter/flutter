@@ -67,7 +67,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setMaskFilter(const flutter::DlMaskFilter* filter) override;
 
   // |flutter::Dispatcher|
-  void setImageFilter(sk_sp<SkImageFilter> filter) override;
+  void setImageFilter(const flutter::DlImageFilter* filter) override;
 
   // |flutter::Dispatcher|
   void save() override;
