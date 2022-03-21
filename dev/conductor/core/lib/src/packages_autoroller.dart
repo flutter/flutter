@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'globals.dart';
+
 // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 // created personal access token with scopes: "repo", "read:org".
 
@@ -8,9 +10,21 @@ import 'dart:io';
 
 class PackageAutoroller {
   PackageAutoroller({
+    required this.githubClient,
     required this.token,
-  });
+  }) {
+    if (token.trim().isEmpty) {
+      throw Exception('empty token!');
+    }
+    if (githubClient.trim().isEmpty) {
+      throw Exception('Must provide path to GitHub client!');
+    }
+  }
 
+  /// Path to GitHub CLI client.
+  final String githubClient;
+
+  /// GitHub API access token.
   final String token;
 
   static const String hostname = 'github.com';
@@ -124,35 +138,31 @@ class PackageAutoroller {
     String? workingDirectory,
   }) async {
     final Process process = await Process.start(
-      binPath,
+      githubClient,
       args,
       workingDirectory: workingDirectory,
+      environment: <String, String>{},
     );
-    final stderrStrings = <String>[];
-    final stdoutStrings = <String>[];
-    process.stdout.transform(utf8.decoder).forEach((String line) {
+    final List<String> stderrStrings = <String>[];
+    final List<String> stdoutStrings = <String>[];
+    unawaited(process.stdout.transform(utf8.decoder).forEach((String line) {
       print('[STDOUT] $line');
       stdoutStrings.add(line);
-    });
-    process.stderr.transform(utf8.decoder).forEach((String line) {
+    }));
+    unawaited(process.stderr.transform(utf8.decoder).forEach((String line) {
       print('[STDERR] $line');
       stderrStrings.add(line);
-    });
+    }));
     if (stdin != null) {
       process.stdin.write(stdin);
       await process.stdin.flush();
-      await process.stdin.close();
+      //await process.stdin.close();
     }
-    final exitCode = await process.exitCode;
-    final stderr = stderrStrings.join('');
-    final stdout = stdoutStrings.join('');
-    if (!allowFailure && stderr.trim().isNotEmpty) {
-      print('got STDERR: $stderr');
-      print(StackTrace.current);
-      exit(1);
-    }
-    if (!allowFailure && await exitCode != 0) {
-      print('Command $binPath ${args.join(' ')} failed with code $exitCode');
+    final int exitCode = await process.exitCode;
+    final String stderr = stderrStrings.join();
+    final String stdout = stdoutStrings.join();
+    if (!allowFailure && exitCode != 0) {
+      print('Command $githubClient ${args.join(' ')} failed with code $exitCode');
       print(stderr);
       print(stdout);
       print(StackTrace.current);
@@ -160,17 +170,18 @@ class PackageAutoroller {
     }
     print(stdout);
   }
-}
 
-String get binPath {
-  final List<String> segments = Platform.script.pathSegments;
-  final Iterable<String> parentSegments = segments.take(segments.length - 1);
-  return <String>[
-    '', // add empty string so the joined string has a leading separator
-    ...parentSegments,
-    'bin',
-    'gh',
-  ].join(Platform.pathSeparator);
+  //String get binPath {
+  //  return 'gh';
+  //  final List<String> segments = Platform.script.pathSegments;
+  //  final Iterable<String> parentSegments = segments.take(segments.length - 1);
+  //  return <String>[
+  //    '', // add empty string so the joined string has a leading separator
+  //    ...parentSegments,
+  //    'bin',
+  //    'gh',
+  //  ].join(Platform.pathSeparator);
+  //}
 }
 
 String get workingDirectory {
