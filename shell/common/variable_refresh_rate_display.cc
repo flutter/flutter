@@ -5,21 +5,30 @@
 #include "flutter/shell/common/variable_refresh_rate_display.h"
 #include "flutter/fml/logging.h"
 
+static double GetInitialRefreshRate(
+    const std::weak_ptr<flutter::VariableRefreshRateReporter>&
+        refresh_rate_reporter) {
+  if (auto reporter = refresh_rate_reporter.lock()) {
+    return reporter->GetRefreshRate();
+  }
+  return 0;
+}
+
 namespace flutter {
 
 VariableRefreshRateDisplay::VariableRefreshRateDisplay(
     DisplayId display_id,
-    const VariableRefreshRateReporter& refresh_rate_reporter)
-    : Display(display_id, refresh_rate_reporter.GetRefreshRate()),
+    const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter)
+    : Display(display_id, GetInitialRefreshRate(refresh_rate_reporter)),
       refresh_rate_reporter_(refresh_rate_reporter) {}
 
 VariableRefreshRateDisplay::VariableRefreshRateDisplay(
-    const VariableRefreshRateReporter& refresh_rate_reporter)
-    : Display(refresh_rate_reporter.GetRefreshRate()),
+    const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter)
+    : Display(GetInitialRefreshRate(refresh_rate_reporter)),
       refresh_rate_reporter_(refresh_rate_reporter) {}
 
 double VariableRefreshRateDisplay::GetRefreshRate() const {
-  return refresh_rate_reporter_.GetRefreshRate();
+  return GetInitialRefreshRate(refresh_rate_reporter_);
 }
 
 }  // namespace flutter

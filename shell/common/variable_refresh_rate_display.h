@@ -18,16 +18,16 @@ class VariableRefreshRateDisplay : public Display {
  public:
   explicit VariableRefreshRateDisplay(
       DisplayId display_id,
-      const VariableRefreshRateReporter& refresh_rate_reporter);
+      const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter);
   explicit VariableRefreshRateDisplay(
-      const VariableRefreshRateReporter& refresh_rate_reporter);
+      const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter);
   ~VariableRefreshRateDisplay() = default;
 
   // |Display|
   double GetRefreshRate() const override;
 
  private:
-  const VariableRefreshRateReporter& refresh_rate_reporter_;
+  const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VariableRefreshRateDisplay);
 };
