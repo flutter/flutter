@@ -6,6 +6,62 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+@immutable
+class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
+  const MyThemeExtensionA({
+    required this.color1,
+    required this.color2,
+  });
+
+  final Color? color1;
+  final Color? color2;
+
+  @override
+  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
+    return MyThemeExtensionA(
+      color1: color1 ?? this.color1,
+      color2: color2 ?? this.color2,
+    );
+  }
+
+  @override
+  MyThemeExtensionA lerp(ThemeExtension<MyThemeExtensionA>? other, double t) {
+    if (other is! MyThemeExtensionA) {
+      return this;
+    }
+    return MyThemeExtensionA(
+      color1: Color.lerp(color1, other.color1, t),
+      color2: Color.lerp(color2, other.color2, t),
+    );
+  }
+}
+
+@immutable
+class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
+  const MyThemeExtensionB({
+    required this.textStyle,
+  });
+
+  final TextStyle? textStyle;
+
+  @override
+  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
+    return MyThemeExtensionB(
+      textStyle: textStyle ?? this.textStyle,
+    );
+  }
+
+  @override
+  MyThemeExtensionB lerp(ThemeExtension<MyThemeExtensionB>? other, double t) {
+    if (other is! MyThemeExtensionB) {
+      return this;
+    }
+    return MyThemeExtensionB(
+      textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
+    );
+  }
+}
+
 void main() {
   test('Theme data control test', () {
     final ThemeData dark = ThemeData.dark();
@@ -377,6 +433,136 @@ void main() {
     expect(expanded.maxHeight, equals(double.infinity));
   });
 
+  group('Theme extensions', () {
+    const Key containerKey = Key('container');
+
+    testWidgets('can be obtained', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: const <ThemeExtension<dynamic>>{
+              MyThemeExtensionA(
+                color1: Colors.black,
+                color2: Colors.amber,
+              ),
+              MyThemeExtensionB(
+                textStyle: TextStyle(fontSize: 50),
+              )
+            },
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+
+      expect(theme.extension<MyThemeExtensionA>()!.color1, Colors.black);
+      expect(theme.extension<MyThemeExtensionA>()!.color2, Colors.amber);
+      expect(theme.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 50));
+    });
+
+    testWidgets('can use copyWith', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: <ThemeExtension<dynamic>>{
+              const MyThemeExtensionA(
+                color1: Colors.black,
+                color2: Colors.amber,
+              ).copyWith(color1: Colors.blue),
+            },
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+
+      expect(theme.extension<MyThemeExtensionA>()!.color1, Colors.blue);
+      expect(theme.extension<MyThemeExtensionA>()!.color2, Colors.amber);
+    });
+
+    testWidgets('can lerp', (WidgetTester tester) async {
+      const MyThemeExtensionA extensionA1 = MyThemeExtensionA(
+        color1: Colors.black,
+        color2: Colors.amber,
+      );
+      const MyThemeExtensionA extensionA2 = MyThemeExtensionA(
+        color1: Colors.white,
+        color2: Colors.blue,
+      );
+      const MyThemeExtensionB extensionB1 = MyThemeExtensionB(
+        textStyle: TextStyle(fontSize: 50),
+      );
+      const MyThemeExtensionB extensionB2 = MyThemeExtensionB(
+        textStyle: TextStyle(fontSize: 100),
+      );
+
+      // Both ThemeDatas include both extensions
+      ThemeData lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>[
+            extensionA1,
+            extensionB1,
+          ],
+        ),
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA2,
+            extensionB2,
+          },
+        ),
+        0.5,
+      );
+
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
+
+      // Missing from 2nd ThemeData
+      lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA1,
+            extensionB1,
+          },
+        ),
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionB2,
+          },
+        ),
+        0.5,
+      );
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, Colors.black); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, Colors.amber); // Not lerped
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
+
+      // Missing from 1st ThemeData
+      lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA1,
+          },
+        ),
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA2,
+            extensionB2,
+          },
+        ),
+        0.5,
+      );
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
+    });
+  });
+
   test('copyWith, ==, hashCode basics', () {
     expect(ThemeData(), ThemeData().copyWith());
     expect(ThemeData().hashCode, ThemeData().copyWith().hashCode);
@@ -506,6 +692,7 @@ void main() {
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
       androidOverscrollIndicator: null,
+      extensions: const <Object, ThemeExtension<dynamic>>{},
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -606,6 +793,9 @@ void main() {
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
+      extensions: const <Object, ThemeExtension<dynamic>>{
+        MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
+      },
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -685,6 +875,7 @@ void main() {
       drawerTheme: otherTheme.drawerTheme,
       listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
+      extensions: otherTheme.extensions.values,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -763,6 +954,7 @@ void main() {
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
+    expect(themeDataCopy.extensions, equals(otherTheme.extensions));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -810,6 +1002,7 @@ void main() {
       'androidOverscrollIndicator',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
+      'extensions',
       'inputDecorationTheme',
       'materialTapTargetSize',
       'pageTransitionsTheme',

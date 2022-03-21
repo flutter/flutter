@@ -53,6 +53,36 @@ import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
 
+/// An interface that defines custom additions to a [ThemeData] object.
+///
+/// Typically used for custom colors. To use, subclass [ThemeExtension],
+/// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
+/// [lerp] methods. The latter will ensure smooth transitions of properties when
+/// switching themes.
+///
+/// {@tool dartpad}
+/// This sample shows how to create and use a subclass of [ThemeExtension] that
+/// defines two colors.
+///
+/// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+/// {@end-tool}
+abstract class ThemeExtension<T extends ThemeExtension<T>> {
+  /// Enable const constructor for subclasses.
+  const ThemeExtension();
+
+  /// The extension's type.
+  Object get type => T;
+
+  /// Creates a copy of this theme extension with the given fields
+  /// replaced by the non-null parameter values.
+  ThemeExtension<T> copyWith();
+
+  /// Linearly interpolate with another [ThemeExtension] object.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t);
+}
+
 // Deriving these values is black magic. The spec claims that pressed buttons
 // have a highlight of 0x66999999, but that's clearly wrong. The videos in the
 // spec show that buttons have a composited highlight of #E1E1E1 on a background
@@ -243,6 +273,7 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -390,6 +421,7 @@ class ThemeData with Diagnosticable {
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    extensions ??= <ThemeExtension<dynamic>>[];
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -562,6 +594,7 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
+      extensions: _themeExtensionIterableToMap(extensions),
       inputDecorationTheme: inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
@@ -665,6 +698,7 @@ class ThemeData with Diagnosticable {
     required this.androidOverscrollIndicator,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
+    required this.extensions,
     required this.inputDecorationTheme,
     required this.materialTapTargetSize,
     required this.pageTransitionsTheme,
@@ -807,6 +841,7 @@ class ThemeData with Diagnosticable {
     required this.primaryColorBrightness,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
+       assert(extensions != null),
        assert(inputDecorationTheme != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
@@ -1052,6 +1087,32 @@ class ThemeData with Diagnosticable {
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
+
+  /// Arbitrary additions to this theme.
+  ///
+  /// To define extensions, pass an [Iterable] containing one or more [ThemeExtension]
+  /// subclasses to [ThemeData.new] or [copyWith].
+  ///
+  /// To obtain an extension, use [extension].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to create and use a subclass of [ThemeExtension] that
+  /// defines two colors.
+  ///
+  /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [extension], a convenience function for obtaining a specific extension.
+  final Map<Object, ThemeExtension<dynamic>> extensions;
+
+  /// Used to obtain a particular [ThemeExtension] from [extensions].
+  ///
+  /// Obtain with `Theme.of(context).extension<MyThemeExtension>()`.
+  ///
+  /// See [extensions] for an interactive example.
+  T? extension<T>() => extensions[T] as T;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.
@@ -1588,6 +1649,7 @@ class ThemeData with Diagnosticable {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -1736,6 +1798,7 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
+      extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
@@ -1889,6 +1952,34 @@ class ThemeData with Diagnosticable {
     return Brightness.dark;
   }
 
+  /// Linearly interpolate between two [extensions].
+  ///
+  /// Includes all theme extensions in [a] and [b].
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static Map<Object, ThemeExtension<dynamic>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
+    // Lerp [a].
+    final Map<Object, ThemeExtension<dynamic>> newExtensions = a.extensions.map((Object id, ThemeExtension<dynamic> extensionA) {
+        final ThemeExtension<dynamic>? extensionB = b.extensions[id];
+        return MapEntry<Object, ThemeExtension<dynamic>>(id, extensionA.lerp(extensionB, t));
+      });
+    // Add [b]-only extensions.
+    newExtensions.addEntries(b.extensions.entries.where(
+      (MapEntry<Object, ThemeExtension<dynamic>> entry) =>
+          !a.extensions.containsKey(entry.key)));
+
+    return newExtensions;
+  }
+
+  /// Convert the [extensionsIterable] passed to [ThemeData.new] or [copyWith]
+  /// to the stored [extensions] map, where each entry's key consists of the extension's type.
+  static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<ThemeExtension<dynamic>> extensionsIterable) {
+    return Map<Object, ThemeExtension<dynamic>>.unmodifiable(<Object, ThemeExtension<dynamic>>{
+      // Strangely, the cast is necessary for tests to run.
+      for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>
+    });
+  }
+
   /// Linearly interpolate between two themes.
   ///
   /// The arguments must not be null.
@@ -1906,6 +1997,7 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
+      extensions: _lerpThemeExtensions(a, b, t),
       inputDecorationTheme:t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
       materialTapTargetSize:t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme:t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
@@ -2006,6 +2098,7 @@ class ThemeData with Diagnosticable {
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
+        mapEquals(other.extensions, extensions) &&
         other.inputDecorationTheme == inputDecorationTheme &&
         other.materialTapTargetSize == materialTapTargetSize &&
         other.pageTransitionsTheme == pageTransitionsTheme &&
@@ -2103,6 +2196,8 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
+      hashList(extensions.keys),
+      hashList(extensions.values),
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
@@ -2200,6 +2295,7 @@ class ThemeData with Diagnosticable {
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
+    properties.add(IterableProperty<ThemeExtension<dynamic>>('extensions', extensions.values, defaultValue: defaultData.extensions.values, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
