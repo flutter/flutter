@@ -76,6 +76,116 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/73330
+  testWidgets('hitTestBehavior test - default to HitTestBehavior.opaque', (WidgetTester tester) async {
+    bool onEnter = false;
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        onEnter: (_) => onEnter = true,
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(onEnter, true);
+  });
+
+  testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild', (WidgetTester tester) async {
+    bool onEnter = false;
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        hitTestBehavior: HitTestBehavior.deferToChild,
+        onEnter: (_) => onEnter = true,
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(onEnter, false);
+  });
+
+  testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild and non-opaque', (WidgetTester tester) async {
+    bool onEnterRegion1 = false;
+    bool onEnterRegion2 = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              onEnter: (_) => onEnterRegion1 = true,
+            ),
+          ),
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              opaque: false,
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              onEnter: (_) => onEnterRegion2 = true,
+              child: Container(
+                color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+                width: 50.0,
+                height: 50.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(onEnterRegion2, true);
+    expect(onEnterRegion1, true);
+  });
+
+  testWidgets('hitTestBehavior test - HitTestBehavior.translucent', (WidgetTester tester) async {
+    bool onEnterRegion1 = false;
+    bool onEnterRegion2 = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              onEnter: (_) => onEnterRegion1 = true,
+            ),
+          ),
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              hitTestBehavior: HitTestBehavior.translucent,
+              onEnter: (_) => onEnterRegion2 = true,
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(onEnterRegion2, true);
+    expect(onEnterRegion1, true);
+  });
+
   testWidgets('onEnter and onExit can be triggered with mouse buttons pressed', (WidgetTester tester) async {
     PointerEnterEvent? enter;
     PointerExitEvent? exit;

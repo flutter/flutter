@@ -2972,7 +2972,7 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
     bool validForMouseTracker = true,
     bool opaque = true,
     RenderBox? child,
-    HitTestBehavior? hitTestBehavior = HitTestBehavior.opaque
+    HitTestBehavior? hitTestBehavior = HitTestBehavior.opaque,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
