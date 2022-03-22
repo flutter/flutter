@@ -90,6 +90,7 @@ struct Command {
   /// If unset, no scissor is applied.
   ///
   std::optional<IRect> scissor;
+  size_t instance_count = 1u;
 
   bool BindVertices(const VertexBuffer& buffer);
 

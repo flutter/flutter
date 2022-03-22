@@ -6,6 +6,8 @@
 #include "flutter/testing/testing.h"
 #include "impeller/fixtures/box_fade.frag.h"
 #include "impeller/fixtures/box_fade.vert.h"
+#include "impeller/fixtures/instanced_draw.frag.h"
+#include "impeller/fixtures/instanced_draw.vert.h"
 #include "impeller/fixtures/test_texture.frag.h"
 #include "impeller/fixtures/test_texture.vert.h"
 #include "impeller/geometry/path_builder.h"
@@ -268,6 +270,61 @@ TEST_F(RendererTest, CanRenderToTexture) {
       cmd, r2t_pass->GetTransientsBuffer().EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->AddCommand(std::move(cmd)));
   ASSERT_TRUE(r2t_pass->EncodeCommands(*context->GetTransientsAllocator()));
+}
+
+TEST_F(RendererTest, CanRenderInstanced) {
+  using VS = InstancedDrawVertexShader;
+  using FS = InstancedDrawFragmentShader;
+
+  VertexBufferBuilder<VS::PerVertexData> builder;
+
+  ASSERT_TRUE(
+      Tessellator{}.Tessellate(FillType::kPositive,
+                               PathBuilder{}
+                                   .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
+                                   .TakePath()
+                                   .CreatePolyline(),
+                               [&builder](Point vtx) {
+                                 VS::PerVertexData data;
+                                 data.vtx = vtx;
+                                 builder.AppendVertex(data);
+                               }));
+
+  auto pipeline =
+      GetContext()
+          ->GetPipelineLibrary()
+          ->GetRenderPipeline(
+              PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(
+                  *GetContext())
+                  ->SetSampleCount(SampleCount::kCount4))
+          .get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+
+  Command cmd;
+  cmd.pipeline = pipeline;
+  cmd.label = "InstancedDraw";
+
+  static constexpr size_t kInstancesCount = 5u;
+  std::vector<VS::InstanceInfo> instances;
+  for (size_t i = 0; i < kInstancesCount; i++) {
+    VS::InstanceInfo info;
+    info.colors = Color::Random();
+    instances.emplace_back(info);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+    VS::FrameInfo frame_info;
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+    VS::BindInstanceInfo(
+        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(instances));
+    cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+
+    cmd.instance_count = kInstancesCount;
+    pass.AddCommand(cmd);
+    return true;
+  }));
 }
 
 }  // namespace testing

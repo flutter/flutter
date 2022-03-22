@@ -44,16 +44,16 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   }; // struct {{def.name}} (size {{def.byte_length}})
 {% endfor %}
 {% endif %}
-{% if length(uniform_buffers) > 0 %}
+{% if length(buffers) > 0 %}
 
   // ===========================================================================
-  // Stage Uniforms ============================================================
+  // Stage Uniform & Storage Buffers ===========================================
   // ===========================================================================
-{% for uniform in uniform_buffers %}
+{% for buffer in buffers %}
 
-  static constexpr auto kResource{{camel_case(uniform.name)}} = ShaderUniformSlot<{{uniform.name}}> { // {{uniform.name}}
-    "{{uniform.name}}",     // name
-    {{uniform.msl_res_0}}u,   // binding
+  static constexpr auto kResource{{camel_case(buffer.name)}} = ShaderUniformSlot<{{buffer.name}}> { // {{buffer.name}}
+    "{{buffer.name}}",     // name
+    {{buffer.msl_res_0}}u, // binding
   };
 {% endfor %}
 {% endif %}
@@ -118,6 +118,10 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 {% endfor %}
   };
 {% endif %}
+
+  // ===========================================================================
+  // Resource Binding Utilities ================================================
+  // ===========================================================================
 
 {% for proto in bind_prototypes %}
   /// {{proto.docstring}}

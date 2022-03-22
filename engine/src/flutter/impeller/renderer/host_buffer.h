@@ -50,6 +50,29 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   }
 
   //----------------------------------------------------------------------------
+  /// @brief      Emplace storage buffer data onto the host buffer. Ensure that
+  ///             backend specific uniform alignment requirements are respected.
+  ///
+  /// @param[in]  uniform     The storage buffer to emplace onto the buffer.
+  ///
+  /// @tparam     StorageBufferType The type of the shader storage buffer.
+  ///
+  /// @return     The buffer view.
+  ///
+  template <
+      class StorageBufferType,
+      class = std::enable_if_t<std::is_standard_layout_v<StorageBufferType>>>
+  [[nodiscard]] BufferView EmplaceStorageBuffer(
+      const std::vector<StorageBufferType>& buffer) {
+    const auto alignment =
+        std::max(alignof(StorageBufferType), DefaultUniformAlignment());
+    return Emplace(buffer.data(),                              // buffer
+                   buffer.size() * sizeof(StorageBufferType),  // size
+                   alignment                                   // alignment
+    );
+  }
+
+  //----------------------------------------------------------------------------
   /// @brief      Emplace non-uniform data (like contiguous vertices) onto the
   ///             host buffer.
   ///
