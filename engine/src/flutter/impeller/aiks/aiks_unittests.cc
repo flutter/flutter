@@ -347,19 +347,10 @@ bool RenderTextInCanvas(std::shared_ptr<Context> context,
 
   // Create the Impeller text frame and draw it at the designated baseline.
   auto frame = TextFrameFromTextBlob(blob);
-  TextRenderContextSkia text_context(context);
-  if (!text_context.IsValid()) {
-    return false;
-  }
-  auto atlas = text_context.CreateGlyphAtlas(frame);
-  if (!atlas) {
-    return false;
-  }
 
   Paint text_paint;
   text_paint.color = Color::Yellow();
-  canvas.DrawTextFrame(std::move(frame), std::move(atlas), text_position,
-                       text_paint);
+  canvas.DrawTextFrame(std::move(frame), text_position, text_paint);
   return true;
 }
 

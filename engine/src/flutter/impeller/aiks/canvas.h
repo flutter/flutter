@@ -78,10 +78,7 @@ class Canvas {
 
   void DrawPicture(Picture picture);
 
-  void DrawTextFrame(TextFrame text_frame,
-                     std::shared_ptr<GlyphAtlas> atlas,
-                     Point position,
-                     Paint paint);
+  void DrawTextFrame(TextFrame text_frame, Point position, Paint paint);
 
   Picture EndRecordingAsPicture();
 

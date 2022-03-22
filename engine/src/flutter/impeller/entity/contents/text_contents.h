@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <memory>
+#include <variant>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -16,6 +17,8 @@
 namespace impeller {
 
 class GlyphAtlas;
+class LazyGlyphAtlas;
+class Context;
 
 class TextContents final : public Contents {
  public:
@@ -27,6 +30,8 @@ class TextContents final : public Contents {
 
   void SetGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas);
 
+  void SetGlyphAtlas(std::shared_ptr<LazyGlyphAtlas> atlas);
+
   void SetColor(Color color);
 
   // |Contents|
@@ -37,7 +42,12 @@ class TextContents final : public Contents {
  private:
   TextFrame frame_;
   Color color_;
-  std::shared_ptr<GlyphAtlas> atlas_;
+  mutable std::variant<std::shared_ptr<GlyphAtlas>,
+                       std::shared_ptr<LazyGlyphAtlas>>
+      atlas_;
+
+  std::shared_ptr<GlyphAtlas> ResolveAtlas(
+      std::shared_ptr<Context> context) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextContents);
 };

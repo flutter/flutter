@@ -10,7 +10,7 @@ impeller_component("display_list") {
     "display_list_dispatcher.h",
   ]
 
-  deps = [
+  public_deps = [
     "../aiks",
     "//flutter/display_list",
     "//flutter/fml",
@@ -21,7 +21,11 @@ impeller_component("display_list") {
 impeller_component("display_list_unittests") {
   testonly = true
 
-  sources = [ "display_list_unittests.cc" ]
+  sources = [
+    "display_list_playground.cc",
+    "display_list_playground.h",
+    "display_list_unittests.cc",
+  ]
 
   deps = [
     ":display_list",

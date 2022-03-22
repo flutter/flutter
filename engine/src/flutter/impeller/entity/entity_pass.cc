@@ -44,6 +44,10 @@ size_t EntityPass::GetSubpassesDepth() const {
   return max_subpass_depth + 1u;
 }
 
+const std::shared_ptr<LazyGlyphAtlas>& EntityPass::GetLazyGlyphAtlas() const {
+  return lazy_glyph_atlas_;
+}
+
 std::optional<Rect> EntityPass::GetEntitiesCoverage() const {
   std::optional<Rect> result;
   for (const auto& entity : entities_) {
