@@ -158,10 +158,6 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// ```dart
   /// CupertinoContextMenu(
-  ///   child: FittedBox(
-  ///     fit: BoxFit.cover,
-  ///     child: Image.asset('assets/photo.jpg'),
-  ///   ),
   ///   // The FittedBox in the preview here allows the image to animate its
   ///   // aspect ratio when the CupertinoContextMenu is animating its preview
   ///   // widget open and closed.
@@ -184,6 +180,10 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
+  ///   child: FittedBox(
+  ///     fit: BoxFit.cover,
+  ///     child: Image.asset('assets/photo.jpg'),
+  ///   ),
   /// )
   /// ```
   ///

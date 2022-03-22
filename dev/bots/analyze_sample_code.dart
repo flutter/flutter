@@ -746,9 +746,10 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  vector_math: any
 
 dev_dependencies:
-  flutter_lints: ^1.0.3
+  flutter_lints: ^2.0.0
 ''');
     }
 
