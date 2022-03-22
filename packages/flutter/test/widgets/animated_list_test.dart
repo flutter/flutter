@@ -19,7 +19,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
             return CustomScrollView(
-              slivers: [
+              slivers: <Widget>[
                 SliverAnimatedList(
                   initialItemCount: itemCount,
                   itemBuilder: (BuildContext context, int index, Animation<double> animation) => Container(
