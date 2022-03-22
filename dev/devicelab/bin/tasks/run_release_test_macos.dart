@@ -74,10 +74,6 @@ void main() {
 
       await run.exitCode;
 
-      if (stderr.isNotEmpty) {
-        throw 'flutter run --release had output on standard error.';
-      }
-
       _findNextMatcherInList(
         stdout,
         (String line) => line.startsWith('Launching lib/main.dart on ') && line.endsWith(' in release mode...'),
