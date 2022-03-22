@@ -433,7 +433,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Called to find the new index of a child based on its key in case of reordering.
   ///
   /// If not provided, a child widget may not map to its existing [RenderObject]
-  /// when the order in which children are returned from [builder] changes.
+  /// when the order in which children are returned from the children builder changes.
   /// This may result in state-loss.
   ///
   /// This callback should take an input [Key], and it should return the
