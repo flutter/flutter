@@ -3684,6 +3684,26 @@ targets:
     - bin/**
     - .ci.yaml
 
+  - name: Mac run_release_test_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: run_release_test_macos
+    scheduler: luci
+    runIf:
+    - dev/**
+    - packages/flutter_tools/**
+    - bin/**
+    - .ci.yaml
+
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
