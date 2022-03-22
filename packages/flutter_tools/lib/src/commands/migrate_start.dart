@@ -18,6 +18,7 @@ import 'migrate.dart';
 class MigrateStartCommand extends FlutterCommand {
   MigrateStartCommand({
     bool verbose = false,
+    this.logger,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -66,6 +67,8 @@ class MigrateStartCommand extends FlutterCommand {
 
   final bool _verbose;
 
+  final Logger logger;
+
   @override
   final String name = 'start';
 
@@ -105,6 +108,7 @@ class MigrateStartCommand extends FlutterCommand {
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
       platforms: platforms,
+      logger: logger,
     );
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);

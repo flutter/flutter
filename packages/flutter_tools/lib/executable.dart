@@ -183,7 +183,10 @@ List<FlutterCommand> generateCommands({
   ),
   InstallCommand(),
   LogsCommand(),
-  MigrateCommand(verbose: verbose),
+  MigrateCommand(
+    verbose: verbose,
+    logger: globals.logger
+  ),
   MakeHostAppEditableCommand(),
   PackagesCommand(),
   PrecacheCommand(
