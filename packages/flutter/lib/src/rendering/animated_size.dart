@@ -184,7 +184,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       case RenderAnimatedSizeState.changed:
       case RenderAnimatedSizeState.unstable:
         // Call markNeedsLayout in case the RenderObject isn't marked dirty
-        // already, to resume interrputed resizing animation.
+        // already, to resume interrupted resizing animation.
         markNeedsLayout();
         break;
     }
