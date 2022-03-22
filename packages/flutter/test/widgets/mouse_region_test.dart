@@ -192,7 +192,7 @@ void main() {
     await tester.pumpWidget(Center(
       child: MouseRegion(
         child: Container(
-          color: const Color.fromARGB(0xff, 0xff, 0x11, 0x07),
+          color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
