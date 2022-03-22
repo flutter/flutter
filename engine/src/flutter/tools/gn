@@ -429,6 +429,10 @@ def to_gn_args(args):
       with open(os.path.join(os.path.dirname(__file__), 'fuchsia/target_api_level')) as f:
         gn_args['fuchsia_target_api_level'] = int(f.read().strip())
 
+    # Flags for Dart features:
+    if args.use_mallinfo2:
+      gn_args['dart_use_mallinfo2'] = args.use_mallinfo2
+
     # Impeller flags.
     if args.enable_impeller_playground:
       gn_args['impeller_enable_playground'] = args.enable_impeller_playground
@@ -548,6 +552,10 @@ def parse_args(args):
   parser.add_argument('--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false')
 
   parser.add_argument('--fuchsia-target-api-level', dest='fuchsia_target_api_level')
+
+  # Flags for Dart features.
+  parser.add_argument('--use-mallinfo2', dest='use_mallinfo2', default=False, action='store_true',
+                      help='Use mallinfo2 to collect malloc stats.')
 
   # Impeller flags.
   parser.add_argument('--enable-impeller-playground', default=False, action='store_true',
