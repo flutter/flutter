@@ -105,7 +105,7 @@ static std::optional<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
                                                  size_t atlas_size) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   SkBitmap bitmap;
-  auto image_info = SkImageInfo::MakeN32Premul(atlas_size, atlas_size);
+  auto image_info = SkImageInfo::MakeA8(atlas_size, atlas_size);
   if (!bitmap.tryAllocPixels(image_info)) {
     return std::nullopt;
   }
@@ -130,28 +130,6 @@ static std::optional<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
     const auto& metrics = font_glyph.font.GetMetrics();
 
     auto glyph_color = SK_ColorWHITE;
-
-#if 0
-    {
-      glyph_color = SkColorSetARGB(255,                //
-                                   std::rand() % 255,  //
-                                   std::rand() % 255,  //
-                                   std::rand() % 255   //
-      );
-      SkPaint debug_paint;
-      debug_paint.setARGB(255 / 4,            //
-                          std::rand() % 255,  //
-                          std::rand() % 255,  //
-                          std::rand() % 255   //
-      );
-      canvas->drawRect(SkRect::MakeXYWH(location.origin.x,    //
-                                        location.origin.y,    //
-                                        location.size.width,  //
-                                        location.size.height  //
-                                        ),
-                       debug_paint);
-    }
-#endif
 
     SkPaint glyph_paint;
     glyph_paint.setColor(glyph_color);
@@ -181,7 +159,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
   const auto& pixmap = bitmap.pixmap();
 
   TextureDescriptor texture_descriptor;
-  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.format = PixelFormat::kR8UNormInt;
   texture_descriptor.size = ISize::MakeWH(atlas_size, atlas_size);
 
   if (pixmap.rowBytes() * pixmap.height() !=
