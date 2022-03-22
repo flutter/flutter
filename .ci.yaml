@@ -3679,10 +3679,10 @@ targets:
       task_name: native_ui_tests_macos
     scheduler: luci
     runIf:
-    - dev/**
-    - packages/flutter_tools/**
-    - bin/**
-    - .ci.yaml
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
@@ -3699,10 +3699,10 @@ targets:
       task_name: run_release_test_macos
     scheduler: luci
     runIf:
-    - dev/**
-    - packages/flutter_tools/**
-    - bin/**
-    - .ci.yaml
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
 
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
