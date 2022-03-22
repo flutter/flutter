@@ -194,6 +194,10 @@ abstract class SliverChildDelegate {
   /// This will be called during `performRebuild` in [SliverMultiBoxAdaptorElement]
   /// to check if a child has moved to a different position. It should return the
   /// index of the child element with associated key, null if not found.
+  ///
+  /// If not provided, a child widget may not map to its existing [RenderObject]
+  /// when the order in which children are returned from the children builder changes.
+  /// This may result in state-loss.
   int? findIndexByKey(Key key) => null;
 
   @override
