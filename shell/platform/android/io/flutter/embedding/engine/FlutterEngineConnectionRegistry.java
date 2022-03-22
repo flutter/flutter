@@ -330,6 +330,12 @@ import java.util.Set;
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
+    final boolean useSoftwareRendering =
+        activity
+            .getIntent()
+            .getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false);
+    flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
+
     // Activate the PlatformViewsController. This must happen before any plugins attempt
     // to use it, otherwise an error stack trace will appear that says there is no
     // flutter/platform_views channel.
