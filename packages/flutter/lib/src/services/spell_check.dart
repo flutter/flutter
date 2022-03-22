@@ -35,60 +35,64 @@ class SpellCheckerSuggestionSpan {
 
 /// Creates a configuration that controls how spell check is handled in a subtree of text input related widgets.
 class SpellCheckConfiguration {
-    //TODO(camillesimon): Figure out if this should be const or not.
-    //TODO(camillesimon): Make platform nullable and add logic to handle.
-    const SpellCheckConfiguration({
-        required this.platform,
-        required this.spellCheckEnabled,
-        this.spellCheckService,
-    }):
-        assert(platform != null),
-        assert(spellCheckEnabled != null);
-
-    /// SpellCheckConfiguration that indicates that spell check should not be run on text input.
-    static const SpellCheckConfiguration disabled = SpellCheckConfiguration(
-        platform: TargetPlatform.android, 
-        spellCheckEnabled: false,
-        spellCheckService: null,
-      );
-
-    /// Determines whether or not spell check is enabled.
-    final bool spellCheckEnabled;
-
-    /// Platform spell check needs to be configured for.
-    final TargetPlatform platform;
-
     /// Service used for spell checking.
     final SpellCheckService? spellCheckService;
+
+    /// Handler used to display spell check results
+    final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+
+    /// Spell check results to pass from spellCheckService to spellCheckSuggestionsHandler
+    List<SpellCheckerSuggestionSpan>? spellCheckResults;
+
+    SpellCheckConfiguration({
+        this.spellCheckService,
+        this.spellCheckSuggestionsHandler
+    });
+
+    bool isSpellCheckEnabled() {
+        return this != SpellCheckConfiguration.disabled;
+    }
+
+    /// SpellCheckConfiguration that indicates that spell check should not be run on text input.
+    static SpellCheckConfiguration disabled = SpellCheckConfiguration();
+
+    static SpellCheckService? getDefaultSpellCheckService(TargetPlatform platform) {
+        switch(platform) {
+            case TargetPlatform.android:
+                return MaterialSpellCheckService();
+            default:
+                return null;
+
+        }
+    }
+
+    static SpellCheckSuggestionsHandler? getDefaultSpellCheckHandler(TargetPlatform platform) {
+        switch(platform) {
+            case TargetPlatform.android:
+                return MaterialSpellCheckSuggestionsHandler();
+            default:
+                return null;
+
+        }
+    }
 }
 
 /// Interface that represents the core functionality needed to support spell check on text input.
 abstract class SpellCheckService {
     // Initiates spell check. Expected to set spellCheckSuggestions in handler if synchronous.
-    void fetchSpellCheckSuggestions(TextInputConnection? textInputConnection, Locale locale, String text);
-
-    // Updates spell check results in handler. May be used in fetchSpellCheckSuggestions if synchronous.
-    //TODO(camillesimon): Provide default implementation assuming developers most likely want access to our handlers.
-    // void updateSpellCheckSuggestions(List<SpellCheckerSuggestionSpan>? suggestions);
-
-    // Relates service to a handler for the results it provides.
-    //TODO(camillesimon): Determine whether or not to add getter/setter instead of update method:
-    //TODO(camillesimon): Provide default implementation to give developers access?
-    SpellCheckSuggestionsHandler? getSpellCheckSuggestionsHandler();
+    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, String text);
 }
 
 /// Interface that represents the core functionality needed to display results of spell check.
 abstract class SpellCheckSuggestionsHandler {
-    // Relates handler to resutls provided by spell check service.
-    set spellCheckSuggestions(List<SpellCheckerSuggestionSpan>? spellCheckSuggestions);
-    List<SpellCheckerSuggestionSpan>? get spellCheckSuggestions;
-
     // Builds toolbar/menu that will display spell check results.
-    Widget buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
+    Widget buildSpellCheckSuggestionsToolbar(List<SpellCheckerSuggestionSpan>? spellCheckResults,
+        TextSelectionDelegate delegate, 
         List<TextSelectionPoint> endpoints, Rect globalEditableRegion, 
         Offset selectionMidpoint, double textLineHeight);
 
     // Build TextSpans with misspelled words indicated.
     TextSpan buildTextSpanWithSpellCheckSuggestions(
+        List<SpellCheckerSuggestionSpan>? spellCheckResults,
         TextEditingValue value, TextStyle? style, bool ignoreComposing);
 }

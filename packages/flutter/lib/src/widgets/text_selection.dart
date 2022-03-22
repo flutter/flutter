@@ -150,7 +150,7 @@ abstract class TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
-    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
+    SpellCheckConfiguration? spellCheckConfiguration,
   );
 
   /// Returns the size of the selection handle.
@@ -434,10 +434,10 @@ class TextSelectionOverlay {
   ToolbarType? visibleToolbarType;
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
-  void showToolbar(ToolbarType toolbarType, SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler) {
+  void showToolbar(ToolbarType toolbarType, SpellCheckConfiguration? spellCheckConfiguration) {
     assert(_toolbar == null);
     visibleToolbarType = toolbarType;
-    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckSuggestionsHandler));
+    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckConfiguration));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
   }
@@ -545,7 +545,7 @@ class TextSelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context, ToolbarType toolbarType,
-    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler) {
+    SpellCheckConfiguration? spellCheckConfiguration) {
     if (selectionControls == null)
       return Container();
 
@@ -593,7 +593,7 @@ class TextSelectionOverlay {
                 clipboardStatus!,
                 renderObject.lastSecondaryTapDownPosition,
                 toolbarType,
-                spellCheckSuggestionsHandler,
+                spellCheckConfiguration,
               );
             },
           ),

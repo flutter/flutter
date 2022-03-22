@@ -335,6 +335,7 @@ class TextField extends StatefulWidget {
     this.enableIMEPersonalizedLearning = true,
     this.spellCheckEnabled = false,
     this.spellCheckService,
+    this.spellCheckSuggestionsHandler,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -792,11 +793,14 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// Whether or not spell check is enabled
+  /// Whether or not spell check is enabled.
   final bool spellCheckEnabled;
 
   /// Spell check service used if spell check is enabled.
   final SpellCheckService? spellCheckService;
+
+  // Spell check handler used if spell check is enabled.
+  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -952,8 +956,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
   }
 
   // Service used for spell checking if enabled.
-  SpellCheckService? _spellCheckService;
   bool? _spellCheckEnabled;
+  SpellCheckService? _spellCheckService;
+  SpellCheckSuggestionsHandler? _spellCheckSuggestionsHandler;
+  SpellCheckConfiguration? _spellCheckConfiguration;
 
   @override
   void initState() {
@@ -964,13 +970,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
-    //TODO(camillesimon): Determine default behavior here. Might be common across text fields depending on input so may move out to static method in services/spell_check.dart.
     WidgetsBinding.instance?.addObserver(this);
-    print("---------------------defaultSpellCheckEnabled made it to TextField as:-------------------");
-    print(WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled);
     _spellCheckEnabled = (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : true;
     if (_spellCheckEnabled!) {
-      _spellCheckService = widget.spellCheckService ?? MaterialSpellCheckService();
+      _spellCheckService = widget.spellCheckService;
+      _spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler;
     }
   }
 
@@ -1147,15 +1151,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
         )
       : AutofillConfiguration.disabled;
 
-    final SpellCheckConfiguration spellCheckConfiguration = widget.spellCheckEnabled
-      ? SpellCheckConfiguration(
-          platform: TargetPlatform.android, //TODO(camillesimon): Find using a context.
-          spellCheckEnabled: true,
-          spellCheckService: _spellCheckService,
-        )
-      : SpellCheckConfiguration.disabled;
-
-    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration, spellCheckConfiguration: spellCheckConfiguration);
+    //TODO(camillesimon): Clean up messy logic, perhaps move to a lifecycle method.
+    if (_spellCheckEnabled!) {
+      if (_spellCheckService == null) {
+      _spellCheckService = SpellCheckConfiguration.getDefaultSpellCheckService(Theme.of(context).platform);
+      }
+      if (_spellCheckSuggestionsHandler == null) {
+      _spellCheckSuggestionsHandler = SpellCheckConfiguration.getDefaultSpellCheckHandler(Theme.of(context).platform);
+      }
+      }
+      if(_spellCheckConfiguration == null) {
+        _spellCheckConfiguration = widget.spellCheckEnabled
+        ? SpellCheckConfiguration(
+            spellCheckService: _spellCheckService,
+            spellCheckSuggestionsHandler: _spellCheckSuggestionsHandler,
+          )
+        : SpellCheckConfiguration.disabled;
+      }
+    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration, spellCheckConfiguration: _spellCheckConfiguration);
   }
   // AutofillClient, SpellCheckConfiguration implementation end.
 

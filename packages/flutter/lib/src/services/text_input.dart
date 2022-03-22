@@ -469,7 +469,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
-    this.spellCheckConfiguration = SpellCheckConfiguration.disabled,
+    this.spellCheckConfiguration,
     this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
   }) : assert(inputType != null),
@@ -514,7 +514,7 @@ class TextInputConfiguration {
   /// The configuration to use for spell check.
   ///
   /// Defaults to disabled, in which case no spell check will be performed.
-  final SpellCheckConfiguration spellCheckConfiguration;
+  final SpellCheckConfiguration? spellCheckConfiguration;
 
   /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -1290,13 +1290,6 @@ class TextInputConnection {
     TextInput._instance._requestAutofill();
   }
 
-  /// Requests that spell checking be initiated on the specified text.
-  void initiateSpellChecking(Locale locale, String text) {
-    assert(attached);
-    TextInput._instance.initiateSpellChecking(locale, text);
-  }
-
-
   /// Requests that the text input control update itself according to the new
   /// [TextInputConfiguration].
   void updateConfig(TextInputConfiguration configuration) {
@@ -1787,17 +1780,6 @@ class TextInput {
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
         break;
-      //TODO(camillesimon): Rename all spellcheckER names to spellcheck
-      // case 'TextInputClient.updateSpellCheckerResults':
-      //   List<String> results = args[1].cast<String>();
-      //   List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
-      //   results.forEach((String result) {
-      //     List<String> resultParsed = result.split(".");
-      //     spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
-      //   });
-      //   // TODO(camillesimon): Remove support for passing text (and remove from engine).
-      //   _currentConfiguration.spellCheckConfiguration.spellCheckService!.updateSpellCheckSuggestions(spellCheckerSuggestionSpans);
-        break;
       default:
         throw MissingPluginException();
     }
@@ -1848,15 +1830,6 @@ class TextInput {
 
   void _requestAutofill() {
     _channel.invokeMethod<void>('TextInput.requestAutofill');
-  }
-
-  void initiateSpellChecking(Locale locale, String text) {
-    assert(locale != null);
-    assert(text != null);
-    _channel.invokeMethod<void>(
-        'TextInput.initiateSpellChecking',
-        <String>[ locale.toLanguageTag(), text ],
-    );
   }
 
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {

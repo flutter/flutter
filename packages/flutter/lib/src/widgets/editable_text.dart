@@ -163,7 +163,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckConfiguration? spellCheckConfiguration}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -174,8 +174,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckSuggestionsHandler != null && spellCheckSuggestionsHandler.spellCheckSuggestions != null && spellCheckSuggestionsHandler.spellCheckSuggestions!.length > 0) {
-        return spellCheckSuggestionsHandler.buildTextSpanWithSpellCheckSuggestions(value, style, false);
+    if (spellCheckConfiguration != null && spellCheckConfiguration!.spellCheckSuggestionsHandler != null && spellCheckConfiguration!.spellCheckResults != null && spellCheckConfiguration!.spellCheckResults!.length > 0) {
+        return spellCheckConfiguration!.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration!.spellCheckResults, value, style, false);
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -2567,9 +2567,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) ?? value;
 
         if (value.text.length > 0) {
-          //TODO(camillesimon): Check if spell check is enabled. Everywhere frankly.
+          //TODO(camillesimon): Check if spell check is enabled throughout the framework, including here.
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.fetchSpellCheckSuggestions(_textInputConnection!, localeForSpellChecking as Locale, value.text);
+          Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          spellCheckResultsFuture.then((results) {
+            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
+          });
         }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -2919,12 +2922,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     //TODO(camillesimon): Clean up messy logic.
     if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-      if (!_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckEnabled) {
+      if (!_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.isSpellCheckEnabled()) {
         return false;
       }
       //TODO(camillesimon): Find platform using a context. Or just have it contained in central place like the service itself.
       _selectionOverlay!.showToolbar(toolbarType, 
-      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.getSpellCheckSuggestionsHandler()!);
+      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration);
       return true;
     }
 
@@ -3314,13 +3317,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // Read only mode should not paint text composing.
     //TODO(camillesimon): Clean up messy logic.
-    if (_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckEnabled) {
+    if (_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.isSpellCheckEnabled()) {
       return widget.controller.buildTextSpan(
         context: context,
         style: widget.style,
         withComposing: !widget.readOnly && _hasFocus,
         //TODO(camillesimon): Determine platform using context. Or just have it contained in central place like the service itself.
-        spellCheckSuggestionsHandler: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration.spellCheckService!.getSpellCheckSuggestionsHandler()!,
+        spellCheckConfiguration: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration,
       );
     }
     else {

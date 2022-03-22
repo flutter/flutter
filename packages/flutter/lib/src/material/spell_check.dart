@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/src/painting/text_span.dart';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/src/services/spell_check.dart';
-import 'package:flutter/src/services/text_input.dart' show TextInputConnection;
 import 'package:flutter/src/services/message_codec.dart';
 import 'package:flutter/src/services/platform_channel.dart';
 import 'package:flutter/src/services/system_channels.dart';
@@ -15,10 +14,8 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 class MaterialSpellCheckService implements SpellCheckService {
-  // create channel, set handler and create handler
   late MethodChannel spellCheckChannel;
 
-  MaterialSpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = MaterialSpellCheckSuggestionsHandler();
   StreamController<List<SpellCheckerSuggestionSpan>> controller = StreamController<List<SpellCheckerSuggestionSpan>>.broadcast();
 
   MaterialSpellCheckService() {
@@ -29,7 +26,6 @@ class MaterialSpellCheckService implements SpellCheckService {
     Future<dynamic> _handleSpellCheckInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      print("---------------FETCH RETURNED----------------");
 
     switch (method) {
       //TODO(camillesimon): Rename all spellcheckER names to spellcheck
@@ -48,42 +44,30 @@ class MaterialSpellCheckService implements SpellCheckService {
   }
 
     @override
-    void fetchSpellCheckSuggestions(TextInputConnection? textInputConnection, Locale locale, String text) async {
+    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, String text) async {
     assert(locale != null);
     assert(text != null);
-    print("---------------FETCH INITIATED----------------");
     spellCheckChannel.invokeMethod<void>(
         'SpellCheck.initiateSpellChecking',
         <String>[ locale.toLanguageTag(), text ],
       );
     
-    controller.stream.listen((List<SpellCheckerSuggestionSpan> results) {    
-      // await for (final results in controller.stream) {
-      this.spellCheckSuggestionsHandler!.spellCheckSuggestions = results;
-    });
-  }
+    List<SpellCheckerSuggestionSpan> spellCheckResults = <SpellCheckerSuggestionSpan>[];
 
-  @override
-  SpellCheckSuggestionsHandler? getSpellCheckSuggestionsHandler() {
-    return spellCheckSuggestionsHandler;
+    await for (final result in controller.stream) {
+      spellCheckResults = result;
+      return spellCheckResults;
+    }
+
+    //TODO(camillesimon): Maybe return an exception
+    return spellCheckResults;
   }
 }
 
 class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
-  List<SpellCheckerSuggestionSpan>? _spellCheckSuggestions;
   @override
-  set spellCheckSuggestions(List<SpellCheckerSuggestionSpan>? spellCheckSuggestions) {
-    _spellCheckSuggestions = spellCheckSuggestions;
-  }
-
-  @override
-  List<SpellCheckerSuggestionSpan>? get spellCheckSuggestions => _spellCheckSuggestions;
-
-  /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
-  /// This toolbar will allow for tap and replace of suggestions for misspelled 
-  /// words.
-  @override
-  Widget buildSpellCheckSuggestionsToolbar(TextSelectionDelegate delegate, 
+  Widget buildSpellCheckSuggestionsToolbar(List<SpellCheckerSuggestionSpan>? spellCheckResults,
+      TextSelectionDelegate delegate, 
       List<TextSelectionPoint> endpoints, Rect globalEditableRegion, 
       Offset selectionMidpoint, double textLineHeight) {
           return _SpellCheckerSuggestionsToolbar(
@@ -92,7 +76,7 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
           globalEditableRegion: globalEditableRegion,
           selectionMidpoint: selectionMidpoint,
           textLineHeight: textLineHeight,
-          spellCheckerSuggestionSpans: _spellCheckSuggestions,
+          spellCheckerSuggestionSpans: spellCheckResults,
         );
       }
 
@@ -101,22 +85,23 @@ class MaterialSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandl
 
   @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
+      List<SpellCheckerSuggestionSpan>? spellCheckResults,
       TextEditingValue value, TextStyle? style, bool ignoreComposing) {
       scssSpans_consumed_index = 0;
       text_consumed_index = 0;
       if (ignoreComposing) {
           return TextSpan(
               style: style,
-              children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.text, style)
+              children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckerSuggestionSpan>[], value.text, style)
           );
       } else {
           return TextSpan(
               style: style,
               children: <TextSpan>[
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textBefore(value.text), style)),
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckerSuggestionSpan>[], value.composing.textBefore(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckerSuggestionSpan>[], value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
                       ))),
-                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(_spellCheckSuggestions ?? <SpellCheckerSuggestionSpan>[], value.composing.textAfter(value.text), style)),
+                  TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckerSuggestionSpan>[], value.composing.textAfter(value.text), style)),
               ],
           );
       }
