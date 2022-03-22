@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -18,12 +19,16 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -35,6 +40,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -364,6 +370,110 @@ public class PlatformPluginTest {
               View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                   | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                   | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+  }
+
+  @Config(sdk = 19)
+  @Test
+  public void verifySystemChromeChangeListenerLegacyWithSystemBarsInvisible() {
+    View fakeDecorView = mock(View.class);
+    Activity fakeActivity = mock(Activity.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
+
+    platformPlugin.insetsListenerLegacy.onSystemUiVisibilityChange(View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+    verify(fakePlatformChannel).systemChromeChanged(true);
+  }
+
+  @Config(sdk = 19)
+  @Test
+  public void verifySystemChromeChangeListenerLegacyWithSystemBarsVisible() {
+    View fakeDecorView = mock(View.class);
+    Activity fakeActivity = mock(Activity.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
+
+    platformPlugin.insetsListenerLegacy.onSystemUiVisibilityChange(~View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+    verify(fakePlatformChannel).systemChromeChanged(false);
+  }
+
+  @Config(sdk = 30)
+  @Test
+  public void verifySystemChromeChangeListenerWithSystemBarsInvisible() {
+    View fakeDecorView = mock(View.class);
+    Activity fakeActivity = mock(Activity.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
+
+    WindowInsets.Builder builder = new WindowInsets.Builder();
+    builder.setInsets(WindowInsetsCompat.Type.systemBars(), Insets.of(0, 0, 0, 0));
+    builder.setVisible(WindowInsetsCompat.Type.systemBars(), false);
+    WindowInsets systemBarsInvisibleInsets = builder.build();
+
+    try (MockedStatic<ViewCompat> mocked = mockStatic(ViewCompat.class)) {
+      mocked
+          .when(
+              () ->
+                  ViewCompat.onApplyWindowInsets(
+                      fakeDecorView,
+                      WindowInsetsCompat.toWindowInsetsCompat(systemBarsInvisibleInsets)))
+          .thenReturn(null);
+
+      platformPlugin.insetsListener.onApplyWindowInsets(
+          fakeDecorView, WindowInsetsCompat.toWindowInsetsCompat(systemBarsInvisibleInsets));
+
+      verify(fakePlatformChannel).systemChromeChanged(true);
+    }
+  }
+
+  @Config(sdk = 30)
+  @Test
+  public void verifySystemChromeChangeListenerWithSystemBarsVisible() {
+    View fakeDecorView = mock(View.class);
+    Activity fakeActivity = mock(Activity.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
+
+    WindowInsets.Builder builder = new WindowInsets.Builder();
+    builder.setInsets(WindowInsetsCompat.Type.systemBars(), Insets.of(0, 0, 0, 0));
+    builder.setVisible(WindowInsetsCompat.Type.systemBars(), true);
+    WindowInsets systemBarsVisibleInsets = builder.build();
+
+    try (MockedStatic<ViewCompat> mocked = mockStatic(ViewCompat.class)) {
+      mocked
+          .when(
+              () ->
+                  ViewCompat.onApplyWindowInsets(
+                      fakeDecorView,
+                      WindowInsetsCompat.toWindowInsetsCompat(systemBarsVisibleInsets)))
+          .thenReturn(null);
+
+      platformPlugin.insetsListener.onApplyWindowInsets(
+          fakeDecorView, WindowInsetsCompat.toWindowInsetsCompat(systemBarsVisibleInsets));
+
+      verify(fakePlatformChannel).systemChromeChanged(false);
     }
   }
 

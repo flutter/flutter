@@ -20,6 +20,8 @@ import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -37,6 +39,9 @@ public class PlatformPlugin {
   private PlatformChannel.SystemChromeStyle currentTheme;
   private int mEnabledOverlays;
   private static final String TAG = "PlatformPlugin";
+
+  @VisibleForTesting View.OnSystemUiVisibilityChangeListener insetsListenerLegacy;
+  @VisibleForTesting androidx.core.view.OnApplyWindowInsetsListener insetsListener;
 
   /**
    * The {@link PlatformPlugin} generally has default behaviors implemented for platform
@@ -140,7 +145,6 @@ public class PlatformPlugin {
       @NonNull PlatformPluginDelegate delegate) {
     this.activity = activity;
     this.platformChannel = platformChannel;
-    this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
     this.platformPluginDelegate = delegate;
 
     mEnabledOverlays = DEFAULT_SYSTEM_UI;
@@ -216,28 +220,56 @@ public class PlatformPlugin {
     }
   }
 
-  private void setSystemChromeChangeListener() {
-    // Set up a listener to notify the framework when the system ui has changed.
+  private void setSystemChromeChangeListenerLegacy() {
     View decorView = activity.getWindow().getDecorView();
-    decorView.setOnSystemUiVisibilityChangeListener(
+    insetsListenerLegacy =
         new View.OnSystemUiVisibilityChangeListener() {
           @Override
           public void onSystemUiVisibilityChange(int visibility) {
             if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-              // The system bars are visible. Make any desired adjustments to
-              // your UI, such as showing the action bar or other navigational
-              // controls. Another common action is to set a timer to dismiss
-              // the system bars and restore the fullscreen mode that was
-              // previously enabled.
               platformChannel.systemChromeChanged(false);
             } else {
-              // The system bars are NOT visible. Make any desired adjustments
-              // to your UI, such as hiding the action bar or other
-              // navigational controls.
               platformChannel.systemChromeChanged(true);
             }
           }
-        });
+        };
+
+    decorView.setOnSystemUiVisibilityChangeListener(insetsListenerLegacy);
+  }
+
+  private void setSystemChromeChangeListener() {
+    // Set up a listener to notify the framework when the system ui has changed.
+    // The Android API for overlays/insets as of API 30 provides backwards compatibility
+    // up through API 20, so legacy code with equivalent behavior is still used for API 19.
+    if (Build.VERSION.SDK_INT <= 19) {
+      setSystemChromeChangeListenerLegacy();
+    } else {
+      View decorView = activity.getWindow().getDecorView();
+      insetsListener =
+          new androidx.core.view.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(
+                View view, WindowInsetsCompat windowInsets) {
+              System.out.println(windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()));
+              if (windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                  || windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())) {
+                // The system bars are visible. Make any desired adjustments to
+                // your UI, such as showing the action bar or other navigational
+                // controls. Another common action is to set a timer to dismiss
+                // the system bars and restore the fullscreen mode that was
+                // previously enabled.
+                platformChannel.systemChromeChanged(false);
+              } else {
+                // The system bars are NOT visible. Make any desired adjustments
+                // to your UI, such as hiding the action bar or other
+                // navigational controls.
+                platformChannel.systemChromeChanged(true);
+              }
+              return ViewCompat.onApplyWindowInsets(view, windowInsets);
+            }
+          };
+      ViewCompat.setOnApplyWindowInsetsListener(decorView, insetsListener);
+    }
   }
 
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
