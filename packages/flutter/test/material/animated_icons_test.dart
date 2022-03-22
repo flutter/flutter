@@ -75,7 +75,7 @@ class RecordedTranslate extends RecordedCanvasCall {
   }
 
   @override
-  int get hashCode => hashValues(dx, dy);
+  int get hashCode => Object.hash(dx, dy);
 }
 
 class RecordedScale extends RecordedCanvasCall {
@@ -90,7 +90,7 @@ class RecordedScale extends RecordedCanvasCall {
   }
 
   @override
-  int get hashCode => hashValues(sx, sy);
+  int get hashCode => Object.hash(sx, sy);
 }
 
 void main() {

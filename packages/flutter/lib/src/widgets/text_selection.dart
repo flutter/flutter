@@ -142,7 +142,9 @@ abstract class TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    // TODO(chunhtai): Change to ValueListenable<ClipboardStatus>? once
+    // mirgration is done. https://github.com/flutter/flutter/issues/99360
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
 
@@ -199,18 +201,20 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
-    clipboardStatus?.update();
   }
 
   /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
-  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
-    clipboardStatus?.update();
   }
 
   /// Call [TextSelectionDelegate.pasteText] to paste text.
@@ -268,9 +272,9 @@ class TextSelectionOverlay {
        assert(handlesVisible != null),
        _handlesVisible = handlesVisible,
        _value = value {
-    renderObject.selectionStartInViewport.addListener(_updateHandleVisibilities);
-    renderObject.selectionEndInViewport.addListener(_updateHandleVisibilities);
-    _updateHandleVisibilities();
+    renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
+    renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
+    _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
       context: context,
       debugRequiredFor: debugRequiredFor,
@@ -285,6 +289,7 @@ class TextSelectionOverlay {
       lineHeightAtEnd: 0.0,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
+      toolbarVisible: _effectiveToolbarVisibility,
       selectionEndPoints: const <TextSelectionPoint>[],
       selectionControls: selectionControls,
       selectionDelegate: selectionDelegate,
@@ -297,6 +302,13 @@ class TextSelectionOverlay {
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
     );
   }
+
+  /// Controls the fade-in and fade-out animations for the toolbar and handles.
+  @Deprecated(
+    'Use `SelectionOverlay.fadeDuration` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.'
+  )
+  static const Duration fadeDuration = SelectionOverlay.fadeDuration;
 
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
@@ -321,9 +333,11 @@ class TextSelectionOverlay {
 
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
-  void _updateHandleVisibilities() {
+  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+  void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
+    _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
   }
 
   /// Whether selection handles are visible.
@@ -339,7 +353,7 @@ class TextSelectionOverlay {
     if (_handlesVisible == visible)
       return;
     _handlesVisible = visible;
-    _updateHandleVisibilities();
+    _updateTextSelectionOverlayVisibilities();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showHandles}
@@ -413,9 +427,12 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
-    renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
-    renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
     _selectionOverlay.dispose();
+    renderObject.selectionStartInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
+    renderObject.selectionEndInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
+    _effectiveToolbarVisibility.dispose();
+    _effectiveStartHandleVisibility.dispose();
+    _effectiveEndHandleVisibility.dispose();
   }
 
   double _getStartGlyphHeight() {
@@ -562,6 +579,7 @@ class SelectionOverlay {
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
+    this.toolbarVisible,
     required List<TextSelectionPoint> selectionEndPoints,
     required this.selectionControls,
     required this.selectionDelegate,
@@ -585,7 +603,6 @@ class SelectionOverlay {
       'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
       'app content was created above the Navigator with the WidgetsApp builder parameter.',
     );
-    _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
   }
 
   /// The context in which the selection handles should appear.
@@ -681,6 +698,14 @@ class SelectionOverlay {
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  /// Whether the toolbar is visible.
+  ///
+  /// If the value changes, the toolbar uses [FadeTransition] to transition
+  /// itself on and off the screen.
+  ///
+  /// If this is null the toolbar will always be visible.
+  final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
   List<TextSelectionPoint> get selectionEndPoints => _selectionEndPoints;
@@ -780,9 +805,6 @@ class SelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late final AnimationController _toolbarController;
-  Animation<double> get _toolbarOpacity => _toolbarController.view;
-
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
   List<OverlayEntry>? _handles;
@@ -798,8 +820,8 @@ class SelectionOverlay {
       return;
 
     _handles = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => _buildStartHandle(context)),
-      OverlayEntry(builder: (BuildContext context) => _buildEndHandle(context)),
+      OverlayEntry(builder: _buildStartHandle),
+      OverlayEntry(builder: _buildEndHandle),
     ];
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
@@ -826,7 +848,6 @@ class SelectionOverlay {
     }
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
-    _toolbarController.forward(from: 0.0);
   }
 
   bool _buildScheduled = false;
@@ -878,7 +899,6 @@ class SelectionOverlay {
   void hideToolbar() {
     if (_toolbar == null)
       return;
-    _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
   }
@@ -888,7 +908,6 @@ class SelectionOverlay {
   /// {@endtemplate}
   void dispose() {
     hide();
-    _toolbarController.dispose();
   }
 
   Widget _buildStartHandle(BuildContext context) {
@@ -967,26 +986,115 @@ class SelectionOverlay {
 
     return Directionality(
       textDirection: Directionality.of(this.context),
-      child: FadeTransition(
-        opacity: _toolbarOpacity,
-        child: CompositedTransformFollower(
-          link: toolbarLayerLink,
-          showWhenUnlinked: false,
-          offset: -editingRegion.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
-                context,
-                editingRegion,
-                lineHeightAtStart,
-                midpoint,
-                selectionEndPoints,
-                selectionDelegate,
-                clipboardStatus!,
-                toolbarLocation,
-              );
-            },
-          ),
+      child: _SelectionToolbarOverlay(
+        preferredLineHeight: lineHeightAtStart,
+        toolbarLocation: toolbarLocation,
+        layerLink: toolbarLayerLink,
+        editingRegion: editingRegion,
+        selectionControls: selectionControls,
+        midpoint: midpoint,
+        selectionEndpoints: selectionEndPoints,
+        visibility: toolbarVisible,
+        selectionDelegate: selectionDelegate,
+        clipboardStatus: clipboardStatus,
+      ),
+    );
+  }
+}
+
+/// This widget represents a selection toolbar.
+class _SelectionToolbarOverlay extends StatefulWidget {
+  /// Creates a toolbar overlay.
+  const _SelectionToolbarOverlay({
+    Key? key,
+    required this.preferredLineHeight,
+    required this.toolbarLocation,
+    required this.layerLink,
+    required this.editingRegion,
+    required this.selectionControls,
+    this.visibility,
+    required this.midpoint,
+    required this.selectionEndpoints,
+    required this.selectionDelegate,
+    required this.clipboardStatus,
+  }) : super(key: key);
+
+  final double preferredLineHeight;
+  final Offset? toolbarLocation;
+  final LayerLink layerLink;
+  final Rect editingRegion;
+  final TextSelectionControls? selectionControls;
+  final ValueListenable<bool>? visibility;
+  final Offset midpoint;
+  final List<TextSelectionPoint> selectionEndpoints;
+  final TextSelectionDelegate? selectionDelegate;
+  final ClipboardStatusNotifier? clipboardStatus;
+
+  @override
+  _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
+}
+
+class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
+
+    _toolbarVisibilityChanged();
+    widget.visibility?.addListener(_toolbarVisibilityChanged);
+  }
+
+  @override
+  void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.visibility == widget.visibility) {
+      return;
+    }
+    oldWidget.visibility?.removeListener(_toolbarVisibilityChanged);
+    _toolbarVisibilityChanged();
+    widget.visibility?.addListener(_toolbarVisibilityChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.visibility?.removeListener(_toolbarVisibilityChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toolbarVisibilityChanged() {
+    if (widget.visibility?.value ?? true) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: CompositedTransformFollower(
+        link: widget.layerLink,
+        showWhenUnlinked: false,
+        offset: -widget.editingRegion.topLeft,
+        child: Builder(
+          builder: (BuildContext context) {
+            return widget.selectionControls!.buildToolbar(
+              context,
+              widget.editingRegion,
+              widget.preferredLineHeight,
+              widget.midpoint,
+              widget.selectionEndpoints,
+              widget.selectionDelegate!,
+              widget.clipboardStatus,
+              widget.toolbarLocation,
+            );
+          },
         ),
       ),
     );
@@ -1042,7 +1150,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   }
 
   void _handleVisibilityChanged() {
-    if (widget.visibility?.value != false) {
+    if (widget.visibility?.value ?? true) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -2034,6 +2142,8 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   }) : super(value);
 
   bool _disposed = false;
+  // TODO(chunhtai): remove this getter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
   /// True if this instance has been disposed.
   bool get disposed => _disposed;
 
@@ -2086,7 +2196,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners) {
+    if (!_disposed && !hasListeners) {
       WidgetsBinding.instance.removeObserver(this);
     }
   }
@@ -2106,9 +2216,9 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   @override
   void dispose() {
-    super.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _disposed = true;
+    super.dispose();
   }
 }
 

@@ -104,6 +104,7 @@ void main() {
         '-configuration', configuration,
         '-scheme', 'Runner',
         '-derivedDataPath', flutterBuildDir.absolute.path,
+        '-destination', 'platform=macOS',
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose)
@@ -291,7 +292,6 @@ void main() {
       'FLUTTER_BUILD_DIR=build',
       'FLUTTER_BUILD_NAME=1.0.0',
       'FLUTTER_BUILD_NUMBER=1',
-      'EXCLUDED_ARCHS=arm64',
       'DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==',
       'DART_OBFUSCATION=true',
       'EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable',
@@ -303,6 +303,7 @@ void main() {
       'PACKAGE_CONFIG=/.dart_tool/package_config.json',
       'COCOAPODS_PARALLEL_CODE_SIGN=true',
     ]));
+    expect(contents, isNot(contains('EXCLUDED_ARCHS')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -332,6 +333,7 @@ void main() {
           '-configuration', 'Debug',
           '-scheme', 'Runner',
           '-derivedDataPath', flutterBuildDir.absolute.path,
+          '-destination', 'platform=macOS',
           'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
           'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
           '-quiet',

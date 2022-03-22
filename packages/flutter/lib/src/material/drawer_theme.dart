@@ -84,14 +84,12 @@ class DrawerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      scrimColor,
-      elevation,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    scrimColor,
+    elevation,
+    shape,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -144,7 +142,7 @@ class DrawerTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// DrawerTheme theme = DrawerTheme.of(context);
+  /// DrawerThemeData theme = DrawerTheme.of(context);
   /// ```
   static DrawerThemeData of(BuildContext context) {
     final DrawerTheme? drawerTheme = context.dependOnInheritedWidgetOfExactType<DrawerTheme>();

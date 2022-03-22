@@ -1,5 +1,5 @@
 {
-  "version": "v0_81",
+  "version": "v0_90",
 
   "md.sys.shape.corner.extra-large": {
     "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
@@ -31,6 +31,10 @@
     "topRight": 4.0,
     "bottomLeft": 0.0,
     "bottomRight": 0.0
+  },
+
+  "md.sys.shape.corner.full": {
+    "family": "SHAPE_FAMILY_CIRCULAR"
   },
 
   "md.sys.shape.corner.large": {

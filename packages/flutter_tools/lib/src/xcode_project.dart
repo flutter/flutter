@@ -134,6 +134,12 @@ class IosProject extends XcodeBasedProject {
 
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
+  /// True, if the app project is using swift.
+  bool get isSwift {
+    final File appDelegateSwift = _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
+    return appDelegateSwift.existsSync();
+  }
+
   /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
   Future<bool> pluginsSupportArmSimulator() async {
     final Directory podXcodeProject = hostAppRoot
@@ -230,7 +236,7 @@ class IosProject extends XcodeBasedProject {
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String? productName;
-    if (globals.xcodeProjectInterpreter?.isInstalled == true) {
+    if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
       final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
         productName = xcodeBuildSettings['FULL_PRODUCT_NAME'];

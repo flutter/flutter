@@ -47,7 +47,7 @@ import 'diagnostics.dart';
 ///  * [InheritedNotifier], an abstract superclass for widgets that use a
 ///    [Listenable]'s notifications to trigger rebuilds in descendant widgets
 ///    that declare a dependency on them, using the [InheritedWidget] mechanism.
-///  * [new Listenable.merge], which creates a [Listenable] that triggers
+///  * [Listenable.merge], which creates a [Listenable] that triggers
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.
 abstract class Listenable {
@@ -98,15 +98,21 @@ abstract class ValueListenable<T> extends Listenable {
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
+/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   int _count = 0;
   // The _listeners is intentionally set to a fixed-length _GrowableList instead
-  // of const [] for performance reasons.
-  // See https://github.com/flutter/flutter/pull/71947/files#r545722476 for
-  // more details.
+  // of const [].
+  //
+  // The const [] creates an instance of _ImmutableList which would be
+  // different from fixed-length _GrowableList used elsewhere in this class.
+  // keeping runtime type the same during the lifetime of this class lets the
+  // compiler to infer concrete type for this property, and thus improves
+  // performance.
   static final List<VoidCallback?> _emptyListeners = List<VoidCallback?>.filled(0, null);
   List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
