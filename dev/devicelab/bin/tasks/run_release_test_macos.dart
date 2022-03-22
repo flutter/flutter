@@ -18,7 +18,9 @@ void main() {
   task(() async {
     deviceOperatingSystem = DeviceOperatingSystem.macos;
     final Device device = await devices.workingDevice;
-    final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
+    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
+    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
+    final Directory appDir = dir(path.join(flutterDirectory.path, 'examples/hello_world'));
     await inDirectory(appDir, () async {
       final Completer<void> ready = Completer<void>();
       final List<String> stdout = <String>[];
