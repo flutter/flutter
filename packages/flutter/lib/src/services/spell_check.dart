@@ -49,10 +49,6 @@ class SpellCheckConfiguration {
         this.spellCheckSuggestionsHandler
     });
 
-    bool isSpellCheckEnabled() {
-        return this != SpellCheckConfiguration.disabled;
-    }
-
     /// SpellCheckConfiguration that indicates that spell check should not be run on text input.
     static SpellCheckConfiguration disabled = SpellCheckConfiguration();
 

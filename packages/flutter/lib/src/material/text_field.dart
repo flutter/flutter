@@ -848,7 +848,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBindingObserver implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
+class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -955,12 +955,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
     );
   }
 
-  // Service used for spell checking if enabled.
-  bool? _spellCheckEnabled;
-  SpellCheckService? _spellCheckService;
-  SpellCheckSuggestionsHandler? _spellCheckSuggestionsHandler;
-  SpellCheckConfiguration? _spellCheckConfiguration;
-
   @override
   void initState() {
     super.initState();
@@ -970,12 +964,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
-    WidgetsBinding.instance?.addObserver(this);
-    _spellCheckEnabled = (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : true;
-    if (_spellCheckEnabled!) {
-      _spellCheckService = widget.spellCheckService;
-      _spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler;
-    }
   }
 
   bool get _canRequestFocus {
@@ -1049,7 +1037,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
-    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -1132,7 +1119,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
     }
   }
 
-  // AutofillClient, SpellCheckConfiguration implementation start.
+  // AutofillClient implementation start.
   @override
   String get autofillId => _editableText!.autofillId;
 
@@ -1151,26 +1138,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
         )
       : AutofillConfiguration.disabled;
 
-    //TODO(camillesimon): Clean up messy logic, perhaps move to a lifecycle method.
-    if (_spellCheckEnabled!) {
-      if (_spellCheckService == null) {
-      _spellCheckService = SpellCheckConfiguration.getDefaultSpellCheckService(Theme.of(context).platform);
-      }
-      if (_spellCheckSuggestionsHandler == null) {
-      _spellCheckSuggestionsHandler = SpellCheckConfiguration.getDefaultSpellCheckHandler(Theme.of(context).platform);
-      }
-      }
-      if(_spellCheckConfiguration == null) {
-        _spellCheckConfiguration = widget.spellCheckEnabled
-        ? SpellCheckConfiguration(
-            spellCheckService: _spellCheckService,
-            spellCheckSuggestionsHandler: _spellCheckSuggestionsHandler,
-          )
-        : SpellCheckConfiguration.disabled;
-      }
-    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration, spellCheckConfiguration: _spellCheckConfiguration);
+    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
   }
-  // AutofillClient, SpellCheckConfiguration implementation end.
+  // AutofillClient implementation end.
 
   @override
   Widget build(BuildContext context) {
@@ -1337,6 +1307,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin, WidgetsBin
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          spellCheckEnabled : widget.spellCheckEnabled,
+          spellCheckService : widget.spellCheckService,
+          spellCheckSuggestionsHandler : widget.spellCheckSuggestionsHandler,
         ),
       ),
     );

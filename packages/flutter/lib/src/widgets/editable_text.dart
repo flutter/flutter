@@ -174,8 +174,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckConfiguration != null && spellCheckConfiguration!.spellCheckSuggestionsHandler != null && spellCheckConfiguration!.spellCheckResults != null && spellCheckConfiguration!.spellCheckResults!.length > 0) {
-        return spellCheckConfiguration!.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration!.spellCheckResults, value, style, false);
+    if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null && spellCheckConfiguration.spellCheckResults!.length > 0) {
+        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, value, style, false);
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -533,6 +533,9 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.spellCheckEnabled = false,
+    this.spellCheckService,
+    this.spellCheckSuggestionsHandler,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1385,6 +1388,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// Whether or not spell check is enabled.
+  final bool spellCheckEnabled;
+
+  /// Spell check service used if spell check is enabled.
+  final SpellCheckService? spellCheckService;
+
+  // Spell check handler used if spell check is enabled.
+  final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
+
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
@@ -1589,6 +1601,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillScope? get currentAutofillScope => _currentAutofillScope;
 
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
+
+  SpellCheckConfiguration? _spellCheckConfiguration;
+
+  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : true;
+
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
@@ -1801,6 +1818,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       });
     }
+
+    if (_spellCheckEnabled!) {
+      SpellCheckService? spellCheckService = widget.spellCheckService ?? SpellCheckConfiguration.getDefaultSpellCheckService(defaultTargetPlatform);
+      SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? SpellCheckConfiguration.getDefaultSpellCheckHandler(defaultTargetPlatform);
+      _spellCheckConfiguration = SpellCheckConfiguration(
+          spellCheckService: spellCheckService,
+          spellCheckSuggestionsHandler: spellCheckSuggestionsHandler);
+  } else {
+    _spellCheckConfiguration = SpellCheckConfiguration.disabled;
+      }
 
     // Restart or stop the blinking cursor when TickerMode changes.
     final bool newTickerEnabled = TickerMode.of(context);
@@ -2566,7 +2593,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
 
-        if (value.text.length > 0) {
+        if (value.text.length > 0 && _spellCheckEnabled!) {
           //TODO(camillesimon): Check if spell check is enabled throughout the framework, including here.
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
@@ -2922,10 +2949,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     //TODO(camillesimon): Clean up messy logic.
     if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-      if (!_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.isSpellCheckEnabled()) {
+      if (_spellCheckEnabled!) {
         return false;
       }
-      //TODO(camillesimon): Find platform using a context. Or just have it contained in central place like the service itself.
       _selectionOverlay!.showToolbar(toolbarType, 
       _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration);
       return true;
@@ -2999,7 +3025,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           currentEditingValue: currentTextEditingValue,
         )
       : AutofillConfiguration.disabled;
-    
+
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
@@ -3016,6 +3042,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      spellCheckConfiguration: _spellCheckConfiguration
     );
   }
 
@@ -3316,23 +3343,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Read only mode should not paint text composing.
-    //TODO(camillesimon): Clean up messy logic.
-    if (_effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.isSpellCheckEnabled()) {
       return widget.controller.buildTextSpan(
         context: context,
         style: widget.style,
         withComposing: !widget.readOnly && _hasFocus,
-        //TODO(camillesimon): Determine platform using context. Or just have it contained in central place like the service itself.
         spellCheckConfiguration: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration,
       );
-    }
-    else {
-      return widget.controller.buildTextSpan(
-        context: context,
-        style: widget.style,
-        withComposing: !widget.readOnly && _hasFocus,
-      );
-    }
   }
 }
 
