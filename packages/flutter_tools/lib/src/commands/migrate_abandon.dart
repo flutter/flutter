@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../migrate/migrate_manifest.dart';
-import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate.dart';
 
@@ -18,6 +14,7 @@ import 'migrate.dart';
 class MigrateAbandonCommand extends FlutterCommand {
   MigrateAbandonCommand({
     bool verbose = false,
+    this.logger,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -29,6 +26,8 @@ class MigrateAbandonCommand extends FlutterCommand {
   }
 
   final bool _verbose;
+
+  final Logger logger;
 
   @override
   final String name = 'abandon';

@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../cache.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
-import '../version.dart';
-import '../runner/flutter_command.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
-import '../cache.dart';
+import '../project.dart';
+import '../runner/flutter_command.dart';
+import '../version.dart';
 import 'migrate.dart';
 
 /// Migrate subcommand that checks the migrate working directory for unresolved conflicts and
@@ -22,6 +20,7 @@ import 'migrate.dart';
 class MigrateApplyCommand extends FlutterCommand {
   MigrateApplyCommand({
     bool verbose = false,
+    this.logger,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -39,11 +38,13 @@ class MigrateApplyCommand extends FlutterCommand {
 
   final bool _verbose;
 
+  final Logger logger;
+
   @override
   final String name = 'apply';
 
   @override
-  final String description = 'Accepts the changes produced by `\$ flutter migrate start` and copies the changed files into your project files. All merge conflicts should be resolved before apply will complete successfully. If conflicts still exist, this command will print the remaining conflicted files.';
+  final String description = r'Accepts the changes produced by `$ flutter migrate start` and copies the changed files into your project files. All merge conflicts should be resolved before apply will complete successfully. If conflicts still exist, this command will print the remaining conflicted files.';
 
   @override
   String get category => FlutterCommandCategory.project;

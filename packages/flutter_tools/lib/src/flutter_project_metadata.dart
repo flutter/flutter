@@ -213,13 +213,13 @@ ${migrateConfig.getOutputFileString()}''';
     final String? versionChannel = target.versionChannel ?? current.versionChannel ?? base.versionChannel;
     // Prefer to leave the project type untouched as it is non-trivial to change project type.
     final FlutterProjectType? projectType = current.projectType ?? base.projectType ?? target.projectType;
-    MigrateConfig migrateConfig = MigrateConfig.merge(
+    final MigrateConfig migrateConfig = MigrateConfig.merge(
       current.migrateConfig,
       base.migrateConfig,
       target.migrateConfig,
       logger,
     );
-    FlutterProjectMetadata output = FlutterProjectMetadata.explicit(
+    final FlutterProjectMetadata output = FlutterProjectMetadata.explicit(
       versionRevision: versionRevision,
       versionChannel: versionChannel,
       projectType: projectType,
@@ -352,6 +352,10 @@ migration:
     }
   }
 
+  /// Performs a biased 3-way merge on current, base, and target MigrateConfigs.
+  ///
+  /// This merge is biased such that the results are consistent with the
+  /// way project migration occurs such as not updating create_revision.
   static MigrateConfig merge(MigrateConfig current, MigrateConfig base, MigrateConfig target, Logger logger) {
     // Create the superset of current and target platforms with baseRevision updated to be that of target.
     final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
@@ -366,16 +370,16 @@ migration:
         platformConfigs[entry.key] = entry.value;
       }
     }
-    for (MapEntry <SupportedPlatform, MigratePlatformConfig> entry in target.platformConfigs.entries) {
+    for (final MapEntry <SupportedPlatform, MigratePlatformConfig> entry in target.platformConfigs.entries) {
       if (!platformConfigs.containsKey(entry.key)) {
         platformConfigs[entry.key] = entry.value;
       }
     }
 
     // Ignore the base file list.
-    List<String> unmanagedFiles = List<String>.from(current.unmanagedFiles);
+    final List<String> unmanagedFiles = List<String>.from(current.unmanagedFiles);
     for (final String path in target.unmanagedFiles) {
-      if (unmanagedFiles.contains(path) && !_kDefaultUnmanagedFiles.contains(path)) {
+      if (!unmanagedFiles.contains(path) && !_kDefaultUnmanagedFiles.contains(path)) {
         unmanagedFiles.add(path);
       }
     }

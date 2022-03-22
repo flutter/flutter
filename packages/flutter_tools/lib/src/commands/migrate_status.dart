@@ -17,6 +17,7 @@ import 'migrate.dart';
 class MigrateStatusCommand extends FlutterCommand {
   MigrateStatusCommand({
     bool verbose = false,
+    this.logger,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -28,6 +29,8 @@ class MigrateStatusCommand extends FlutterCommand {
   }
 
   final bool _verbose;
+
+  final Logger logger;
 
   @override
   final String name = 'status';
@@ -48,8 +51,8 @@ class MigrateStatusCommand extends FlutterCommand {
       workingDir = globals.fs.directory(stringArg('working-directory'));
     }
     if (!workingDir.existsSync()) {
-      print('No migration in progress. Start a new migration with:\n');
-      print('    \$ flutter migrate start\n');
+      logger.printStatus('No migration in progress. Start a new migration with:\n');
+      logger.printStatus('    \$ flutter migrate start\n');
       return const FlutterCommandResult(ExitStatus.fail);
     }
 

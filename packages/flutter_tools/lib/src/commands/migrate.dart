@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
-import '../base/file_system.dart';
-import '../build_info.dart';
-import '../globals.dart' as globals;
-import '../project.dart';
-import '../runner/flutter_command.dart';
+import '../base/logger.dart';
 import '../cache.dart';
+import '../runner/flutter_command.dart';
 import 'migrate_abandon.dart';
 import 'migrate_apply.dart';
 import 'migrate_start.dart';
@@ -20,14 +15,17 @@ const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
     bool verbose = false,
+    this.logger,
   }) : _verbose = verbose {
-    addSubcommand(MigrateAbandonCommand(verbose: verbose));
-    addSubcommand(MigrateApplyCommand(verbose: verbose));
-    addSubcommand(MigrateStartCommand(verbose: verbose));
-    addSubcommand(MigrateStatusCommand(verbose: verbose));
+    addSubcommand(MigrateAbandonCommand(verbose: _verbose, logger: logger));
+    addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger));
+    addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger));
+    addSubcommand(MigrateStatusCommand(verbose: _verbose, logger: logger));
   }
 
   final bool _verbose;
+
+  final Logger logger;
 
   @override
   final String name = 'migrate';

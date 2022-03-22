@@ -7,23 +7,30 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../migrate/migrate_utils.dart';
 
-/// 
+/// Handles the custom/manual merging of one file at `localPath`.
+///
+/// The `merge` method should be overridden to implement custom merging.
 abstract class CustomMerge {
   CustomMerge({
     required this.logger,
   });
 
+  /// The local path (with the project root as the root directory) of the file to merge.
   final String localPath = '';
   final Logger logger;
 
+  /// Called to perform a custom three way merge between the current,
+  /// base, and target files.
   MergeResult merge(File current, File base, File target);
 }
 
+/// Manually merges a flutter .metadata file.
+///
+/// See `FlutterProjectMetadata`.
 class MetadataCustomMerge extends CustomMerge {
   MetadataCustomMerge({
     required Logger logger,
@@ -34,14 +41,12 @@ class MetadataCustomMerge extends CustomMerge {
 
   @override
   MergeResult merge(File current, File base, File target) {
-    print('CUSTOM MERGE');
     final FlutterProjectMetadata result = FlutterProjectMetadata.merge(
       FlutterProjectMetadata(current, logger),
       FlutterProjectMetadata(base, logger),
       FlutterProjectMetadata(target, logger),
       logger,
     );
-    print(result.toString());
     return MergeResult.explicit(
       mergedString: result.toString(),
       hasConflict: false,

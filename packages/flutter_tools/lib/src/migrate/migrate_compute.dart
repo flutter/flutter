@@ -34,14 +34,6 @@ const List<String> _skippedDirectories = const <String>[
   'assets', // Common directory for user assets.
 ];
 
-const List<String> _skippedMergeFileExt = const <String>[
-  // Don't merge image files
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-];
-
 bool _skipped(String localPath) {
   if (_skippedFiles.contains(localPath)) {
     return true;
@@ -53,6 +45,14 @@ bool _skipped(String localPath) {
   }
   return false;
 }
+
+const List<String> _skippedMergeFileExt = const <String>[
+  // Don't merge image files
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+];
 
 /// True for files that should not be merged. Typically, images and binary files.
 bool _skippedMerge(String localPath) {
@@ -151,7 +151,7 @@ Future<MigrateResult?> computeMigration({
   if (flutterProject == null) {
     flutterProject = FlutterProject.current();
   }
-  Status statusTicker = logger.startProgress('Computing migration');
+  final Status statusTicker = logger.startProgress('Computing migration');
 
   final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
   final MigrateConfig config = metadata.migrateConfig;
@@ -163,11 +163,11 @@ Future<MigrateResult?> computeMigration({
   );
   final String fallbackRevision = await getFallbackBaseRevision(metadata, FlutterVersion(workingDirectory: flutterProject.directory.absolute.path));
   String rootBaseRevision = '';
-  Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
-  Set<String> revisions = Set<String>();
+  final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
+  final Set<String> revisions = Set<String>();
   if (baseRevision == null) {
     print(config.platformConfigs.keys);
-    for (MigratePlatformConfig platform in config.platformConfigs.values) {
+    for (final MigratePlatformConfig platform in config.platformConfigs.values) {
       String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
       if (platform.platform == SupportedPlatform.root) {
         rootBaseRevision = effectiveRevision;
@@ -183,7 +183,7 @@ Future<MigrateResult?> computeMigration({
   }
   // Reorder such that the root revision is created first.
   revisions.remove(rootBaseRevision);
-  List<String> revisionsList = List<String>.from(revisions);
+  final List<String> revisionsList = List<String>.from(revisions);
   if (rootBaseRevision != '') {
     revisionsList.insert(0, rootBaseRevision);
   }
@@ -192,8 +192,8 @@ Future<MigrateResult?> computeMigration({
   // Extract the files/paths that should be ignored by the migrate tool.
   // These paths are absolute paths.
   if (verbose) logger.printStatus('Parsing unmanagedFiles.');
-  List<String> unmanagedFiles = <String>[];
-  List<String> unmanagedDirectories = <String>[];
+  final List<String> unmanagedFiles = <String>[];
+  final List<String> unmanagedDirectories = <String>[];
   final String basePath = flutterProject.directory.path;
   for (String localPath in config.unmanagedFiles) {
     if (localPath.endsWith(globals.fs.path.separator)) {
@@ -203,7 +203,7 @@ Future<MigrateResult?> computeMigration({
     }
   }
 
-  MigrateResult migrateResult = MigrateResult.empty();
+  final MigrateResult migrateResult = MigrateResult.empty();
 
   // Generate the base templates
   final bool customBaseAppDir = baseAppPath != null;
@@ -229,14 +229,13 @@ Future<MigrateResult?> computeMigration({
 
   Directory targetFlutterDirectory = globals.fs.directory(Cache.flutterRoot!);
   // Clone base flutter
-  List<Directory> sdkTempDirs = <Directory>[];
+  final List<Directory> sdkTempDirs = <Directory>[];
   if (verbose) logger.printStatus('Creating base app.');
   if (baseAppPath == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
-    print(revisionsList);
     for (String revision in revisionsList) {
       final List<String> platforms = <String>[];
-      for (MigratePlatformConfig config in revisionToConfigs[revision]!) {
+      for (final MigratePlatformConfig config in revisionToConfigs[revision]!) {
         platforms.add(config.platform.toString().split('.').last);
       }
       platforms.remove('root'); // Root does not need to be listed and is not a valid platform
@@ -247,7 +246,7 @@ Future<MigrateResult?> computeMigration({
       //   - fallback revision
       //   - target revision (currently installed flutter)
       late Directory sdkDir;
-      List<String> revisionsToTry = <String>[revision];
+      final List<String> revisionsToTry = <String>[revision];
       if (revision != fallbackRevision) {
         revisionsToTry.add(fallbackRevision);
       }
@@ -306,7 +305,7 @@ Future<MigrateResult?> computeMigration({
   final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
   int modifiedFilesCount = 0;
   final Map<String, DiffResult> diffMap = <String, DiffResult>{};
-  for (FileSystemEntity entity in generatedBaseFiles) {
+  for (final FileSystemEntity entity in generatedBaseFiles) {
     if (entity is! File) {
       continue;
     }
@@ -338,7 +337,7 @@ Future<MigrateResult?> computeMigration({
   if (verbose) logger.printStatus('$modifiedFilesCount files were modified between base and target apps.');
 
   // Check for any new files that were added in the new template
-  for (FileSystemEntity entity in generatedTargetFiles) {
+  for (final FileSystemEntity entity in generatedTargetFiles) {
     if (entity is! File) {
       continue;
     }
@@ -358,14 +357,14 @@ Future<MigrateResult?> computeMigration({
   }
   if (verbose) logger.printStatus('${migrateResult.addedFiles.length} files were newly added in the target app.');
 
-  List<CustomMerge> customMerges = <CustomMerge>[
+  final List<CustomMerge> customMerges = <CustomMerge>[
     MetadataCustomMerge(logger: logger),
   ];
 
   // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
-  for (FileSystemEntity entity in currentFiles) {
+  for (final FileSystemEntity entity in currentFiles) {
     if (entity is! File) {
       continue;
     }
@@ -466,10 +465,10 @@ Future<MigrateResult?> computeMigration({
 }
 
 String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
-    if (metadata.versionRevision != null) {
-      return metadata.versionRevision!;
-    }
-    return version.frameworkRevision;
+  if (metadata.versionRevision != null) {
+    return metadata.versionRevision!;
+  }
+  return version.frameworkRevision;
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
@@ -480,7 +479,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false,
   final Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
   if (verbose) globals.logger.printStatus('Writing migrate working directory at `${workingDir.path}`');
   // Write files in working dir
-  for (MergeResult result in migrateResult.mergeResults) {
+  for (final MergeResult result in migrateResult.mergeResults) {
     final File file = workingDir.childFile(result.localPath);
     file.createSync(recursive: true);
     if (result.mergedString != null) {
@@ -490,7 +489,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false,
     }
   }
 
-  for (FilePendingMigration addedFile in migrateResult.addedFiles) {
+  for (final FilePendingMigration addedFile in migrateResult.addedFiles) {
     final File file = workingDir.childFile(addedFile.localPath);
     file.createSync(recursive: true);
     try {
@@ -510,4 +509,3 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false,
 
   checkAndPrintMigrateStatus(manifest, workingDir);
 }
-
