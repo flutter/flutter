@@ -669,6 +669,9 @@ class PageView extends StatefulWidget {
   /// you are planning to change child order at a later time, consider using
   /// [PageView] or [PageView.custom].
   ///
+  /// The `findChildIndexCallback` argument corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
+  ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.builder({
     Key? key,
@@ -679,6 +682,7 @@ class PageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
@@ -689,7 +693,11 @@ class PageView extends StatefulWidget {
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
+       childrenDelegate = SliverChildBuilderDelegate(
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+       ),
        super(key: key);
 
   /// Creates a scrollable list that works page by page with a custom child

@@ -1132,7 +1132,8 @@ class ListView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
-  /// null.
+  /// null. The `findChildIndexCallback` argument corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
   ///
   /// [ListView.builder] by default does not support child reordering. If
   /// you are planning to change child order at a later time, consider using
@@ -1149,6 +1150,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.prototypeItem,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1167,6 +1169,7 @@ class ListView extends BoxScrollView {
        ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1235,7 +1238,8 @@ class ListView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
-  /// null.
+  /// null. The `findChildIndexCallback` argument corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
   ListView.separated({
     Key? key,
     Axis scrollDirection = Axis.vertical,
@@ -1246,6 +1250,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry? padding,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1278,6 +1283,7 @@ class ListView extends BoxScrollView {
            }
            return widget;
          },
+         findChildIndexCallback: findChildIndexCallback,
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1803,7 +1809,8 @@ class GridView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// be null. The `findChildIndexCallback` argument corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
   GridView.builder({
     Key? key,
     Axis scrollDirection = Axis.vertical,
@@ -1815,6 +1822,7 @@ class GridView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     required this.gridDelegate,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1828,6 +1836,7 @@ class GridView extends BoxScrollView {
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,

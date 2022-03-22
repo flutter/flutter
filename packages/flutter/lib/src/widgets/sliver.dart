@@ -429,6 +429,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Defaults to providing an index for each widget.
   final SemanticIndexCallback semanticIndexCallback;
 
+  /// {@template flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   /// Called to find the new index of a child based on its key in case of reordering.
   ///
   /// If not provided, a child widget may not map to its existing [RenderObject]
@@ -437,6 +438,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// This callback should take an input [Key], and it should return the
   /// index of the child element with that associated key, or null if not found.
+  /// {@endtemplate}
   final ChildIndexGetter? findChildIndexCallback;
 
   @override
