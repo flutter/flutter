@@ -269,17 +269,14 @@ void Canvas::Save(bool create_subpass) {
   xformation_stack_.emplace_back(std::move(entry));
 }
 
-void Canvas::DrawTextFrame(TextFrame text_frame,
-                           std::shared_ptr<GlyphAtlas> atlas,
-                           Point position,
-                           Paint paint) {
-  if (!atlas || !atlas->IsValid()) {
-    return;
-  }
+void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {
+  auto lazy_glyph_atlas = GetCurrentPass().GetLazyGlyphAtlas();
+
+  lazy_glyph_atlas->AddTextFrame(std::move(text_frame));
 
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(std::move(text_frame));
-  text_contents->SetGlyphAtlas(std::move(atlas));
+  text_contents->SetGlyphAtlas(std::move(lazy_glyph_atlas));
   text_contents->SetColor(paint.color.Premultiply());
 
   Entity entity;

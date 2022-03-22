@@ -27,13 +27,13 @@ TEST_F(TypographerTest, CanConvertTextBlob) {
 }
 
 TEST_F(TypographerTest, CanCreateRenderContext) {
-  auto context = std::make_shared<TextRenderContextSkia>(GetContext());
-  ASSERT_TRUE(context->IsValid());
+  auto context = TextRenderContext::Create(GetContext());
+  ASSERT_TRUE(context && context->IsValid());
 }
 
 TEST_F(TypographerTest, CanCreateGlyphAtlas) {
-  auto context = std::make_shared<TextRenderContextSkia>(GetContext());
-  ASSERT_TRUE(context->IsValid());
+  auto context = TextRenderContext::Create(GetContext());
+  ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font;
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);
   ASSERT_TRUE(blob);

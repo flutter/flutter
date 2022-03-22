@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 
 #include "flutter/fml/macros.h"
@@ -19,18 +20,11 @@ namespace impeller {
 ///             This is necessary to create and reference resources related to
 ///             rendering text on the GPU.
 ///
-///             It is caller responsibility to create as few of these and keep
-///             these around for as long possible.
 ///
 class TextRenderContext {
  public:
-  //----------------------------------------------------------------------------
-  /// @brief      Create a new context to render text that talks to an
-  ///             underlying graphics context.
-  ///
-  /// @param[in]  context  The graphics context
-  ///
-  TextRenderContext(std::shared_ptr<Context> context);
+  static std::unique_ptr<TextRenderContext> Create(
+      std::shared_ptr<Context> context);
 
   virtual ~TextRenderContext();
 
@@ -43,15 +37,20 @@ class TextRenderContext {
   ///
   const std::shared_ptr<Context>& GetContext() const;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Create a new glyph atlas for the specified text frame.
-  ///
-  /// @param[in]  frame  The text frame
-  ///
-  /// @return     A valid glyph atlas or null.
-  ///
+  using FrameIterator = std::function<const TextFrame*(void)>;
   virtual std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
-      const TextFrame& frame) const = 0;
+      FrameIterator iterator) const = 0;
+
+  std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(const TextFrame& frame) const;
+
+ protected:
+  //----------------------------------------------------------------------------
+  /// @brief      Create a new context to render text that talks to an
+  ///             underlying graphics context.
+  ///
+  /// @param[in]  context  The graphics context
+  ///
+  TextRenderContext(std::shared_ptr<Context> context);
 
  private:
   std::shared_ptr<Context> context_;

@@ -13,6 +13,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_delegate.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/typographer/lazy_glyph_atlas.h"
 
 namespace impeller {
 
@@ -41,6 +42,8 @@ class EntityPass {
 
   const Subpasses& GetSubpasses() const;
 
+  const std::shared_ptr<LazyGlyphAtlas>& GetLazyGlyphAtlas() const;
+
   EntityPass* AddSubpass(std::unique_ptr<EntityPass> pass);
 
   EntityPass* GetSuperpass() const;
@@ -61,6 +64,8 @@ class EntityPass {
   size_t stencil_depth_ = 0u;
   std::unique_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
+  std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_ =
+      std::make_shared<LazyGlyphAtlas>();
 
   std::optional<Rect> GetSubpassCoverage(const EntityPass& subpass) const;
 
