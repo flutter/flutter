@@ -622,9 +622,10 @@ class StartupTest {
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
-        case DeviceOperatingSystem.windows:
-        case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
           break;
       }
 
@@ -738,9 +739,10 @@ class DevtoolsStartupTest {
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
-        case DeviceOperatingSystem.windows:
-        case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
           break;
       }
 
@@ -1350,12 +1352,14 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
-      case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
-      case DeviceOperatingSystem.fuchsia:
-        throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.macos:
+        throw Exception('Unsupported option for macOS devices');
+      case DeviceOperatingSystem.windows:
+        throw Exception('Unsupported option for Windows devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -1388,12 +1392,14 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
         break;
-      case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
-      case DeviceOperatingSystem.fuchsia:
-        throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.macos:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.windows:
+        throw Exception('Unsupported option for Windows devices');
     }
     watch.start();
     await flutter('build', options: options);
