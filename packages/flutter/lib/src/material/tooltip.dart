@@ -295,8 +295,10 @@ class Tooltip extends StatefulWidget {
   }
 }
 
-/// Contains the state for a [Tooltip]. This class can be used to
-/// programmatically show the Tooltip, see the [ensureTooltipVisible] method.
+/// Contains the state for a [Tooltip].
+///
+/// This class can be used to programmatically show the Tooltip, see the
+/// [ensureTooltipVisible] method.
 class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
