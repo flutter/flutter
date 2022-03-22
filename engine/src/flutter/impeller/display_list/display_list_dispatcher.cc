@@ -454,7 +454,8 @@ void DisplayListDispatcher::clipPath(const SkPath& path,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawColor(SkColor color, flutter::DlBlendMode dl_mode) {
+void DisplayListDispatcher::drawColor(SkColor color,
+                                      flutter::DlBlendMode dl_mode) {
   Paint paint;
   paint.color = ToColor(color);
   if (auto mode = ToBlendMode(dl_mode); mode.has_value()) {
@@ -608,7 +609,10 @@ void DisplayListDispatcher::drawDisplayList(
 void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                          SkScalar x,
                                          SkScalar y) {
-  UNIMPLEMENTED;
+  canvas_.DrawTextFrame(TextFrameFromTextBlob(blob),  //
+                        impeller::Point{x, y},        //
+                        paint_                        //
+  );
 }
 
 // |flutter::Dispatcher|

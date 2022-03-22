@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "text_contents.h"
+#include "impeller/entity/contents/text_contents.h"
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
@@ -11,8 +11,10 @@
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/typographer/glyph_atlas.h"
+#include "impeller/typographer/lazy_glyph_atlas.h"
 
 namespace impeller {
+
 TextContents::TextContents() = default;
 
 TextContents::~TextContents() = default;
@@ -23,6 +25,23 @@ void TextContents::SetTextFrame(TextFrame frame) {
 
 void TextContents::SetGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas) {
   atlas_ = std::move(atlas);
+}
+
+void TextContents::SetGlyphAtlas(std::shared_ptr<LazyGlyphAtlas> atlas) {
+  atlas_ = std::move(atlas);
+}
+
+std::shared_ptr<GlyphAtlas> TextContents::ResolveAtlas(
+    std::shared_ptr<Context> context) const {
+  if (auto lazy_atlas = std::get_if<std::shared_ptr<LazyGlyphAtlas>>(&atlas_)) {
+    return lazy_atlas->get()->CreateOrGetGlyphAtlas(context);
+  }
+
+  if (auto atlas = std::get_if<std::shared_ptr<GlyphAtlas>>(&atlas_)) {
+    return *atlas;
+  }
+
+  return nullptr;
 }
 
 void TextContents::SetColor(Color color) {
@@ -36,7 +55,9 @@ bool TextContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  if (!atlas_ || !atlas_->IsValid()) {
+  auto atlas = ResolveAtlas(renderer.GetContext());
+
+  if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";
     return false;
   }
@@ -57,15 +78,15 @@ bool TextContents::Render(const ContentContext& renderer,
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
   frame_info.atlas_size =
-      Point{static_cast<Scalar>(atlas_->GetTexture()->GetSize().width),
-            static_cast<Scalar>(atlas_->GetTexture()->GetSize().height)};
+      Point{static_cast<Scalar>(atlas->GetTexture()->GetSize().width),
+            static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};
   frame_info.text_color = ToVector(color_);
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   // Common fragment uniforms for all glyphs.
   FS::BindGlyphAtlasSampler(
       cmd,                                                        // command
-      atlas_->GetTexture(),                                       // texture
+      atlas->GetTexture(),                                        // texture
       renderer.GetContext()->GetSamplerLibrary()->GetSampler({})  // sampler
   );
 
@@ -107,7 +128,7 @@ bool TextContents::Render(const ContentContext& renderer,
     // Draw each glyph individually. This should probably be batched.
     for (const auto& glyph_position : run.GetGlyphPositions()) {
       FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
-      auto atlas_glyph_pos = atlas_->FindFontGlyphPosition(font_glyph_pair);
+      auto atlas_glyph_pos = atlas->FindFontGlyphPosition(font_glyph_pair);
       if (!atlas_glyph_pos.has_value()) {
         VALIDATION_LOG << "Could not find glyph position in the atlas.";
         return false;

@@ -25,22 +25,24 @@ TextRenderContextSkia::TextRenderContextSkia(std::shared_ptr<Context> context)
 TextRenderContextSkia::~TextRenderContextSkia() = default;
 
 static FontGlyphPair::Set CollectUniqueFontGlyphPairsSet(
-    const std::vector<TextRun>& runs) {
+    TextRenderContext::FrameIterator frame_iterator) {
   FontGlyphPair::Set set;
-  for (const auto& run : runs) {
-    auto font = run.GetFont();
-    for (const auto& glyph_position : run.GetGlyphPositions()) {
-      set.insert({font, glyph_position.glyph});
+  while (auto frame = frame_iterator()) {
+    for (const auto& run : frame->GetRuns()) {
+      auto font = run.GetFont();
+      for (const auto& glyph_position : run.GetGlyphPositions()) {
+        set.insert({font, glyph_position.glyph});
+      }
     }
   }
   return set;
 }
 
 static FontGlyphPair::Vector CollectUniqueFontGlyphPairs(
-    const std::vector<TextRun>& runs) {
+    TextRenderContext::FrameIterator frame_iterator) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   FontGlyphPair::Vector vector;
-  auto set = CollectUniqueFontGlyphPairsSet(runs);
+  auto set = CollectUniqueFontGlyphPairsSet(frame_iterator);
   vector.reserve(set.size());
   for (const auto& item : set) {
     vector.emplace_back(std::move(item));
@@ -202,7 +204,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
 }
 
 std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
-    const TextFrame& frame) const {
+    FrameIterator frame_iterator) const {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!IsValid()) {
     return nullptr;
@@ -213,7 +215,8 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   // ---------------------------------------------------------------------------
   // Step 1: Collect unique font-glyph pairs in the frame.
   // ---------------------------------------------------------------------------
-  auto font_glyph_pairs = CollectUniqueFontGlyphPairs(frame.GetRuns());
+
+  auto font_glyph_pairs = CollectUniqueFontGlyphPairs(frame_iterator);
   if (font_glyph_pairs.empty()) {
     return glyph_atlas;
   }
