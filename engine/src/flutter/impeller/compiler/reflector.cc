@@ -166,11 +166,27 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
 
   const auto shader_resources = compiler_->get_shader_resources();
 
-  if (auto uniform_buffers = ReflectResources(shader_resources.uniform_buffers);
-      uniform_buffers.has_value()) {
-    root["uniform_buffers"] = std::move(uniform_buffers.value());
-  } else {
-    return std::nullopt;
+  // Uniform and storage buffers.
+  {
+    auto& buffers = root["buffers"] = nlohmann::json::array_t{};
+    if (auto uniform_buffers_json =
+            ReflectResources(shader_resources.uniform_buffers);
+        uniform_buffers_json.has_value()) {
+      for (const auto& uniform_buffer : uniform_buffers_json.value()) {
+        buffers.emplace_back(std::move(uniform_buffer));
+      }
+    } else {
+      return std::nullopt;
+    }
+    if (auto storage_buffers_json =
+            ReflectResources(shader_resources.storage_buffers);
+        storage_buffers_json.has_value()) {
+      for (const auto& uniform_buffer : storage_buffers_json.value()) {
+        buffers.emplace_back(std::move(uniform_buffer));
+      }
+    } else {
+      return std::nullopt;
+    }
   }
 
   {
@@ -730,6 +746,25 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
     {
       std::stringstream stream;
       stream << "Bind uniform buffer for resource named " << uniform_buffer.name
+             << ".";
+      proto.docstring = stream.str();
+    }
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "Command&",
+        .argument_name = "command",
+    });
+    proto.args.push_back(BindPrototypeArgument{
+        .type_name = "BufferView",
+        .argument_name = "view",
+    });
+  }
+  for (const auto& storage_buffer : resources.storage_buffers) {
+    auto& proto = prototypes.emplace_back(BindPrototype{});
+    proto.return_type = "bool";
+    proto.name = ConvertToCamelCase(storage_buffer.name);
+    {
+      std::stringstream stream;
+      stream << "Bind storage buffer for resource named " << storage_buffer.name
              << ".";
       proto.docstring = stream.str();
     }

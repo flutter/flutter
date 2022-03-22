@@ -482,7 +482,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
                          indexType:ToMTLIndexType(command.index_type)
                        indexBuffer:mtl_index_buffer
                  indexBufferOffset:command.index_buffer.range.offset
-                     instanceCount:1u
+                     instanceCount:command.instance_count
                         baseVertex:command.base_vertex
                       baseInstance:0u];
   }
