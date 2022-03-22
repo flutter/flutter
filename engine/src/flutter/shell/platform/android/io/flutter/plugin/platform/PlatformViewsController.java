@@ -111,6 +111,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Used to acquire the original motion events using the motionEventIds.
   private final MotionEventTracker motionEventTracker;
 
+  // Whether software rendering is used.
+  private boolean usesSoftwareRendering = false;
+
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
 
@@ -188,9 +191,17 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final PlatformView platformView = viewFactory.create(context, viewId, createParams);
           platformViews.put(viewId, platformView);
 
-          final TextureRegistry.SurfaceTextureEntry textureEntry =
-              textureRegistry.createSurfaceTexture();
-          final PlatformViewWrapper wrapperView = new PlatformViewWrapper(context, textureEntry);
+          PlatformViewWrapper wrapperView;
+          long txId;
+          if (usesSoftwareRendering) {
+            wrapperView = new PlatformViewWrapper(context);
+            txId = -1;
+          } else {
+            final TextureRegistry.SurfaceTextureEntry textureEntry =
+                textureRegistry.createSurfaceTexture();
+            wrapperView = new PlatformViewWrapper(context, textureEntry);
+            txId = textureEntry.id();
+          }
           wrapperView.setTouchProcessor(androidTouchProcessor);
 
           final int physicalWidth = toPhysicalPixels(request.logicalWidth);
@@ -227,7 +238,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
           flutterView.addView(wrapperView);
           viewWrappers.append(viewId, wrapperView);
-          return textureEntry.id();
+          return txId;
         }
 
         @Override
@@ -481,6 +492,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     this.textureRegistry = textureRegistry;
     platformViewsChannel = new PlatformViewsChannel(dartExecutor);
     platformViewsChannel.setPlatformViewsHandler(channelHandler);
+  }
+
+  /**
+   * Sets whether Flutter uses software rendering.
+   *
+   * <p>When software rendering is used, no GL context is available on the raster thread. When this
+   * is set to true, there's no Flutter composition of Android views and Flutter widgets since GL
+   * textures cannot be used.
+   *
+   * <p>Software rendering is only used for testing in emulators, and it should never be set to true
+   * in a production environment.
+   *
+   * @param useSoftwareRendering Whether software rendering is used.
+   */
+  public void setSoftwareRendering(boolean useSoftwareRendering) {
+    usesSoftwareRendering = useSoftwareRendering;
   }
 
   /**

@@ -54,7 +54,6 @@ class PlatformViewWrapper extends FrameLayout {
   private AndroidTouchProcessor touchProcessor;
 
   @Nullable @VisibleForTesting ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
-  @Nullable private TextureRegistry.SurfaceTextureEntry textureEntry;
   private final AtomicLong pendingFramesCount = new AtomicLong(0L);
 
   private final TextureRegistry.OnFrameConsumedListener listener =
@@ -88,7 +87,6 @@ class PlatformViewWrapper extends FrameLayout {
   public PlatformViewWrapper(
       @NonNull Context context, @NonNull TextureRegistry.SurfaceTextureEntry textureEntry) {
     this(context);
-    this.textureEntry = textureEntry;
     textureEntry.setOnFrameConsumedListener(listener);
     setTexture(textureEntry.surfaceTexture());
   }
@@ -230,7 +228,12 @@ class PlatformViewWrapper extends FrameLayout {
   @Override
   @SuppressLint("NewApi")
   public void draw(Canvas canvas) {
-    if (surface == null || !surface.isValid()) {
+    if (surface == null) {
+      super.draw(canvas);
+      Log.e(TAG, "Platform view cannot be composed without a surface.");
+      return;
+    }
+    if (!surface.isValid()) {
       Log.e(TAG, "Invalid surface. The platform view cannot be displayed.");
       return;
     }

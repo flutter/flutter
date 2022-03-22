@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implements;
 
 @TargetApi(31)
 @RunWith(AndroidJUnit4.class)
@@ -115,6 +117,28 @@ public class PlatformViewWrapperTest {
     verify(surface, times(1)).unlockCanvasAndPost(canvas);
     verifyNoMoreInteractions(surface);
     verifyNoMoreInteractions(canvas);
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowView.class,
+      })
+  public void draw_withoutSurface() {
+    final Context ctx = ApplicationProvider.getApplicationContext();
+    final PlatformViewWrapper wrapper =
+        new PlatformViewWrapper(ctx) {
+          @Override
+          public void onDraw(Canvas canvas) {
+            canvas.drawColor(Color.RED);
+          }
+        };
+    // Test.
+    final Canvas canvas = mock(Canvas.class);
+    wrapper.draw(canvas);
+
+    // Verify.
+    verify(canvas, times(1)).drawColor(Color.RED);
   }
 
   @Test
@@ -274,4 +298,7 @@ public class PlatformViewWrapperTest {
     view.unsetOnDescendantFocusChangeListener();
     verify(viewTreeObserver, times(1)).removeOnGlobalFocusChangeListener(activeFocusListener);
   }
+
+  @Implements(View.class)
+  public static class ShadowView {}
 }
