@@ -33,6 +33,7 @@ void main() {
       final Process run = await startFlutter(
         'run',
         options: options,
+        isBot: false,
       );
       int? runExitCode;
       run.stdout
