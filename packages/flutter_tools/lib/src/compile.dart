@@ -317,6 +317,9 @@ class KernelCompiler {
       if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) ...<String>[
         '--source',
         dartPluginRegistrant.path,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=${dartPluginRegistrant.uri}',
       ],
       ...?extraFrontEndOptions,
       mainUri,
@@ -775,6 +778,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (additionalSource != null) ...<String>[
         '--source',
         additionalSource,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=${Uri.file(additionalSource)}',
       ],
       if (platformDill != null) ...<String>[
         '--platform',
