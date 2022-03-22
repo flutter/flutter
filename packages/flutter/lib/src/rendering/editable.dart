@@ -473,22 +473,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   _CompositeRenderEditablePainter get _builtInForegroundPainters => _cachedBuiltInForegroundPainters ??= _createBuiltInForegroundPainters();
   _CompositeRenderEditablePainter? _cachedBuiltInForegroundPainters;
   _CompositeRenderEditablePainter _createBuiltInForegroundPainters() {
+    List<RenderEditablePainter> painters = <RenderEditablePainter>[];
+    if (paintCursorAboveText) {
+      painters = <RenderEditablePainter>[
+        _autocorrectHighlightPainter,
+        _selectionPainter,
+        _caretPainter
+      ];
+    }
     return _CompositeRenderEditablePainter(
-      painters: <RenderEditablePainter>[
-        if (paintCursorAboveText) _caretPainter,
-      ],
+      painters: painters,
     );
   }
 
   _CompositeRenderEditablePainter get _builtInPainters => _cachedBuiltInPainters ??= _createBuiltInPainters();
   _CompositeRenderEditablePainter? _cachedBuiltInPainters;
   _CompositeRenderEditablePainter _createBuiltInPainters() {
-    return _CompositeRenderEditablePainter(
-      painters: <RenderEditablePainter>[
+    List<RenderEditablePainter> painters = <RenderEditablePainter>[];
+    if (!paintCursorAboveText) {
+      painters = <RenderEditablePainter>[
         _autocorrectHighlightPainter,
         _selectionPainter,
-        if (!paintCursorAboveText) _caretPainter,
-      ],
+        _caretPainter
+      ];
+    }
+    return _CompositeRenderEditablePainter(
+      painters: painters,
     );
   }
 
@@ -1077,10 +1087,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// {@template flutter.rendering.RenderEditable.paintCursorAboveText}
-  /// If the cursor should be painted on top of the text or underneath it.
+  /// If the cursor and the text selection highlight should be painted on top of the text or underneath it.
   ///
   /// By default, the cursor should be painted on top for iOS platforms and
   /// underneath for Android platforms.
+  ///
+  /// The hierarchy of the selection box follows the cursor mean that selection
+  /// box can painted above the text or under the text.
+  /// And you can use this property to change the selection box level.
   /// {@endtemplate}
   bool get paintCursorAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
