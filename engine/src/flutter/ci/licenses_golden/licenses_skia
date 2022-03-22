@@ -1,4 +1,4 @@
-Signature: 19dbab762de5028813fe301ee1de14b7
+Signature: 949a75756f4be24830f7fa35e10c2c83
 
 UNUSED LICENSES:
 
@@ -822,7 +822,6 @@ FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/mesa-d
 FILE: ../../../third_party/skia/infra/bots/assets/mockery/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/mskp/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/node/VERSION
-FILE: ../../../third_party/skia/infra/bots/assets/procdump_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/protoc/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/provisioning_profile_ios/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skimage/VERSION
@@ -927,7 +926,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86_64-Debug-All-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Mac10.13-Clang-MacBookPro11.5-CPU-AVX2-x86_64-Debug-All-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Ubuntu18-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_ProcDump.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/cpu_scale_failed.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/cpu_scale_failed_golo.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/cpu_scale_failed_once.json
@@ -2521,7 +2519,6 @@ FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipelineDesc.c
 FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
-FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDataCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDataCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ProgramCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.cpp
