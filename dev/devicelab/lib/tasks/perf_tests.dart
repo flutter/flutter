@@ -1264,8 +1264,6 @@ class CompileTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
       await flutter('packages', options: <String>['get']);
 
       final Map<String, dynamic> compileRelease = await _compileApp(reportPackageContentSizes: reportPackageContentSizes);
