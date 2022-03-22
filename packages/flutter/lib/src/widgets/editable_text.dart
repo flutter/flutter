@@ -963,7 +963,7 @@ class EditableText extends StatefulWidget {
   ///
   /// For [CupertinoTextField]s, the value is set to the ambient
   /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
-  /// value is set to the ambient [TextSelectionThemeData.selectionColor].
+  /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color? selectionColor;
 
   /// {@template flutter.widgets.editableText.selectionControls}
