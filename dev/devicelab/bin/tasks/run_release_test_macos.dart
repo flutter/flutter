@@ -25,10 +25,14 @@ void main() {
       final List<String> stderr = <String>[];
 
       print('run: starting...');
-      final Process run = await startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['--suppress-analytics', 'run', '--release', '-d', device.deviceId, 'lib/main.dart'],
-        isBot: false, // we just want to test the output, not have any debugging info
+      final List<String> options = <String>[
+        '--release',
+        '-d',
+        device.deviceId,
+      ];
+      final Process run = await startFlutter(
+        'run',
+        options: options,
       );
       int? runExitCode;
       run.stdout
