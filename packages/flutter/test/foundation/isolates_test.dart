@@ -90,6 +90,8 @@ Future<void> expectFileSuccessfullyCompletes(String filename) async {
   final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
   final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
   final String scriptPath = fs.path.join(packageRoot, 'test', 'foundation', filename);
+
+  // enable asserts to also catch potentially wrong assertions
   final ProcessResult result = await Process.run(dartPath, <String>['run', '--enable-asserts', scriptPath]);
   expect(result.exitCode, 0);
 }
