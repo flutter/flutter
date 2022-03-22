@@ -1841,10 +1841,10 @@ class _LiveTestPointerRecord {
 
 class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
-    required ViewConfiguration configuration,
+    required super.configuration,
     required this.onNeedPaint,
-    required ui.FlutterView window,
-  }) : super(configuration: configuration, window: window);
+    required super.window,
+  });
 
   @override
   TestViewConfiguration get configuration => super.configuration as TestViewConfiguration;
