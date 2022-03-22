@@ -132,7 +132,7 @@ void main() {
               hitTestBehavior: HitTestBehavior.deferToChild,
               onEnter: (_) => onEnterRegion2 = true,
               child: Container(
-                color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+                color: const Color.fromARGB(0xff, 0xff, 0x10, 0x19),
                 width: 50.0,
                 height: 50.0,
               ),
@@ -192,7 +192,7 @@ void main() {
     await tester.pumpWidget(Center(
       child: MouseRegion(
         child: Container(
-          color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+          color: const Color.fromARGB(0xff, 0xff, 0x11, 0x07),
           width: 100.0,
           height: 100.0,
         ),
