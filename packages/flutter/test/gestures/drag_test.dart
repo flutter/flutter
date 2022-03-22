@@ -1619,7 +1619,8 @@ void main() {
 
 testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureTester tester) {
     final PanGestureRecognizer pan = PanGestureRecognizer();
-    final PanGestureRecognizer competingPan = PanGestureRecognizer(); // No reason
+    // We need a competing gesture recognizer so that the gesture is not immediately claimed.
+    final PanGestureRecognizer competingPan = PanGestureRecognizer();
     addTearDown(pan.dispose);
     addTearDown(competingPan.dispose);
 

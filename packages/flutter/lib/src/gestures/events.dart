@@ -2078,17 +2078,17 @@ class _TransformedPointerPanZoomStartEvent extends _TransformedPointerEvent with
 }
 
 mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
-  /// The total pan offset of the pan/zoom
+  /// The total pan offset of the pan/zoom.
   Offset get pan;
-  /// The total pan offset of the pan/zoom, transformed into local coordinates
+  /// The total pan offset of the pan/zoom, transformed into local coordinates.
   Offset get localPan;
-  /// The amount the pan offset changed since the last event
+  /// The amount the pan offset changed since the last event.
   Offset get panDelta;
-  /// The amount the pan offset changed since the last event, transformed into local coordinates
+  /// The amount the pan offset changed since the last event, transformed into local coordinates.
   Offset get localPanDelta;
-  /// The scale (zoom factor) of the pan/zoom
+  /// The scale (zoom factor) of the pan/zoom.
   double get scale;
-  /// The amount the pan/zoom has rotated in radians so far
+  /// The amount the pan/zoom has rotated in radians so far.
   double get rotation;
 
   @override
@@ -2162,6 +2162,10 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
        assert(kind != null),
        assert(device != null),
        assert(position != null),
+       assert(pan != null),
+       assert(panDelta != null),
+       assert(scale != null),
+       assert(rotation != null),
        super(
          timeStamp: timeStamp,
          kind: kind,

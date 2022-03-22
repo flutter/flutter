@@ -370,9 +370,9 @@ void main() {
     tester.route(down);
     expect(log, isEmpty);
 
-    // scale will win if focal point delta exceeds 18.0*2
+    // Scale will win if focal point delta exceeds 18.0*2.
 
-    tester.route(pointer1.move(const Offset(10.0, 50.0))); // delta of 40.0 exceeds 18.0*2
+    tester.route(pointer1.move(const Offset(10.0, 50.0))); // Delta of 40.0 exceeds 18.0*2.
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -998,7 +998,7 @@ void main() {
     tester.route(down);
     expect(log, isEmpty);
 
-    // scale will win if focal point delta exceeds 18.0*2
+    // Scale will win if focal point delta exceeds 18.0*2.
 
     tester.route(pointer1.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(10.0, 40.0))); // delta of 40.0 exceeds 18.0*2
     expect(log, equals(<String>['scale-start', 'scale-update']));
