@@ -194,13 +194,3 @@ void surroundParagraph(
   final SurfacePaint paint = SurfacePaint()..color = blue..style = PaintingStyle.stroke;
   canvas.drawRect(rect, paint.paintData);
 }
-
-void fillPlaceholder(
-  EngineCanvas canvas,
-  Offset offset,
-  CanvasParagraph paragraph,
-) {
-  final TextBox placeholderBox = paragraph.getBoxesForPlaceholders().single;
-  final SurfacePaint paint = SurfacePaint()..color = red;
-  canvas.drawRect(placeholderBox.toRect().shift(offset), paint.paintData);
-}

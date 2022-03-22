@@ -31,7 +31,8 @@ class EngineLineMetrics implements ui.LineMetrics {
         endIndexWithoutNewlines = -1,
         widthWithTrailingSpaces = width,
         boxes = <RangeBox>[],
-        spaceBoxCount = 0;
+        spaceBoxCount = 0,
+        trailingSpaceBoxCount = 0;
 
   EngineLineMetrics.rich(
     this.lineNumber, {
@@ -49,6 +50,7 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.descent,
     required this.boxes,
     required this.spaceBoxCount,
+    required this.trailingSpaceBoxCount,
   })  : displayText = null,
         unscaledAscent = double.infinity;
 
@@ -80,6 +82,12 @@ class EngineLineMetrics implements ui.LineMetrics {
 
   /// The number of boxes that are space-only.
   final int spaceBoxCount;
+
+  /// The number of trailing boxes that are space-only.
+  final int trailingSpaceBoxCount;
+
+  /// The number of space-only boxes excluding trailing spaces.
+  int get nonTrailingSpaceBoxCount => spaceBoxCount - trailingSpaceBoxCount;
 
   @override
   final bool hardBreak;
