@@ -39,7 +39,7 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// Material Design 3 introduced new types of cards. These can
-/// be achieved by using different configuration of properties on the
+/// be produced by configuring the [Card] widget's properties.
 /// [Card] widget.
 /// {@tool dartpad}
 /// This sample shows creation of [Card] widgets for elevated, filled and

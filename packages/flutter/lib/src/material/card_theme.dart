@@ -60,6 +60,8 @@ class CardTheme with Diagnosticable {
   /// Default value for [Card.surfaceTintColor].
   ///
   /// If null, [Card] will not display an overlay color.
+  ///
+  /// See [Material.surfaceTintColor] for more details.
   final Color? surfaceTintColor;
 
   /// Default value for [Card.elevation].

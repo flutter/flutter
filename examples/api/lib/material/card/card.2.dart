@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const CardExamplesApp());
+void main() { runApp(const CardExamplesApp()); }
 
 class CardExamplesApp extends StatelessWidget {
   const CardExamplesApp({Key? key}) : super(key: key);
