@@ -487,11 +487,11 @@ Future<void> testMain() async {
     final Offset offset = Offset(bounds.left + 5, bounds.top + y + 5);
 
     // Range for "em 12 " and the first character of `_rtlWord1`.
-    paintBoxes(canvas, offset, paragraph.getBoxesForRange(3, 10), lightBlue);
+    fillBoxes(canvas, offset, paragraph.getBoxesForRange(3, 10), lightBlue);
     // Range for the second half of `_rtlWord1` and all of `_rtlWord2` and " 3".
-    paintBoxes(canvas, offset, paragraph.getBoxesForRange(11, 21), lightPurple);
+    fillBoxes(canvas, offset, paragraph.getBoxesForRange(11, 21), lightPurple);
     // Range for "psum dolo".
-    paintBoxes(canvas, offset, paragraph.getBoxesForRange(24, 33), green);
+    fillBoxes(canvas, offset, paragraph.getBoxesForRange(24, 33), green);
 
     canvas.drawParagraph(paragraph, offset);
   }
@@ -573,11 +573,4 @@ Future<void> testMain() async {
 
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_bidi_selection_dom');
   });
-}
-
-void paintBoxes(EngineCanvas canvas, Offset offset, List<TextBox> boxes, Color color) {
-  for (final TextBox box in boxes) {
-    final Rect rect = box.toRect().shift(offset);
-    canvas.drawRect(rect, SurfacePaintData()..color = color);
-  }
 }

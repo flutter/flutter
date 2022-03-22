@@ -315,11 +315,13 @@ void _applySpanStylesToParagraph({
 }
 
 void _positionSpanElement(html.Element element, EngineLineMetrics line, RangeBox box) {
-  final ui.TextBox textBox = box.toTextBox(line);
+  final ui.Rect boxRect = box.toTextBox(line, forPainting: true).toRect();
   element.style
     ..position = 'absolute'
-    ..top = '${textBox.top}px'
-    ..left = '${textBox.left}px';
+    ..top = '${boxRect.top}px'
+    ..left = '${boxRect.left}px'
+    // This is needed for space-only spans that are used to justify the paragraph.
+    ..width = '${boxRect.width}px';
 }
 
 /// A common interface for all types of spans that make up a paragraph.

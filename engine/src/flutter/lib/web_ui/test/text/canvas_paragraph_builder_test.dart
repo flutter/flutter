@@ -51,7 +51,7 @@ Future<void> testMain() async {
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*5, fontSize: 13)}">'
       'Hello'
       '</span>'
       '</p>',
@@ -63,10 +63,10 @@ Future<void> testMain() async {
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*3, fontSize: 13)}">'
       'Hel'
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 13, left: 0, width: 13*2, fontSize: 13)}">'
       'lo'
       '</span>'
       '</p>',
@@ -95,7 +95,7 @@ Future<void> testMain() async {
     expect(
       paragraph.toDomElement().outerHtml,
       '<p style="${paragraphStyle()}">'
-      '<span style="${spanStyle(top: 0, left: 0)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 14*5)}">'
       'Hello'
       '</span>'
       '</p>',
@@ -119,7 +119,7 @@ Future<void> testMain() async {
     expect(
       paragraph.toDomElement().outerHtml,
       '<p style="${paragraphStyle()}">'
-      '<span style="${spanStyle(top: 0, left: 0)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 14*5)}">'
       'Hello'
       '</span>'
       '</p>',
@@ -140,7 +140,7 @@ Future<void> testMain() async {
     expect(
       paragraph.toDomElement().outerHtml,
       '<p style="${paragraphStyle()}">'
-      '<span style="${spanStyle(top: 0, left: 0)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 14*4)}">'
       'Hell...'
       '</span>'
       '</p>',
@@ -165,13 +165,14 @@ Future<void> testMain() async {
     expect(paragraph.spans, hasLength(1));
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    expect(
-      paragraph.toDomElement().outerHtml,
+    expectOuterHtml(
+      paragraph,
       '<p style="${paragraphStyle(lineHeight: 1.5, fontSize: 9)}">'
-      '<span style="${spanStyle(top: 0, left: 0, lineHeight: 1.5, fontSize: 9, fontWeight: 'bold', fontStyle: 'italic', letterSpacing: 2)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: (9+2)*5, lineHeight: 1.5, fontSize: 9, fontWeight: 'bold', fontStyle: 'italic', letterSpacing: 2)}">'
       'Hello'
       '</span>'
       '</p>',
+      ignorePositions: !isBlink,
     );
 
     final FlatTextSpan span = paragraph.spans.single as FlatTextSpan;
@@ -206,31 +207,32 @@ Future<void> testMain() async {
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, fontSize: 13, fontWeight: 'bold')}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*5, fontSize: 13, fontWeight: 'bold')}">'
       'Hello'
       '</span>'
-      '<span style="${spanStyle(top: 0, left: 65, fontSize: 13, fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 0, left: 65, width: 13*1, fontSize: 13, fontStyle: 'italic')}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: 0, left: 78, fontSize: 13, fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 0, left: 78, width: 13*5, fontSize: 13, fontStyle: 'italic')}">'
       'world'
       '</span>'
       '</p>',
       ignorePositions: !isBlink,
     );
 
-    // Should break "Hello world" into 2 lines: "Hello" and " world".
+    // Should break "Hello world" into 2 lines: "Hello " and "world".
     paragraph.layout(const ParagraphConstraints(width: 75.0));
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, fontSize: 13, fontWeight: 'bold')}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*5, fontSize: 13, fontWeight: 'bold')}">'
       'Hello'
       '</span>'
-      '<span style="${spanStyle(top: 0, left: 65, fontSize: 13, fontStyle: 'italic')}">'
+      // Trailing space.
+      '<span style="${spanStyle(top: 0, left: 65, width: 0, fontSize: 13, fontStyle: 'italic')}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 0, fontSize: 13, fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 13, left: 0, width: 13*5, fontSize: 13, fontStyle: 'italic')}">'
       'world'
       '</span>'
       '</p>',
@@ -279,16 +281,16 @@ Future<void> testMain() async {
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, lineHeight: 2, fontSize: 13, fontWeight: 'bold')}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*5, lineHeight: 2, fontSize: 13, fontWeight: 'bold')}">'
       'Hello'
       '</span>'
-      '<span style="${spanStyle(top: 6, left: 65, fontSize: 13, fontWeight: 'bold', fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 6, left: 65, width: 13*1, fontSize: 13, fontWeight: 'bold', fontStyle: 'italic')}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: 6, left: 78, fontSize: 13, fontWeight: 'bold', fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 6, left: 78, width: 13*5, fontSize: 13, fontWeight: 'bold', fontStyle: 'italic')}">'
       'world'
       '</span>'
-      '<span style="${spanStyle(top: 6, left: 143, fontSize: 13, fontWeight: 'normal', fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 6, left: 143, width: 13*1, fontSize: 13, fontWeight: 'normal', fontStyle: 'italic')}">'
       '!'
       '</span>'
       '</p>',
@@ -347,37 +349,38 @@ Future<void> testMain() async {
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*5, fontSize: 13)}">'
       'First'
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 13, left: 0, width: 13*6, fontSize: 13)}">'
       'Second'
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 78, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 13, left: 78, width: 13*1, fontSize: 13)}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 91, fontSize: 13, fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 13, left: 91, width: 13*13, fontSize: 13, fontStyle: 'italic')}">'
       'ThirdLongLine'
       '</span>'
       '</p>',
       ignorePositions: !isBlink,
     );
 
-    // Should break the paragraph into "First", "Second" and "ThirdLongLine".
+    // Should break the paragraph into "First", "Second " and "ThirdLongLine".
     paragraph.layout(const ParagraphConstraints(width: 180.0));
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 13)}">'
-      '<span style="${spanStyle(top: 0, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 0, left: 0, width: 13*5, fontSize: 13)}">'
       'First'
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 0, fontSize: 13)}">'
+      '<span style="${spanStyle(top: 13, left: 0, width: 13*6, fontSize: 13)}">'
       'Second'
       '</span>'
-      '<span style="${spanStyle(top: 13, left: 78, fontSize: 13)}">'
+      // Trailing space.
+      '<span style="${spanStyle(top: 13, left: 78, width: 0, fontSize: 13)}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: 26, left: 0, fontSize: 13, fontStyle: 'italic')}">'
+      '<span style="${spanStyle(top: 26, left: 0, width: 13*13, fontSize: 13, fontStyle: 'italic')}">'
       'ThirdLongLine'
       '</span>'
       '</p>',
@@ -409,19 +412,19 @@ Future<void> testMain() async {
     expectOuterHtml(
       paragraph,
       '<p style="${paragraphStyle(fontSize: 18, fontFamily: 'second')}">'
-      '<span style="${spanStyle(top: null, left: null, fontSize: 12, fontFamily: 'first')}">'
+      '<span style="${spanStyle(top: null, left: null, width: null, fontSize: 12, fontFamily: 'first')}">'
       'First'
       '</span>'
-      '<span style="${spanStyle(top: null, left: null, fontSize: 12, fontFamily: 'first')}">'
+      '<span style="${spanStyle(top: null, left: null, width: null, fontSize: 12, fontFamily: 'first')}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: null, left: null, fontSize: 18, fontFamily: 'second')}">'
+      '<span style="${spanStyle(top: null, left: null, width: null, fontSize: 18, fontFamily: 'second')}">'
       'Second'
       '</span>'
-      '<span style="${spanStyle(top: null, left: null, fontSize: 18, fontFamily: 'second')}">'
+      '<span style="${spanStyle(top: null, left: null, width: null, fontSize: 18, fontFamily: 'second')}">'
       ' '
       '</span>'
-      '<span style="${spanStyle(top: null, left: null, fontSize: 10, fontFamily: 'third')}">'
+      '<span style="${spanStyle(top: null, left: null, width: null, fontSize: 10, fontFamily: 'third')}">'
       'Third'
       '</span>'
       '</p>',
@@ -453,6 +456,7 @@ String paragraphStyle({
 String spanStyle({
   required num? top,
   required num? left,
+  required num? width,
   String fontFamily = defaultFontFamily,
   num fontSize = defaultFontSize,
   String? fontWeight,
@@ -471,6 +475,7 @@ String spanStyle({
     'position: absolute;',
     if (top != null) 'top: ${top}px;',
     if (left != null) 'left: ${left}px;',
+    if (width != null) 'width: ${width}px;',
   ].join(' ');
 }
 
@@ -510,6 +515,7 @@ void expectOuterHtml(CanvasParagraph paragraph, String expected, {required bool 
 /// unknown and could be different depending on browser and environment.
 String removePositionInfo(String outerHtml) {
   return outerHtml
+      .replaceAll(RegExp(r'\s*width:\s*[\d\.]+px\s*;\s*'), '')
       .replaceAll(RegExp(r'\s*top:\s*[\d\.]+px\s*;\s*'), '')
       .replaceAll(RegExp(r'\s*left:\s*[\d\.]+px\s*;\s*'), '');
 }

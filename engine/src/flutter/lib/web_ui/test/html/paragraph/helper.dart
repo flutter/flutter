@@ -67,3 +67,29 @@ Future<void> takeScreenshot(
     sceneElement.remove();
   }
 }
+
+/// Fills the single placeholder in the given [paragraph] with a red rectangle.
+///
+/// The placeholder is filled relative to [offset].
+///
+/// Throws if the paragraph contains more than one placeholder.
+void fillPlaceholder(
+  EngineCanvas canvas,
+  Offset offset,
+  CanvasParagraph paragraph,
+) {
+  final TextBox placeholderBox = paragraph.getBoxesForPlaceholders().single;
+  final SurfacePaint paint = SurfacePaint()..color = red;
+  canvas.drawRect(placeholderBox.toRect().shift(offset), paint.paintData);
+}
+
+
+/// Fill the given [boxes] with rectangles of the given [color].
+///
+/// All rectangles are filled relative to [offset].
+void fillBoxes(EngineCanvas canvas, Offset offset, List<TextBox> boxes, Color color) {
+  for (final TextBox box in boxes) {
+    final Rect rect = box.toRect().shift(offset);
+    canvas.drawRect(rect, SurfacePaintData()..color = color);
+  }
+}

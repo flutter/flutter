@@ -26,17 +26,12 @@ class TextPaintService {
       return;
     }
 
-    final EngineLineMetrics lastLine = lines.last;
     for (final EngineLineMetrics line in lines) {
       if (line.boxes.isEmpty) {
         continue;
       }
 
       final RangeBox lastBox = line.boxes.last;
-      final double justifyPerSpaceBox =
-          _calculateJustifyPerSpaceBox(paragraph, line, lastLine, lastBox);
-
-      ui.Offset justifiedOffset = offset;
 
       for (final RangeBox box in line.boxes) {
         final bool isTrailingSpaceBox =
@@ -44,13 +39,9 @@ class TextPaintService {
 
         // Don't paint background for the trailing space in the line.
         if (!isTrailingSpaceBox) {
-          _paintBackground(canvas, justifiedOffset, line, box, justifyPerSpaceBox);
+          _paintBackground(canvas, offset, line, box);
         }
-        _paintText(canvas, justifiedOffset, line, box);
-
-        if (box is SpanBox && box.isSpaceOnly && justifyPerSpaceBox != 0.0) {
-          justifiedOffset = justifiedOffset.translate(justifyPerSpaceBox, 0.0);
-        }
+        _paintText(canvas, offset, line, box);
       }
     }
   }
@@ -60,7 +51,6 @@ class TextPaintService {
     ui.Offset offset,
     EngineLineMetrics line,
     RangeBox box,
-    double justifyPerSpaceBox,
   ) {
     if (box is SpanBox) {
       final FlatTextSpan span = box.span;
@@ -68,13 +58,7 @@ class TextPaintService {
       // Paint the background of the box, if the span has a background.
       final SurfacePaint? background = span.style.background as SurfacePaint?;
       if (background != null) {
-        ui.Rect rect = box.toTextBox(line).toRect().shift(offset);
-        if (box.isSpaceOnly) {
-          rect = ui.Rect.fromPoints(
-            rect.topLeft,
-            rect.bottomRight.translate(justifyPerSpaceBox, 0.0),
-          );
-        }
+        final ui.Rect rect = box.toTextBox(line, forPainting: true).toRect().shift(offset);
         canvas.drawRect(rect, background.paintData);
       }
     }
@@ -143,32 +127,4 @@ class TextPaintService {
     canvas.setCssFont(span.style.cssFontString);
     canvas.setUpPaint(paint.paintData, null);
   }
-}
-
-/// Calculates for the given [line], the amount of extra width that needs to be
-/// added to each space box in order to align the line with the rest of the
-/// paragraph.
-double _calculateJustifyPerSpaceBox(
-  CanvasParagraph paragraph,
-  EngineLineMetrics line,
-  EngineLineMetrics lastLine,
-  RangeBox lastBox,
-) {
-  // Don't apply any justification on the last line.
-  if (line != lastLine &&
-      paragraph.width.isFinite &&
-      paragraph.paragraphStyle.textAlign == ui.TextAlign.justify) {
-    final double justifyTotal = paragraph.width - line.width;
-
-    int spaceBoxesToJustify = line.spaceBoxCount;
-    // If the last box is a space box, we can't use it to justify text.
-    if (lastBox is SpanBox && lastBox.isSpaceOnly) {
-      spaceBoxesToJustify--;
-    }
-    if (spaceBoxesToJustify > 0) {
-      return justifyTotal / spaceBoxesToJustify;
-    }
-  }
-
-  return 0.0;
 }
