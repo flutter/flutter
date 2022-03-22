@@ -26,6 +26,12 @@ class MigrateStartCommand extends FlutterCommand {
       defaultsTo: null,
       valueHelp: 'path',
     );
+    argParser.addOption(
+      'platforms',
+      help: '',
+      defaultsTo: null,
+      valueHelp: 'path',
+    );
     argParser.addFlag(
       'delete-temp-directories',
       negatable: true,
@@ -80,6 +86,16 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
+    List<SupportedPlatform> platforms = <SupportedPlatform>[];
+    if (stringArg('platforms') != null) {
+      for (String platformString in stringArg('platforms')!.split(',')) {
+        platformString = platformString.trim();
+        platforms.add(SupportedPlatform.values.firstWhere(
+          (SupportedPlatform val) => val.toString() == 'SupportedPlatform.$platformString'
+        ));
+      }
+    }
+
     MigrateResult? migrateResult = await computeMigration(
       verbose: _verbose,
       flutterProject: project,
@@ -88,6 +104,7 @@ class MigrateStartCommand extends FlutterCommand {
       baseRevision: stringArg('base-revision'),
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
+      platforms: platforms,
     );
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);

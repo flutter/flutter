@@ -14,6 +14,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'custom_merge.dart';
 import 'migrate_manifest.dart';
 import 'migrate_utils.dart';
 
@@ -131,6 +132,7 @@ Future<MigrateResult?> computeMigration({
     String? baseRevision,
     String? targetRevision,
     bool deleteTempDirectories = true,
+    List<SupportedPlatform>? platforms,
     Logger? logger,
   }) async {
   if (logger == null) {
@@ -154,11 +156,17 @@ Future<MigrateResult?> computeMigration({
   final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
   final MigrateConfig config = metadata.migrateConfig;
 
+  // We call populate in case MigrateConfig is empty. If it is filled, populate should not do anything.
+  config.populate(
+    projectDirectory: flutterProject.directory,
+    logger: logger,
+  );
   final String fallbackRevision = await getFallbackBaseRevision(metadata, FlutterVersion(workingDirectory: flutterProject.directory.absolute.path));
   String rootBaseRevision = '';
   Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
   Set<String> revisions = Set<String>();
   if (baseRevision == null) {
+    print(config.platformConfigs.keys);
     for (MigratePlatformConfig platform in config.platformConfigs.values) {
       String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
       if (platform.platform == SupportedPlatform.root) {
@@ -225,6 +233,7 @@ Future<MigrateResult?> computeMigration({
   if (verbose) logger.printStatus('Creating base app.');
   if (baseAppPath == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
+    print(revisionsList);
     for (String revision in revisionsList) {
       final List<String> platforms = <String>[];
       for (MigratePlatformConfig config in revisionToConfigs[revision]!) {
@@ -301,20 +310,20 @@ Future<MigrateResult?> computeMigration({
     if (entity is! File) {
       continue;
     }
-    final File oldTemplateFile = (entity as File).absolute;
-    if (!oldTemplateFile.path.startsWith(migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
+    final File baseTemplateFile = (entity as File).absolute;
+    if (!baseTemplateFile.path.startsWith(migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
       continue;
     }
-    final String localPath = oldTemplateFile.path.replaceFirst(migrateResult.generatedBaseTemplateDirectory!.absolute.path + globals.fs.path.separator, '');
+    final String localPath = baseTemplateFile.path.replaceFirst(migrateResult.generatedBaseTemplateDirectory!.absolute.path + globals.fs.path.separator, '');
     if (_skipped(localPath)) {
       continue;
     }
-    if (await MigrateUtils.isGitIgnored(oldTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
+    if (await MigrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
       diffMap[localPath] = DiffResult.ignored();
     }
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
     if (targetTemplateFile.existsSync()) {
-      DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, targetTemplateFile);
+      DiffResult diff = await MigrateUtils.diffFiles(baseTemplateFile, targetTemplateFile);
       diffMap[localPath] = diff;
       if (verbose && diff.diff != '') {
         logger.printStatus('  Found ${diff.exitCode} changes in $localPath ');
@@ -349,6 +358,10 @@ Future<MigrateResult?> computeMigration({
   }
   if (verbose) logger.printStatus('${migrateResult.addedFiles.length} files were newly added in the target app.');
 
+  List<CustomMerge> customMerges = <CustomMerge>[
+    MetadataCustomMerge(logger: logger),
+  ];
+
   // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
@@ -381,8 +394,9 @@ Future<MigrateResult?> computeMigration({
         _skippedMerge(localPath)) {
       continue;
     }
-    final File oldTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
-    final DiffResult userDiff = await MigrateUtils.diffFiles(oldTemplateFile, currentFile);
+    final File baseTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
+    final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
+    final DiffResult userDiff = await MigrateUtils.diffFiles(baseTemplateFile, currentFile);
 
     if (userDiff.exitCode == 0) {
       // Current file unchanged by user
@@ -396,14 +410,14 @@ Future<MigrateResult?> computeMigration({
           MergeResult result;
           try {
             result = MergeResult.explicit(
-              mergedString: migrateResult.generatedTargetTemplateDirectory!.childFile(localPath).readAsStringSync(),
+              mergedString: targetTemplateFile.readAsStringSync(),
               hasConflict: false,
               exitCode: 0,
               localPath: localPath,
             );
           } on FileSystemException {
             result = MergeResult.explicit(
-              mergedBytes: migrateResult.generatedTargetTemplateDirectory!.childFile(localPath).readAsBytesSync(),
+              mergedBytes: targetTemplateFile.readAsBytesSync(),
               hasConflict: false,
               exitCode: 0,
               localPath: localPath,
@@ -417,12 +431,21 @@ Future<MigrateResult?> computeMigration({
     }
 
     if (diffMap.containsKey(localPath)) {
-      final MergeResult result = await MigrateUtils.gitMergeFile(
-        ancestor: globals.fs.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath),
-        current: currentFile.path,
-        other: globals.fs.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
-        localPath: localPath,
-      );
+      MergeResult? result;
+      for (final CustomMerge customMerge in customMerges) {
+        if (customMerge.localPath == localPath) {
+          result = customMerge.merge(currentFile, baseTemplateFile, targetTemplateFile);
+          break;
+        }
+      }
+      if (result == null) {
+        result = await MigrateUtils.gitMergeFile(
+          ancestor: globals.fs.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath),
+          current: currentFile.path,
+          other: globals.fs.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
+          localPath: localPath,
+        );
+      }
       migrateResult.mergeResults.add(result);
       if (verbose) logger.printStatus('$localPath was merged.');
       continue;
