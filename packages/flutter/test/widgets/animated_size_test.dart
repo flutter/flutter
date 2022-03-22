@@ -349,5 +349,89 @@ void main() {
       await pumpWidget(const Size(222, 222), const Duration(milliseconds: 10));
       expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(222, 222));
     });
+
+    testWidgets('re-attach with interrupted animation', (WidgetTester tester) async {
+      const Key key1 = ValueKey<String>('key1');
+      const Key key2 = ValueKey<String>('key2');
+      late StateSetter setState;
+      Size childSize = const Size.square(100);
+      final Widget animatedSize = Center(
+        key: GlobalKey(debugLabel: 'animated size'),
+        // This SizedBox creates a relayout boundary so _cleanRelayoutBoundary
+        // does not mark the descendant render objects below the relayout boundary
+        // dirty.
+        child: SizedBox.fromSize(
+          size: const Size.square(200),
+          child: Center(
+            child: AnimatedSize(
+              duration: const Duration(seconds: 1),
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter stateSetter) {
+                  setState = stateSetter;
+                  return SizedBox.fromSize(size: childSize);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              SizedBox(
+                key: key1,
+                height: 200,
+                child: animatedSize,
+              ),
+              const SizedBox(
+                key: key2,
+                height: 200,
+              )
+            ],
+          ),
+        )
+      );
+
+      setState(() {
+        childSize = const Size.square(150);
+      });
+      // Kick off the resizing animation.
+      await tester.pump();
+
+      // Immediately reparent the AnimatedSize subtree to a different parent
+      // with the same incoming constraints.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              const SizedBox(
+                key: key1,
+                height: 200,
+              ),
+              SizedBox(
+                key: key2,
+                height: 200,
+                child: animatedSize,
+              )
+            ],
+          ),
+        )
+      );
+
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AnimatedSize)).size,
+        const Size.square(100),
+      );
+      await tester.pumpAndSettle();
+      // The animatedSize widget animates to the right size.
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AnimatedSize)).size,
+        const Size.square(150),
+      );
+    });
   });
 }
