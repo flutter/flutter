@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'globals.dart';
+import 'repository.dart';
 
 // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 // created personal access token with scopes: "repo", "read:org".
@@ -12,6 +13,7 @@ class PackageAutoroller {
   PackageAutoroller({
     required this.githubClient,
     required this.token,
+    required this.framework,
   }) {
     if (token.trim().isEmpty) {
       throw Exception('empty token!');
@@ -20,6 +22,8 @@ class PackageAutoroller {
       throw Exception('Must provide path to GitHub client!');
     }
   }
+
+  final FrameworkRepository framework;
 
   /// Path to GitHub CLI client.
   final String githubClient;
@@ -30,9 +34,9 @@ class PackageAutoroller {
   static const String hostname = 'github.com';
 
   Future<void> roll() async {
-    await authLogout();
+    await authLogout(); // TODO delete
     await authLogin();
-    await createPr(workingDirectory: workingDirectory);
+    await createPr(workingDirectory: workingDirectory); // use framework
     await authLogout();
   }
 
@@ -137,6 +141,7 @@ class PackageAutoroller {
     String? stdin,
     String? workingDirectory,
   }) async {
+    print('Executing "$githubClient ${args.join(' ')}" in $workingDirectory');
     final Process process = await Process.start(
       githubClient,
       args,
@@ -154,9 +159,10 @@ class PackageAutoroller {
       stderrStrings.add(line);
     }));
     if (stdin != null) {
+      print('passing STDIN: $stdin');
       process.stdin.write(stdin);
       await process.stdin.flush();
-      //await process.stdin.close();
+      await process.stdin.close();
     }
     final int exitCode = await process.exitCode;
     final String stderr = stderrStrings.join();
