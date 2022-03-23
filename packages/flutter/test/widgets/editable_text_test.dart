@@ -8391,40 +8391,21 @@ void main() {
       await tester.tap(find.byWidget(editableText2));
       await tester.pumpAndSettle();
 
-      final List<String> logOrder;
-      if (isBrowser) {
-        // On the web, TextField gets blurred when focusing outside of the widget.
-        // This test case is not applicable for web.
-        logOrder = <String>[
-          'TextInput.clearClient',
-          'TextInput.hide',
-          'TextInput.setClient',
-          'TextInput.setEditableSizeAndTransform',
-          'TextInput.setMarkedTextRect',
-          'TextInput.setStyle',
-          'TextInput.setEditingState',
-          'TextInput.show',
-          'TextInput.requestAutofill',
-          'TextInput.setCaretRect',
-        ];
-      } else {
-        // Send TextInput.show after TextInput.setEditingState. Otherwise
-        // some Android keyboards ignore the "show keyboard" request, as the
-        // Android text input plugin restarts the input method when setEditingState
-        // is sent by the framework.
-        logOrder = <String>[
-          'TextInput.clearClient',
-          'TextInput.setClient',
-          'TextInput.setEditableSizeAndTransform',
-          'TextInput.setMarkedTextRect',
-          'TextInput.setStyle',
-          'TextInput.setEditingState',
-          'TextInput.show',
-          'TextInput.requestAutofill',
-          'TextInput.setCaretRect',
-        ];
-      }
-
+      // Send TextInput.show after TextInput.setEditingState. Otherwise
+      // some Android keyboards ignore the "show keyboard" request, as the
+      // Android text input plugin restarts the input method when setEditingState
+      // is sent by the framework.
+      final List<String> logOrder = <String>[
+        'TextInput.clearClient',
+        'TextInput.setClient',
+        'TextInput.setEditableSizeAndTransform',
+        'TextInput.setMarkedTextRect',
+        'TextInput.setStyle',
+        'TextInput.setEditingState',
+        'TextInput.show',
+        'TextInput.requestAutofill',
+        'TextInput.setCaretRect',
+      ];
       expect(
         tester.testTextInput.log.map((MethodCall m) => m.method),
         logOrder,
