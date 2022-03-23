@@ -99,6 +99,7 @@ void main() {
       minLeadingWidth: 400,
       enableFeedback: true,
       mouseCursor: MaterialStateMouseCursor.clickable,
+      visualDensity: VisualDensity.comfortable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -106,22 +107,24 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, <String>[
-      'dense: true',
-      'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))',
-      'style: drawer',
-      'selectedColor: Color(0x00000001)',
-      'iconColor: Color(0x00000002)',
-      'textColor: Color(0x00000003)',
-      'contentPadding: EdgeInsets.all(100.0)',
-      'tileColor: Color(0x00000004)',
-      'selectedTileColor: Color(0x00000005)',
-      'horizontalTitleGap: 200.0',
-      'minVerticalPadding: 300.0',
-      'minLeadingWidth: 400.0',
-      'enableFeedback: true',
-      'mouseCursor: MaterialStateMouseCursor(clickable)',
-    ]);
+    expect(description[0], 'dense: true');
+    expect(description[1], 'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
+    expect(description[2], 'style: drawer');
+    expect(description[3], 'selectedColor: Color(0x00000001)');
+    expect(description[4], 'iconColor: Color(0x00000002)');
+    expect(description[5], 'textColor: Color(0x00000003)');
+    expect(description[6], 'contentPadding: EdgeInsets.all(100.0)');
+    expect(description[7], 'tileColor: Color(0x00000004)');
+    expect(description[8], 'selectedTileColor: Color(0x00000005)');
+    expect(description[9], 'horizontalTitleGap: 200.0');
+    expect(description[10], 'minVerticalPadding: 300.0');
+    expect(description[11], 'minLeadingWidth: 400.0');
+    expect(description[12], 'enableFeedback: true');
+    expect(description[13], 'mouseCursor: MaterialStateMouseCursor(clickable)');
+    expect(
+      description[14],
+      equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)'),
+    );
   });
 
   testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
