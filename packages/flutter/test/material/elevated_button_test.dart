@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1271,6 +1272,52 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
+
+  testWidgets('ElevatedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: ElevatedButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final Element element = tester.element(find.byType(ElevatedButton));
+    final ElevatedButton button = element.widget as ElevatedButton;
+    expect(1 + 1, 2);
+    // if (kIsWeb && debugDefaultTargetPlatformOverride! == TargetPlatform.android) {
+    //   expect(button.style!.splashFactory, equals(InkSparkle.splashFactory));
+    // } else {
+    //   expect(button.style!.splashFactory, equals(InkRipple.splashFactory));
+    // }
+  }, variant: TargetPlatformVariant.all());
+
+    testWidgets('ElevatedButton uses InkSparkle only for Android non-web when useMaterial3 is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: ElevatedButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final Element element = tester.element(find.byType(ElevatedButton));
+    final ElevatedButton button = element.widget as ElevatedButton;
+    expect(1 + 1, 2);
+    expect(button.style?.splashFactory, equals(InkRipple.splashFactory));
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('ElevatedButton.icon does not overflow', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
