@@ -11779,6 +11779,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), null);
+  // On web, the text selection toolbar paste button is handled by the browser.
   }, skip: kIsWeb); // [intended]
 }
 
