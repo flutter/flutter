@@ -70,10 +70,8 @@ class ValueKey<T> extends LocalKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is ValueKey<T>
-        && other.value == value;
+    if (other.runtimeType != runtimeType) return false;
+    return other is ValueKey<T> && other.value == value;
   }
 
   @override

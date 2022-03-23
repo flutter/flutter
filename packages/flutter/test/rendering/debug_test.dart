@@ -44,7 +44,8 @@ void main() {
     );
     expect(
       simple.toString(parentConfiguration: singleLineTextConfiguration),
-      equals('transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]'),
+      equals(
+          'transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]'),
     );
 
     final TransformProperty nullProperty = TransformProperty(
@@ -66,14 +67,24 @@ void main() {
 
   test('debugPaintPadding', () {
     expect((Canvas canvas) {
-      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), null);
+      debugPaintPadding(
+          canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), null);
     }, paints..rect(color: const Color(0x90909090)));
     expect((Canvas canvas) {
-      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(11.0, 11.0, 19.0, 19.0));
-    }, paints..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
+      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
+          const Rect.fromLTRB(11.0, 11.0, 19.0, 19.0));
+    },
+        paints
+          ..path(color: const Color(0x900090FF))
+          ..path(color: const Color(0xFF0090FF)));
     expect((Canvas canvas) {
-      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(15.0, 15.0, 15.0, 15.0));
-    }, paints..rect(rect: const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), color: const Color(0x90909090)));
+      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
+          const Rect.fromLTRB(15.0, 15.0, 15.0, 15.0));
+    },
+        paints
+          ..rect(
+              rect: const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
+              color: const Color(0x90909090)));
   });
 
   test('debugPaintPadding from render objects', () {
@@ -95,7 +106,11 @@ void main() {
       ],
     );
     layout(root);
-    expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..rect(color: const Color(0x90909090)));
+    expect(
+        b.debugPaint,
+        paints
+          ..rect(color: const Color(0xFF00FFFF))
+          ..rect(color: const Color(0x90909090)));
     expect(b.debugPaint, isNot(paints..path()));
     expect(
       s.debugPaint,
@@ -140,12 +155,18 @@ void main() {
           ..path(color: const Color(0xFF0090FF)),
       ),
     );
-    expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
+    expect(
+        b.debugPaint,
+        paints
+          ..rect(color: const Color(0xFF00FFFF))
+          ..path(color: const Color(0x900090FF))
+          ..path(color: const Color(0xFF0090FF)));
     expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
     debugPaintSizeEnabled = false;
   });
 
-  test('debugPaintPadding from render objects with inverted direction vertical', () {
+  test('debugPaintPadding from render objects with inverted direction vertical',
+      () {
     debugPaintSizeEnabled = true;
     RenderSliver s;
     final RenderViewport root = RenderViewport(
@@ -165,7 +186,8 @@ void main() {
     );
     layout(root);
     dynamic error;
-    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
+    final PaintingContext context = PaintingContext(
+        ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
         context,
@@ -178,7 +200,9 @@ void main() {
     debugPaintSizeEnabled = false;
   });
 
-  test('debugPaintPadding from render objects with inverted direction horizontal', () {
+  test(
+      'debugPaintPadding from render objects with inverted direction horizontal',
+      () {
     debugPaintSizeEnabled = true;
     RenderSliver s;
     final RenderViewport root = RenderViewport(
@@ -198,7 +222,8 @@ void main() {
     );
     layout(root);
     dynamic error;
-    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
+    final PaintingContext context = PaintingContext(
+        ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
         context,
@@ -237,25 +262,31 @@ void main() {
     debugDisableOpacityLayers = false;
   });
 
-  test('debugAssertAllRenderVarsUnset warns when debugProfileLayoutsEnabled set', () {
+  test(
+      'debugAssertAllRenderVarsUnset warns when debugProfileLayoutsEnabled set',
+      () {
     debugProfileLayoutsEnabled = true;
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugProfileLayoutsEnabled = false;
   });
 
-  test('debugAssertAllRenderVarsUnset warns when debugDisableClipLayers set', () {
+  test('debugAssertAllRenderVarsUnset warns when debugDisableClipLayers set',
+      () {
     debugDisableClipLayers = true;
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisableClipLayers = false;
   });
 
-  test('debugAssertAllRenderVarsUnset warns when debugDisablePhysicalShapeLayers set', () {
+  test(
+      'debugAssertAllRenderVarsUnset warns when debugDisablePhysicalShapeLayers set',
+      () {
     debugDisablePhysicalShapeLayers = true;
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisablePhysicalShapeLayers = false;
   });
 
-  test('debugAssertAllRenderVarsUnset warns when debugDisableOpacityLayers set', () {
+  test('debugAssertAllRenderVarsUnset warns when debugDisableOpacityLayers set',
+      () {
     debugDisableOpacityLayers = true;
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisableOpacityLayers = false;

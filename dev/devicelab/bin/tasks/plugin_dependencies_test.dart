@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
 
 /// Tests that a plugin A can depend on platform code from a plugin B
 /// as long as plugin B is defined as a pub dependency of plugin A.
@@ -19,7 +19,6 @@ final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
 /// contains "Unresolved reference: plugin_b".
 Future<void> main() async {
   await task(() async {
-
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -29,12 +28,13 @@ Future<void> main() async {
 
     print('\nUsing JAVA_HOME=$javaHome');
 
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_dependencies.');
+    final Directory tempDir =
+        Directory.systemTemp.createTempSync('flutter_plugin_dependencies.');
     try {
-
       section('Create plugin A');
 
-      final Directory pluginADirectory = Directory(path.join(tempDir.path, 'plugin_a'));
+      final Directory pluginADirectory =
+          Directory(path.join(tempDir.path, 'plugin_a'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -50,7 +50,8 @@ Future<void> main() async {
 
       section('Create plugin B');
 
-      final Directory pluginBDirectory = Directory(path.join(tempDir.path, 'plugin_b'));
+      final Directory pluginBDirectory =
+          Directory(path.join(tempDir.path, 'plugin_b'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -66,7 +67,8 @@ Future<void> main() async {
 
       section('Create plugin C without android/ directory');
 
-      final Directory pluginCDirectory = Directory(path.join(tempDir.path, 'plugin_c'));
+      final Directory pluginCDirectory =
+          Directory(path.join(tempDir.path, 'plugin_c'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -85,7 +87,8 @@ Future<void> main() async {
         'android',
       ));
 
-      final File pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
+      final File pluginCpubspec =
+          File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
       await pluginCpubspec.writeAsString('''
 name: plugin_c
 version: 0.0.1
@@ -107,7 +110,8 @@ environment:
 
       section('Create plugin D without ios/ directory');
 
-      final Directory pluginDDirectory = Directory(path.join(tempDir.path, 'plugin_d'));
+      final Directory pluginDDirectory =
+          Directory(path.join(tempDir.path, 'plugin_d'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -150,21 +154,23 @@ public class DummyPluginBClass {
 
       section('Make plugin A depend on plugin B, C, and D');
 
-      final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
+      final File pluginApubspec =
+          File(path.join(pluginADirectory.path, 'pubspec.yaml'));
       String pluginApubspecContent = await pluginApubspec.readAsString();
       pluginApubspecContent = pluginApubspecContent.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
         '${platformLineSep}dependencies:$platformLineSep'
-        '  plugin_b:$platformLineSep'
-        '    path: ${pluginBDirectory.path}$platformLineSep'
-        '  plugin_c:$platformLineSep'
-        '    path: ${pluginCDirectory.path}$platformLineSep'
-        '  plugin_d:$platformLineSep'
-        '    path: ${pluginDDirectory.path}$platformLineSep',
+            '  plugin_b:$platformLineSep'
+            '    path: ${pluginBDirectory.path}$platformLineSep'
+            '  plugin_c:$platformLineSep'
+            '    path: ${pluginCDirectory.path}$platformLineSep'
+            '  plugin_d:$platformLineSep'
+            '    path: ${pluginDDirectory.path}$platformLineSep',
       );
       await pluginApubspec.writeAsString(pluginApubspecContent, flush: true);
 
-      section('Write Kotlin code in plugin A that references Kotlin code from plugin B');
+      section(
+          'Write Kotlin code in plugin A that references Kotlin code from plugin B');
 
       final File pluginAKotlinClass = File(path.join(
         pluginADirectory.path,
@@ -190,7 +196,8 @@ public class DummyPluginAClass {
 
       section('Verify .flutter-plugins-dependencies');
 
-      final Directory exampleApp = Directory(path.join(pluginADirectory.path, 'example'));
+      final Directory exampleApp =
+          Directory(path.join(pluginADirectory.path, 'example'));
 
       await inDirectory(exampleApp, () async {
         await flutter(
@@ -203,41 +210,44 @@ public class DummyPluginAClass {
           File(path.join(exampleApp.path, '.flutter-plugins-dependencies'));
 
       if (!flutterPluginsDependenciesFile.existsSync()) {
-        return TaskResult.failure("${flutterPluginsDependenciesFile.path} doesn't exist");
+        return TaskResult.failure(
+            "${flutterPluginsDependenciesFile.path} doesn't exist");
       }
 
-      final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();
+      final String flutterPluginsDependenciesFileContent =
+          flutterPluginsDependenciesFile.readAsStringSync();
 
-      final Map<String, dynamic> jsonContent = json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
+      final Map<String, dynamic> jsonContent =
+          json.decode(flutterPluginsDependenciesFileContent)
+              as Map<String, dynamic>;
 
       // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
       // dependency graph and are tested by unit tests.
-      final List<dynamic> dependencyGraph = jsonContent['dependencyGraph'] as List<dynamic>;
-      const String kExpectedPluginsDependenciesContent =
-        '['
+      final List<dynamic> dependencyGraph =
+          jsonContent['dependencyGraph'] as List<dynamic>;
+      const String kExpectedPluginsDependenciesContent = '['
           '{'
-            '"name":"plugin_a",'
-            '"dependencies":["plugin_b","plugin_c","plugin_d"]'
+          '"name":"plugin_a",'
+          '"dependencies":["plugin_b","plugin_c","plugin_d"]'
           '},'
           '{'
-            '"name":"plugin_b",'
-            '"dependencies":[]'
+          '"name":"plugin_b",'
+          '"dependencies":[]'
           '},'
           '{'
-            '"name":"plugin_c",'
-            '"dependencies":[]'
+          '"name":"plugin_c",'
+          '"dependencies":[]'
           '},'
           '{'
-            '"name":"plugin_d",'
-            '"dependencies":[]'
+          '"name":"plugin_d",'
+          '"dependencies":[]'
           '}'
-        ']';
+          ']';
       final String graphString = json.encode(dependencyGraph);
       if (graphString != kExpectedPluginsDependenciesContent) {
         return TaskResult.failure(
-          'Unexpected file content in ${flutterPluginsDependenciesFile.path}: '
-          'Found "$graphString" instead of "$kExpectedPluginsDependenciesContent"'
-        );
+            'Unexpected file content in ${flutterPluginsDependenciesFile.path}: '
+            'Found "$graphString" instead of "$kExpectedPluginsDependenciesContent"');
       }
 
       section('Build plugin A example Android app');

@@ -21,7 +21,9 @@ void main() {
         expect(context, isNotNull);
       });
 
-      test('returns root context in child of root zone if zone was manually created', () {
+      test(
+          'returns root context in child of root zone if zone was manually created',
+          () {
         final Zone rootZone = Zone.current;
         final AppContext rootContext = context;
         runZoned<void>(() {
@@ -35,45 +37,54 @@ void main() {
 
       test('returns child context after run', () async {
         final AppContext rootContext = context;
-        await rootContext.run<void>(name: 'child', body: () {
-          expect(context, isNot(rootContext));
-          expect(context.name, 'child');
-          called = true;
-        });
+        await rootContext.run<void>(
+            name: 'child',
+            body: () {
+              expect(context, isNot(rootContext));
+              expect(context.name, 'child');
+              called = true;
+            });
         expect(called, isTrue);
       });
 
       test('returns grandchild context after nested run', () async {
         final AppContext rootContext = context;
-        await rootContext.run<void>(name: 'child', body: () async {
-          final AppContext childContext = context;
-          await childContext.run<void>(name: 'grandchild', body: () {
-            expect(context, isNot(rootContext));
-            expect(context, isNot(childContext));
-            expect(context.name, 'grandchild');
-            called = true;
-          });
-        });
+        await rootContext.run<void>(
+            name: 'child',
+            body: () async {
+              final AppContext childContext = context;
+              await childContext.run<void>(
+                  name: 'grandchild',
+                  body: () {
+                    expect(context, isNot(rootContext));
+                    expect(context, isNot(childContext));
+                    expect(context.name, 'grandchild');
+                    called = true;
+                  });
+            });
         expect(called, isTrue);
       });
 
       test('scans up zone hierarchy for first context', () async {
         final AppContext rootContext = context;
-        await rootContext.run<void>(name: 'child', body: () {
-          final AppContext childContext = context;
-          runZoned<void>(() {
-            expect(context, isNot(rootContext));
-            expect(context, same(childContext));
-            expect(context.name, 'child');
-            called = true;
-          });
-        });
+        await rootContext.run<void>(
+            name: 'child',
+            body: () {
+              final AppContext childContext = context;
+              runZoned<void>(() {
+                expect(context, isNot(rootContext));
+                expect(context, same(childContext));
+                expect(context.name, 'child');
+                called = true;
+              });
+            });
         expect(called, isTrue);
       });
     });
 
     group('operator[]', () {
-      test('still finds values if async code runs after body has finished', () async {
+      test('still finds values if async code runs after body has finished',
+          () async {
         final Completer<void> outer = Completer<void>();
         final Completer<void> inner = Completer<void>();
         String? value;
@@ -164,13 +175,14 @@ void main() {
         expect(
           () => value,
           throwsA(
-            isA<ContextDependencyCycleException>()
-              .having((ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[String, double, int])
-              .having(
-                (ContextDependencyCycleException error) => error.toString(),
-                'toString()',
-                'Dependency cycle detected: String -> double -> int',
-              ),
+            isA<ContextDependencyCycleException>().having(
+                (ContextDependencyCycleException error) => error.cycle,
+                'cycle',
+                <Type>[String, double, int]).having(
+              (ContextDependencyCycleException error) => error.toString(),
+              'toString()',
+              'Dependency cycle detected: String -> double -> int',
+            ),
           ),
         );
       });
@@ -184,9 +196,11 @@ void main() {
       });
 
       test('passes name to child context', () async {
-        await context.run<void>(name: 'child', body: () {
-          expect(context.name, 'child');
-        });
+        await context.run<void>(
+            name: 'child',
+            body: () {
+              expect(context.name, 'child');
+            });
       });
 
       group('fallbacks', () {

@@ -27,10 +27,11 @@ void main() {
 
   testUsingContext('Generates install manifest for a debug build', () async {
     final Logger logger = BufferLogger.test();
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final Directory buildDirectory = fileSystem.currentDirectory
-      .childDirectory('build')
-      .childDirectory('winuwp');
+        .childDirectory('build')
+        .childDirectory('winuwp');
 
     await createManifest(
       logger: logger,
@@ -41,15 +42,18 @@ void main() {
       buildInfo: BuildInfo.debug,
     );
 
-    final File manifest = flutterProject.windowsUwp.ephemeralDirectory.childFile('install_manifest');
+    final File manifest = flutterProject.windowsUwp.ephemeralDirectory
+        .childFile('install_manifest');
     expect(manifest, exists);
-    expect(manifest.readAsLinesSync(), unorderedEquals(<String>[
-      'C:/build/flutter_assets/kernel_blob.bin',
-      'C:/build/flutter_assets/AssetManifest.json',
-      'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
-      'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
-      'C:/winuwp/flutter/ephemeral/icudtl.dat',
-    ]));
+    expect(
+        manifest.readAsLinesSync(),
+        unorderedEquals(<String>[
+          'C:/build/flutter_assets/kernel_blob.bin',
+          'C:/build/flutter_assets/AssetManifest.json',
+          'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
+          'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
+          'C:/winuwp/flutter/ephemeral/icudtl.dat',
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -57,10 +61,11 @@ void main() {
 
   testUsingContext('Generates install manifest for a release build', () async {
     final Logger logger = BufferLogger.test();
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final Directory buildDirectory = fileSystem.currentDirectory
-      .childDirectory('build')
-      .childDirectory('winuwp');
+        .childDirectory('build')
+        .childDirectory('winuwp');
 
     await createManifest(
       logger: logger,
@@ -71,28 +76,35 @@ void main() {
       buildInfo: BuildInfo.release,
     );
 
-    final File manifest = flutterProject.windowsUwp.ephemeralDirectory.childFile('install_manifest');
+    final File manifest = flutterProject.windowsUwp.ephemeralDirectory
+        .childFile('install_manifest');
     expect(manifest, exists);
-    expect(manifest.readAsLinesSync(), unorderedEquals(<String>[
-      'C:/build/winuwp/app.so',
-      'C:/build/flutter_assets/AssetManifest.json',
-      'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
-      'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
-      'C:/winuwp/flutter/ephemeral/icudtl.dat'
-    ]));
+    expect(
+        manifest.readAsLinesSync(),
+        unorderedEquals(<String>[
+          'C:/build/winuwp/app.so',
+          'C:/build/flutter_assets/AssetManifest.json',
+          'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
+          'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
+          'C:/winuwp/flutter/ephemeral/icudtl.dat'
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Generates install manifest for a release build with assets', () async {
+  testUsingContext('Generates install manifest for a release build with assets',
+      () async {
     final BufferLogger logger = BufferLogger.test();
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final Directory buildDirectory = fileSystem.currentDirectory
-      .childDirectory('build')
-      .childDirectory('winuwp');
+        .childDirectory('build')
+        .childDirectory('winuwp');
 
-    fileSystem.currentDirectory.childDirectory('.dart_tool').childFile('package_config.json')
+    fileSystem.currentDirectory
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 {
@@ -112,9 +124,9 @@ flutter:
 
 ''');
     fileSystem.currentDirectory
-      .childDirectory('assets')
-      .childFile('foo.png')
-      .createSync(recursive: true);
+        .childDirectory('assets')
+        .childFile('foo.png')
+        .createSync(recursive: true);
 
     await createManifest(
       logger: logger,
@@ -125,18 +137,21 @@ flutter:
       buildInfo: BuildInfo.release,
     );
 
-    final File manifest = flutterProject.windowsUwp.ephemeralDirectory.childFile('install_manifest');
+    final File manifest = flutterProject.windowsUwp.ephemeralDirectory
+        .childFile('install_manifest');
     expect(manifest, exists);
-    expect(manifest.readAsLinesSync(), unorderedEquals(<String>[
-      'C:/build/winuwp/app.so',
-      'C:/build/flutter_assets/assets/foo.png',
-      'C:/build/flutter_assets/AssetManifest.json',
-      'C:/build/flutter_assets/FontManifest.json',
-      'C:/build/flutter_assets/NOTICES.Z',
-      'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
-      'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
-      'C:/winuwp/flutter/ephemeral/icudtl.dat'
-    ]));
+    expect(
+        manifest.readAsLinesSync(),
+        unorderedEquals(<String>[
+          'C:/build/winuwp/app.so',
+          'C:/build/flutter_assets/assets/foo.png',
+          'C:/build/flutter_assets/AssetManifest.json',
+          'C:/build/flutter_assets/FontManifest.json',
+          'C:/build/flutter_assets/NOTICES.Z',
+          'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
+          'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
+          'C:/winuwp/flutter/ephemeral/icudtl.dat'
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),

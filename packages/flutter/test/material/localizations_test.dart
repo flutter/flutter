@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
+  testWidgets(
+      'English translations exist for all MaterialLocalizations properties',
+      (WidgetTester tester) async {
     const MaterialLocalizations localizations = DefaultMaterialLocalizations();
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
@@ -140,27 +142,65 @@ void main() {
     expect(localizations.selectedRowCountTitle(1), isNotNull);
     expect(localizations.selectedRowCountTitle(2), isNotNull);
     expect(localizations.selectedRowCountTitle(100), isNotNull);
-    expect(localizations.selectedRowCountTitle(0).contains(r'$selectedRowCount'), isFalse);
-    expect(localizations.selectedRowCountTitle(1).contains(r'$selectedRowCount'), isFalse);
-    expect(localizations.selectedRowCountTitle(2).contains(r'$selectedRowCount'), isFalse);
-    expect(localizations.selectedRowCountTitle(100).contains(r'$selectedRowCount'), isFalse);
+    expect(
+        localizations.selectedRowCountTitle(0).contains(r'$selectedRowCount'),
+        isFalse);
+    expect(
+        localizations.selectedRowCountTitle(1).contains(r'$selectedRowCount'),
+        isFalse);
+    expect(
+        localizations.selectedRowCountTitle(2).contains(r'$selectedRowCount'),
+        isFalse);
+    expect(
+        localizations.selectedRowCountTitle(100).contains(r'$selectedRowCount'),
+        isFalse);
 
     expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNotNull);
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNotNull);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$firstRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$lastRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$rowCount'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$firstRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, true)
+            .contains(r'$firstRow'),
+        isFalse);
+    expect(
+        localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$lastRow'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, true)
+            .contains(r'$rowCount'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, false)
+            .contains(r'$firstRow'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, false)
+            .contains(r'$lastRow'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, false)
+            .contains(r'$rowCount'),
+        isFalse);
 
     expect(localizations.licensesPackageDetailText(0), isNotNull);
     expect(localizations.licensesPackageDetailText(1), isNotNull);
     expect(localizations.licensesPackageDetailText(2), isNotNull);
     expect(localizations.licensesPackageDetailText(100), isNotNull);
-    expect(localizations.licensesPackageDetailText(1).contains(r'$licensesCount'), isFalse);
-    expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
-    expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
+    expect(
+        localizations.licensesPackageDetailText(1).contains(r'$licensesCount'),
+        isFalse);
+    expect(
+        localizations.licensesPackageDetailText(2).contains(r'$licensesCount'),
+        isFalse);
+    expect(
+        localizations
+            .licensesPackageDetailText(100)
+            .contains(r'$licensesCount'),
+        isFalse);
   });
 
   testWidgets('MaterialLocalizations.of throws', (WidgetTester tester) async {
@@ -178,12 +218,16 @@ void main() {
       ),
     );
 
-    expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No MaterialLocalizations found'),
-    )));
+    expect(
+        () =>
+            MaterialLocalizations.of(noLocalizationsAvailable.currentContext!),
+        throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+          'message',
+          contains('No MaterialLocalizations found'),
+        )));
 
-    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
+    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!),
+        isA<MaterialLocalizations>());
   });
 }

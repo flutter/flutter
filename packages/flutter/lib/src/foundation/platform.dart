@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_platform_io.dart'
-  if (dart.library.html) '_platform_web.dart' as platform;
+import '_platform_io.dart' if (dart.library.html) '_platform_web.dart'
+    as platform;
 
 /// The [TargetPlatform] that matches the platform on which the framework is
 /// currently executing.

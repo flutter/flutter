@@ -16,7 +16,8 @@ import 'test_utils.dart';
 
 Future<int> getFreePort() async {
   int port = 0;
-  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  final ServerSocket serverSocket =
+      await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
   port = serverSocket.port;
   await serverSocket.close();
   return port;
@@ -24,21 +25,19 @@ Future<int> getFreePort() async {
 
 Future<void> waitForObservatoryMessage(Process process, int port) async {
   final Completer<void> completer = Completer<void>();
-  process.stdout
-    .transform(utf8.decoder)
-    .listen((String line) {
-      printOnFailure(line);
-      if (line.contains('An Observatory debugger and profiler on Flutter test device is available at')) {
-        if (line.contains('http://127.0.0.1:$port')) {
-          completer.complete();
-        } else {
-          completer.completeError(Exception('Did not forward to provided port $port, instead found $line'));
-        }
+  process.stdout.transform(utf8.decoder).listen((String line) {
+    printOnFailure(line);
+    if (line.contains(
+        'An Observatory debugger and profiler on Flutter test device is available at')) {
+      if (line.contains('http://127.0.0.1:$port')) {
+        completer.complete();
+      } else {
+        completer.completeError(Exception(
+            'Did not forward to provided port $port, instead found $line'));
       }
-    });
-  process.stderr
-    .transform(utf8.decoder)
-    .listen(printOnFailure);
+    }
+  });
+  process.stderr.transform(utf8.decoder).listen(printOnFailure);
   return completer.future;
 }
 
@@ -56,7 +55,8 @@ void main() {
   });
 
   testWithoutContext('flutter run --observatory-port', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int port = await getFreePort();
     // If only --observatory-port is provided, --observatory-port will be used by DDS
     // and the VM service will bind to a random port.
@@ -74,10 +74,11 @@ void main() {
   });
 
   testWithoutContext('flutter run --dds-port --observatory-port', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int observatoryPort = await getFreePort();
     int ddsPort = await getFreePort();
-    while(ddsPort == observatoryPort) {
+    while (ddsPort == observatoryPort) {
       ddsPort = await getFreePort();
     }
     // If both --dds-port and --observatory-port are provided, --dds-port will be used by
@@ -97,7 +98,8 @@ void main() {
   });
 
   testWithoutContext('flutter run --dds-port', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int ddsPort = await getFreePort();
     // If only --dds-port is provided, --dds-port will be used by DDS and the VM service
     // will bind to a random port.
@@ -113,5 +115,4 @@ void main() {
     process.kill();
     await process.exitCode;
   });
-
 }

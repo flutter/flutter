@@ -20,7 +20,7 @@ List<Color> _kColors = <Color>[
 
 /// A simple model object for a dot that reacts to pointer pressure.
 class Dot {
-  Dot({ required Color color }) : _paint = Paint()..color = color;
+  Dot({required Color color}) : _paint = Paint()..color = color;
 
   final Paint _paint;
   Offset position = Offset.zero;
@@ -94,8 +94,7 @@ class RenderDots extends RenderBox {
     canvas.drawRect(offset & size, Paint()..color = const Color(0xFFFFFFFF));
 
     // We iterate through our model and paint each dot.
-    for (final Dot dot in _dots.values)
-      dot.paint(canvas, offset);
+    for (final Dot dot in _dots.values) dot.paint(canvas, offset);
   }
 }
 
@@ -126,7 +125,8 @@ void main() {
   //
   // We use the StackParentData of the paragraph to position the text in the top
   // left corner of the screen.
-  final StackParentData paragraphParentData = paragraph.parentData! as StackParentData;
+  final StackParentData paragraphParentData =
+      paragraph.parentData! as StackParentData;
   paragraphParentData
     ..top = 40.0
     ..left = 20.0;

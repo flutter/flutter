@@ -11,20 +11,20 @@ import '../project.dart';
 
 /// For a given build, determines whether dependencies have changed since the
 /// last call to processPods, then calls processPods with that information.
-Future<void> processPodsIfNeeded(
-  XcodeBasedProject xcodeProject,
-  String buildDirectory,
-  BuildMode buildMode) async {
+Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject,
+    String buildDirectory, BuildMode buildMode) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());
-  if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
+  if (!(hasPlugins(project) ||
+      (project.isModule && xcodeProject.podfile.existsSync()))) {
     return;
   }
   // If the Xcode project, Podfile, or generated xcconfig have changed since
   // last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(
-    fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
+    fingerprintPath:
+        globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
@@ -42,10 +42,11 @@ Future<void> processPodsIfNeeded(
   );
 
   final bool didPodInstall = await globals.cocoaPods?.processPods(
-    xcodeProject: xcodeProject,
-    buildMode: buildMode,
-    dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
-  ) ?? false;
+        xcodeProject: xcodeProject,
+        buildMode: buildMode,
+        dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
+      ) ??
+      false;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();
   }

@@ -8,25 +8,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
+  testWidgets('simultaneously dispose a widget and end the scroll animation',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
-          left: ListView(children: List<Widget>.generate(250, (int i) => Text('$i'))),
+          left: ListView(
+              children: List<Widget>.generate(250, (int i) => Text('$i'))),
           right: Container(),
         ),
       ),
     );
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 1000.0);
+    await tester.fling(
+        find.byType(ListView), const Offset(0.0, -200.0), 1000.0);
     await tester.pump();
 
     tester.state<FlipWidgetState>(find.byType(FlipWidget)).flip();
     await tester.pump(const Duration(hours: 5));
   });
 
-  testWidgets('Disposing a (nested) Scrollable while holding in overscroll does not crash', (WidgetTester tester) async {
+  testWidgets(
+      'Disposing a (nested) Scrollable while holding in overscroll does not crash',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27707.
 
     final ScrollController controller = ScrollController();
@@ -73,8 +78,10 @@ void main() {
     final double currentOffset = controller.offset;
 
     // Start a hold activity by putting one pointer down.
-    await tester.startGesture(tester.getTopLeft(find.byKey(outerContainer)) + const Offset(50.0, 50.0));
-    await tester.pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
+    await tester.startGesture(tester.getTopLeft(find.byKey(outerContainer)) +
+        const Offset(50.0, 50.0));
+    await tester
+        .pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
     expect(controller.offset, currentOffset);
 
     // Dispose the scrollables while the finger is still down, this should not crash.
@@ -85,5 +92,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(controller.hasClients, isFalse);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 }

@@ -13,7 +13,8 @@ import 'package:flutter_tools/src/build_system/targets/desktop.dart';
 import '../../../src/common.dart';
 
 void main() {
-  testWithoutContext('unpackDesktopArtifacts copies files/directories to target', () async {
+  testWithoutContext(
+      'unpackDesktopArtifacts copies files/directories to target', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('inputs/foo').createSync(recursive: true);
     // Should be copied.
@@ -41,58 +42,73 @@ void main() {
     expect(fileSystem.file('outputs/d.txt'), isNot(exists));
 
     // Depfile is correct.
-    expect(depfile.inputs.map((File file) => file.path), unorderedEquals(<String>[
-      'inputs/a.txt',
-      'inputs/b.txt',
-      'foo/c.txt',
-    ]));
-    expect(depfile.outputs.map((File file) => file.path), unorderedEquals(<String>[
-      'outputs/a.txt',
-      'outputs/b.txt',
-      'outputs/foo/c.txt',
-    ]));
+    expect(
+        depfile.inputs.map((File file) => file.path),
+        unorderedEquals(<String>[
+          'inputs/a.txt',
+          'inputs/b.txt',
+          'foo/c.txt',
+        ]));
+    expect(
+        depfile.outputs.map((File file) => file.path),
+        unorderedEquals(<String>[
+          'outputs/a.txt',
+          'outputs/b.txt',
+          'outputs/foo/c.txt',
+        ]));
   });
 
-  testWithoutContext('unpackDesktopArtifacts throws when attempting to copy missing file', () async {
+  testWithoutContext(
+      'unpackDesktopArtifacts throws when attempting to copy missing file',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
 
-    expect(() => unpackDesktopArtifacts(
-      fileSystem: fileSystem,
-      engineSourcePath: 'inputs',
-      outputDirectory: fileSystem.directory('outputs'),
-      artifacts: <String>[
-        'a.txt',
-      ],
-      clientSourcePaths: <String>['foo'],
-    ), throwsException);
+    expect(
+        () => unpackDesktopArtifacts(
+              fileSystem: fileSystem,
+              engineSourcePath: 'inputs',
+              outputDirectory: fileSystem.directory('outputs'),
+              artifacts: <String>[
+                'a.txt',
+              ],
+              clientSourcePaths: <String>['foo'],
+            ),
+        throwsException);
   });
 
-  testWithoutContext('unpackDesktopArtifacts throws when attempting to copy missing directory', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('inputs/a.txt').createSync(recursive: true);
-
-    expect(() => unpackDesktopArtifacts(
-      fileSystem: fileSystem,
-      engineSourcePath: 'inputs',
-      outputDirectory: fileSystem.directory('outputs'),
-      artifacts: <String>[
-        'a.txt',
-      ],
-      clientSourcePaths: <String>['foo'],
-    ), throwsException);
-  });
-
-  testWithoutContext('unpackDesktopArtifacts does not require a client source path', () async {
+  testWithoutContext(
+      'unpackDesktopArtifacts throws when attempting to copy missing directory',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('inputs/a.txt').createSync(recursive: true);
 
-    expect(() => unpackDesktopArtifacts(
-      fileSystem: fileSystem,
-      engineSourcePath: 'inputs',
-      outputDirectory: fileSystem.directory('outputs'),
-      artifacts: <String>[
-        'a.txt',
-      ],
-    ), returnsNormally);
+    expect(
+        () => unpackDesktopArtifacts(
+              fileSystem: fileSystem,
+              engineSourcePath: 'inputs',
+              outputDirectory: fileSystem.directory('outputs'),
+              artifacts: <String>[
+                'a.txt',
+              ],
+              clientSourcePaths: <String>['foo'],
+            ),
+        throwsException);
+  });
+
+  testWithoutContext(
+      'unpackDesktopArtifacts does not require a client source path', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('inputs/a.txt').createSync(recursive: true);
+
+    expect(
+        () => unpackDesktopArtifacts(
+              fileSystem: fileSystem,
+              engineSourcePath: 'inputs',
+              outputDirectory: fileSystem.directory('outputs'),
+              artifacts: <String>[
+                'a.txt',
+              ],
+            ),
+        returnsNormally);
   });
 }

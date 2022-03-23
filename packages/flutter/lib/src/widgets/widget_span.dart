@@ -74,19 +74,18 @@ class WidgetSpan extends PlaceholderSpan {
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline? baseline,
     TextStyle? style,
-  }) : assert(child != null),
-       assert(
-         baseline != null || !(
-          identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-          identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-          identical(alignment, ui.PlaceholderAlignment.baseline)
+  })  : assert(child != null),
+        assert(
+          baseline != null ||
+              !(identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+                  identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+                  identical(alignment, ui.PlaceholderAlignment.baseline)),
         ),
-      ),
-       super(
-         alignment: alignment,
-         baseline: baseline,
-         style: style,
-       );
+        super(
+          alignment: alignment,
+          baseline: baseline,
+          style: style,
+        );
 
   /// The widget to embed inline within text.
   final Widget child;
@@ -100,7 +99,8 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+  void build(ui.ParagraphBuilder builder,
+      {double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions}) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
@@ -108,7 +108,8 @@ class WidgetSpan extends PlaceholderSpan {
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
     assert(builder.placeholderCount < dimensions!.length);
-    final PlaceholderDimensions currentDimensions = dimensions![builder.placeholderCount];
+    final PlaceholderDimensions currentDimensions =
+        dimensions![builder.placeholderCount];
     builder.addPlaceholder(
       currentDimensions.size.width,
       currentDimensions.size.height,
@@ -129,7 +130,8 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(
+      TextPosition position, Accumulator offset) {
     if (position.offset == offset.value) {
       return this;
     }
@@ -145,10 +147,8 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other))
-      return RenderComparison.identical;
-    if (other.runtimeType != runtimeType)
-      return RenderComparison.layout;
+    if (identical(this, other)) return RenderComparison.identical;
+    if (other.runtimeType != runtimeType) return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
     final WidgetSpan typedOther = other as WidgetSpan;
@@ -158,26 +158,21 @@ class WidgetSpan extends PlaceholderSpan {
     RenderComparison result = RenderComparison.identical;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(other.style!);
-      if (candidate.index > result.index)
-        result = candidate;
-      if (result == RenderComparison.layout)
-        return result;
+      if (candidate.index > result.index) result = candidate;
+      if (result == RenderComparison.layout) return result;
     }
     return result;
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    if (super != other)
-      return false;
-    return other is WidgetSpan
-        && other.child == child
-        && other.alignment == alignment
-        && other.baseline == baseline;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    if (super != other) return false;
+    return other is WidgetSpan &&
+        other.child == child &&
+        other.alignment == alignment &&
+        other.baseline == baseline;
   }
 
   @override

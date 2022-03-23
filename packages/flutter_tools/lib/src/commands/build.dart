@@ -21,7 +21,7 @@ import 'build_web.dart';
 import 'build_winuwp.dart';
 
 class BuildCommand extends FlutterCommand {
-  BuildCommand({ bool verboseHelp = false }) {
+  BuildCommand({bool verboseHelp = false}) {
     _addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
@@ -35,9 +35,7 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildLinuxCommand(
-      operatingSystemUtils: globals.os,
-      verboseHelp: verboseHelp
-    ));
+        operatingSystemUtils: globals.os, verboseHelp: verboseHelp));
     _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
@@ -59,7 +57,8 @@ class BuildCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
+  Future<FlutterCommandResult> runCommand() async =>
+      FlutterCommandResult.fail();
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
@@ -80,8 +79,9 @@ abstract class BuildSubCommand extends FlutterCommand {
   @protected
   void displayNullSafetyMode(BuildInfo buildInfo) {
     globals.printStatus('');
-    if (buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Building with sound null safety 💪', emphasis: true);
+    if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
+      globals.printStatus('💪 Building with sound null safety 💪',
+          emphasis: true);
     } else {
       globals.printStatus(
         'Building without sound null safety',

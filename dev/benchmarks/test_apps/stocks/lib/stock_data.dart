@@ -16,7 +16,8 @@ import 'package:http/http.dart' as http;
 final math.Random _rng = math.Random();
 
 class Stock {
-  Stock(this.symbol, this.name, this.lastSale, this.marketCap, this.percentChange);
+  Stock(this.symbol, this.name, this.lastSale, this.marketCap,
+      this.percentChange);
 
   Stock.fromFields(List<String> fields) {
     // TODO(jackson): This class should only have static data, not lastSale, etc.
@@ -24,7 +25,7 @@ class Stock {
     lastSale = 0.0;
     try {
       lastSale = double.parse(fields[2]);
-    } catch (_) { }
+    } catch (_) {}
     symbol = fields[0];
     name = fields[1];
     marketCap = fields[4];
@@ -76,7 +77,9 @@ class StockData extends ChangeNotifier {
   static bool actuallyFetchData = true;
 
   void _fetchNextChunk() {
-    _httpClient!.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
+    _httpClient!
+        .get(_urlToFetch(_nextChunk++))
+        .then<void>((http.Response response) {
       final String json = response.body;
       if (json == null) {
         debugPrint('Failed to load stock data chunk ${_nextChunk - 1}');

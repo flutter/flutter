@@ -167,7 +167,8 @@ class FlutterLaunchRequestArguments
         if (args != null) 'args': args,
         if (toolArgs != null) 'toolArgs': toolArgs,
         if (customTool != null) 'customTool': customTool,
-        if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
+        if (customToolReplacesArgs != null)
+          'customToolReplacesArgs': customToolReplacesArgs,
       };
 
   static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>

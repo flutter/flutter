@@ -13,12 +13,15 @@ import '../common.dart';
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false,
+      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final LiveTestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized()
+          as LiveTestWidgetsFlutterBinding;
 
   final Stopwatch watch = Stopwatch();
   int iterations = 0;

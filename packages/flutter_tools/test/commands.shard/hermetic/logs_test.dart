@@ -24,8 +24,10 @@ void main() {
     testUsingContext('fail with a bad device id', () async {
       final LogsCommand command = LogsCommand();
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
-        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+        () => createTestCommandRunner(command)
+            .run(<String>['-d', 'abc123', 'logs']),
+        throwsA(isA<ToolExit>().having(
+            (ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
       );
     });
   });

@@ -32,7 +32,6 @@ class TestScrollPhysics extends ScrollPhysics {
   }
 }
 
-
 void main() {
   test('ScrollPhysics applyTo()', () {
     const TestScrollPhysics a = TestScrollPhysics(name: 'a');
@@ -65,7 +64,9 @@ void main() {
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
 
-    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -93,7 +94,9 @@ void main() {
     );
   });
 
-  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
+  test(
+      "ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0",
+      () {
     final ScrollMetrics position = FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 100.0,
@@ -108,9 +111,12 @@ void main() {
 
     // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
     // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0),
+        moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0),
+        moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, 1000)!.dx(0),
+        moreOrLessEquals(1000));
   });
 
   group('BouncingScrollPhysics test', () {
@@ -122,11 +128,11 @@ void main() {
 
     test('overscroll is progressively harder', () {
       final ScrollMetrics lessOverscrolledPosition = FixedScrollMetrics(
-          minScrollExtent: 0.0,
-          maxScrollExtent: 1000.0,
-          pixels: -20.0,
-          viewportDimension: 100.0,
-          axisDirection: AxisDirection.down,
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
       );
 
       final ScrollMetrics moreOverscrolledPosition = FixedScrollMetrics(
@@ -137,11 +143,11 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double lessOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
+      final double lessOverscrollApplied = physicsUnderTest
+          .applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
 
-      final double moreOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
+      final double moreOverscrollApplied = physicsUnderTest
+          .applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
 
       expect(lessOverscrollApplied, greaterThan(1.0));
       expect(lessOverscrollApplied, lessThan(20.0));
@@ -165,8 +171,8 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
+          overscrolledPosition, -10.0);
 
       expect(easingApplied, lessThan(-1.0));
       expect(easingApplied, greaterThan(-10.0));
@@ -200,8 +206,8 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
+          overscrolledPosition, -10.0);
       final double tensioningApplied =
           physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
 
@@ -210,11 +216,11 @@ void main() {
 
     test('overscroll a small list and a big list works the same way', () {
       final ScrollMetrics smallListOverscrolledPosition = FixedScrollMetrics(
-          minScrollExtent: 0.0,
-          maxScrollExtent: 10.0,
-          pixels: -20.0,
-          viewportDimension: 100.0,
-          axisDirection: AxisDirection.down,
+        minScrollExtent: 0.0,
+        maxScrollExtent: 10.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
       );
 
       final ScrollMetrics bigListOverscrolledPosition = FixedScrollMetrics(
@@ -225,11 +231,11 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double smallListOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
+      final double smallListOverscrollApplied = physicsUnderTest
+          .applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
 
-      final double bigListOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
+      final double bigListOverscrollApplied = physicsUnderTest
+          .applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
 
       expect(smallListOverscrollApplied, equals(bigListOverscrollApplied));
 
@@ -289,7 +295,8 @@ FlutterError
     }
   });
 
-  testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
+  testWidgets('PageScrollPhysics work with NestedScrollView',
+      (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(Material(
       child: Directionality(
@@ -298,7 +305,8 @@ FlutterError
           physics: const PageScrollPhysics(),
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
+              SliverToBoxAdapter(
+                  child: Container(height: 300, color: Colors.blue)),
             ];
           },
           body: ListView.builder(
@@ -310,6 +318,7 @@ FlutterError
         ),
       ),
     ));
-    await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
+    await tester.fling(
+        find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
 }

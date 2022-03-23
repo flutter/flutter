@@ -71,10 +71,10 @@ class DrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
+  static DrawerThemeData? lerp(
+      DrawerThemeData? a, DrawerThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
+    if (a == null && b == null) return null;
     return DrawerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       scrimColor: Color.lerp(a?.scrimColor, b?.scrimColor, t),
@@ -85,32 +85,32 @@ class DrawerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    scrimColor,
-    elevation,
-    shape,
-  );
+        backgroundColor,
+        scrimColor,
+        elevation,
+        shape,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DrawerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.scrimColor == scrimColor
-        && other.elevation == elevation
-        && other.shape == shape;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is DrawerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.scrimColor == scrimColor &&
+        other.elevation == elevation &&
+        other.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(
+        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('scrimColor', scrimColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
 
@@ -128,7 +128,8 @@ class DrawerTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  })  : assert(data != null),
+        super(key: key, child: child);
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.
@@ -145,7 +146,8 @@ class DrawerTheme extends InheritedTheme {
   /// DrawerThemeData theme = DrawerTheme.of(context);
   /// ```
   static DrawerThemeData of(BuildContext context) {
-    final DrawerTheme? drawerTheme = context.dependOnInheritedWidgetOfExactType<DrawerTheme>();
+    final DrawerTheme? drawerTheme =
+        context.dependOnInheritedWidgetOfExactType<DrawerTheme>();
     return drawerTheme?.data ?? Theme.of(context).drawerTheme;
   }
 

@@ -40,7 +40,8 @@ void main() {
       Cache.flutterRoot = '';
     });
 
-    testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
+    testUsingContext('Can immediately tool exit on recognized exit code/stderr',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -52,7 +53,7 @@ void main() {
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-         'gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -66,24 +67,28 @@ void main() {
         stderr: '\nSome gradle message\n',
       ));
 
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       bool handlerCalled = false;
       await expectLater(() async {
-       await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        await builder.buildGradleApp(
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -98,12 +103,11 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
-              }) async {
+              handler: (
+                  {String line,
+                  FlutterProject project,
+                  bool usesAndroidX,
+                  bool multidexEnabled}) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
               },
@@ -112,23 +116,25 @@ void main() {
           ],
         );
       },
-      throwsToolExit(
-        message: 'Gradle task assembleRelease failed with exit code 1'
-      ));
+          throwsToolExit(
+              message: 'Gradle task assembleRelease failed with exit code 1'));
 
       expect(handlerCalled, isTrue);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-failure',
-          parameters: CustomDimensions(),
-        ),
-      ));
+      expect(
+          testUsage.events,
+          contains(
+            const TestUsageEvent(
+              'build',
+              'gradle',
+              label: 'gradle-random-event-label-failure',
+              parameters: CustomDimensions(),
+            ),
+          ));
     });
 
-    testUsingContext('Can retry build on recognized exit code/stderr', () async {
+    testUsingContext('Can retry build on recognized exit code/stderr',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -162,25 +168,29 @@ void main() {
         processManager.addCommand(fakeCmd);
       }
 
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       int testFnCalled = 0;
       await expectLater(() async {
-       await builder.buildGradleApp(
+        await builder.buildGradleApp(
           maxRetries: maxRetries,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -199,37 +209,41 @@ void main() {
                 }
                 return false;
               },
-              handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
-              }) async {
+              handler: (
+                  {String line,
+                  FlutterProject project,
+                  bool usesAndroidX,
+                  bool multidexEnabled}) async {
                 return GradleBuildStatus.retry;
               },
               eventLabel: 'random-event-label',
             ),
           ],
         );
-      }, throwsToolExit(
-        message: 'Gradle task assembleRelease failed with exit code 1'
-      ));
+      },
+          throwsToolExit(
+              message: 'Gradle task assembleRelease failed with exit code 1'));
 
-      expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
-      expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
+      expect(logger.statusText,
+          contains('Retrying Gradle Build: #1, wait time: 100ms'));
+      expect(logger.statusText,
+          contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
       expect(testFnCalled, equals(maxRetries + 1));
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-failure',
-          parameters: CustomDimensions(),
-        ),
-      ));
+      expect(
+          testUsage.events,
+          contains(
+            const TestUsageEvent(
+              'build',
+              'gradle',
+              label: 'gradle-random-event-label-failure',
+              parameters: CustomDimensions(),
+            ),
+          ));
     });
 
-    testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
+    testUsingContext('Converts recognized ProcessExceptions into tools exits',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -255,24 +269,28 @@ void main() {
         stderr: '\nSome gradle message\n',
       ));
 
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       bool handlerCalled = false;
       await expectLater(() async {
-       await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        await builder.buildGradleApp(
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -287,12 +305,11 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
-              }) async {
+              handler: (
+                  {String line,
+                  FlutterProject project,
+                  bool usesAndroidX,
+                  bool multidexEnabled}) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
               },
@@ -301,20 +318,21 @@ void main() {
           ],
         );
       },
-      throwsToolExit(
-        message: 'Gradle task assembleRelease failed with exit code 1'
-      ));
+          throwsToolExit(
+              message: 'Gradle task assembleRelease failed with exit code 1'));
 
       expect(handlerCalled, isTrue);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-failure',
-          parameters: CustomDimensions(),
-        ),
-      ));
+      expect(
+          testUsage.events,
+          contains(
+            const TestUsageEvent(
+              'build',
+              'gradle',
+              label: 'gradle-random-event-label-failure',
+              parameters: CustomDimensions(),
+            ),
+          ));
     });
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
@@ -328,40 +346,43 @@ void main() {
         platform: FakePlatform(),
       );
       processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'gradlew',
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=false',
-          '-Ptree-shake-icons=false',
-          'assembleRelease',
-        ],
-        exitCode: 1,
-        onRun: () {
-          throw const ProcessException('', <String>[], 'Unrecognized');
-        }
-      ));
+          command: const <String>[
+            'gradlew',
+            '-q',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            '-Ptarget=lib/main.dart',
+            '-Pbase-application-name=io.flutter.app.FlutterApplication',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=false',
+            'assembleRelease',
+          ],
+          exitCode: 1,
+          onRun: () {
+            throw const ProcessException('', <String>[], 'Unrecognized');
+          }));
 
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -416,26 +437,30 @@ void main() {
         ],
       ));
 
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-      fileSystem.directory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('flutter-apk')
-        .childFile('app-release.apk')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('build')
+          .childDirectory('app')
+          .childDirectory('outputs')
+          .childDirectory('flutter-apk')
+          .childFile('app-release.apk')
+          .createSync(recursive: true);
 
       await builder.buildGradleApp(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -453,30 +478,32 @@ void main() {
             test: (String line) {
               return line.contains('Some gradle message');
             },
-            handler: ({
-              String line,
-              FlutterProject project,
-              bool usesAndroidX,
-                bool multidexEnabled
-            }) async {
+            handler: (
+                {String line,
+                FlutterProject project,
+                bool usesAndroidX,
+                bool multidexEnabled}) async {
               return GradleBuildStatus.retry;
             },
             eventLabel: 'random-event-label',
           ),
         ],
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-success',
-          parameters: CustomDimensions(),
-        ),
-      ));
+      expect(
+          testUsage.events,
+          contains(
+            const TestUsageEvent(
+              'build',
+              'gradle',
+              label: 'gradle-random-event-label-success',
+              parameters: CustomDimensions(),
+            ),
+          ));
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('performs code size analysis and sends analytics', () async {
+    testUsingContext('performs code size analysis and sends analytics',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -490,7 +517,7 @@ void main() {
           },
         ),
       );
-       processManager.addCommand(const FakeCommand(
+      processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -505,32 +532,39 @@ void main() {
         ],
       ));
 
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       final Archive archive = Archive()
-        ..addFile(ArchiveFile('AndroidManifest.xml', 100,  List<int>.filled(100, 0)))
-        ..addFile(ArchiveFile('META-INF/CERT.RSA', 10,  List<int>.filled(10, 0)))
-        ..addFile(ArchiveFile('META-INF/CERT.SF', 10,  List<int>.filled(10, 0)))
-        ..addFile(ArchiveFile('lib/arm64-v8a/libapp.so', 50,  List<int>.filled(50, 0)))
-        ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+        ..addFile(
+            ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+        ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+        ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+        ..addFile(
+            ArchiveFile('lib/arm64-v8a/libapp.so', 50, List<int>.filled(50, 0)))
+        ..addFile(ArchiveFile(
+            'lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
-      fileSystem.directory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('flutter-apk')
-        .childFile('app-release.apk')
+      fileSystem
+          .directory('build')
+          .childDirectory('app')
+          .childDirectory('outputs')
+          .childDirectory('flutter-apk')
+          .childFile('app-release.apk')
         ..createSync(recursive: true)
         ..writeAsBytesSync(ZipEncoder().encode(archive));
 
@@ -565,15 +599,18 @@ void main() {
         localGradleErrors: <GradleHandledError>[],
       );
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'code-size-analysis',
-          'apk',
-        ),
-      ));
+      expect(
+          testUsage.events,
+          contains(
+            const TestUsageEvent(
+              'code-size-analysis',
+              'apk',
+            ),
+          ));
     });
 
-    testUsingContext('indicates that an APK has been built successfully', () async {
+    testUsingContext('indicates that an APK has been built successfully',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -596,26 +633,30 @@ void main() {
           'assembleRelease'
         ],
       ));
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('build.gradle')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-      fileSystem.directory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('flutter-apk')
-        .childFile('app-release.apk')
-        .createSync(recursive: true);
+      fileSystem
+          .directory('build')
+          .childDirectory('app')
+          .childDirectory('outputs')
+          .childDirectory('flutter-apk')
+          .childFile('app-release.apk')
+          .createSync(recursive: true);
 
       await builder.buildGradleApp(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -638,7 +679,9 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
+    testUsingContext(
+        "doesn't indicate how to consume an AAR when printHowToConsumeAar is false",
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -650,7 +693,7 @@ void main() {
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-           'gradlew',
+          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -671,18 +714,18 @@ void main() {
         flutter:
           module:
             androidPackage: com.example.test
-        '''
-      );
+        ''');
 
       fileSystem.file('.android/gradlew').createSync(recursive: true);
-      fileSystem.file('.android/gradle.properties')
-        .writeAsStringSync('irrelevant');
-      fileSystem.file('.android/build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .file('.android/gradle.properties')
+          .writeAsStringSync('irrelevant');
+      fileSystem.file('.android/build.gradle').createSync(recursive: true);
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+        androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -700,7 +743,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
+    testUsingContext('gradle exit code and stderr is forwarded to tool exit',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -735,28 +779,34 @@ void main() {
         flutter:
           module:
             androidPackage: com.example.test
-        '''
-      );
+        ''');
 
       fileSystem.file('.android/gradlew').createSync(recursive: true);
-      fileSystem.file('.android/gradle.properties')
+      fileSystem
+          .file('.android/gradle.properties')
           .writeAsStringSync('irrelevant');
-      fileSystem.file('.android/build.gradle')
-          .createSync(recursive: true);
+      fileSystem.file('.android/build.gradle').createSync(recursive: true);
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
-      await expectLater(() async =>
-        builder.buildGradleAar(
-          androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          outputDirectory: fileSystem.directory('build/'),
-          target: '',
-          buildNumber: '1.0',
-        ), throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
+      await expectLater(
+          () async => builder.buildGradleAar(
+                androidBuildInfo: const AndroidBuildInfo(
+                    BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+                project: FlutterProject.fromDirectoryTest(
+                    fileSystem.currentDirectory),
+                outputDirectory: fileSystem.directory('build/'),
+                target: '',
+                buildNumber: '1.0',
+              ),
+          throwsToolExit(
+              exitCode: 108,
+              message:
+                  'Gradle task assembleAarRelease failed with exit code 108.'));
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
+    testUsingContext('build apk uses selected local engine with arm32 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -793,28 +843,42 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm/armeabi_v7a_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/armeabi_v7a_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/armeabi_v7a_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/armeabi_v7a_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
-      fileSystem.file('android/build.gradle')
-        .createSync(recursive: true);
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
+      fileSystem
+          .directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem
+          .directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -830,7 +894,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
+    testUsingContext('build apk uses selected local engine with arm64 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -867,20 +932,34 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_arm64/arm64_v8a_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/arm64_v8a_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/arm64_v8a_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/arm64_v8a_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/arm64_v8a_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/arm64_v8a_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+              'out/android_arm64/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem
+          .directory('android')
           .childFile('gradle.properties')
           .createSync(recursive: true);
-      fileSystem.file('android/build.gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem
+          .directory('android')
           .childDirectory('app')
           .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -888,7 +967,8 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -904,7 +984,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build apk uses selected local engine with x86 ABI', () async {
+    testUsingContext('build apk uses selected local engine with x86 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -941,20 +1022,33 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_x86/x86_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x86/x86_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x86/x86_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_x86/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x86/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x86/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/x86_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/x86_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/x86_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem
+          .directory('android')
           .childFile('gradle.properties')
           .createSync(recursive: true);
-      fileSystem.file('android/build.gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem
+          .directory('android')
           .childDirectory('app')
           .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -962,7 +1056,8 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -978,7 +1073,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build apk uses selected local engine with x64 ABI', () async {
+    testUsingContext('build apk uses selected local engine with x64 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -1016,20 +1112,33 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_x64/x86_64_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x64/x86_64_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x64/x86_64_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_x64/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x64/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/x86_64_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/x86_64_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/x86_64_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem
+          .directory('android')
           .childFile('gradle.properties')
           .createSync(recursive: true);
-      fileSystem.file('android/build.gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem
+          .directory('android')
           .childDirectory('app')
           .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1037,7 +1146,8 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1063,8 +1173,8 @@ void main() {
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(
-        const FakeCommand(command: <String>[
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
           'gradlew',
           '-q',
           '--no-daemon',
@@ -1079,12 +1189,13 @@ void main() {
       ));
       fileSystem.file('android/gradlew').createSync(recursive: true);
 
-      fileSystem.directory('android')
+      fileSystem
+          .directory('android')
           .childFile('gradle.properties')
           .createSync(recursive: true);
-      fileSystem.file('android/build.gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('android')
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem
+          .directory('android')
           .childDirectory('app')
           .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1092,7 +1203,8 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project:
+              FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1109,7 +1221,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
+    testUsingContext('build aar uses selected local engine with arm32 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -1149,12 +1262,24 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm/armeabi_v7a_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/armeabi_v7a_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/armeabi_v7a_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/armeabi_v7a_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -1162,38 +1287,40 @@ void main() {
         flutter:
           module:
             androidPackage: com.example.test
-        '''
-      );
+        ''');
 
-      fileSystem.directory('.android/gradle')
-        .createSync(recursive: true);
-      fileSystem.directory('.android/gradle/wrapper')
-        .createSync(recursive: true);
+      fileSystem.directory('.android/gradle').createSync(recursive: true);
+      fileSystem
+          .directory('.android/gradle/wrapper')
+          .createSync(recursive: true);
       fileSystem.file('.android/gradlew').createSync(recursive: true);
-      fileSystem.file('.android/gradle.properties')
-        .writeAsStringSync('irrelevant');
-      fileSystem.file('.android/build.gradle')
-        .createSync(recursive: true);
+      fileSystem
+          .file('.android/gradle.properties')
+          .writeAsStringSync('irrelevant');
+      fileSystem.file('.android/build.gradle').createSync(recursive: true);
 
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+        androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
         buildNumber: '2.0',
       );
 
-      expect(fileSystem.link(
-        'build/outputs/repo/io/flutter/flutter_embedding_release/'
-        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
-        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
-      ), exists);
+      expect(
+          fileSystem.link(
+              'build/outputs/repo/io/flutter/flutter_embedding_release/'
+              '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+              'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'),
+          exists);
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build aar uses selected local engine with x64 ABI', () async {
+    testUsingContext('build aar uses selected local engine with x64 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -1233,12 +1360,25 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_arm64/arm64_v8a_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/arm64_v8a_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/arm64_v8a_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_arm64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/arm64_v8a_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/arm64_v8a_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/arm64_v8a_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_arm64/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+              'out/android_arm64/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -1246,18 +1386,17 @@ void main() {
         flutter:
           module:
             androidPackage: com.example.test
-        '''
-      );
+        ''');
 
-      fileSystem.directory('.android/gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('.android/gradle/wrapper')
+      fileSystem.directory('.android/gradle').createSync(recursive: true);
+      fileSystem
+          .directory('.android/gradle/wrapper')
           .createSync(recursive: true);
       fileSystem.file('.android/gradlew').createSync(recursive: true);
-      fileSystem.file('.android/gradle.properties')
+      fileSystem
+          .file('.android/gradle.properties')
           .writeAsStringSync('irrelevant');
-      fileSystem.file('.android/build.gradle')
-          .createSync(recursive: true);
+      fileSystem.file('.android/build.gradle').createSync(recursive: true);
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
@@ -1269,15 +1408,17 @@ void main() {
         buildNumber: '2.0',
       );
 
-      expect(fileSystem.link(
-        'build/outputs/repo/io/flutter/flutter_embedding_release/'
-        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
-        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
-      ), exists);
+      expect(
+          fileSystem.link(
+              'build/outputs/repo/io/flutter/flutter_embedding_release/'
+              '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+              'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'),
+          exists);
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build aar uses selected local engine with x86 ABI', () async {
+    testUsingContext('build aar uses selected local engine with x86 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -1317,12 +1458,24 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_x86/x86_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x86/x86_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x86/x86_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_x86/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x86/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x86/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/x86_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/x86_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/x86_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x86/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -1330,18 +1483,17 @@ void main() {
         flutter:
           module:
             androidPackage: com.example.test
-        '''
-      );
+        ''');
 
-      fileSystem.directory('.android/gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('.android/gradle/wrapper')
+      fileSystem.directory('.android/gradle').createSync(recursive: true);
+      fileSystem
+          .directory('.android/gradle/wrapper')
           .createSync(recursive: true);
       fileSystem.file('.android/gradlew').createSync(recursive: true);
-      fileSystem.file('.android/gradle.properties')
+      fileSystem
+          .file('.android/gradle.properties')
           .writeAsStringSync('irrelevant');
-      fileSystem.file('.android/build.gradle')
-          .createSync(recursive: true);
+      fileSystem.file('.android/build.gradle').createSync(recursive: true);
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
@@ -1353,15 +1505,17 @@ void main() {
         buildNumber: '2.0',
       );
 
-      expect(fileSystem.link(
-        'build/outputs/repo/io/flutter/flutter_embedding_release/'
-        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
-        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
-      ), exists);
+      expect(
+          fileSystem.link(
+              'build/outputs/repo/io/flutter/flutter_embedding_release/'
+              '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+              'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'),
+          exists);
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('build aar uses selected local engine on x64 ABI', () async {
+    testUsingContext('build aar uses selected local engine on x64 ABI',
+        () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
         processManager: processManager,
@@ -1373,7 +1527,7 @@ void main() {
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-         'gradlew',
+          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -1401,12 +1555,24 @@ void main() {
   </dependencies>
 </project>
 ''');
-      fileSystem.file('out/android_x64/x86_64_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x64/x86_64_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x64/x86_64_release.maven-metadata.xml').createSync(recursive: true);
-      fileSystem.file('out/android_x64/flutter_embedding_release.jar').createSync(recursive: true);
-      fileSystem.file('out/android_x64/flutter_embedding_release.pom').createSync(recursive: true);
-      fileSystem.file('out/android_x64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/x86_64_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/x86_64_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/x86_64_release.maven-metadata.xml')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/flutter_embedding_release.jar')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/flutter_embedding_release.pom')
+          .createSync(recursive: true);
+      fileSystem
+          .file('out/android_x64/flutter_embedding_release.maven-metadata.xml')
+          .createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -1414,18 +1580,17 @@ void main() {
         flutter:
           module:
             androidPackage: com.example.test
-        '''
-      );
+        ''');
 
-      fileSystem.directory('.android/gradle')
-          .createSync(recursive: true);
-      fileSystem.directory('.android/gradle/wrapper')
+      fileSystem.directory('.android/gradle').createSync(recursive: true);
+      fileSystem
+          .directory('.android/gradle/wrapper')
           .createSync(recursive: true);
       fileSystem.file('.android/gradlew').createSync(recursive: true);
-      fileSystem.file('.android/gradle.properties')
+      fileSystem
+          .file('.android/gradle.properties')
           .writeAsStringSync('irrelevant');
-      fileSystem.file('.android/build.gradle')
-          .createSync(recursive: true);
+      fileSystem.file('.android/build.gradle').createSync(recursive: true);
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
@@ -1437,11 +1602,12 @@ void main() {
         buildNumber: '2.0',
       );
 
-      expect(fileSystem.link(
-        'build/outputs/repo/io/flutter/flutter_embedding_release/'
-        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
-        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
-      ), exists);
+      expect(
+          fileSystem.link(
+              'build/outputs/repo/io/flutter/flutter_embedding_release/'
+              '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+              'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'),
+          exists);
       expect(processManager, hasNoRemainingExpectations);
     });
   });

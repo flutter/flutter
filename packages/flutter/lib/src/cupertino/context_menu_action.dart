@@ -19,10 +19,10 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.isDestructiveAction = false,
     this.onPressed,
     this.trailingIcon,
-  }) : assert(child != null),
-       assert(isDefaultAction != null),
-       assert(isDestructiveAction != null),
-       super(key: key);
+  })  : assert(child != null),
+        assert(isDefaultAction != null),
+        assert(isDestructiveAction != null),
+        super(key: key);
 
   /// The widget that will be placed inside the action.
   final Widget child;
@@ -45,15 +45,18 @@ class CupertinoContextMenuAction extends StatefulWidget {
   final IconData? trailingIcon;
 
   @override
-  State<CupertinoContextMenuAction> createState() => _CupertinoContextMenuActionState();
+  State<CupertinoContextMenuAction> createState() =>
+      _CupertinoContextMenuActionState();
 }
 
-class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {
+class _CupertinoContextMenuActionState
+    extends State<CupertinoContextMenuAction> {
   static const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFEEEEEE),
     darkColor: Color(0xFF212122),
   );
-  static const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
+  static const Color _kBackgroundColorPressed =
+      CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
@@ -100,8 +103,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
       );
     }
     return _kActionSheetActionStyle.copyWith(
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
-    );
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context));
   }
 
   @override
@@ -122,8 +124,9 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
           child: Container(
             decoration: BoxDecoration(
               color: _isPressed
-                ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
-                : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+                  ? CupertinoDynamicColor.resolve(
+                      _kBackgroundColorPressed, context)
+                  : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
             ),
             padding: const EdgeInsets.symmetric(
               vertical: 16.0,

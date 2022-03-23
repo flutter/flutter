@@ -16,16 +16,18 @@ class PlistParser {
     required FileSystem fileSystem,
     required Logger logger,
     required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  })  : _fileSystem = fileSystem,
+        _logger = logger,
+        _processUtils =
+            ProcessUtils(logger: logger, processManager: processManager);
 
   final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
   static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
-  static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
+  static const String kCFBundleShortVersionStringKey =
+      'CFBundleShortVersionString';
   static const String kCFBundleExecutable = 'CFBundleExecutable';
 
   /// Returns the content, converted to XML, of the plist file located at
@@ -41,13 +43,21 @@ class PlistParser {
       throw const FileNotFoundException(executable);
     }
     final List<String> args = <String>[
-      executable, '-convert', 'xml1', '-o', '-', plistFilePath,
+      executable,
+      '-convert',
+      'xml1',
+      '-o',
+      '-',
+      plistFilePath,
     ];
     try {
-      final String xmlContent = _processUtils.runSync(
-        args,
-        throwOnError: true,
-      ).stdout.trim();
+      final String xmlContent = _processUtils
+          .runSync(
+            args,
+            throwOnError: true,
+          )
+          .stdout
+          .trim();
       return xmlContent;
     } on ProcessException catch (error) {
       _logger.printTrace('$error');
@@ -81,7 +91,8 @@ class PlistParser {
   Map<String, Object> _parseXml(String xmlContent) {
     final XmlDocument document = XmlDocument.parse(xmlContent);
     // First element child is <plist>. The first element child of plist is <dict>.
-    final XmlElement dictObject = document.firstElementChild!.firstElementChild!;
+    final XmlElement dictObject =
+        document.firstElementChild!.firstElementChild!;
     return _parseXmlDict(dictObject);
   }
 
@@ -106,7 +117,7 @@ class PlistParser {
   static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
   Object? _parseXmlNode(XmlElement node) {
-    switch (node.name.local){
+    switch (node.name.local) {
       case 'string':
         return node.text;
       case 'real':
@@ -122,7 +133,11 @@ class PlistParser {
       case 'data':
         return base64.decode(node.text.replaceAll(_nonBase64Pattern, ''));
       case 'array':
-        return node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList();
+        return node.children
+            .whereType<XmlElement>()
+            .map<Object?>(_parseXmlNode)
+            .whereType<Object>()
+            .toList();
       case 'dict':
         return _parseXmlDict(node);
     }

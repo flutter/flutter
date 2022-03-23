@@ -81,10 +81,10 @@ class Checkbox extends StatefulWidget {
     this.autofocus = false,
     this.shape,
     this.side,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(autofocus != null),
-       super(key: key);
+  })  : assert(tristate != null),
+        assert(tristate || value != null),
+        assert(autofocus != null),
+        super(key: key);
 
   /// Whether this checkbox is checked.
   ///
@@ -333,7 +333,8 @@ class Checkbox extends StatefulWidget {
   State<Checkbox> createState() => _CheckboxState();
 }
 
-class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {
+class _CheckboxState extends State<Checkbox>
+    with TickerProviderStateMixin, ToggleableStateMixin {
   final _CheckboxPainter _painter = _CheckboxPainter();
   bool? _previousValue;
 
@@ -395,8 +396,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide)
       return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
-    if (!states.contains(MaterialState.selected))
-      return side;
+    if (!states.contains(MaterialState.selected)) return side;
     return null;
   }
 
@@ -405,67 +405,81 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
-    final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
-      ?? checkboxTheme.materialTapTargetSize
-      ?? themeData.materialTapTargetSize;
-    final VisualDensity effectiveVisualDensity = widget.visualDensity
-      ?? checkboxTheme.visualDensity
-      ?? themeData.visualDensity;
+    final MaterialTapTargetSize effectiveMaterialTapTargetSize =
+        widget.materialTapTargetSize ??
+            checkboxTheme.materialTapTargetSize ??
+            themeData.materialTapTargetSize;
+    final VisualDensity effectiveVisualDensity = widget.visualDensity ??
+        checkboxTheme.visualDensity ??
+        themeData.visualDensity;
     Size size;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
+        size = const Size(
+            kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
         break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-      return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? checkboxTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateMouseCursor.clickable.resolve(states);
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
+        MaterialStateProperty.resolveWith<MouseCursor>(
+            (Set<MaterialState> states) {
+      return MaterialStateProperty.resolveAs<MouseCursor?>(
+              widget.mouseCursor, states) ??
+          checkboxTheme.mouseCursor?.resolve(states) ??
+          MaterialStateMouseCursor.clickable.resolve(states);
     });
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
-    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? _widgetFillColor.resolve(activeStates)
-      ?? checkboxTheme.fillColor?.resolve(activeStates)
-      ?? _defaultFillColor.resolve(activeStates);
-    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? _widgetFillColor.resolve(inactiveStates)
-      ?? checkboxTheme.fillColor?.resolve(inactiveStates)
-      ?? _defaultFillColor.resolve(inactiveStates);
+    final Set<MaterialState> inactiveStates = states
+      ..remove(MaterialState.selected);
+    final Color effectiveActiveColor =
+        widget.fillColor?.resolve(activeStates) ??
+            _widgetFillColor.resolve(activeStates) ??
+            checkboxTheme.fillColor?.resolve(activeStates) ??
+            _defaultFillColor.resolve(activeStates);
+    final Color effectiveInactiveColor =
+        widget.fillColor?.resolve(inactiveStates) ??
+            _widgetFillColor.resolve(inactiveStates) ??
+            checkboxTheme.fillColor?.resolve(inactiveStates) ??
+            _defaultFillColor.resolve(inactiveStates);
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
-    final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
-      ?? widget.focusColor
-      ?? checkboxTheme.overlayColor?.resolve(focusedStates)
-      ?? themeData.focusColor;
+    final Color effectiveFocusOverlayColor =
+        widget.overlayColor?.resolve(focusedStates) ??
+            widget.focusColor ??
+            checkboxTheme.overlayColor?.resolve(focusedStates) ??
+            themeData.focusColor;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
-    final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
-        ?? themeData.hoverColor;
+    final Color effectiveHoverOverlayColor =
+        widget.overlayColor?.resolve(hoveredStates) ??
+            widget.hoverColor ??
+            checkboxTheme.overlayColor?.resolve(hoveredStates) ??
+            themeData.hoverColor;
 
-    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
-    final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? checkboxTheme.overlayColor?.resolve(activePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+    final Set<MaterialState> activePressedStates = activeStates
+      ..add(MaterialState.pressed);
+    final Color effectiveActivePressedOverlayColor =
+        widget.overlayColor?.resolve(activePressedStates) ??
+            checkboxTheme.overlayColor?.resolve(activePressedStates) ??
+            effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
-    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
-    final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? checkboxTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+    final Set<MaterialState> inactivePressedStates = inactiveStates
+      ..add(MaterialState.pressed);
+    final Color effectiveInactivePressedOverlayColor =
+        widget.overlayColor?.resolve(inactivePressedStates) ??
+            checkboxTheme.overlayColor?.resolve(inactivePressedStates) ??
+            effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
-    final Color effectiveCheckColor = widget.checkColor
-      ?? checkboxTheme.checkColor?.resolve(states)
-      ?? const Color(0xFFFFFFFF);
+    final Color effectiveCheckColor = widget.checkColor ??
+        checkboxTheme.checkColor?.resolve(states) ??
+        const Color(0xFFFFFFFF);
 
     return Semantics(
       checked: widget.value ?? false,
@@ -483,7 +497,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..reactionColor = effectiveActivePressedOverlayColor
           ..hoverColor = effectiveHoverOverlayColor
           ..focusColor = effectiveFocusOverlayColor
-          ..splashRadius = widget.splashRadius ?? checkboxTheme.splashRadius ?? kRadialReactionRadius
+          ..splashRadius = widget.splashRadius ??
+              checkboxTheme.splashRadius ??
+              kRadialReactionRadius
           ..downPosition = downPosition
           ..isFocused = states.contains(MaterialState.focused)
           ..isHovered = states.contains(MaterialState.hovered)
@@ -492,10 +508,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..checkColor = effectiveCheckColor
           ..value = value
           ..previousValue = _previousValue
-          ..shape = widget.shape ?? checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0)),
-          )
-          ..side = _resolveSide(widget.side) ?? _resolveSide(checkboxTheme.side),
+          ..shape = widget.shape ??
+              checkboxTheme.shape ??
+              const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(1.0)),
+              )
+          ..side =
+              _resolveSide(widget.side) ?? _resolveSide(checkboxTheme.side),
       ),
     );
   }
@@ -562,7 +581,8 @@ class _CheckboxPainter extends ToggleablePainter {
   Rect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
     final double size = _kEdgeSize - inset * _kStrokeWidth;
-    final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
+    final Rect rect =
+        Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
     return rect;
   }
 
@@ -570,7 +590,9 @@ class _CheckboxPainter extends ToggleablePainter {
   // value == true or null.
   Color _colorAt(double t) {
     // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
-    return t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!;
+    return t >= 0.25
+        ? activeColor
+        : Color.lerp(inactiveColor, activeColor, t * 4.0)!;
   }
 
   // White stroke used to paint the check and dash.
@@ -581,7 +603,8 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeWidth = _kStrokeWidth;
   }
 
-  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
+  void _drawBox(
+      Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
     if (fill) {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
@@ -630,11 +653,13 @@ class _CheckboxPainter extends ToggleablePainter {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
+    final Offset origin =
+        size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
     final AnimationStatus status = position.status;
-    final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
-      ? position.value
-      : 1.0 - position.value;
+    final double tNormalized =
+        status == AnimationStatus.forward || status == AnimationStatus.completed
+            ? position.value
+            : 1.0 - position.value;
 
     // Four cases: false to null, false to true, null to false, true to false
     if (previousValue == false || value == false) {
@@ -643,7 +668,8 @@ class _CheckboxPainter extends ToggleablePainter {
       final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
-        final BorderSide border = side ?? BorderSide(width: 2, color: paint.color);
+        final BorderSide border =
+            side ?? BorderSide(width: 2, color: paint.color);
         _drawBox(canvas, outer, paint, border, false); // only paint the border
       } else {
         _drawBox(canvas, outer, paint, side, true);
@@ -653,9 +679,10 @@ class _CheckboxPainter extends ToggleablePainter {
         else
           _drawCheck(canvas, origin, tShrink, strokePaint);
       }
-    } else { // Two cases: null to true, true to null
+    } else {
+      // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
-      final Paint paint = Paint() ..color = _colorAt(1.0);
+      final Paint paint = Paint()..color = _colorAt(1.0);
 
       _drawBox(canvas, outer, paint, side, true);
       if (tNormalized <= 0.5) {

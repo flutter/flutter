@@ -91,17 +91,22 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(anchorPoint != null || debugCheckHasDirectionality(
-        context,
-        why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
-        alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
-    ));
+    assert(anchorPoint != null ||
+        debugCheckHasDirectionality(
+          context,
+          why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
+          alternative:
+              "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
+        ));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
-    final Offset resolvedAnchorPoint = _capOffset(anchorPoint ?? _fallbackAnchorPoint(context), parentSize);
-    final Iterable<Rect> subScreens = _subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
-    final Rect closestSubScreen = _closestToAnchorPoint(subScreens, resolvedAnchorPoint);
+    final Offset resolvedAnchorPoint =
+        _capOffset(anchorPoint ?? _fallbackAnchorPoint(context), parentSize);
+    final Iterable<Rect> subScreens =
+        _subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
+    final Rect closestSubScreen =
+        _closestToAnchorPoint(subScreens, resolvedAnchorPoint);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -128,16 +133,20 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Iterable<Rect> _avoidBounds(MediaQueryData mediaQuery) {
-    return mediaQuery.displayFeatures.map((DisplayFeature d) => d.bounds)
+    return mediaQuery.displayFeatures
+        .map((DisplayFeature d) => d.bounds)
         .where((Rect r) => r.shortestSide > 0);
   }
 
   /// Returns the closest sub-screen to the [anchorPoint].
-  static Rect _closestToAnchorPoint(Iterable<Rect> subScreens, Offset anchorPoint) {
+  static Rect _closestToAnchorPoint(
+      Iterable<Rect> subScreens, Offset anchorPoint) {
     Rect closestScreen = subScreens.first;
-    double closestDistance = _distanceFromPointToRect(anchorPoint, closestScreen);
+    double closestDistance =
+        _distanceFromPointToRect(anchorPoint, closestScreen);
     for (final Rect screen in subScreens) {
-      final double subScreenDistance = _distanceFromPointToRect(anchorPoint, screen);
+      final double subScreenDistance =
+          _distanceFromPointToRect(anchorPoint, screen);
       if (subScreenDistance < closestDistance) {
         closestScreen = screen;
         closestDistance = subScreenDistance;
@@ -189,7 +198,8 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   /// Returns sub-screens resulted by dividing [wantedBounds] along items of
   /// [avoidBounds] that are at least as high or as wide.
-  static Iterable<Rect> _subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
+  static Iterable<Rect> _subScreensInBounds(
+      Rect wantedBounds, Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
       final List<Rect> newSubScreens = <Rect>[];
@@ -244,8 +254,10 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Offset _capOffset(Offset offset, Size maximum) {
-    if (offset.dx >= 0 && offset.dx <= maximum.width
-        && offset.dy >=0 && offset.dy <= maximum.height) {
+    if (offset.dx >= 0 &&
+        offset.dx <= maximum.width &&
+        offset.dy >= 0 &&
+        offset.dy <= maximum.height) {
       return offset;
     } else {
       return Offset(

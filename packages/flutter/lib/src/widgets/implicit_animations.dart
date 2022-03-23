@@ -36,7 +36,8 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as a tight constraint of zero size.
-  BoxConstraintsTween({ BoxConstraints? begin, BoxConstraints? end }) : super(begin: begin, end: end);
+  BoxConstraintsTween({BoxConstraints? begin, BoxConstraints? end})
+      : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -67,7 +68,8 @@ class DecorationTween extends Tween<Decoration> {
   /// result is always null. If [end] is not null, then its lerping logic is
   /// used (via [Decoration.lerpTo]). Otherwise, [begin]'s lerping logic is used
   /// (via [Decoration.lerpFrom]).
-  DecorationTween({ Decoration? begin, Decoration? end }) : super(begin: begin, end: end);
+  DecorationTween({Decoration? begin, Decoration? end})
+      : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -90,7 +92,8 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an [EdgeInsets] with no inset.
-  EdgeInsetsTween({ EdgeInsets? begin, EdgeInsets? end }) : super(begin: begin, end: end);
+  EdgeInsetsTween({EdgeInsets? begin, EdgeInsets? end})
+      : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -112,7 +115,8 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an [EdgeInsetsGeometry] with no inset.
-  EdgeInsetsGeometryTween({ EdgeInsetsGeometry? begin, EdgeInsetsGeometry? end }) : super(begin: begin, end: end);
+  EdgeInsetsGeometryTween({EdgeInsetsGeometry? begin, EdgeInsetsGeometry? end})
+      : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -130,7 +134,8 @@ class BorderRadiusTween extends Tween<BorderRadius?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as a right angle (no radius).
-  BorderRadiusTween({ BorderRadius? begin, BorderRadius? end }) : super(begin: begin, end: end);
+  BorderRadiusTween({BorderRadius? begin, BorderRadius? end})
+      : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -148,7 +153,7 @@ class BorderTween extends Tween<Border?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as having no border.
-  BorderTween({ Border? begin, Border? end }) : super(begin: begin, end: end);
+  BorderTween({Border? begin, Border? end}) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -169,7 +174,7 @@ class Matrix4Tween extends Tween<Matrix4> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  Matrix4Tween({ Matrix4? begin, Matrix4? end }) : super(begin: begin, end: end);
+  Matrix4Tween({Matrix4? begin, Matrix4? end}) : super(begin: begin, end: end);
 
   @override
   Matrix4 lerp(double t) {
@@ -207,7 +212,8 @@ class TextStyleTween extends Tween<TextStyle> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  TextStyleTween({ TextStyle? begin, TextStyle? end }) : super(begin: begin, end: end);
+  TextStyleTween({TextStyle? begin, TextStyle? end})
+      : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -281,9 +287,9 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.onEnd,
-  }) : assert(curve != null),
-       assert(duration != null),
-       super(key: key);
+  })  : assert(curve != null),
+        assert(duration != null),
+        super(key: key);
 
   /// The curve to apply when animating the parameters of this container.
   final Curve curve;
@@ -298,12 +304,14 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget>
+      createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties
+        .add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   }
 }
 
@@ -337,7 +345,8 @@ typedef TweenConstructor<T extends Object> = Tween<T> Function(T targetValue);
 /// of this visitor.
 ///
 /// The `<T>` parameter specifies the type of value that's being animated.
-typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T targetValue, TweenConstructor<T> constructor);
+typedef TweenVisitor<T extends Object> = Tween<T>? Function(
+    Tween<T>? tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for the `State` of widgets with implicit animations.
 ///
@@ -349,7 +358,8 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 /// instances. Subclasses must implement the [forEachTween] method to allow
 /// [ImplicitlyAnimatedWidgetState] to iterate through the widget's fields and
 /// animate them.
-abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
+abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
+    extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
   AnimationController get controller => _controller;
@@ -389,7 +399,8 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     }
     _controller.duration = widget.duration;
     if (_constructTweens()) {
-      forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
+      forEachTween((Tween<dynamic>? tween, dynamic targetValue,
+          TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
         return tween;
       });
@@ -416,8 +427,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   }
 
   void _updateTween(Tween<dynamic>? tween, dynamic targetValue) {
-    if (tween == null)
-      return;
+    if (tween == null) return;
     tween
       ..begin = tween.evaluate(_animation)
       ..end = targetValue;
@@ -425,7 +435,8 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   bool _constructTweens() {
     bool shouldStartAnimation = false;
-    forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
+    forEachTween((Tween<dynamic>? tween, dynamic targetValue,
+        TweenConstructor<dynamic> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
         if (_shouldAnimateTween(tween, targetValue))
@@ -535,7 +546,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///     an evaluation of the tween against the current [animation], and the
   ///     [Tween.end] value for each tween will be the target value.
   @protected
-  void didUpdateTweens() { }
+  void didUpdateTweens() {}
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
@@ -548,7 +559,8 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 /// Subclasses must implement the [forEachTween] method to allow
 /// [AnimatedWidgetBaseState] to iterate through the subclasses' widget's fields
 /// and animate them.
-abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends ImplicitlyAnimatedWidgetState<T> {
+abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget>
+    extends ImplicitlyAnimatedWidgetState<T> {
   @override
   void initState() {
     super.initState();
@@ -556,7 +568,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 
   void _handleAnimationChanged() {
-    setState(() { /* The animation ticked. Rebuild with new animation value */ });
+    setState(() {/* The animation ticked. Rebuild with new animation value */});
   }
 }
 
@@ -617,21 +629,22 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(margin == null || margin.isNonNegative),
-       assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
-       ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
-       constraints =
-        (width != null || height != null)
-          ? constraints?.tighten(width: width, height: height)
-            ?? BoxConstraints.tightFor(width: width, height: height)
-          : constraints,
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(margin == null || margin.isNonNegative),
+        assert(padding == null || padding.isNonNegative),
+        assert(decoration == null || decoration.debugAssertIsValid()),
+        assert(constraints == null || constraints.debugAssertIsValid()),
+        assert(
+          color == null || decoration == null,
+          'Cannot provide both a color and a decoration\n'
+          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
+        ),
+        decoration =
+            decoration ?? (color != null ? BoxDecoration(color: color) : null),
+        constraints = (width != null || height != null)
+            ? constraints?.tighten(width: width, height: height) ??
+                BoxConstraints.tightFor(width: width, height: height)
+            : constraints,
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The [child] contained by the container.
   ///
@@ -710,24 +723,36 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   final Clip clipBehavior;
 
   @override
-  AnimatedWidgetBaseState<AnimatedContainer> createState() => _AnimatedContainerState();
+  AnimatedWidgetBaseState<AnimatedContainer> createState() =>
+      _AnimatedContainerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
-    properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
-    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>(
+        'alignment', alignment,
+        showName: false, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
+        defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>(
+        'constraints', constraints,
+        defaultValue: null, showName: false));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin,
+        defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('transformAlignment', transformAlignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>(
+        'transformAlignment', transformAlignment,
+        defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
-class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
+class _AnimatedContainerState
+    extends AnimatedWidgetBaseState<AnimatedContainer> {
   AlignmentGeometryTween? _alignment;
   EdgeInsetsGeometryTween? _padding;
   DecorationTween? _decoration;
@@ -739,14 +764,47 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
-    _padding = visitor(_padding, widget.padding, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
-    _decoration = visitor(_decoration, widget.decoration, (dynamic value) => DecorationTween(begin: value as Decoration)) as DecorationTween?;
-    _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => DecorationTween(begin: value as Decoration)) as DecorationTween?;
-    _constraints = visitor(_constraints, widget.constraints, (dynamic value) => BoxConstraintsTween(begin: value as BoxConstraints)) as BoxConstraintsTween?;
-    _margin = visitor(_margin, widget.margin, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
-    _transform = visitor(_transform, widget.transform, (dynamic value) => Matrix4Tween(begin: value as Matrix4)) as Matrix4Tween?;
-    _transformAlignment = visitor(_transformAlignment, widget.transformAlignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
+    _alignment = visitor(
+            _alignment,
+            widget.alignment,
+            (dynamic value) =>
+                AlignmentGeometryTween(begin: value as AlignmentGeometry))
+        as AlignmentGeometryTween?;
+    _padding = visitor(
+            _padding,
+            widget.padding,
+            (dynamic value) =>
+                EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry))
+        as EdgeInsetsGeometryTween?;
+    _decoration = visitor(_decoration, widget.decoration,
+            (dynamic value) => DecorationTween(begin: value as Decoration))
+        as DecorationTween?;
+    _foregroundDecoration = visitor(
+            _foregroundDecoration,
+            widget.foregroundDecoration,
+            (dynamic value) => DecorationTween(begin: value as Decoration))
+        as DecorationTween?;
+    _constraints = visitor(
+            _constraints,
+            widget.constraints,
+            (dynamic value) =>
+                BoxConstraintsTween(begin: value as BoxConstraints))
+        as BoxConstraintsTween?;
+    _margin = visitor(
+            _margin,
+            widget.margin,
+            (dynamic value) =>
+                EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry))
+        as EdgeInsetsGeometryTween?;
+    _transform = visitor(_transform, widget.transform,
+            (dynamic value) => Matrix4Tween(begin: value as Matrix4))
+        as Matrix4Tween?;
+    _transformAlignment = visitor(
+            _transformAlignment,
+            widget.transformAlignment,
+            (dynamic value) =>
+                AlignmentGeometryTween(begin: value as AlignmentGeometry))
+        as AlignmentGeometryTween?;
   }
 
   @override
@@ -769,14 +827,28 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, showName: false, defaultValue: null));
-    description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
-    description.add(DiagnosticsProperty<DecorationTween>('bg', _decoration, defaultValue: null));
-    description.add(DiagnosticsProperty<DecorationTween>('fg', _foregroundDecoration, defaultValue: null));
-    description.add(DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
-    description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
-    description.add(ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
-    description.add(DiagnosticsProperty<AlignmentGeometryTween>('transformAlignment', _transformAlignment, defaultValue: null));
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>(
+        'alignment', _alignment,
+        showName: false, defaultValue: null));
+    description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>(
+        'padding', _padding,
+        defaultValue: null));
+    description.add(DiagnosticsProperty<DecorationTween>('bg', _decoration,
+        defaultValue: null));
+    description.add(DiagnosticsProperty<DecorationTween>(
+        'fg', _foregroundDecoration,
+        defaultValue: null));
+    description.add(DiagnosticsProperty<BoxConstraintsTween>(
+        'constraints', _constraints,
+        showName: false, defaultValue: null));
+    description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>(
+        'margin', _margin,
+        defaultValue: null));
+    description
+        .add(ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>(
+        'transformAlignment', _transformAlignment,
+        defaultValue: null));
   }
 }
 
@@ -814,9 +886,9 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(padding != null),
-       assert(padding.isNonNegative),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(padding != null),
+        assert(padding.isNonNegative),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -827,7 +899,8 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final Widget? child;
 
   @override
-  AnimatedWidgetBaseState<AnimatedPadding> createState() => _AnimatedPaddingState();
+  AnimatedWidgetBaseState<AnimatedPadding> createState() =>
+      _AnimatedPaddingState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -841,15 +914,20 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _padding = visitor(_padding, widget.padding, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
+    _padding = visitor(
+            _padding,
+            widget.padding,
+            (dynamic value) =>
+                EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry))
+        as EdgeInsetsGeometryTween?;
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: _padding!
-        .evaluate(animation)
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
+          .evaluate(animation)
+          .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
       child: widget.child,
     );
   }
@@ -857,7 +935,9 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
+    description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>(
+        'padding', _padding,
+        defaultValue: null));
   }
 }
 
@@ -906,10 +986,10 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(alignment != null),
-       assert(widthFactor == null || widthFactor >= 0.0),
-       assert(heightFactor == null || heightFactor >= 0.0),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(alignment != null),
+        assert(widthFactor == null || widthFactor >= 0.0),
+        assert(heightFactor == null || heightFactor >= 0.0),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// How to align the child.
   ///
@@ -950,7 +1030,8 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties
+        .add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
   }
 }
 
@@ -961,12 +1042,21 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
-    if(widget.heightFactor != null) {
-      _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _alignment = visitor(
+            _alignment,
+            widget.alignment,
+            (dynamic value) =>
+                AlignmentGeometryTween(begin: value as AlignmentGeometry))
+        as AlignmentGeometryTween?;
+    if (widget.heightFactor != null) {
+      _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor,
+              (dynamic value) => Tween<double>(begin: value as double))
+          as Tween<double>?;
     }
-    if(widget.widthFactor != null) {
-      _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    if (widget.widthFactor != null) {
+      _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor,
+              (dynamic value) => Tween<double>(begin: value as double))
+          as Tween<double>?;
     }
   }
 
@@ -983,9 +1073,15 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, defaultValue: null));
-    description.add(DiagnosticsProperty<Tween<double>>('widthFactor', _widthFactorTween, defaultValue: null));
-    description.add(DiagnosticsProperty<Tween<double>>('heightFactor', _heightFactorTween, defaultValue: null));
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>(
+        'alignment', _alignment,
+        defaultValue: null));
+    description.add(DiagnosticsProperty<Tween<double>>(
+        'widthFactor', _widthFactorTween,
+        defaultValue: null));
+    description.add(DiagnosticsProperty<Tween<double>>(
+        'heightFactor', _heightFactorTween,
+        defaultValue: null));
   }
 }
 
@@ -1049,9 +1145,9 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(left == null || right == null || width == null),
-       assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(left == null || right == null || width == null),
+        assert(top == null || bottom == null || height == null),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -1063,13 +1159,13 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : left = rect.left,
-       top = rect.top,
-       width = rect.width,
-       height = rect.height,
-       right = null,
-       bottom = null,
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : left = rect.left,
+        top = rect.top,
+        width = rect.width,
+        height = rect.height,
+        right = null,
+        bottom = null,
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1101,7 +1197,8 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  AnimatedWidgetBaseState<AnimatedPositioned> createState() => _AnimatedPositionedState();
+  AnimatedWidgetBaseState<AnimatedPositioned> createState() =>
+      _AnimatedPositionedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1115,7 +1212,8 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositioned> {
+class _AnimatedPositionedState
+    extends AnimatedWidgetBaseState<AnimatedPositioned> {
   Tween<double>? _left;
   Tween<double>? _top;
   Tween<double>? _right;
@@ -1125,12 +1223,24 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _left = visitor(_left, widget.left, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _top = visitor(_top, widget.top, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _right = visitor(_right, widget.right, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _width = visitor(_width, widget.width, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _height = visitor(_height, widget.height, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _left = visitor(_left, widget.left,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _top = visitor(_top, widget.top,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _right = visitor(_right, widget.right,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _bottom = visitor(_bottom, widget.bottom,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _width = visitor(_width, widget.width,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _height = visitor(_height, widget.height,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
   }
 
   @override
@@ -1202,9 +1312,9 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(start == null || end == null || width == null),
-       assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(start == null || end == null || width == null),
+        assert(top == null || bottom == null || height == null),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1236,7 +1346,8 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  AnimatedWidgetBaseState<AnimatedPositionedDirectional> createState() => _AnimatedPositionedDirectionalState();
+  AnimatedWidgetBaseState<AnimatedPositionedDirectional> createState() =>
+      _AnimatedPositionedDirectionalState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1250,7 +1361,8 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<AnimatedPositionedDirectional> {
+class _AnimatedPositionedDirectionalState
+    extends AnimatedWidgetBaseState<AnimatedPositionedDirectional> {
   Tween<double>? _start;
   Tween<double>? _top;
   Tween<double>? _end;
@@ -1260,12 +1372,24 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _start = visitor(_start, widget.start, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _top = visitor(_top, widget.top, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _end = visitor(_end, widget.end, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _width = visitor(_width, widget.width, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _height = visitor(_height, widget.height, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _start = visitor(_start, widget.start,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _top = visitor(_top, widget.top,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _end = visitor(_end, widget.end,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _bottom = visitor(_bottom, widget.bottom,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _width = visitor(_width, widget.width,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _height = visitor(_height, widget.height,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
   }
 
   @override
@@ -1364,8 +1488,8 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(scale != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(scale != null),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1390,14 +1514,17 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
   final FilterQuality? filterQuality;
 
   @override
-  ImplicitlyAnimatedWidgetState<AnimatedScale> createState() => _AnimatedScaleState();
+  ImplicitlyAnimatedWidgetState<AnimatedScale> createState() =>
+      _AnimatedScaleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('scale', scale));
-    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment, defaultValue: Alignment.center));
-    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality, defaultValue: null));
+    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment,
+        defaultValue: Alignment.center));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality,
+        defaultValue: null));
   }
 }
 
@@ -1407,7 +1534,9 @@ class _AnimatedScaleState extends ImplicitlyAnimatedWidgetState<AnimatedScale> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _scale = visitor(_scale, widget.scale, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _scale = visitor(_scale, widget.scale,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
   }
 
   @override
@@ -1492,7 +1621,7 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(turns != null),
+  })  : assert(turns != null),
         super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
@@ -1519,24 +1648,30 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
   final FilterQuality? filterQuality;
 
   @override
-  ImplicitlyAnimatedWidgetState<AnimatedRotation> createState() => _AnimatedRotationState();
+  ImplicitlyAnimatedWidgetState<AnimatedRotation> createState() =>
+      _AnimatedRotationState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('turns', turns));
-    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment, defaultValue: Alignment.center));
-    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality, defaultValue: null));
+    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment,
+        defaultValue: Alignment.center));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality,
+        defaultValue: null));
   }
 }
 
-class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotation> {
+class _AnimatedRotationState
+    extends ImplicitlyAnimatedWidgetState<AnimatedRotation> {
   Tween<double>? _turns;
   late Animation<double> _turnsAnimation;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _turns = visitor(_turns, widget.turns, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _turns = visitor(_turns, widget.turns,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
   }
 
   @override
@@ -1601,7 +1736,8 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
   final Offset offset;
 
   @override
-  ImplicitlyAnimatedWidgetState<AnimatedSlide> createState() => _AnimatedSlideState();
+  ImplicitlyAnimatedWidgetState<AnimatedSlide> createState() =>
+      _AnimatedSlideState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1616,7 +1752,9 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _offset = visitor(_offset, widget.offset, (dynamic value) => Tween<Offset>(begin: value as Offset)) as Tween<Offset>?;
+    _offset = visitor(_offset, widget.offset,
+            (dynamic value) => Tween<Offset>(begin: value as Offset))
+        as Tween<Offset>?;
   }
 
   @override
@@ -1704,8 +1842,8 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     required Duration duration,
     VoidCallback? onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1731,7 +1869,8 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  ImplicitlyAnimatedWidgetState<AnimatedOpacity> createState() => _AnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<AnimatedOpacity> createState() =>
+      _AnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1740,13 +1879,16 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
+class _AnimatedOpacityState
+    extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
   Tween<double>? _opacity;
   late Animation<double> _opacityAnimation;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _opacity = visitor(_opacity, widget.opacity,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
   }
 
   @override
@@ -1800,8 +1942,8 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     required Duration duration,
     VoidCallback? onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The sliver below this widget in the tree.
   final Widget? sliver;
@@ -1825,7 +1967,8 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> createState() => _SliverAnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> createState() =>
+      _SliverAnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1834,13 +1977,16 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> {
+class _SliverAnimatedOpacityState
+    extends ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> {
   Tween<double>? _opacity;
   late Animation<double> _opacityAnimation;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _opacity = visitor(_opacity, widget.opacity,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
   }
 
   @override
@@ -1896,13 +2042,13 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(style != null),
-       assert(child != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(style != null),
+        assert(child != null),
+        assert(softWrap != null),
+        assert(overflow != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(textWidthBasis != null),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1949,27 +2095,41 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override
-  AnimatedWidgetBaseState<AnimatedDefaultTextStyle> createState() => _AnimatedDefaultTextStyleState();
+  AnimatedWidgetBaseState<AnimatedDefaultTextStyle> createState() =>
+      _AnimatedDefaultTextStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     style.debugFillProperties(properties);
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+        EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(FlagProperty('softWrap',
+        value: softWrap,
+        ifTrue: 'wrapping at box width',
+        ifFalse: 'no wrapping except at line break characters',
+        showName: true));
+    properties.add(
+        EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
-    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(EnumProperty<TextWidthBasis>(
+        'textWidthBasis', textWidthBasis,
+        defaultValue: TextWidthBasis.parent));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>(
+        'textHeightBehavior', textHeightBehavior,
+        defaultValue: null));
   }
 }
 
-class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDefaultTextStyle> {
+class _AnimatedDefaultTextStyleState
+    extends AnimatedWidgetBaseState<AnimatedDefaultTextStyle> {
   TextStyleTween? _style;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _style = visitor(_style, widget.style, (dynamic value) => TextStyleTween(begin: value as TextStyle)) as TextStyleTween?;
+    _style = visitor(_style, widget.style,
+            (dynamic value) => TextStyleTween(begin: value as TextStyle))
+        as TextStyleTween?;
   }
 
   @override
@@ -2025,16 +2185,16 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(clipBehavior != null),
-       assert(borderRadius != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(color != null),
-       assert(shadowColor != null),
-       assert(animateColor != null),
-       assert(animateShadowColor != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  })  : assert(child != null),
+        assert(shape != null),
+        assert(clipBehavior != null),
+        assert(borderRadius != null),
+        assert(elevation != null && elevation >= 0.0),
+        assert(color != null),
+        assert(shadowColor != null),
+        assert(animateColor != null),
+        assert(animateShadowColor != null),
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -2073,22 +2233,26 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final bool animateShadowColor;
 
   @override
-  AnimatedWidgetBaseState<AnimatedPhysicalModel> createState() => _AnimatedPhysicalModelState();
+  AnimatedWidgetBaseState<AnimatedPhysicalModel> createState() =>
+      _AnimatedPhysicalModelState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<BoxShape>('shape', shape));
-    properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    properties
+        .add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     properties.add(DoubleProperty('elevation', elevation));
     properties.add(ColorProperty('color', color));
     properties.add(DiagnosticsProperty<bool>('animateColor', animateColor));
     properties.add(ColorProperty('shadowColor', shadowColor));
-    properties.add(DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
+    properties.add(
+        DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
   }
 }
 
-class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysicalModel> {
+class _AnimatedPhysicalModelState
+    extends AnimatedWidgetBaseState<AnimatedPhysicalModel> {
   BorderRadiusTween? _borderRadius;
   Tween<double>? _elevation;
   ColorTween? _color;
@@ -2096,10 +2260,16 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => BorderRadiusTween(begin: value as BorderRadius)) as BorderRadiusTween?;
-    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _color = visitor(_color, widget.color, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
-    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
+    _borderRadius = visitor(_borderRadius, widget.borderRadius,
+            (dynamic value) => BorderRadiusTween(begin: value as BorderRadius))
+        as BorderRadiusTween?;
+    _elevation = visitor(_elevation, widget.elevation,
+            (dynamic value) => Tween<double>(begin: value as double))
+        as Tween<double>?;
+    _color = visitor(_color, widget.color,
+        (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
+    _shadowColor = visitor(_shadowColor, widget.shadowColor,
+        (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
   }
 
   @override

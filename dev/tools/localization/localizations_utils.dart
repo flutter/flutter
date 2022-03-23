@@ -13,7 +13,7 @@ import 'language_subtag_registry.dart';
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
-int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+int sortFilesByPath(FileSystemEntity a, FileSystemEntity b) {
   return a.path.compareTo(b.path);
 }
 
@@ -36,7 +36,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   ///
   /// When `deriveScriptCode` is true, if [scriptCode] was unspecified, it will
   /// be derived from the [languageCode] and [countryCode] if possible.
-  factory LocaleInfo.fromString(String locale, { bool deriveScriptCode = false }) {
+  factory LocaleInfo.fromString(String locale,
+      {bool deriveScriptCode = false}) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
@@ -63,29 +64,31 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     /// script, so it is safe to apply (Hant) to Taiwanese languages.
     if (deriveScriptCode && scriptCode == null) {
       switch (languageCode) {
-        case 'zh': {
-          if (countryCode == null) {
-            scriptCode = 'Hans';
-          }
-          switch (countryCode) {
-            case 'CN':
-            case 'SG':
+        case 'zh':
+          {
+            if (countryCode == null) {
               scriptCode = 'Hans';
-              break;
-            case 'TW':
-            case 'HK':
-            case 'MO':
-              scriptCode = 'Hant';
-              break;
+            }
+            switch (countryCode) {
+              case 'CN':
+              case 'SG':
+                scriptCode = 'Hans';
+                break;
+              case 'TW':
+              case 'HK':
+              case 'MO':
+                scriptCode = 'Hant';
+                break;
+            }
+            break;
           }
-          break;
-        }
-        case 'sr': {
-          if (countryCode == null) {
-            scriptCode = 'Cyrl';
+        case 'sr':
+          {
+            if (countryCode == null) {
+              scriptCode = 'Cyrl';
+            }
+            break;
           }
-          break;
-        }
       }
       // Increment length if we were able to assume a scriptCode.
       if (scriptCode != null) {
@@ -93,10 +96,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       }
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
-      if (scriptCode != null)
-        originalString += '_$scriptCode';
-      if (countryCode != null)
-        originalString += '_$countryCode';
+      if (scriptCode != null) originalString += '_$scriptCode';
+      if (countryCode != null) originalString += '_$countryCode';
     }
 
     return LocaleInfo(
@@ -111,20 +112,21 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final String languageCode;
   final String? scriptCode;
   final String? countryCode;
-  final int length;             // The number of fields. Ranges from 1-3.
-  final String originalString;  // Original un-parsed locale string.
+  final int length; // The number of fields. Ranges from 1-3.
+  final String originalString; // Original un-parsed locale string.
 
   String camelCase() {
     return originalString
-      .split('_')
-      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-      .join();
+        .split('_')
+        .map<String>((String part) =>
+            part.substring(0, 1).toUpperCase() +
+            part.substring(1).toLowerCase())
+        .join();
   }
 
   @override
   bool operator ==(Object other) {
-    return other is LocaleInfo
-        && other.originalString == originalString;
+    return other is LocaleInfo && other.originalString == originalString;
   }
 
   @override
@@ -162,17 +164,21 @@ void loadMatchingArbsIntoBundleMaps({
   /// overwrite the existing assumed data.
   final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
 
-  for (final FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
+  for (final FileSystemEntity entity in directory.listSync().toList()
+    ..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
+    if (FileSystemEntity.isFileSync(entityPath) &&
+        filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
       final File arbFile = File(entityPath);
 
       // Helper method to fill the maps with the correct data from file.
       void populateResources(LocaleInfo locale, File file) {
         final Map<String, String> resources = localeToResources[locale]!;
-        final Map<String, dynamic> attributes = localeToResourceAttributes[locale]!;
-        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        final Map<String, dynamic> attributes =
+            localeToResourceAttributes[locale]!;
+        final Map<String, dynamic> bundle =
+            json.decode(file.readAsStringSync()) as Map<String, dynamic>;
         for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
           if (key.startsWith('@'))
@@ -181,10 +187,12 @@ void loadMatchingArbsIntoBundleMaps({
             resources[key] = bundle[key] as String;
         }
       }
+
       // Only pre-assume scriptCode if there is a country or script code to assume off of.
       // When we assume scriptCode based on languageCode-only, we want this initial pass
       // to use the un-assumed version as a base class.
-      LocaleInfo locale = LocaleInfo.fromString(localeString, deriveScriptCode: localeString.split('_').length > 1);
+      LocaleInfo locale = LocaleInfo.fromString(localeString,
+          deriveScriptCode: localeString.split('_').length > 1);
       // Allow overwrite if the existing data is assumed.
       if (assumedLocales.contains(locale)) {
         localeToResources[locale] = <String, String>{};
@@ -198,7 +206,8 @@ void loadMatchingArbsIntoBundleMaps({
       // Add an assumed locale to default to when there is no info on scriptOnly locales.
       locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
       if (locale.scriptCode != null) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
+        final LocaleInfo scriptLocale = LocaleInfo.fromString(
+            '${locale.languageCode}_${locale.scriptCode}');
         if (!localeToResources.containsKey(scriptLocale)) {
           assumedLocales.add(scriptLocale);
           localeToResources[scriptLocale] ??= <String, String>{};
@@ -221,9 +230,8 @@ void checkCwdIsRepoRoot(String commandName) {
 
   if (!isRepoRoot) {
     exitWithError(
-      '$commandName must be run from the root of the Flutter repository. The '
-      'current working directory is: ${Directory.current.path}'
-    );
+        '$commandName must be run from the root of the Flutter repository. The '
+        'current working directory is: ${Directory.current.path}');
   }
 }
 
@@ -235,18 +243,23 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     )
     ..addFlag(
       'material',
-      help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
+      help:
+          'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
     )
     ..addFlag(
       'cupertino',
-      help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
+      help:
+          'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   final bool writeToFile = args['overwrite'] as bool;
   final bool materialOnly = args['material'] as bool;
   final bool cupertinoOnly = args['cupertino'] as bool;
 
-  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
+  return GeneratorOptions(
+      writeToFile: writeToFile,
+      materialOnly: materialOnly,
+      cupertinoOnly: cupertinoOnly);
 }
 
 class GeneratorOptions {
@@ -266,15 +279,14 @@ Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
-    if (line == '')
-      continue;
+    if (line == '') continue;
     if (line.startsWith('  ')) {
-      lastHeading[lastHeading.length - 1] = '${lastHeading.last}${line.substring(1)}';
+      lastHeading[lastHeading.length - 1] =
+          '${lastHeading.last}${line.substring(1)}';
       continue;
     }
     final int colon = line.indexOf(':');
-    if (colon <= 0)
-      throw 'not sure how to deal with "$line"';
+    if (colon <= 0) throw 'not sure how to deal with "$line"';
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);
     lastHeading = result.putIfAbsent(name, () => <String>[]);
@@ -293,23 +305,28 @@ const String kParentheticalPrefix = ' (';
 ///
 /// The data is obtained from the official IANA registry.
 void precacheLanguageAndRegionTags() {
-  final List<Map<String, List<String>>> sections =
-      languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
+  final List<Map<String, List<String>>> sections = languageSubtagRegistry
+      .split('%%')
+      .skip(1)
+      .map<Map<String, List<String>>>(_parseSection)
+      .toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
-      assert(section.containsKey('Subtag') && section.containsKey('Description'), section.toString());
+      assert(
+          section.containsKey('Subtag') && section.containsKey('Description'),
+          section.toString());
       final String subtag = section['Subtag']!.single;
       String description = section['Description']!.join(' ');
-      if (description.startsWith('United '))
-        description = 'the $description';
+      if (description.startsWith('United ')) description = 'the $description';
       if (description.contains(kParentheticalPrefix))
-        description = description.substring(0, description.indexOf(kParentheticalPrefix));
+        description =
+            description.substring(0, description.indexOf(kParentheticalPrefix));
       if (description.contains(kProvincePrefix))
-        description = description.substring(0, description.indexOf(kProvincePrefix));
-      if (description.endsWith(' Republic'))
-        description = 'the $description';
+        description =
+            description.substring(0, description.indexOf(kProvincePrefix));
+      if (description.endsWith(' Republic')) description = 'the $description';
       switch (type) {
         case 'language':
           _languages[subtag] = description;
@@ -342,10 +359,8 @@ String describeLocale(String tag) {
     script = _scripts[subtags[1]];
     assert(region != null && script != null);
   }
-  if (region != null)
-    output += ', as used in $region';
-  if (script != null)
-    output += ', using the $script script';
+  if (region != null) output += ', as used in $region';
+  if (script != null) output += ', using the $script script';
   return output;
 }
 
@@ -385,7 +400,8 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
-  if (<String>['\n', '\f', '\t', '\r', '\b'].every((String pattern) => !value.contains(pattern))) {
+  if (<String>['\n', '\f', '\t', '\r', '\b']
+      .every((String pattern) => !value.contains(pattern))) {
     final bool hasDollar = value.contains(r'$');
     final bool hasBackslash = value.contains(r'\');
     final bool hasQuote = value.contains("'");
@@ -400,26 +416,25 @@ String generateString(String value) {
 
   const String backslash = '__BACKSLASH__';
   assert(
-    !value.contains(backslash),
-    'Input string cannot contain the sequence: '
-    '"__BACKSLASH__", as it is used as part of '
-    'backslash character processing.'
-  );
+      !value.contains(backslash),
+      'Input string cannot contain the sequence: '
+      '"__BACKSLASH__", as it is used as part of '
+      'backslash character processing.');
 
   value = value
-    // Replace backslashes with a placeholder for now to properly parse
-    // other special characters.
-    .replaceAll(r'\', backslash)
-    .replaceAll(r'$', r'\$')
-    .replaceAll("'", r"\'")
-    .replaceAll('"', r'\"')
-    .replaceAll('\n', r'\n')
-    .replaceAll('\f', r'\f')
-    .replaceAll('\t', r'\t')
-    .replaceAll('\r', r'\r')
-    .replaceAll('\b', r'\b')
-    // Reintroduce escaped backslashes into generated Dart string.
-    .replaceAll(backslash, r'\\');
+      // Replace backslashes with a placeholder for now to properly parse
+      // other special characters.
+      .replaceAll(r'\', backslash)
+      .replaceAll(r'$', r'\$')
+      .replaceAll("'", r"\'")
+      .replaceAll('"', r'\"')
+      .replaceAll('\n', r'\n')
+      .replaceAll('\f', r'\f')
+      .replaceAll('\t', r'\t')
+      .replaceAll('\r', r'\r')
+      .replaceAll('\b', r'\b')
+      // Reintroduce escaped backslashes into generated Dart string.
+      .replaceAll(backslash, r'\\');
 
   return "'$value'";
 }
@@ -431,6 +446,7 @@ String generateEncodedString(String locale, String value) {
   if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF))
     return generateString(value);
 
-  final String unicodeEscapes = value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  final String unicodeEscapes =
+      value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
   return "'$unicodeEscapes'";
 }

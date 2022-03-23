@@ -7,7 +7,8 @@ import 'package:conductor_core/src/git.dart';
 import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/next.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
-import 'package:conductor_core/src/proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'package:conductor_core/src/proto/conductor_state.pbenum.dart'
+    show ReleasePhase;
 import 'package:conductor_core/src/repository.dart';
 import 'package:conductor_core/src/state.dart';
 import 'package:conductor_core/src/stdio.dart';
@@ -63,7 +64,8 @@ void main() {
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+          ..createSync(recursive: true),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
@@ -80,7 +82,9 @@ void main() {
     });
 
     group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
-      test('does not prompt user and updates currentPhase if there are no engine cherrypicks', () async {
+      test(
+          'does not prompt user and updates currentPhase if there are no engine cherrypicks',
+          () async {
         final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
@@ -89,15 +93,18 @@ void main() {
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
-        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
-            ..createSync(recursive: true);
+        final File ciYaml = fileSystem
+            .file('$checkoutsParentDirectory/engine/.ci.yaml')
+          ..createSync(recursive: true);
         // this branch already present in ciYaml
-        _initializeCiYamlFile(ciYaml, enabledBranches: <String>[candidateBranch]);
+        _initializeCiYamlFile(ciYaml,
+            enabledBranches: <String>[candidateBranch]);
         final pb.ConductorState state = pb.ConductorState(
           currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
           engine: pb.Repository(
             candidateBranch: candidateBranch,
-            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
+            checkoutPath:
+                fileSystem.path.join(checkoutsParentDirectory, 'engine'),
             workingBranch: workingBranch,
             startingGitHead: revision1,
             upstream: pb.Remote(name: 'upstream', url: remoteUrl),
@@ -110,7 +117,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -130,14 +138,17 @@ void main() {
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
         expect(
-          stdio.stdout,
-          contains('You must now codesign the engine binaries for commit $revision1'));
+            stdio.stdout,
+            contains(
+                'You must now codesign the engine binaries for commit $revision1'));
       });
 
-      test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
+      test('confirms to stdout when all engine cherrypicks were auto-applied',
+          () async {
         stdio.stdin.add('n');
-        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
-            ..createSync(recursive: true);
+        final File ciYaml = fileSystem
+            .file('$checkoutsParentDirectory/engine/.ci.yaml')
+          ..createSync(recursive: true);
         _initializeCiYamlFile(ciYaml);
         final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
@@ -156,7 +167,8 @@ void main() {
                 state: pb.CherrypickState.COMPLETED,
               ),
             ],
-            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
+            checkoutPath:
+                fileSystem.path.join(checkoutsParentDirectory, 'engine'),
             workingBranch: workingBranch,
             upstream: pb.Remote(name: 'upstream', url: remoteUrl),
             mirror: pb.Remote(name: 'mirror', url: remoteUrl),
@@ -170,7 +182,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -185,7 +198,8 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
         expect(
           stdio.stdout,
-          contains('All engine cherrypicks have been auto-applied by the conductor'),
+          contains(
+              'All engine cherrypicks have been auto-applied by the conductor'),
         );
       });
 
@@ -193,19 +207,26 @@ void main() {
         const String remoteUrl = 'https://github.com/org/repo.git';
         const String releaseChannel = 'beta';
         stdio.stdin.add('y');
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        final FakeProcessManager processManager =
+            FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
-                  ..createSync(recursive: true);
+              final File file = fileSystem
+                  .file('$checkoutsParentDirectory/engine/.ci.yaml')
+                ..createSync(recursive: true);
               _initializeCiYamlFile(file);
             },
           ),
-          const FakeCommand(command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch']),
+          const FakeCommand(command: <String>[
+            'git',
+            'push',
+            'mirror',
+            'HEAD:refs/heads/$workingBranch'
+          ]),
         ]);
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
@@ -218,7 +239,8 @@ void main() {
           currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
           engine: pb.Repository(
             candidateBranch: candidateBranch,
-            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
+            checkoutPath:
+                fileSystem.path.join(checkoutsParentDirectory, 'engine'),
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
                 trunkRevision: revision2,
@@ -238,7 +260,10 @@ void main() {
           <String>[],
         );
         // engine dir is expected to already exist
-        fileSystem.directory(checkoutsParentDirectory).childDirectory('engine').createSync(recursive: true);
+        fileSystem
+            .directory(checkoutsParentDirectory)
+            .childDirectory('engine')
+            .createSync(recursive: true);
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory),
@@ -259,9 +284,12 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
         expect(
-          stdio.stdout,
-          contains('You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
-        expect(stdio.stdout, contains(
+            stdio.stdout,
+            contains(
+                'You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
+        expect(
+            stdio.stdout,
+            contains(
                 'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
@@ -306,7 +334,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -323,7 +352,10 @@ void main() {
         );
 
         expect(processManager, hasNoRemainingExpectations);
-        expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
+        expect(
+            stdio.stdout,
+            contains(
+                'Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error.contains('Aborting command.'), true);
       });
@@ -344,7 +376,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -361,19 +394,26 @@ void main() {
         );
 
         expect(processManager, hasNoRemainingExpectations);
-        expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
-        expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+        expect(
+            stdio.stdout,
+            contains(
+                'Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
+        expect(
+            finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
     });
 
     group('APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION', () {
       const String mirrorRemoteUrl = 'https://github.com/org/repo.git';
       const String upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
-      const String engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
-      const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
+      const String engineUpstreamRemoteUrl =
+          'https://github.com/mirror/engine.git';
+      const String frameworkCheckoutPath =
+          '$checkoutsParentDirectory/framework';
       const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
       const String oldEngineVersion = '000000001';
-      const String frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
+      const String frameworkCherrypick =
+          '431ae69b4dd2dd48f7ba0153671e0311014c958b';
       late FakeProcessManager processManager;
       late FakePlatform platform;
       late pb.ConductorState state;
@@ -415,7 +455,8 @@ void main() {
         // create engine repo
         fileSystem.directory(engineCheckoutPath).createSync(recursive: true);
         // create framework repo
-        final Directory frameworkDir = fileSystem.directory(frameworkCheckoutPath);
+        final Directory frameworkDir =
+            fileSystem.directory(frameworkCheckoutPath);
         final File engineRevisionFile = frameworkDir
             .childDirectory('bin')
             .childDirectory('internal')
@@ -424,7 +465,9 @@ void main() {
         engineRevisionFile.writeAsStringSync(oldEngineVersion, flush: true);
       });
 
-      test('with no dart, engine or framework cherrypicks, no user input, no PR needed', () async {
+      test(
+          'with no dart, engine or framework cherrypicks, no user input, no PR needed',
+          () async {
         state = pb.ConductorState(
           framework: pb.Repository(
             candidateBranch: candidateBranch,
@@ -449,7 +492,8 @@ void main() {
 
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -474,12 +518,18 @@ void main() {
         );
       });
 
-      test('with no engine cherrypicks but a dart revision update, updates engine revision', () async {
+      test(
+          'with no engine cherrypicks but a dart revision update, updates engine revision',
+          () async {
         stdio.stdin.add('n');
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           // we want merged upstream commit, not local working commit
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(command: <String>[
+            'git',
+            'checkout',
+            'upstream/$candidateBranch'
+          ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
@@ -488,8 +538,9 @@ void main() {
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
-                  ..createSync();
+              final File file = fileSystem
+                  .file('$checkoutsParentDirectory/framework/.ci.yaml')
+                ..createSync();
               _initializeCiYamlFile(file);
             },
           ),
@@ -533,7 +584,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -546,8 +598,12 @@ void main() {
         ]);
 
         expect(processManager, hasNoRemainingExpectations);
-        expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
-        expect(stdio.stdout, contains('Are you ready to push your framework branch'));
+        expect(
+            stdio.stdout,
+            contains(
+                'Updating engine revision from $oldEngineVersion to $revision1'));
+        expect(stdio.stdout,
+            contains('Are you ready to push your framework branch'));
       });
 
       test('does not update state.currentPhase if user responds no', () async {
@@ -556,10 +612,15 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           // we want merged upstream commit, not local working commit
           FakeCommand(
-            command: const <String>['git', 'checkout', 'upstream/$candidateBranch'],
+            command: const <String>[
+              'git',
+              'checkout',
+              'upstream/$candidateBranch'
+            ],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
-                  ..createSync();
+              final File file = fileSystem
+                  .file('$checkoutsParentDirectory/framework/.ci.yaml')
+                ..createSync();
               _initializeCiYamlFile(file);
             },
           ),
@@ -568,7 +629,8 @@ void main() {
             stdout: revision1,
           ),
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
+          const FakeCommand(
+              command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM path/to/engine.version',
@@ -591,7 +653,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -607,9 +670,13 @@ void main() {
           fileSystem.file(stateFile),
         );
 
-        expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $mirrorRemoteUrl? (y/n) '));
+        expect(
+            stdio.stdout,
+            contains(
+                'Are you ready to push your framework branch to the repository $mirrorRemoteUrl? (y/n) '));
         expect(stdio.error, contains('Aborting command.'));
-        expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
+        expect(
+            finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
 
       test('updates state.currentPhase if user responds yes', () async {
@@ -618,7 +685,11 @@ void main() {
           // Engine repo
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           // we want merged upstream commit, not local working commit
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(command: <String>[
+            'git',
+            'checkout',
+            'upstream/$candidateBranch'
+          ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
@@ -628,8 +699,9 @@ void main() {
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
-                  ..createSync();
+              final File file = fileSystem
+                  .file('$checkoutsParentDirectory/framework/.ci.yaml')
+                ..createSync();
               _initializeCiYamlFile(file);
             },
           ),
@@ -648,7 +720,12 @@ void main() {
             stdout: revision4,
           ),
           const FakeCommand(
-            command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch'],
+            command: <String>[
+              'git',
+              'push',
+              'mirror',
+              'HEAD:refs/heads/$workingBranch'
+            ],
           ),
         ]);
         writeStateToFile(
@@ -658,7 +735,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -677,7 +755,8 @@ void main() {
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
         expect(
           stdio.stdout,
-          contains('Rolling new engine hash $revision1 to framework checkout...'),
+          contains(
+              'Rolling new engine hash $revision1 to framework checkout...'),
         );
         expect(
           stdio.stdout,
@@ -685,11 +764,13 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('Are you ready to push your framework branch to the repository $mirrorRemoteUrl? (y/n)'),
+          contains(
+              'Are you ready to push your framework branch to the repository $mirrorRemoteUrl? (y/n)'),
         );
         expect(
           stdio.stdout,
-          contains('Executed command: `git push mirror HEAD:refs/heads/$workingBranch`'),
+          contains(
+              'Executed command: `git push mirror HEAD:refs/heads/$workingBranch`'),
         );
         expect(stdio.error, isEmpty);
       });
@@ -727,7 +808,11 @@ void main() {
               command: <String>['git', 'fetch', 'upstream'],
             ),
             const FakeCommand(
-              command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+              command: <String>[
+                'git',
+                'checkout',
+                '$remoteName/$candidateBranch'
+              ],
             ),
             const FakeCommand(
               command: <String>['git', 'rev-parse', 'HEAD'],
@@ -742,7 +827,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -759,7 +845,10 @@ void main() {
         );
 
         expect(processManager, hasNoRemainingExpectations);
-        expect(stdio.stdout, contains('Are you ready to tag commit $revision1 as $releaseVersion'));
+        expect(
+            stdio.stdout,
+            contains(
+                'Are you ready to tag commit $revision1 as $releaseVersion'));
         expect(stdio.error, contains('Aborting command.'));
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
         expect(finalState.logs, stdio.logs);
@@ -767,12 +856,17 @@ void main() {
 
       test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        final FakeProcessManager processManager =
+            FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
           const FakeCommand(
-            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            command: <String>[
+              'git',
+              'checkout',
+              '$remoteName/$candidateBranch'
+            ],
           ),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -799,7 +893,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -817,7 +912,10 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
-        expect(stdio.stdout, contains('Are you ready to tag commit $revision1 as $releaseVersion'));
+        expect(
+            stdio.stdout,
+            contains(
+                'Are you ready to tag commit $revision1 as $releaseVersion'));
         expect(finalState.logs, stdio.logs);
       });
     });
@@ -848,12 +946,17 @@ void main() {
 
       test('does not update currentPhase if user responds no', () async {
         stdio.stdin.add('n');
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        final FakeProcessManager processManager =
+            FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
           const FakeCommand(
-            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            command: <String>[
+              'git',
+              'checkout',
+              '$remoteName/$candidateBranch'
+            ],
           ),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -867,7 +970,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -887,7 +991,8 @@ void main() {
         expect(stdio.error, contains('Aborting command.'));
         expect(
           stdio.stdout,
-          contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
+          contains(
+              'About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
         );
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
       });
@@ -896,23 +1001,38 @@ void main() {
         stdio.stdin.add('y');
         // for kSynchronizeDevWithBeta
         stdio.stdin.add('y');
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        final FakeProcessManager processManager =
+            FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
           const FakeCommand(
-            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            command: <String>[
+              'git',
+              'checkout',
+              '$remoteName/$candidateBranch'
+            ],
           ),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
           const FakeCommand(
-            command: <String>['git', 'push', FrameworkRepository.defaultUpstream, '$revision1:$releaseChannel'],
+            command: <String>[
+              'git',
+              'push',
+              FrameworkRepository.defaultUpstream,
+              '$revision1:$releaseChannel'
+            ],
           ),
           // for kSynchronizeDevWithBeta
           const FakeCommand(
-            command: <String>['git', 'push', FrameworkRepository.defaultUpstream, '$revision1:dev'],
+            command: <String>[
+              'git',
+              'push',
+              FrameworkRepository.defaultUpstream,
+              '$revision1:dev'
+            ],
           ),
         ]);
         writeStateToFile(
@@ -922,7 +1042,8 @@ void main() {
         );
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+            ..createSync(recursive: true),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
@@ -942,17 +1063,20 @@ void main() {
         expect(stdio.error, isEmpty);
         expect(
           stdio.stdout,
-          contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
+          contains(
+              'About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
         );
         expect(
           stdio.stdout,
-          contains('Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
+          contains(
+              'Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
         );
         expect(finalState.currentPhase, ReleasePhase.VERIFY_RELEASE);
       });
     });
 
-    test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
+    test('throws exception if state.currentPhase is RELEASE_COMPLETED',
+        () async {
       final FakeProcessManager processManager = FakeProcessManager.empty();
       final FakePlatform platform = FakePlatform(
         environment: <String, String>{
@@ -971,7 +1095,8 @@ void main() {
       );
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+          ..createSync(recursive: true),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
@@ -1050,7 +1175,9 @@ void main() {
       platform = FakePlatform();
     });
 
-    test('catches GitException if the push was rejected and instead throws a helpful ConductorException', () async {
+    test(
+        'catches GitException if the push was rejected and instead throws a helpful ConductorException',
+        () async {
       const String gitPushErrorMessage = '''
  To github.com:user/engine.git
 
@@ -1063,16 +1190,27 @@ void main() {
 ''';
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory)
+          ..createSync(recursive: true),
         platform: platform,
         processManager: FakeProcessManager.empty(),
         stdio: stdio,
       );
-      final Repository testRepository = _TestRepository.fromCheckouts(checkouts);
+      final Repository testRepository =
+          _TestRepository.fromCheckouts(checkouts);
       final pb.Repository testPbRepository = pb.Repository();
-      (checkouts.processManager as FakeProcessManager).addCommands(<FakeCommand>[
+      (checkouts.processManager as FakeProcessManager)
+          .addCommands(<FakeCommand>[
         FakeCommand(
-          command: <String>['git', 'clone', '--origin', 'upstream', '--', testRepository.upstreamRemote.url, '/flutter/dev/conductor/flutter_conductor_checkouts/test-repo/test-repo'],
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            testRepository.upstreamRemote.url,
+            '/flutter/dev/conductor/flutter_conductor_checkouts/test-repo/test-repo'
+          ],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -1080,7 +1218,8 @@ void main() {
         ),
         FakeCommand(
           command: const <String>['git', 'push', '', 'HEAD:refs/heads/'],
-          exception: GitException(gitPushErrorMessage, <String>['git', 'push', '--force', '', 'HEAD:refs/heads/']),
+          exception: GitException(gitPushErrorMessage,
+              <String>['git', 'push', '--force', '', 'HEAD:refs/heads/']),
         )
       ]);
       final NextContext nextContext = NextContext(
@@ -1095,7 +1234,8 @@ void main() {
         throwsA(isA<ConductorException>().having(
           (ConductorException exception) => exception.message,
           'has correct message',
-          contains('Re-run this command with --force to overwrite the remote branch'),
+          contains(
+              'Re-run this command with --force to overwrite the remote branch'),
         )),
       );
     });
@@ -1134,16 +1274,20 @@ class _UnimplementedStdio implements Stdio {
 }
 
 class _TestRepository extends Repository {
-  _TestRepository.fromCheckouts(Checkouts checkouts, [String name = 'test-repo']) : super(
-    fileSystem: checkouts.fileSystem,
-    parentDirectory: checkouts.directory.childDirectory(name),
-    platform: checkouts.platform,
-    processManager: checkouts.processManager,
-    name: name,
-    requiredLocalBranches: <String>[],
-    stdio: checkouts.stdio,
-    upstreamRemote: const Remote(name: RemoteName.upstream, url: 'git@github.com:upstream/repo.git'),
-  );
+  _TestRepository.fromCheckouts(Checkouts checkouts,
+      [String name = 'test-repo'])
+      : super(
+          fileSystem: checkouts.fileSystem,
+          parentDirectory: checkouts.directory.childDirectory(name),
+          platform: checkouts.platform,
+          processManager: checkouts.processManager,
+          name: name,
+          requiredLocalBranches: <String>[],
+          stdio: checkouts.stdio,
+          upstreamRemote: const Remote(
+              name: RemoteName.upstream,
+              url: 'git@github.com:upstream/repo.git'),
+        );
 
   @override
   Future<_TestRepository> cloneRepository(String? cloneName) async {
@@ -1158,11 +1302,11 @@ class _TestNextContext extends NextContext {
     required File stateFile,
     required Checkouts checkouts,
   }) : super(
-    autoAccept: autoAccept,
-    force: force,
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+          autoAccept: autoAccept,
+          force: force,
+          checkouts: checkouts,
+          stateFile: stateFile,
+        );
 
   @override
   Future<bool> prompt(String message) {

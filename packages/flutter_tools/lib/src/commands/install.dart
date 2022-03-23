@@ -10,12 +10,14 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
-class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
+class InstallCommand extends FlutterCommand
+    with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
     requiresPubspecYaml();
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
-    argParser.addFlag('uninstall-only',
+    argParser.addFlag(
+      'uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
   }
@@ -42,14 +44,16 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
       throwToolExit('No target device found');
     }
     if (userIdentifier != null && device is! AndroidDevice) {
-      throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
+      throwToolExit(
+          '--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
+    final ApplicationPackage? package =
+        await applicationPackages?.getPackageForPlatform(
       await targetDevice.targetPlatform,
     );
     if (package == null) {
@@ -84,18 +88,15 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 }
 
-Future<bool> installApp(
-  Device device,
-  ApplicationPackage package, {
-  String? userIdentifier,
-  bool uninstall = true
-}) async {
+Future<bool> installApp(Device device, ApplicationPackage package,
+    {String? userIdentifier, bool uninstall = true}) async {
   if (package == null) {
     return false;
   }
 
   try {
-    if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
+    if (uninstall &&
+        await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
         globals.printWarning('Warning: uninstalling old version failed');

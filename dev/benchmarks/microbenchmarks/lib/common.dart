@@ -20,7 +20,6 @@ import 'dart:convert' show json;
 ///     printer.printToStdout();
 ///
 class BenchmarkResultPrinter {
-
   final List<_BenchmarkResult> _results = <_BenchmarkResult>[];
 
   /// Adds a benchmark result to the list of results.
@@ -29,7 +28,11 @@ class BenchmarkResultPrinter {
   /// result value. [unit] is the unit of measurement, such as "ms", "km", "h".
   /// [name] is a computer-readable name of the result used as a key in the JSON
   /// serialization of the results.
-  void addResult({ required String description, required double value, required String unit, required String name }) {
+  void addResult(
+      {required String description,
+      required double value,
+      required String unit,
+      required String name}) {
     _results.add(_BenchmarkResult(description, value, unit, name));
   }
 
@@ -58,7 +61,8 @@ class BenchmarkResultPrinter {
   String _printPlainText() {
     final StringBuffer buf = StringBuffer();
     for (final _BenchmarkResult result in _results) {
-      buf.writeln('${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
+      buf.writeln(
+          '${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
     }
     return buf.toString();
   }

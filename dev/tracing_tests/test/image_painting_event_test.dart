@@ -23,7 +23,8 @@ void main() {
       fail('This test _must_ be run with --enable-vmservice.');
     }
 
-    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
+    vmService = await vmServiceConnectUri(
+        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await vmService.streamListen(EventStreams.kExtension);
 
     // Initialize bindings
@@ -42,9 +43,9 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService
-        .onExtensionEvent
-        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+    vmService.onExtensionEvent
+        .firstWhere((Event event) =>
+            event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
@@ -78,9 +79,9 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService
-        .onExtensionEvent
-        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+    vmService.onExtensionEvent
+        .firstWhere((Event event) =>
+            event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);

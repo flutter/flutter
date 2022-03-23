@@ -51,19 +51,22 @@ Future<void> main() async {
   ));
   await SchedulerBinding.instance.endOfFrame;
 
-  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
+  final WidgetController controller =
+      LiveWidgetController(WidgetsBinding.instance);
 
   // Scroll down
   for (int iteration = 0; iteration < maxIterations; iteration += 1) {
     debugPrint('Scroll down... $iteration/$maxIterations');
-    await controller.fling(find.byType(ListView), const Offset(0.0, -700.0), speed);
+    await controller.fling(
+        find.byType(ListView), const Offset(0.0, -700.0), speed);
     await Future<void>.delayed(pauses);
   }
 
   // Scroll up
   for (int iteration = 0; iteration < maxIterations; iteration += 1) {
     debugPrint('Scroll up... $iteration/$maxIterations');
-    await controller.fling(find.byType(ListView), const Offset(0.0, 300.0), speed);
+    await controller.fling(
+        find.byType(ListView), const Offset(0.0, 300.0), speed);
     await Future<void>.delayed(pauses);
   }
 

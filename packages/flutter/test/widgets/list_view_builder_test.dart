@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('ListView.builder mount/dismount smoke test', (WidgetTester tester) async {
+  testWidgets('ListView.builder mount/dismount smoke test',
+      (WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -38,11 +39,13 @@ void main() {
 
     final FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-    expect(callbackTracker, equals(<int>[
-      0, 1, 2, 3, 4, 5, // visible in viewport
-      6, 7, 8, // in caching area
-    ]));
-    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[ 6, 7, 8]);
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, 1, 2, 3, 4, 5, // visible in viewport
+          6, 7, 8, // in caching area
+        ]));
+    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7, 8]);
 
     callbackTracker.clear();
     testWidget.flip();
@@ -54,11 +57,13 @@ void main() {
     testWidget.flip();
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[
-      0, 1, 2, 3, 4, 5,
-      6, 7, 8, // in caching area
-    ]));
-    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[ 6, 7, 8]);
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, 1, 2, 3, 4, 5,
+          6, 7, 8, // in caching area
+        ]));
+    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7, 8]);
   });
 
   testWidgets('ListView.builder vertical', (WidgetTester tester) async {
@@ -99,11 +104,13 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[
-      0, // in caching area
-      1, 2, 3, 4,
-      5, // in caching area
-    ]));
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, // in caching area
+          1, 2, 3, 4,
+          5, // in caching area
+        ]));
     check(visible: <int>[1, 2, 3, 4], hidden: <int>[0, 5]);
     callbackTracker.clear();
 
@@ -112,11 +119,13 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[
-      0, 1, // in caching area
-      2, 3, 4,
-      5, 6, // in caching area
-    ]));
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, 1, // in caching area
+          2, 3, 4,
+          5, 6, // in caching area
+        ]));
     check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5, 6]);
     callbackTracker.clear();
 
@@ -125,11 +134,13 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[
-      0, 1, // in caching area
-      2, 3, 4, 5,
-      6, // in caching area
-    ]));
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, 1, // in caching area
+          2, 3, 4, 5,
+          6, // in caching area
+        ]));
     check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6]);
     callbackTracker.clear();
   });
@@ -173,11 +184,13 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[
-      0, // in caching area
-      1, 2, 3, 4, 5,
-      6, // in caching area
-    ]));
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, // in caching area
+          1, 2, 3, 4, 5,
+          6, // in caching area
+        ]));
     check(visible: <int>[1, 2, 3, 4, 5], hidden: <int>[0, 6]);
     callbackTracker.clear();
 
@@ -186,11 +199,13 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[
-      0, 1, // in caching area
-      2, 3, 4, 5,
-      6, 7, // in caching area
-    ]));
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, 1, // in caching area
+          2, 3, 4, 5,
+          6, 7, // in caching area
+        ]));
     check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6, 7]);
     callbackTracker.clear();
 
@@ -199,16 +214,19 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    expect(callbackTracker, equals(<int>[
-      0, 1, // in caching area
-      2, 3, 4, 5, 6,
-      7, // in caching area
-    ]));
+    expect(
+        callbackTracker,
+        equals(<int>[
+          0, 1, // in caching area
+          2, 3, 4, 5, 6,
+          7, // in caching area
+        ]));
     check(visible: <int>[2, 3, 4, 5, 6], hidden: <int>[0, 1, 7]);
     callbackTracker.clear();
   });
 
-  testWidgets('ListView.builder 10 items, 2-3 items visible', (WidgetTester tester) async {
+  testWidgets('ListView.builder 10 items, 2-3 items visible',
+      (WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
 
     // The root view is 800x600 in the test environment and our list
@@ -217,7 +235,8 @@ void main() {
 
     Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
-      return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
+      return Text('$index',
+          key: ValueKey<int>(index), textDirection: TextDirection.ltr);
     }
 
     final Widget testWidget = Directionality(
@@ -261,7 +280,8 @@ void main() {
     callbackTracker.clear();
   });
 
-  testWidgets('ListView.builder 30 items with big jump, using prototypeItem', (WidgetTester tester) async {
+  testWidgets('ListView.builder 30 items with big jump, using prototypeItem',
+      (WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
 
     // The root view is 800x600 in the test environment and our list
@@ -270,7 +290,8 @@ void main() {
 
     Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
-      return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
+      return Text('$index',
+          key: ValueKey<int>(index), textDirection: TextDirection.ltr);
     }
 
     final Widget testWidget = Directionality(
@@ -294,7 +315,8 @@ void main() {
 
     // 2 is in the cache area, but not visible.
     expect(callbackTracker, equals(<int>[0, 1, 2]));
-    final List<int> initialExpectedHidden = List<int>.generate(28, (int i) => i + 2);
+    final List<int> initialExpectedHidden =
+        List<int>.generate(28, (int i) => i + 2);
     check(visible: <int>[0, 1], hidden: initialExpectedHidden);
     callbackTracker.clear();
 
@@ -310,7 +332,7 @@ void main() {
   });
 
   testWidgets('ListView.separated', (WidgetTester tester) async {
-    Widget buildFrame({ required int itemCount }) {
+    Widget buildFrame({required int itemCount}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(
@@ -347,15 +369,26 @@ void main() {
 
     // ListView's height is 600, so items i0-i5 and s0-s4 fit.
     await tester.pumpWidget(buildFrame(itemCount: 25));
-    for (final String s in <String>['i0', 's0', 'i1', 's1', 'i2', 's2', 'i3', 's3', 'i4', 's4', 'i5'])
-      expect(find.text(s), findsOneWidget);
+    for (final String s in <String>[
+      'i0',
+      's0',
+      'i1',
+      's1',
+      'i2',
+      's2',
+      'i3',
+      's3',
+      'i4',
+      's4',
+      'i5'
+    ]) expect(find.text(s), findsOneWidget);
     expect(find.text('s5'), findsNothing);
     expect(find.text('i6'), findsNothing);
   });
 
-
-  testWidgets('ListView.separated uses correct semanticChildCount', (WidgetTester tester) async {
-    Widget buildFrame({ required int itemCount}) {
+  testWidgets('ListView.separated uses correct semanticChildCount',
+      (WidgetTester tester) async {
+    Widget buildFrame({required int itemCount}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(
@@ -402,7 +435,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/72292
-  testWidgets('ListView.builder and SingleChildScrollView can work well together', (WidgetTester tester) async {
+  testWidgets(
+      'ListView.builder and SingleChildScrollView can work well together',
+      (WidgetTester tester) async {
     Widget builder(int itemCount) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -425,7 +460,8 @@ void main() {
   });
 }
 
-void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {
+void check(
+    {List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
   for (final int i in visible) {
     expect(find.text('$i'), findsOneWidget);
   }

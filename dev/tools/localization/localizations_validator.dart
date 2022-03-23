@@ -9,11 +9,19 @@ import 'localizations_utils.dart';
 
 // The first suffix in kPluralSuffixes must be "Other". "Other" is special
 // because it's the only one that is required.
-const List<String> kPluralSuffixes = <String>['Other', 'Zero', 'One', 'Two', 'Few', 'Many'];
-final RegExp kPluralRegexp = RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
+const List<String> kPluralSuffixes = <String>[
+  'Other',
+  'Zero',
+  'One',
+  'Two',
+  'Few',
+  'Many'
+];
+final RegExp kPluralRegexp =
+    RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
 
 class ValidationError implements Exception {
-  ValidationError(this. message);
+  ValidationError(this.message);
   final String message;
   @override
   String toString() => message;
@@ -36,28 +44,27 @@ void validateEnglishLocalizations(File file) {
     throw ValidationError(errorMessages.toString());
   }
 
-  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+  final Map<String, dynamic> bundle =
+      json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
   for (final String resourceId in bundle.keys) {
-    if (resourceId.startsWith('@'))
-      continue;
+    if (resourceId.startsWith('@')) continue;
 
-    if (bundle['@$resourceId'] != null)
-      continue;
+    if (bundle['@$resourceId'] != null) continue;
 
     bool checkPluralResource(String suffix) {
       final int suffixIndex = resourceId.indexOf(suffix);
-      return suffixIndex != -1 && bundle['@${resourceId.substring(0, suffixIndex)}'] != null;
+      return suffixIndex != -1 &&
+          bundle['@${resourceId.substring(0, suffixIndex)}'] != null;
     }
-    if (kPluralSuffixes.any(checkPluralResource))
-      continue;
+
+    if (kPluralSuffixes.any(checkPluralResource)) continue;
 
     errorMessages.writeln('A value was not specified for @$resourceId');
   }
 
   for (final String atResourceId in bundle.keys) {
-    if (!atResourceId.startsWith('@'))
-      continue;
+    if (!atResourceId.startsWith('@')) continue;
 
     final dynamic atResourceValue = bundle[atResourceId];
     final Map<String, dynamic>? atResource =
@@ -77,15 +84,16 @@ void validateEnglishLocalizations(File file) {
     if (plural != null) {
       final String resourceIdOther = '${resourceId}Other';
       if (!bundle.containsKey(resourceIdOther))
-        errorMessages.writeln('Default plural resource $resourceIdOther undefined');
+        errorMessages
+            .writeln('Default plural resource $resourceIdOther undefined');
     } else {
       if (!optional && !bundle.containsKey(resourceId))
-        errorMessages.writeln('No matching $resourceId defined for $atResourceId');
+        errorMessages
+            .writeln('No matching $resourceId defined for $atResourceId');
     }
   }
 
-  if (errorMessages.isNotEmpty)
-    throw ValidationError(errorMessages.toString());
+  if (errorMessages.isNotEmpty) throw ValidationError(errorMessages.toString());
 }
 
 /// Enforces the following invariants in our localizations:
@@ -101,8 +109,10 @@ void validateLocalizations(
   Map<LocaleInfo, Map<String, String>> localeToResources,
   Map<LocaleInfo, Map<String, dynamic>> localeToAttributes,
 ) {
-  final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
-  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+  final Map<String, String> canonicalLocalizations =
+      localeToResources[LocaleInfo.fromString('en')]!;
+  final Set<String> canonicalKeys =
+      Set<String>.from(canonicalLocalizations.keys);
   final StringBuffer errorMessages = StringBuffer();
   bool explainMissingKeys = false;
   for (final LocaleInfo locale in localeToResources.keys) {
@@ -115,51 +125,52 @@ void validateLocalizations(
     // require them so long as the "Other" variation exists.
     bool isPluralVariation(String key) {
       final Match? pluralMatch = kPluralRegexp.firstMatch(key);
-      if (pluralMatch == null)
-        return false;
+      if (pluralMatch == null) return false;
       final String? prefix = pluralMatch[1];
       return resources.containsKey('${prefix}Other');
     }
 
     final Set<String> keys = Set<String>.from(
-      resources.keys.where((String key) => !isPluralVariation(key))
-    );
+        resources.keys.where((String key) => !isPluralVariation(key)));
 
     // Make sure keys are valid (i.e. they also exist in the canonical
     // localizations)
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
     if (invalidKeys.isNotEmpty)
-      errorMessages.writeln('Locale "$locale" contains invalid resource keys: ${invalidKeys.join(', ')}');
+      errorMessages.writeln(
+          'Locale "$locale" contains invalid resource keys: ${invalidKeys.join(', ')}');
     // For language-level locales only, check that they have a complete list of
     // keys, or opted out of using certain ones.
     if (locale.length == 1) {
       final Map<String, dynamic>? attributes = localeToAttributes[locale];
       final List<String?> missingKeys = <String?>[];
-       for (final String missingKey in canonicalKeys.difference(keys)) {
+      for (final String missingKey in canonicalKeys.difference(keys)) {
         final dynamic attribute = attributes?[missingKey];
-        final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed');
+        final bool intentionallyOmitted =
+            attribute is Map && attribute.containsKey('notUsed');
         if (!intentionallyOmitted && !isPluralVariation(missingKey))
           missingKeys.add(missingKey);
       }
       if (missingKeys.isNotEmpty) {
         explainMissingKeys = true;
-        errorMessages.writeln('Locale "$locale" is missing the following resource keys: ${missingKeys.join(', ')}');
+        errorMessages.writeln(
+            'Locale "$locale" is missing the following resource keys: ${missingKeys.join(', ')}');
       }
     }
   }
 
   if (errorMessages.isNotEmpty) {
     if (explainMissingKeys) {
-        errorMessages
-          ..writeln()
-          ..writeln(
+      errorMessages
+        ..writeln()
+        ..writeln(
             'If a resource key is intentionally omitted, add an attribute corresponding '
-            'to the key name with a "notUsed" property explaining why. Example:'
-          )
-          ..writeln()
-          ..writeln('"@anteMeridiemAbbreviation": {')
-          ..writeln('  "notUsed": "Sindhi time format does not use a.m. indicator"')
-          ..writeln('}');
+            'to the key name with a "notUsed" property explaining why. Example:')
+        ..writeln()
+        ..writeln('"@anteMeridiemAbbreviation": {')
+        ..writeln(
+            '  "notUsed": "Sindhi time format does not use a.m. indicator"')
+        ..writeln('}');
     }
     throw ValidationError(errorMessages.toString());
   }

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ColorTestingDemo extends StatelessWidget {
-  const ColorTestingDemo({ Key? key }) : super(key: key);
+  const ColorTestingDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/color_demo';
 
@@ -23,15 +23,24 @@ class ColorDemoHome extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(5.0),
         children: <Widget>[
-          Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/gbr.png'),
-          Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/tf.png'),
-          Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/wide-gamut.png'),
-          const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFF00FF00)),
-          const GradientRow(leftColor: Color(0xFF0000FF), rightColor: Color(0xFFFFFF00)),
-          const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFF0000FF)),
-          const GradientRow(leftColor: Color(0xFF00FF00), rightColor: Color(0xFFFFFF00)),
-          const GradientRow(leftColor: Color(0xFF0000FF), rightColor: Color(0xFF00FF00)),
-          const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFFFFFF00)),
+          Image.network(
+              'https://flutter.github.io/assets-for-api-docs/assets/tests/colors/gbr.png'),
+          Image.network(
+              'https://flutter.github.io/assets-for-api-docs/assets/tests/colors/tf.png'),
+          Image.network(
+              'https://flutter.github.io/assets-for-api-docs/assets/tests/colors/wide-gamut.png'),
+          const GradientRow(
+              leftColor: Color(0xFFFF0000), rightColor: Color(0xFF00FF00)),
+          const GradientRow(
+              leftColor: Color(0xFF0000FF), rightColor: Color(0xFFFFFF00)),
+          const GradientRow(
+              leftColor: Color(0xFFFF0000), rightColor: Color(0xFF0000FF)),
+          const GradientRow(
+              leftColor: Color(0xFF00FF00), rightColor: Color(0xFFFFFF00)),
+          const GradientRow(
+              leftColor: Color(0xFF0000FF), rightColor: Color(0xFF00FF00)),
+          const GradientRow(
+              leftColor: Color(0xFFFF0000), rightColor: Color(0xFFFFFF00)),
 
           // For the following pairs, the blend result should match the opaque color.
           const ColorRow(color: Color(0xFFBCBCBC)),
@@ -52,7 +61,9 @@ class ColorDemoHome extends StatelessWidget {
 }
 
 class GradientRow extends StatelessWidget {
-  const GradientRow({ Key? key, required this.rightColor, required this.leftColor }) : super(key: key);
+  const GradientRow(
+      {Key? key, required this.rightColor, required this.leftColor})
+      : super(key: key);
 
   final Color leftColor;
   final Color rightColor;
@@ -65,7 +76,7 @@ class GradientRow extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[ leftColor, rightColor ],
+          colors: <Color>[leftColor, rightColor],
         ),
       ),
     );
@@ -73,7 +84,7 @@ class GradientRow extends StatelessWidget {
 }
 
 class ColorRow extends StatelessWidget {
-  const ColorRow({ Key? key, required this.color }) : super(key: key);
+  const ColorRow({Key? key, required this.color}) : super(key: key);
 
   final Color color;
 

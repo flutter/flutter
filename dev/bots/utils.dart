@@ -11,7 +11,8 @@ final bool hasColor = stdout.supportsAnsiEscapes;
 
 final String bold = hasColor ? '\x1B[1m' : ''; // used for shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // used for errors
-final String green = hasColor ? '\x1B[32m' : ''; // used for section titles, commands
+final String green =
+    hasColor ? '\x1B[32m' : ''; // used for section titles, commands
 final String yellow = hasColor ? '\x1B[33m' : ''; // used for skips
 final String cyan = hasColor ? '\x1B[36m' : ''; // used for paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // used for clocks
@@ -35,7 +36,8 @@ void exit(int exitCode) {
 }
 
 void exitWithError(List<String> messages) {
-  final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
+  final String redLine =
+      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
   print(redLine);
   messages.forEach(print);
   print(redLine);
@@ -50,19 +52,19 @@ PrintCallback print = core_internals.print;
 String get clock {
   final DateTime now = DateTime.now();
   return '$reverse▌'
-         '${now.hour.toString().padLeft(2, "0")}:'
-         '${now.minute.toString().padLeft(2, "0")}:'
-         '${now.second.toString().padLeft(2, "0")}'
-         '▐$reset';
+      '${now.hour.toString().padLeft(2, "0")}:'
+      '${now.minute.toString().padLeft(2, "0")}:'
+      '${now.second.toString().padLeft(2, "0")}'
+      '▐$reset';
 }
 
 String prettyPrintDuration(Duration duration) {
   String result = '';
   final int minutes = duration.inMinutes;
-  if (minutes > 0)
-    result += '${minutes}min ';
+  if (minutes > 0) result += '${minutes}min ';
   final int seconds = duration.inSeconds - minutes * 60;
-  final int milliseconds = duration.inMilliseconds - (seconds * 1000 + minutes * 60 * 1000);
+  final int milliseconds =
+      duration.inMilliseconds - (seconds * 1000 + minutes * 60 * 1000);
   result += '$seconds.${milliseconds.toString().padLeft(3, "0")}s';
   return result;
 }

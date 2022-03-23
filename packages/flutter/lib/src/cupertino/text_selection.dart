@@ -49,10 +49,12 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
   final double textLineHeight;
 
   @override
-  _CupertinoTextSelectionControlsToolbarState createState() => _CupertinoTextSelectionControlsToolbarState();
+  _CupertinoTextSelectionControlsToolbarState createState() =>
+      _CupertinoTextSelectionControlsToolbarState();
 }
 
-class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSelectionControlsToolbar> {
+class _CupertinoTextSelectionControlsToolbarState
+    extends State<_CupertinoTextSelectionControlsToolbar> {
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -83,7 +85,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null &&
+        widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -93,7 +96,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough
     // space at the bottom in this case.
-    final double anchorX = (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
+    final double anchorX =
+        (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
@@ -104,7 +108,9 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // going to be facing up or down.
     final Offset anchorAbove = Offset(
       anchorX,
-      widget.endpoints.first.point.dy - widget.textLineHeight + widget.globalEditableRegion.top,
+      widget.endpoints.first.point.dy -
+          widget.textLineHeight +
+          widget.globalEditableRegion.top,
     );
     final Offset anchorBelow = Offset(
       anchorX,
@@ -112,7 +118,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     );
 
     final List<Widget> items = <Widget>[];
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final CupertinoLocalizations localizations =
+        CupertinoLocalizations.of(context);
     final Widget onePhysicalPixelVerticalDivider =
         SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
@@ -136,12 +143,13 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     if (widget.handleCopy != null) {
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
-    if (widget.handlePaste != null
-        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
+    if (widget.handlePaste != null &&
+        widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
+      addToolbarButton(
+          localizations.selectAllButtonLabel, widget.handleSelectAll!);
     }
 
     // If there is no option available, build an empty widget.
@@ -180,13 +188,14 @@ class _TextSelectionHandlePainter extends CustomPainter {
     );
     final Path path = Path()
       ..addOval(circle)
-    // Draw line so it slightly overlaps the circle.
+      // Draw line so it slightly overlaps the circle.
       ..addRect(line);
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) =>
+      color != oldPainter.color;
 }
 
 /// iOS Cupertino styled text selection controls.
@@ -219,7 +228,8 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+      handleSelectAll:
+          canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       selectionMidpoint: selectionMidpoint,
       textLineHeight: textLineHeight,
     );
@@ -227,13 +237,16 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(
+      BuildContext context, TextSelectionHandleType type, double textLineHeight,
+      [VoidCallback? onTap]) {
     // iOS selection handles do not respond to taps.
     final Size desiredSize;
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter:
+          _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -288,7 +301,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
-          handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
+          handleSize.height -
+              2 * _kSelectionHandleRadius +
+              _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
       case TextSelectionHandleType.collapsed:
@@ -302,4 +317,5 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that follows iOS design conventions.
-final TextSelectionControls cupertinoTextSelectionControls = CupertinoTextSelectionControls();
+final TextSelectionControls cupertinoTextSelectionControls =
+    CupertinoTextSelectionControls();

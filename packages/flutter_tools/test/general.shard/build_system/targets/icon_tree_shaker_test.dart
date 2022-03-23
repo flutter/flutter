@@ -17,7 +17,20 @@ import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
 final Platform kNoAnsiPlatform = FakePlatform();
-const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
+const List<int> _kTtfHeaderBytes = <int>[
+  0,
+  1,
+  0,
+  0,
+  0,
+  15,
+  0,
+  128,
+  0,
+  3,
+  0,
+  112
+];
 
 const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
 const String outputPath = '/output/fonts/MaterialIcons-Regular.otf';
@@ -36,13 +49,16 @@ void main() {
   late List<String> fontSubsetArgs;
 
   List<String> _getConstFinderArgs(String appDillPath) => <String>[
-    dartPath,
-    '--disable-dart-dev',
-    constFinderPath,
-    '--kernel-file', appDillPath,
-    '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
-    '--class-name', 'IconData',
-  ];
+        dartPath,
+        '--disable-dart-dev',
+        constFinderPath,
+        '--kernel-file',
+        appDillPath,
+        '--class-library-uri',
+        'package:flutter/src/widgets/icon_data.dart',
+        '--class-name',
+        'IconData',
+      ];
 
   void _addConstFinderInvocation(
     String appDillPath, {
@@ -334,7 +350,8 @@ void main() {
       artifacts: artifacts,
     );
 
-    _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
+    _addConstFinderInvocation(appDill.path,
+        stdout: constFinderResultWithInvalid);
 
     await expectLater(
       () => iconTreeShaker.subsetFont(
@@ -343,9 +360,8 @@ void main() {
         relativePath: relativePath,
       ),
       throwsToolExit(
-        message:
-          'Avoid non-constant invocations of IconData or try to build'
-          ' again with --no-tree-shake-icons.',
+        message: 'Avoid non-constant invocations of IconData or try to build'
+            ' again with --no-tree-shake-icons.',
       ),
     );
     expect(processManager, hasNoRemainingExpectations);

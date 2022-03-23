@@ -54,7 +54,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       constraints: BoxConstraints.tight(const Size(200, 50)),
                       child: TextFormField(
                         onSaved: (String? value) {
-                          debugPrint('Value for field $index saved as "$value"');
+                          debugPrint(
+                              'Value for field $index saved as "$value"');
                         },
                       ),
                     ),

@@ -33,7 +33,7 @@ class TextButtonThemeData with Diagnosticable {
   /// Creates a [TextButtonThemeData].
   ///
   /// The [style] may be null.
-  const TextButtonThemeData({ this.style });
+  const TextButtonThemeData({this.style});
 
   /// Overrides for [TextButton]'s default style.
   ///
@@ -45,10 +45,10 @@ class TextButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two text button themes.
-  static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null)
-      return null;
+  static TextButtonThemeData? lerp(
+      TextButtonThemeData? a, TextButtonThemeData? b, double t) {
+    assert(t != null);
+    if (a == null && b == null) return null;
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
@@ -59,17 +59,16 @@ class TextButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     return other is TextButtonThemeData && other.style == style;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
 }
 
@@ -92,7 +91,8 @@ class TextButtonTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  })  : assert(data != null),
+        super(key: key, child: child);
 
   /// The configuration of this theme.
   final TextButtonThemeData data;
@@ -108,7 +108,8 @@ class TextButtonTheme extends InheritedTheme {
   /// TextButtonThemeData theme = TextButtonTheme.of(context);
   /// ```
   static TextButtonThemeData of(BuildContext context) {
-    final TextButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
+    final TextButtonTheme? buttonTheme =
+        context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 

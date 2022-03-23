@@ -17,7 +17,8 @@ class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
-  }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
+  })  : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
+        super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -26,11 +27,11 @@ class BuildBundleCommand extends BuildSubCommand {
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     argParser
       ..addOption('depfile',
-        defaultsTo: defaultDepfilePath,
-        help: 'A file path where a depfile will be written. '
-              'This contains all build inputs and outputs in a Make-style syntax.'
-      )
-      ..addOption('target-platform',
+          defaultsTo: defaultDepfilePath,
+          help: 'A file path where a depfile will be written. '
+              'This contains all build inputs and outputs in a Make-style syntax.')
+      ..addOption(
+        'target-platform',
         defaultsTo: 'android-arm',
         allowed: const <String>[
           'android-arm',
@@ -45,15 +46,18 @@ class BuildBundleCommand extends BuildSubCommand {
         ],
         help: 'The architecture for which to build the application.',
       )
-      ..addOption('asset-dir',
+      ..addOption(
+        'asset-dir',
         defaultsTo: getAssetBuildDirectory(),
-        help: 'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
-              'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
+        help:
+            'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
+            'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
       )
       ..addFlag(
         'tree-shake-icons',
         hide: !verboseHelp,
-        help: '(deprecated) Icon font tree shaking is not supported by this command.',
+        help:
+            '(deprecated) Icon font tree shaking is not supported by this command.',
       );
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -65,7 +69,8 @@ class BuildBundleCommand extends BuildSubCommand {
   final String name = 'bundle';
 
   @override
-  final String description = 'Build the Flutter assets directory from your app.';
+  final String description =
+      'Build the Flutter assets directory from your app.';
 
   @override
   final String usageFooter = 'The Flutter assets directory contains your '
@@ -75,7 +80,8 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     if (flutterProject == null) {
       return const CustomDimensions();
     }
@@ -88,7 +94,8 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<void> validateCommand() async {
     if (boolArg('tree-shake-icons')) {
-      throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
+      throwToolExit(
+          'The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
   }

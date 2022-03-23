@@ -64,8 +64,8 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
     Key? key,
     this.notifier,
     required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+  })  : assert(child != null),
+        super(key: key, child: child);
 
   /// The [Listenable] object to which to listen.
   ///
@@ -110,8 +110,7 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
 
   @override
   Widget build() {
-    if (_dirty)
-      notifyClients(widget as InheritedNotifier<T>);
+    if (_dirty) notifyClients(widget as InheritedNotifier<T>);
     return super.build();
   }
 

@@ -9,7 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('RenderParagraph relayout upon system fonts changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),
@@ -21,13 +22,15 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-      (ByteData? data) { },
+      (ByteData? data) {},
     );
-    final RenderObject renderObject = tester.renderObject(find.text('text widget'));
+    final RenderObject renderObject =
+        tester.renderObject(find.text('text widget'));
     expect(renderObject.debugNeedsLayout, isTrue);
   });
 
-  testWidgets('RenderEditable relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('RenderEditable relayout upon system fonts changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectableText('text widget'),
@@ -39,13 +42,14 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     final EditableTextState state = tester.state(find.byType(EditableText));
     expect(state.renderEditable.debugNeedsLayout, isTrue);
   });
 
-  testWidgets('Banner repaint upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('Banner repaint upon system fonts changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Banner(
         message: 'message',
@@ -60,23 +64,26 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     final RenderObject renderObject = tester.renderObject(find.byType(Banner));
     expect(renderObject.debugNeedsPaint, isTrue);
   });
 
-  testWidgets('CupertinoDatePicker reset cache upon system fonts change - date time mode', (WidgetTester tester) async {
+  testWidgets(
+      'CupertinoDatePicker reset cache upon system fonts change - date time mode',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoDatePicker(
-          onDateTimeChanged: (DateTime dateTime) { },
+          onDateTimeChanged: (DateTime dateTime) {},
         ),
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     // ignore: avoid_dynamic_calls
-    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
+    final Map<int, double> cache =
+        state.estimatedColumnWidths as Map<int, double>;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -84,26 +91,31 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     // Cache should be cleaned.
     expect(cache.isEmpty, isTrue);
     final Element element = tester.element(find.byType(CupertinoDatePicker));
     expect(element.dirty, isTrue);
-  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('CupertinoDatePicker reset cache upon system fonts change - date mode', (WidgetTester tester) async {
+  testWidgets(
+      'CupertinoDatePicker reset cache upon system fonts change - date mode',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
-          onDateTimeChanged: (DateTime dateTime) { },
+          onDateTimeChanged: (DateTime dateTime) {},
         ),
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     // ignore: avoid_dynamic_calls
-    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
+    final Map<int, double> cache =
+        state.estimatedColumnWidths as Map<int, double>;
     // Simulates font missing.
     cache.clear();
     const Map<String, dynamic> data = <String, dynamic>{
@@ -112,19 +124,23 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     // Cache should be replenished
     expect(cache.isNotEmpty, isTrue);
     final Element element = tester.element(find.byType(CupertinoDatePicker));
     expect(element.dirty, isTrue);
-  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('CupertinoDatePicker reset cache upon system fonts change - time mode', (WidgetTester tester) async {
+  testWidgets(
+      'CupertinoDatePicker reset cache upon system fonts change - time mode',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTimerPicker(
-          onTimerDurationChanged: (Duration d) { },
+          onTimerDurationChanged: (Duration d) {},
         ),
       ),
     );
@@ -142,7 +158,7 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     // Metrics should be refreshed
     // ignore: avoid_dynamic_calls
@@ -150,18 +166,24 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(state.numberLabelHeight - 23.0 < precisionErrorTolerance, isTrue);
     // ignore: avoid_dynamic_calls
-    expect(state.numberLabelBaseline - 18.400070190429688 < precisionErrorTolerance, isTrue);
+    expect(
+        state.numberLabelBaseline - 18.400070190429688 <
+            precisionErrorTolerance,
+        isTrue);
     final Element element = tester.element(find.byType(CupertinoTimerPicker));
     expect(element.dirty, isTrue);
-  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('RangeSlider relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('RangeSlider relayout upon system fonts changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: RangeSlider(
             values: const RangeValues(0.0, 1.0),
-            onChanged: (RangeValues values) { },
+            onChanged: (RangeValues values) {},
           ),
         ),
       ),
@@ -172,22 +194,26 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
-    final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
+    final RenderObject renderObject =
+        tester.renderObject(find.byType(RangeSlider));
 
     late bool sliderBoxNeedsLayout;
-    renderObject.visitChildren((RenderObject child) {sliderBoxNeedsLayout = child.debugNeedsLayout;});
+    renderObject.visitChildren((RenderObject child) {
+      sliderBoxNeedsLayout = child.debugNeedsLayout;
+    });
     expect(sliderBoxNeedsLayout, isTrue);
   });
 
-  testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('Slider relayout upon system fonts changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Slider(
             value: 0.0,
-            onChanged: (double value) { },
+            onChanged: (double value) {},
           ),
         ),
       ),
@@ -198,14 +224,15 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     // _RenderSlider is the last render object in the tree.
     final RenderObject renderObject = tester.allRenderObjects.last;
     expect(renderObject.debugNeedsLayout, isTrue);
   });
 
-  testWidgets('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('TimePicker relayout upon system fonts changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -242,13 +269,15 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
+      (ByteData? data) {},
     );
     final RenderObject renderObject = tester.renderObject(
-      find.descendant(
-        of: find.byKey(const Key('parent')),
-        matching: find.byType(CustomPaint),
-      ).first,
+      find
+          .descendant(
+            of: find.byKey(const Key('parent')),
+            matching: find.byType(CustomPaint),
+          )
+          .first,
     );
     expect(renderObject.debugNeedsPaint, isTrue);
   });

@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
+  testWidgets('Navigation bar updates destinations when tapped',
+      (WidgetTester tester) async {
     int mutatedIndex = -1;
     final Widget widget = _buildWidget(
       NavigationBar(
@@ -38,7 +39,8 @@ void main() {
     expect(mutatedIndex, 0);
   });
 
-  testWidgets('NavigationBar can update background color', (WidgetTester tester) async {
+  testWidgets('NavigationBar can update background color',
+      (WidgetTester tester) async {
     const Color color = Colors.yellow;
 
     await tester.pumpWidget(
@@ -63,7 +65,8 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgets('NavigationBar can update elevation', (WidgetTester tester) async {
+  testWidgets('NavigationBar can update elevation',
+      (WidgetTester tester) async {
     const double elevation = 42.0;
 
     await tester.pumpWidget(
@@ -88,7 +91,8 @@ void main() {
     expect(_getMaterial(tester).elevation, equals(elevation));
   });
 
-  testWidgets('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
+  testWidgets('NavigationBar adds bottom padding to height',
+      (WidgetTester tester) async {
     const double bottomPadding = 40.0;
 
     await tester.pumpWidget(
@@ -109,13 +113,15 @@ void main() {
       ),
     );
 
-    final double defaultSize = tester.getSize(find.byType(NavigationBar)).height;
+    final double defaultSize =
+        tester.getSize(find.byType(NavigationBar)).height;
     expect(defaultSize, 80);
 
     await tester.pumpWidget(
       _buildWidget(
         MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
+          data: const MediaQueryData(
+              padding: EdgeInsets.only(bottom: bottomPadding)),
           child: NavigationBar(
             destinations: const <Widget>[
               NavigationDestination(
@@ -137,7 +143,8 @@ void main() {
     expect(tester.getSize(find.byType(NavigationBar)).height, expectedHeight);
   });
 
-  testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
+  testWidgets('NavigationBar uses proper defaults when no parameters are given',
+      (WidgetTester tester) async {
     // Pre-M3 settings that were hand coded.
     await tester.pumpWidget(
       _buildWidget(
@@ -161,7 +168,8 @@ void main() {
     expect(_getMaterial(tester).elevation, 0);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_indicator(tester)?.color, const Color(0x3d2196f3));
-    expect(_indicator(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
+    expect(_indicator(tester)?.shape,
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
 
     // M3 settings from the token database.
     await tester.pumpWidget(
@@ -192,10 +200,11 @@ void main() {
     expect(_indicator(tester)?.shape, const StadiumBorder());
   });
 
-  testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
+  testWidgets('NavigationBar shows tooltips with text scaling ',
+      (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({required double textScaleFactor}) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Localizations(
@@ -248,10 +257,12 @@ void main() {
     await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
+    expect(tester.getSize(find.text(label).last),
+        Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
   });
 
-  testWidgets('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
+  testWidgets('Custom tooltips in NavigationBarDestination',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -289,7 +300,6 @@ void main() {
     await tester.longPress(find.text('C'));
     expect(find.byTooltip('C'), findsNothing);
   });
-
 
   testWidgets('Navigation bar semantics', (WidgetTester tester) async {
     Widget _widget({int selectedIndex = 0}) {
@@ -355,7 +365,8 @@ void main() {
     );
   });
 
-  testWidgets('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
+  testWidgets('Navigation bar semantics with some labels hidden',
+      (WidgetTester tester) async {
     Widget _widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
@@ -420,7 +431,8 @@ void main() {
     );
   });
 
-  testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
+  testWidgets('Navigation bar does not grow with text scale factor',
+      (WidgetTester tester) async {
     const int animationMilliseconds = 800;
 
     Widget _widget({double textScaleFactor = 1}) {
@@ -428,7 +440,8 @@ void main() {
         MediaQuery(
           data: MediaQueryData(textScaleFactor: textScaleFactor),
           child: NavigationBar(
-            animationDuration: const Duration(milliseconds: animationMilliseconds),
+            animationDuration:
+                const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
               NavigationDestination(
                 icon: Icon(Icons.ac_unit),
@@ -445,7 +458,8 @@ void main() {
     }
 
     await tester.pumpWidget(_widget());
-    final double initialHeight = tester.getSize(find.byType(NavigationBar)).height;
+    final double initialHeight =
+        tester.getSize(find.byType(NavigationBar)).height;
 
     await tester.pumpWidget(_widget(textScaleFactor: 2));
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
@@ -467,15 +481,18 @@ Widget _buildWidget(Widget child) {
 
 Material _getMaterial(WidgetTester tester) {
   return tester.firstWidget<Material>(
-    find.descendant(of: find.byType(NavigationBar), matching: find.byType(Material)),
+    find.descendant(
+        of: find.byType(NavigationBar), matching: find.byType(Material)),
   );
 }
 
 ShapeDecoration? _indicator(WidgetTester tester) {
-  return tester.firstWidget<Container>(
-    find.descendant(
-      of: find.byType(FadeTransition),
-      matching: find.byType(Container),
-    ),
-  ).decoration as ShapeDecoration?;
+  return tester
+      .firstWidget<Container>(
+        find.descendant(
+          of: find.byType(FadeTransition),
+          matching: find.byType(Container),
+        ),
+      )
+      .decoration as ShapeDecoration?;
 }

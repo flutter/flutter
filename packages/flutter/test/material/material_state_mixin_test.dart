@@ -14,7 +14,9 @@ const Color falseColor = Colors.green;
 /// Mock widget which plays the role of a button -- it can emit notifications
 /// that [MaterialState] values are now in or out of play.
 class _InnerWidget extends StatefulWidget {
-  const _InnerWidget({required this.onValueChanged, required this.controller, Key? key}) : super(key: key);
+  const _InnerWidget(
+      {required this.onValueChanged, required this.controller, Key? key})
+      : super(key: key);
   final ValueChanged<bool> onValueChanged;
   final StreamController<bool> controller;
 
@@ -28,6 +30,7 @@ class _InnerWidgetState extends State<_InnerWidget> {
     super.initState();
     widget.controller.stream.listen((bool val) => widget.onValueChanged(val));
   }
+
   @override
   Widget build(BuildContext context) => Container();
 }
@@ -56,7 +59,6 @@ class _MyWidget extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -71,8 +73,11 @@ class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
 }
 
 void main() {
-
-  Future<void> _verify(WidgetTester tester, Widget widget, StreamController<bool> controller,) async {
+  Future<void> _verify(
+    WidgetTester tester,
+    Widget widget,
+    StreamController<bool> controller,
+  ) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: widget)));
     // Set the value to True
     controller.sink.add(true);
@@ -135,7 +140,8 @@ void main() {
     await _verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.scrolledUnder is tracked', (WidgetTester tester) async {
+  testWidgets('MaterialState.scrolledUnder is tracked',
+      (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,

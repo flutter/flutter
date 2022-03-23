@@ -54,8 +54,8 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   const ScrollAwareImageProvider({
     required this.context,
     required this.imageProvider,
-  }) : assert(context != null),
-       assert(imageProvider != null);
+  })  : assert(context != null),
+        assert(imageProvider != null);
 
   /// The context that may or may not be enclosed by a [Scrollable].
   ///
@@ -83,8 +83,10 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // Do this before checking scrolling, so that if the bytes are available we
     // render them even though we're scrolling fast - there's no additional
     // allocations to do for texture memory, it's already there.
-    if (stream.completer != null || PaintingBinding.instance.imageCache.containsKey(key)) {
-      imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
+    if (stream.completer != null ||
+        PaintingBinding.instance.imageCache.containsKey(key)) {
+      imageProvider.resolveStreamForKey(
+          configuration, stream, key, handleError);
       return;
     }
     // The context has gone out of the tree - ignore it.
@@ -97,7 +99,8 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // check again.
     if (Scrollable.recommendDeferredLoadingForContext(context.context!)) {
       SchedulerBinding.instance.scheduleFrameCallback((_) {
-        scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
+        scheduleMicrotask(
+            () => resolveStreamForKey(configuration, stream, key, handleError));
       });
       return;
     }
@@ -107,8 +110,10 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   }
 
   @override
-  ImageStreamCompleter load(T key, DecoderCallback decode) => imageProvider.load(key, decode);
+  ImageStreamCompleter load(T key, DecoderCallback decode) =>
+      imageProvider.load(key, decode);
 
   @override
-  Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+  Future<T> obtainKey(ImageConfiguration configuration) =>
+      imageProvider.obtainKey(configuration);
 }

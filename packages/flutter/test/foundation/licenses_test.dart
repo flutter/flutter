@@ -9,7 +9,8 @@ void main() {
   test('LicenseEntryWithLineBreaks - most cases', () {
     // There's some trailing spaces in this string.
     // To avoid IDEs stripping them, I've escaped them as \u0020.
-    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(<String>[], '''
+    final List<LicenseParagraph> paragraphs =
+        const LicenseEntryWithLineBreaks(<String>[], '''
 A
 A
 A
@@ -157,17 +158,29 @@ S
   });
 
   test('LicenseEntryWithLineBreaks - leading and trailing whitespace', () {
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ').paragraphs.toList(), isEmpty);
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ').paragraphs.toList(), isEmpty);
+    expect(
+        const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ')
+            .paragraphs
+            .toList(),
+        isEmpty);
+    expect(
+        const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ')
+            .paragraphs
+            .toList(),
+        isEmpty);
 
     List<LicenseParagraph> paragraphs;
 
-    paragraphs = const LicenseEntryWithLineBreaks(<String>[], '    \nA\n    ').paragraphs.toList();
+    paragraphs = const LicenseEntryWithLineBreaks(<String>[], '    \nA\n    ')
+        .paragraphs
+        .toList();
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));
 
-    paragraphs = const LicenseEntryWithLineBreaks(<String>[], '\n\n\nA\n\n\n').paragraphs.toList();
+    paragraphs = const LicenseEntryWithLineBreaks(<String>[], '\n\n\nA\n\n\n')
+        .paragraphs
+        .toList();
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));

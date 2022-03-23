@@ -12,21 +12,19 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 bool _isAsciiLetter(String? char) {
-  if (char == null)
-    return false;
+  if (char == null) return false;
   const int charUpperA = 0x41;
   const int charUpperZ = 0x5A;
   const int charLowerA = 0x61;
   const int charLowerZ = 0x7A;
   assert(char.length == 1);
   final int charCode = char.codeUnitAt(0);
-  return (charCode >= charUpperA && charCode <= charUpperZ)
-      || (charCode >= charLowerA && charCode <= charLowerZ);
+  return (charCode >= charUpperA && charCode <= charUpperZ) ||
+      (charCode >= charLowerA && charCode <= charLowerZ);
 }
 
 bool _isDigit(String? char) {
-  if (char == null)
-    return false;
+  if (char == null) return false;
   final int charDigit0 = '0'.codeUnitAt(0);
   final int charDigit9 = '9'.codeUnitAt(0);
   assert(char.length == 1);
@@ -38,11 +36,12 @@ bool _isDigit(String? char) {
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+      : super(keyData, logicalData);
 
   List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.entries.where((PhysicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.name);
+      return entry.constantName.startsWith('numpad') &&
+          LogicalKeyData.printable.containsKey(entry.name);
     }).toList();
   }
 
@@ -55,7 +54,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   List<LogicalKeyEntry> get _numpadLogicalKeyData {
     return logicalData.entries.where((LogicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.name);
+      return entry.constantName.startsWith('numpad') &&
+          LogicalKeyData.printable.containsKey(entry.name);
     }).toList();
   }
 
@@ -144,7 +144,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.androidScanCodes != null) {
         for (final int code in entry.androidScanCodes) {
-          lines.add(code, '  $code: PhysicalKeyboardKey.${entry.constantName},');
+          lines.add(
+              code, '  $code: PhysicalKeyboardKey.${entry.constantName},');
         }
       }
     }
@@ -156,7 +157,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Windows scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.windowsScanCode != null) {
-        lines.add(entry.windowsScanCode!, '  ${entry.windowsScanCode}: PhysicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.windowsScanCode!,
+            '  ${entry.windowsScanCode}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -180,10 +182,12 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       // Letter keys on Windows are not recorded in logical_key_data.json,
       // because they are not used by the embedding. Add them manually.
       final List<int>? keyCodes = entry.windowsValues.isNotEmpty
-        ? entry.windowsValues
-        : (_isAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] :
-           _isDigit(entry.keyLabel)       ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] :
-           null);
+          ? entry.windowsValues
+          : (_isAsciiLetter(entry.keyLabel)
+              ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
+              : _isDigit(entry.keyLabel)
+                  ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
+                  : null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -198,7 +202,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('macOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.macOSScanCode != null) {
-        lines.add(entry.macOSScanCode!, '  ${toHex(entry.macOSScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.macOSScanCode!,
+            '  ${toHex(entry.macOSScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -209,7 +214,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('macOS numpad map');
     for (final PhysicalKeyEntry entry in _numpadKeyData) {
       if (entry.macOSScanCode != null) {
-        lines.add(entry.macOSScanCode!, '  ${toHex(entry.macOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.macOSScanCode!,
+            '  ${toHex(entry.macOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -219,7 +225,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('macOS function key map');
     for (final PhysicalKeyEntry entry in _functionKeyData) {
       if (entry.macOSScanCode != null) {
-        lines.add(entry.macOSScanCode!, '  ${toHex(entry.macOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.macOSScanCode!,
+            '  ${toHex(entry.macOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -241,7 +248,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('iOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.iOSScanCode != null) {
-        lines.add(entry.iOSScanCode!, '  ${toHex(entry.iOSScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.iOSScanCode!,
+            '  ${toHex(entry.iOSScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -252,7 +260,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('iOS numpad map');
     for (final PhysicalKeyEntry entry in _numpadKeyData) {
       if (entry.iOSScanCode != null) {
-        lines.add(entry.iOSScanCode!,'  ${toHex(entry.iOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.iOSScanCode!,
+            '  ${toHex(entry.iOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -274,7 +283,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Fuchsia key code map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       for (final int value in entry.fuchsiaValues) {
-        lines.add(value, '  ${toHex(value)}: LogicalKeyboardKey.${entry.constantName},');
+        lines.add(value,
+            '  ${toHex(value)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -285,7 +295,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.usbHidCode != null) {
-        fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
+        fuchsiaScanCodeMap.writeln(
+            '  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return fuchsiaScanCodeMap.toString().trimRight();
@@ -293,7 +304,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to logical keys.
   String get _webLogicalKeyMap {
-    final OutputLines<String> lines = OutputLines<String>('Web logical key map');
+    final OutputLines<String> lines =
+        OutputLines<String>('Web logical key map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       for (final String name in entry.webNames) {
         lines.add(name, "  '$name': LogicalKeyboardKey.${entry.constantName},");
@@ -304,10 +316,12 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to physical keys.
   String get _webPhysicalKeyMap {
-    final OutputLines<String> lines = OutputLines<String>('Web physical key map');
+    final OutputLines<String> lines =
+        OutputLines<String>('Web physical key map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.name != null) {
-        lines.add(entry.name, "  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
+        lines.add(entry.name,
+            "  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
       }
     }
     return lines.sortedJoin().trimRight();
@@ -317,7 +331,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<String> lines = OutputLines<String>('Web numpad map');
     for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
       if (entry.name != null) {
-        lines.add(entry.name, "  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
+        lines.add(entry.name,
+            "  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
       }
     }
     return lines.sortedJoin().trimRight();
@@ -325,13 +340,20 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web number pad codes to logical keys.
   String get _webLocationMap {
-    final String jsonRaw = File(path.join(dataRoot, 'web_logical_location_mapping.json')).readAsStringSync();
-    final Map<String, List<String?>> locationMap = parseMapOfListOfNullableString(jsonRaw);
+    final String jsonRaw =
+        File(path.join(dataRoot, 'web_logical_location_mapping.json'))
+            .readAsStringSync();
+    final Map<String, List<String?>> locationMap =
+        parseMapOfListOfNullableString(jsonRaw);
     final OutputLines<String> lines = OutputLines<String>('Web location map');
     locationMap.forEach((String key, List<String?> keyNames) {
       final String keyStrings = keyNames.map((String? keyName) {
-        final String? constantName = keyName == null ? null : logicalData.entryByName(keyName).constantName;
-        return constantName != null ? 'LogicalKeyboardKey.$constantName' : 'null';
+        final String? constantName = keyName == null
+            ? null
+            : logicalData.entryByName(keyName).constantName;
+        return constantName != null
+            ? 'LogicalKeyboardKey.$constantName'
+            : 'null';
       }).join(', ');
       lines.add(key, "  '$key': <LogicalKeyboardKey?>[$keyStrings],");
     });

@@ -66,10 +66,10 @@ class BorderSide {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-  }) : assert(color != null),
-       assert(width != null),
-       assert(width >= 0.0),
-       assert(style != null);
+  })  : assert(color != null),
+        assert(width != null),
+        assert(width >= 0.0),
+        assert(style != null);
 
   /// Creates a [BorderSide] that represents the addition of the two given
   /// [BorderSide]s.
@@ -88,12 +88,9 @@ class BorderSide {
     assert(canMerge(a, b));
     final bool aIsNone = a.style == BorderStyle.none && a.width == 0.0;
     final bool bIsNone = b.style == BorderStyle.none && b.width == 0.0;
-    if (aIsNone && bIsNone)
-      return BorderSide.none;
-    if (aIsNone)
-      return b;
-    if (bIsNone)
-      return a;
+    if (aIsNone && bIsNone) return BorderSide.none;
+    if (aIsNone) return b;
+    if (bIsNone) return a;
     assert(a.color == b.color);
     assert(a.style == b.style);
     return BorderSide(
@@ -124,7 +121,8 @@ class BorderSide {
   final BorderStyle style;
 
   /// A hairline black border that is not rendered.
-  static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
+  static const BorderSide none =
+      BorderSide(width: 0.0, style: BorderStyle.none);
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
@@ -197,10 +195,8 @@ class BorderSide {
     assert(a != null);
     assert(b != null);
     if ((a.style == BorderStyle.none && a.width == 0.0) ||
-        (b.style == BorderStyle.none && b.width == 0.0))
-      return true;
-    return a.style == b.style
-        && a.color == b.color;
+        (b.style == BorderStyle.none && b.width == 0.0)) return true;
+    return a.style == b.style && a.color == b.color;
   }
 
   /// Linearly interpolate between two border sides.
@@ -212,13 +208,10 @@ class BorderSide {
     assert(a != null);
     assert(b != null);
     assert(t != null);
-    if (t == 0.0)
-      return a;
-    if (t == 1.0)
-      return b;
+    if (t == 0.0) return a;
+    if (t == 1.0) return b;
     final double width = ui.lerpDouble(a.width, b.width, t)!;
-    if (width < 0.0)
-      return BorderSide.none;
+    if (width < 0.0) return BorderSide.none;
     if (a.style == b.style) {
       return BorderSide(
         color: Color.lerp(a.color, b.color, t)!,
@@ -251,21 +244,20 @@ class BorderSide {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is BorderSide
-        && other.color == color
-        && other.width == width
-        && other.style == style;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is BorderSide &&
+        other.color == color &&
+        other.width == width &&
+        other.style == style;
   }
 
   @override
   int get hashCode => Object.hash(color, width, style);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() =>
+      '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
 }
 
 /// Base class for shape outlines.
@@ -315,7 +307,7 @@ abstract class ShapeBorder {
   /// The `reversed` argument is true if this object was the right operand of
   /// the `+` operator, and false if it was the left operand.
   @protected
-  ShapeBorder? add(ShapeBorder other, { bool reversed = false }) => null;
+  ShapeBorder? add(ShapeBorder other, {bool reversed = false}) => null;
 
   /// Creates a new border consisting of the two borders on either side of the
   /// operator.
@@ -326,7 +318,9 @@ abstract class ShapeBorder {
   /// merely paints the two borders sequentially, with the left hand operand on
   /// the inside and the right hand operand on the outside.
   ShapeBorder operator +(ShapeBorder other) {
-    return add(other) ?? other.add(this, reversed: true) ?? _CompoundBorder(<ShapeBorder>[other, this]);
+    return add(other) ??
+        other.add(this, reversed: true) ??
+        _CompoundBorder(<ShapeBorder>[other, this]);
   }
 
   /// Creates a copy of this border, scaled by the factor `t`.
@@ -379,8 +373,7 @@ abstract class ShapeBorder {
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a == null)
-      return scale(t);
+    if (a == null) return scale(t);
     return null;
   }
 
@@ -411,8 +404,7 @@ abstract class ShapeBorder {
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b == null)
-      return scale(1.0 - t);
+    if (b == null) return scale(1.0 - t);
     return null;
   }
 
@@ -427,10 +419,8 @@ abstract class ShapeBorder {
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
     assert(t != null);
     ShapeBorder? result;
-    if (b != null)
-      result = b.lerpFrom(a, t);
-    if (result == null && a != null)
-      result = a.lerpTo(b, t);
+    if (b != null) result = b.lerpFrom(a, t);
+    if (result == null && a != null) result = a.lerpTo(b, t);
     return result ?? (t < 0.5 ? a : b);
   }
 
@@ -453,7 +443,7 @@ abstract class ShapeBorder {
   ///
   ///  * [getInnerPath], which creates the path for the inner edge.
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
-  Path getOuterPath(Rect rect, { TextDirection? textDirection });
+  Path getOuterPath(Rect rect, {TextDirection? textDirection});
 
   /// Create a [Path] that describes the inner edge of the border.
   ///
@@ -474,7 +464,7 @@ abstract class ShapeBorder {
   ///
   ///  * [getOuterPath], which creates the path for the outer edge.
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
-  Path getInnerPath(Rect rect, { TextDirection? textDirection });
+  Path getInnerPath(Rect rect, {TextDirection? textDirection});
 
   /// Paints the border within the given [Rect] on the given [Canvas].
   ///
@@ -482,7 +472,7 @@ abstract class ShapeBorder {
   /// has a text direction dependency (for example if it is expressed in terms
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection });
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection});
 
   @override
   String toString() {
@@ -498,7 +488,7 @@ abstract class OutlinedBorder extends ShapeBorder {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The value of [side] must not be null.
-  const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
+  const OutlinedBorder({this.side = BorderSide.none}) : assert(side != null);
 
   /// The border outline's color and weight.
   ///
@@ -508,7 +498,7 @@ abstract class OutlinedBorder extends ShapeBorder {
 
   /// Returns a copy of this OutlinedBorder that draws its outline with the
   /// specified [side], if [side] is non-null.
-  OutlinedBorder copyWith({ BorderSide? side });
+  OutlinedBorder copyWith({BorderSide? side});
 }
 
 /// Represents the addition of two otherwise-incompatible borders.
@@ -516,9 +506,9 @@ abstract class OutlinedBorder extends ShapeBorder {
 /// The borders are listed from the outside to the inside.
 class _CompoundBorder extends ShapeBorder {
   _CompoundBorder(this.borders)
-    : assert(borders != null),
-      assert(borders.length >= 2),
-      assert(!borders.any((ShapeBorder border) => border is _CompoundBorder));
+      : assert(borders != null),
+        assert(borders.length >= 2),
+        assert(!borders.any((ShapeBorder border) => border is _CompoundBorder));
 
   final List<ShapeBorder> borders;
 
@@ -533,7 +523,7 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder add(ShapeBorder other, { bool reversed = false }) {
+  ShapeBorder add(ShapeBorder other, {bool reversed = false}) {
     // This wraps the list of borders with "other", or, if "reversed" is true,
     // wraps "other" with the list of borders.
     // If "reversed" is false, "other" should end up being at the start of the
@@ -544,8 +534,8 @@ class _CompoundBorder extends ShapeBorder {
       // border, and "merged" is the result of attempting to merge it with the
       // new border. If it's null, it couldn't be merged.
       final ShapeBorder ours = reversed ? borders.last : borders.first;
-      final ShapeBorder? merged = ours.add(other, reversed: reversed)
-                             ?? other.add(ours, reversed: !reversed);
+      final ShapeBorder? merged = ours.add(other, reversed: reversed) ??
+          other.add(ours, reversed: !reversed);
       if (merged != null) {
         final List<ShapeBorder> result = <ShapeBorder>[...borders];
         result[reversed ? result.length - 1 : 0] = merged;
@@ -555,8 +545,7 @@ class _CompoundBorder extends ShapeBorder {
     // We can't, so fall back to just adding the new border to the list.
     final List<ShapeBorder> mergedBorders = <ShapeBorder>[
       if (reversed) ...borders,
-      if (other is _CompoundBorder) ...other.borders
-      else other,
+      if (other is _CompoundBorder) ...other.borders else other,
       if (!reversed) ...borders,
     ];
     return _CompoundBorder(mergedBorders);
@@ -565,7 +554,9 @@ class _CompoundBorder extends ShapeBorder {
   @override
   ShapeBorder scale(double t) {
     return _CompoundBorder(
-      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList(),
+      borders
+          .map<ShapeBorder>((ShapeBorder border) => border.scale(t))
+          .toList(),
     );
   }
 
@@ -581,16 +572,20 @@ class _CompoundBorder extends ShapeBorder {
 
   static _CompoundBorder lerp(ShapeBorder? a, ShapeBorder? b, double t) {
     assert(t != null);
-    assert(a is _CompoundBorder || b is _CompoundBorder); // Not really necessary, but all call sites currently intend this.
-    final List<ShapeBorder?> aList = a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
-    final List<ShapeBorder?> bList = b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];
+    assert(a is _CompoundBorder ||
+        b is _CompoundBorder); // Not really necessary, but all call sites currently intend this.
+    final List<ShapeBorder?> aList =
+        a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
+    final List<ShapeBorder?> bList =
+        b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];
     final List<ShapeBorder> results = <ShapeBorder>[];
     final int length = math.max(aList.length, bList.length);
     for (int index = 0; index < length; index += 1) {
       final ShapeBorder? localA = index < aList.length ? aList[index] : null;
       final ShapeBorder? localB = index < bList.length ? bList[index] : null;
       if (localA != null && localB != null) {
-        final ShapeBorder? localResult = localA.lerpTo(localB, t) ?? localB.lerpFrom(localA, t);
+        final ShapeBorder? localResult =
+            localA.lerpTo(localB, t) ?? localB.lerpFrom(localA, t);
         if (localResult != null) {
           results.add(localResult);
           continue;
@@ -600,28 +595,26 @@ class _CompoundBorder extends ShapeBorder {
       // is inserted before the shape that is going away, so that the outer path changes to
       // the new border earlier rather than later. (This affects, among other things, where
       // the ShapeDecoration class puts its background.)
-      if (localB != null)
-        results.add(localB.scale(t));
-      if (localA != null)
-        results.add(localA.scale(1.0 - t));
+      if (localB != null) results.add(localB.scale(t));
+      if (localA != null) results.add(localA.scale(1.0 - t));
     }
     return _CompoundBorder(results);
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     for (int index = 0; index < borders.length - 1; index += 1)
       rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
     return borders.last.getInnerPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return borders.first.getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     for (final ShapeBorder border in borders) {
       border.paint(canvas, rect, textDirection: textDirection);
       rect = border.dimensions.resolve(textDirection).deflateRect(rect);
@@ -630,12 +623,10 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is _CompoundBorder
-        && listEquals<ShapeBorder>(other.borders, borders);
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is _CompoundBorder &&
+        listEquals<ShapeBorder>(other.borders, borders);
   }
 
   @override
@@ -647,7 +638,9 @@ class _CompoundBorder extends ShapeBorder {
     // in the list in the opposite order of what the source looks like: a + b =>
     // [b, a]. We do this to make the painting code more optimal, and most of
     // the rest of the code doesn't care, except toString() (for debugging).
-    return borders.reversed.map<String>((ShapeBorder border) => border.toString()).join(' + ');
+    return borders.reversed
+        .map<String>((ShapeBorder border) => border.toString())
+        .join(' + ');
   }
 }
 
@@ -686,8 +679,7 @@ void paintBorder(
   // We draw the borders as filled shapes, unless the borders are hairline
   // borders, in which case we use PaintingStyle.stroke, with the stroke width
   // specified here.
-  final Paint paint = Paint()
-    ..strokeWidth = 0.0;
+  final Paint paint = Paint()..strokeWidth = 0.0;
 
   final Path path = Path();
 

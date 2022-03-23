@@ -39,12 +39,14 @@ Future<void> main() async {
           'dSYMs',
           'Runner.app.dSYM',
         ));
-        final Directory applications = Directory(path.join(products, 'Applications'));
+        final Directory applications =
+            Directory(path.join(products, 'Applications'));
 
         final Directory appBundle = applications
             .listSync()
             .whereType<Directory>()
-            .singleWhere((Directory directory) => path.extension(directory.path) == '.app');
+            .singleWhere((Directory directory) =>
+                path.extension(directory.path) == '.app');
 
         final String flutterFramework = path.join(
           appBundle.path,

@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 
 class ShowSharedValue extends StatelessWidget {
-  const ShowSharedValue({ Key? key, required this.appDataKey }) : super(key: key);
+  const ShowSharedValue({Key? key, required this.appDataKey}) : super(key: key);
 
   final String appDataKey;
 
@@ -16,7 +16,8 @@ class ShowSharedValue extends StatelessWidget {
     // The SharedAppData.getValue() call here causes this widget to depend
     // on the value of the SharedAppData's 'foo' key. If it's changed, with
     // SharedAppData.setValue(), then this widget will be rebuilt.
-    final String value = SharedAppData.getValue<String, String>(context, appDataKey, () => 'initial');
+    final String value = SharedAppData.getValue<String, String>(
+        context, appDataKey, () => 'initial');
     return Text('$appDataKey: $value');
   }
 }
@@ -25,7 +26,7 @@ class ShowSharedValue extends StatelessWidget {
 // to be rebuilt. In this case that's the ShowSharedValue widget that's
 // displaying the value of a key whose value has been updated.
 class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -52,7 +53,8 @@ class _HomeState extends State<Home> {
                 _fooVersion += 1;
                 // Changing the SharedAppData's value for 'foo' causes the widgets that
                 // depend on 'foo' to be rebuilt.
-                SharedAppData.setValue<String, String?>(context, 'foo', 'FOO $_fooVersion'); // note: no setState()
+                SharedAppData.setValue<String, String?>(
+                    context, 'foo', 'FOO $_fooVersion'); // note: no setState()
               },
             ),
             const SizedBox(height: 16),
@@ -60,7 +62,8 @@ class _HomeState extends State<Home> {
               child: const Text('change bar'),
               onPressed: () {
                 _barVersion += 1;
-                SharedAppData.setValue<String, String?>(context, 'bar', 'BAR $_barVersion');  // note: no setState()
+                SharedAppData.setValue<String, String?>(
+                    context, 'bar', 'BAR $_barVersion'); // note: no setState()
               },
             ),
           ],

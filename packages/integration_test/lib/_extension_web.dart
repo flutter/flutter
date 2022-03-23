@@ -16,10 +16,13 @@ import 'dart:js_util' as js_util;
 /// See also:
 ///
 ///  * `_extension_io.dart`, which has the dart:io implementation
-void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<String, String>) callback) {
-  js_util.setProperty(html.window, r'$flutterDriver', allowInterop((dynamic message) async {
+void registerWebServiceExtension(
+    Future<Map<String, dynamic>> Function(Map<String, String>) callback) {
+  js_util.setProperty(html.window, r'$flutterDriver',
+      allowInterop((dynamic message) async {
     try {
-      final Map<String, dynamic> messageJson = jsonDecode(message as String) as Map<String, dynamic>;
+      final Map<String, dynamic> messageJson =
+          jsonDecode(message as String) as Map<String, dynamic>;
       final Map<String, String> params = messageJson.cast<String, String>();
       final Map<String, dynamic> result = await callback(params);
       context[r'$flutterDriverResult'] = json.encode(result);

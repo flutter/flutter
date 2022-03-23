@@ -75,11 +75,13 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer =
+          FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
+      final ProxiedDevices proxiedDevices =
+          ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.discoverDevices();
       expect(devices, hasLength(1));
@@ -96,16 +98,19 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer =
+          FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
+      final ProxiedDevices proxiedDevices =
+          ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.devices;
       expect(devices, hasLength(1));
       final Device device = devices[0];
-      final bool supportsRuntimeMode = await device.supportsRuntimeMode(BuildMode.release);
+      final bool supportsRuntimeMode =
+          await device.supportsRuntimeMode(BuildMode.release);
       expect(fakeDevice.supportsRuntimeModeCalledBuildMode, BuildMode.release);
       expect(supportsRuntimeMode, true);
     });
@@ -116,11 +121,13 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer =
+          FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
+      final ProxiedDevices proxiedDevices =
+          ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
@@ -146,13 +153,17 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer =
+          FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
-      final FakePrebuiltApplicationPackage prebuiltApplicationPackage = FakePrebuiltApplicationPackage();
-      final File dummyApplicationBinary = memoryFileSystem.file('/directory/dummy_file');
+      final ProxiedDevices proxiedDevices =
+          ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
+      final FakePrebuiltApplicationPackage prebuiltApplicationPackage =
+          FakePrebuiltApplicationPackage();
+      final File dummyApplicationBinary =
+          memoryFileSystem.file('/directory/dummy_file');
       dummyApplicationBinary.parent.createSync();
       dummyApplicationBinary.writeAsStringSync('dummy content');
       prebuiltApplicationPackage.applicationPackage = dummyApplicationBinary;
@@ -162,11 +173,14 @@ void main() {
       final Device device = devices[0];
 
       // Now try to start the app
-      final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
+      final FakeApplicationPackage applicationPackage =
+          FakeApplicationPackage();
       applicationPackageFactory.applicationPackage = applicationPackage;
 
-      final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
-      fakeDevice.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri observatoryUri =
+          Uri.parse('http://127.0.0.1:12345/observatory');
+      fakeDevice.launchResult =
+          LaunchResult.succeeded(observatoryUri: observatoryUri);
 
       final LaunchResult launchResult = await device.startApp(
         prebuiltApplicationPackage,
@@ -177,13 +191,18 @@ void main() {
       // The returned observatoryUri was a forwarded port, so we cannot compare them directly.
       expect(launchResult.observatoryUri.path, observatoryUri.path);
 
-      expect(applicationPackageFactory.applicationBinaryRequested.readAsStringSync(), 'dummy content');
-      expect(applicationPackageFactory.platformRequested, TargetPlatform.android_arm);
+      expect(
+          applicationPackageFactory.applicationBinaryRequested
+              .readAsStringSync(),
+          'dummy content');
+      expect(applicationPackageFactory.platformRequested,
+          TargetPlatform.android_arm);
 
       expect(fakeDevice.startAppPackage, applicationPackage);
 
       // Now try to stop the app
-      final bool stopAppResult = await device.stopApp(prebuiltApplicationPackage);
+      final bool stopAppResult =
+          await device.stopApp(prebuiltApplicationPackage);
       expect(fakeDevice.stopAppPackage, applicationPackage);
       expect(stopAppResult, true);
     }, overrides: <Type, Generator>{
@@ -198,20 +217,23 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer =
+          FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
+      final ProxiedDevices proxiedDevices =
+          ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.devices;
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
-      final List<int> screenshot = <int>[1,2,3,4,5];
+      final List<int> screenshot = <int>[1, 2, 3, 4, 5];
       fakeDevice.screenshot = screenshot;
 
-      final File screenshotOutputFile = memoryFileSystem.file('screenshot_file');
+      final File screenshotOutputFile =
+          memoryFileSystem.file('screenshot_file');
       await device.takeScreenshot(screenshotOutputFile);
 
       expect(await screenshotOutputFile.readAsBytes(), screenshot);
@@ -223,8 +245,10 @@ void main() {
 }
 
 class FakeDaemonStreams implements DaemonStreams {
-  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
-  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> inputs =
+      StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> outputs =
+      StreamController<DaemonMessage>();
 
   @override
   Stream<DaemonMessage> get inputStream {
@@ -232,8 +256,9 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int> binary ]) {
-    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
+  void send(Map<String, dynamic> message, [List<int> binary]) {
+    outputs.add(DaemonMessage(
+        message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
   @override
@@ -308,7 +333,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   FutureOr<DeviceLogReader> getLogReader({
     covariant ApplicationPackage app,
     bool includePastLogs = false,
-  }) => logReader;
+  }) =>
+      logReader;
 
   ApplicationPackage startAppPackage;
   LaunchResult launchResult;
@@ -345,7 +371,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 }
 
 class FakeDeviceLogReader implements DeviceLogReader {
-  final StreamController<String> logLinesController = StreamController<String>();
+  final StreamController<String> logLinesController =
+      StreamController<String>();
   bool disposeCalled = false;
 
   @override
@@ -364,7 +391,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
 
   @override
   String get name => 'device';
-
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {
@@ -373,7 +399,8 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
   ApplicationPackage applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform,
+      {BuildInfo buildInfo, File applicationBinary}) async {
     platformRequested = platform;
     applicationBinaryRequested = applicationBinary;
     return applicationPackage;
@@ -382,7 +409,8 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
-class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {
+class FakePrebuiltApplicationPackage extends Fake
+    implements PrebuiltApplicationPackage {
   @override
   File applicationPackage;
 }

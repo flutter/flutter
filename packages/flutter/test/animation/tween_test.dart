@@ -5,10 +5,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
+const String kApiDocsLink =
+    'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
 
 void main() {
-  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
+  test(
+      'throws flutter error when tweening types that do not fully satisfy tween requirements - Object',
+      () {
     final Tween<Object> objectTween = Tween<Object>(
       begin: Object(),
       end: Object(),
@@ -17,7 +20,8 @@ void main() {
     expect(
       () => objectTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (FlutterError error) =>
+            error.diagnostics.map((DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
@@ -28,7 +32,9 @@ void main() {
     );
   });
 
-  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Color', () {
+  test(
+      'throws flutter error when tweening types that do not fully satisfy tween requirements - Color',
+      () {
     final Tween<Color> colorTween = Tween<Color>(
       begin: const Color(0xFF000000),
       end: const Color(0xFFFFFFFF),
@@ -37,7 +43,8 @@ void main() {
     expect(
       () => colorTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (FlutterError error) =>
+            error.diagnostics.map((DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "Color(0xff000000)" and "Color(0xffffffff)".',
@@ -48,7 +55,9 @@ void main() {
     );
   });
 
-  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Rect', () {
+  test(
+      'throws flutter error when tweening types that do not fully satisfy tween requirements - Rect',
+      () {
     final Tween<Rect> rectTween = Tween<Rect>(
       begin: const Rect.fromLTWH(0, 0, 10, 10),
       end: const Rect.fromLTWH(2, 2, 2, 2),
@@ -57,7 +66,8 @@ void main() {
     expect(
       () => rectTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (FlutterError error) =>
+            error.diagnostics.map((DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)" and "Rect.fromLTRB(2.0, 2.0, 4.0, 4.0)".',
@@ -68,7 +78,9 @@ void main() {
     );
   });
 
-  test('throws flutter error when tweening types that do not fully satisfy tween requirements - int', () {
+  test(
+      'throws flutter error when tweening types that do not fully satisfy tween requirements - int',
+      () {
     final Tween<int> colorTween = Tween<int>(
       begin: 0,
       end: 1,
@@ -77,7 +89,8 @@ void main() {
     expect(
       () => colorTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (FlutterError error) =>
+            error.diagnostics.map((DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "0" and "1".',
@@ -91,7 +104,8 @@ void main() {
   test('Can chain tweens', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
     expect(tween, hasOneLineDescription);
-    final Animatable<double> chain = tween.chain(Tween<double>(begin: 0.50, end: 1.0));
+    final Animatable<double> chain =
+        tween.chain(Tween<double>(begin: 0.50, end: 1.0));
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
@@ -135,7 +149,8 @@ void main() {
   });
 
   test('SizeTween', () {
-    final SizeTween tween = SizeTween(begin: Size.zero, end: const Size(20.0, 30.0));
+    final SizeTween tween =
+        SizeTween(begin: Size.zero, end: const Size(20.0, 30.0));
     expect(tween.lerp(0.5), equals(const Size(10.0, 15.0)));
     expect(tween, hasOneLineDescription);
   });
@@ -156,13 +171,17 @@ void main() {
 
   test('Matrix4Tween', () {
     final Matrix4 a = Matrix4.identity();
-    final Matrix4 b = a.clone()..translate(6.0, -8.0)..scale(0.5, 1.0, 5.0);
+    final Matrix4 b = a.clone()
+      ..translate(6.0, -8.0)
+      ..scale(0.5, 1.0, 5.0);
     final Matrix4Tween tween = Matrix4Tween(begin: a, end: b);
     expect(tween.lerp(0.0), equals(a));
     expect(tween.lerp(1.0), equals(b));
     expect(
       tween.lerp(0.5),
-      equals(a.clone()..translate(3.0, -4.0)..scale(0.75, 1.0, 3.0)),
+      equals(a.clone()
+        ..translate(3.0, -4.0)
+        ..scale(0.75, 1.0, 3.0)),
     );
     final Matrix4 c = a.clone()..rotateZ(1.0);
     final Matrix4Tween rotationTween = Matrix4Tween(begin: a, end: c);
@@ -184,7 +203,8 @@ void main() {
   });
 
   test('ReverseTween', () {
-    final ReverseTween<int> tween = ReverseTween<int>(IntTween(begin: 5, end: 9));
+    final ReverseTween<int> tween =
+        ReverseTween<int>(IntTween(begin: 5, end: 9));
     expect(tween.lerp(0.5), 7);
     expect(tween.lerp(0.7), 6);
   });

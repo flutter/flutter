@@ -13,66 +13,67 @@ import 'package:flutter_tools/src/project.dart';
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
 List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
-    FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    <String, Object>{
-      'name': 'ephemeral',
-      'id': 'ephemeral',
-      'isSupported': true,
-      'targetPlatform': 'android-arm',
-      'emulator': true,
-      'sdk': 'Test SDK (1.2.3)',
-      'capabilities': <String, Object>{
-        'hotReload': true,
-        'hotRestart': true,
-        'screenshot': false,
-        'fastStart': false,
-        'flutterExit': true,
-        'hardwareRendering': true,
-        'startPaused': true
-      }
-    }
-  ),
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      <String, Object>{
+        'name': 'ephemeral',
+        'id': 'ephemeral',
+        'isSupported': true,
+        'targetPlatform': 'android-arm',
+        'emulator': true,
+        'sdk': 'Test SDK (1.2.3)',
+        'capabilities': <String, Object>{
+          'hotReload': true,
+          'hotRestart': true,
+          'screenshot': false,
+          'fastStart': false,
+          'flutterExit': true,
+          'hardwareRendering': true,
+          'startPaused': true
+        }
+      }),
   FakeDeviceJsonData(
-    FakeDevice('webby', 'webby')
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript)
-      ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
-    <String,Object>{
-      'name': 'webby',
-      'id': 'webby',
-      'isSupported': true,
-      'targetPlatform': 'web-javascript',
-      'emulator': true,
-      'sdk': 'Web SDK (1.2.4)',
-      'capabilities': <String, Object>{
-        'hotReload': true,
-        'hotRestart': true,
-        'screenshot': false,
-        'fastStart': false,
-        'flutterExit': true,
-        'hardwareRendering': true,
-        'startPaused': true
-      }
-    }
-  ),
+      FakeDevice('webby', 'webby')
+        ..targetPlatform =
+            Future<TargetPlatform>.value(TargetPlatform.web_javascript)
+        ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
+      <String, Object>{
+        'name': 'webby',
+        'id': 'webby',
+        'isSupported': true,
+        'targetPlatform': 'web-javascript',
+        'emulator': true,
+        'sdk': 'Web SDK (1.2.4)',
+        'capabilities': <String, Object>{
+          'hotReload': true,
+          'hotRestart': true,
+          'screenshot': false,
+          'fastStart': false,
+          'flutterExit': true,
+          'hardwareRendering': true,
+          'startPaused': true
+        }
+      }),
 ];
 
 /// Fake device to test `devices` command.
 class FakeDevice extends Device {
-  FakeDevice(this.name, String id, {
+  FakeDevice(
+    this.name,
+    String id, {
     bool ephemeral = true,
     bool isSupported = true,
     bool isSupportedForProject = true,
     PlatformType type = PlatformType.web,
     LaunchResult? launchResult,
-  }) : _isSupported = isSupported,
-      _isSupportedForProject = isSupportedForProject,
-      _launchResult = launchResult ?? LaunchResult.succeeded(),
-      super(
-        id,
-        platformType: type,
-        category: Category.mobile,
-        ephemeral: ephemeral,
-      );
+  })  : _isSupported = isSupported,
+        _isSupportedForProject = isSupportedForProject,
+        _launchResult = launchResult ?? LaunchResult.succeeded(),
+        super(
+          id,
+          platformType: type,
+          category: Category.mobile,
+          ephemeral: ephemeral,
+        );
 
   final bool _isSupported;
   final bool _isSupportedForProject;
@@ -82,7 +83,8 @@ class FakeDevice extends Device {
   final String name;
 
   @override
-  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
+  Future<LaunchResult> startApp(
+    covariant ApplicationPackage package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
@@ -90,30 +92,36 @@ class FakeDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String? userIdentifier,
-  }) async => _launchResult;
+  }) async =>
+      _launchResult;
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {
+  Future<bool> stopApp(
+    covariant ApplicationPackage app, {
     String? userIdentifier,
-  }) async => true;
+  }) async =>
+      true;
 
   @override
   Future<bool> uninstallApp(
-  covariant ApplicationPackage app, {
+    covariant ApplicationPackage app, {
     String? userIdentifier,
-  }) async => true;
+  }) async =>
+      true;
 
   @override
   Future<void> dispose() async {}
 
   @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+  Future<TargetPlatform> targetPlatform =
+      Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
+  bool isSupportedForProject(FlutterProject flutterProject) =>
+      _isSupportedForProject;
 
   @override
   bool isSupported() => _isSupported;
@@ -137,11 +145,13 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   FakePollingDeviceDiscovery() : super('mock');
 
   final List<Device> _devices = <Device>[];
-  final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
-  final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
+  final StreamController<Device> _onAddedController =
+      StreamController<Device>.broadcast();
+  final StreamController<Device> _onRemovedController =
+      StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     lastPollingTimeout = timeout;
     return _devices;
   }
@@ -165,7 +175,7 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   void setDevices(List<Device> devices) {
-    while(_devices.isNotEmpty) {
+    while (_devices.isNotEmpty) {
       _removeDevice(_devices.first);
     }
     devices.forEach(addDevice);
@@ -198,11 +208,10 @@ class FakeDeviceLogReader extends DeviceLogReader {
 
   final List<String> _lineQueue = <String>[];
   late final StreamController<String> _linesController =
-    StreamController<String>
-        .broadcast(onListen: () {
-      _lineQueue.forEach(_linesController.add);
-      _lineQueue.clear();
-    });
+      StreamController<String>.broadcast(onListen: () {
+    _lineQueue.forEach(_linesController.add);
+    _lineQueue.clear();
+  });
 
   @override
   Stream<String> get logLines => _linesController.stream;

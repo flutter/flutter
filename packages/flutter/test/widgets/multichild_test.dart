@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
-  final MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
+  final MultiChildRenderObjectElement element =
+      tester.element(find.byElementPredicate(
     (Element element) => element is MultiChildRenderObjectElement,
   ));
   expect(element, isNotNull);
@@ -21,7 +22,8 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
       expect(child, isA<RenderDecoratedBox>());
       final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.decoration, equals(decoration));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData! as StackParentData;
+      final StackParentData decoratedBoxParentData =
+          decoratedBox.parentData! as StackParentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
@@ -32,7 +34,8 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 }
 
 class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
-  MockMultiChildRenderObjectWidget({ Key? key, required List<Widget> children }) : super(key: key, children: children);
+  MockMultiChildRenderObjectWidget({Key? key, required List<Widget> children})
+      : super(key: key, children: children);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -42,8 +45,8 @@ class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
 }
 
 void main() {
-  testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
-
+  testWidgets('MultiChildRenderObjectElement control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -55,7 +58,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -80,7 +84,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -93,7 +98,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC, kBoxDecorationA]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationB, kBoxDecorationC, kBoxDecorationA]);
 
     await tester.pumpWidget(
       Stack(
@@ -106,7 +112,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC, kBoxDecorationB]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationA, kBoxDecorationC, kBoxDecorationB]);
 
     await tester.pumpWidget(
       Stack(
@@ -124,11 +131,10 @@ void main() {
     );
 
     checkTree(tester, <BoxDecoration>[]);
-
   });
 
-  testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) async {
-
+  testWidgets('MultiChildRenderObjectElement with stateless widgets',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -140,7 +146,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -155,7 +162,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -172,7 +180,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -191,7 +200,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -208,7 +218,8 @@ void main() {
       ),
     );
 
-    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
+    checkTree(tester,
+        <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
 
     await tester.pumpWidget(
       Stack(
@@ -253,7 +264,8 @@ void main() {
     checkTree(tester, <BoxDecoration>[]);
   });
 
-  testWidgets('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement with stateful widgets',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -365,7 +377,7 @@ class FakeRenderObject extends RenderBox {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ Key? key, required this.child }) : super(key: key);
+  const DummyWidget({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 

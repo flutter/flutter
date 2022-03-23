@@ -54,16 +54,21 @@ Future<void> run(List<String> args) async {
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
-    ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
-    ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
-    ..addFlag(_kOptionCoverage,
+    ..addOption(_kOptionTests,
+        help:
+            'Path to json file that maps Dart test files to precompiled dill files')
+    ..addOption(_kOptionCoverageDirectory,
+        help: 'The path to the directory that will have coverage collected')
+    ..addFlag(
+      _kOptionCoverage,
       defaultsTo: false,
       negatable: false,
       help: 'Whether to collect coverage information.',
     )
-    ..addOption(_kOptionCoveragePath,
-        defaultsTo: 'coverage/lcov.info',
-        help: 'Where to store coverage information (if coverage is enabled).',
+    ..addOption(
+      _kOptionCoveragePath,
+      defaultsTo: 'coverage/lcov.info',
+      help: 'Where to store coverage information (if coverage is enabled).',
     );
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
@@ -75,66 +80,80 @@ Future<void> run(List<String> args) async {
   try {
     Cache.flutterRoot = tempDir.path;
 
-    final String shellPath = globals.fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
+    final String shellPath =
+        globals.fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
     if (!globals.fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
 
-    final Directory sdkRootSrc = globals.fs.directory(argResults[_kOptionSdkRoot]);
+    final Directory sdkRootSrc =
+        globals.fs.directory(argResults[_kOptionSdkRoot]);
     if (!globals.fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
     Directory coverageDirectory;
-    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String;
+    final String coverageDirectoryPath =
+        argResults[_kOptionCoverageDirectory] as String;
     if (coverageDirectoryPath != null) {
       if (!globals.fs.isDirectorySync(coverageDirectoryPath)) {
-        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
+        throwToolExit(
+            'Cannot find coverage directory at $coverageDirectoryPath');
       }
       coverageDirectory = globals.fs.directory(coverageDirectoryPath);
     }
 
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
-    final Link testerDestLink =
-        globals.fs.link(globals.artifacts.getArtifactPath(Artifact.flutterTester));
+    final Link testerDestLink = globals.fs
+        .link(globals.artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(globals.fs.path.absolute(shellPath));
 
-    final Directory sdkRootDest =
-        globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+    final Directory sdkRootDest = globals.fs.directory(
+        globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
     for (final FileSystemEntity artifact in sdkRootSrc.listSync()) {
-      globals.fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
+      globals.fs
+          .link(sdkRootDest.childFile(artifact.basename).path)
+          .createSync(artifact.path);
     }
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
-    globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
+    globals.fs
+        .link(sdkRootDest.childFile('platform.dill').path)
+        .createSync('platform_strong.dill');
 
     Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage'] as bool) {
       collector = CoverageCollector(
-        packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
-        libraryPredicate: (String libraryName) {
-          // If we have a specified coverage directory then accept all libraries.
-          if (coverageDirectory != null) {
-            return true;
-          }
-          final String projectName = FlutterProject.current().manifest.appName;
-          return libraryName.contains(projectName);
-        });
+          packagesPath: globals.fs.path.normalize(
+              globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
+          libraryPredicate: (String libraryName) {
+            // If we have a specified coverage directory then accept all libraries.
+            if (coverageDirectory != null) {
+              return true;
+            }
+            final String projectName =
+                FlutterProject.current().manifest.appName;
+            return libraryName.contains(projectName);
+          });
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }
       testDirectory = globals.fs.directory(argResults[_kOptionTestDirectory]);
     }
 
-
     final Map<String, String> tests = <String, String>{};
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
-      (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>).cast<Map<String, dynamic>>());
+        (json.decode(globals.fs
+                .file(argResults[_kOptionTests])
+                .readAsStringSync()) as List<dynamic>)
+            .cast<Map<String, dynamic>>());
     for (final Map<String, dynamic> map in jsonList) {
-      final String source = globals.fs.file(map['source']).resolveSymbolicLinksSync();
-      final String dill = globals.fs.file(map['dill']).resolveSymbolicLinksSync();
+      final String source =
+          globals.fs.file(map['source']).resolveSymbolicLinksSync();
+      final String dill =
+          globals.fs.file(map['dill']).resolveSymbolicLinksSync();
       tests[source] = dill;
     }
 
@@ -147,14 +166,16 @@ Future<void> run(List<String> args) async {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
+          packagesPath: globals.fs.path.normalize(
+              globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
         ),
       ),
       watcher: collector,
       enableObservatory: collector != null,
       precompiledDillFiles: tests,
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
-      icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
+      icudtlPath:
+          globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
     );
 
@@ -167,7 +188,9 @@ Future<void> run(List<String> args) async {
       } else {
         globals.fs.currentDirectory = testDirectory;
       }
-      if (!collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory)) {
+      if (!collector.collectCoverageData(
+          argResults[_kOptionCoveragePath] as String,
+          coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
       }
     }

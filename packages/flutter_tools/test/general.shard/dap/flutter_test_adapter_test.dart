@@ -18,9 +18,8 @@ void main() {
         : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
-      Cache.flutterRoot = globals.platform.isWindows
-          ? r'C:\fake\flutter'
-          : '/fake/flutter';
+      Cache.flutterRoot =
+          globals.platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';
     });
 
     test('includes toolArgs', () async {
@@ -47,11 +46,14 @@ void main() {
 
     group('includes customTool', () {
       test('with no args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(fileSystem: globals.fs,
-        platform: globals.platform,);
+        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
         final MockRequest request = MockRequest();
-        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+        final FlutterLaunchRequestArguments args =
+            FlutterLaunchRequestArguments(
           cwd: '/project',
           program: 'foo.dart',
           customTool: '/custom/flutter',
@@ -68,11 +70,14 @@ void main() {
       });
 
       test('with all args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(fileSystem: globals.fs,
-        platform: globals.platform,);
+        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        );
         final Completer<void> responseCompleter = Completer<void>();
         final MockRequest request = MockRequest();
-        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+        final FlutterLaunchRequestArguments args =
+            FlutterLaunchRequestArguments(
           cwd: '/project',
           program: 'foo.dart',
           customTool: '/custom/flutter',

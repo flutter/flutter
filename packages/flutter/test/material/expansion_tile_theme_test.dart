@@ -22,6 +22,7 @@ class TestIconState extends State<TestIcon> {
     return const Icon(Icons.expand_more);
   }
 }
+
 class TestText extends StatefulWidget {
   const TestText(this.text, {Key? key}) : super(key: key);
 
@@ -43,8 +44,10 @@ class TestTextState extends State<TestText> {
 
 void main() {
   test('ExpansionTileThemeData copyWith, ==, hashCode basics', () {
-    expect(const ExpansionTileThemeData(), const ExpansionTileThemeData().copyWith());
-    expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
+    expect(const ExpansionTileThemeData(),
+        const ExpansionTileThemeData().copyWith());
+    expect(const ExpansionTileThemeData().hashCode,
+        const ExpansionTileThemeData().copyWith().hashCode);
   });
 
   test('ExpansionTileThemeData defaults', () {
@@ -60,7 +63,8 @@ void main() {
     expect(theme.collapsedTextColor, null);
   });
 
-  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ExpansionTileThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -72,7 +76,8 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ExpansionTileThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ExpansionTileThemeData(
       backgroundColor: Color(0xff000000),
@@ -143,17 +148,20 @@ void main() {
       ),
     );
 
-    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    final BoxDecoration boxDecoration = tester
+        .firstWidget<Container>(find.descendant(
+          of: find.byKey(tileKey),
+          matching: find.byType(Container),
+        ))
+        .decoration! as BoxDecoration;
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
     expect(boxDecoration.color, collapsedBackgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
     final Rect listTileRect = tester.getRect(find.byType(ListTile));
-    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
+    final Rect tallerWidget =
+        titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(listTileRect.left, titleRect.left - 8);
@@ -164,8 +172,10 @@ void main() {
     expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
 
-    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
-    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+    Color getIconColor() =>
+        tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() =>
+        tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
     // Check the collapsed icon color when iconColor is applied.
     expect(getIconColor(), collapsedIconColor);
@@ -213,17 +223,20 @@ void main() {
       ),
     );
 
-    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    final BoxDecoration boxDecoration = tester
+        .firstWidget<Container>(find.descendant(
+          of: find.byKey(tileKey),
+          matching: find.byType(Container),
+        ))
+        .decoration! as BoxDecoration;
     // Check the tile's background color when backgroundColor is applied.
     expect(boxDecoration.color, backgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
     final Rect listTileRect = tester.getRect(find.byType(ListTile));
-    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
+    final Rect tallerWidget =
+        titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(listTileRect.left, titleRect.left - 8);
@@ -234,8 +247,10 @@ void main() {
     expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
 
-    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
-    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+    Color getIconColor() =>
+        tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() =>
+        tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
     // Check the expanded icon color when iconColor is applied.
     expect(getIconColor(), iconColor);

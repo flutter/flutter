@@ -13,7 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (continuous LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -50,8 +51,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // The start thumb is selected when tapping the left inactive track.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
@@ -67,7 +70,8 @@ void main() {
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (continuous RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -104,8 +108,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // The end thumb is selected when tapping the left inactive track.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
@@ -121,7 +127,8 @@ void main() {
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (discrete LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -160,8 +167,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // The start thumb is selected when tapping the left inactive track.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
@@ -179,7 +188,8 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (discrete RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -218,8 +228,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // The start thumb is selected when tapping the left inactive track.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
@@ -237,7 +249,9 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged to the min and max (continuous LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -266,8 +280,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // Drag the start thumb to the min.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
@@ -281,7 +297,9 @@ void main() {
     expect(values.end, equals(1));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged to the min and max (continuous RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -310,8 +328,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // Drag the end thumb to the max.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
@@ -325,7 +345,9 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged to the min and max (discrete LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -356,8 +378,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // Drag the start thumb to the min.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
@@ -371,7 +395,9 @@ void main() {
     expect(values.end, equals(100));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged to the min and max (discrete RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -402,8 +428,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // Drag the end thumb to the max.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
@@ -417,7 +445,9 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -446,8 +476,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the start thumb towards the center.
@@ -467,7 +499,9 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -496,8 +530,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the end thumb towards the center.
@@ -517,7 +553,9 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -548,8 +586,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the start thumb towards the center.
@@ -569,7 +609,9 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -600,8 +642,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the end thumb towards the center.
@@ -621,7 +665,9 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -650,8 +696,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the start thumb towards the center.
@@ -671,7 +719,9 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -700,8 +750,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the end thumb towards the center.
@@ -721,7 +773,9 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -752,8 +806,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the start thumb towards the center.
@@ -773,7 +829,9 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -804,8 +862,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the end thumb towards the center.
@@ -825,7 +885,9 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     RangeValues? startValues;
     RangeValues? endValues;
@@ -863,8 +925,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // Drag the start thumb towards the center.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
@@ -879,7 +943,9 @@ void main() {
     expect(endValues!.end, moreOrLessEquals(70, epsilon: 1));
   });
 
-  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     late RangeValues startValues;
     late RangeValues endValues;
@@ -917,8 +983,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
     // Drag the thumbs together.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
@@ -942,22 +1010,22 @@ void main() {
 
   ThemeData _buildTheme() {
     return ThemeData(
-        platform: TargetPlatform.android,
-        primarySwatch: Colors.blue,
-        sliderTheme: const SliderThemeData(
-          disabledThumbColor: Color(0xff000001),
-          disabledActiveTickMarkColor: Color(0xff000002),
-          disabledActiveTrackColor: Color(0xff000003),
-          disabledInactiveTickMarkColor: Color(0xff000004),
-          disabledInactiveTrackColor: Color(0xff000005),
-          activeTrackColor: Color(0xff000006),
-          activeTickMarkColor: Color(0xff000007),
-          inactiveTrackColor: Color(0xff000008),
-          inactiveTickMarkColor: Color(0xff000009),
-          overlayColor: Color(0xff000010),
-          thumbColor: Color(0xff000011),
-          valueIndicatorColor: Color(0xff000012),
-        ),
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+      sliderTheme: const SliderThemeData(
+        disabledThumbColor: Color(0xff000001),
+        disabledActiveTickMarkColor: Color(0xff000002),
+        disabledActiveTrackColor: Color(0xff000003),
+        disabledInactiveTickMarkColor: Color(0xff000004),
+        disabledInactiveTrackColor: Color(0xff000005),
+        activeTrackColor: Color(0xff000006),
+        activeTickMarkColor: Color(0xff000007),
+        inactiveTrackColor: Color(0xff000008),
+        inactiveTickMarkColor: Color(0xff000009),
+        overlayColor: Color(0xff000010),
+        thumbColor: Color(0xff000011),
+        valueIndicatorColor: Color(0xff000012),
+      ),
     );
   }
 
@@ -969,9 +1037,11 @@ void main() {
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
-      values = newValues;
-    };
+    final ValueChanged<RangeValues>? onChanged = !enabled
+        ? null
+        : (RangeValues newValues) {
+            values = newValues;
+          };
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
@@ -981,7 +1051,8 @@ void main() {
               data: theme,
               child: RangeSlider(
                 values: values,
-                labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                labels: RangeLabels(values.start.toStringAsFixed(2),
+                    values.end.toStringAsFixed(2)),
                 divisions: divisions,
                 activeColor: activeColor,
                 inactiveColor: inactiveColor,
@@ -994,13 +1065,16 @@ void main() {
     );
   }
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a default enabled slider',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
     await tester.pumpWidget(_buildThemedApp(theme: theme));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     // Check default theme for enabled widget.
     expect(
@@ -1016,21 +1090,30 @@ void main() {
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.thumbColor),
     );
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes when setting the active color',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, activeColor: activeColor));
+    await tester
+        .pumpWidget(_buildThemedApp(theme: theme, activeColor: activeColor));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1046,19 +1129,26 @@ void main() {
         ..circle(color: activeColor),
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes when setting the inactive color',
+      (WidgetTester tester) async {
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, inactiveColor: inactiveColor));
+    await tester.pumpWidget(
+        _buildThemedApp(theme: theme, inactiveColor: inactiveColor));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1073,12 +1163,17 @@ void main() {
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.thumbColor),
     );
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes with active and inactive colors',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
@@ -1090,7 +1185,8 @@ void main() {
       inactiveColor: inactiveColor,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1106,18 +1202,24 @@ void main() {
         ..circle(color: activeColor),
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a discrete slider',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
     await tester.pumpWidget(_buildThemedApp(theme: theme, divisions: 3));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1136,17 +1238,21 @@ void main() {
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.thumbColor),
     );
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
-
 
     await tester.pumpWidget(_buildThemedApp(
       theme: theme,
@@ -1155,7 +1261,8 @@ void main() {
       divisions: 3,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1175,20 +1282,28 @@ void main() {
         ..circle(color: activeColor),
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
+    expect(sliderBox,
+        isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a default disabled slider',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
     await tester.pumpWidget(_buildThemedApp(theme: theme, enabled: false));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1199,10 +1314,13 @@ void main() {
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(
+        sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
@@ -1215,7 +1333,8 @@ void main() {
       enabled: false,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     expect(
       sliderBox,
@@ -1226,10 +1345,13 @@ void main() {
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(
+        sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes when the value indicators are showing',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
@@ -1240,9 +1362,11 @@ void main() {
       int? divisions,
       bool enabled = true,
     }) {
-      final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
-        values = newValues;
-      };
+      final ValueChanged<RangeValues>? onChanged = !enabled
+          ? null
+          : (RangeValues newValues) {
+              values = newValues;
+            };
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -1252,7 +1376,8 @@ void main() {
                 data: theme,
                 child: RangeSlider(
                   values: values,
-                  labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                  labels: RangeLabels(values.start.toStringAsFixed(2),
+                      values.end.toStringAsFixed(2)),
                   divisions: divisions,
                   activeColor: activeColor,
                   inactiveColor: inactiveColor,
@@ -1267,9 +1392,11 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox =
+        tester.renderObject(find.byType(Overlay));
 
-    final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topRight =
+        tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
@@ -1285,7 +1412,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.5, 0.75);
     const Color fillColor = Color(0xf55f5f5f);
 
@@ -1298,6 +1427,7 @@ void main() {
       void onChanged(RangeValues newValues) {
         values = newValues;
       }
+
       return MaterialApp(
         home: Scaffold(
           // The builder is used to pass the context from the MaterialApp widget
@@ -1324,7 +1454,9 @@ void main() {
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
                             );
                           },
                         ),
@@ -1341,8 +1473,10 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
-    final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
+    final RenderObject valueIndicatorBox =
+        tester.renderObject(find.byType(Overlay));
+    final Offset topRight =
+        tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
@@ -1350,14 +1484,14 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-      // Represents the raised button wth next text.
-      ..path(color: Colors.black)
-      ..paragraph()
-      // Represents the range slider.
-      ..path(color: fillColor)
-      ..paragraph()
-      ..path(color: fillColor)
-      ..paragraph(),
+        // Represents the raised button wth next text.
+        ..path(color: Colors.black)
+        ..paragraph()
+        // Represents the range slider.
+        ..path(color: fillColor)
+        ..paragraph()
+        ..path(color: fillColor)
+        ..paragraph(),
     );
 
     // Represents the Raised Button and Range Slider.
@@ -1371,11 +1505,11 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-       paints
-         ..path(color: fillColor)
-         ..paragraph()
-         ..path(color: fillColor)
-         ..paragraph(),
+        paints
+          ..path(color: fillColor)
+          ..paragraph()
+          ..path(color: fillColor)
+          ..paragraph(),
       ),
     );
 
@@ -1388,7 +1522,8 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider top thumb gets stroked when overlapping',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1428,12 +1563,15 @@ void main() {
       ),
     );
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the thumbs towards the center.
@@ -1455,7 +1593,8 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider top value indicator gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider top value indicator gets stroked when overlapping',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1481,7 +1620,8 @@ void main() {
                     data: theme,
                     child: RangeSlider(
                       values: values,
-                      labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                      labels: RangeLabels(values.start.toStringAsFixed(2),
+                          values.end.toStringAsFixed(2)),
                       onChanged: (RangeValues newValues) {
                         setState(() {
                           values = newValues;
@@ -1497,12 +1637,15 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox =
+        tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the thumbs towards the center.
@@ -1527,7 +1670,9 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider top value indicator gets stroked when overlapping with large text scale',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1548,14 +1693,16 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: 2.0),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
+                    .copyWith(textScaleFactor: 2.0),
                 child: Material(
                   child: Center(
                     child: Theme(
                       data: theme,
                       child: RangeSlider(
                         values: values,
-                        labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                        labels: RangeLabels(values.start.toStringAsFixed(2),
+                            values.end.toStringAsFixed(2)),
                         onChanged: (RangeValues newValues) {
                           setState(() {
                             values = newValues;
@@ -1572,12 +1719,15 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox =
+        tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the thumbs towards the center.
@@ -1602,7 +1752,8 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Range Slider thumb gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider thumb gets stroked when overlapping',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1627,7 +1778,8 @@ void main() {
                     data: theme,
                     child: RangeSlider(
                       values: values,
-                      labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                      labels: RangeLabels(values.start.toStringAsFixed(2),
+                          values.end.toStringAsFixed(2)),
                       onChanged: (RangeValues newValues) {
                         setState(() {
                           values = newValues;
@@ -1645,8 +1797,10 @@ void main() {
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
-    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
-    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight =
+        tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
 
     // Drag the thumbs towards the center.
@@ -1693,7 +1847,7 @@ void main() {
               child: RangeSlider(
                 values: const RangeValues(10.0, 12.0),
                 max: 100.0,
-                onChanged: (RangeValues v) { },
+                onChanged: (RangeValues v) {},
               ),
             ),
           ),
@@ -1707,9 +1861,9 @@ void main() {
       tester.getSemantics(find.byType(RangeSlider)),
       matchesSemantics(
         scopesRoute: true,
-        children:<Matcher>[
+        children: <Matcher>[
           matchesSemantics(
-            children:  <Matcher>[
+            children: <Matcher>[
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
@@ -1737,7 +1891,8 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Range Slider implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
@@ -1751,8 +1906,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -1768,7 +1924,9 @@ void main() {
     ]);
   });
 
-  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -1796,18 +1954,26 @@ void main() {
       renderObject,
       paints
         // left inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(-24.0, 3.0, -12.0, 7.0, topLeft: const Radius.circular(2.0), bottomLeft: const Radius.circular(2.0)))
+        ..rrect(
+            rrect: RRect.fromLTRBAndCorners(-24.0, 3.0, -12.0, 7.0,
+                topLeft: const Radius.circular(2.0),
+                bottomLeft: const Radius.circular(2.0)))
         // active track RRect
         ..rect(rect: const Rect.fromLTRB(-12.0, 2.0, 0.0, 8.0))
         // right inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        ..rrect(
+            rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0,
+                topRight: const Radius.circular(2.0),
+                bottomRight: const Radius.circular(2.0)))
         // thumbs
         ..circle(x: -12.0, y: 5.0, radius: 10.0)
         ..circle(x: 0.0, y: 5.0, radius: 10.0),
     );
   });
 
-  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider can be painted in a narrower constraint when track shape is Rectangular',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1852,7 +2018,9 @@ void main() {
     );
   });
 
-  testWidgets('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
+  testWidgets(
+      'Update the divisions and values at the same time for RangeSlider',
+      (WidgetTester tester) async {
     // Regress test for https://github.com/flutter/flutter/issues/65943
     Widget buildFrame(double maxValue) {
       return MaterialApp(
@@ -1879,19 +2047,27 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late Rect activeTrackRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
-        return false;
-      activeTrackRect = arguments[0] as Rect;
-      return true;
-    }));
+    expect(
+        renderObject,
+        paints
+          ..something((Symbol method, List<dynamic> arguments) {
+            if (method != #drawRect) return false;
+            activeTrackRect = arguments[0] as Rect;
+            return true;
+          }));
 
     // The 1st thumb should at one-third(5 / 15) of the Slider.
     // The 2nd thumb should at (8 / 15) of the Slider.
     // The left of the active track shape is the position of the 1st thumb.
     // The right of the active track shape is the position of the 2nd thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
-    expect(nearEqual(activeTrackRect.left, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
-    expect(nearEqual(activeTrackRect.right, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
+    expect(
+        nearEqual(activeTrackRect.left, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0,
+            0.01),
+        true);
+    expect(
+        nearEqual(activeTrackRect.right,
+            (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01),
+        true);
   });
 }

@@ -13,19 +13,23 @@ import 'theme.dart';
 class _FadeUpwardsPageTransition extends StatelessWidget {
   _FadeUpwardsPageTransition({
     Key? key,
-    required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
+    required Animation<double>
+        routeAnimation, // The route's linear 0.0 - 1.0 animation.
     required this.child,
-  }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
-       _opacityAnimation = routeAnimation.drive(_easeInTween),
-       super(key: key);
+  })  : _positionAnimation =
+            routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
+        _opacityAnimation = routeAnimation.drive(_easeInTween),
+        super(key: key);
 
   // Fractional offset from 1/4 screen below the top to fully on screen.
   static final Tween<Offset> _bottomUpTween = Tween<Offset>(
     begin: const Offset(0.0, 0.25),
     end: Offset.zero,
   );
-  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _fastOutSlowInTween =
+      CurveTween(curve: Curves.fastOutSlowIn);
+  static final Animatable<double> _easeInTween =
+      CurveTween(curve: Curves.easeIn);
 
   final Animation<Offset> _positionAnimation;
   final Animation<double> _opacityAnimation;
@@ -97,10 +101,13 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
           end: size.height,
         ).animate(primaryAnimation);
 
-        final Animation<double> opacityAnimation = _scrimOpacityTween.animate(primaryAnimation);
-        final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
+        final Animation<double> opacityAnimation =
+            _scrimOpacityTween.animate(primaryAnimation);
+        final Animation<Offset> primaryTranslationAnimation =
+            _primaryTranslationTween.animate(primaryAnimation);
 
-        final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
+        final Animation<Offset> secondaryTranslationAnimation =
+            _secondaryTranslationTween.animate(
           CurvedAnimation(
             parent: secondaryAnimation,
             curve: _transitionCurve,
@@ -157,25 +164,27 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.animation,
     required this.secondaryAnimation,
     this.child,
-  }) : assert(animation != null),
-       assert(secondaryAnimation != null),
-       super(key: key);
+  })  : assert(animation != null),
+        assert(secondaryAnimation != null),
+        super(key: key);
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
-  static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
+  static final List<TweenSequenceItem<double>>
+      fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.0, end: 0.4)
-        .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+          .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
       weight: 0.166666,
     ),
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.4, end: 1.0)
-        .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+          .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
       weight: 1.0 - 0.166666,
     ),
   ];
-  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
+  static final TweenSequence<double> _scaleCurveSequence =
+      TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
 
   /// The animation that drives the [child]'s entrance and exit.
   ///
@@ -260,9 +269,9 @@ class _ZoomEnterTransition extends StatelessWidget {
     required this.animation,
     this.reverse = false,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null),
-       super(key: key);
+  })  : assert(animation != null),
+        assert(reverse != null),
+        super(key: key);
 
   final Animation<double> animation;
   final Widget? child;
@@ -306,13 +315,12 @@ class _ZoomEnterTransition extends StatelessWidget {
     }
 
     final Animation<double> fadeTransition = reverse
-      ? kAlwaysCompleteAnimation
-      : _fadeInTransition.animate(animation);
+        ? kAlwaysCompleteAnimation
+        : _fadeInTransition.animate(animation);
 
-    final Animation<double> scaleTransition = (reverse
-      ? _scaleDownTransition
-      : _scaleUpTransition
-    ).animate(animation);
+    final Animation<double> scaleTransition =
+        (reverse ? _scaleDownTransition : _scaleUpTransition)
+            .animate(animation);
 
     return AnimatedBuilder(
       animation: animation,
@@ -339,9 +347,9 @@ class _ZoomExitTransition extends StatelessWidget {
     required this.animation,
     this.reverse = false,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null),
-       super(key: key);
+  })  : assert(animation != null),
+        assert(reverse != null),
+        super(key: key);
 
   final Animation<double> animation;
   final bool reverse;
@@ -365,12 +373,11 @@ class _ZoomExitTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> fadeTransition = reverse
-      ? _fadeOutTransition.animate(animation)
-      : kAlwaysCompleteAnimation;
-    final Animation<double> scaleTransition = (reverse
-      ? _scaleDownTransition
-      : _scaleUpTransition
-    ).animate(animation);
+        ? _fadeOutTransition.animate(animation)
+        : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition =
+        (reverse ? _scaleDownTransition : _scaleUpTransition)
+            .animate(animation);
 
     return FadeTransition(
       opacity: fadeTransition,
@@ -535,7 +542,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(route, context, animation, secondaryAnimation, child);
+    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
+        route, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -565,9 +573,12 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
+  const PageTransitionsTheme(
+      {Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders})
+      : _builders = builders;
 
-  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
+  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
+      <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
@@ -596,26 +607,29 @@ class PageTransitionsTheme with Diagnosticable {
       platform = TargetPlatform.iOS;
 
     final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
-    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+        builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
+    return matchingBuilder.buildTransitions<T>(
+        route, context, animation, secondaryAnimation, child);
   }
 
   // Just used to the builders Map to a list with one PageTransitionsBuilder per platform
   // for the operator == overload.
-  List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
-    return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
+  List<PageTransitionsBuilder?> _all(
+      Map<TargetPlatform, PageTransitionsBuilder> builders) {
+    return TargetPlatform.values
+        .map((TargetPlatform platform) => builders[platform])
+        .toList();
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     if (other is PageTransitionsTheme && identical(builders, other.builders))
       return true;
-    return other is PageTransitionsTheme
-        && listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
+    return other is PageTransitionsTheme &&
+        listEquals<PageTransitionsBuilder?>(
+            _all(other.builders), _all(builders));
   }
 
   @override

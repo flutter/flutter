@@ -12,15 +12,11 @@ import 'android_platform_view.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(
-    const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
-  const PlatformViewApp({
-    Key? key
-  }) : super(key: key);
+  const PlatformViewApp({Key? key}) : super(key: key);
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
@@ -44,14 +40,15 @@ class PlatformViewAppState extends State<PlatformViewApp> {
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ Key? key }) : super(key: key);
+  const PlatformViewLayout({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Platform View Scrolling Layout')),
       body: ListView.builder(
-        key: const Key('platform-views-scroll'), // This key is used by the driver test.
+        key: const Key(
+            'platform-views-scroll'), // This key is used by the driver test.
         itemCount: 200,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
@@ -60,7 +57,7 @@ class PlatformViewLayout extends StatelessWidget {
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
               child: Stack(
-                children: const <Widget> [
+                children: const <Widget>[
                   DummyPlatformView(),
                   RotationContainer(),
                 ],
@@ -78,7 +75,8 @@ class DummyPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String viewType = 'benchmarks/platform_views_layout_hybrid_composition/DummyPlatformView';
+    const String viewType =
+        'benchmarks/platform_views_layout_hybrid_composition/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
       nativeView = const UiKitView(
@@ -108,7 +106,7 @@ class RotationContainer extends StatefulWidget {
 }
 
 class _RotationContainerState extends State<RotationContainer>
-  with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
 
   @override
@@ -121,6 +119,7 @@ class _RotationContainerState extends State<RotationContainer>
     );
     _rotationController.repeat();
   }
+
   @override
   Widget build(BuildContext context) {
     return RotationTransition(

@@ -9,7 +9,8 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:test_api/test_api.dart' as test_package;
 
 /// Signature for the [reportTestException] callback.
-typedef TestExceptionReporter = void Function(FlutterErrorDetails details, String testDescription);
+typedef TestExceptionReporter = void Function(
+    FlutterErrorDetails details, String testDescription);
 
 /// A function that is called by the test framework when an unexpected error
 /// occurred during a test.
@@ -28,7 +29,8 @@ set reportTestException(TestExceptionReporter handler) {
   _reportTestException = handler;
 }
 
-void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String testDescription) {
+void _defaultTestExceptionReporter(
+    FlutterErrorDetails errorDetails, String testDescription) {
   FlutterError.dumpErrorToConsole(errorDetails, forceReport: true);
   // test_package.registerException actually just calls the current zone's error handler (that
   // is to say, _parentZone's handleUncaughtError function). FakeAsync doesn't add one of those,
@@ -38,7 +40,9 @@ void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String test
   String additional = '';
   if (testDescription.isNotEmpty)
     additional = '\nThe test description was: $testDescription';
-  test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
+  test_package.registerException(
+      'Test failed. See exception logs above.$additional', _emptyStackTrace);
 }
 
-final StackTrace _emptyStackTrace = stack_trace.Chain(const <stack_trace.Trace>[]);
+final StackTrace _emptyStackTrace =
+    stack_trace.Chain(const <stack_trace.Trace>[]);

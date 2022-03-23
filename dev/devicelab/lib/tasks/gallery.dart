@@ -28,7 +28,8 @@ TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
   );
 }
 
-TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionHybridTest(
+    {bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
     semanticsEnabled: semanticsEnabled,
     driverFile: semanticsEnabled
@@ -38,7 +39,6 @@ TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) 
 }
 
 class GalleryTransitionTest {
-
   GalleryTransitionTest({
     this.semanticsEnabled = false,
     this.testFile = 'transitions_perf',
@@ -65,7 +65,8 @@ class GalleryTransitionTest {
     final Device device = await devices.workingDevice;
     await device.unlock();
     final String deviceId = device.deviceId;
-    final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
+    final Directory galleryDirectory =
+        dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
       String? applicationBinaryPath;
       if (deviceOperatingSystem == DeviceOperatingSystem.android) {
@@ -85,22 +86,21 @@ class GalleryTransitionTest {
         applicationBinaryPath = 'build/app/outputs/flutter-apk/app-profile.apk';
       }
 
-      final String testDriver = driverFile ?? (semanticsEnabled
-          ? '${testFile}_with_semantics_test'
-          : '${testFile}_test');
+      final String testDriver = driverFile ??
+          (semanticsEnabled
+              ? '${testFile}_with_semantics_test'
+              : '${testFile}_test');
       section('DRIVE START');
       await flutter('drive', options: <String>[
         '--no-dds',
         '--profile',
-        if (needFullTimeline)
-          '--trace-startup',
+        if (needFullTimeline) '--trace-startup',
         if (applicationBinaryPath != null)
           '--use-application-binary=$applicationBinaryPath'
-        else
-          ...<String>[
-            '-t',
-            'test_driver/$testFile.dart',
-          ],
+        else ...<String>[
+          '-t',
+          'test_driver/$testFile.dart',
+        ],
         '--driver',
         'test_driver/$testDriver.dart',
         '-d',
@@ -108,14 +108,17 @@ class GalleryTransitionTest {
       ]);
     });
 
-    final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
+    final String testOutputDirectory =
+        Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ??
+            '${galleryDirectory.path}/build';
     final Map<String, dynamic> summary = json.decode(
       file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
       final Map<String, dynamic> original = json.decode(
-        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
+        file('$testOutputDirectory/$transitionDurationFile.json')
+            .readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
@@ -125,8 +128,10 @@ class GalleryTransitionTest {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
-    final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
-    return TaskResult.success(summary,
+    final bool isAndroid =
+        deviceOperatingSystem == DeviceOperatingSystem.android;
+    return TaskResult.success(
+      summary,
       detailFiles: <String>[
         if (transitionDurationFile != null)
           '$testOutputDirectory/$transitionDurationFile.json',
@@ -134,8 +139,7 @@ class GalleryTransitionTest {
           '$testOutputDirectory/$timelineTraceFile.json'
       ],
       benchmarkScoreKeys: <String>[
-        if (transitionDurationFile != null)
-          'missed_transition_count',
+        if (transitionDurationFile != null) 'missed_transition_count',
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
         '90th_percentile_frame_build_time_millis',
@@ -168,8 +172,10 @@ class GalleryTransitionTest {
         if (measureMemory && !isAndroid) ...<String>[
           // See https://github.com/flutter/flutter/issues/68888
           if (summary['average_memory_usage'] != null) 'average_memory_usage',
-          if (summary['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
-          if (summary['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
+          if (summary['90th_percentile_memory_usage'] != null)
+            '90th_percentile_memory_usage',
+          if (summary['99th_percentile_memory_usage'] != null)
+            '99th_percentile_memory_usage',
         ],
       ],
     );
@@ -182,7 +188,8 @@ int _countMissedTransitions(Map<String, List<int>> transitions) {
   transitions.forEach((String demoName, List<int> durations) {
     final int longestDuration = durations.reduce(math.max);
     if (longestDuration > kTransitionBudget) {
-      print('$demoName missed transition time budget ($longestDuration µs > $kTransitionBudget µs)');
+      print(
+          '$demoName missed transition time budget ($longestDuration µs > $kTransitionBudget µs)');
       count++;
     }
   });

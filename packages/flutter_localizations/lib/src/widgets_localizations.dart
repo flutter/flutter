@@ -25,7 +25,9 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// function, rather than constructing this class directly.
   GlobalWidgetsLocalizations(this.locale) {
     final String language = locale.languageCode.toLowerCase();
-    _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
+    _textDirection = _rtlLanguages.contains(language)
+        ? TextDirection.rtl
+        : TextDirection.ltr;
   }
 
   // See http://en.wikipedia.org/wiki/Right-to-left
@@ -51,24 +53,28 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [WidgetsApp] does so by default.
   static Future<WidgetsLocalizations> load(Locale locale) {
-    return SynchronousFuture<WidgetsLocalizations>(GlobalWidgetsLocalizations(locale));
+    return SynchronousFuture<WidgetsLocalizations>(
+        GlobalWidgetsLocalizations(locale));
   }
 
   /// A [LocalizationsDelegate] that uses [GlobalWidgetsLocalizations.load]
   /// to create an instance of this class.
   ///
   /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
-  static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate =
+      _WidgetsLocalizationsDelegate();
 }
 
-class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+class _WidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
   const _WidgetsLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) => GlobalWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(Locale locale) =>
+      GlobalWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;

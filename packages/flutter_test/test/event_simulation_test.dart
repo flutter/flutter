@@ -9,7 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<String> platforms = <String>['linux', 'macos', 'android', 'fuchsia'];
 
-void _verifyKeyEvent<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
+void _verifyKeyEvent<T extends KeyEvent>(
+    KeyEvent event,
+    PhysicalKeyboardKey physical,
+    LogicalKeyboardKey logical,
+    String? character) {
   expect(event, isA<T>());
   expect(event.physicalKey, physical);
   expect(event.logicalKey, logical);
@@ -17,7 +21,11 @@ void _verifyKeyEvent<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey phy
   expect(event.synthesized, false);
 }
 
-void _verifyRawKeyEvent<T extends RawKeyEvent>(RawKeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
+void _verifyRawKeyEvent<T extends RawKeyEvent>(
+    RawKeyEvent event,
+    PhysicalKeyboardKey physical,
+    LogicalKeyboardKey logical,
+    String? character) {
   expect(event, isA<T>());
   expect(event.physicalKey, physical);
   expect(event.logicalKey, logical);
@@ -37,7 +45,8 @@ Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
 }
 
 void main() {
-  testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
+  testWidgets('simulates keyboard events (RawEvent)',
+      (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<RawKeyEvent> events = <RawKeyEvent>[];
@@ -56,12 +65,16 @@ void main() {
     await tester.idle();
 
     for (final String platform in platforms) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+      await tester.sendKeyEvent(LogicalKeyboardKey.shiftLeft,
+          platform: platform);
       await tester.sendKeyEvent(LogicalKeyboardKey.shift, platform: platform);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA,
+          platform: platform);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad1, platform: platform);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad1, platform: platform);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad1,
+          platform: platform);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad1,
+          platform: platform);
       await tester.idle();
 
       expect(events.length, 8);
@@ -73,7 +86,10 @@ void main() {
           expect(events[i].runtimeType, equals(RawKeyUpEvent));
         }
         if (i < 4) {
-          expect(events[i].data.isModifierPressed(ModifierKey.shiftModifier, side: KeyboardSide.left), equals(isEven));
+          expect(
+              events[i].data.isModifierPressed(ModifierKey.shiftModifier,
+                  side: KeyboardSide.left),
+              equals(isEven));
         }
       }
       events.clear();
@@ -85,8 +101,10 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates keyboard events (KeyData then RawKeyEvent)', (WidgetTester tester) async {
-    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
+  testWidgets('simulates keyboard events (KeyData then RawKeyEvent)',
+      (WidgetTester tester) async {
+    debugKeyEventSimulatorTransitModeOverride =
+        KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<KeyEvent> events = <KeyEvent>[];
 
@@ -106,23 +124,30 @@ void main() {
     // Key press shiftLeft
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
     expect(events.length, 1);
-    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftLeft, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft}));
+    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.shiftLeft,
+        LogicalKeyboardKey.shiftLeft, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyRepeatEvent(LogicalKeyboardKey.shiftLeft);
     expect(events.length, 1);
-    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftLeft, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft}));
+    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.shiftLeft,
+        LogicalKeyboardKey.shiftLeft, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     expect(events.length, 1);
-    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftLeft, null);
+    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.shiftLeft,
+        LogicalKeyboardKey.shiftLeft, null);
     expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
@@ -131,21 +156,28 @@ void main() {
     // Key press keyA
     await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
     expect(events.length, 1);
-    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.keyA}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.keyA}));
+    _verifyKeyEvent<KeyDownEvent>(
+        events[0], PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.keyA}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.keyA}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
-    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.keyA}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.keyA}));
+    _verifyKeyEvent<KeyRepeatEvent>(
+        events[0], PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.keyA}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.keyA}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, null);
+    _verifyKeyEvent<KeyUpEvent>(
+        events[0], PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, null);
     expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
@@ -153,21 +185,28 @@ void main() {
 
     // Key press numpad1
     await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad1);
-    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numpad1, LogicalKeyboardKey.numpad1, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numpad1}));
+    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numpad1,
+        LogicalKeyboardKey.numpad1, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyRepeatEvent(LogicalKeyboardKey.numpad1);
-    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.numpad1, LogicalKeyboardKey.numpad1, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numpad1}));
+    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.numpad1,
+        LogicalKeyboardKey.numpad1, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad1);
-    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.numpad1, LogicalKeyboardKey.numpad1, null);
+    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.numpad1,
+        LogicalKeyboardKey.numpad1, null);
     expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
@@ -175,43 +214,60 @@ void main() {
 
     // Key press numLock (1st time)
     await tester.sendKeyDownEvent(LogicalKeyboardKey.numLock);
-    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numLock, LogicalKeyboardKey.numLock, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numLock,
+        LogicalKeyboardKey.numLock, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.lockModesEnabled,
+        equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
     events.clear();
 
     await tester.sendKeyRepeatEvent(LogicalKeyboardKey.numLock);
-    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.numLock, LogicalKeyboardKey.numLock, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.numLock,
+        LogicalKeyboardKey.numLock, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.lockModesEnabled,
+        equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
     events.clear();
 
     await tester.sendKeyUpEvent(LogicalKeyboardKey.numLock);
-    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.numLock, LogicalKeyboardKey.numLock, null);
+    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.numLock,
+        LogicalKeyboardKey.numLock, null);
     expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
-    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+    expect(HardwareKeyboard.instance.lockModesEnabled,
+        equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
     events.clear();
 
     // Key press numLock (2nd time)
     await tester.sendKeyDownEvent(LogicalKeyboardKey.numLock);
-    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numLock, LogicalKeyboardKey.numLock, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
+    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numLock,
+        LogicalKeyboardKey.numLock, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyRepeatEvent(LogicalKeyboardKey.numLock);
-    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.numLock, LogicalKeyboardKey.numLock, null);
-    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
+    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.numLock,
+        LogicalKeyboardKey.numLock, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed,
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
     await tester.sendKeyUpEvent(LogicalKeyboardKey.numLock);
-    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.numLock, LogicalKeyboardKey.numLock, null);
+    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.numLock,
+        LogicalKeyboardKey.numLock, null);
     expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
@@ -225,7 +281,8 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates using the correct transit mode: rawKeyData', (WidgetTester tester) async {
+  testWidgets('simulates using the correct transit mode: rawKeyData',
+      (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<Object> events = <Object>[];
@@ -253,36 +310,45 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
     expect(events.length, 2);
     expect(events[0], isA<KeyEvent>());
-    _verifyKeyEvent<KeyDownEvent>(events[0] as KeyEvent, PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
+    _verifyKeyEvent<KeyDownEvent>(events[0] as KeyEvent,
+        PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
     expect(events[1], isA<RawKeyEvent>());
-    _verifyRawKeyEvent<RawKeyDownEvent>(events[1] as RawKeyEvent, PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
+    _verifyRawKeyEvent<RawKeyDownEvent>(events[1] as RawKeyEvent,
+        PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
     events.clear();
 
     // A (physical keyA, logical keyB) is released.
     //
     // Since this event was synthesized and regularized before being sent to
     // HardwareKeyboard, this event will be accepted.
-    await simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA);
+    await simulateKeyUpEvent(LogicalKeyboardKey.keyB,
+        physicalKey: PhysicalKeyboardKey.keyA);
     expect(events.length, 2);
     expect(events[0], isA<KeyEvent>());
-    _verifyKeyEvent<KeyUpEvent>(events[0] as KeyEvent, PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, null);
+    _verifyKeyEvent<KeyUpEvent>(events[0] as KeyEvent, PhysicalKeyboardKey.keyA,
+        LogicalKeyboardKey.keyA, null);
     expect(events[1], isA<RawKeyEvent>());
-    _verifyRawKeyEvent<RawKeyUpEvent>(events[1] as RawKeyEvent, PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, null);
+    _verifyRawKeyEvent<RawKeyUpEvent>(events[1] as RawKeyEvent,
+        PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, null);
     events.clear();
 
     // Manually switch the transit mode to `keyDataThenRawKeyData`. This will
     // never happen in real applications so the assertion error can verify that
     // the transit mode is correctly applied.
-    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
+    debugKeyEventSimulatorTransitModeOverride =
+        KeyDataTransitMode.keyDataThenRawKeyData;
 
-    await _shouldThrow<AssertionError>(() =>
-      simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA));
+    await _shouldThrow<AssertionError>(() => simulateKeyUpEvent(
+        LogicalKeyboardKey.keyB,
+        physicalKey: PhysicalKeyboardKey.keyA));
 
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates using the correct transit mode: keyDataThenRawKeyData', (WidgetTester tester) async {
-    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
+  testWidgets('simulates using the correct transit mode: keyDataThenRawKeyData',
+      (WidgetTester tester) async {
+    debugKeyEventSimulatorTransitModeOverride =
+        KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<Object> events = <Object>[];
 
@@ -309,9 +375,11 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
     expect(events.length, 2);
     expect(events[0], isA<KeyEvent>());
-    _verifyKeyEvent<KeyDownEvent>(events[0] as KeyEvent, PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
+    _verifyKeyEvent<KeyDownEvent>(events[0] as KeyEvent,
+        PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
     expect(events[1], isA<RawKeyEvent>());
-    _verifyRawKeyEvent<RawKeyDownEvent>(events[1] as RawKeyEvent, PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
+    _verifyRawKeyEvent<RawKeyDownEvent>(events[1] as RawKeyEvent,
+        PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, 'a');
     events.clear();
 
     // A (physical keyA, logical keyB) is released.
@@ -319,8 +387,9 @@ void main() {
     // Since this event is transmitted to HardwareKeyboard as-is, it will be rejected due to
     // inconsistent logical key. This does not indicate behaviral difference,
     // since KeyData is will never send malformed data sequence in real applications.
-    await _shouldThrow<AssertionError>(() =>
-      simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA));
+    await _shouldThrow<AssertionError>(() => simulateKeyUpEvent(
+        LogicalKeyboardKey.keyB,
+        physicalKey: PhysicalKeyboardKey.keyA));
 
     debugKeyEventSimulatorTransitModeOverride = null;
   });

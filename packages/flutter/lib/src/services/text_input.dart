@@ -4,13 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show
-  FontWeight,
-  Offset,
-  Size,
-  Rect,
-  TextAlign,
-  TextDirection;
+import 'dart:ui' show FontWeight, Offset, Size, Rect, TextAlign, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -81,8 +75,8 @@ enum SmartQuotesType {
 @immutable
 class TextInputType {
   const TextInputType._(this.index)
-    : signed = null,
-      decimal = null;
+      : signed = null,
+        decimal = null;
 
   /// Optimize for numerical information.
   ///
@@ -179,12 +173,32 @@ class TextInputType {
 
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none,
+    text,
+    multiline,
+    number,
+    phone,
+    datetime,
+    emailAddress,
+    url,
+    visiblePassword,
+    name,
+    streetAddress,
+    none,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none',
+    'text',
+    'multiline',
+    'number',
+    'phone',
+    'datetime',
+    'emailAddress',
+    'url',
+    'visiblePassword',
+    'name',
+    'address',
+    'none',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -209,10 +223,10 @@ class TextInputType {
 
   @override
   bool operator ==(Object other) {
-    return other is TextInputType
-        && other.index == index
-        && other.signed == signed
-        && other.decimal == decimal;
+    return other is TextInputType &&
+        other.index == index &&
+        other.signed == signed &&
+        other.decimal == decimal;
   }
 
   @override
@@ -468,17 +482,19 @@ class TextInputConfiguration {
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
-  }) : assert(inputType != null),
-       assert(obscureText != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(autocorrect != null),
-       assert(enableSuggestions != null),
-       assert(keyboardAppearance != null),
-       assert(inputAction != null),
-       assert(textCapitalization != null),
-       assert(enableIMEPersonalizedLearning != null),
-       assert(enableDeltaModel != null);
+  })  : assert(inputType != null),
+        assert(obscureText != null),
+        smartDashesType = smartDashesType ??
+            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ??
+            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+        assert(autocorrect != null),
+        assert(enableSuggestions != null),
+        assert(keyboardAppearance != null),
+        assert(inputAction != null),
+        assert(textCapitalization != null),
+        assert(enableIMEPersonalizedLearning != null),
+        assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -637,8 +653,10 @@ class TextInputConfiguration {
       inputAction: inputAction ?? this.inputAction,
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
-      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
-      autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      enableIMEPersonalizedLearning:
+          enableIMEPersonalizedLearning ?? this.enableIMEPersonalizedLearning,
+      autofillConfiguration:
+          autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
   }
@@ -685,7 +703,7 @@ class TextInputConfiguration {
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofill != null) 'autofill': autofill,
-      'enableDeltaModel' : enableDeltaModel,
+      'enableDeltaModel': enableDeltaModel,
     };
   }
 }
@@ -724,8 +742,8 @@ class RawFloatingCursorPoint {
   RawFloatingCursorPoint({
     this.offset,
     required this.state,
-  }) : assert(state != null),
-       assert(state != FloatingCursorDragState.Update || offset != null);
+  })  : assert(state != null),
+        assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
@@ -750,9 +768,9 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
-  }) : assert(text != null),
-       assert(selection != null),
-       assert(composing != null);
+  })  : assert(text != null),
+        assert(selection != null),
+        assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -761,7 +779,8 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] as int? ?? -1,
         extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
+            TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
       ),
       composing: TextRange(
@@ -834,7 +853,10 @@ class TextEditingValue {
   /// If this property is false while the [composing] range's `isValid` is true,
   /// it usually indicates the current [composing] range is invalid because of a
   /// programming error.
-  bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
+  bool get isComposingRangeValid =>
+      composing.isValid &&
+      composing.isNormalized &&
+      composing.end <= text.length;
 
   /// Returns a new [TextEditingValue], which is this [TextEditingValue] with
   /// its [text] partially replaced by the `replacementString`.
@@ -854,21 +876,29 @@ class TextEditingValue {
   ///
   /// This method does nothing if the given `replacementRange` is not
   /// [TextRange.isValid].
-  TextEditingValue replaced(TextRange replacementRange, String replacementString) {
+  TextEditingValue replaced(
+      TextRange replacementRange, String replacementString) {
     if (!replacementRange.isValid) {
       return this;
     }
-    final String newText = text.replaceRange(replacementRange.start, replacementRange.end, replacementString);
+    final String newText = text.replaceRange(
+        replacementRange.start, replacementRange.end, replacementString);
 
-    if (replacementRange.end - replacementRange.start == replacementString.length) {
+    if (replacementRange.end - replacementRange.start ==
+        replacementString.length) {
       return copyWith(text: newText);
     }
 
     int adjustIndex(int originalIndex) {
       // The length added by adding the replacementString.
-      final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
+      final int replacedLength = originalIndex <= replacementRange.start &&
+              originalIndex < replacementRange.end
+          ? 0
+          : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
+      final int removedLength =
+          originalIndex.clamp(replacementRange.start, replacementRange.end) -
+              replacementRange.start;
       return originalIndex + replacedLength - removedLength;
     }
 
@@ -899,24 +929,24 @@ class TextEditingValue {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+  String toString() =>
+      '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    return other is TextEditingValue
-        && other.text == text
-        && other.selection == selection
-        && other.composing == composing;
+    if (identical(this, other)) return true;
+    return other is TextEditingValue &&
+        other.text == text &&
+        other.selection == selection &&
+        other.composing == composing;
   }
 
   @override
   int get hashCode => Object.hash(
-    text.hashCode,
-    selection.hashCode,
-    composing.hashCode,
-  );
+        text.hashCode,
+        selection.hashCode,
+        composing.hashCode,
+      );
 }
 
 /// Indicates what triggered the change in selected text (including changes to
@@ -976,7 +1006,8 @@ mixin TextSelectionDelegate {
   /// * [EditableTextState.userUpdateTextEditingValue]: an implementation that
   ///   applies additional pre-processing to the specified [value], before
   ///   updating the text editing state.
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
+  void userUpdateTextEditingValue(
+      TextEditingValue value, SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
   ///
@@ -1152,13 +1183,11 @@ class SelectionRect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (runtimeType != other.runtimeType)
-      return false;
-    return other is SelectionRect
-        && other.position == position
-        && other.bounds   == bounds;
+    if (identical(this, other)) return true;
+    if (runtimeType != other.runtimeType) return false;
+    return other is SelectionRect &&
+        other.position == position &&
+        other.bounds == bounds;
   }
 
   @override
@@ -1317,10 +1346,10 @@ class TextInputConnection {
   /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedRect)
-      return;
+    if (rect == _cachedRect) return;
     _cachedRect = rect;
-    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    final Rect validRect =
+        rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
       <String, dynamic>{
         'width': validRect.width,
@@ -1335,10 +1364,10 @@ class TextInputConnection {
   /// the accent selection menu.
   void setCaretRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedCaretRect)
-      return;
+    if (rect == _cachedCaretRect) return;
     _cachedCaretRect = rect;
-    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    final Rect validRect =
+        rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setCaretRect(
       <String, dynamic>{
         'width': validRect.width,
@@ -1356,8 +1385,15 @@ class TextInputConnection {
   void setSelectionRects(List<SelectionRect> selectionRects) {
     if (!listEquals(_cachedSelectionRects, selectionRects)) {
       _cachedSelectionRects = selectionRects;
-      TextInput._instance._setSelectionRects(selectionRects.map((SelectionRect rect) {
-        return <num>[rect.bounds.left, rect.bounds.top, rect.bounds.width, rect.bounds.height, rect.position];
+      TextInput._instance
+          ._setSelectionRects(selectionRects.map((SelectionRect rect) {
+        return <num>[
+          rect.bounds.left,
+          rect.bounds.top,
+          rect.bounds.width,
+          rect.bounds.height,
+          rect.position
+        ];
       }).toList());
     }
   }
@@ -1436,7 +1472,8 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.newline':
       return TextInputAction.newline;
   }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
+  throw FlutterError.fromParts(
+      <DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
@@ -1448,16 +1485,20 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     case 'FloatingCursorDragState.end':
       return FloatingCursorDragState.End;
   }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
+  throw FlutterError.fromParts(
+      <DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
 }
 
-RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
+RawFloatingCursorPoint _toTextPoint(
+    FloatingCursorDragState state, Map<String, dynamic> encoded) {
   assert(state != null, 'You must provide a state to set a new editing point.');
-  assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
-  assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
+  assert(encoded['X'] != null,
+      'You must provide a value for the horizontal location of the floating cursor.');
+  assert(encoded['Y'] != null,
+      'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
-    : Offset.zero;
+      ? Offset(encoded['X'] as double, encoded['Y'] as double)
+      : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1529,14 +1570,16 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
+      _instance._channel = newChannel
+        ..setMethodCallHandler(_instance._handleTextInputInvocation);
       return true;
     }());
   }
 
   static final TextInput _instance = TextInput._();
 
-  static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
+  static const List<TextInputAction> _androidSupportedInputActions =
+      <TextInputAction>[
     TextInputAction.none,
     TextInputAction.unspecified,
     TextInputAction.done,
@@ -1548,7 +1591,8 @@ class TextInput {
     TextInputAction.newline,
   ];
 
-  static const List<TextInputAction> _iOSSupportedInputActions = <TextInputAction>[
+  static const List<TextInputAction> _iOSSupportedInputActions =
+      <TextInputAction>[
     TextInputAction.unspecified,
     TextInputAction.done,
     TextInputAction.send,
@@ -1572,7 +1616,8 @@ class TextInput {
   /// A client that no longer wishes to interact with the text input control
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
-  static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
+  static TextInputConnection attach(
+      TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
     final TextInputConnection connection = TextInputConnection._(client);
@@ -1583,20 +1628,22 @@ class TextInput {
   /// This method actually notifies the embedding of the client. It is utilized
   /// by [attach] and by [_handleTextInputInvocation] for the
   /// `TextInputClient.requestExistingInputState` method.
-  void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
+  void _attach(
+      TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
       'TextInput.setClient',
-      <dynamic>[ connection._id, configuration.toJson() ],
+      <dynamic>[connection._id, configuration.toJson()],
     );
     _currentConnection = connection;
     _currentConfiguration = configuration;
   }
 
-  static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
+  static bool _debugEnsureInputActionWorksOnPlatform(
+      TextInputAction inputAction) {
     assert(() {
       if (kIsWeb) {
         // TODO(flutterweb): what makes sense here?
@@ -1623,12 +1670,14 @@ class TextInput {
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
-  final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
+  final Map<String, ScribbleClient> _scribbleClients =
+      <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
 
   /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list.
   @visibleForTesting
-  static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
+  static Map<String, ScribbleClient> get scribbleClients =>
+      TextInput._instance._scribbleClients;
 
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
@@ -1637,19 +1686,27 @@ class TextInput {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+      _scribbleClients[args[0]]?.onScribbleFocus(
+          Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
+      final List<double> args = (methodCall.arguments as List<dynamic>)
+          .cast<num>()
+          .map<double>((num value) => value.toDouble())
+          .toList();
       return _scribbleClients.keys.where((String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false))
-          return false;
-        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ??
+            false)) return false;
+        final Rect bounds =
+            _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
         return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
       }).map((String elementIdentifier) {
         final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
-        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+        return <dynamic>[
+          elementIdentifier,
+          ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]
+        ];
       }).toList();
     } else if (method == 'TextInputClient.scribbleInteractionBegan') {
       _scribbleInProgress = true;
@@ -1658,15 +1715,15 @@ class TextInput {
       _scribbleInProgress = false;
       return;
     }
-    if (_currentConnection == null)
-      return;
+    if (_currentConnection == null) return;
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection!._client != null);
       _attach(_currentConnection!, _currentConfiguration);
-      final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
+      final TextEditingValue? editingValue =
+          _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
         _setEditingState(editingValue);
       }
@@ -1687,7 +1744,8 @@ class TextInput {
           editingValue[tag] as Map<String, dynamic>,
         );
         final AutofillClient? client = scope?.getAutofillClient(tag);
-        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+        if (client != null &&
+            client.textInputConfiguration.autofillConfiguration.enabled) {
           client.autofill(textEditingValue);
         }
       }
@@ -1704,33 +1762,36 @@ class TextInput {
         // In debug builds we allow "-1" as a magical client ID that ignores
         // this verification step so that tests can always get through, even
         // when they are not mocking the engine side of text input.
-        if (client == -1)
-          debugAllowAnyway = true;
+        if (client == -1) debugAllowAnyway = true;
         return true;
       }());
-      if (!debugAllowAnyway)
-        return;
+      if (!debugAllowAnyway) return;
     }
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        _currentConnection!._client.updateEditingValue(
+            TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.updateEditingStateWithDeltas':
-        assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
+        assert(_currentConnection!._client is DeltaTextInputClient,
+            'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
         final List<TextEditingDelta> deltas = <TextEditingDelta>[];
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
         for (final dynamic encodedDelta in encoded['deltas']) {
-          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          final TextEditingDelta delta =
+              TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
           deltas.add(delta);
         }
 
-        (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
+        (_currentConnection!._client as DeltaTextInputClient)
+            .updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
-        _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        _currentConnection!._client
+            .performAction(_toTextInputAction(args[1] as String));
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
@@ -1749,13 +1810,15 @@ class TextInput {
         _currentConnection!._client.connectionClosed();
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
-        _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        _currentConnection!._client
+            .showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
       case 'TextInputClient.showToolbar':
         _currentConnection!._client.showToolbar();
         break;
       case 'TextInputClient.insertTextPlaceholder':
-        _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        _currentConnection!._client.insertTextPlaceholder(
+            Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
         break;
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
@@ -1768,8 +1831,7 @@ class TextInput {
   bool _hidePending = false;
 
   void _scheduleHide() {
-    if (_hidePending)
-      return;
+    if (_hidePending) return;
     _hidePending = true;
 
     // Schedule a deferred task that hides the text input. If someone else
@@ -1895,7 +1957,7 @@ class TextInput {
   /// * [EditableText.autofillHints] for autofill save troubleshooting tips.
   /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
   ///   topmost [AutofillGroup] is getting disposed.
-  static void finishAutofillContext({ bool shouldSave = true }) {
+  static void finishAutofillContext({bool shouldSave = true}) {
     assert(shouldSave != null);
     TextInput._instance._channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
@@ -1908,7 +1970,8 @@ class TextInput {
   ///
   /// For example, the registered [ScribbleClient] list is used to respond to
   /// UIIndirectScribbleInteraction on an iPad.
-  static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
+  static void registerScribbleElement(
+      String elementIdentifier, ScribbleClient scribbleClient) {
     TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
   }
 

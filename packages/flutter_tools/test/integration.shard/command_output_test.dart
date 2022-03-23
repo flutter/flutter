@@ -15,8 +15,11 @@ import 'test_utils.dart';
 // command output and not using cached artifacts.
 
 void main() {
-  testWithoutContext('All development tools and deprecated commands are hidden and help text is not verbose', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+  testWithoutContext(
+      'All development tools and deprecated commands are hidden and help text is not verbose',
+      () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '-h',
@@ -33,22 +36,26 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
-  testWithoutContext('Flutter help is shown with -? command line argument', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+  testWithoutContext('Flutter help is shown with -? command line argument',
+      () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '-?',
     ]);
 
     // Development tools.
-    expect(result.stdout, contains(
-      'Run "flutter help <command>" for more information about a command.\n'
-      'Run "flutter help -v" for verbose help output, including less commonly used options.'
-    ));
+    expect(
+        result.stdout,
+        contains(
+            'Run "flutter help <command>" for more information about a command.\n'
+            'Run "flutter help -v" for verbose help output, including less commonly used options.'));
   });
 
   testWithoutContext('flutter doctor is not verbose', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'doctor',
@@ -60,7 +67,8 @@ void main() {
   });
 
   testWithoutContext('flutter doctor -vv super verbose', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'doctor',
@@ -72,36 +80,37 @@ void main() {
   });
 
   testWithoutContext('flutter config contains all features', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'config',
     ]);
 
     // contains all of the experiments in features.dart
-    expect((result.stdout as String).split('\n'), containsAll(<Matcher>[
-      for (final Feature feature in allFeatures)
-        contains(feature.configSetting),
-    ]));
+    expect(
+        (result.stdout as String).split('\n'),
+        containsAll(<Matcher>[
+          for (final Feature feature in allFeatures)
+            contains(feature.configSetting),
+        ]));
   });
 
   testWithoutContext('flutter run --machine uses AppRunLogger', () async {
-    final Directory directory = createResolvedTempDirectorySync('flutter_run_test.')
-      .createTempSync('_flutter_run_test.')
-      ..createSync(recursive: true);
+    final Directory directory =
+        createResolvedTempDirectorySync('flutter_run_test.')
+            .createTempSync('_flutter_run_test.')
+          ..createSync(recursive: true);
 
     try {
+      directory.childFile('pubspec.yaml').writeAsStringSync('name: foo');
+      directory.childFile('.packages').writeAsStringSync('\n');
       directory
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('name: foo');
-      directory
-        .childFile('.packages')
-        .writeAsStringSync('\n');
-      directory
-        .childDirectory('lib')
-        .childFile('main.dart')
-        .createSync(recursive: true);
-      final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
+      final String flutterBin =
+          fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
         'run',
@@ -110,14 +119,16 @@ void main() {
         '-v',
         '--no-resident',
       ], workingDirectory: directory.path);
-      expect(result.stderr, isNot(contains('Oops; flutter has exited unexpectedly:')));
+      expect(result.stderr,
+          isNot(contains('Oops; flutter has exited unexpectedly:')));
     } finally {
       tryToDelete(directory);
     }
   });
 
   testWithoutContext('flutter attach --machine uses AppRunLogger', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'attach',
@@ -125,11 +136,16 @@ void main() {
       '-v',
     ]);
 
-    expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
+    expect(
+        result.stderr,
+        contains(
+            'Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
-  testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+  testWithoutContext(
+      'flutter --version --machine outputs JSON with flutterRoot', () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--version',
@@ -137,18 +153,24 @@ void main() {
     ]);
 
     final Map<String, Object?> versionInfo = json.decode(result.stdout
-      .toString()
-      .replaceAll('Building flutter tool...', '')
-      .replaceAll('Waiting for another flutter command to release the startup lock...', '')
-      .trim()) as Map<String, Object?>;
+        .toString()
+        .replaceAll('Building flutter tool...', '')
+        .replaceAll(
+            'Waiting for another flutter command to release the startup lock...',
+            '')
+        .trim()) as Map<String, Object?>;
 
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
   });
 
-  testWithoutContext('A tool exit is thrown for an invalid debug-url in flutter attach', () async {
+  testWithoutContext(
+      'A tool exit is thrown for an invalid debug-url in flutter attach',
+      () async {
     // This test is almost exactly like the next one; update them together please.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--show-test-device',
@@ -159,13 +181,16 @@ void main() {
     ], workingDirectory: helloWorld);
 
     expect(result.exitCode, 1);
-    expect(result.stderr, contains('Invalid `--debug-url`: http://127.0.0.1:3333*/'));
+    expect(result.stderr,
+        contains('Invalid `--debug-url`: http://127.0.0.1:3333*/'));
   });
 
   testWithoutContext('--debug-uri is an alias for --debug-url', () async {
     // This text is exactly the same as the previous one but with a "l" turned to an "i".
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--show-test-device',
@@ -176,17 +201,19 @@ void main() {
     ], workingDirectory: helloWorld);
 
     expect(result.exitCode, 1);
-    expect(result.stderr, contains('Invalid `--debug-url`: http://127.0.0.1:3333*/')); // _"url"_ not "uri"!
+    expect(
+        result.stderr,
+        contains(
+            'Invalid `--debug-url`: http://127.0.0.1:3333*/')); // _"url"_ not "uri"!
   });
 
   testWithoutContext('will load bootstrap script before starting', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    final File bootstrap = fileSystem.file(fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'internal',
-      platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'),
+    final File bootstrap = fileSystem.file(
+      fileSystem.path.join(getFlutterRoot(), 'bin', 'internal',
+          platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'),
     );
 
     try {
@@ -201,9 +228,12 @@ void main() {
     }
   });
 
-  testWithoutContext('Providing sksl bundle with missing file with tool exit', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+  testWithoutContext('Providing sksl bundle with missing file with tool exit',
+      () async {
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'build',
@@ -212,12 +242,15 @@ void main() {
     ], workingDirectory: helloWorld);
 
     expect(result.exitCode, 1);
-    expect(result.stderr, contains('No SkSL shader bundle found at foo/bar/baz.json'));
+    expect(result.stderr,
+        contains('No SkSL shader bundle found at foo/bar/baz.json'));
   });
 
   testWithoutContext('flutter attach does not support --release', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--show-test-device',
@@ -230,7 +263,8 @@ void main() {
   });
 
   testWithoutContext('flutter can report crashes', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'update-packages',
@@ -240,15 +274,19 @@ void main() {
     });
 
     expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains(
-      'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
-      'A crash report has been written to',
-    ));
+    expect(
+        result.stderr,
+        contains(
+          'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
+          'A crash report has been written to',
+        ));
   });
 
   testWithoutContext('flutter supports trailing args', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'test',

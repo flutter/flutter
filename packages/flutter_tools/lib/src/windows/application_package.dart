@@ -38,8 +38,8 @@ abstract class WindowsApp extends ApplicationPackage {
 class PrebuiltWindowsApp extends WindowsApp {
   PrebuiltWindowsApp({
     required String executable,
-  }) : _executable = executable,
-       super(projectBundleId: executable);
+  })  : _executable = executable,
+        super(projectBundleId: executable);
 
   final String _executable;
 
@@ -61,10 +61,10 @@ class BuildableWindowsApp extends WindowsApp {
   String executable(BuildMode buildMode) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-        getWindowsBuildDirectory(),
-        'runner',
-        sentenceCase(getNameForBuildMode(buildMode)),
-        '$binaryName.exe',
+      getWindowsBuildDirectory(),
+      'runner',
+      sentenceCase(getNameForBuildMode(buildMode)),
+      '$binaryName.exe',
     );
   }
 
@@ -73,7 +73,8 @@ class BuildableWindowsApp extends WindowsApp {
 }
 
 class BuildableUwpApp extends ApplicationPackage {
-  BuildableUwpApp({required this.project}) : super(id: project.packageGuid ?? 'com.example.placeholder');
+  BuildableUwpApp({required this.project})
+      : super(id: project.packageGuid ?? 'com.example.placeholder');
 
   final WindowsUwpProject project;
 

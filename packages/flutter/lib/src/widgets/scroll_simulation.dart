@@ -35,13 +35,13 @@ class BouncingScrollSimulation extends Simulation {
     required this.trailingExtent,
     required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null),
-       super(tolerance: tolerance) {
+  })  : assert(position != null),
+        assert(velocity != null),
+        assert(leadingExtent != null),
+        assert(trailingExtent != null),
+        assert(leadingExtent <= trailingExtent),
+        assert(spring != null),
+        super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -57,14 +57,16 @@ class BouncingScrollSimulation extends Simulation {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
         _springSimulation = _overscrollSimulation(
           trailingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(
+              _frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
         _springTime = _frictionSimulation.timeAtX(leadingExtent);
         _springSimulation = _underscrollSimulation(
           leadingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(
+              _frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else {
@@ -147,8 +149,8 @@ class ClampingScrollSimulation extends Simulation {
     required this.velocity,
     this.friction = 0.015,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
-       super(tolerance: tolerance) {
+  })  : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
+        super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _initialVelocityPenetration).abs();
   }
@@ -182,7 +184,8 @@ class ClampingScrollSimulation extends Simulation {
     final double scaledFriction = friction * _decelerationForFriction(0.84);
 
     // See getSplineDeceleration().
-    final double deceleration = math.log(0.35 * velocity.abs() / scaledFriction);
+    final double deceleration =
+        math.log(0.35 * velocity.abs() / scaledFriction);
 
     return math.exp(deceleration / (_kDecelerationRate - 1.0));
   }
@@ -204,7 +207,9 @@ class ClampingScrollSimulation extends Simulation {
   //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
   static const double _initialVelocityPenetration = 3.065;
   static double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
+    return (1.2 * t * t * t) -
+        (3.27 * t * t) +
+        (_initialVelocityPenetration * t);
   }
 
   // The derivative of the _flingDistancePenetration() function.

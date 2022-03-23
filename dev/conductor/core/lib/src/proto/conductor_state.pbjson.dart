@@ -68,15 +68,28 @@ const Remote$json = const {
 };
 
 /// Descriptor for `Remote`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List remoteDescriptor =
-    $convert.base64Decode('CgZSZW1vdGUSEgoEbmFtZRgBIAEoCVIEbmFtZRIQCgN1cmwYAiABKAlSA3VybA==');
+final $typed_data.Uint8List remoteDescriptor = $convert.base64Decode(
+    'CgZSZW1vdGUSEgoEbmFtZRgBIAEoCVIEbmFtZRIQCgN1cmwYAiABKAlSA3VybA==');
 @$core.Deprecated('Use cherrypickDescriptor instead')
 const Cherrypick$json = const {
   '1': 'Cherrypick',
   '2': const [
     const {'1': 'trunkRevision', '3': 1, '4': 1, '5': 9, '10': 'trunkRevision'},
-    const {'1': 'appliedRevision', '3': 2, '4': 1, '5': 9, '10': 'appliedRevision'},
-    const {'1': 'state', '3': 3, '4': 1, '5': 14, '6': '.conductor_state.CherrypickState', '10': 'state'},
+    const {
+      '1': 'appliedRevision',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'appliedRevision'
+    },
+    const {
+      '1': 'state',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.conductor_state.CherrypickState',
+      '10': 'state'
+    },
   ],
 };
 
@@ -87,13 +100,52 @@ final $typed_data.Uint8List cherrypickDescriptor = $convert.base64Decode(
 const Repository$json = const {
   '1': 'Repository',
   '2': const [
-    const {'1': 'candidateBranch', '3': 1, '4': 1, '5': 9, '10': 'candidateBranch'},
-    const {'1': 'startingGitHead', '3': 2, '4': 1, '5': 9, '10': 'startingGitHead'},
-    const {'1': 'currentGitHead', '3': 3, '4': 1, '5': 9, '10': 'currentGitHead'},
+    const {
+      '1': 'candidateBranch',
+      '3': 1,
+      '4': 1,
+      '5': 9,
+      '10': 'candidateBranch'
+    },
+    const {
+      '1': 'startingGitHead',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'startingGitHead'
+    },
+    const {
+      '1': 'currentGitHead',
+      '3': 3,
+      '4': 1,
+      '5': 9,
+      '10': 'currentGitHead'
+    },
     const {'1': 'checkoutPath', '3': 4, '4': 1, '5': 9, '10': 'checkoutPath'},
-    const {'1': 'upstream', '3': 5, '4': 1, '5': 11, '6': '.conductor_state.Remote', '10': 'upstream'},
-    const {'1': 'mirror', '3': 6, '4': 1, '5': 11, '6': '.conductor_state.Remote', '10': 'mirror'},
-    const {'1': 'cherrypicks', '3': 7, '4': 3, '5': 11, '6': '.conductor_state.Cherrypick', '10': 'cherrypicks'},
+    const {
+      '1': 'upstream',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.conductor_state.Remote',
+      '10': 'upstream'
+    },
+    const {
+      '1': 'mirror',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.conductor_state.Remote',
+      '10': 'mirror'
+    },
+    const {
+      '1': 'cherrypicks',
+      '3': 7,
+      '4': 3,
+      '5': 11,
+      '6': '.conductor_state.Cherrypick',
+      '10': 'cherrypicks'
+    },
     const {'1': 'dartRevision', '3': 8, '4': 1, '5': 9, '10': 'dartRevision'},
     const {'1': 'workingBranch', '3': 9, '4': 1, '5': 9, '10': 'workingBranch'},
   ],
@@ -106,16 +158,68 @@ final $typed_data.Uint8List repositoryDescriptor = $convert.base64Decode(
 const ConductorState$json = const {
   '1': 'ConductorState',
   '2': const [
-    const {'1': 'releaseChannel', '3': 1, '4': 1, '5': 9, '10': 'releaseChannel'},
-    const {'1': 'releaseVersion', '3': 2, '4': 1, '5': 9, '10': 'releaseVersion'},
-    const {'1': 'engine', '3': 4, '4': 1, '5': 11, '6': '.conductor_state.Repository', '10': 'engine'},
-    const {'1': 'framework', '3': 5, '4': 1, '5': 11, '6': '.conductor_state.Repository', '10': 'framework'},
+    const {
+      '1': 'releaseChannel',
+      '3': 1,
+      '4': 1,
+      '5': 9,
+      '10': 'releaseChannel'
+    },
+    const {
+      '1': 'releaseVersion',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'releaseVersion'
+    },
+    const {
+      '1': 'engine',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.conductor_state.Repository',
+      '10': 'engine'
+    },
+    const {
+      '1': 'framework',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.conductor_state.Repository',
+      '10': 'framework'
+    },
     const {'1': 'createdDate', '3': 6, '4': 1, '5': 3, '10': 'createdDate'},
-    const {'1': 'lastUpdatedDate', '3': 7, '4': 1, '5': 3, '10': 'lastUpdatedDate'},
+    const {
+      '1': 'lastUpdatedDate',
+      '3': 7,
+      '4': 1,
+      '5': 3,
+      '10': 'lastUpdatedDate'
+    },
     const {'1': 'logs', '3': 8, '4': 3, '5': 9, '10': 'logs'},
-    const {'1': 'currentPhase', '3': 9, '4': 1, '5': 14, '6': '.conductor_state.ReleasePhase', '10': 'currentPhase'},
-    const {'1': 'conductorVersion', '3': 10, '4': 1, '5': 9, '10': 'conductorVersion'},
-    const {'1': 'releaseType', '3': 11, '4': 1, '5': 14, '6': '.conductor_state.ReleaseType', '10': 'releaseType'},
+    const {
+      '1': 'currentPhase',
+      '3': 9,
+      '4': 1,
+      '5': 14,
+      '6': '.conductor_state.ReleasePhase',
+      '10': 'currentPhase'
+    },
+    const {
+      '1': 'conductorVersion',
+      '3': 10,
+      '4': 1,
+      '5': 9,
+      '10': 'conductorVersion'
+    },
+    const {
+      '1': 'releaseType',
+      '3': 11,
+      '4': 1,
+      '5': 14,
+      '6': '.conductor_state.ReleaseType',
+      '10': 'releaseType'
+    },
   ],
 };
 

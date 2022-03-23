@@ -29,10 +29,8 @@ void main() {
     }
 
     Future<void> expectScriptResult(
-        List<String> testNames,
-        int expectedExitCode,
-        {String? deviceId}
-      ) async {
+        List<String> testNames, int expectedExitCode,
+        {String? deviceId}) async {
       final ProcessResult result = await runScript(testNames, <String>[
         if (deviceId != null) ...<String>['-d', deviceId],
       ]);
@@ -79,24 +77,30 @@ void main() {
 
     test('exits with code 0 when provided a valid device ID', () async {
       await expectScriptResult(<String>['smoke_test_device'], 0,
-        deviceId: 'FAKE');
+          deviceId: 'FAKE');
     });
 
     test('exits with code 1 when provided a bad device ID', () async {
       await expectScriptResult(<String>['smoke_test_device'], 1,
-        deviceId: 'THIS_IS_NOT_VALID');
+          deviceId: 'THIS_IS_NOT_VALID');
     });
 
-
     test('runs A/B test', () async {
-      final Directory tempDirectory = Directory.systemTemp.createTempSync('flutter_devicelab_ab_test.');
-      final File abResultsFile = File(path.join(tempDirectory.path, 'test_results.json'));
+      final Directory tempDirectory =
+          Directory.systemTemp.createTempSync('flutter_devicelab_ab_test.');
+      final File abResultsFile =
+          File(path.join(tempDirectory.path, 'test_results.json'));
 
       expect(abResultsFile.existsSync(), isFalse);
 
       final ProcessResult result = await runScript(
         <String>['smoke_test_success'],
-        <String>['--ab=2', '--local-engine=host_debug_unopt', '--ab-result-file', abResultsFile.path],
+        <String>[
+          '--ab=2',
+          '--local-engine=host_debug_unopt',
+          '--ab-result-file',
+          abResultsFile.path
+        ],
       );
       expect(result.exitCode, 0);
 

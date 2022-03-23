@@ -7,15 +7,20 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('precedingScrollExtent is reported as infinity for Sliver of unknown size', (WidgetTester tester) async {
+  testWidgets(
+      'precedingScrollExtent is reported as infinity for Sliver of unknown size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
-            const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
+            const SliverToBoxAdapter(
+                child: SizedBox(width: double.infinity, height: 150.0)),
+            const SliverToBoxAdapter(
+                child: SizedBox(width: double.infinity, height: 150.0)),
             SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              delegate:
+                  SliverChildBuilderDelegate((BuildContext context, int index) {
                 if (index < 100) {
                   return const SizedBox(width: double.infinity, height: 150.0);
                 } else {
@@ -35,7 +40,8 @@ void main() {
     // The last Sliver comes after a SliverList that has many more items than
     // can fit in the viewport, and the SliverList doesn't report a child count,
     // so the SliverList leads to an infinite precedingScrollExtent.
-    final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+    final RenderViewport renderViewport =
+        tester.renderObject(find.byType(Viewport));
     final RenderSliver lastRenderSliver = renderViewport.lastChild!;
     expect(lastRenderSliver.constraints.precedingScrollExtent, double.infinity);
   });

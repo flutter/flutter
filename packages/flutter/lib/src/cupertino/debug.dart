@@ -19,7 +19,9 @@ import 'localizations.dart';
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasCupertinoLocalizations(BuildContext context) {
   assert(() {
-    if (Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations) == null) {
+    if (Localizations.of<CupertinoLocalizations>(
+            context, CupertinoLocalizations) ==
+        null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No CupertinoLocalizations found.'),
         ErrorDescription(
@@ -36,7 +38,8 @@ bool debugCheckHasCupertinoLocalizations(BuildContext context) {
           'automatically, or add a Localization widget with a '
           'CupertinoLocalizations delegate.',
         ),
-        ...context.describeMissingAncestor(expectedAncestorType: CupertinoLocalizations),
+        ...context.describeMissingAncestor(
+            expectedAncestorType: CupertinoLocalizations),
       ]);
     }
     return true;

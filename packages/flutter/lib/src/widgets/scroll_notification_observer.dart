@@ -16,20 +16,22 @@ import 'scroll_notification.dart';
 /// [NotificationListener]. It supports a listener list instead of
 /// just a single listener and its listeners run unconditionally, they
 /// do not require a gating boolean return value.
-typedef ScrollNotificationCallback = void Function(ScrollNotification notification);
+typedef ScrollNotificationCallback = void Function(
+    ScrollNotification notification);
 
 class _ScrollNotificationObserverScope extends InheritedWidget {
   const _ScrollNotificationObserverScope({
     Key? key,
     required Widget child,
     required ScrollNotificationObserverState scrollNotificationObserverState,
-  }) : _scrollNotificationObserverState = scrollNotificationObserverState,
-      super(key: key, child: child);
+  })  : _scrollNotificationObserverState = scrollNotificationObserverState,
+        super(key: key, child: child);
 
-  final ScrollNotificationObserverState  _scrollNotificationObserverState;
+  final ScrollNotificationObserverState _scrollNotificationObserverState;
 
   @override
-  bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
+  bool updateShouldNotify(_ScrollNotificationObserverScope old) =>
+      _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
 class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
@@ -66,7 +68,8 @@ class ScrollNotificationObserver extends StatefulWidget {
   const ScrollNotificationObserver({
     Key? key,
     required this.child,
-  }) : assert(child != null), super(key: key);
+  })  : assert(child != null),
+        super(key: key);
 
   /// The subtree below this widget.
   final Widget child;
@@ -75,11 +78,14 @@ class ScrollNotificationObserver extends StatefulWidget {
   ///
   /// If there is no enclosing [ScrollNotificationObserver] widget, then null is returned.
   static ScrollNotificationObserverState? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
+    return context
+        .dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()
+        ?._scrollNotificationObserverState;
   }
 
   @override
-  ScrollNotificationObserverState createState() => ScrollNotificationObserverState();
+  ScrollNotificationObserverState createState() =>
+      ScrollNotificationObserverState();
 }
 
 /// The listener list state for a [ScrollNotificationObserver] returned by
@@ -89,7 +95,8 @@ class ScrollNotificationObserver extends StatefulWidget {
 /// [NotificationListener]. It supports a listener list instead of
 /// just a single listener and its listeners run unconditionally, they
 /// do not require a gating boolean return value.
-class ScrollNotificationObserverState extends State<ScrollNotificationObserver> {
+class ScrollNotificationObserverState
+    extends State<ScrollNotificationObserver> {
   LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
 
   bool _debugAssertNotDisposed() {
@@ -125,20 +132,20 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   void _notifyListeners(ScrollNotification notification) {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
-      return;
+    if (_listeners!.isEmpty) return;
 
-    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
+    final List<_ListenerEntry> localListeners =
+        List<_ListenerEntry>.of(_listeners!);
     for (final _ListenerEntry entry in localListeners) {
       try {
-        if (entry.list != null)
-          entry.listener(notification);
+        if (entry.list != null) entry.listener(notification);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'widget library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          context: ErrorDescription(
+              'while dispatching notifications for $runtimeType'),
           informationCollector: () => <DiagnosticsNode>[
             DiagnosticsProperty<ScrollNotificationObserverState>(
               'The $runtimeType sending notification was',

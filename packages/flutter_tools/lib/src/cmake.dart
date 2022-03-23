@@ -12,7 +12,8 @@ String? getCmakeExecutableName(CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
-  final RegExp nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
+  final RegExp nameSetPattern =
+      RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
   for (final String line in project.cmakeFile.readAsLinesSync()) {
     final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
@@ -29,7 +30,8 @@ String? getCmakePackageGuid(File cmakeFile) {
   if (!cmakeFile.existsSync()) {
     return null;
   }
-  final RegExp nameSetPattern = RegExp(r'^\s*set\(PACKAGE_GUID\s*"(.*)"\s*\)\s*$');
+  final RegExp nameSetPattern =
+      RegExp(r'^\s*set\(PACKAGE_GUID\s*"(.*)"\s*\)\s*$');
   for (final String line in cmakeFile.readAsLinesSync()) {
     final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
@@ -46,11 +48,13 @@ String _escapeBackslashes(String s) {
 /// Writes a generated CMake configuration file for [project], including
 /// variables expected by the build template and an environment variable list
 /// for calling back into Flutter.
-void writeGeneratedCmakeConfig(String flutterRoot, CmakeBasedProject project, Map<String, String> environment) {
+void writeGeneratedCmakeConfig(String flutterRoot, CmakeBasedProject project,
+    Map<String, String> environment) {
   // Only a limited set of variables are needed by the CMake files themselves,
   // the rest are put into a list to pass to the re-entrant build step.
   final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
-  final String escapedProjectDir = _escapeBackslashes(project.parent.directory.path);
+  final String escapedProjectDir =
+      _escapeBackslashes(project.parent.directory.path);
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)

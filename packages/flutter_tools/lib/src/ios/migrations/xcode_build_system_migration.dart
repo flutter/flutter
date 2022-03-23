@@ -14,15 +14,16 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
   XcodeBuildSystemMigration(
     IosProject project,
     Logger logger,
-  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings,
-      super(logger);
+  )   : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings,
+        super(logger);
 
   final File _xcodeWorkspaceSharedSettings;
 
   @override
   bool migrate() {
     if (!_xcodeWorkspaceSharedSettings.existsSync()) {
-      logger.printTrace('Xcode workspace settings not found, skipping build system migration');
+      logger.printTrace(
+          'Xcode workspace settings not found, skipping build system migration');
       return true;
     }
 
@@ -35,7 +36,8 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
 
     // contains instead of equals to ignore newline file ending variance.
     if (contents.contains(legacyBuildSettingsWorkspace)) {
-      logger.printStatus('Legacy build system detected, removing ${_xcodeWorkspaceSharedSettings.path}');
+      logger.printStatus(
+          'Legacy build system detected, removing ${_xcodeWorkspaceSharedSettings.path}');
       _xcodeWorkspaceSharedSettings.deleteSync();
     }
 

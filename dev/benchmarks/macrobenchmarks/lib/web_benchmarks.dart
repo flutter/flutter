@@ -41,31 +41,41 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   // Benchmarks that run both in CanvasKit and HTML modes
   BenchDefaultTargetPlatform.benchmarkName: () => BenchDefaultTargetPlatform(),
   BenchBuildImage.benchmarkName: () => BenchBuildImage(),
-  BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),
-  BenchCardInfiniteScroll.benchmarkNameBackward: () => BenchCardInfiniteScroll.backward(),
+  BenchCardInfiniteScroll.benchmarkName: () =>
+      BenchCardInfiniteScroll.forward(),
+  BenchCardInfiniteScroll.benchmarkNameBackward: () =>
+      BenchCardInfiniteScroll.backward(),
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect.staticPaint(),
   BenchDrawRect.variablePaintBenchmarkName: () => BenchDrawRect.variablePaint(),
   BenchPathRecording.benchmarkName: () => BenchPathRecording(),
-  BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
+  BenchTextOutOfPictureBounds.benchmarkName: () =>
+      BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
-  BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
-  BenchPageViewScrollLineThrough.benchmarkName: () => BenchPageViewScrollLineThrough(),
+  BenchDynamicClipOnStaticPicture.benchmarkName: () =>
+      BenchDynamicClipOnStaticPicture(),
+  BenchPageViewScrollLineThrough.benchmarkName: () =>
+      BenchPageViewScrollLineThrough(),
   BenchPictureRecording.benchmarkName: () => BenchPictureRecording(),
   BenchUpdateManyChildLayers.benchmarkName: () => BenchUpdateManyChildLayers(),
   BenchMouseRegionGridScroll.benchmarkName: () => BenchMouseRegionGridScroll(),
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
-  BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
+  BenchMouseRegionMixedGridHover.benchmarkName: () =>
+      BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
-  BenchLinkInfiniteScroll.benchmarkName: () => BenchLinkInfiniteScroll.forward(),
-  BenchLinkInfiniteScroll.benchmarkNameBackward: () => BenchLinkInfiniteScroll.backward(),
+  BenchLinkInfiniteScroll.benchmarkName: () =>
+      BenchLinkInfiniteScroll.forward(),
+  BenchLinkInfiniteScroll.benchmarkNameBackward: () =>
+      BenchLinkInfiniteScroll.backward(),
 
   // CanvasKit-only benchmarks
   if (isCanvasKit) ...<String, RecorderFactory>{
     BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
-    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
-    BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
+    BenchBuildColorsGrid.canvasKitBenchmarkName: () =>
+        BenchBuildColorsGrid.canvasKit(),
+    BenchTextCachedLayout.canvasKitBenchmarkName: () =>
+        BenchTextCachedLayout.canvasKit(),
 
     // The HTML renderer does not decode frame-by-frame. It just drops an <img>
     // element and lets it animate automatically with no feedback to the
@@ -76,8 +86,10 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   // HTML-only benchmarks
   if (!isCanvasKit) ...<String, RecorderFactory>{
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
-    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
-    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
+    BenchTextCachedLayout.canvasBenchmarkName: () =>
+        BenchTextCachedLayout.canvas(),
+    BenchBuildColorsGrid.canvasBenchmarkName: () =>
+        BenchBuildColorsGrid.canvas(),
   },
 };
 
@@ -88,7 +100,8 @@ Future<void> main() async {
   final String nextBenchmark = await _client.requestNextBenchmark();
 
   if (nextBenchmark == LocalBenchmarkServerClient.kManualFallback) {
-    _fallbackToManual('The server did not tell us which benchmark to run next.');
+    _fallbackToManual(
+        'The server did not tell us which benchmark to run next.');
     return;
   }
 
@@ -110,7 +123,8 @@ Future<void> _runBenchmark(String benchmarkName) async {
       final Runner runner = recorder.isTracingEnabled && !_client.isInManualMode
           ? Runner(
               recorder: recorder,
-              setUpAllDidRun: () => _client.startPerformanceTracing(benchmarkName),
+              setUpAllDidRun: () =>
+                  _client.startPerformanceTracing(benchmarkName),
               tearDownAllWillRun: _client.stopPerformanceTracing,
             )
           : Runner(recorder: recorder);
@@ -134,7 +148,8 @@ Future<void> _runBenchmark(String benchmarkName) async {
       handleUncaughtError: (
         Zone self,
         ZoneDelegate parent,
-        Zone zone, Object error,
+        Zone zone,
+        Object error,
         StackTrace stackTrace,
       ) async {
         if (_client.isInManualMode) {
@@ -157,19 +172,19 @@ void _fallbackToManual(String error) {
 
       <!-- Absolutely position it so it receives the clicks and not the glasspane -->
       <ul style="position: absolute">
-        ${
-          benchmarks.keys
-            .map((String name) => '<li><button id="$name">$name</button></li>')
-            .join('\n')
-        }
+        ${benchmarks.keys.map((String name) => '<li><button id="$name">$name</button></li>').join('\n')}
       </ul>
     </div>
-  ''', validator: html.NodeValidatorBuilder()..allowHtml5()..allowInlineStyles());
+  ''',
+      validator: html.NodeValidatorBuilder()
+        ..allowHtml5()
+        ..allowInlineStyles());
 
   for (final String benchmarkName in benchmarks.keys) {
     final html.Element button = html.document.querySelector('#$benchmarkName')!;
     button.addEventListener('click', (_) {
-      final html.Element? manualPanel = html.document.querySelector('#manual-panel');
+      final html.Element? manualPanel =
+          html.document.querySelector('#manual-panel');
       manualPanel?.remove();
       _runBenchmark(benchmarkName);
     });
@@ -206,10 +221,11 @@ class TimeseriesVisualization {
     // The amount of vertical space available on the chart. Because some
     // outliers can be huge they can dwarf all the useful values. So we
     // limit it to 1.5 x the biggest non-outlier.
-    _maxValueChartRange = 1.5 * _stats.samples
-      .where((AnnotatedSample sample) => !sample.isOutlier)
-      .map<double>((AnnotatedSample sample) => sample.magnitude)
-      .fold<double>(0, math.max);
+    _maxValueChartRange = 1.5 *
+        _stats.samples
+            .where((AnnotatedSample sample) => !sample.isOutlier)
+            .map<double>((AnnotatedSample sample) => sample.magnitude)
+            .fold<double>(0, math.max);
   }
 
   static const double _kCanvasHeight = 200;
@@ -271,11 +287,13 @@ class TimeseriesVisualization {
 
     // Draw a horizontal solid line corresponding to the average.
     _ctx.lineWidth = 1;
-    drawLine(0, _normalized(_stats.average), _screenWidth, _normalized(_stats.average));
+    drawLine(0, _normalized(_stats.average), _screenWidth,
+        _normalized(_stats.average));
 
     // Draw a horizontal dashed line corresponding to the outlier cut off.
     _ctx.setLineDash(<num>[5, 5]);
-    drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth, _normalized(_stats.outlierCutOff));
+    drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth,
+        _normalized(_stats.outlierCutOff));
 
     // Draw a light red band that shows the noise (1 stddev in each direction).
     _ctx.fillStyle = 'rgba(255,50,50,0.3)';
@@ -371,10 +389,8 @@ class LocalBenchmarkServerClient {
       sendData: json.encode(profile.toJson()),
     );
     if (request.status != 200) {
-      throw Exception(
-        'Failed to report profile data to benchmark server. '
-        'The server responded with status code ${request.status}.'
-      );
+      throw Exception('Failed to report profile data to benchmark server. '
+          'The server responded with status code ${request.status}.');
     }
   }
 

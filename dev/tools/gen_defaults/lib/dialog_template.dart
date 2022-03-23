@@ -5,7 +5,8 @@
 import 'template.dart';
 
 class DialogTemplate extends TokenTemplate {
-  const DialogTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const DialogTemplate(String fileName, Map<String, dynamic> tokens)
+      : super(fileName, tokens);
 
   @override
   String generate() => '''

@@ -78,7 +78,10 @@ void main() {
       const String homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
       for (final String dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
+        fileSystem
+            .directory(homePath)
+            .childDirectory(dir)
+            .createSync(recursive: true);
       }
     });
 
@@ -108,12 +111,12 @@ void main() {
           isA<Exception>().having(
             (Exception e) => e.toString(),
             'description',
-            contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
+            contains(
+                'analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
           ),
         ),
       );
-    },
-    overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
@@ -122,15 +125,20 @@ void main() {
   testWithoutContext('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
-    final Directory tempDir = fileSystem.systemTempDirectory
-      .createTempSync('flutter_analysis_test.');
+    final Directory tempDir =
+        fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
     Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
     expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
-    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
+    expect(
+        inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem),
+        isFalse);
     expect(inRepo(<String>[Cache.flutterRoot], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot, 'foo')], fileSystem), isTrue);
+    expect(
+        inRepo(<String>[fileSystem.path.join(Cache.flutterRoot, 'foo')],
+            fileSystem),
+        isTrue);
 
     // Relative paths
     fileSystem.currentDirectory = Cache.flutterRoot;
@@ -156,7 +164,8 @@ void main() {
         'startLine': 15,
         'startColumn': 4,
       },
-      'message': 'Prefer final for variable declarations if they are not reassigned.',
+      'message':
+          'Prefer final for variable declarations if they are not reassigned.',
       'hasFix': false,
     };
     expect(WrittenError.fromJson(json).toString(),
@@ -168,7 +177,8 @@ bool inRepo(List<String> fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot));
+  final String root =
+      fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

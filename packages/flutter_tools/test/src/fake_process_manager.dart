@@ -4,7 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show ProcessSignal, Process, ProcessStartMode, ProcessResult, systemEncoding;
+import 'dart:io' as io
+    show
+        ProcessSignal,
+        Process,
+        ProcessStartMode,
+        ProcessResult,
+        systemEncoding;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -33,9 +39,9 @@ class FakeCommand {
     this.stdin,
     this.exception,
     this.outputFollowsExit = false,
-  }) : assert(command != null),
-       assert(duration != null),
-       assert(exitCode != null);
+  })  : assert(command != null),
+        assert(duration != null),
+        assert(exitCode != null);
 
   /// The exact commands that must be matched for this [FakeCommand] to be
   /// considered correct.
@@ -133,14 +139,13 @@ class _FakeProcess implements io.Process {
     this._stdout,
     this._completer,
     bool outputFollowsExit,
-  ) : exitCode = Future<void>.delayed(duration).then((void value) {
-        if (_completer != null) {
-          return _completer.future.then((void _) => _exitCode);
-        }
-        return _exitCode;
-      }),
-      stdin = stdin ?? IOSink(StreamController<List<int>>().sink)
-  {
+  )   : exitCode = Future<void>.delayed(duration).then((void value) {
+          if (_completer != null) {
+            return _completer.future.then((void _) => _exitCode);
+          }
+          return _exitCode;
+        }),
+        stdin = stdin ?? IOSink(StreamController<List<int>>().sink) {
     if (_stderr == null) {
       stderr = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
@@ -211,8 +216,10 @@ abstract class FakeProcessManager implements ProcessManager {
   /// [FakeCommand.onRun] to set a flag, or specify a sentinel command as your
   /// last command and verify its execution is successful, to ensure that all
   /// the specified commands are actually called.
-  factory FakeProcessManager.list(List<FakeCommand> commands) = _SequenceProcessManager;
-  factory FakeProcessManager.empty() => _SequenceProcessManager(<FakeCommand>[]);
+  factory FakeProcessManager.list(List<FakeCommand> commands) =
+      _SequenceProcessManager;
+  factory FakeProcessManager.empty() =>
+      _SequenceProcessManager(<FakeCommand>[]);
 
   FakeProcessManager._();
 
@@ -256,9 +263,11 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding? encoding,
   ) {
     _pid += 1;
-    final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
+    final FakeCommand fakeCommand =
+        findCommand(command, workingDirectory, environment, encoding);
     if (fakeCommand.exception != null) {
-      assert(fakeCommand.exception is Exception || fakeCommand.exception is Error);
+      assert(
+          fakeCommand.exception is Exception || fakeCommand.exception is Error);
       throw fakeCommand.exception!; // ignore: only_throw_errors
     }
     if (fakeCommand.onRun != null) {
@@ -285,7 +294,8 @@ abstract class FakeProcessManager implements ProcessManager {
     bool runInShell = false, // ignored
     io.ProcessStartMode mode = io.ProcessStartMode.normal, // ignored
   }) {
-    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, io.systemEncoding);
+    final _FakeProcess process = _runCommand(command.cast<String>(),
+        workingDirectory, environment, io.systemEncoding);
     if (process._completer != null) {
       _fakeRunningProcesses[process.pid] = process;
       process.exitCode.whenComplete(() {
@@ -305,13 +315,18 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
   }) async {
-    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
+    final _FakeProcess process = _runCommand(
+        command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     await process.exitCode;
     return io.ProcessResult(
       process.pid,
       process._exitCode,
-      stdoutEncoding == null ? process.stdout : await stdoutEncoding.decodeStream(process.stdout),
-      stderrEncoding == null ? process.stderr : await stderrEncoding.decodeStream(process.stderr),
+      stdoutEncoding == null
+          ? process.stdout
+          : await stdoutEncoding.decodeStream(process.stdout),
+      stderrEncoding == null
+          ? process.stderr
+          : await stderrEncoding.decodeStream(process.stderr),
     );
   }
 
@@ -325,7 +340,8 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding? stdoutEncoding = io.systemEncoding, // actual encoder is ignored
     Encoding? stderrEncoding = io.systemEncoding, // actual encoder is ignored
   }) {
-    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
+    final _FakeProcess process = _runCommand(
+        command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     return io.ProcessResult(
       process.pid,
       process._exitCode,
@@ -336,7 +352,8 @@ abstract class FakeProcessManager implements ProcessManager {
 
   /// Returns false if executable in [excludedExecutables].
   @override
-  bool canRun(dynamic executable, {String? workingDirectory}) => !excludedExecutables.contains(executable);
+  bool canRun(dynamic executable, {String? workingDirectory}) =>
+      !excludedExecutables.contains(executable);
 
   Set<String> excludedExecutables = <String>{};
 
@@ -373,7 +390,7 @@ class _FakeAnyProcessManager extends FakeProcessManager {
   }
 
   @override
-  void addCommand(FakeCommand command) { }
+  void addCommand(FakeCommand command) {}
 
   @override
   bool get hasRemainingExpectations => true;
@@ -395,9 +412,9 @@ class _SequenceProcessManager extends FakeProcessManager {
     Encoding? encoding,
   ) {
     expect(_commands, isNotEmpty,
-      reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
-              'but the FakeProcessManager.list expected no more processes.'
-    );
+        reason:
+            'ProcessManager was told to execute $command (in $workingDirectory) '
+            'but the FakeProcessManager.list expected no more processes.');
     _commands.first._matches(command, workingDirectory, environment, encoding);
     return _commands.removeAt(0);
   }
@@ -431,11 +448,11 @@ class _HasNoRemainingExpectations extends Matcher {
 
   @override
   Description describeMismatch(
-      dynamic item,
-      Description description,
-      Map<dynamic, dynamic> matchState,
-      bool verbose,
-      ) {
+    dynamic item,
+    Description description,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
     return description.add(
         'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}');

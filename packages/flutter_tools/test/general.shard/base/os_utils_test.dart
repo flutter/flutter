@@ -18,7 +18,8 @@ void main() {
 
     setUp(() {
       fileSystem = LocalFileSystem.test(signals: Signals.test());
-      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_tools_os_utils_test.');
+      tempDir = fileSystem.systemTempDirectory
+          .createTempSync('flutter_tools_os_utils_test.');
     });
 
     tearDown(() {
@@ -33,7 +34,8 @@ void main() {
         platform: platform,
         processManager: const LocalProcessManager(),
       );
-      final File file = fileSystem.file(fileSystem.path.join(tempDir.path, 'foo.script'));
+      final File file =
+          fileSystem.file(fileSystem.path.join(tempDir.path, 'foo.script'));
       file.writeAsStringSync('hello world');
       operatingSystemUtils.makeExecutable(file);
 

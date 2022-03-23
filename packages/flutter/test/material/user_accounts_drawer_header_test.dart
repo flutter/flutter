@@ -14,12 +14,12 @@ const Key avatarD = Key('D');
 
 Future<void> pumpTestWidget(
   WidgetTester tester, {
-      bool withName = true,
-      bool withEmail = true,
-      bool withOnDetailsPressedHandler = true,
-      Size otherAccountsPictureSize = const Size.square(40.0),
-      Size currentAccountPictureSize  = const Size.square(72.0),
-    }) async {
+  bool withName = true,
+  bool withEmail = true,
+  bool withOnDetailsPressedHandler = true,
+  Size otherAccountsPictureSize = const Size.square(40.0),
+  Size currentAccountPictureSize = const Size.square(72.0),
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: MediaQuery(
@@ -34,7 +34,7 @@ Future<void> pumpTestWidget(
         child: Material(
           child: Center(
             child: UserAccountsDrawerHeader(
-              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
+              onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
               currentAccountPictureSize: currentAccountPictureSize,
               otherAccountsPicturesSize: otherAccountsPictureSize,
               currentAccountPicture: const ExcludeSemantics(
@@ -94,21 +94,28 @@ void main() {
     box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
     expect(box.size.height, equals(160.0 + 20.0 + 8.0 + 1.0));
 
-    final Offset topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
-    final Offset topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
+    final Offset topLeft =
+        tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
+    final Offset topRight =
+        tester.getTopRight(find.byType(UserAccountsDrawerHeader));
 
     final Offset avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
     final Offset avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
     final Offset avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
 
     expect(avatarATopLeft.dx - topLeft.dx, equals(16.0 + 10.0)); // left padding
-    expect(avatarATopLeft.dy - topLeft.dy, equals(16.0 + 20.0)); // add top padding
-    expect(topRight.dx - avatarDTopRight.dx, equals(16.0 + 30.0)); // right padding
-    expect(avatarDTopRight.dy - topRight.dy, equals(16.0 + 20.0)); // add top padding
-    expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
+    expect(
+        avatarATopLeft.dy - topLeft.dy, equals(16.0 + 20.0)); // add top padding
+    expect(
+        topRight.dx - avatarDTopRight.dx, equals(16.0 + 30.0)); // right padding
+    expect(avatarDTopRight.dy - topRight.dy,
+        equals(16.0 + 20.0)); // add top padding
+    expect(avatarDTopRight.dx - avatarCTopRight.dx,
+        equals(40.0 + 16.0)); // size + space between
   });
 
-  testWidgets('UserAccountsDrawerHeader change default size test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader change default size test',
+      (WidgetTester tester) async {
     const Size currentAccountPictureSize = Size.square(60.0);
     const Size otherAccountsPictureSize = Size.square(30.0);
 
@@ -118,14 +125,17 @@ void main() {
       otherAccountsPictureSize: otherAccountsPictureSize,
     );
 
-    final RenderBox currentAccountRenderBox = tester.renderObject(find.byKey(avatarA));
-    final RenderBox otherAccountRenderBox = tester.renderObject(find.byKey(avatarC));
+    final RenderBox currentAccountRenderBox =
+        tester.renderObject(find.byKey(avatarA));
+    final RenderBox otherAccountRenderBox =
+        tester.renderObject(find.byKey(avatarC));
 
     expect(currentAccountRenderBox.size, currentAccountPictureSize);
     expect(otherAccountRenderBox.size, otherAccountsPictureSize);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon rotation test',
+      (WidgetTester tester) async {
     await pumpTestWidget(tester);
     Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
@@ -161,7 +171,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/25801.
-  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState',
+      (WidgetTester tester) async {
     late StateSetter testSetState;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -169,7 +180,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             testSetState = setState;
             return UserAccountsDrawerHeader(
-              onDetailsPressed: () { },
+              onDetailsPressed: () {},
               accountName: const Text('name'),
               accountEmail: const Text('email'),
             );
@@ -184,7 +195,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[0], 1.0);
     expect(transformWidget.transform.getRotation()[4], 1.0);
 
-    testSetState(() { });
+    testSetState(() {});
     await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isFalse);
 
@@ -196,7 +207,8 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy',
+      (WidgetTester tester) async {
     await pumpTestWidget(tester);
     Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
@@ -237,7 +249,8 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon color changes', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon color changes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
@@ -256,7 +269,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
-          onDetailsPressed: () { },
+          onDetailsPressed: () {},
           accountName: const Text('name'),
           accountEmail: const Text('email'),
           arrowColor: arrowColor,
@@ -268,7 +281,8 @@ void main() {
     expect(iconWidget.color, arrowColor);
   });
 
-  testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters LTR',
+      (WidgetTester tester) async {
     Widget buildFrame({
       Widget? currentAccountPicture,
       List<Widget>? otherAccountsPictures,
@@ -294,18 +308,19 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-    final RenderBox box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    final RenderBox box =
+        tester.renderObject(find.byType(UserAccountsDrawerHeader));
     expect(box.size.height, equals(160.0 + 1.0)); // height + bottom edge)
     expect(find.byType(Icon), findsNothing);
 
     await tester.pumpWidget(buildFrame(
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(find.byType(Icon), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
@@ -318,7 +333,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -332,7 +347,7 @@ void main() {
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -376,7 +391,8 @@ void main() {
     );
   });
 
-  testWidgets('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters RTL',
+      (WidgetTester tester) async {
     Widget buildFrame({
       Widget? currentAccountPicture,
       List<Widget>? otherAccountsPictures,
@@ -405,18 +421,19 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-    final RenderBox box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    final RenderBox box =
+        tester.renderObject(find.byType(UserAccountsDrawerHeader));
     expect(box.size.height, equals(160.0 + 1.0)); // height + bottom edge)
     expect(find.byType(Icon), findsNothing);
 
     await tester.pumpWidget(buildFrame(
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(find.byType(Icon), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
@@ -429,7 +446,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -443,7 +460,7 @@ void main() {
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -487,7 +504,8 @@ void main() {
     );
   });
 
-  testWidgets('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader provides semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
 
@@ -536,35 +554,46 @@ void main() {
             ),
           ],
         ),
-        ignoreId: true, ignoreTransform: true, ignoreRect: true,
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
       ),
     );
 
     semantics.dispose();
   });
 
-  testWidgets('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
+  testWidgets('alternative account selectors have sufficient tap targets',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpTestWidget(tester);
 
-    expect(tester.getSemantics(find.text('B')), matchesSemantics(
-      label: 'B',
-      size: const Size(48.0, 48.0),
-    ));
+    expect(
+        tester.getSemantics(find.text('B')),
+        matchesSemantics(
+          label: 'B',
+          size: const Size(48.0, 48.0),
+        ));
 
-    expect(tester.getSemantics(find.text('C')), matchesSemantics(
-      label: 'C',
-      size: const Size(48.0, 48.0),
-    ));
+    expect(
+        tester.getSemantics(find.text('C')),
+        matchesSemantics(
+          label: 'C',
+          size: const Size(48.0, 48.0),
+        ));
 
-    expect(tester.getSemantics(find.text('D')), matchesSemantics(
-      label: 'D',
-      size: const Size(48.0, 48.0),
-    ));
+    expect(
+        tester.getSemantics(find.text('D')),
+        matchesSemantics(
+          label: 'D',
+          size: const Size(48.0, 48.0),
+        ));
     handle.dispose();
   });
 
-  testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
+  testWidgets(
+      'UserAccountsDrawerHeader provides semantics with missing properties',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(
       tester,
@@ -611,7 +640,9 @@ void main() {
             ),
           ],
         ),
-        ignoreId: true, ignoreTransform: true, ignoreRect: true,
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
       ),
     );
 

@@ -23,7 +23,8 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
     // Values extracted from navigation bar. For toolbar or tabbar the dark color is 0xF0161616.
   ),
   CupertinoColors.systemBackground,
-  _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
+  _CupertinoTextThemeDefaults(
+      CupertinoColors.label, CupertinoColors.inactiveGray),
 );
 
 /// Applies a visual styling theme to descendant Cupertino widgets.
@@ -53,9 +54,9 @@ class CupertinoTheme extends StatelessWidget {
     Key? key,
     required this.data,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key);
+  })  : assert(child != null),
+        assert(data != null),
+        super(key: key);
 
   /// The [CupertinoThemeData] styling for this theme.
   final CupertinoThemeData data;
@@ -67,8 +68,10 @@ class CupertinoTheme extends StatelessWidget {
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
-    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
+    final _InheritedCupertinoTheme? inheritedTheme =
+        context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    return (inheritedTheme?.theme.data ?? const CupertinoThemeData())
+        .resolveFrom(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -87,8 +90,10 @@ class CupertinoTheme extends StatelessWidget {
   /// * [CupertinoThemeData.brightness], the property takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context) {
-    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.of(context).platformBrightness;
+    final _InheritedCupertinoTheme? inheritedTheme =
+        context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    return inheritedTheme?.theme.data.brightness ??
+        MediaQuery.of(context).platformBrightness;
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -107,8 +112,10 @@ class CupertinoTheme extends StatelessWidget {
   /// * [brightnessOf], which throws if no valid [CupertinoTheme] or
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
-    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybeOf(context)?.platformBrightness;
+    final _InheritedCupertinoTheme? inheritedTheme =
+        context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    return inheritedTheme?.theme.data.brightness ??
+        MediaQuery.maybeOf(context)?.platformBrightness;
   }
 
   /// The widget below this widget in the tree.
@@ -139,13 +146,14 @@ class _InheritedCupertinoTheme extends InheritedWidget {
     Key? key,
     required this.theme,
     required Widget child,
-  }) : assert(theme != null),
-       super(key: key, child: child);
+  })  : assert(theme != null),
+        super(key: key, child: child);
 
   final CupertinoTheme theme;
 
   @override
-  bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;
+  bool updateShouldNotify(_InheritedCupertinoTheme old) =>
+      theme.data != old.theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].
@@ -165,7 +173,8 @@ class _InheritedCupertinoTheme extends InheritedWidget {
 ///  * [ThemeData], a Material equivalent that also configures Cupertino
 ///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData].
 @immutable
-class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable {
+class CupertinoThemeData extends NoDefaultCupertinoThemeData
+    with Diagnosticable {
   /// Creates a [CupertinoTheme] styling specification.
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
@@ -177,13 +186,13 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
   }) : this.raw(
-        brightness,
-        primaryColor,
-        primaryContrastingColor,
-        textTheme,
-        barBackgroundColor,
-        scaffoldBackgroundColor,
-      );
+          brightness,
+          primaryColor,
+          primaryContrastingColor,
+          textTheme,
+          barBackgroundColor,
+          scaffoldBackgroundColor,
+        );
 
   /// Same as the default constructor but with positional arguments to avoid
   /// forgetting any and to specify all arguments.
@@ -198,14 +207,14 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
   ) : this._rawWithDefaults(
-    brightness,
-    primaryColor,
-    primaryContrastingColor,
-    textTheme,
-    barBackgroundColor,
-    scaffoldBackgroundColor,
-    _kDefaultTheme,
-  );
+          brightness,
+          primaryColor,
+          primaryContrastingColor,
+          textTheme,
+          barBackgroundColor,
+          scaffoldBackgroundColor,
+          _kDefaultTheme,
+        );
 
   const CupertinoThemeData._rawWithDefaults(
     Brightness? brightness,
@@ -216,13 +225,13 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? scaffoldBackgroundColor,
     this._defaults,
   ) : super(
-    brightness: brightness,
-    primaryColor: primaryColor,
-    primaryContrastingColor: primaryContrastingColor,
-    textTheme: textTheme,
-    barBackgroundColor: barBackgroundColor,
-    scaffoldBackgroundColor: scaffoldBackgroundColor,
-  );
+          brightness: brightness,
+          primaryColor: primaryColor,
+          primaryContrastingColor: primaryContrastingColor,
+          textTheme: textTheme,
+          barBackgroundColor: barBackgroundColor,
+          scaffoldBackgroundColor: scaffoldBackgroundColor,
+        );
 
   final _CupertinoThemeDefaults _defaults;
 
@@ -230,18 +239,22 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   Color get primaryColor => super.primaryColor ?? _defaults.primaryColor;
 
   @override
-  Color get primaryContrastingColor => super.primaryContrastingColor ?? _defaults.primaryContrastingColor;
+  Color get primaryContrastingColor =>
+      super.primaryContrastingColor ?? _defaults.primaryContrastingColor;
 
   @override
   CupertinoTextThemeData get textTheme {
-    return super.textTheme ?? _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
+    return super.textTheme ??
+        _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
   }
 
   @override
-  Color get barBackgroundColor => super.barBackgroundColor ?? _defaults.barBackgroundColor;
+  Color get barBackgroundColor =>
+      super.barBackgroundColor ?? _defaults.barBackgroundColor;
 
   @override
-  Color get scaffoldBackgroundColor => super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
+  Color get scaffoldBackgroundColor =>
+      super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
 
   @override
   NoDefaultCupertinoThemeData noDefault() {
@@ -257,7 +270,8 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 
   @override
   CupertinoThemeData resolveFrom(BuildContext context) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
+    Color? convertColor(Color? color) =>
+        CupertinoDynamicColor.maybeResolve(color, context);
 
     return CupertinoThemeData._rawWithDefaults(
       brightness,
@@ -294,11 +308,19 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
-    properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
-    properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
-    properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
-    properties.add(createCupertinoColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(
+        EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(createCupertinoColorProperty('primaryColor', primaryColor,
+        defaultValue: defaultData.primaryColor));
+    properties.add(createCupertinoColorProperty(
+        'primaryContrastingColor', primaryContrastingColor,
+        defaultValue: defaultData.primaryContrastingColor));
+    properties.add(createCupertinoColorProperty(
+        'barBackgroundColor', barBackgroundColor,
+        defaultValue: defaultData.barBackgroundColor));
+    properties.add(createCupertinoColorProperty(
+        'scaffoldBackgroundColor', scaffoldBackgroundColor,
+        defaultValue: defaultData.scaffoldBackgroundColor));
     textTheme.debugFillProperties(properties);
   }
 }
@@ -407,7 +429,8 @@ class NoDefaultCupertinoThemeData {
   /// [CupertinoThemeData].
   @protected
   NoDefaultCupertinoThemeData resolveFrom(BuildContext context) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
+    Color? convertColor(Color? color) =>
+        CupertinoDynamicColor.maybeResolve(color, context);
 
     return NoDefaultCupertinoThemeData(
       brightness: brightness,
@@ -430,16 +453,18 @@ class NoDefaultCupertinoThemeData {
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
-    Color? barBackgroundColor ,
+    Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
   }) {
     return NoDefaultCupertinoThemeData(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
-      primaryContrastingColor: primaryContrastingColor ?? this.primaryContrastingColor,
+      primaryContrastingColor:
+          primaryContrastingColor ?? this.primaryContrastingColor,
       textTheme: textTheme ?? this.textTheme,
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+      scaffoldBackgroundColor:
+          scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
     );
   }
 }
@@ -462,8 +487,10 @@ class _CupertinoThemeDefaults {
   final Color scaffoldBackgroundColor;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
-  _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme) {
-    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context);
+  _CupertinoThemeDefaults resolveFrom(
+      BuildContext context, bool resolveTextTheme) {
+    Color convertColor(Color color) =>
+        CupertinoDynamicColor.resolve(color, context);
 
     return _CupertinoThemeDefaults(
       brightness,
@@ -471,7 +498,9 @@ class _CupertinoThemeDefaults {
       convertColor(primaryContrastingColor),
       convertColor(barBackgroundColor),
       convertColor(scaffoldBackgroundColor),
-      resolveTextTheme ? textThemeDefaults.resolveFrom(context) : textThemeDefaults,
+      resolveTextTheme
+          ? textThemeDefaults.resolveFrom(context)
+          : textThemeDefaults,
     );
   }
 }
@@ -493,7 +522,7 @@ class _CupertinoTextThemeDefaults {
     );
   }
 
-  CupertinoTextThemeData createDefaults({ required Color primaryColor }) {
+  CupertinoTextThemeData createDefaults({required Color primaryColor}) {
     assert(primaryColor != null);
     return _DefaultCupertinoTextThemeData(
       primaryColor: primaryColor,
@@ -511,10 +540,10 @@ class _DefaultCupertinoTextThemeData extends CupertinoTextThemeData {
     required this.labelColor,
     required this.inactiveGray,
     required Color primaryColor,
-  }) : assert(labelColor != null),
-       assert(inactiveGray != null),
-       assert(primaryColor != null),
-       super(primaryColor: primaryColor);
+  })  : assert(labelColor != null),
+        assert(inactiveGray != null),
+        assert(primaryColor != null),
+        super(primaryColor: primaryColor);
 
   final Color labelColor;
   final Color inactiveGray;
@@ -523,17 +552,22 @@ class _DefaultCupertinoTextThemeData extends CupertinoTextThemeData {
   TextStyle get textStyle => super.textStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get tabLabelTextStyle => super.tabLabelTextStyle.copyWith(color: inactiveGray);
+  TextStyle get tabLabelTextStyle =>
+      super.tabLabelTextStyle.copyWith(color: inactiveGray);
 
   @override
-  TextStyle get navTitleTextStyle => super.navTitleTextStyle.copyWith(color: labelColor);
+  TextStyle get navTitleTextStyle =>
+      super.navTitleTextStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get navLargeTitleTextStyle => super.navLargeTitleTextStyle.copyWith(color: labelColor);
+  TextStyle get navLargeTitleTextStyle =>
+      super.navLargeTitleTextStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get pickerTextStyle => super.pickerTextStyle.copyWith(color: labelColor);
+  TextStyle get pickerTextStyle =>
+      super.pickerTextStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get dateTimePickerTextStyle => super.dateTimePickerTextStyle.copyWith(color: labelColor);
+  TextStyle get dateTimePickerTextStyle =>
+      super.dateTimePickerTextStyle.copyWith(color: labelColor);
 }

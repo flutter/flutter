@@ -16,13 +16,16 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
 const double pythonCost = 3001.0; // six average SWE days, in dollars
-const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
+const double skipCost =
+    2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2011.0; // a few days to refactor the code.
 const double deprecationCost = 233.0; // a few hours to remove the old code.
 const double legacyDeprecationCost = 9973.0; // a couple of weeks.
-const double packageNullSafetyMigrationCost = 2017.0; // a few days to migrate package.
-const double fileNullSafetyMigrationCost = 257.0; // a few hours to migrate file.
+const double packageNullSafetyMigrationCost =
+    2017.0; // a few days to migrate package.
+const double fileNullSafetyMigrationCost =
+    257.0; // a few hours to migrate file.
 
 final RegExp todoPattern = RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = RegExp(r'// *ignore:');
@@ -30,34 +33,27 @@ final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
 final RegExp asDynamicPattern = RegExp(r'\bas dynamic\b');
 final RegExp deprecationPattern = RegExp(r'^ *@[dD]eprecated');
 const Pattern globalsPattern = 'globals.';
-const String legacyDeprecationPattern = '// flutter_ignore: deprecation_syntax, https';
+const String legacyDeprecationPattern =
+    '// flutter_ignore: deprecation_syntax, https';
 final RegExp dartVersionPattern = RegExp(r'// *@dart *= *(\d+).(\d+)');
 
 final Version firstNullSafeDartVersion = Version(2, 12, 0);
 
 Future<double> findCostsForFile(File file) async {
-  if (path.extension(file.path) == '.py')
-    return pythonCost;
+  if (path.extension(file.path) == '.py') return pythonCost;
   if (path.extension(file.path) != '.dart' &&
       path.extension(file.path) != '.yaml' &&
-      path.extension(file.path) != '.sh')
-    return 0.0;
+      path.extension(file.path) != '.sh') return 0.0;
   final bool isTest = file.path.endsWith('_test.dart');
   final bool isDart = file.path.endsWith('.dart');
   double total = 0.0;
   for (final String line in await file.readAsLines()) {
-    if (line.contains(todoPattern))
-      total += todoCost;
-    if (line.contains(ignorePattern))
-      total += ignoreCost;
-    if (line.contains(ignoreForFilePattern))
-      total += ignoreForFileCost;
-    if (!isTest && line.contains(asDynamicPattern))
-      total += asDynamicCost;
-    if (line.contains(deprecationPattern))
-      total += deprecationCost;
-    if (line.contains(legacyDeprecationPattern))
-      total += legacyDeprecationCost;
+    if (line.contains(todoPattern)) total += todoCost;
+    if (line.contains(ignorePattern)) total += ignoreCost;
+    if (line.contains(ignoreForFilePattern)) total += ignoreForFileCost;
+    if (!isTest && line.contains(asDynamicPattern)) total += asDynamicCost;
+    if (line.contains(deprecationPattern)) total += deprecationCost;
+    if (line.contains(legacyDeprecationPattern)) total += legacyDeprecationCost;
     if (isTest && line.contains('skip:') && !line.contains('[intended]'))
       total += skipCost;
     if (isDart && isOptingOutOfNullSafety(line))
@@ -74,27 +70,29 @@ bool isOptingOutOfNullSafety(String line) {
     return false;
   }
   assert(match.groupCount == 2);
-  return Version(int.parse(match.group(1)!), int.parse(match.group(2)!), 0) < firstNullSafeDartVersion;
+  return Version(int.parse(match.group(1)!), int.parse(match.group(2)!), 0) <
+      firstNullSafeDartVersion;
 }
 
 bool packageIsNullSafe(File file) {
   assert(path.basename(file.path) == 'pubspec.yaml');
   final Pubspec pubspec = Pubspec.parse(file.readAsStringSync());
-  final VersionConstraint? constraint = pubspec.environment == null ? null : pubspec.environment!['sdk'];
-  final bool hasConstraint = constraint != null && !constraint.isAny && !constraint.isEmpty;
+  final VersionConstraint? constraint =
+      pubspec.environment == null ? null : pubspec.environment!['sdk'];
+  final bool hasConstraint =
+      constraint != null && !constraint.isAny && !constraint.isEmpty;
   return hasConstraint &&
       constraint is VersionRange &&
       constraint.min != null &&
-      Version(constraint.min!.major, constraint.min!.minor, 0) >= firstNullSafeDartVersion;
+      Version(constraint.min!.major, constraint.min!.minor, 0) >=
+          firstNullSafeDartVersion;
 }
 
 Future<int> findGlobalsForFile(File file) async {
-  if (path.extension(file.path) != '.dart')
-    return 0;
+  if (path.extension(file.path) != '.dart') return 0;
   int total = 0;
   for (final String line in await file.readAsLines()) {
-    if (line.contains(globalsPattern))
-      total += 1;
+    if (line.contains(globalsPattern)) total += 1;
   }
   return total;
 }
@@ -106,8 +104,11 @@ Future<double> findCostsForRepo() async {
     workingDirectory: flutterDirectory.path,
   );
   double total = 0.0;
-  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
-    total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
+  await for (final String entry in git.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter()))
+    total +=
+        await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
     throw Exception('git exit with unexpected error code $gitExitCode');
@@ -117,12 +118,19 @@ Future<double> findCostsForRepo() async {
 Future<int> findGlobalsForTool() async {
   final Process git = await startProcess(
     'git',
-    <String>['ls-files', '--full-name', path.join(flutterDirectory.path, 'packages', 'flutter_tools')],
+    <String>[
+      'ls-files',
+      '--full-name',
+      path.join(flutterDirectory.path, 'packages', 'flutter_tools')
+    ],
     workingDirectory: flutterDirectory.path,
   );
   int total = 0;
-  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
-    total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
+  await for (final String entry in git.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter()))
+    total +=
+        await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
     throw Exception('git exit with unexpected error code $gitExitCode');
@@ -133,10 +141,12 @@ Future<int> countDependencies() async {
   final List<String> lines = (await evalFlutter(
     'update-packages',
     options: <String>['--transitive-closure'],
-  )).split('\n');
+  ))
+      .split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
-    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+    throw Exception(
+        '"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
   return count;
 }
 
@@ -144,10 +154,12 @@ Future<int> countConsumerDependencies() async {
   final List<String> lines = (await evalFlutter(
     'update-packages',
     options: <String>['--transitive-closure', '--consumer-only'],
-  )).split('\n');
+  ))
+      .split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
-    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+    throw Exception(
+        '"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
   return count;
 }
 

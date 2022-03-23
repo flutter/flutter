@@ -122,7 +122,8 @@ void main() {
     expect(find.text('second route'), findsOneWidget);
   });
 
-  testWidgets('Changing the key resets the navigator', (WidgetTester tester) async {
+  testWidgets('Changing the key resets the navigator',
+      (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -172,7 +173,8 @@ void main() {
     expect(find.text('second route'), findsNothing);
   });
 
-  testWidgets('Throws FlutterError when onUnknownRoute is null', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError when onUnknownRoute is null',
+      (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -209,7 +211,8 @@ void main() {
     );
   });
 
-  testWidgets('Throws FlutterError when onUnknownRoute returns null', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError when onUnknownRoute returns null',
+      (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
@@ -239,7 +242,8 @@ void main() {
     );
   });
 
-  testWidgets('Navigator of CupertinoTabView restores state', (WidgetTester tester) async {
+  testWidgets('Navigator of CupertinoTabView restores state',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
@@ -252,7 +256,7 @@ void main() {
             },
           ),
           routes: <String, WidgetBuilder>{
-            '/2' : (BuildContext context) => const Text('second route'),
+            '/2': (BuildContext context) => const Text('second route'),
           },
         ),
       ),

@@ -17,9 +17,11 @@ import 'binding.dart';
 import 'deprecated.dart';
 
 /// Ensure the appropriate test binding is initialized.
-TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
+TestWidgetsFlutterBinding ensureInitialized(
+    [@visibleForTesting Map<String, String>? environment]) {
   environment ??= Platform.environment;
-  if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
+  if (environment.containsKey('FLUTTER_TEST') &&
+      environment['FLUTTER_TEST'] != 'false') {
     return AutomatedTestWidgetsFlutterBinding.ensureInitialized();
   }
   return LiveTestWidgetsFlutterBinding.ensureInitialized();
@@ -37,13 +39,15 @@ void mockFlutterAssets() {
   }
   final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS']!;
   assert(Platform.environment['APP_NAME'] != null);
-  final String prefix =  'packages/${Platform.environment['APP_NAME']!}/';
+  final String prefix = 'packages/${Platform.environment['APP_NAME']!}/';
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
-  SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+  SystemChannels.navigation
+      .setMockMethodCallHandler((MethodCall methodCall) async {});
 
-  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+  ServicesBinding.instance.defaultBinaryMessenger
+      .setMockMessageHandler('flutter/assets', (ByteData? message) async {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));
@@ -77,14 +81,14 @@ class _MockHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? _) {
     if (!warningPrinted) {
       test_package.printOnFailure(
-        'Warning: At least one test in this suite creates an HttpClient. When\n'
-        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-        'requests will return status code 400, and no network request will\n'
-        'actually be made. Any test expecting a real network connection and\n'
-        'status code will fail.\n'
-        'To test code that needs an HttpClient, provide your own HttpClient\n'
-        'implementation to the code under test, so that your test can\n'
-        'consistently provide a testable response to the code under test.');
+          'Warning: At least one test in this suite creates an HttpClient. When\n'
+          'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
+          'requests will return status code 400, and no network request will\n'
+          'actually be made. Any test expecting a real network connection and\n'
+          'status code will fail.\n'
+          'To test code that needs an HttpClient, provide your own HttpClient\n'
+          'implementation to the code under test, so that your test can\n'
+          'consistently provide a testable response to the code under test.');
       warningPrinted = true;
     }
     return _MockHttpClient();
@@ -109,28 +113,33 @@ class _MockHttpClient implements HttpClient {
   String? userAgent;
 
   @override
-  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) { }
+  void addCredentials(
+      Uri url, String realm, HttpClientCredentials credentials) {}
 
   @override
-  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) { }
+  void addProxyCredentials(
+      String host, int port, String realm, HttpClientCredentials credentials) {}
 
   @override
-  Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
+  Future<ConnectionTask<Socket>> Function(
+      Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
 
   @override
   Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
 
   @override
-  Future<bool> Function(String host, int port, String scheme, String realm)? authenticateProxy;
+  Future<bool> Function(String host, int port, String scheme, String realm)?
+      authenticateProxy;
 
   @override
-  bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
+  bool Function(X509Certificate cert, String host, int port)?
+      badCertificateCallback;
 
   @override
   Function(String line)? keyLog;
 
   @override
-  void close({ bool force = false }) { }
+  void close({bool force = false}) {}
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {
@@ -166,7 +175,8 @@ class _MockHttpClient implements HttpClient {
   }
 
   @override
-  Future<HttpClientRequest> open(String method, String host, int port, String path) {
+  Future<HttpClientRequest> open(
+      String method, String host, int port, String path) {
     return Future<HttpClientRequest>.value(_MockHttpRequest());
   }
 
@@ -215,10 +225,10 @@ class _MockHttpRequest extends HttpClientRequest {
   final HttpHeaders headers = _MockHttpHeaders();
 
   @override
-  void add(List<int> data) { }
+  void add(List<int> data) {}
 
   @override
-  void addError(Object error, [ StackTrace? stackTrace ]) { }
+  void addError(Object error, [StackTrace? stackTrace]) {}
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
@@ -254,23 +264,24 @@ class _MockHttpRequest extends HttpClientRequest {
   Uri get uri => Uri();
 
   @override
-  void write(Object? obj) { }
+  void write(Object? obj) {}
 
   @override
-  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) { }
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {}
 
   @override
-  void writeCharCode(int charCode) { }
+  void writeCharCode(int charCode) {}
 
   @override
-  void writeln([ Object? obj = '' ]) { }
+  void writeln([Object? obj = '']) {}
 }
 
 /// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
 // TODO(tvolkert): Change to `extends Stream<Uint8List>` once
 // https://dart-review.googlesource.com/c/sdk/+/104525 is rolled into the framework.
 class _MockHttpResponse implements HttpClientResponse {
-  final Stream<Uint8List> _delegate = Stream<Uint8List>.fromIterable(const Iterable<Uint8List>.empty());
+  final Stream<Uint8List> _delegate =
+      Stream<Uint8List>.fromIterable(const Iterable<Uint8List>.empty());
 
   @override
   final HttpHeaders headers = _MockHttpHeaders();
@@ -301,8 +312,10 @@ class _MockHttpResponse implements HttpClientResponse {
   bool get isRedirect => false;
 
   @override
-  StreamSubscription<Uint8List> listen(void Function(Uint8List event)? onData, { Function? onError, void Function()? onDone, bool? cancelOnError }) {
-    return const Stream<Uint8List>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  StreamSubscription<Uint8List> listen(void Function(Uint8List event)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+    return const Stream<Uint8List>.empty().listen(onData,
+        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
@@ -312,8 +325,10 @@ class _MockHttpResponse implements HttpClientResponse {
   String get reasonPhrase => '';
 
   @override
-  Future<HttpClientResponse> redirect([ String? method, Uri? url, bool? followLoops ]) {
-    return Future<HttpClientResponse>.error(UnsupportedError('Mocked response'));
+  Future<HttpClientResponse> redirect(
+      [String? method, Uri? url, bool? followLoops]) {
+    return Future<HttpClientResponse>.error(
+        UnsupportedError('Mocked response'));
   }
 
   @override
@@ -356,7 +371,8 @@ class _MockHttpResponse implements HttpClientResponse {
   }
 
   @override
-  Stream<Uint8List> distinct([bool Function(Uint8List previous, Uint8List next)? equals]) {
+  Stream<Uint8List> distinct(
+      [bool Function(Uint8List previous, Uint8List next)? equals]) {
     return _delegate.distinct(equals);
   }
 
@@ -385,16 +401,20 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Future<Uint8List> firstWhere(
-      bool Function(Uint8List element) test, {
-        List<int> Function()? orElse,
-      }) {
-    return _delegate.firstWhere(test, orElse: orElse == null ? null : () {
-      return Uint8List.fromList(orElse());
-    });
+    bool Function(Uint8List element) test, {
+    List<int> Function()? orElse,
+  }) {
+    return _delegate.firstWhere(test,
+        orElse: orElse == null
+            ? null
+            : () {
+                return Uint8List.fromList(orElse());
+              });
   }
 
   @override
-  Future<S> fold<S>(S initialValue, S Function(S previous, Uint8List element) combine) {
+  Future<S> fold<S>(
+      S initialValue, S Function(S previous, Uint8List element) combine) {
     return _delegate.fold<S>(initialValue, combine);
   }
 
@@ -405,9 +425,9 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Stream<Uint8List> handleError(
-      Function onError, {
-        bool Function(dynamic error)? test,
-      }) {
+    Function onError, {
+    bool Function(dynamic error)? test,
+  }) {
     return _delegate.handleError(onError, test: test);
   }
 
@@ -427,12 +447,15 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Future<Uint8List> lastWhere(
-      bool Function(Uint8List element) test, {
-        List<int> Function()? orElse,
-      }) {
-    return _delegate.lastWhere(test, orElse: orElse == null ? null : () {
-      return Uint8List.fromList(orElse());
-    });
+    bool Function(Uint8List element) test, {
+    List<int> Function()? orElse,
+  }) {
+    return _delegate.lastWhere(test,
+        orElse: orElse == null
+            ? null
+            : () {
+                return Uint8List.fromList(orElse());
+              });
   }
 
   @override
@@ -449,7 +472,8 @@ class _MockHttpResponse implements HttpClientResponse {
   }
 
   @override
-  Future<Uint8List> reduce(List<int> Function(Uint8List previous, Uint8List element) combine) {
+  Future<Uint8List> reduce(
+      List<int> Function(Uint8List previous, Uint8List element) combine) {
     return _delegate.reduce((Uint8List previous, Uint8List element) {
       return Uint8List.fromList(combine(previous, element));
     });
@@ -459,10 +483,14 @@ class _MockHttpResponse implements HttpClientResponse {
   Future<Uint8List> get single => _delegate.single;
 
   @override
-  Future<Uint8List> singleWhere(bool Function(Uint8List element) test, {List<int> Function()? orElse}) {
-    return _delegate.singleWhere(test, orElse: orElse == null ? null : () {
-      return Uint8List.fromList(orElse());
-    });
+  Future<Uint8List> singleWhere(bool Function(Uint8List element) test,
+      {List<int> Function()? orElse}) {
+    return _delegate.singleWhere(test,
+        orElse: orElse == null
+            ? null
+            : () {
+                return Uint8List.fromList(orElse());
+              });
   }
 
   @override
@@ -487,9 +515,9 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Stream<Uint8List> timeout(
-      Duration timeLimit, {
-        void Function(EventSink<Uint8List> sink)? onTimeout,
-      }) {
+    Duration timeLimit, {
+    void Function(EventSink<Uint8List> sink)? onTimeout,
+  }) {
     return _delegate.timeout(timeLimit, onTimeout: onTimeout);
   }
 
@@ -520,25 +548,25 @@ class _MockHttpHeaders extends HttpHeaders {
   List<String>? operator [](String name) => <String>[];
 
   @override
-  void add(String name, Object value, {bool preserveHeaderCase = false}) { }
+  void add(String name, Object value, {bool preserveHeaderCase = false}) {}
 
   @override
-  void clear() { }
+  void clear() {}
 
   @override
-  void forEach(void Function(String name, List<String> values) f) { }
+  void forEach(void Function(String name, List<String> values) f) {}
 
   @override
-  void noFolding(String name) { }
+  void noFolding(String name) {}
 
   @override
-  void remove(String name, Object value) { }
+  void remove(String name, Object value) {}
 
   @override
-  void removeAll(String name) { }
+  void removeAll(String name) {}
 
   @override
-  void set(String name, Object value, {bool preserveHeaderCase = false}) { }
+  void set(String name, Object value, {bool preserveHeaderCase = false}) {}
 
   @override
   String? value(String name) => null;

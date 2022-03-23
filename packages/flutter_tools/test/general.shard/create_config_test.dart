@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/commands/create_base.dart';
 import '../src/common.dart';
 
 void main() {
-
   test('Validates Pub package name', () {
     expect(isValidPackageName('is'), false);
     expect(isValidPackageName('92'), false);

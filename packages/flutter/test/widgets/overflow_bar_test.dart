@@ -51,7 +51,8 @@ void main() {
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
 
-    Widget buildFrame({ required double spacing, required TextDirection textDirection }) {
+    Widget buildFrame(
+        {required double spacing, required TextDirection textDirection}) {
       return Directionality(
         textDirection: textDirection,
         child: Align(
@@ -69,28 +70,44 @@ void main() {
     }
 
     // Children are vertically centered, start at x=0
-    await tester.pumpWidget(buildFrame(spacing: 0, textDirection: TextDirection.ltr));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 8, 48, 56));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(48, 0, 112, 64));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(112, 16, 144, 48));
+    await tester
+        .pumpWidget(buildFrame(spacing: 0, textDirection: TextDirection.ltr));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 8, 48, 56));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(48, 0, 112, 64));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(112, 16, 144, 48));
 
     // Children are vertically centered, start at x=0
-    await tester.pumpWidget(buildFrame(spacing: 10, textDirection: TextDirection.ltr));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 8, 48, 56));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(10.0 + 48, 0, 10.0 + 112, 64));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(10.0 + 112 + 10.0, 16, 10.0 + 10.0 + 144, 48));
+    await tester
+        .pumpWidget(buildFrame(spacing: 10, textDirection: TextDirection.ltr));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 8, 48, 56));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(10.0 + 48, 0, 10.0 + 112, 64));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(10.0 + 112 + 10.0, 16, 10.0 + 10.0 + 144, 48));
 
     // Children appear in reverse order for RTL
-    await tester.pumpWidget(buildFrame(spacing: 0, textDirection: TextDirection.rtl));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 16, 32, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(32, 0, 96, 64));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(96, 8, 144, 56));
+    await tester
+        .pumpWidget(buildFrame(spacing: 0, textDirection: TextDirection.rtl));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 16, 32, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(32, 0, 96, 64));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(96, 8, 144, 56));
 
     // Children appear in reverse order for RTL
-    await tester.pumpWidget(buildFrame(spacing: 10, textDirection: TextDirection.rtl));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 16, 32, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(10.0 + 32, 0, 10.0 + 96, 64));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(10.0 + 96 + 10.0, 8, 10.0 + 10.0 + 144, 56));
+    await tester
+        .pumpWidget(buildFrame(spacing: 10, textDirection: TextDirection.rtl));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 16, 32, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(10.0 + 32, 0, 10.0 + 96, 64));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(10.0 + 96 + 10.0, 8, 10.0 + 10.0 + 144, 56));
   });
 
   testWidgets('OverflowBar vertical layout', (WidgetTester tester) async {
@@ -127,55 +144,89 @@ void main() {
 
     // Children are left aligned
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 0, 48, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(0, 48, 64, 112));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 112, 32, 144));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 0, 48, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(0, 48, 64, 112));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 112, 32, 144));
 
     // Children are left aligned
-    await tester.pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.end, textDirection: TextDirection.rtl));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 0, 48, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(0, 48, 64, 112));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 112, 32, 144));
+    await tester.pumpWidget(buildFrame(
+        overflowAlignment: OverflowBarAlignment.end,
+        textDirection: TextDirection.rtl));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 0, 48, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(0, 48, 64, 112));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 112, 32, 144));
 
     // Spaced children are left aligned
     await tester.pumpWidget(buildFrame(overflowSpacing: 10));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 0, 48, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(0, 10.0 + 48, 64, 10.0 + 112));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 10.0 + 112 + 10.0, 32, 10.0 + 10.0 + 144));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 0, 48, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(0, 10.0 + 48, 64, 10.0 + 112));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 10.0 + 112 + 10.0, 32, 10.0 + 10.0 + 144));
 
     // Left-aligned children appear in reverse order for VerticalDirection.up
-    await tester.pumpWidget(buildFrame(overflowDirection: VerticalDirection.up));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 0, 32, 32));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(0, 32, 64, 96));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 96, 48, 144));
+    await tester
+        .pumpWidget(buildFrame(overflowDirection: VerticalDirection.up));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 0, 32, 32));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(0, 32, 64, 96));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 96, 48, 144));
 
     // Left-aligned spaced children appear in reverse order for VerticalDirection.up
-    await tester.pumpWidget(buildFrame(overflowSpacing: 10, overflowDirection: VerticalDirection.up));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(0, 0, 32, 32));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(0, 10.0 + 32, 64, 10.0 + 96));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(0, 10.0 + 10.0 + 96, 48, 10.0 + 10.0 + 144));
+    await tester.pumpWidget(buildFrame(
+        overflowSpacing: 10, overflowDirection: VerticalDirection.up));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(0, 0, 32, 32));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(0, 10.0 + 32, 64, 10.0 + 96));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(0, 10.0 + 10.0 + 96, 48, 10.0 + 10.0 + 144));
 
     // Children are right aligned
-    await tester.pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.end));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0 - 48, 0, 100, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0 - 64, 48, 100, 112));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0 - 32, 112, 100, 144));
+    await tester
+        .pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.end));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(100.0 - 48, 0, 100, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(100.0 - 64, 48, 100, 112));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(100.0 - 32, 112, 100, 144));
 
     // Children are right aligned
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0 - 48, 0, 100, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0 - 64, 48, 100, 112));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0 - 32, 112, 100, 144));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(100.0 - 48, 0, 100, 48));
+    expect(tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(100.0 - 64, 48, 100, 112));
+    expect(tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(100.0 - 32, 112, 100, 144));
 
     // Children are centered
-    await tester.pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.center));
-    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0/2.0 - 48/2, 0, 100.0/2.0 + 48/2, 48));
-    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0/2.0 - 64/2, 48, 100.0/2.0 + 64/2, 112));
-    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0/2.0 - 32/2, 112, 100.0/2.0 + 32/2, 144));
+    await tester
+        .pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.center));
+    expect(tester.getRect(find.byKey(child1Key)),
+        const Rect.fromLTRB(100.0 / 2.0 - 48 / 2, 0, 100.0 / 2.0 + 48 / 2, 48));
+    expect(
+        tester.getRect(find.byKey(child2Key)),
+        const Rect.fromLTRB(
+            100.0 / 2.0 - 64 / 2, 48, 100.0 / 2.0 + 64 / 2, 112));
+    expect(
+        tester.getRect(find.byKey(child3Key)),
+        const Rect.fromLTRB(
+            100.0 / 2.0 - 32 / 2, 112, 100.0 / 2.0 + 32 / 2, 144));
   });
 
   testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
-    Widget buildFrame({ required double width }) {
+    Widget buildFrame({required double width}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -199,14 +250,15 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(width: 800));
-    expect(tester.getSize(find.byType(OverflowBar)).width, 152); // 152 = 48 + 4 + 64 + 4 + 32
+    expect(tester.getSize(find.byType(OverflowBar)).width,
+        152); // 152 = 48 + 4 + 64 + 4 + 32
 
     await tester.pumpWidget(buildFrame(width: 150));
     expect(tester.getSize(find.byType(OverflowBar)).width, 150);
   });
 
   testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
-    Widget buildFrame({ required double maxWidth }) {
+    Widget buildFrame({required double maxWidth}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -230,14 +282,16 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(maxWidth: 800));
-    expect(tester.getSize(find.byType(OverflowBar)).height, 75); // 75 = max(50, 25, 75)
+    expect(tester.getSize(find.byType(OverflowBar)).height,
+        75); // 75 = max(50, 25, 75)
 
     await tester.pumpWidget(buildFrame(maxWidth: 150));
-    expect(tester.getSize(find.byType(OverflowBar)).height, 166); // 166 = 50 + 8 + 25 + 8 + 75
+    expect(tester.getSize(find.byType(OverflowBar)).height,
+        166); // 166 = 50 + 8 + 25 + 8 + 75
   });
 
-
-  testWidgets('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
+  testWidgets('OverflowBar is wider that its intrinsic width',
+      (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -273,7 +327,9 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key2)).dx, 600);
   });
 
-  testWidgets('OverflowBar with alignment should match Row with mainAxisAlignment', (WidgetTester tester) async {
+  testWidgets(
+      'OverflowBar with alignment should match Row with mainAxisAlignment',
+      (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -300,7 +356,8 @@ void main() {
       TextDirection.rtl,
     ];
 
-    Widget buildFrame(MainAxisAlignment alignment, TextDirection textDirection) {
+    Widget buildFrame(
+        MainAxisAlignment alignment, TextDirection textDirection) {
       return Directionality(
         textDirection: textDirection,
         child: Column(

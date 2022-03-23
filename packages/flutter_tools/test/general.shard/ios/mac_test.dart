@@ -50,7 +50,8 @@ void main() {
         outputFile = MemoryFileSystem.test().file('image.png');
       });
 
-      testWithoutContext('error if idevicescreenshot is not installed', () async {
+      testWithoutContext('error if idevicescreenshot is not installed',
+          () async {
         // Let `idevicescreenshot` fail with exit code 1.
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
@@ -72,20 +73,28 @@ void main() {
           logger: logger,
         );
 
-        expect(() async => iMobileDevice.takeScreenshot(
-          outputFile,
-          '1234',
-          IOSDeviceConnectionInterface.usb,
-        ), throwsA(anything));
+        expect(
+            () async => iMobileDevice.takeScreenshot(
+                  outputFile,
+                  '1234',
+                  IOSDeviceConnectionInterface.usb,
+                ),
+            throwsA(anything));
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
 
-      testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
+      testWithoutContext(
+          'idevicescreenshot captures and returns USB screenshot', () async {
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234',
+            'HostArtifact.idevicescreenshot',
+            outputFile.path,
+            '--udid',
+            '1234',
           ],
-          environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+          environment: const <String, String>{
+            'DYLD_LIBRARY_PATH': '/path/to/libraries'
+          },
         ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
@@ -103,12 +112,20 @@ void main() {
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
 
-      testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
+      testWithoutContext(
+          'idevicescreenshot captures and returns network screenshot',
+          () async {
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234', '--network',
+            'HostArtifact.idevicescreenshot',
+            outputFile.path,
+            '--udid',
+            '1234',
+            '--network',
           ],
-          environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+          environment: const <String, String>{
+            'DYLD_LIBRARY_PATH': '/path/to/libraries'
+          },
         ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
@@ -153,17 +170,19 @@ void main() {
       );
 
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
-      expect(testUsage.events, contains(
-        TestUsageEvent(
-          'build',
-          'ios',
-          label: 'xcode-bitcode-failure',
-          parameters: CustomDimensions(
-            buildEventCommand: buildCommands.toString(),
-            buildEventSettings: buildSettings.toString(),
-          ),
-        ),
-      ));
+      expect(
+          testUsage.events,
+          contains(
+            TestUsageEvent(
+              'build',
+              'ios',
+              label: 'xcode-bitcode-failure',
+              parameters: CustomDimensions(
+                buildEventCommand: buildCommands.toString(),
+                buildEventSettings: buildSettings.toString(),
+              ),
+            ),
+          ));
     });
 
     testWithoutContext('No provisioning profile shows message', () async {
@@ -235,7 +254,8 @@ Error launching application on iPhone.''',
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
-        contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
+        contains(
+            "No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     });
 
@@ -316,11 +336,13 @@ Could not build the precompiled application for the device.''',
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
-        contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
+        contains(
+            'Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
     });
 
-    testWithoutContext('embedded and linked framework iOS mismatch shows message', () async {
+    testWithoutContext(
+        'embedded and linked framework iOS mismatch shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -357,7 +379,9 @@ Exited (sigterm)''',
       );
     });
 
-    testWithoutContext('embedded and linked framework iOS simulator mismatch shows message', () async {
+    testWithoutContext(
+        'embedded and linked framework iOS simulator mismatch shows message',
+        () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -396,19 +420,16 @@ Exited (sigterm)''',
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
-    const String flutterAssetPbxProjLines =
-      '/* flutter_assets */\n'
-      '/* App.framework\n'
-      'another line';
+    const String flutterAssetPbxProjLines = '/* flutter_assets */\n'
+        '/* App.framework\n'
+        'another line';
 
-    const String appFlxPbxProjLines =
-      '/* app.flx\n'
-      '/* App.framework\n'
-      'another line';
+    const String appFlxPbxProjLines = '/* app.flx\n'
+        '/* App.framework\n'
+        'another line';
 
-    const String cleanPbxProjLines =
-      '/* App.framework\n'
-      'another line';
+    const String cleanPbxProjLines = '/* App.framework\n'
+        'another line';
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final File pbxprojFile = MemoryFileSystem.test().file('project.pbxproj')
@@ -450,7 +471,8 @@ Exited (sigterm)''',
     });
 
     testWithoutContext('removes xattr', () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager =
+          FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
           'xattr',
           '-r',
@@ -460,24 +482,30 @@ Exited (sigterm)''',
         ])
       ]);
 
-      await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      await removeFinderExtendedAttributes(projectDirectory,
+          ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('ignores errors', () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'xattr',
-          '-r',
-          '-d',
-          'com.apple.FinderInfo',
-          projectDirectory.path,
-        ], exitCode: 1,
+      final FakeProcessManager processManager =
+          FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            projectDirectory.path,
+          ],
+          exitCode: 1,
         )
       ]);
 
-      await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
-      expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
+      await removeFinderExtendedAttributes(projectDirectory,
+          ProcessUtils(processManager: processManager, logger: logger), logger);
+      expect(logger.traceText,
+          contains('Failed to remove xattr com.apple.FinderInfo'));
       expect(processManager, hasNoRemainingExpectations);
     });
   });
@@ -489,8 +517,10 @@ class FakeIosProject extends Fake implements IosProject {
   final File xcodeProjectInfoFile;
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'UnitTestRunner.app';
+  Future<String> hostAppBundleName(BuildInfo? buildInfo) async =>
+      'UnitTestRunner.app';
 
   @override
-  Directory get xcodeProject => xcodeProjectInfoFile.fileSystem.directory('Runner.xcodeproj');
+  Directory get xcodeProject =>
+      xcodeProjectInfoFile.fileSystem.directory('Runner.xcodeproj');
 }

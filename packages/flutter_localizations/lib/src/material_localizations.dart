@@ -97,26 +97,26 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     required intl.DateFormat shortMonthDayFormat,
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : assert(localeName != null),
-       _localeName = localeName,
-       assert(fullYearFormat != null),
-       _fullYearFormat = fullYearFormat,
-       assert(compactDateFormat != null),
-       _compactDateFormat = compactDateFormat,
-       assert(shortDateFormat != null),
-       _shortDateFormat = shortDateFormat,
-       assert(mediumDateFormat != null),
-       _mediumDateFormat = mediumDateFormat,
-       assert(longDateFormat != null),
-       _longDateFormat = longDateFormat,
-       assert(yearMonthFormat != null),
-       _yearMonthFormat = yearMonthFormat,
-       assert(shortMonthDayFormat != null),
-       _shortMonthDayFormat = shortMonthDayFormat,
-       assert(decimalFormat != null),
-       _decimalFormat = decimalFormat,
-       assert(twoDigitZeroPaddedFormat != null),
-       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+  })  : assert(localeName != null),
+        _localeName = localeName,
+        assert(fullYearFormat != null),
+        _fullYearFormat = fullYearFormat,
+        assert(compactDateFormat != null),
+        _compactDateFormat = compactDateFormat,
+        assert(shortDateFormat != null),
+        _shortDateFormat = shortDateFormat,
+        assert(mediumDateFormat != null),
+        _mediumDateFormat = mediumDateFormat,
+        assert(longDateFormat != null),
+        _longDateFormat = longDateFormat,
+        assert(yearMonthFormat != null),
+        _yearMonthFormat = yearMonthFormat,
+        assert(shortMonthDayFormat != null),
+        _shortMonthDayFormat = shortMonthDayFormat,
+        assert(decimalFormat != null),
+        _decimalFormat = decimalFormat,
+        assert(twoDigitZeroPaddedFormat != null),
+        _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
@@ -130,8 +130,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   final intl.NumberFormat _twoDigitZeroPaddedFormat;
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
-    switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
+  String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
+    switch (hourFormat(
+        of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
       case HourFormat.H:
@@ -185,7 +186,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   DateTime? parseCompactDate(String? inputString) {
     try {
-      return inputString != null ? _compactDateFormat.parseStrict(inputString) : null;
+      return inputString != null
+          ? _compactDateFormat.parseStrict(inputString)
+          : null;
     } on FormatException {
       return null;
     }
@@ -197,7 +200,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  int get firstDayOfWeekIndex => (_longDateFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
+  int get firstDayOfWeekIndex =>
+      (_longDateFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
 
   @override
   String formatDecimal(int number) {
@@ -205,7 +209,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay,
+      {bool alwaysUse24HourFormat = false}) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -214,7 +219,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    final String hour = formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
+    final String hour =
+        formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
     final String minute = formatMinute(timeOfDay);
     switch (timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat)) {
       case TimeOfDayFormat.h_colon_mm_space_a:
@@ -247,7 +253,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String dateRangeStartDateSemanticLabel(String formattedDate) {
-    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
+    return dateRangeStartDateSemanticLabelRaw.replaceFirst(
+        r'$fullDate', formattedDate);
   }
 
   /// The raw version of [dateRangeEndDateSemanticLabel], with `$fullDate` verbatim
@@ -257,7 +264,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String dateRangeEndDateSemanticLabel(String formattedDate) {
-    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
+    return dateRangeEndDateSemanticLabelRaw.replaceFirst(
+        r'$fullDate', formattedDate);
   }
 
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
@@ -284,14 +292,17 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get pageRowsInfoTitleRaw;
 
   @override
-  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
-    String? text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
+  String pageRowsInfoTitle(
+      int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
+    String? text =
+        rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
     text ??= pageRowsInfoTitleRaw;
-    assert(text != null, 'A $_localeName localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
+    assert(text != null,
+        'A $_localeName localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
     return text
-      .replaceFirst(r'$firstRow', formatDecimal(firstRow))
-      .replaceFirst(r'$lastRow', formatDecimal(lastRow))
-      .replaceFirst(r'$rowCount', formatDecimal(rowCount));
+        .replaceFirst(r'$firstRow', formatDecimal(firstRow))
+        .replaceFirst(r'$lastRow', formatDecimal(lastRow))
+        .replaceFirst(r'$rowCount', formatDecimal(rowCount));
   }
 
   /// The raw version of [tabLabel], with `$tabIndex` and `$tabCount` verbatim
@@ -300,13 +311,13 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
     return template
-      .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
-      .replaceFirst(r'$tabCount', formatDecimal(tabCount));
+        .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
+        .replaceFirst(r'$tabCount', formatDecimal(tabCount));
   }
 
   /// The "zero" form of [selectedRowCountTitle].
@@ -434,10 +445,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * <http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US>, which shows
   ///    the short time pattern used in the `en_US` locale.
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
+  TimeOfDayFormat timeOfDayFormat({bool alwaysUse24HourFormat = false}) {
     assert(alwaysUse24HourFormat != null);
-    if (alwaysUse24HourFormat)
-      return _get24HourVersionOf(timeOfDayFormatRaw);
+    if (alwaysUse24HourFormat) return _get24HourVersionOf(timeOfDayFormatRaw);
     return timeOfDayFormatRaw;
   }
 
@@ -667,7 +677,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate =
+      _MaterialLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -690,7 +701,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///   // ...
   /// )
   /// ```
-  static const List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> delegates =
+      <LocalizationsDelegate<dynamic>>[
     GlobalCupertinoLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
@@ -713,13 +725,16 @@ TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
   }
 }
 
-class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+class _MaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => kMaterialSupportedLanguages.contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      kMaterialSupportedLanguages.contains(locale.languageCode);
 
-  static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations = <Locale, Future<MaterialLocalizations>>{};
+  static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations =
+      <Locale, Future<MaterialLocalizations>>{};
 
   @override
   Future<MaterialLocalizations> load(Locale locale) {
@@ -727,7 +742,8 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     return _loadedTranslations.putIfAbsent(locale, () {
       util.loadDateIntlDataIfNotLoaded();
 
-      final String localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      final String localeName =
+          intl.Intl.canonicalizedLocale(locale.toString());
       assert(
         locale.toString() == localeName,
         'Flutter does not support the non-standard locale form $locale (which '
@@ -799,5 +815,6 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalMaterialLocalizations.delegate(${kMaterialSupportedLanguages.length} locales)';
+  String toString() =>
+      'GlobalMaterialLocalizations.delegate(${kMaterialSupportedLanguages.length} locales)';
 }

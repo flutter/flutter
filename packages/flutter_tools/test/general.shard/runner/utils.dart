@@ -9,10 +9,9 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 typedef CommandFunction = Future<FlutterCommandResult> Function();
 
 class DummyFlutterCommand extends FlutterCommand {
-
   DummyFlutterCommand({
     this.shouldUpdateCache = false,
-    this.noUsagePath  = false,
+    this.noUsagePath = false,
     this.name = 'dummy',
     this.commandFunction,
     this.packagesPath,
@@ -37,7 +36,9 @@ class DummyFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return commandFunction == null ? FlutterCommandResult.fail() : await commandFunction();
+    return commandFunction == null
+        ? FlutterCommandResult.fail()
+        : await commandFunction();
   }
 
   @override

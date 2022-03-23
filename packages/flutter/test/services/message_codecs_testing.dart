@@ -7,7 +7,8 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes) {
+void checkEncoding<T>(
+    MessageCodec<T> codec, T message, List<int> expectedBytes) {
   final ByteData encoded = codec.encodeMessage(message)!;
   expect(
     encoded.buffer.asUint8List(0, encoded.lengthInBytes),
@@ -34,19 +35,17 @@ void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
 bool deepEquals(dynamic valueA, dynamic valueB) {
   if (valueA is TypedData)
     return valueB is TypedData && deepEqualsTypedData(valueA, valueB);
-  if (valueA is List)
-    return valueB is List && deepEqualsList(valueA, valueB);
-  if (valueA is Map)
-    return valueB is Map && deepEqualsMap(valueA, valueB);
-  if (valueA is double && valueA.isNaN)
-    return valueB is double && valueB.isNaN;
+  if (valueA is List) return valueB is List && deepEqualsList(valueA, valueB);
+  if (valueA is Map) return valueB is Map && deepEqualsMap(valueA, valueB);
+  if (valueA is double && valueA.isNaN) return valueB is double && valueB.isNaN;
   return valueA == valueB;
 }
 
 bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
   if (valueA is ByteData) {
-    return valueB is ByteData
-        && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
+    return valueB is ByteData &&
+        deepEqualsList(
+            valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
   }
   if (valueA is Uint8List)
     return valueB is Uint8List && deepEqualsList(valueA, valueB);
@@ -62,18 +61,15 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
 }
 
 bool deepEqualsList(List<dynamic> valueA, List<dynamic> valueB) {
-  if (valueA.length != valueB.length)
-    return false;
+  if (valueA.length != valueB.length) return false;
   for (int i = 0; i < valueA.length; i++) {
-    if (!deepEquals(valueA[i], valueB[i]))
-      return false;
+    if (!deepEquals(valueA[i], valueB[i])) return false;
   }
   return true;
 }
 
 bool deepEqualsMap(Map<dynamic, dynamic> valueA, Map<dynamic, dynamic> valueB) {
-  if (valueA.length != valueB.length)
-    return false;
+  if (valueA.length != valueB.length) return false;
   for (final dynamic key in valueA.keys) {
     if (!valueB.containsKey(key) || !deepEquals(valueA[key], valueB[key]))
       return false;

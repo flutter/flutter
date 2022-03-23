@@ -20,9 +20,8 @@ class StatefulWrapper extends StatefulWidget {
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
-
   void trigger() {
-    setState(() { /* no-op setState */ });
+    setState(() {/* no-op setState */});
   }
 
   bool built = false;
@@ -49,7 +48,9 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
+  testWidgets(
+      'Calling setState on a widget that moves into a LayoutBuilder in the same frame',
+      (WidgetTester tester) async {
     StatefulWrapperState statefulWrapper;
     final Widget inner = Wrapper(
       child: StatefulWrapper(
@@ -58,7 +59,8 @@ void main() {
       ),
     );
     await tester.pumpWidget(FlipWidget(
-      left: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      left: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
         return inner;
       }),
       right: inner,

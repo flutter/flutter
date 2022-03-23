@@ -33,7 +33,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   /// Creates a [OutlinedButtonThemeData].
   ///
   /// The [style] may be null.
-  const OutlinedButtonThemeData({ this.style });
+  const OutlinedButtonThemeData({this.style});
 
   /// Overrides for [OutlinedButton]'s default style.
   ///
@@ -45,10 +45,10 @@ class OutlinedButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two outlined button themes.
-  static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null)
-      return null;
+  static OutlinedButtonThemeData? lerp(
+      OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
+    assert(t != null);
+    if (a == null && b == null) return null;
     return OutlinedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
@@ -59,17 +59,16 @@ class OutlinedButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     return other is OutlinedButtonThemeData && other.style == style;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
 }
 
@@ -92,7 +91,8 @@ class OutlinedButtonTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  })  : assert(data != null),
+        super(key: key, child: child);
 
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;
@@ -108,7 +108,8 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
   static OutlinedButtonThemeData of(BuildContext context) {
-    final OutlinedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
+    final OutlinedButtonTheme? buttonTheme =
+        context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).outlinedButtonTheme;
   }
 
@@ -118,5 +119,6 @@ class OutlinedButtonTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(OutlinedButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(OutlinedButtonTheme oldWidget) =>
+      data != oldWidget.data;
 }

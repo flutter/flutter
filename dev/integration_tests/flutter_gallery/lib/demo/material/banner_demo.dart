@@ -13,7 +13,7 @@ enum BannerDemoAction {
 }
 
 class BannerDemo extends StatefulWidget {
-  const BannerDemo({ Key? key }) : super(key: key);
+  const BannerDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/material/banner';
 
@@ -48,8 +48,11 @@ class _BannerDemoState extends State<BannerDemo> {
   @override
   Widget build(BuildContext context) {
     final Widget banner = MaterialBanner(
-      content: const Text('Your password was updated on your other device. Please sign in again.'),
-      leading: _showLeading ? const CircleAvatar(child: Icon(Icons.access_alarm)) : null,
+      content: const Text(
+          'Your password was updated on your other device. Please sign in again.'),
+      leading: _showLeading
+          ? const CircleAvatar(child: Icon(Icons.access_alarm))
+          : null,
       actions: <Widget>[
         TextButton(
           child: const Text('SIGN IN'),
@@ -78,7 +81,8 @@ class _BannerDemoState extends State<BannerDemo> {
           MaterialDemoDocumentationButton(BannerDemo.routeName),
           PopupMenuButton<BannerDemoAction>(
             onSelected: handleDemoAction,
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<BannerDemoAction>>[
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<BannerDemoAction>>[
               const PopupMenuItem<BannerDemoAction>(
                 value: BannerDemoAction.reset,
                 child: Text('Reset the banner'),
@@ -98,12 +102,16 @@ class _BannerDemoState extends State<BannerDemo> {
           ),
         ],
       ),
-      body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (BuildContext context, int index) {
-        if (index == 0 && _displayBanner) {
-          return banner;
-        }
-        return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'),);
-      }),
+      body: ListView.builder(
+          itemCount: _displayBanner ? _numItems + 1 : _numItems,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0 && _displayBanner) {
+              return banner;
+            }
+            return ListTile(
+              title: Text('Item ${_displayBanner ? index : index + 1}'),
+            );
+          }),
     );
   }
 }

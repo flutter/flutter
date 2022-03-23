@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 
-
 /// Positions the toolbar at [anchor] if it fits, otherwise moves it so that it
 /// just fits fully on-screen.
 ///
@@ -16,7 +15,8 @@ import 'package:flutter/rendering.dart';
 ///     itself.
 ///   * [TextSelectionToolbarLayoutDelegate], which does a similar layout for
 ///     the mobile text selection toolbars.
-class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
+class DesktopTextSelectionToolbarLayoutDelegate
+    extends SingleChildLayoutDelegate {
   /// Creates an instance of TextSelectionToolbarLayoutDelegate.
   DesktopTextSelectionToolbarLayoutDelegate({
     required this.anchor,

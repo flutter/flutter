@@ -19,11 +19,13 @@ late VmService _vmService;
 
 void initTimelineTests() {
   setUpAll(() async {
-    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+    final developer.ServiceProtocolInfo info =
+        await developer.Service.getInfo();
     if (info.serverUri == null) {
       fail('This test _must_ be run with --enable-vmservice.');
     }
-    _vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
+    _vmService = await vmServiceConnectUri(
+        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await _vmService.setVMTimelineFlags(<String>['Dart']);
     isolateId = developer.Service.getIsolateID(isolate.Isolate.current)!;
   });
@@ -35,21 +37,27 @@ Future<List<TimelineEvent>> fetchTimelineEvents() async {
   return timeline.traceEvents!;
 }
 
-Future<List<TimelineEvent>> fetchInterestingEvents(Set<String> interestingLabels) async {
+Future<List<TimelineEvent>> fetchInterestingEvents(
+    Set<String> interestingLabels) async {
   return (await fetchTimelineEvents()).where((TimelineEvent event) {
-    return interestingLabels.contains(event.json!['name'])
-        && event.json!['ph'] == 'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
+    return interestingLabels.contains(event.json!['name']) &&
+        event.json!['ph'] ==
+            'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
   }).toList();
 }
 
 String eventToName(TimelineEvent event) => event.json!['name'] as String;
 
-Future<List<String>> fetchInterestingEventNames(Set<String> interestingLabels) async {
-  return (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName).toList();
+Future<List<String>> fetchInterestingEventNames(
+    Set<String> interestingLabels) async {
+  return (await fetchInterestingEvents(interestingLabels))
+      .map<String>(eventToName)
+      .toList();
 }
 
 Future<void> runFrame(VoidCallback callback) {
-  final Future<void> result = SchedulerBinding.instance.endOfFrame; // schedules a frame
+  final Future<void> result =
+      SchedulerBinding.instance.endOfFrame; // schedules a frame
   callback();
   return result;
 }

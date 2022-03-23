@@ -11,10 +11,10 @@ const String kUIThreadVsyncProcessEvent = 'VsyncProcessCallback';
 ///
 /// `RefreshRate` is the time between the start of a vsync pulse and the target time of that vsync.
 class RefreshRateSummary {
-
   /// Creates a [RefreshRateSummary] given the timeline events.
   factory RefreshRateSummary({required List<TimelineEvent> vsyncEvents}) {
-    return RefreshRateSummary._(refreshRates: _computeRefreshRates(vsyncEvents));
+    return RefreshRateSummary._(
+        refreshRates: _computeRefreshRates(vsyncEvents));
   }
 
   RefreshRateSummary._({required List<double> refreshRates}) {
@@ -123,11 +123,14 @@ class RefreshRateSummary {
       assert(event.arguments != null);
       final Map<String, dynamic> arguments = event.arguments!;
       const double nanosecondsPerSecond = 1e+9;
-      final int startTimeInNanoseconds = int.parse(arguments['StartTime'] as String);
-      final int targetTimeInNanoseconds = int.parse(arguments['TargetTime'] as String);
-      final int frameDurationInNanoseconds = targetTimeInNanoseconds - startTimeInNanoseconds;
-      final double refreshRate = nanosecondsPerSecond /
-          frameDurationInNanoseconds;
+      final int startTimeInNanoseconds =
+          int.parse(arguments['StartTime'] as String);
+      final int targetTimeInNanoseconds =
+          int.parse(arguments['TargetTime'] as String);
+      final int frameDurationInNanoseconds =
+          targetTimeInNanoseconds - startTimeInNanoseconds;
+      final double refreshRate =
+          nanosecondsPerSecond / frameDurationInNanoseconds;
       result.add(refreshRate);
     }
     return result;

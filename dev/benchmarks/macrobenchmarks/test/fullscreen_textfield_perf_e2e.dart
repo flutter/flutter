@@ -18,7 +18,8 @@ void main() {
     // test.
     pageDelay: const Duration(milliseconds: 50),
     body: (WidgetController controller) async {
-      final Finder textfield = find.byKey(const ValueKey<String>('fullscreen-textfield'));
+      final Finder textfield =
+          find.byKey(const ValueKey<String>('fullscreen-textfield'));
       controller.tap(textfield);
       await Future<void>.delayed(const Duration(milliseconds: 5000));
     },

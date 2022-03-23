@@ -5,7 +5,8 @@
 import 'template.dart';
 
 class FABTemplate extends TokenTemplate {
-  const FABTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const FABTemplate(String fileName, Map<String, dynamic> tokens)
+      : super(fileName, tokens);
 
   @override
   String generate() => '''

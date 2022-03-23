@@ -45,8 +45,10 @@ void main() {
     test(
       'AutofillClients send the correct configuration to the platform and responds to updateEditingStateWithTag method correctly',
       () async {
-        final FakeAutofillClient client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
-        final FakeAutofillClient client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
+        final FakeAutofillClient client1 =
+            FakeAutofillClient(const TextEditingValue(text: 'test1'));
+        final FakeAutofillClient client2 =
+            FakeAutofillClient(const TextEditingValue(text: 'test2'));
 
         client1.textInputConfiguration = TextInputConfiguration(
           autofillConfiguration: AutofillConfiguration(
@@ -71,20 +73,25 @@ void main() {
 
         scope.attach(client1, client1.textInputConfiguration);
 
-        final Map<String, dynamic> expectedConfiguration = client1.textInputConfiguration.toJson();
+        final Map<String, dynamic> expectedConfiguration =
+            client1.textInputConfiguration.toJson();
         expectedConfiguration['fields'] = <Map<String, dynamic>>[
           client1.textInputConfiguration.toJson(),
           client2.textInputConfiguration.toJson(),
         ];
 
         fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
-          MethodCall('TextInput.setClient', <dynamic>[1, expectedConfiguration]),
+          MethodCall(
+              'TextInput.setClient', <dynamic>[1, expectedConfiguration]),
         ]);
 
         const TextEditingValue text2 = TextEditingValue(text: 'Text 2');
         fakeTextChannel.incoming?.call(MethodCall(
           'TextInputClient.updateEditingStateWithTag',
-          <dynamic>[0, <String, dynamic>{ client2.autofillId : text2.toJSON() }],
+          <dynamic>[
+            0,
+            <String, dynamic>{client2.autofillId: text2.toJSON()}
+          ],
         ));
 
         expect(client2.currentTextEditingValue, text2);
@@ -142,7 +149,8 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
+  void autofill(TextEditingValue newEditingValue) =>
+      updateEditingValue(newEditingValue);
 
   @override
   void showToolbar() {

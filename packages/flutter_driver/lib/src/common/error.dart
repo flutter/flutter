@@ -21,8 +21,7 @@ class DriverError extends Error {
 
   @override
   String toString() {
-    if (originalError == null)
-      return 'DriverError: $message\n';
+    if (originalError == null) return 'DriverError: $message\n';
     return '''
 DriverError: $message
 Original error: $originalError

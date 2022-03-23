@@ -13,19 +13,19 @@ class NavigationIconView {
     String? title,
     Color? color,
     required TickerProvider vsync,
-  }) : _icon = icon,
-       _color = color,
-       _title = title,
-       item = BottomNavigationBarItem(
-         icon: icon,
-         activeIcon: activeIcon,
-         label: title,
-         backgroundColor: color,
-       ),
-       controller = AnimationController(
-         duration: kThemeAnimationDuration,
-         vsync: vsync,
-       ) {
+  })  : _icon = icon,
+        _color = color,
+        _title = title,
+        item = BottomNavigationBarItem(
+          icon: icon,
+          activeIcon: activeIcon,
+          label: title,
+          backgroundColor: color,
+        ),
+        controller = AnimationController(
+          duration: kThemeAnimationDuration,
+          vsync: vsync,
+        ) {
     _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
     ));
@@ -38,7 +38,8 @@ class NavigationIconView {
   final AnimationController controller;
   late Animation<double> _animation;
 
-  FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
+  FadeTransition transition(
+      BottomNavigationBarType type, BuildContext context) {
     Color? iconColor;
     if (type == BottomNavigationBarType.shifting) {
       iconColor = _color;
@@ -172,7 +173,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   Widget _buildTransitionsStack() {
     final List<FadeTransition> transitions = <FadeTransition>[
-      for (final NavigationIconView view in _navigationViews) view.transition(_type, context),
+      for (final NavigationIconView view in _navigationViews)
+        view.transition(_type, context),
     ];
 
     // We want to have the newly animating (fading in) views on top.
@@ -191,7 +193,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
+          .map<BottomNavigationBarItem>(
+              (NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
@@ -215,7 +218,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
                 _type = value;
               });
             },
-            itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuItem<BottomNavigationBarType>>[
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
                 child: Text('Fixed'),

@@ -75,7 +75,8 @@ abstract class Animatable<T> {
   }
 }
 
-class _AnimatedEvaluation<T> extends Animation<T> with AnimationWithParentMixin<double> {
+class _AnimatedEvaluation<T> extends Animation<T>
+    with AnimationWithParentMixin<double> {
   _AnimatedEvaluation(this.parent, this._evaluatable);
 
   @override
@@ -262,7 +263,8 @@ class Tween<T extends Object?> extends Animatable<T> {
       dynamic result;
       try {
         // ignore: avoid_dynamic_calls
-        result = (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t;
+        result =
+            (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t;
         result as T;
         return true;
       } on NoSuchMethodError {
@@ -293,7 +295,8 @@ class Tween<T extends Object?> extends Animatable<T> {
             'for more information.',
           ),
           if (begin is int || end is int)
-            ErrorHint('To lerp int values, consider IntTween or StepTween instead.')
+            ErrorHint(
+                'To lerp int values, consider IntTween or StepTween instead.')
           else
             ErrorHint(
               'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
@@ -303,7 +306,8 @@ class Tween<T extends Object?> extends Animatable<T> {
       }
     }());
     // ignore: avoid_dynamic_calls
-    return (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t as T;
+    return (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t
+        as T;
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -320,23 +324,22 @@ class Tween<T extends Object?> extends Animatable<T> {
   /// subclass.
   @override
   T transform(double t) {
-    if (t == 0.0)
-      return begin as T;
-    if (t == 1.0)
-      return end as T;
+    if (t == 0.0) return begin as T;
+    if (t == 1.0) return end as T;
     return lerp(t);
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
+  String toString() =>
+      '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
 class ReverseTween<T extends Object?> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
-    : assert(parent != null),
-      super(begin: parent.end, end: parent.begin);
+      : assert(parent != null),
+        super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
@@ -368,7 +371,7 @@ class ColorTween extends Tween<Color?> {
   /// or [end] if you want the effect of fading in or out of transparent.
   /// Instead prefer null. [Colors.transparent] refers to black transparent and
   /// thus will fade out of or into black which is likely unwanted.
-  ColorTween({ Color? begin, Color? end }) : super(begin: begin, end: end);
+  ColorTween({Color? begin, Color? end}) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -388,7 +391,7 @@ class SizeTween extends Tween<Size?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty size.
-  SizeTween({ Size? begin, Size? end }) : super(begin: begin, end: end);
+  SizeTween({Size? begin, Size? end}) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -409,7 +412,7 @@ class RectTween extends Tween<Rect?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty rect at the top left corner.
-  RectTween({ Rect? begin, Rect? end }) : super(begin: begin, end: end);
+  RectTween({Rect? begin, Rect? end}) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -436,7 +439,7 @@ class IntTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  IntTween({ int? begin, int? end }) : super(begin: begin, end: end);
+  IntTween({int? begin, int? end}) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
@@ -464,7 +467,7 @@ class StepTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  StepTween({ int? begin, int? end }) : super(begin: begin, end: end);
+  StepTween({int? begin, int? end}) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
@@ -482,7 +485,8 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin as T;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ConstantTween')}(value: $begin)';
+  String toString() =>
+      '${objectRuntimeType(this, 'ConstantTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.
@@ -515,8 +519,7 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ required this.curve })
-    : assert(curve != null);
+  CurveTween({required this.curve}) : assert(curve != null);
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;
@@ -531,5 +534,6 @@ class CurveTween extends Animatable<double> {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
+  String toString() =>
+      '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
 }

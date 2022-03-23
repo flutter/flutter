@@ -17,15 +17,16 @@ import 'framework.dart';
 ///
 /// When subclassing [UniqueWidget], provide the corresponding [State] subclass
 /// as the type argument.
-abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWidget {
+abstract class UniqueWidget<T extends State<StatefulWidget>>
+    extends StatefulWidget {
   /// Creates a widget that has exactly one inflated instance in the tree.
   ///
   /// The [key] argument must not be null because it identifies the unique
   /// inflated instance of this widget.
   const UniqueWidget({
     required GlobalKey<T> key,
-  }) : assert(key != null),
-       super(key: key);
+  })  : assert(key != null),
+        super(key: key);
 
   @override
   T createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345

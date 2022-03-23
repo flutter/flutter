@@ -18,8 +18,9 @@ import 'flutter_adapter_args.dart';
 import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
-class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker {
+class FlutterDebugAdapter extends DartDebugAdapter<
+    FlutterLaunchRequestArguments,
+    FlutterAttachRequestArguments> with PidTracker {
   FlutterDebugAdapter(
     ByteStreamServerChannel channel, {
     required this.fileSystem,
@@ -66,7 +67,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   /// Outstanding requests that have been sent to the Flutter run daemon and
   /// their handlers.
-  final Map<int, Completer<Object?>> _flutterRequestCompleters = <int, Completer<Object?>>{};
+  final Map<int, Completer<Object?>> _flutterRequestCompleters =
+      <int, Completer<Object?>>{};
 
   /// Whether or not this adapter can handle the restartRequest.
   ///
@@ -136,14 +138,14 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
   Future<void> attachImpl() async {
-    final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
+    final FlutterAttachRequestArguments args =
+        this.args as FlutterAttachRequestArguments;
 
     final String? vmServiceUri = args.vmServiceUri;
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',
-      if (vmServiceUri != null)
-      ...<String>['--debug-uri', vmServiceUri],
+      if (vmServiceUri != null) ...<String>['--debug-uri', vmServiceUri],
     ];
 
     await _startProcess(
@@ -233,11 +235,12 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       return;
     }
 
-    final String errorText = (errorData['renderedErrorText'] as String?)
-        ?? (errorData['description'] as String?)
+    final String errorText = (errorData['renderedErrorText'] as String?) ??
+        (errorData['description'] as String?)
         // We should never not error text, but if we do at least send something
         // so it's not just completely silent.
-        ?? 'Unknown error in Flutter.Error event';
+        ??
+        'Unknown error in Flutter.Error event';
     sendOutput('stderr', '$errorText\n');
   }
 
@@ -247,7 +250,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
+    final FlutterLaunchRequestArguments args =
+        this.args as FlutterLaunchRequestArguments;
 
     final List<String> toolArgs = <String>[
       'run',
@@ -281,7 +285,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     List<String>? userArgs,
   }) async {
     // Handle customTool and deletion of any arguments for it.
-    final String executable = customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable = customTool ??
+        fileSystem.path.join(Cache.flutterRoot!, 'bin',
+            platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = customToolReplacesArgs;
     if (customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
@@ -308,7 +314,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
+  Future<void> launchAsProcess(
+      String executable, List<String> processArgs) async {
     logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
       executable,

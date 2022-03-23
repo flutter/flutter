@@ -78,17 +78,17 @@ class TextButton extends ButtonStyleButton {
     Clip clipBehavior = Clip.none,
     required Widget child,
   }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    onHover: onHover,
-    onFocusChange: onFocusChange,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
+          key: key,
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          style: style,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          clipBehavior: clipBehavior,
+          child: child,
+        );
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -164,15 +164,17 @@ class TextButton extends ButtonStyleButton {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
-      ? null
-      : _TextButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
-      ? null
-      : _TextButtonDefaultOverlay(primary);
-    final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
+    final MaterialStateProperty<Color?>? foregroundColor =
+        (onSurface == null && primary == null)
+            ? null
+            : _TextButtonDefaultForeground(primary, onSurface);
+    final MaterialStateProperty<Color?>? overlayColor =
+        (primary == null) ? null : _TextButtonDefaultOverlay(primary);
+    final MaterialStateProperty<MouseCursor>? mouseCursor =
+        (enabledMouseCursor == null && disabledMouseCursor == null)
+            ? null
+            : _TextButtonDefaultMouseCursor(
+                enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -286,7 +288,8 @@ class TextButton extends ButtonStyleButton {
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
       maximumSize: Size.infinite,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.basic,
       visualDensity: theme.visualDensity,
@@ -336,7 +339,8 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered))
       return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+    if (states.contains(MaterialState.focused) ||
+        states.contains(MaterialState.pressed))
       return primary.withOpacity(0.12);
     return null;
   }
@@ -348,7 +352,8 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
+class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor>
+    with Diagnosticable {
   _TextButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
   final MouseCursor enabledCursor;
@@ -356,8 +361,7 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
-      return disabledCursor;
+    if (states.contains(MaterialState.disabled)) return disabledCursor;
     return enabledCursor;
   }
 }
@@ -375,20 +379,20 @@ class _TextButtonWithIcon extends TextButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         onHover: onHover,
-         onFocusChange: onFocusChange,
-         style: style,
-         focusNode: focusNode,
-         autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
-         child: _TextButtonWithIconChild(icon: icon, label: label),
-      );
+  })  : assert(icon != null),
+        assert(label != null),
+        super(
+          key: key,
+          onPressed: onPressed,
+          onLongPress: onLongPress,
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          style: style,
+          focusNode: focusNode,
+          autofocus: autofocus ?? false,
+          clipBehavior: clipBehavior ?? Clip.none,
+          child: _TextButtonWithIconChild(icon: icon, label: label),
+        );
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
@@ -399,8 +403,8 @@ class _TextButtonWithIcon extends TextButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
-    );
+          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
+        );
   }
 }
 
@@ -417,7 +421,8 @@ class _TextButtonWithIconChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
+    final double gap =
+        scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],

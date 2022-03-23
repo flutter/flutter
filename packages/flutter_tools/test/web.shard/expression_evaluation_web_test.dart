@@ -34,9 +34,10 @@ void main() {
       // The non-test project has a loop around its breakpoints.
       // No need to start paused as all breakpoint would be eventually reached.
       await flutter.run(
-        withDebugger: true, chrome: true,
-        expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+          withDebugger: true,
+          chrome: true,
+          expressionEvaluation: expressionEvaluation,
+          additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
     Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -53,13 +54,15 @@ void main() {
       );
     }
 
-    testWithoutContext('cannot evaluate expression if feature is disabled', () async {
+    testWithoutContext('cannot evaluate expression if feature is disabled',
+        () async {
       await start(expressionEvaluation: false);
       await breakInTopLevelFunction(flutter);
       await failToEvaluateExpression(flutter);
     });
 
-    testWithoutContext('shows no native javascript objects in static scope', () async {
+    testWithoutContext('shows no native javascript objects in static scope',
+        () async {
       await start(expressionEvaluation: true);
       await breakInTopLevelFunction(flutter);
       await checkStaticScope(flutter);
@@ -71,41 +74,49 @@ void main() {
       await evaluateErrorExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in top level function', () async {
+    testWithoutContext('can evaluate trivial expressions in top level function',
+        () async {
       await start(expressionEvaluation: true);
       await breakInTopLevelFunction(flutter);
       await evaluateTrivialExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in build method', () async {
+    testWithoutContext('can evaluate trivial expressions in build method',
+        () async {
       await start(expressionEvaluation: true);
       await breakInBuildMethod(flutter);
       await evaluateTrivialExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate complex expressions in top level function', () async {
+    testWithoutContext('can evaluate complex expressions in top level function',
+        () async {
       await start(expressionEvaluation: true);
       await breakInTopLevelFunction(flutter);
       await evaluateComplexExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate complex expressions in build method', () async {
+    testWithoutContext('can evaluate complex expressions in build method',
+        () async {
       await start(expressionEvaluation: true);
       await breakInBuildMethod(flutter);
       await evaluateComplexExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
+    testWithoutContext(
+        'can evaluate trivial expressions in library without pause', () async {
       await start(expressionEvaluation: true);
       await evaluateTrivialExpressionsInLibrary(flutter);
     });
 
-    testWithoutContext('can evaluate complex expressions in library without pause', () async {
+    testWithoutContext(
+        'can evaluate complex expressions in library without pause', () async {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
 
-    testWithoutContext('evaluated expression includes web library environment defines', () async {
+    testWithoutContext(
+        'evaluated expression includes web library environment defines',
+        () async {
       await start(expressionEvaluation: true);
       await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
     });
@@ -140,13 +151,16 @@ void main() {
       // Start paused so we can set a breakpoint before passing it
       // in the execution.
       return flutter.run(
-        withDebugger: true, chrome: true,
-        expressionEvaluation: expressionEvaluation,
-        startPaused: true, script: project.testFilePath,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+          withDebugger: true,
+          chrome: true,
+          expressionEvaluation: expressionEvaluation,
+          startPaused: true,
+          script: project.testFilePath,
+          additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
-    testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
+    testWithoutContext('cannot evaluate expressions if feature is disabled',
+        () async {
       await startPaused(expressionEvaluation: false);
       await breakInMethod(flutter);
       await failToEvaluateExpression(flutter);
@@ -164,16 +178,20 @@ void main() {
       await evaluateComplexExpressions(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
+    testWithoutContext(
+        'can evaluate trivial expressions in library without pause', () async {
       await startPaused(expressionEvaluation: true);
       await evaluateTrivialExpressionsInLibrary(flutter);
     });
 
-    testWithoutContext('can evaluate complex expressions in library without pause', () async {
+    testWithoutContext(
+        'can evaluate complex expressions in library without pause', () async {
       await startPaused(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
-    testWithoutContext('evaluated expression includes web library environment defines', () async {
+    testWithoutContext(
+        'evaluated expression includes web library environment defines',
+        () async {
       await startPaused(expressionEvaluation: true);
       await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
     });
@@ -219,21 +237,26 @@ Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
-Future<void> evaluateTrivialExpressionsInLibrary(FlutterTestDriver flutter) async {
+Future<void> evaluateTrivialExpressionsInLibrary(
+    FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
   final ObjRef res = await flutter.evaluate(library.id, '"test"');
   expectInstance(res, InstanceKind.kString, 'test');
 }
 
-Future<void> evaluateComplexExpressionsInLibrary(FlutterTestDriver flutter) async {
+Future<void> evaluateComplexExpressionsInLibrary(
+    FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
-  final ObjRef res = await flutter.evaluate(library.id, 'new DateTime.now().year');
+  final ObjRef res =
+      await flutter.evaluate(library.id, 'new DateTime.now().year');
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
-Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver flutter) async {
+Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(
+    FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
-  final ObjRef res = await flutter.evaluate(library.id, 'const bool.fromEnvironment("dart.library.html")');
+  final ObjRef res = await flutter.evaluate(
+      library.id, 'const bool.fromEnvironment("dart.library.html")');
   expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
@@ -244,18 +267,23 @@ Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   // Issue: https://github.com/dart-lang/sdk/issues/44760
   final Isolate isolate = await flutter.getFlutterIsolate();
   return isolate.libraries
-    .firstWhere((LibraryRef l) => l.uri.contains('org-dartlang-app'));
+      .firstWhere((LibraryRef l) => l.uri.contains('org-dartlang-app'));
 }
 
 void expectInstance(ObjRef result, String kind, String message) {
-  expect(result,
-    const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.kind, 'kind', kind)
-      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
+  expect(
+      result,
+      const TypeMatcher<InstanceRef>()
+          .having((InstanceRef instance) => instance.kind, 'kind', kind)
+          .having((InstanceRef instance) => instance.valueAsString,
+              'valueAsString', message));
 }
 
 void expectError(ObjRef result, String message) {
-  expect(result,
-    const TypeMatcher<ErrorRef>()
-      .having((ErrorRef instance) => instance.message, 'message', contains(message)));
+  expect(
+      result,
+      const TypeMatcher<ErrorRef>().having(
+          (ErrorRef instance) => instance.message,
+          'message',
+          contains(message)));
 }

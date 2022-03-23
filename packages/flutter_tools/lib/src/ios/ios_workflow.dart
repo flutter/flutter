@@ -12,25 +12,30 @@ class IOSWorkflow implements Workflow {
     required Platform platform,
     required FeatureFlags featureFlags,
     required Xcode xcode,
-  }) : _platform = platform,
-       _featureFlags = featureFlags,
-       _xcode = xcode;
+  })  : _platform = platform,
+        _featureFlags = featureFlags,
+        _xcode = xcode;
 
   final Platform _platform;
   final FeatureFlags _featureFlags;
   final Xcode _xcode;
 
   @override
-  bool get appliesToHostPlatform => _featureFlags.isIOSEnabled && _platform.isMacOS;
+  bool get appliesToHostPlatform =>
+      _featureFlags.isIOSEnabled && _platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
-  bool get canListDevices => appliesToHostPlatform && _xcode.isInstalledAndMeetsVersionCheck && _xcode.isSimctlInstalled;
+  bool get canListDevices =>
+      appliesToHostPlatform &&
+      _xcode.isInstalledAndMeetsVersionCheck &&
+      _xcode.isSimctlInstalled;
 
   // We need xcode to launch simulator devices, and ios-deploy
   // for real devices.
   @override
-  bool get canLaunchDevices => appliesToHostPlatform && _xcode.isInstalledAndMeetsVersionCheck;
+  bool get canLaunchDevices =>
+      appliesToHostPlatform && _xcode.isInstalledAndMeetsVersionCheck;
 
   @override
   bool get canListEmulators => false;

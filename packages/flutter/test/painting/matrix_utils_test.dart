@@ -10,7 +10,8 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('MatrixUtils.transformRect handles very large finite values', () {
-    const Rect evilRect = Rect.fromLTRB(0.0, -1.7976931348623157e+308, 800.0, 1.7976931348623157e+308);
+    const Rect evilRect = Rect.fromLTRB(
+        0.0, -1.7976931348623157e+308, 800.0, 1.7976931348623157e+308);
     final Matrix4 transform = Matrix4.identity()..translate(10.0);
     final Rect transformedRect = MatrixUtils.transformRect(transform, evilRect);
     expect(transformedRect.isFinite, true);
@@ -50,7 +51,8 @@ void main() {
   });
 
   test('cylindricalProjectionTransform identity', () {
-    final Matrix4 initialState = MatrixUtils.createCylindricalProjectionTransform(
+    final Matrix4 initialState =
+        MatrixUtils.createCylindricalProjectionTransform(
       radius: 0.0,
       angle: 0.0,
       perspective: 0.0,
@@ -60,7 +62,8 @@ void main() {
   });
 
   test('cylindricalProjectionTransform rotate with no radius', () {
-    final Matrix4 simpleRotate = MatrixUtils.createCylindricalProjectionTransform(
+    final Matrix4 simpleRotate =
+        MatrixUtils.createCylindricalProjectionTransform(
       radius: 0.0,
       angle: pi / 2.0,
       perspective: 0.0,
@@ -86,10 +89,22 @@ void main() {
     );
 
     expect(actual.storage, <dynamic>[
-      1.0, 0.0, 0.0, 0.0,
-      0.0, moreOrLessEquals(0.5), moreOrLessEquals(0.8660254037844386), moreOrLessEquals(-0.0008660254037844386),
-      0.0, moreOrLessEquals(-0.8660254037844386), moreOrLessEquals(0.5), moreOrLessEquals(-0.0005),
-      0.0, moreOrLessEquals(-86.60254037844386), moreOrLessEquals(-50.0), 1.05,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      moreOrLessEquals(0.5),
+      moreOrLessEquals(0.8660254037844386),
+      moreOrLessEquals(-0.0008660254037844386),
+      0.0,
+      moreOrLessEquals(-0.8660254037844386),
+      moreOrLessEquals(0.5),
+      moreOrLessEquals(-0.0005),
+      0.0,
+      moreOrLessEquals(-86.60254037844386),
+      moreOrLessEquals(-50.0),
+      1.05,
     ]);
   });
 
@@ -123,7 +138,8 @@ void main() {
     );
 
     expect(
-      MatrixUtils.transformPoint(forcedTransform, const Offset(-1.2344, 1422434.23)),
+      MatrixUtils.transformPoint(
+          forcedTransform, const Offset(-1.2344, 1422434.23)),
       forcedOffset,
     );
   });
@@ -139,14 +155,17 @@ void main() {
 
     // 2D Scaling
     expect(
-      MatrixUtils.transformRect(Matrix4.diagonal3Values(2, 2, 2), rectangle20x20),
+      MatrixUtils.transformRect(
+          Matrix4.diagonal3Values(2, 2, 2), rectangle20x20),
       const Rect.fromLTRB(20, 40, 60, 80),
     );
 
     // Rotation
     expect(
       MatrixUtils.transformRect(Matrix4.rotationZ(pi / 2.0), rectangle20x20),
-      within<Rect>(distance: 0.00001, from: const Rect.fromLTRB(-40.0, 10.0, -20.0, 30.0)),
+      within<Rect>(
+          distance: 0.00001,
+          from: const Rect.fromLTRB(-40.0, 10.0, -20.0, 30.0)),
     );
   });
 

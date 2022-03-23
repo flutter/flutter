@@ -40,12 +40,13 @@ class BlockHashes {
   final String fileMd5;
 
   Map<String, Object> toJson() => <String, Object>{
-    'blockSize': blockSize,
-    'totalSize': totalSize,
-    'adler32': base64.encode(Uint8List.view(Uint32List.fromList(adler32).buffer)),
-    'md5': md5,
-    'fileMd5': fileMd5,
-  };
+        'blockSize': blockSize,
+        'totalSize': totalSize,
+        'adler32':
+            base64.encode(Uint8List.view(Uint32List.fromList(adler32).buffer)),
+        'md5': md5,
+        'fileMd5': fileMd5,
+      };
 
   static BlockHashes fromJson(Map<String, Object?> obj) {
     return BlockHashes(
@@ -63,10 +64,12 @@ class BlockHashes {
 Stream<Uint8List> convertToChunks(Stream<Uint8List> source, int chunkSize) {
   final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
   final StreamController<Uint8List> controller = StreamController<Uint8List>();
-  final StreamSubscription<Uint8List> subscription = source.listen((Uint8List chunk) {
+  final StreamSubscription<Uint8List> subscription =
+      source.listen((Uint8List chunk) {
     int start = 0;
     while (start < chunk.length) {
-      final int sizeToTake = min(chunkSize - bytesBuilder.length, chunk.length - start);
+      final int sizeToTake =
+          min(chunkSize - bytesBuilder.length, chunk.length - start);
       assert(sizeToTake > 0);
       assert(sizeToTake <= chunkSize);
 
@@ -134,7 +137,7 @@ int adler32Hash(List<int> binary) {
 /// Helper to calculate rolling Adler32 hash of a file.
 @visibleForTesting
 class RollingAdler32 {
-  RollingAdler32(this.blockSize): _buffer = Uint8List(blockSize);
+  RollingAdler32(this.blockSize) : _buffer = Uint8List(blockSize);
 
   /// Block size of the rolling hash calculation.
   final int blockSize;
@@ -183,7 +186,7 @@ class RollingAdler32 {
     } else if (_cur == 0) {
       return _buffer;
     } else {
-      final BytesBuilder builder = BytesBuilder(copy:false)
+      final BytesBuilder builder = BytesBuilder(copy: false)
         ..add(Uint8List.sublistView(_buffer, _cur))
         ..add(Uint8List.sublistView(_buffer, 0, _cur));
       return builder.takeBytes();
@@ -222,15 +225,18 @@ class RollingAdler32 {
 /// given instructions.
 class FileTransfer {
   /// Calculate hashes of blocks in the file.
-  Future<BlockHashes> calculateBlockHashesOfFile(File file, { int? blockSize }) async {
+  Future<BlockHashes> calculateBlockHashesOfFile(File file,
+      {int? blockSize}) async {
     final int totalSize = await file.length();
     blockSize ??= max(sqrt(totalSize).ceil(), 2560);
 
-    final Stream<Uint8List> fileContentStream = file.openRead().map((List<int> chunk) => Uint8List.fromList(chunk));
+    final Stream<Uint8List> fileContentStream =
+        file.openRead().map((List<int> chunk) => Uint8List.fromList(chunk));
 
     final List<int> adler32Results = <int>[];
     final List<String> md5Results = <String>[];
-    await for (final Uint8List chunk in convertToChunks(fileContentStream, blockSize)) {
+    await for (final Uint8List chunk
+        in convertToChunks(fileContentStream, blockSize)) {
       adler32Results.add(adler32Hash(chunk));
       md5Results.add(base64.encode(md5.convert(chunk).bytes));
     }
@@ -252,9 +258,11 @@ class FileTransfer {
   ///
   /// Returns an empty list if the destination file is exactly the same as the
   /// source file.
-  Future<List<FileDeltaBlock>> computeDelta(File file, BlockHashes hashes) async {
+  Future<List<FileDeltaBlock>> computeDelta(
+      File file, BlockHashes hashes) async {
     // Skip computing delta if the destination file matches the source file.
-    if (await file.length() == hashes.totalSize && await _md5OfFile(file) == hashes.fileMd5) {
+    if (await file.length() == hashes.totalSize &&
+        await _md5OfFile(file) == hashes.fileMd5) {
       return <FileDeltaBlock>[];
     }
 
@@ -294,7 +302,8 @@ class FileTransfer {
 
         // The indices of possible matching blocks.
         final List<int> blockIndices = adler32ToBlockIndex[hash]!;
-        final String md5Hash = base64.encode(md5.convert(adler32.currentBlock()).bytes);
+        final String md5Hash =
+            base64.encode(md5.convert(adler32.currentBlock()).bytes);
 
         // Verify if any of our findings actually matches the destination block by comparing its MD5.
         for (final int blockIndex in blockIndices) {
@@ -307,23 +316,27 @@ class FileTransfer {
 
           // Copy the previously unmatched data from the source file.
           if (size - start > blockSize) {
-            blocks.add(FileDeltaBlock.fromSource(start: start, size: size - start - blockSize));
+            blocks.add(FileDeltaBlock.fromSource(
+                start: start, size: size - start - blockSize));
           }
 
           start = size;
 
           // Try to extend the previous entry.
           if (blocks.isNotEmpty && blocks.last.copyFromDestination) {
-            final int lastBlockIndex = (blocks.last.start + blocks.last.size) ~/ blockSize;
+            final int lastBlockIndex =
+                (blocks.last.start + blocks.last.size) ~/ blockSize;
             if (hashes.md5[lastBlockIndex] == md5Hash) {
               // We can extend the previous entry.
               final FileDeltaBlock last = blocks.removeLast();
-              blocks.add(FileDeltaBlock.fromDestination(start: last.start, size: last.size + blockSize));
+              blocks.add(FileDeltaBlock.fromDestination(
+                  start: last.start, size: last.size + blockSize));
               break;
             }
           }
 
-          blocks.add(FileDeltaBlock.fromDestination(start: blockIndex * blockSize, size: blockSize));
+          blocks.add(FileDeltaBlock.fromDestination(
+              start: blockIndex * blockSize, size: blockSize));
           break;
         }
       }
@@ -339,10 +352,14 @@ class FileTransfer {
 
   /// Generates the binary blocks that need to be transferred to the remote
   /// end to regenerate the file.
-  Future<Uint8List> binaryForRebuilding(File file, List<FileDeltaBlock> delta) async {
+  Future<Uint8List> binaryForRebuilding(
+      File file, List<FileDeltaBlock> delta) async {
     final RandomAccessFile binaryView = await file.open();
-    final Iterable<FileDeltaBlock> toTransfer = delta.where((FileDeltaBlock block) => !block.copyFromDestination);
-    final int totalSize = toTransfer.map((FileDeltaBlock i) => i.size).reduce((int a, int b) => a + b);
+    final Iterable<FileDeltaBlock> toTransfer =
+        delta.where((FileDeltaBlock block) => !block.copyFromDestination);
+    final int totalSize = toTransfer
+        .map((FileDeltaBlock i) => i.size)
+        .reduce((int a, int b) => a + b);
     final Uint8List buffer = Uint8List(totalSize);
     int start = 0;
     for (final FileDeltaBlock current in toTransfer) {
@@ -358,13 +375,15 @@ class FileTransfer {
 
   /// Generate the new destination file from the source file, with the
   /// [blocks] and [binary] stream given.
-  Future<bool> rebuildFile(File file, List<FileDeltaBlock> delta, Stream<List<int>> binary) async {
+  Future<bool> rebuildFile(
+      File file, List<FileDeltaBlock> delta, Stream<List<int>> binary) async {
     final RandomAccessFile fileView = await file.open();
 
     // Buffer used to hold the file content in memory.
     final BytesBuilder buffer = BytesBuilder(copy: false);
 
-    final StreamIterator<List<int>> iterator = StreamIterator<List<int>>(binary);
+    final StreamIterator<List<int>> iterator =
+        StreamIterator<List<int>>(binary);
     int currentIteratorStart = -1;
 
     bool iteratorMoveNextReturnValue = true;
@@ -376,10 +395,12 @@ class FileTransfer {
       } else {
         int toRead = current.size;
         while (toRead > 0) {
-          if (currentIteratorStart >= 0 && currentIteratorStart < iterator.current.length) {
+          if (currentIteratorStart >= 0 &&
+              currentIteratorStart < iterator.current.length) {
             final int size = iterator.current.length - currentIteratorStart;
             final int sizeToRead = min(toRead, size);
-            buffer.add(iterator.current.sublist(currentIteratorStart, currentIteratorStart + sizeToRead));
+            buffer.add(iterator.current.sublist(
+                currentIteratorStart, currentIteratorStart + sizeToRead));
             currentIteratorStart += sizeToRead;
             toRead -= sizeToRead;
           } else {
@@ -402,7 +423,8 @@ class FileTransfer {
 
   Future<String> _md5OfFile(File file) async {
     final Md5Hash fileMd5Hash = Md5Hash();
-    await file.openRead().forEach((List<int> chunk) => fileMd5Hash.addChunk(Uint8List.fromList(chunk)));
+    await file.openRead().forEach(
+        (List<int> chunk) => fileMd5Hash.addChunk(Uint8List.fromList(chunk)));
     return base64.encode(fileMd5Hash.finalize().buffer.asUint8List());
   }
 }
@@ -410,8 +432,11 @@ class FileTransfer {
 /// Represents a single line of instruction on how to generate the target file.
 @immutable
 class FileDeltaBlock {
-  const FileDeltaBlock.fromSource({required this.start, required this.size}): copyFromDestination = false;
-  const FileDeltaBlock.fromDestination({required this.start, required this.size}): copyFromDestination = true;
+  const FileDeltaBlock.fromSource({required this.start, required this.size})
+      : copyFromDestination = false;
+  const FileDeltaBlock.fromDestination(
+      {required this.start, required this.size})
+      : copyFromDestination = true;
 
   /// If true, this block should be read from the destination file.
   final bool copyFromDestination;
@@ -422,16 +447,17 @@ class FileDeltaBlock {
   /// Byte offset in the destination file from which the block should be read.
   final int start;
 
-  Map<String, Object> toJson() => <String, Object> {
-    if (copyFromDestination)
-      'start': start,
-    'size': size,
-  };
+  Map<String, Object> toJson() => <String, Object>{
+        if (copyFromDestination) 'start': start,
+        'size': size,
+      };
 
-  static List<FileDeltaBlock> fromJsonList(List<Map<String, Object?>> jsonList) {
+  static List<FileDeltaBlock> fromJsonList(
+      List<Map<String, Object?>> jsonList) {
     return jsonList.map((Map<String, Object?> json) {
       if (json.containsKey('start')) {
-        return FileDeltaBlock.fromDestination(start: json['start']! as int, size: json['size']! as int);
+        return FileDeltaBlock.fromDestination(
+            start: json['start']! as int, size: json['size']! as int);
       } else {
         // The start position does not matter on the destination machine.
         return FileDeltaBlock.fromSource(start: 0, size: json['size']! as int);
@@ -444,7 +470,9 @@ class FileDeltaBlock {
     if (other is! FileDeltaBlock) {
       return false;
     }
-    return other.copyFromDestination == copyFromDestination && other.size == size && other.start == start;
+    return other.copyFromDestination == copyFromDestination &&
+        other.size == size &&
+        other.start == start;
   }
 
   @override

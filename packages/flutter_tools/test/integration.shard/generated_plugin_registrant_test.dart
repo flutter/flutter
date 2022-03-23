@@ -47,8 +47,7 @@ void main() {
     await _createProject(projectDir, <String>[]);
     // We need to add a dependency with web support to trigger
     // the generated_plugin_registrant generation.
-    await _addDependency(projectDir, 'shared_preferences',
-        version: '^2.0.0');
+    await _addDependency(projectDir, 'shared_preferences', version: '^2.0.0');
     await _analyzeProject(projectDir);
 
     expect(
@@ -155,8 +154,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
     ),
   );
 
-  final File snapshotBackup =
-      globals.fs.file('$flutterToolsSnapshotPath.bak');
+  final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;

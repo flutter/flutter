@@ -10,15 +10,18 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
-  DevicesCommand({ bool verboseHelp = false }) {
-    argParser.addFlag('machine',
+  DevicesCommand({bool verboseHelp = false}) {
+    argParser.addFlag(
+      'machine',
       negatable: false,
-      help: 'Output device information in machine readable structured JSON format.',
+      help:
+          'Output device information in machine readable structured JSON format.',
     );
     argParser.addOption(
       'timeout',
       abbr: 't',
-      help: '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
+      help:
+          '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
       hide: !verboseHelp,
     );
     usesDeviceTimeoutOption();
@@ -38,7 +41,8 @@ class DevicesCommand extends FlutterCommand {
     if (argResults?['timeout'] != null) {
       final int? timeoutSeconds = int.tryParse(stringArg('timeout')!);
       if (timeoutSeconds == null) {
-        throwToolExit('Could not parse -t/--timeout argument. It must be an integer.');
+        throwToolExit(
+            'Could not parse -t/--timeout argument. It must be an integer.');
       }
       return Duration(seconds: timeoutSeconds);
     }
@@ -48,7 +52,8 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults?['timeout'] != null) {
-      globals.printWarning('${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.');
+      globals.printWarning(
+          '${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.');
     }
     return super.validateCommand();
   }
@@ -57,12 +62,14 @@ class DevicesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (globals.doctor?.canListAnything != true) {
       throwToolExit(
-        "Unable to locate a development device; please run 'flutter doctor' for "
-        'information about installing additional components.',
-        exitCode: 1);
+          "Unable to locate a development device; please run 'flutter doctor' for "
+          'information about installing additional components.',
+          exitCode: 1);
     }
 
-    final List<Device> devices = await globals.deviceManager?.refreshAllConnectedDevices(timeout: deviceDiscoveryTimeout) ?? <Device>[];
+    final List<Device> devices = await globals.deviceManager
+            ?.refreshAllConnectedDevices(timeout: deviceDiscoveryTimeout) ??
+        <Device>[];
 
     if (boolArg('machine')) {
       await printDevicesAsJson(devices);
@@ -71,17 +78,22 @@ class DevicesCommand extends FlutterCommand {
         final StringBuffer status = StringBuffer('No devices detected.');
         status.writeln();
         status.writeln();
-        status.writeln('Run "flutter emulators" to list and start any available device emulators.');
+        status.writeln(
+            'Run "flutter emulators" to list and start any available device emulators.');
         status.writeln();
-        status.write('If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
+        status.write(
+            'If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
         if (deviceDiscoveryTimeout == null) {
-          status.write('You may also try increasing the time to wait for connected devices with the --${FlutterOptions.kDeviceTimeout} flag. ');
+          status.write(
+              'You may also try increasing the time to wait for connected devices with the --${FlutterOptions.kDeviceTimeout} flag. ');
         }
-        status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
+        status.write(
+            'Visit https://flutter.dev/setup/ for troubleshooting tips.');
 
         globals.printStatus(status.toString());
       } else {
-        globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
+        globals.printStatus(
+            '${devices.length} connected ${pluralize('device', devices.length)}:\n');
         await Device.printDevices(devices, globals.logger);
       }
       await _printDiagnostics();
@@ -90,7 +102,8 @@ class DevicesCommand extends FlutterCommand {
   }
 
   Future<void> _printDiagnostics() async {
-    final List<String> diagnostics = await globals.deviceManager?.getDeviceDiagnostics() ?? <String>[];
+    final List<String> diagnostics =
+        await globals.deviceManager?.getDeviceDiagnostics() ?? <String>[];
     if (diagnostics.isNotEmpty) {
       globals.printStatus('');
       for (final String diagnostic in diagnostics) {
@@ -100,10 +113,7 @@ class DevicesCommand extends FlutterCommand {
   }
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
-    globals.printStatus(
-      const JsonEncoder.withIndent('  ').convert(
-        await Future.wait(devices.map((Device d) => d.toJson()))
-      )
-    );
+    globals.printStatus(const JsonEncoder.withIndent('  ')
+        .convert(await Future.wait(devices.map((Device d) => d.toJson()))));
   }
 }

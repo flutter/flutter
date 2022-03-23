@@ -50,7 +50,8 @@ void main() {
           child: Container(
             margin: const EdgeInsets.all(150.0),
             decoration: ShapeDecoration(
-              shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              shape: const BeveledRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
               shadows: kElevationToShadow[elevation],
             ),
             height: 100.0,
@@ -59,6 +60,7 @@ void main() {
         ),
       );
     }
+
     for (final int elevation in kElevationToShadow.keys) {
       testWidgets('elevation $elevation', (WidgetTester tester) async {
         debugDisableShadows = false;

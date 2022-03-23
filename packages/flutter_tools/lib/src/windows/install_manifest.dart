@@ -36,15 +36,22 @@ Future<void> createManifest({
   if (buildInfo.mode.isPrecompiled) {
     outputs.add(buildDirectory.childFile('app.so'));
   } else {
-    outputs.add(buildDirectory.parent.childDirectory('flutter_assets').childFile('kernel_blob.bin'));
+    outputs.add(buildDirectory.parent
+        .childDirectory('flutter_assets')
+        .childFile('kernel_blob.bin'));
   }
   for (final String key in assetBundle.entries.keys) {
-    outputs.add(buildDirectory.parent.childDirectory('flutter_assets').childFile(key));
+    outputs.add(
+        buildDirectory.parent.childDirectory('flutter_assets').childFile(key));
   }
-  outputs.add(project.ephemeralDirectory.childFile('flutter_windows_winuwp.dll'));
-  outputs.add(project.ephemeralDirectory.childFile('flutter_windows_winuwp.dll.pdb'));
+  outputs
+      .add(project.ephemeralDirectory.childFile('flutter_windows_winuwp.dll'));
+  outputs.add(
+      project.ephemeralDirectory.childFile('flutter_windows_winuwp.dll.pdb'));
   outputs.add(project.ephemeralDirectory.childFile('icudtl.dat'));
   project.ephemeralDirectory.childFile('install_manifest')
     ..createSync(recursive: true)
-    ..writeAsStringSync(outputs.map((File file) => file.absolute.uri.path.substring(1)).join('\n'));
+    ..writeAsStringSync(outputs
+        .map((File file) => file.absolute.uri.path.substring(1))
+        .join('\n'));
 }

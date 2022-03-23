@@ -58,11 +58,9 @@ enum _TestMode {
 ///
 /// Creates a different paragraph each time in order to avoid hitting the cache.
 class BenchTextLayout extends RawRecorder {
-  BenchTextLayout.canvas()
-      : super(name: canvasBenchmarkName);
+  BenchTextLayout.canvas() : super(name: canvasBenchmarkName);
 
-  BenchTextLayout.canvasKit()
-      : super(name: canvasKitBenchmarkName);
+  BenchTextLayout.canvasKit() : super(name: canvasKitBenchmarkName);
 
   static const String canvasBenchmarkName = 'text_canvas_layout';
   static const String canvasKitBenchmarkName = 'text_canvaskit_layout';
@@ -143,23 +141,22 @@ class BenchTextLayout extends RawRecorder {
 /// use the same paragraph instance because the layout method will shortcircuit
 /// in that case.
 class BenchTextCachedLayout extends RawRecorder {
-  BenchTextCachedLayout.canvas()
-      : super(name: canvasBenchmarkName);
+  BenchTextCachedLayout.canvas() : super(name: canvasBenchmarkName);
 
-  BenchTextCachedLayout.canvasKit()
-      : super(name: canvasKitBenchmarkName);
+  BenchTextCachedLayout.canvasKit() : super(name: canvasKitBenchmarkName);
 
   static const String canvasBenchmarkName = 'text_canvas_cached_layout';
   static const String canvasKitBenchmarkName = 'text_canvas_kit_cached_layout';
 
   @override
   void body(Profile profile) {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
-        ..pushStyle(ui.TextStyle(fontSize: 12.0))
-        ..addText(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
-          'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-        );
+    final ui.ParagraphBuilder builder =
+        ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
+          ..pushStyle(ui.TextStyle(fontSize: 12.0))
+          ..addText(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+            'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          );
     final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
       paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -180,10 +177,12 @@ int _counter = 0;
 /// colors. Each color's description is made of several [Text] nodes.
 class BenchBuildColorsGrid extends WidgetBuildRecorder {
   BenchBuildColorsGrid.canvas()
-      : _mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
+      : _mode = _TestMode.useCanvasTextLayout,
+        super(name: canvasBenchmarkName);
 
   BenchBuildColorsGrid.canvasKit()
-      : _mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
+      : _mode = _TestMode.useCanvasKit,
+        super(name: canvasKitBenchmarkName);
 
   /// Disables tracing for this benchmark.
   ///
@@ -247,7 +246,11 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 const double kColorItemHeight = 48.0;
 
 class Palette {
-  Palette({required this.name, required this.primary, this.accent, this.threshold = 900});
+  Palette(
+      {required this.name,
+      required this.primary,
+      this.accent,
+      this.threshold = 900});
 
   final String name;
   final MaterialColor primary;

@@ -28,8 +28,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
+    FadeTransition widget2Opacity = tester
+        .element(find.text('Page 2'))
+        .findAncestorWidgetOfExactType<FadeTransition>()!;
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -52,8 +53,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
+    widget2Opacity = tester
+        .element(find.text('Page 2'))
+        .findAncestorWidgetOfExactType<FadeTransition>()!;
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
@@ -92,7 +94,8 @@ void main() {
 
     Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-    final RenderDecoratedBox box = tester.element(find.byKey(page2Key))
+    final RenderDecoratedBox box = tester
+        .element(find.byKey(page2Key))
         .findAncestorRenderObjectOfType<RenderDecoratedBox>()!;
 
     // Page 1 is moving to the left.
@@ -111,7 +114,8 @@ void main() {
     // offset.dx = 0.
     final PaintPattern paintsShadow = paints;
     for (int i = 0; i < 0.05 * 800; i += 1) {
-      paintsShadow.rect(rect: Rect.fromLTWH(-i.toDouble() - 1.0 , 0.0, 1.0, 600));
+      paintsShadow.rect(
+          rect: Rect.fromLTWH(-i.toDouble() - 1.0, 0.0, 1.0, 600));
     }
     expect(box, paintsShadow);
 
@@ -146,7 +150,9 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -157,12 +163,14 @@ void main() {
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(
-      builder: (BuildContext context) {
-        return const Material(child: Text('Page 2'));
-      },
-      fullscreenDialog: true,
-    ));
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return const Material(child: Text('Page 2'));
+          },
+          fullscreenDialog: true,
+        ));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -206,7 +214,9 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -227,7 +237,8 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
     await tester.pump();
 
@@ -257,7 +268,8 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
     await tester.pump();
 
@@ -277,16 +289,20 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('PUSH'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+            child: TextButton(
+              child: const Text('PUSH'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => const Text('HELLO'),
     };
     await tester.pumpWidget(
@@ -300,7 +316,8 @@ void main() {
     expect(find.text('PUSH'), findsNothing);
     expect(find.text('HELLO'), findsOneWidget);
     final Offset helloPosition1 = tester.getCenter(find.text('HELLO'));
-    final TestGesture gesture = await tester.startGesture(const Offset(2.5, 300.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(2.5, 300.0));
     await tester.pump(const Duration(milliseconds: 20));
     await gesture.moveBy(const Offset(100.0, 0.0));
     expect(find.text('PUSH'), findsNothing);
@@ -311,7 +328,8 @@ void main() {
     final Offset helloPosition2 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition1.dx, lessThan(helloPosition2.dx));
     expect(helloPosition1.dy, helloPosition2.dy);
-    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.iOS);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform,
+        TargetPlatform.iOS);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -327,7 +345,8 @@ void main() {
     //     frame in which the theme animation ends.
     //  3. End all the other animations.
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
-    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.android);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform,
+        TargetPlatform.android);
     final Offset helloPosition3 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition3, helloPosition2);
     expect(find.text('PUSH'), findsOneWidget);
@@ -367,29 +386,34 @@ void main() {
     final Offset helloPosition6 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition5.dx, lessThan(helloPosition6.dx));
     expect(helloPosition5.dy, helloPosition6.dy);
-    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform,
+        TargetPlatform.macOS);
   });
 
-  testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
+  testWidgets('test no back gesture on fullscreen dialogs',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(body: Text('Page 1')),
       ),
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(
-      builder: (BuildContext context) {
-        return const Scaffold(body: Text('Page 2'));
-      },
-      fullscreenDialog: true,
-    ));
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return const Scaffold(body: Text('Page 2'));
+          },
+          fullscreenDialog: true,
+        ));
     await tester.pumpAndSettle();
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
     await tester.pump();
 
@@ -398,9 +422,12 @@ void main() {
 
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('test adaptable transitions switch during execution', (WidgetTester tester) async {
+  testWidgets('test adaptable transitions switch during execution',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -479,9 +506,12 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
+  testWidgets('test edge swipe then drop back at starting point works',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
@@ -514,9 +544,12 @@ void main() {
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
+  testWidgets('test edge swipe then drop back at ending point works',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
@@ -547,9 +580,12 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+  testWidgets('Back swipe dismiss interrupted by route push',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -560,7 +596,8 @@ void main() {
           body: Center(
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push<void>(scaffoldKey.currentContext!, MaterialPageRoute<void>(
+                Navigator.push<void>(scaffoldKey.currentContext!,
+                    MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return const Scaffold(
                       body: Center(child: Text('route')),
@@ -587,22 +624,28 @@ void main() {
     await gesture.moveBy(const Offset(400, 0));
     await gesture.up();
     await tester.pump();
-    expect( // The 'route' route has been dragged to the right, halfway across the screen
-      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
+    expect(
+      // The 'route' route has been dragged to the right, halfway across the screen
+      tester.getTopLeft(find.ancestor(
+          of: find.text('route'), matching: find.byType(Scaffold))),
       const Offset(400, 0),
     );
-    expect( // The 'push' route is sliding in from the left.
-      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))).dx,
+    expect(
+      // The 'push' route is sliding in from the left.
+      tester
+          .getTopLeft(find.ancestor(
+              of: find.text('push'), matching: find.byType(Scaffold)))
+          .dx,
       lessThan(0),
     );
     await tester.pumpAndSettle();
     expect(find.text('push'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))),
+      tester.getTopLeft(find.ancestor(
+          of: find.text('push'), matching: find.byType(Scaffold))),
       Offset.zero,
     );
     expect(find.text('route'), findsNothing);
-
 
     // Run the dismiss animation 60%, which exposes the route "push" button,
     // and then press the button. A drag dropped animation is 400ms when dropped
@@ -618,13 +661,17 @@ void main() {
     await gesture.up();
     await tester.pump(); // Trigger the dropped snapping animation.
     expect(
-      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
+      tester.getTopLeft(find.ancestor(
+          of: find.text('route'), matching: find.byType(Scaffold))),
       const Offset(400, 0),
     );
     // Let the dismissing snapping animation go 60%.
     await tester.pump(const Duration(milliseconds: 240));
     expect(
-      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))).dx,
+      tester
+          .getTopLeft(find.ancestor(
+              of: find.text('route'), matching: find.byType(Scaffold)))
+          .dx,
       moreOrLessEquals(798, epsilon: 1),
     );
 
@@ -642,9 +689,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
+  testWidgets('During back swipe the route ignores input',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
 
     final GlobalKey homeScaffoldKey = GlobalKey();
@@ -669,7 +719,8 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
+    Navigator.push<void>(homeScaffoldKey.currentContext!,
+        MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
@@ -698,7 +749,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
     await gesture.moveBy(const Offset(400, 0));
     await tester.pump();
-    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
+    expect(
+        tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
@@ -710,11 +762,16 @@ void main() {
     // Tapping the "page" route's back button doesn't do anything either.
     await tester.tap(find.byTooltip('Back'), warnIfMissed: false);
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
+    expect(
+        tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
+  testWidgets(
+      'After a pop caused by a back-swipe, input reaches the exposed route',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41024
 
     final GlobalKey homeScaffoldKey = GlobalKey();
@@ -739,10 +796,13 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext!).userGestureInProgressNotifier;
+    final ValueNotifier<bool> notifier =
+        Navigator.of(homeScaffoldKey.currentContext!)
+            .userGestureInProgressNotifier;
     expect(notifier.value, false);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
+    Navigator.push<void>(homeScaffoldKey.currentContext!,
+        MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
@@ -770,7 +830,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
     await gesture.moveBy(const Offset(500, 0));
     await tester.pump();
-    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(500, 0));
+    expect(
+        tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(500, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
     expect(notifier.value, true);
     await gesture.up();
@@ -783,9 +844,13 @@ void main() {
     await tester.tap(find.byKey(homeScaffoldKey));
     expect(homeTapCount, 2);
     expect(pageTapCount, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
+  testWidgets(
+      'A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
 
     await tester.pumpWidget(
@@ -800,8 +865,9 @@ void main() {
     final Offset titleInitialTopLeft = tester.getTopLeft(find.text('Title'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push<void>(
-      CupertinoPageRoute<void>(builder: (BuildContext context) => const Placeholder()),
-    );
+          CupertinoPageRoute<void>(
+              builder: (BuildContext context) => const Placeholder()),
+        );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
@@ -811,7 +877,9 @@ void main() {
     // Title of the first route slides to the left.
     expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
     expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
@@ -854,12 +922,14 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
-  testWidgets('MaterialPage can toggle MaintainState', (WidgetTester tester) async {
+  testWidgets('MaterialPage can toggle MaintainState',
+      (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      MaterialPage<void>(
+          key: pageKeyOne, maintainState: false, child: const Text('first')),
       MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
@@ -901,7 +971,8 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
-  testWidgets('MaterialPage does not lose its state when transitioning out', (WidgetTester tester) async {
+  testWidgets('MaterialPage does not lose its state when transitioning out',
+      (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
     expect(find.text('subpage'), findsOneWidget);
@@ -921,7 +992,9 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
-            onPopPage: (Route<dynamic> route, dynamic result) { return false; },
+            onPopPage: (Route<dynamic> route, dynamic result) {
+              return false;
+            },
             pages: const <Page<Object?>>[
               MaterialPage<void>(
                 restorationId: 'p1',
@@ -949,7 +1022,9 @@ void main() {
     await tester.pump();
     expect(find.text('count: 1'), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('p2');
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .restorablePushNamed('p2');
     await tester.pumpAndSettle();
 
     expect(find.text('p1'), findsNothing);
@@ -979,8 +1054,10 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
   @override
   Iterable<RouteTransitionRecord> resolve({
     required List<RouteTransitionRecord> newPageRouteHistory,
-    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
+    required Map<RouteTransitionRecord?, RouteTransitionRecord>
+        locationToExitingPageRoute,
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>>
+        pageRouteToPagelessRoutes,
   }) {
     hasTransition = true;
     return super.resolve(
@@ -1011,7 +1088,8 @@ Widget buildNavigator({
           key: key,
           pages: pages,
           onPopPage: onPopPage,
-          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
+          transitionDelegate:
+              transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
         ),
       ),
     ),
@@ -1054,7 +1132,8 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
 }
 
 class TestRestorableWidget extends StatefulWidget {
-  const TestRestorableWidget({Key? key, required this.restorationId}) : super(key: key);
+  const TestRestorableWidget({Key? key, required this.restorationId})
+      : super(key: key);
 
   final String restorationId;
 
@@ -1062,7 +1141,8 @@ class TestRestorableWidget extends StatefulWidget {
   State<StatefulWidget> createState() => _TestRestorableWidgetState();
 }
 
-class _TestRestorableWidgetState extends State<TestRestorableWidget> with RestorationMixin {
+class _TestRestorableWidgetState extends State<TestRestorableWidget>
+    with RestorationMixin {
   @override
   String? get restorationId => widget.restorationId;
 

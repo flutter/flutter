@@ -25,14 +25,18 @@ void main() {
     test('accounts for device pixel ratio in paintBounds', () {
       layout(RenderAspectRatio(aspectRatio: 1.0));
       pumpFrame();
-      final Size logicalSize = TestRenderingFlutterBinding.instance.renderView.configuration.size;
-      final double devicePixelRatio = TestRenderingFlutterBinding.instance.renderView.configuration.devicePixelRatio;
+      final Size logicalSize =
+          TestRenderingFlutterBinding.instance.renderView.configuration.size;
+      final double devicePixelRatio = TestRenderingFlutterBinding
+          .instance.renderView.configuration.devicePixelRatio;
       final Size physicalSize = logicalSize * devicePixelRatio;
-      expect(TestRenderingFlutterBinding.instance.renderView.paintBounds, Offset.zero & physicalSize);
+      expect(TestRenderingFlutterBinding.instance.renderView.paintBounds,
+          Offset.zero & physicalSize);
     });
 
     test('does not replace the root layer unnecessarily', () {
-      final ui.FlutterView window = TestWindow(window: RendererBinding.instance.window);
+      final ui.FlutterView window =
+          TestWindow(window: RendererBinding.instance.window);
       final RenderView view = RenderView(
         configuration: createViewConfiguration(),
         window: window,
@@ -52,7 +56,8 @@ void main() {
   test('ViewConfiguration == and hashCode', () {
     final ViewConfiguration viewConfigurationA = createViewConfiguration();
     final ViewConfiguration viewConfigurationB = createViewConfiguration();
-    final ViewConfiguration viewConfigurationC = createViewConfiguration(devicePixelRatio: 3.0);
+    final ViewConfiguration viewConfigurationC =
+        createViewConfiguration(devicePixelRatio: 3.0);
 
     expect(viewConfigurationA == viewConfigurationB, true);
     expect(viewConfigurationA != viewConfigurationC, true);

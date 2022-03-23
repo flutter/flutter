@@ -35,7 +35,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -43,7 +44,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -51,7 +53,8 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
-  test('A Banner with a location of topStart paints in the top right (RTL)', () {
+  test('A Banner with a location of topStart paints in the top right (RTL)',
+      () {
     final BannerPainter bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
@@ -63,7 +66,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -71,7 +75,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -91,7 +96,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -99,7 +105,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -119,7 +126,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -127,7 +135,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -135,7 +144,9 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
-  test('A Banner with a location of bottomStart paints in the bottom left (LTR)', () {
+  test(
+      'A Banner with a location of bottomStart paints in the bottom left (LTR)',
+      () {
     final BannerPainter bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
@@ -147,7 +158,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -155,7 +167,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -163,7 +176,9 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
-  test('A Banner with a location of bottomStart paints in the bottom right (RTL)', () {
+  test(
+      'A Banner with a location of bottomStart paints in the bottom right (RTL)',
+      () {
     final BannerPainter bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
@@ -175,7 +190,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -183,7 +199,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -191,7 +208,8 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
-  test('A Banner with a location of bottomEnd paints in the bottom right (LTR)', () {
+  test('A Banner with a location of bottomEnd paints in the bottom right (LTR)',
+      () {
     final BannerPainter bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
@@ -203,7 +221,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -211,7 +230,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -219,7 +239,8 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
-  test('A Banner with a location of bottomEnd paints in the bottom left (RTL)', () {
+  test('A Banner with a location of bottomEnd paints in the bottom left (RTL)',
+      () {
     final BannerPainter bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
@@ -231,7 +252,8 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -239,7 +261,8 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand =
+        canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -255,14 +278,22 @@ void main() {
         child: Banner(message: 'Hello', location: BannerLocation.topEnd),
       ),
     );
-    expect(find.byType(CustomPaint), paints
-      ..save()
-      ..translate(x: 800.0, y: 0.0)
-      ..rotate(angle: math.pi / 4.0)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
-      ..paragraph(offset: const Offset(-40.0, 29.0))
-      ..restore(),
+    expect(
+      find.byType(CustomPaint),
+      paints
+        ..save()
+        ..translate(x: 800.0, y: 0.0)
+        ..rotate(angle: math.pi / 4.0)
+        ..rect(
+            rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+            color: const Color(0x7f000000),
+            hasMaskFilter: true)
+        ..rect(
+            rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+            color: const Color(0xa0b71c1c),
+            hasMaskFilter: false)
+        ..paragraph(offset: const Offset(-40.0, 29.0))
+        ..restore(),
     );
     debugDisableShadows = true;
   });
@@ -270,14 +301,22 @@ void main() {
   testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(const MaterialApp(home: Placeholder()));
-    expect(find.byType(CheckedModeBanner), paints
-      ..save()
-      ..translate(x: 800.0, y: 0.0)
-      ..rotate(angle: math.pi / 4.0)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
-      ..paragraph(offset: const Offset(-40.0, 29.0))
-      ..restore(),
+    expect(
+      find.byType(CheckedModeBanner),
+      paints
+        ..save()
+        ..translate(x: 800.0, y: 0.0)
+        ..rotate(angle: math.pi / 4.0)
+        ..rect(
+            rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+            color: const Color(0x7f000000),
+            hasMaskFilter: true)
+        ..rect(
+            rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+            color: const Color(0xa0b71c1c),
+            hasMaskFilter: false)
+        ..paragraph(offset: const Offset(-40.0, 29.0))
+        ..restore(),
     );
     debugDisableShadows = true;
   });

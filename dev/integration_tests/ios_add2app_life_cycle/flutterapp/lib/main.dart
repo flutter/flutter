@@ -12,7 +12,8 @@ VoidCallback? originalSemanticsListener;
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // Disconnects semantics listener for testing purposes.
-  originalSemanticsListener = WidgetsBinding.instance.platformDispatcher.onSemanticsEnabledChanged;
+  originalSemanticsListener =
+      WidgetsBinding.instance.platformDispatcher.onSemanticsEnabledChanged;
   RendererBinding.instance.platformDispatcher.onSemanticsEnabledChanged = null;
   RendererBinding.instance.setSemanticsEnabled(false);
   // If the test passes, LifeCycleSpy will rewire the semantics listener back.
@@ -33,8 +34,10 @@ class LifeCycleSpy extends StatefulWidget {
   State<LifeCycleSpy> createState() => _LifeCycleSpyState();
 }
 
-class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver {
-  final List<AppLifecycleState> _expectedLifeCycleSequence = <AppLifecycleState>[
+class _LifeCycleSpyState extends State<LifeCycleSpy>
+    with WidgetsBindingObserver {
+  final List<AppLifecycleState> _expectedLifeCycleSequence =
+      <AppLifecycleState>[
     AppLifecycleState.detached,
     AppLifecycleState.inactive,
     AppLifecycleState.resumed,
@@ -45,7 +48,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _actualLifeCycleSequence =  <AppLifecycleState?>[
+    _actualLifeCycleSequence = <AppLifecycleState?>[
       ServicesBinding.instance.lifecycleState
     ];
   }
@@ -59,17 +62,20 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
-      _actualLifeCycleSequence = List<AppLifecycleState>.from(_actualLifeCycleSequence!);
+      _actualLifeCycleSequence =
+          List<AppLifecycleState>.from(_actualLifeCycleSequence!);
       _actualLifeCycleSequence?.add(state);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (const ListEquality<AppLifecycleState?>().equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
+    if (const ListEquality<AppLifecycleState?>()
+        .equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
       // Rewires the semantics harness if test passes.
       RendererBinding.instance.setSemanticsEnabled(true);
-      RendererBinding.instance.platformDispatcher.onSemanticsEnabledChanged = originalSemanticsListener;
+      RendererBinding.instance.platformDispatcher.onSemanticsEnabledChanged =
+          originalSemanticsListener;
     }
     return const MaterialApp(
       title: 'Flutter View',

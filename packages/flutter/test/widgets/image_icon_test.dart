@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 
-
 void main() {
   late ImageProvider image;
 
@@ -20,7 +19,8 @@ void main() {
     );
   });
 
-  testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, default size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: ImageIcon(image),
@@ -45,7 +45,8 @@ void main() {
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
   });
 
-  testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, explicit size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: ImageIcon(
@@ -73,7 +74,8 @@ void main() {
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
-  testWidgets('ImageIcon sizing - sized theme, explicit size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sized theme, explicit size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: IconTheme(
@@ -90,7 +92,8 @@ void main() {
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('ImageIcon sizing - sizeless theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sizeless theme, default size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: IconTheme(
@@ -118,11 +121,12 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byType(ImageIcon)), matchesSemantics(
-      label: 'test',
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+        tester.getSemantics(find.byType(ImageIcon)),
+        matchesSemantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
+        ));
     handle.dispose();
   });
-
 }

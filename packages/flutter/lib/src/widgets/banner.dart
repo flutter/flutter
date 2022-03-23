@@ -10,10 +10,13 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 
-const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
+const double _kOffset =
+    40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
-const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
-const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+const double _kBottomOffset =
+    _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
+const Rect _kRect =
+    Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
 
 const Color _kColor = Color(0xA0B71C1C);
 const TextStyle _kTextStyle = TextStyle(
@@ -64,12 +67,12 @@ class BannerPainter extends CustomPainter {
     required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(textDirection != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(repaint: PaintingBinding.instance.systemFonts);
+  })  : assert(message != null),
+        assert(textDirection != null),
+        assert(location != null),
+        assert(color != null),
+        assert(textStyle != null),
+        super(repaint: PaintingBinding.instance.systemFonts);
 
   /// The message to show in the banner.
   final String message;
@@ -123,8 +126,7 @@ class BannerPainter extends CustomPainter {
 
   void _prepare() {
     _paintShadow = _shadow.toPaint();
-    _paintBanner = Paint()
-      ..color = color;
+    _paintBanner = Paint()..color = color;
     _textPainter = TextPainter(
       text: TextSpan(style: textStyle, text: message),
       textAlign: TextAlign.center,
@@ -135,8 +137,7 @@ class BannerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!_prepared)
-      _prepare();
+    if (!_prepared) _prepare();
     canvas
       ..translate(_translationX(size.width), _translationY(size.height))
       ..rotate(_rotation)
@@ -144,15 +145,18 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, _paintBanner);
     const double width = _kOffset * 2.0;
     _textPainter.layout(minWidth: width, maxWidth: width);
-    _textPainter.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
+    _textPainter.paint(
+        canvas,
+        _kRect.topLeft +
+            Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
   }
 
   @override
   bool shouldRepaint(BannerPainter oldDelegate) {
-    return message != oldDelegate.message
-        || location != oldDelegate.location
-        || color != oldDelegate.color
-        || textStyle != oldDelegate.textStyle;
+    return message != oldDelegate.message ||
+        location != oldDelegate.location ||
+        color != oldDelegate.color ||
+        textStyle != oldDelegate.textStyle;
   }
 
   @override
@@ -247,11 +251,11 @@ class Banner extends StatelessWidget {
     this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(key: key);
+  })  : assert(message != null),
+        assert(location != null),
+        assert(color != null),
+        assert(textStyle != null),
+        super(key: key);
 
   /// The widget to show behind the banner.
   ///
@@ -299,7 +303,8 @@ class Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert((textDirection != null && layoutDirection != null) || debugCheckHasDirectionality(context));
+    assert((textDirection != null && layoutDirection != null) ||
+        debugCheckHasDirectionality(context));
     return CustomPaint(
       foregroundPainter: BannerPainter(
         message: message,
@@ -317,9 +322,12 @@ class Banner extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('message', message, showName: false));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+        defaultValue: null));
     properties.add(EnumProperty<BannerLocation>('location', location));
-    properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>(
+        'layoutDirection', layoutDirection,
+        defaultValue: null));
     properties.add(ColorProperty('color', color, showName: false));
     textStyle.debugFillProperties(properties, prefix: 'text ');
   }

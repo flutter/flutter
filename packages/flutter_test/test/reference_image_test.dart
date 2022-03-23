@@ -24,7 +24,8 @@ void main() {
   const ui.Color transparentRed = ui.Color.fromARGB(128, 255, 0, 0);
 
   group('succeeds', () {
-    testWidgets('when images have the same content', (WidgetTester tester) async {
+    testWidgets('when images have the same content',
+        (WidgetTester tester) async {
       await expectLater(
         await createTestImage(100, 100, red),
         matchesReferenceImage(await createTestImage(100, 100, red)),
@@ -52,13 +53,15 @@ void main() {
       final ui.Image red100 = await createTestImage(100, 100, red);
       expect(
         await matchesReferenceImage(red50).matchAsync(red100),
-        equals('does not match as width or height do not match. [100×100] != [50×50]'),
+        equals(
+            'does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
       final ui.Image red100 = await createTestImage(100, 100, red);
-      final ui.Image transparentRed100 = await createTestImage(100, 100, transparentRed);
+      final ui.Image transparentRed100 =
+          await createTestImage(100, 100, transparentRed);
       expect(
         await matchesReferenceImage(red100).matchAsync(transparentRed100),
         equals('does not match on 57 pixels'),

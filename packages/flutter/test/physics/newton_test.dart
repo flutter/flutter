@@ -40,7 +40,8 @@ void main() {
     // velocity and positions with drag = 0.025.
     double startPosition = 10.0;
     double startVelocity = 600.0;
-    FrictionSimulation f = FrictionSimulation(0.025, startPosition, startVelocity);
+    FrictionSimulation f =
+        FrictionSimulation(0.025, startPosition, startVelocity);
     double endPosition = f.x(1.0);
     double endVelocity = f.dx(1.0);
     expect(endPosition, greaterThan(startPosition));
@@ -49,7 +50,8 @@ void main() {
     // Verify that the "through" FrictionSimulation ends up at
     // endPosition and endVelocity; implies that it computed the right
     // value for _drag.
-    FrictionSimulation friction = FrictionSimulation.through(startPosition, endPosition, startVelocity, endVelocity);
+    FrictionSimulation friction = FrictionSimulation.through(
+        startPosition, endPosition, startVelocity, endVelocity);
     expect(friction.isDone(0.0), false);
     expect(friction.x(0.0), 10.0);
     expect(friction.dx(0.0), 600.0);
@@ -68,14 +70,16 @@ void main() {
     expect(endPosition, lessThan(startPosition));
     expect(endVelocity, greaterThan(startVelocity));
 
-    friction = FrictionSimulation.through(startPosition, endPosition, startVelocity, endVelocity);
+    friction = FrictionSimulation.through(
+        startPosition, endPosition, startVelocity, endVelocity);
     expect(friction.isDone(1.0 + precisionErrorTolerance), true);
     expect(friction.x(1.0), moreOrLessEquals(endPosition));
     expect(friction.dx(1.0), moreOrLessEquals(endVelocity));
   });
 
   test('BoundedFrictionSimulation control test', () {
-    final BoundedFrictionSimulation friction = BoundedFrictionSimulation(0.3, 100.0, 400.0, 50.0, 150.0);
+    final BoundedFrictionSimulation friction =
+        BoundedFrictionSimulation(0.3, 100.0, 400.0, 50.0, 150.0);
 
     friction.tolerance = const Tolerance(velocity: 1.0);
 
@@ -89,7 +93,8 @@ void main() {
   });
 
   test('test_gravity', () {
-    final GravitySimulation gravity = GravitySimulation(200.0, 100.0, 600.0, 0.0);
+    final GravitySimulation gravity =
+        GravitySimulation(200.0, 100.0, 600.0, 0.0);
 
     expect(gravity.isDone(0.0), false);
     expect(gravity.x(0.0), 100.0);
@@ -119,46 +124,70 @@ void main() {
   });
 
   test('spring_types', () {
-    SpringSimulation crit = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-    ), 0.0, 300.0, 0.0);
+    SpringSimulation crit = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    crit = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-    ), 0.0, 300.0, 0.0);
+    crit = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    final SpringSimulation under = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 0.75,
-    ), 0.0, 300.0, 0.0);
+    final SpringSimulation under = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 0.75,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(under.type, SpringType.underDamped);
 
-    final SpringSimulation over = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 1.25,
-    ), 0.0, 300.0, 0.0);
+    final SpringSimulation over = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 1.25,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(over.type, SpringType.overDamped);
 
     // Just so we don't forget how to create a desc without the ratio.
-    final SpringSimulation other = SpringSimulation(const SpringDescription(
-      mass: 1.0,
-      stiffness: 100.0,
-      damping: 20.0,
-    ), 0.0, 20.0, 20.0);
+    final SpringSimulation other = SpringSimulation(
+        const SpringDescription(
+          mass: 1.0,
+          stiffness: 100.0,
+          damping: 20.0,
+        ),
+        0.0,
+        20.0,
+        20.0);
     expect(other.type, SpringType.criticallyDamped);
   });
 
   test('crit_spring', () {
-    final SpringSimulation crit = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-    ), 0.0, 500.0, 0.0);
+    final SpringSimulation crit = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+        ),
+        0.0,
+        500.0,
+        0.0);
 
     crit.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
 
@@ -182,11 +211,15 @@ void main() {
   });
 
   test('overdamped_spring', () {
-    final SpringSimulation over = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 1.25,
-    ), 0.0, 500.0, 0.0);
+    final SpringSimulation over = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 1.25,
+        ),
+        0.0,
+        500.0,
+        0.0);
 
     over.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
 
@@ -207,11 +240,15 @@ void main() {
   });
 
   test('underdamped_spring', () {
-    final SpringSimulation under = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 0.25,
-    ), 0.0, 300.0, 0.0);
+    final SpringSimulation under = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 0.25,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(under.type, SpringType.underDamped);
 
     expect(under.isDone(0.0), false);
@@ -289,7 +326,8 @@ void main() {
   });
 
   test('over/under scroll spring', () {
-    final SpringDescription spring = SpringDescription.withDampingRatio(mass: 1.0, stiffness: 170.0, ratio: 1.1);
+    final SpringDescription spring = SpringDescription.withDampingRatio(
+        mass: 1.0, stiffness: 170.0, ratio: 1.1);
     final BouncingScrollSimulation scroll = BouncingScrollSimulation(
       position: 500.0,
       velocity: -7500.0,

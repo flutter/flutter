@@ -34,15 +34,20 @@ void main() {
         'clean',
       ], workingDirectory: workingDirectory);
 
-      final File podfile = fileSystem.file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile'));
-      final File podfileLock = fileSystem.file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile.lock'));
+      final File podfile = fileSystem
+          .file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile'));
+      final File podfileLock = fileSystem.file(
+          fileSystem.path.join(workingDirectory, 'macos', 'Podfile.lock'));
       expect(podfile, exists);
       expect(podfileLock, exists);
 
       // Simulate a newer Podfile than Podfile.lock.
       podfile.setLastModifiedSync(DateTime.now());
-      podfileLock.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 1)));
-      expect(podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()), isTrue);
+      podfileLock.setLastModifiedSync(
+          DateTime.now().subtract(const Duration(days: 1)));
+      expect(
+          podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()),
+          isTrue);
 
       final List<String> buildCommand = <String>[
         flutterBin,
@@ -51,7 +56,8 @@ void main() {
         'macos',
         '--$buildModeLower',
       ];
-      final ProcessResult result = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
+      final ProcessResult result = processManager.runSync(buildCommand,
+          workingDirectory: workingDirectory);
 
       printOnFailure('Output of flutter build macos:');
       printOnFailure(result.stdout.toString());
@@ -69,7 +75,9 @@ void main() {
         buildMode,
         'flutter_gallery.app',
       ));
-      expect(podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()), isTrue);
+      expect(
+          podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()),
+          isTrue);
 
       final Directory outputAppFramework =
           fileSystem.directory(fileSystem.path.join(
@@ -104,7 +112,9 @@ void main() {
       );
 
       // Check complicated macOS framework symlink structure.
-      final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
+      final Link current = outputFlutterFramework
+          .childDirectory('Versions')
+          .childLink('Current');
 
       expect(current.targetSync(), 'A');
 
@@ -133,7 +143,8 @@ void main() {
       );
 
       // Build again without cleaning.
-      final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
+      final ProcessResult secondBuild = processManager.runSync(buildCommand,
+          workingDirectory: workingDirectory);
 
       printOnFailure('Output of second build:');
       printOnFailure(secondBuild.stdout.toString());
@@ -147,6 +158,8 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-    }, skip: !platform.isMacOS); // [intended] only makes sense for macos platform.
+    },
+        skip: !platform
+            .isMacOS); // [intended] only makes sense for macos platform.
   }
 }

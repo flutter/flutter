@@ -89,7 +89,8 @@ class ModalPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+  testWidgets('Barriers show when using PageRouteBuilder',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const TestPage());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();

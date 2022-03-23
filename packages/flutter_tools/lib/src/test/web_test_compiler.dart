@@ -29,12 +29,12 @@ class WebTestCompiler {
     required Platform platform,
     required ProcessManager processManager,
     required Config config,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _platform = platform,
-       _processManager = processManager,
-       _config = config;
+  })  : _logger = logger,
+        _fileSystem = fileSystem,
+        _artifacts = artifacts,
+        _platform = platform,
+        _processManager = processManager,
+        _config = config;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -53,8 +53,10 @@ class WebTestCompiler {
     HostArtifact platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
     // TODO(zanderso): to support autodetect this would need to partition the source code into a
     // a sound and unsound set and perform separate compilations.
-    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
+    final List<String> extraFrontEndOptions =
+        List<String>.of(buildInfo.extraFrontEndOptions);
+    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound ||
+        buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
       platformDillArtifact = HostArtifact.webPlatformKernelDill;
       if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
         extraFrontEndOptions.add('--no-sound-null-safety');
@@ -71,24 +73,28 @@ class WebTestCompiler {
     final List<File> generatedFiles = <File>[];
     for (final String testFilePath in testFiles) {
       final List<String> relativeTestSegments = _fileSystem.path.split(
-        _fileSystem.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
-      final File generatedFile = _fileSystem.file(
-        _fileSystem.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
+          _fileSystem.path.relative(testFilePath,
+              from: projectDirectory.childDirectory('test').path));
+      final File generatedFile = _fileSystem.file(_fileSystem.path.join(
+          outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
       generatedFile
         ..createSync(recursive: true)
         ..writeAsStringSync(generateTestEntrypoint(
-            relativeTestPath: relativeTestSegments.join('/'),
-            absolutePath: testFilePath,
-            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
-            languageVersion: languageVersion,
+          relativeTestPath: relativeTestSegments.join('/'),
+          absolutePath: testFilePath,
+          testConfigPath:
+              findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
+          languageVersion: languageVersion,
         ));
       generatedFiles.add(generatedFile);
     }
     // Generate a fake main file that imports all tests to be executed. This will force
     // each of them to be compiled.
-    final StringBuffer buffer = StringBuffer('// @dart=${languageVersion.major}.${languageVersion.minor}\n');
+    final StringBuffer buffer = StringBuffer(
+        '// @dart=${languageVersion.major}.${languageVersion.minor}\n');
     for (final File generatedFile in generatedFiles) {
-      buffer.writeln('import "${_fileSystem.path.basename(generatedFile.path)}";');
+      buffer.writeln(
+          'import "${_fileSystem.path.basename(generatedFile.path)}";');
     }
     buffer.writeln('void main() {}');
     _fileSystem.file(_fileSystem.path.join(outputDirectory.path, 'main.dart'))
@@ -117,10 +123,15 @@ class WebTestCompiler {
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
       platformDill: _artifacts
-        .getHostArtifact(platformDillArtifact)
-        .absolute.uri.toString(),
+          .getHostArtifact(platformDillArtifact)
+          .absolute
+          .uri
+          .toString(),
       dartDefines: buildInfo.dartDefines,
-      librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
+      librariesSpec: _artifacts
+          .getHostArtifact(HostArtifact.flutterWebLibrariesJson)
+          .uri
+          .toString(),
       packagesPath: buildInfo.packagesPath,
       artifacts: _artifacts,
       processManager: _processManager,
@@ -144,10 +155,14 @@ class WebTestCompiler {
     _fileSystem.file(cachedKernelPath).parent.createSync(recursive: true);
     _fileSystem.file(output.outputFilename).copySync(cachedKernelPath);
 
-    final File codeFile = outputDirectory.childFile('${output.outputFilename}.sources');
-    final File manifestFile = outputDirectory.childFile('${output.outputFilename}.json');
-    final File sourcemapFile = outputDirectory.childFile('${output.outputFilename}.map');
-    final File metadataFile = outputDirectory.childFile('${output.outputFilename}.metadata');
+    final File codeFile =
+        outputDirectory.childFile('${output.outputFilename}.sources');
+    final File manifestFile =
+        outputDirectory.childFile('${output.outputFilename}.json');
+    final File sourcemapFile =
+        outputDirectory.childFile('${output.outputFilename}.map');
+    final File metadataFile =
+        outputDirectory.childFile('${output.outputFilename}.metadata');
     return WebMemoryFS()
       ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }

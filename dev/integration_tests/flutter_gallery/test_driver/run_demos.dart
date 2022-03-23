@@ -13,8 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// `demo_lists.dart` for more examples).
 final List<String> kSkippedDemos = <String>[
   // The CI uses Chromium, which lacks the video codecs to run this demo.
-  if (kIsWeb)
-    'Video@Media',
+  if (kIsWeb) 'Video@Media',
 ];
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
@@ -24,8 +23,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
   String? currentDemoCategory;
 
   for (final String demo in demos) {
-    if (kSkippedDemos.contains(demo))
-      continue;
+    if (kSkippedDemos.contains(demo)) continue;
 
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);

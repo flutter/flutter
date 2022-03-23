@@ -94,7 +94,8 @@ void main() {
     );
   });
 
-  testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMediaQuery control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -221,7 +222,8 @@ void main() {
     }
   });
 
-  testWidgets('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
+  testWidgets('debugCheckHasWidgetsLocalizations throws',
+      (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -240,7 +242,8 @@ void main() {
     );
 
     expect(
-      () => debugCheckHasWidgetsLocalizations(noLocalizationsAvailable.currentContext!),
+      () => debugCheckHasWidgetsLocalizations(
+          noLocalizationsAvailable.currentContext!),
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
@@ -248,14 +251,18 @@ void main() {
       )),
     );
 
-    expect(debugCheckHasWidgetsLocalizations(localizationsAvailable.currentContext!), isTrue);
+    expect(
+        debugCheckHasWidgetsLocalizations(
+            localizationsAvailable.currentContext!),
+        isTrue);
   });
 
   test('debugAssertAllWidgetVarsUnset', () {
     debugHighlightDeprecatedWidgets = true;
     late FlutterError error;
     try {
-      debugAssertAllWidgetVarsUnset('The value of a widget debug variable was changed by the test.');
+      debugAssertAllWidgetVarsUnset(
+          'The value of a widget debug variable was changed by the test.');
     } on FlutterError catch (e) {
       error = e;
     } finally {

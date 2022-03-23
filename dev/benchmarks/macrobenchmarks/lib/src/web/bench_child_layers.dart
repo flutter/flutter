@@ -65,7 +65,8 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
       for (int col = 0; col < kColumns; col++) {
         final int layerId = 1000000 * row + col;
         final OffsetEngineLayer? oldLayer = _layers[layerId];
-        final double wobbleOffsetX = col * cellSize.width + (wobbleCounter - 5).abs();
+        final double wobbleOffsetX =
+            col * cellSize.width + (wobbleCounter - 5).abs();
         final double offsetY = row * cellSize.height;
         // Retain every other layer, so we exercise the update path 50% of the
         // time and the retain path the other 50%.

@@ -199,13 +199,15 @@ class Backdrop extends StatefulWidget {
   State<Backdrop> createState() => _BackdropState();
 }
 
-class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
+class _BackdropState extends State<Backdrop>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   AnimationController? _controller;
   late Animation<double> _frontOpacity;
 
-  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
-    .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
+  static final Animatable<double> _frontOpacityTween =
+      Tween<double>(begin: 0.2, end: 1.0).chain(
+          CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
 
   @override
   void initState() {
@@ -235,8 +237,10 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   double get _backdropHeight {
     // Warning: this can be safely called from the event handlers but it may
     // not be called at build time.
-    final RenderBox renderBox = _backdropKey.currentContext!.findRenderObject()! as RenderBox;
-    return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
+    final RenderBox renderBox =
+        _backdropKey.currentContext!.findRenderObject()! as RenderBox;
+    return math.max(
+        0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -244,10 +248,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed)
-      return;
+    if (_controller!.isAnimating ||
+        _controller!.status == AnimationStatus.completed) return;
 
-    final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
+    final double flingVelocity =
+        details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)
       _controller!.fling(velocity: math.max(2.0, -flingVelocity));
     else if (flingVelocity > 0.0)
@@ -258,13 +263,16 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   void _toggleFrontLayer() {
     final AnimationStatus status = _controller!.status;
-    final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
+    final bool isOpen = status == AnimationStatus.completed ||
+        status == AnimationStatus.forward;
     _controller!.fling(velocity: isOpen ? -2.0 : 2.0);
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    final Animation<RelativeRect> frontRelativeRect = _controller!.drive(RelativeRectTween(
-      begin: RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
+    final Animation<RelativeRect> frontRelativeRect =
+        _controller!.drive(RelativeRectTween(
+      begin: RelativeRect.fromLTRB(
+          0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
     ));
     return Stack(
@@ -315,7 +323,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 color: Theme.of(context).canvasColor,
                 clipper: ShapeBorderClipper(
                   shape: BeveledRectangleBorder(
-                    borderRadius: _kFrontHeadingBevelRadius.transform(_controller!.value)!,
+                    borderRadius: _kFrontHeadingBevelRadius
+                        .transform(_controller!.value)!,
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,

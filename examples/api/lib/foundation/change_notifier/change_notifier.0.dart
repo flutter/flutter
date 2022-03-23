@@ -7,7 +7,8 @@
 import 'package:flutter/material.dart';
 
 class CounterBody extends StatelessWidget {
-  const CounterBody({Key? key, required this.counterValueNotifier}) : super(key: key);
+  const CounterBody({Key? key, required this.counterValueNotifier})
+      : super(key: key);
 
   final ValueNotifier<int> counterValueNotifier;
 

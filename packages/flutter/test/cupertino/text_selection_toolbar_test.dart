@@ -15,7 +15,8 @@ const double _kToolbarContentDistance = 8.0;
 const double _kToolbarHeight = 43.0;
 
 // A custom text selection menu that just displays a single custom button.
-class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
+class _CustomCupertinoTextSelectionControls
+    extends CupertinoTextSelectionControls {
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -28,7 +29,8 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     Offset? lastSecondaryTapDownPosition,
   ) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
+    final double anchorX =
+        (selectionMidpoint.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
@@ -55,7 +57,8 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
 }
 
 class TestBox extends SizedBox {
-  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+  const TestBox({Key? key})
+      : super(key: key, width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;
@@ -68,21 +71,25 @@ void main() {
   Finder _findPrivate(String type) {
     return find.descendant(
       of: find.byType(CupertinoApp),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
+      matching:
+          find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
     );
   }
 
   // Finding CupertinoTextSelectionToolbar won't give you the position as the user sees
   // it because it's a full-sized Stack at the top level. This method finds the
   // visible part of the toolbar for use in measurements.
-  Finder _findToolbar() => _findPrivate('_CupertinoTextSelectionToolbarContent');
+  Finder _findToolbar() =>
+      _findPrivate('_CupertinoTextSelectionToolbarContent');
 
   Finder _findOverflowNextButton() => find.text('▶');
   Finder _findOverflowBackButton() => find.text('◀');
 
-  testWidgets('paginates children if they overflow', (WidgetTester tester) async {
+  testWidgets('paginates children if they overflow',
+      (WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final List<Widget> children =
+        List<Widget>.generate(7, (int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -180,9 +187,12 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits',
+      (WidgetTester tester) async {
     late StateSetter setState;
     const double height = _kToolbarHeight;
     const double anchorBelowY = 500.0;
@@ -198,9 +208,18 @@ void main() {
                 anchorAbove: Offset(50.0, anchorAboveY),
                 anchorBelow: const Offset(50.0, anchorBelowY),
                 children: <Widget>[
-                  Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                  Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                  Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  Container(
+                      color: const Color(0xffff0000),
+                      width: 50.0,
+                      height: height),
+                  Container(
+                      color: const Color(0xff00ff00),
+                      width: 50.0,
+                      height: height),
+                  Container(
+                      color: const Color(0xff0000ff),
+                      width: 50.0,
+                      height: height),
                 ],
               );
             },
@@ -229,9 +248,12 @@ void main() {
     await tester.pump();
     toolbarY = tester.getTopLeft(_findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar',
+      (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Select me custom menu',
     );
@@ -251,7 +273,8 @@ void main() {
 
     // Long press on "custom" to select it.
     final Offset customPos = textOffsetToPosition(tester, 11);
-    final TestGesture gesture = await tester.startGesture(customPos, pointer: 7);
+    final TestGesture gesture =
+        await tester.startGesture(customPos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -262,5 +285,7 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }

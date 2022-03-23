@@ -97,7 +97,8 @@ class ImageIcon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
+    properties.add(DiagnosticsProperty<ImageProvider>('image', image,
+        ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
   }

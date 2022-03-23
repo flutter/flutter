@@ -66,7 +66,6 @@ class Version implements Comparable<Version> {
     return primary;
   }
 
-
   static Version get unknown => Version(0, 0, 0, text: 'unknown');
 
   /// The major version number: "1" in "1.2.3".
@@ -84,17 +83,16 @@ class Version implements Comparable<Version> {
   /// of the parsed version.
   final String _text;
 
-  static final RegExp versionPattern =
-      RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
+  static final RegExp versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
 
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.
   @override
   bool operator ==(Object other) {
-    return other is Version
-        && other.major == major
-        && other.minor == minor
-        && other.patch == patch;
+    return other is Version &&
+        other.major == major &&
+        other.minor == minor &&
+        other.patch == patch;
   }
 
   @override

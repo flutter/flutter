@@ -6,8 +6,10 @@ import 'dart:io';
 
 void main(List<String> arguments) {
   File? scriptOutputStreamFile;
-  final String? scriptOutputStreamFileEnv = Platform.environment['SCRIPT_OUTPUT_STREAM_FILE'];
-  if (scriptOutputStreamFileEnv != null && scriptOutputStreamFileEnv.isNotEmpty) {
+  final String? scriptOutputStreamFileEnv =
+      Platform.environment['SCRIPT_OUTPUT_STREAM_FILE'];
+  if (scriptOutputStreamFileEnv != null &&
+      scriptOutputStreamFileEnv.isNotEmpty) {
     scriptOutputStreamFile = File(scriptOutputStreamFileEnv);
   }
   Context(
@@ -28,7 +30,8 @@ class Context {
     File? scriptOutputStreamFile,
   }) {
     if (scriptOutputStreamFile != null) {
-      scriptOutputStream = scriptOutputStreamFile.openSync(mode: FileMode.write);
+      scriptOutputStream =
+          scriptOutputStreamFile.openSync(mode: FileMode.write);
     }
   }
 
@@ -147,7 +150,9 @@ class Context {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-    final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])?.toLowerCase();
+    final String? buildMode =
+        (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])
+            ?.toLowerCase();
 
     if (buildMode != null) {
       if (buildMode.contains('release')) {
@@ -160,16 +165,23 @@ class Context {
         return 'debug';
       }
     }
-    echoError('========================================================================');
+    echoError(
+        '========================================================================');
     echoError('ERROR: Unknown FLUTTER_BUILD_MODE: $buildMode.');
-    echoError("Valid values are 'Debug', 'Profile', or 'Release' (case insensitive).");
-    echoError('This is controlled by the FLUTTER_BUILD_MODE environment variable.');
-    echoError('If that is not set, the CONFIGURATION environment variable is used.');
+    echoError(
+        "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive).");
+    echoError(
+        'This is controlled by the FLUTTER_BUILD_MODE environment variable.');
+    echoError(
+        'If that is not set, the CONFIGURATION environment variable is used.');
     echoError('');
     echoError('You can fix this by either adding an appropriately named build');
-    echoError('configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the');
-    echoError('.xcconfig file for the current build configuration (${environment['CONFIGURATION']}).');
-    echoError('========================================================================');
+    echoError(
+        'configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the');
+    echoError(
+        '.xcconfig file for the current build configuration (${environment['CONFIGURATION']}).');
+    echoError(
+        '========================================================================');
     exitApp(-1);
   }
 
@@ -178,15 +190,13 @@ class Context {
   void embedFlutterFrameworks() {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
-    final String xcodeFrameworksDir = '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
-    runSync(
-      'mkdir',
-      <String>[
-        '-p',
-        '--',
-        xcodeFrameworksDir,
-      ]
-    );
+    final String xcodeFrameworksDir =
+        '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
+    runSync('mkdir', <String>[
+      '-p',
+      '--',
+      xcodeFrameworksDir,
+    ]);
     runSync(
       'rsync',
       <String>[
@@ -226,15 +236,15 @@ class Context {
       return;
     }
 
-    final String builtProductsPlist = '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
+    final String builtProductsPlist =
+        '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
 
     if (!existsFile(builtProductsPlist)) {
       // Very occasionally Xcode hasn't created an Info.plist when this runs.
       // The file will be present on re-run.
-      echo(
-        '${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
-        '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
-        'enable "flutter attach".');
+      echo('${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
+          '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
+          'enable "flutter attach".');
       return;
     }
 
@@ -309,7 +319,8 @@ class Context {
   }
 
   void buildApp() {
-    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null && environment['VERBOSE_SCRIPT_LOGGING'] != '';
+    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null &&
+        environment['VERBOSE_SCRIPT_LOGGING'] != '';
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     String projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
@@ -353,28 +364,36 @@ class Context {
         '--release", then re-run Archive from Xcode.',
       );
     }
-    final String frameworkPath = '${environmentEnsure('FLUTTER_ROOT')}/bin/cache/artifacts/engine/$artifactVariant';
+    final String frameworkPath =
+        '${environmentEnsure('FLUTTER_ROOT')}/bin/cache/artifacts/engine/$artifactVariant';
 
     String flutterFramework = '$frameworkPath/Flutter.xcframework';
 
     final String? localEngine = environment['LOCAL_ENGINE'];
     if (localEngine != null) {
       if (!localEngine.toLowerCase().contains(buildMode)) {
-        echoError('========================================================================');
-        echoError("ERROR: Requested build with Flutter local engine at '$localEngine'");
-        echoError("This engine is not compatible with FLUTTER_BUILD_MODE: '$buildMode'.");
-        echoError('You can fix this by updating the LOCAL_ENGINE environment variable, or');
+        echoError(
+            '========================================================================');
+        echoError(
+            "ERROR: Requested build with Flutter local engine at '$localEngine'");
+        echoError(
+            "This engine is not compatible with FLUTTER_BUILD_MODE: '$buildMode'.");
+        echoError(
+            'You can fix this by updating the LOCAL_ENGINE environment variable, or');
         echoError('by running:');
         echoError('  flutter build ios --local-engine=ios_$buildMode');
         echoError('or');
         echoError('  flutter build ios --local-engine=ios_${buildMode}_unopt');
-        echoError('========================================================================');
+        echoError(
+            '========================================================================');
         exitApp(-1);
       }
-      flutterFramework = '${environmentEnsure('FLUTTER_ENGINE')}/out/$localEngine/Flutter.xcframework';
+      flutterFramework =
+          '${environmentEnsure('FLUTTER_ENGINE')}/out/$localEngine/Flutter.xcframework';
     }
     String bitcodeFlag = '';
-    if (environment['ENABLE_BITCODE'] == 'YES' && environment['ACTION'] == 'install') {
+    if (environment['ENABLE_BITCODE'] == 'YES' &&
+        environment['ACTION'] == 'install') {
       bitcodeFlag = 'true';
     }
 
@@ -400,11 +419,14 @@ class Context {
       flutterArgs.add('--verbose');
     }
 
-    if (environment['FLUTTER_ENGINE'] != null && environment['FLUTTER_ENGINE']!.isNotEmpty) {
-      flutterArgs.add('--local-engine-src-path=${environment['FLUTTER_ENGINE']}');
+    if (environment['FLUTTER_ENGINE'] != null &&
+        environment['FLUTTER_ENGINE']!.isNotEmpty) {
+      flutterArgs
+          .add('--local-engine-src-path=${environment['FLUTTER_ENGINE']}');
     }
 
-    if (environment['LOCAL_ENGINE'] != null && environment['LOCAL_ENGINE']!.isNotEmpty) {
+    if (environment['LOCAL_ENGINE'] != null &&
+        environment['LOCAL_ENGINE']!.isNotEmpty) {
       flutterArgs.add('--local-engine=${environment['LOCAL_ENGINE']}');
     }
 
@@ -427,21 +449,29 @@ class Context {
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
 
-    if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
-      flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
+    if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null &&
+        environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
+      flutterArgs.add(
+          '--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
     }
 
-    final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-    if (expandedCodeSignIdentity != null && expandedCodeSignIdentity.isNotEmpty && environment['CODE_SIGNING_REQUIRED'] != 'NO') {
+    final String? expandedCodeSignIdentity =
+        environment['EXPANDED_CODE_SIGN_IDENTITY'];
+    if (expandedCodeSignIdentity != null &&
+        expandedCodeSignIdentity.isNotEmpty &&
+        environment['CODE_SIGNING_REQUIRED'] != 'NO') {
       flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
     }
 
-    if (environment['BUNDLE_SKSL_PATH'] != null && environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
+    if (environment['BUNDLE_SKSL_PATH'] != null &&
+        environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
       flutterArgs.add('-dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
     }
 
-    if (environment['CODE_SIZE_DIRECTORY'] != null && environment['CODE_SIZE_DIRECTORY']!.isNotEmpty) {
-      flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
+    if (environment['CODE_SIZE_DIRECTORY'] != null &&
+        environment['CODE_SIZE_DIRECTORY']!.isNotEmpty) {
+      flutterArgs
+          .add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
     }
 
     flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
@@ -451,7 +481,8 @@ class Context {
       flutterArgs,
       verbose: verbose,
       allowFail: true,
-      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
+      workingDirectory:
+          projectPath, // equivalent of RunCommand pushd "${project_path}"
     );
 
     if (result.exitCode != 0) {

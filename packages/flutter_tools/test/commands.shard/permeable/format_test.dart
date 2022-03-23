@@ -20,7 +20,8 @@ void main() {
 
     setUp(() {
       Cache.disableLocking();
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
+      tempDir = globals.fs.systemTempDirectory
+          .createTempSync('flutter_tools_format_test.');
     });
 
     tearDown(() {
@@ -30,7 +31,8 @@ void main() {
     testUsingContext('a file', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = globals.fs.file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = globals.fs
+          .file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
@@ -45,10 +47,10 @@ void main() {
     testUsingContext('dry-run', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = globals.fs.file(
-          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
-      final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
-          'main()', 'main(  )');
+      final File srcFile = globals.fs
+          .file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted =
+          srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
       final FormatCommand command = FormatCommand(verboseHelp: false);
@@ -62,10 +64,10 @@ void main() {
     testUsingContext('dry-run with -n', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = globals.fs.file(
-          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
-      final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
-          'main()', 'main(  )');
+      final File srcFile = globals.fs
+          .file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted =
+          srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
       final FormatCommand command = FormatCommand(verboseHelp: false);
@@ -79,18 +81,23 @@ void main() {
     testUsingContext('dry-run with set-exit-if-changed', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = globals.fs.file(
-          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
-      final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
-          'main()', 'main(  )');
+      final File srcFile = globals.fs
+          .file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted =
+          srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
       final FormatCommand command = FormatCommand(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      expect(runner.run(<String>[
-        'format', '--dry-run', '--set-exit-if-changed', srcFile.path,
-      ]), throwsException);
+      expect(
+          runner.run(<String>[
+            'format',
+            '--dry-run',
+            '--set-exit-if-changed',
+            srcFile.path,
+          ]),
+          throwsException);
 
       final String shouldNotFormatted = srcFile.readAsStringSync();
       expect(shouldNotFormatted, nonFormatted);
@@ -101,22 +108,27 @@ void main() {
       const int lineLengthLong = 120;
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = globals.fs.file(
-          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = globals.fs
+          .file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
       final String nonFormatted = srcFile.readAsStringSync();
-      srcFile.writeAsStringSync(
-          nonFormatted.replaceFirst('main()',
-              'main(anArgument1, anArgument2, anArgument3, anArgument4, anArgument5)'));
+      srcFile.writeAsStringSync(nonFormatted.replaceFirst('main()',
+          'main(anArgument1, anArgument2, anArgument3, anArgument4, anArgument5)'));
 
       final String nonFormattedWithLongLine = srcFile.readAsStringSync();
       final FormatCommand command = FormatCommand(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['format', '--line-length', '$lineLengthLong', srcFile.path]);
+      await runner.run(
+          <String>['format', '--line-length', '$lineLengthLong', srcFile.path]);
       final String notFormatted = srcFile.readAsStringSync();
       expect(nonFormattedWithLongLine, notFormatted);
 
-      await runner.run(<String>['format', '--line-length', '$lineLengthShort', srcFile.path]);
+      await runner.run(<String>[
+        'format',
+        '--line-length',
+        '$lineLengthShort',
+        srcFile.path
+      ]);
       final String shouldFormatted = srcFile.readAsStringSync();
       expect(nonFormattedWithLongLine, isNot(shouldFormatted));
     });

@@ -107,6 +107,7 @@ class BuildSystemConfig {
 /// and meets any additional contracts present in the target.
 abstract class Target {
   const Target();
+
   /// The user-readable name of the target.
   ///
   /// This information is surfaced in the assemble commands and used as an
@@ -203,7 +204,8 @@ abstract class Target {
   }
 
   /// Performs a fold across this target and its dependencies.
-  T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
+  T fold<T>(
+      T initialValue, T Function(T previousValue, Target target) combine) {
     final T dependencyResult = dependencies.fold(
         initialValue, (T prev, Target t) => t.fold(prev, combine));
     return combine(dependencyResult, this);
@@ -265,7 +267,7 @@ class CompositeTarget extends Target {
   String get name => '_composite';
 
   @override
-  Future<void> build(Environment environment) async { }
+  Future<void> build(Environment environment) async {}
 
   @override
   List<Source> get inputs => <Source>[];
@@ -357,7 +359,8 @@ class Environment {
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
 
-    final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
+    final Directory rootBuildDir =
+        buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
     return Environment._(
       outputDir: outputDir,
@@ -382,7 +385,8 @@ class Environment {
   ///
   /// Any directories not provided will fallback to a [testDirectory]
   @visibleForTesting
-  factory Environment.test(Directory testDirectory, {
+  factory Environment.test(
+    Directory testDirectory, {
     Directory? projectDir,
     Directory? outputDir,
     Directory? cacheDir,
@@ -565,9 +569,9 @@ class FlutterBuildSystem extends BuildSystem {
     required FileSystem fileSystem,
     required Platform platform,
     required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+  })  : _fileSystem = fileSystem,
+        _platform = platform,
+        _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -618,29 +622,31 @@ class FlutterBuildSystem extends BuildSystem {
     {
       buildInstance.inputFiles.removeWhere((String path, File file) {
         return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
+            path.contains('xcconfig') ||
+            path.contains('.dart_tool');
       });
       buildInstance.outputFiles.removeWhere((String path, File file) {
         return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
+            path.contains('xcconfig') ||
+            path.contains('.dart_tool');
       });
     }
     trackSharedBuildDirectory(
-      environment, _fileSystem, buildInstance.outputFiles,
+      environment,
+      _fileSystem,
+      buildInstance.outputFiles,
     );
-    environment.buildDir.childFile('outputs.json')
-      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
+    environment.buildDir.childFile('outputs.json').writeAsStringSync(
+        json.encode(buildInstance.outputFiles.keys.toList()));
 
     return BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
       inputFiles: buildInstance.inputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
       outputFiles: buildInstance.outputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 
@@ -657,7 +663,8 @@ class FlutterBuildSystem extends BuildSystem {
 
     FileStore? fileCache;
     if (previousBuild == null || _incrementalFileStore[previousBuild] == null) {
-      final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+      final File cacheFile =
+          environment.buildDir.childFile(FileStore.kFileCache);
       fileCache = FileStore(
         cacheFile: cacheFile,
         logger: _logger,
@@ -707,8 +714,10 @@ class FlutterBuildSystem extends BuildSystem {
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
   ) {
-    final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
-    final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
+    final String currentBuildId =
+        fileSystem.path.basename(environment.buildDir.path);
+    final File lastBuildIdFile =
+        environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
       lastBuildIdFile.parent.createSync(recursive: true);
       lastBuildIdFile.writeAsStringSync(currentBuildId);
@@ -724,18 +733,18 @@ class FlutterBuildSystem extends BuildSystem {
     lastBuildIdFile
       ..createSync()
       ..writeAsStringSync(currentBuildId);
-    final File outputsFile = environment.buildDir
-      .parent
-      .childDirectory(lastBuildId)
-      .childFile('outputs.json');
+    final File outputsFile = environment.buildDir.parent
+        .childDirectory(lastBuildId)
+        .childFile('outputs.json');
 
     if (!outputsFile.existsSync()) {
       // There is no output list. This could happen if the user manually
       // edited .last_config or deleted .dart_tool.
       return;
     }
-    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
-      .cast<String>();
+    final List<String> lastOutputs =
+        (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
+            .cast<String>();
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
@@ -754,31 +763,37 @@ class _BuildInstance {
     required this.logger,
     required this.fileSystem,
     Platform? platform,
-  })
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
+  }) : resourcePool = Pool(buildSystemConfig.resourcePoolSize ??
+            platform?.numberOfProcessors ??
+            1);
 
   final Logger logger;
   final FileSystem fileSystem;
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
+  final Map<String, AsyncMemoizer<bool>> pending =
+      <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
   final Map<String, File> outputFiles = <String, File>{};
 
   // Timings collected during target invocation.
-  final Map<String, PerformanceMeasurement> stepTimings = <String, PerformanceMeasurement>{};
+  final Map<String, PerformanceMeasurement> stepTimings =
+      <String, PerformanceMeasurement>{};
 
   // Exceptions caught during the build process.
-  final Map<String, ExceptionMeasurement> exceptionMeasurements = <String, ExceptionMeasurement>{};
+  final Map<String, ExceptionMeasurement> exceptionMeasurements =
+      <String, ExceptionMeasurement>{};
 
   Future<bool> invokeTarget(Node node) async {
-    final List<bool> results = await Future.wait(node.dependencies.map(invokeTarget));
+    final List<bool> results =
+        await Future.wait(node.dependencies.map(invokeTarget));
     if (results.any((bool result) => !result)) {
       return false;
     }
-    final AsyncMemoizer<bool> memoizer = pending[node.target.name] ??= AsyncMemoizer<bool>();
+    final AsyncMemoizer<bool> memoizer =
+        pending[node.target.name] ??= AsyncMemoizer<bool>();
     return memoizer.runOnce(() => _invokeInternal(node));
   }
 
@@ -815,7 +830,7 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        node.computeChanges(environment, fileCache, fileSystem, logger);
+          node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -835,7 +850,8 @@ class _BuildInstance {
         logger.printTrace('Skipping target: ${node.target.name}');
         skipped = true;
       } else {
-        logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+        logger.printTrace(
+            '${node.target.name}: Starting due to ${node.invalidatedReasons}');
         await node.target.build(environment);
         logger.printTrace('${node.target.name}: Complete');
         node.inputs.addAll(node.target.resolveInputs(environment).sources);
@@ -868,8 +884,8 @@ class _BuildInstance {
       node.target.clearStamp(environment);
       succeeded = false;
       skipped = false;
-      exceptionMeasurements[node.target.name] = ExceptionMeasurement(
-          node.target.name, exception, stackTrace);
+      exceptionMeasurements[node.target.name] =
+          ExceptionMeasurement(node.target.name, exception, stackTrace);
     } finally {
       resource.release();
       stopwatch.stop();
@@ -887,7 +903,8 @@ class _BuildInstance {
 
 /// Helper class to collect exceptions.
 class ExceptionMeasurement {
-  ExceptionMeasurement(this.target, this.exception, this.stackTrace, {this.fatal = false});
+  ExceptionMeasurement(this.target, this.exception, this.stackTrace,
+      {this.fatal = false});
 
   final String target;
   final Object? exception;
@@ -935,13 +952,16 @@ void checkCycles(Target initial) {
     }
     stack.remove(target);
   }
+
   checkInternal(initial, <Target>{}, <Target>{});
 }
 
 /// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
+void verifyOutputDirectories(
+    List<File> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
-  final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
+  final String projectDirectory =
+      environment.projectDir.resolveSymbolicLinksSync();
   final List<File> missingOutputs = <File>[];
   for (final File sourceFile in outputs) {
     if (!sourceFile.existsSync()) {
@@ -949,7 +969,8 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
       continue;
     }
     final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
+    if (!path.startsWith(buildDirectory) &&
+        !path.startsWith(projectDirectory)) {
       throw MisplacedOutputException(path, target.name);
     }
   }
@@ -1035,7 +1056,8 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Map<InvalidatedReasonKind, InvalidatedReason> invalidatedReasons = <InvalidatedReasonKind, InvalidatedReason>{};
+  final Map<InvalidatedReasonKind, InvalidatedReason> invalidatedReasons =
+      <InvalidatedReasonKind, InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
@@ -1068,11 +1090,13 @@ class Node {
       }
 
       final String absolutePath = file.path;
-      final String? previousAssetKey = fileStore.previousAssetKeys[absolutePath];
+      final String? previousAssetKey =
+          fileStore.previousAssetKeys[absolutePath];
       if (fileStore.currentAssetKeys.containsKey(absolutePath)) {
         final String? currentHash = fileStore.currentAssetKeys[absolutePath];
         if (currentHash != previousAssetKey) {
-          final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputChanged);
+          final InvalidatedReason reason =
+              _invalidate(InvalidatedReasonKind.inputChanged);
           reason.data.add(absolutePath);
           _dirty = true;
         }
@@ -1087,14 +1111,16 @@ class Node {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetChanged);
+        final InvalidatedReason reason =
+            _invalidate(InvalidatedReasonKind.outputSetChanged);
         reason.data.add(previousOutput);
         // if this isn't a current output file there is no reason to compute the key.
         continue;
       }
       final File file = fileSystem.file(previousOutput);
       if (!file.existsSync()) {
-        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputMissing);
+        final InvalidatedReason reason =
+            _invalidate(InvalidatedReasonKind.outputMissing);
         reason.data.add(file.path);
         _dirty = true;
         continue;
@@ -1104,7 +1130,8 @@ class Node {
       if (fileStore.currentAssetKeys.containsKey(absolutePath)) {
         final String? currentHash = fileStore.currentAssetKeys[absolutePath];
         if (currentHash != previousHash) {
-          final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputChanged);
+          final InvalidatedReason reason =
+              _invalidate(InvalidatedReasonKind.outputChanged);
           reason.data.add(absolutePath);
           _dirty = true;
         }
@@ -1118,9 +1145,12 @@ class Node {
     // always being rerun.
     if (missingInputs.isNotEmpty) {
       _dirty = true;
-      final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
-      logger.printTrace('invalidated build due to missing files: $missingMessage');
-      final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputMissing);
+      final String missingMessage =
+          missingInputs.map((File file) => file.path).join(', ');
+      logger.printTrace(
+          'invalidated build due to missing files: $missingMessage');
+      final InvalidatedReason reason =
+          _invalidate(InvalidatedReasonKind.inputMissing);
       reason.data.addAll(missingInputs.map((File file) => file.path));
     }
 
@@ -1129,7 +1159,8 @@ class Node {
     if (sourcesToDiff.isNotEmpty) {
       final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
-        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputChanged);
+        final InvalidatedReason reason =
+            _invalidate(InvalidatedReasonKind.inputChanged);
         reason.data.addAll(dirty.map((File file) => file.path));
         _dirty = true;
       }
@@ -1143,6 +1174,7 @@ class InvalidatedReason {
   InvalidatedReason(this.kind);
 
   final InvalidatedReasonKind kind;
+
   /// Absolute file paths of inputs or outputs, depending on [kind].
   final List<String> data = <String>[];
 

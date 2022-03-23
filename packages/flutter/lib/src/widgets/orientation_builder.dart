@@ -10,7 +10,8 @@ import 'media_query.dart';
 /// Signature for a function that builds a widget given an [Orientation].
 ///
 /// Used by [OrientationBuilder.builder].
-typedef OrientationWidgetBuilder = Widget Function(BuildContext context, Orientation orientation);
+typedef OrientationWidgetBuilder = Widget Function(
+    BuildContext context, Orientation orientation);
 
 /// Builds a widget tree that can depend on the parent widget's orientation
 /// (distinct from the device orientation).
@@ -31,8 +32,8 @@ class OrientationBuilder extends StatelessWidget {
   const OrientationBuilder({
     Key? key,
     required this.builder,
-  }) : assert(builder != null),
-       super(key: key);
+  })  : assert(builder != null),
+        super(key: key);
 
   /// Builds the widgets below this widget given this widget's orientation.
   ///
@@ -42,11 +43,14 @@ class OrientationBuilder extends StatelessWidget {
   /// a vertical array.
   final OrientationWidgetBuilder builder;
 
-  Widget _buildWithConstraints(BuildContext context, BoxConstraints constraints) {
+  Widget _buildWithConstraints(
+      BuildContext context, BoxConstraints constraints) {
     // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
     // both infinite), we prefer Orientation.portrait because its more common to
     // scroll vertically then horizontally.
-    final Orientation orientation = constraints.maxWidth > constraints.maxHeight ? Orientation.landscape : Orientation.portrait;
+    final Orientation orientation = constraints.maxWidth > constraints.maxHeight
+        ? Orientation.landscape
+        : Orientation.portrait;
     return builder(context, orientation);
   }
 

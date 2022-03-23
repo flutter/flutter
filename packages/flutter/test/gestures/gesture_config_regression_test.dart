@@ -14,7 +14,8 @@ class TestResult {
 }
 
 class NestedScrollableCase extends StatefulWidget {
-  const NestedScrollableCase({Key? key, required this.testResult}) : super(key: key);
+  const NestedScrollableCase({Key? key, required this.testResult})
+      : super(key: key);
 
   final TestResult testResult;
 
@@ -23,7 +24,6 @@ class NestedScrollableCase extends StatefulWidget {
 }
 
 class _NestedScrollableCaseState extends State<NestedScrollableCase> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,11 +40,13 @@ class _NestedScrollableCaseState extends State<NestedScrollableCase> {
                     onVerticalDragDown: (DragDownDetails details) {
                       widget.testResult.dragStarted = true;
                     },
-                    onVerticalDragUpdate: (DragUpdateDetails details){
+                    onVerticalDragUpdate: (DragUpdateDetails details) {
                       widget.testResult.dragUpdate = true;
                     },
                     onVerticalDragEnd: (_) {},
-                    child: Text('List Item $index', key: ValueKey<int>(index),
+                    child: Text(
+                      'List Item $index',
+                      key: ValueKey<int>(index),
                     ),
                   ),
                 );
@@ -58,7 +60,8 @@ class _NestedScrollableCaseState extends State<NestedScrollableCase> {
 }
 
 class NestedDragableCase extends StatefulWidget {
-  const NestedDragableCase({Key? key, required this.testResult}) : super(key: key);
+  const NestedDragableCase({Key? key, required this.testResult})
+      : super(key: key);
 
   final TestResult testResult;
 
@@ -67,7 +70,6 @@ class NestedDragableCase extends StatefulWidget {
 }
 
 class _NestedDragableCaseState extends State<NestedDragableCase> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +88,7 @@ class _NestedDragableCaseState extends State<NestedDragableCase> {
                     onDragStarted: () {
                       widget.testResult.dragStarted = true;
                     },
-                    onDragUpdate: (DragUpdateDetails details){
+                    onDragUpdate: (DragUpdateDetails details) {
                       widget.testResult.dragUpdate = true;
                     },
                     onDragEnd: (_) {},
@@ -102,8 +104,11 @@ class _NestedDragableCaseState extends State<NestedDragableCase> {
 }
 
 void main() {
-  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
+  testWidgets(
+      'Scroll Views get the same ScrollConfiguration as GestureDetectors',
+      (WidgetTester tester) async {
+    tester.binding.window.viewConfigurationTestValue =
+        const ui.ViewConfiguration(
       gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
     );
     final TestResult result = TestResult();
@@ -118,15 +123,18 @@ void main() {
     // that do not receive the same gesture settings to fire at different times than would
     // be expected.
     final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
-    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.timedDragFrom(
+        start, const Offset(0, 5), const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
-   expect(result.dragStarted, true);
-   expect(result.dragUpdate, true);
+    expect(result.dragStarted, true);
+    expect(result.dragUpdate, true);
   });
 
-  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
+  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables',
+      (WidgetTester tester) async {
+    tester.binding.window.viewConfigurationTestValue =
+        const ui.ViewConfiguration(
       gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
     );
     final TestResult result = TestResult();
@@ -141,10 +149,11 @@ void main() {
     // that do not receive the same gesture settings to fire at different times than would
     // be expected.
     final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
-    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.timedDragFrom(
+        start, const Offset(0, 5), const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
-   expect(result.dragStarted, true);
-   expect(result.dragUpdate, true);
+    expect(result.dragStarted, true);
+    expect(result.dragUpdate, true);
   });
 }

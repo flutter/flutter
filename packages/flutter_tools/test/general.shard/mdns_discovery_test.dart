@@ -25,7 +25,8 @@ void main() {
           bool? includeLoopback,
           bool? includeLinkLocal,
           InternetAddressType? type,
-        }) async => <NetworkInterface>[],
+        }) async =>
+            <NetworkInterface>[],
       );
     });
 
@@ -33,9 +34,9 @@ void main() {
       resetNetworkInterfaceLister();
     });
 
-
     testWithoutContext('No ports available', () async {
-      final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+      final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
@@ -46,8 +47,11 @@ void main() {
       expect(port, isNull);
     });
 
-    testWithoutContext('Prints helpful message when there is no ipv4 link local address.', () async {
-      final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+    testWithoutContext(
+        'Prints helpful message when there is no ipv4 link local address.',
+        () async {
+      final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
       final BufferLogger logger = BufferLogger.test();
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
@@ -69,7 +73,8 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
         },
       );
@@ -90,7 +95,8 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
         },
         txtResponse: <String, List<TxtResourceRecord>>{
@@ -105,7 +111,8 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final MDnsObservatoryDiscoveryResult? result = await portDiscovery.query();
+      final MDnsObservatoryDiscoveryResult? result =
+          await portDiscovery.query();
       expect(result?.port, 123);
       expect(result?.authCode, 'xyz/');
     });
@@ -118,10 +125,12 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
           'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000,
+                port: 321, weight: 1, priority: 1, target: 'local'),
           ],
         },
       );
@@ -142,10 +151,12 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
           'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000,
+                port: 321, weight: 1, priority: 1, target: 'local'),
           ],
         },
       );
@@ -159,7 +170,8 @@ void main() {
       expect(port, 321);
     });
 
-    testWithoutContext('Multiple ports available per process, with appId', () async {
+    testWithoutContext('Multiple ports available per process, with appId',
+        () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -167,12 +179,16 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 1234, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
           'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000, port: 4321, weight: 1, priority: 1, target: 'local'),
-            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000,
+                port: 4321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000,
+                port: 321, weight: 1, priority: 1, target: 'local'),
           ],
         },
       );
@@ -189,7 +205,7 @@ void main() {
     testWithoutContext('Query returns null', () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[],
-         <String, List<SrvResourceRecord>>{},
+        <String, List<SrvResourceRecord>>{},
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
@@ -201,9 +217,11 @@ void main() {
       expect(port, isNull);
     });
 
-    testWithoutContext('Throws Exception when client throws OSError on start', () async {
-      final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}, osErrorOnStart: true);
-
+    testWithoutContext('Throws Exception when client throws OSError on start',
+        () async {
+      final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{},
+          osErrorOnStart: true);
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
@@ -216,14 +234,17 @@ void main() {
       );
     });
 
-    testWithoutContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
+    testWithoutContext(
+        'Correctly builds Observatory URI with hostVmservicePort == 0',
+        () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000,
+                port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
         },
       );
@@ -234,14 +255,17 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final Uri? uri = await portDiscovery.getObservatoryUri('bar', device, hostVmservicePort: 0);
+      final Uri? uri = await portDiscovery.getObservatoryUri('bar', device,
+          hostVmservicePort: 0);
       expect(uri.toString(), 'http://127.0.0.1:123/');
     });
   });
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {
-  FakeMDnsClient(this.ptrRecords, this.srvResponse, {
+  FakeMDnsClient(
+    this.ptrRecords,
+    this.srvResponse, {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
     this.osErrorOnStart = false,
   });
@@ -268,16 +292,20 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsObservatoryDiscovery.dartObservatoryName) {
+    if (T == PtrResourceRecord &&
+        query.fullyQualifiedName ==
+            MDnsObservatoryDiscovery.dartObservatoryName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
     if (T == SrvResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[]) as Stream<T>;
+      return Stream<SrvResourceRecord>.fromIterable(
+          srvResponse[key] ?? <SrvResourceRecord>[]) as Stream<T>;
     }
     if (T == TxtResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
+      return Stream<TxtResourceRecord>.fromIterable(
+          txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }

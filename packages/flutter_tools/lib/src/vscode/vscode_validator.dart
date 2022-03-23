@@ -16,9 +16,9 @@ class VsCodeValidator extends DoctorValidator {
 
   final VsCode _vsCode;
 
-  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
-    return VsCode
-        .allInstalled(fileSystem, platform, processManager)
+  static Iterable<DoctorValidator> installedValidators(
+      FileSystem fileSystem, Platform platform, ProcessManager processManager) {
+    return VsCode.allInstalled(fileSystem, platform, processManager)
         .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 

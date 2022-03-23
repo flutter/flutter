@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
+  const Swapper({Key? key, this.stable, this.swapper}) : super(key: key);
 
   final Widget? stable;
   final Widget? swapper;
@@ -80,10 +80,8 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null)
-      visitor(stable!);
-    if (swapper != null)
-      visitor(swapper!);
+    if (stable != null) visitor(stable!);
+    if (swapper != null) visitor(swapper!);
   }
 
   @override
@@ -119,7 +117,8 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, bool oldIsOnTop, bool newIsOnTop) {
+  void moveRenderObjectChild(
+      RenderBox child, bool oldIsOnTop, bool newIsOnTop) {
     moveSlots.add(Pair<bool>(oldIsOnTop, newIsOnTop));
     assert(oldIsOnTop == !newIsOnTop);
     renderObject.setSwapper(child, newIsOnTop);
@@ -143,13 +142,10 @@ class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
   set stable(RenderBox? child) {
-    if (child == _stable)
-      return;
-    if (_stable != null)
-      dropChild(_stable!);
+    if (child == _stable) return;
+    if (_stable != null) dropChild(_stable!);
     _stable = child;
-    if (child != null)
-      adoptChild(child);
+    if (child != null) adoptChild(child);
   }
 
   bool? _swapperIsOnTop;
@@ -160,21 +156,16 @@ class RenderSwapper extends RenderBox {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper)
-      return;
-    if (_swapper != null)
-      dropChild(_swapper!);
+    if (child == _swapper) return;
+    if (_swapper != null) dropChild(_swapper!);
     _swapper = child;
-    if (child != null)
-      adoptChild(child);
+    if (child != null) adoptChild(child);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null)
-      visitor(_stable!);
-    if (_swapper != null)
-      visitor(_swapper!);
+    if (_stable != null) visitor(_stable!);
+    if (_swapper != null) visitor(_swapper!);
   }
 
   @override
@@ -206,12 +197,14 @@ class RenderSwapper extends RenderBox {
       maxHeight: constraints.maxHeight / 2,
     );
     if (_stable != null) {
-      final BoxParentData stableParentData = _stable!.parentData! as BoxParentData;
+      final BoxParentData stableParentData =
+          _stable!.parentData! as BoxParentData;
       _stable!.layout(childConstraints);
       stableParentData.offset = _swapperIsOnTop! ? bottomOffset : topOffset;
     }
     if (_swapper != null) {
-      final BoxParentData swapperParentData = _swapper!.parentData! as BoxParentData;
+      final BoxParentData swapperParentData =
+          _swapper!.parentData! as BoxParentData;
       _swapper!.layout(childConstraints);
       swapperParentData.offset = _swapperIsOnTop! ? topOffset : bottomOffset;
     }
@@ -231,10 +224,13 @@ class RenderSwapper extends RenderBox {
   }
 }
 
-BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
+BoxParentData parentDataFor(RenderObject renderObject) =>
+    renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
+  testWidgets(
+      'RenderObjectElement *RenderObjectChild methods get called with correct arguments',
+      (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {
@@ -251,9 +247,11 @@ void main() {
     }
 
     await tester.pumpWidget(widget());
-    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
+    final SwapperElement swapper =
+        tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
     final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
-    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
+    final RenderBox blueBox =
+        tester.renderObject<RenderBox>(find.byKey(blueKey));
     expect(swapper.insertSlots.length, 2);
     expect(swapper.insertSlots, contains('stable'));
     expect(swapper.insertSlots, contains(true));
@@ -278,7 +276,9 @@ void main() {
     expect(swapper.removeSlots, contains(false));
   });
 
-  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
+  testWidgets(
+      'RenderObjectElement *ChildRenderObject methods fail with deprecation message',
+      (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {

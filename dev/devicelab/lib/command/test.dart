@@ -18,7 +18,8 @@ class TestCommand extends Command<void> {
     argParser.addOption(
       'device-id',
       abbr: 'd',
-      help: 'Target device id (prefixes are allowed, names are not supported).\n'
+      help:
+          'Target device id (prefixes are allowed, names are not supported).\n'
           'The option will be ignored if the test target does not run on a\n'
           'mobile device. This still respects the device operating system\n'
           'settings in the test case, and will results in error if no device\n'
@@ -43,9 +44,12 @@ class TestCommand extends Command<void> {
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
           'the location based on the value of the --flutter-root option.',
     );
-    argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
+    argParser.addOption('luci-builder',
+        help:
+            '[Flutter infrastructure] Name of the LUCI builder being run on.');
     argParser.addOption('results-file',
-        help: '[Flutter infrastructure] File path for test results. If passed with\n'
+        help:
+            '[Flutter infrastructure] File path for test results. If passed with\n'
             'task, will write test results to the file.');
     argParser.addFlag(
       'silent',
@@ -63,7 +67,8 @@ class TestCommand extends Command<void> {
   Future<void> run() async {
     final List<String> taskArgsRaw = argResults!['task-args'] as List<String>;
     // Prepend '--' to convert args to options when passed to task
-    final List<String> taskArgs = taskArgsRaw.map((String taskArg) => '--$taskArg').toList();
+    final List<String> taskArgs =
+        taskArgsRaw.map((String taskArg) => '--$taskArg').toList();
     print(taskArgs);
     await runTasks(
       <String>[argResults!['task'] as String],

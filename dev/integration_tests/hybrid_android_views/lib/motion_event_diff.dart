@@ -40,7 +40,8 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
     Map<String, dynamic> synthesizedEvent) {
   final int synthesizedActionMasked =
       getActionMasked(synthesizedEvent['action'] as int);
-  final int originalActionMasked = getActionMasked(originalEvent['action'] as int);
+  final int originalActionMasked =
+      getActionMasked(originalEvent['action'] as int);
   final String synthesizedActionName =
       getActionName(synthesizedActionMasked, synthesizedEvent['action'] as int);
   final String originalActionName =
@@ -53,7 +54,8 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
   if (kPointerActions.contains(originalActionMasked) &&
       originalActionMasked == synthesizedActionMasked) {
     final int originalPointer = getPointerIdx(originalEvent['action'] as int);
-    final int synthesizedPointer = getPointerIdx(synthesizedEvent['action'] as int);
+    final int synthesizedPointer =
+        getPointerIdx(synthesizedEvent['action'] as int);
     if (originalPointer != synthesizedPointer)
       diffBuffer.write(
           'pointerIdx (expected: $originalPointer actual: $synthesizedPointer action: $originalActionName ');
@@ -63,9 +65,11 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
 void diffPointerProperties(StringBuffer diffBuffer,
     Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
-      (originalEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      (originalEvent['pointerProperties'] as List<dynamic>)
+          .cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
-      (synthesizedEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      (synthesizedEvent['pointerProperties'] as List<dynamic>)
+          .cast<Map<dynamic, dynamic>>();
 
   if (expectedList.length != actualList.length) {
     diffBuffer.write(
@@ -85,9 +89,11 @@ void diffPointerProperties(StringBuffer diffBuffer,
 void diffPointerCoordsList(StringBuffer diffBuffer,
     Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
-      (originalEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      (originalEvent['pointerCoords'] as List<dynamic>)
+          .cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
-      (synthesizedEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      (synthesizedEvent['pointerCoords'] as List<dynamic>)
+          .cast<Map<dynamic, dynamic>>();
 
   if (expectedList.length != actualList.length) {
     diffBuffer.write(
@@ -105,7 +111,8 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
 
 void diffPointerCoords(Map<String, dynamic> expected,
     Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
-  diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerCoord $pointerIdx] ');
+  diffMaps(expected, actual, diffBuffer,
+      messagePrefix: '[pointerCoord $pointerIdx] ');
 }
 
 void diffMaps(
@@ -122,10 +129,8 @@ void diffMaps(
     return;
   }
   for (final String key in expected.keys) {
-    if (excludeKeys.contains(key))
-      continue;
-    if (doublesApproximatelyMatch(expected[key], actual[key]))
-      continue;
+    if (excludeKeys.contains(key)) continue;
+    if (doublesApproximatelyMatch(expected[key], actual[key])) continue;
 
     if (expected[key] != actual[key]) {
       diffBuffer.write(

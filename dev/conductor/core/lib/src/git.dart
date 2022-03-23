@@ -66,7 +66,8 @@ class Git {
         '$explanation. Git exited with error code ${result.exitCode}.',
       );
     } else {
-      message.writeln('Command "git ${args.join(' ')}" failed to $explanation.');
+      message
+          .writeln('Command "git ${args.join(' ')}" failed to $explanation.');
     }
     if ((result.stdout as String).isNotEmpty) {
       message.writeln('stdout from git:\n${result.stdout}\n');

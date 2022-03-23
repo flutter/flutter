@@ -24,18 +24,18 @@ class MacOSDevice extends DesktopDevice {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _operatingSystemUtils = operatingSystemUtils,
-       super(
-        'macos',
-        platformType: PlatformType.macos,
-        ephemeral: false,
-        processManager: processManager,
-        logger: logger,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      );
+  })  : _processManager = processManager,
+        _logger = logger,
+        _operatingSystemUtils = operatingSystemUtils,
+        super(
+          'macos',
+          platformType: PlatformType.macos,
+          ephemeral: false,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -79,26 +79,31 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(covariant MacOSApp package, BuildMode buildMode) {
+  String? executablePathForDevice(
+      covariant MacOSApp package, BuildMode buildMode) {
     return package.executable(buildMode);
   }
 
   @override
-  void onAttached(covariant MacOSApp package, BuildMode buildMode, Process process) {
+  void onAttached(
+      covariant MacOSApp package, BuildMode buildMode, Process process) {
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
     final String? applicationBundle = package.applicationBundle(buildMode);
     if (applicationBundle == null) {
-      _logger.printError('Failed to foreground app; application bundle not found');
+      _logger
+          .printError('Failed to foreground app; application bundle not found');
       return;
     }
     _processManager.run(<String>[
-      'open', applicationBundle,
+      'open',
+      applicationBundle,
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
-        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
+        _logger.printError(
+            'Failed to foreground app; open returned ${result.exitCode}');
       }
     });
   }
@@ -112,13 +117,13 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
-       _macOSWorkflow = macOSWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('macOS devices');
+  })  : _logger = logger,
+        _platform = platform,
+        _macOSWorkflow = macOSWorkflow,
+        _processManager = processManager,
+        _fileSystem = fileSystem,
+        _operatingSystemUtils = operatingSystemUtils,
+        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;
@@ -134,7 +139,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!canListAnything) {
       return const <Device>[];
     }

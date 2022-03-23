@@ -40,19 +40,23 @@ class FrameTimingSummarizer {
     final List<int> layerCacheCounts = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.layerCacheCount),
     );
-    final List<int> layerCacheCountsSorted = List<int>.from(layerCacheCounts)..sort();
+    final List<int> layerCacheCountsSorted = List<int>.from(layerCacheCounts)
+      ..sort();
     final List<int> layerCacheBytes = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.layerCacheBytes),
     );
-    final List<int> layerCacheBytesSorted = List<int>.from(layerCacheBytes)..sort();
+    final List<int> layerCacheBytesSorted = List<int>.from(layerCacheBytes)
+      ..sort();
     final List<int> pictureCacheCounts = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.pictureCacheCount),
     );
-    final List<int> pictureCacheCountsSorted = List<int>.from(pictureCacheCounts)..sort();
+    final List<int> pictureCacheCountsSorted =
+        List<int>.from(pictureCacheCounts)..sort();
     final List<int> pictureCacheBytes = List<int>.unmodifiable(
       data.map<int>((FrameTiming datum) => datum.pictureCacheBytes),
     );
-    final List<int> pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)..sort();
+    final List<int> pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)
+      ..sort();
     final List<Duration> vsyncOverheadSorted =
         List<Duration>.from(vsyncOverhead)..sort();
     Duration add(Duration a, Duration b) => a + b;
@@ -81,7 +85,8 @@ class FrameTimingSummarizer {
       p90LayerCacheBytes: _findPercentile(layerCacheBytesSorted, 0.90),
       p99LayerCacheBytes: _findPercentile(layerCacheBytesSorted, 0.99),
       worstLayerCacheBytes: layerCacheBytesSorted.last,
-      averagePictureCacheCount: pictureCacheCounts.reduce(addInts) / data.length,
+      averagePictureCacheCount:
+          pictureCacheCounts.reduce(addInts) / data.length,
       p90PictureCacheCount: _findPercentile(pictureCacheCountsSorted, 0.90),
       p99PictureCacheCount: _findPercentile(pictureCacheCountsSorted, 0.99),
       worstPictureCacheCount: pictureCacheCountsSorted.last,
@@ -270,16 +275,21 @@ class FrameTimingSummarizer {
         '99th_percentile_layer_cache_count': p99LayerCacheCount,
         'worst_layer_cache_count': worstLayerCacheCount,
         'average_layer_cache_memory': averageLayerCacheBytes / 1024.0 / 1024.0,
-        '90th_percentile_layer_cache_memory': p90LayerCacheBytes / 1024.0 / 1024.0,
-        '99th_percentile_layer_cache_memory': p99LayerCacheBytes / 1024.0 / 1024.0,
+        '90th_percentile_layer_cache_memory':
+            p90LayerCacheBytes / 1024.0 / 1024.0,
+        '99th_percentile_layer_cache_memory':
+            p99LayerCacheBytes / 1024.0 / 1024.0,
         'worst_layer_cache_memory': worstLayerCacheBytes / 1024.0 / 1024.0,
         'average_picture_cache_count': averagePictureCacheCount,
         '90th_percentile_picture_cache_count': p90PictureCacheCount,
         '99th_percentile_picture_cache_count': p99PictureCacheCount,
         'worst_picture_cache_count': worstPictureCacheCount,
-        'average_picture_cache_memory': averagePictureCacheBytes / 1024.0 / 1024.0,
-        '90th_percentile_picture_cache_memory': p90PictureCacheBytes / 1024.0 / 1024.0,
-        '99th_percentile_picture_cache_memory': p99PictureCacheBytes / 1024.0 / 1024.0,
+        'average_picture_cache_memory':
+            averagePictureCacheBytes / 1024.0 / 1024.0,
+        '90th_percentile_picture_cache_memory':
+            p90PictureCacheBytes / 1024.0 / 1024.0,
+        '99th_percentile_picture_cache_memory':
+            p99PictureCacheBytes / 1024.0 / 1024.0,
         'worst_picture_cache_memory': worstPictureCacheBytes / 1024.0 / 1024.0,
         'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
         'frame_count': frameBuildTime.length,
@@ -306,7 +316,8 @@ T _findPercentile<T>(List<T> data, double p) {
 ///
 /// [data] must be sorted in ascending order.
 int _countExceed<T extends Comparable<T>>(List<T> data, T threshold) {
-  final int exceedsThresholdIndex = data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
+  final int exceedsThresholdIndex =
+      data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
   if (exceedsThresholdIndex == -1) {
     return 0;
   }

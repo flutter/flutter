@@ -63,7 +63,8 @@ void main() {
     expect(config.keys, isNot(contains('foo')));
   });
 
-  testWithoutContext('Config does not error on a file with a deprecated field', () {
+  testWithoutContext('Config does not error on a file with a deprecated field',
+      () {
     final BufferLogger bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('.flutter_example')
       ..writeAsStringSync('''
@@ -115,7 +116,8 @@ void main() {
     expect(bufferLogger.errorText, isEmpty);
   });
 
-  testWithoutContext('Config does not error on a normally fatal file system exception', () {
+  testWithoutContext(
+      'Config does not error on a normally fatal file system exception', () {
     final BufferLogger bufferLogger = BufferLogger.test();
     final File file = ErrorHandlingFile(
       platform: FakePlatform(),
@@ -125,12 +127,16 @@ void main() {
 
     config = Config.createForTesting(file, bufferLogger);
 
-    expect(bufferLogger.errorText, contains('Could not read preferences in testfile'));
-    expect(bufferLogger.errorText, contains(r'sudo chown -R $(whoami) /testfile'));
+    expect(bufferLogger.errorText,
+        contains('Could not read preferences in testfile'));
+    expect(
+        bufferLogger.errorText, contains(r'sudo chown -R $(whoami) /testfile'));
   });
 
   testWithoutContext('Config in home dir is used if it exists', () {
-    memoryFileSystem.file('.flutter_example').writeAsStringSync('{"hello":"bar"}');
+    memoryFileSystem
+        .file('.flutter_example')
+        .writeAsStringSync('{"hello":"bar"}');
     config = Config(
       'example',
       fileSystem: memoryFileSystem,
@@ -138,10 +144,13 @@ void main() {
       platform: fakePlatform,
     );
     expect(config.getValue('hello'), 'bar');
-    expect(memoryFileSystem.file('.config/flutter/example').existsSync(), false);
+    expect(
+        memoryFileSystem.file('.config/flutter/example').existsSync(), false);
   });
 
-  testWithoutContext('Config is created in config dir if it does not already exist in home dir', () {
+  testWithoutContext(
+      'Config is created in config dir if it does not already exist in home dir',
+      () {
     config = Config(
       'example',
       fileSystem: memoryFileSystem,
@@ -167,6 +176,7 @@ class FakeFile extends Fake implements File {
 
   @override
   String readAsStringSync({Encoding encoding = utf8ForTesting}) {
-    throw const FileSystemException('', '', OSError('', 13)); // EACCES error on linux
+    throw const FileSystemException(
+        '', '', OSError('', 13)); // EACCES error on linux
   }
 }

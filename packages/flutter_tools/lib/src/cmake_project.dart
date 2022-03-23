@@ -40,7 +40,8 @@ abstract class CmakeBasedProject {
 }
 
 /// The Windows sub project.
-class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
+class WindowsProject extends FlutterProjectPlatform
+    implements CmakeBasedProject {
   WindowsProject.fromFlutter(this.parent);
 
   @override
@@ -52,7 +53,8 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   String get _childDirectory => 'windows';
 
   @override
-  bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
+  bool existsSync() =>
+      _editableDirectory.existsSync() && cmakeFile.existsSync();
 
   @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
@@ -61,45 +63,57 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
 
   @override
-  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+  File get generatedCmakeConfigFile =>
+      ephemeralDirectory.childFile('generated_config.cmake');
 
   @override
-  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+  File get generatedPluginCmakeFile =>
+      managedDirectory.childFile('generated_plugins.cmake');
 
   @override
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+  Directory get pluginSymlinkDirectory =>
+      ephemeralDirectory.childDirectory('.plugin_symlinks');
 
-  Directory get _editableDirectory => parent.directory.childDirectory(_childDirectory);
+  Directory get _editableDirectory =>
+      parent.directory.childDirectory(_childDirectory);
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
   /// creation should live here.
-  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+  Directory get managedDirectory =>
+      _editableDirectory.childDirectory('flutter');
 
   /// The subdirectory of [managedDirectory] that contains files that are
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
-  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+  Directory get ephemeralDirectory =>
+      managedDirectory.childDirectory('ephemeral');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 /// The Windows UWP version of the Windows project.
 class WindowsUwpProject extends WindowsProject {
-  WindowsUwpProject.fromFlutter(FlutterProject parent) : super.fromFlutter(parent);
+  WindowsUwpProject.fromFlutter(FlutterProject parent)
+      : super.fromFlutter(parent);
 
   @override
   String get _childDirectory => 'winuwp';
 
-  File get runnerCmakeFile => _editableDirectory.childDirectory('runner_uwp').childFile('CMakeLists.txt');
+  File get runnerCmakeFile => _editableDirectory
+      .childDirectory('runner_uwp')
+      .childFile('CMakeLists.txt');
 
   /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
-  int? get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
+  int? get projectVersion => int.tryParse(
+      _editableDirectory.childFile('project_version').readAsStringSync());
 
   /// Retrieve the GUID of the UWP package.
   late final String? packageGuid = getCmakePackageGuid(runnerCmakeFile);
 
-  File get appManifest => _editableDirectory.childDirectory('runner_uwp').childFile('appxmanifest.in');
+  File get appManifest => _editableDirectory
+      .childDirectory('runner_uwp')
+      .childFile('appxmanifest.in');
 
   late final String? packageVersion = parseAppVersion(this);
 }
@@ -115,7 +129,8 @@ String? parseAppVersion(WindowsUwpProject project) {
   try {
     document = XmlDocument.parse(appManifestFile.readAsStringSync());
   } on XmlParserException {
-    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
+    throwToolExit(
+        'Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
   }
   for (final XmlElement metaData in document.findAllElements('Identity')) {
     return metaData.getAttribute('Version');
@@ -133,19 +148,22 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
-  static final RegExp _applicationIdPattern = RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
+  static final RegExp _applicationIdPattern =
+      RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
 
   Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
   /// creation should live here.
-  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+  Directory get managedDirectory =>
+      _editableDirectory.childDirectory('flutter');
 
   /// The subdirectory of [managedDirectory] that contains files that are
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
-  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+  Directory get ephemeralDirectory =>
+      managedDirectory.childDirectory('ephemeral');
 
   @override
   bool existsSync() => _editableDirectory.existsSync();
@@ -157,13 +175,16 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
 
   @override
-  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+  File get generatedCmakeConfigFile =>
+      ephemeralDirectory.childFile('generated_config.cmake');
 
   @override
-  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+  File get generatedPluginCmakeFile =>
+      managedDirectory.childFile('generated_plugins.cmake');
 
   @override
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+  Directory get pluginSymlinkDirectory =>
+      ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 

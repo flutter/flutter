@@ -29,7 +29,8 @@ class _BufferGoldenMatcher extends AsyncMatcher {
     } else if (item is Future<List<int>>) {
       buffer = Uint8List.fromList(await item);
     } else {
-      throw AssertionError('Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}');
+      throw AssertionError(
+          'Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}');
     }
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
     if (autoUpdateGoldenFiles) {
@@ -37,7 +38,8 @@ class _BufferGoldenMatcher extends AsyncMatcher {
       return null;
     }
     try {
-      final bool success = await goldenFileComparator.compare(buffer, testNameUri);
+      final bool success =
+          await goldenFileComparator.compare(buffer, testNameUri);
       return success ? null : 'does not match';
     } on TestFailure catch (ex) {
       return ex.message;
@@ -70,5 +72,5 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// ```
 /// {@end-tool}
 AsyncMatcher bufferMatchesGoldenFile(String key, {int? version}) {
-   return _BufferGoldenMatcher(Uri.parse(key), version);
+  return _BufferGoldenMatcher(Uri.parse(key), version);
 }

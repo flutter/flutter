@@ -40,11 +40,10 @@ class ViewConfiguration {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is ViewConfiguration
-        && other.size == size
-        && other.devicePixelRatio == devicePixelRatio;
+    if (other.runtimeType != runtimeType) return false;
+    return other is ViewConfiguration &&
+        other.size == size &&
+        other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
@@ -59,7 +58,8 @@ class ViewConfiguration {
 /// The view represents the total output surface of the render tree and handles
 /// bootstrapping the rendering pipeline. The view has a unique child
 /// [RenderBox], which is required to fill the entire output surface.
-class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
+class RenderView extends RenderObject
+    with RenderObjectWithChildMixin<RenderBox> {
   /// Creates the root of the render tree.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
@@ -69,9 +69,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderBox? child,
     required ViewConfiguration configuration,
     required ui.FlutterView window,
-  }) : assert(configuration != null),
-       _configuration = configuration,
-       _window = window {
+  })  : assert(configuration != null),
+        _configuration = configuration,
+        _window = window {
     this.child = child;
   }
 
@@ -82,14 +82,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
+
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
-    if (configuration == value)
-      return;
+    if (configuration == value) return;
     _configuration = value;
     replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
@@ -148,7 +148,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
   @override
-  void debugAssertDoesMeetConstraints() { assert(false); }
+  void debugAssertDoesMeetConstraints() {
+    assert(false);
+  }
 
   @override
   void performResize() {
@@ -161,13 +163,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     _size = configuration.size;
     assert(_size.isFinite);
 
-    if (child != null)
-      child!.layout(BoxConstraints.tight(_size));
+    if (child != null) child!.layout(BoxConstraints.tight(_size));
   }
 
   @override
-  void rotate({ int? oldAngle, int? newAngle, Duration? time }) {
-    assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
+  void rotate({int? oldAngle, int? newAngle, Duration? time}) {
+    assert(
+        false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
   /// Determines the set of render objects located at the given position.
@@ -180,7 +182,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { required Offset position }) {
+  bool hitTest(HitTestResult result, {required Offset position}) {
     if (child != null)
       child!.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
@@ -205,8 +207,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child!, offset);
+    if (child != null) context.paintChild(child!, offset);
   }
 
   @override
@@ -221,18 +222,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
     if (!kReleaseMode) {
-      Timeline.startSync('COMPOSITING', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('COMPOSITING',
+          arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
-      if (automaticSystemUiAdjustment)
-        _updateSystemChrome();
+      if (automaticSystemUiAdjustment) _updateSystemChrome();
       _window.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
-          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
+          debugCurrentRepaintColor = debugCurrentRepaintColor
+              .withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
         return true;
       }());
     } finally {
@@ -284,7 +286,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       // bottom drawn pixel is at 1919 position.
       bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
     );
-    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
+    final SystemUiOverlayStyle? upperOverlayStyle =
+        layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
@@ -304,11 +307,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
         statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
         statusBarColor: upperOverlayStyle?.statusBarColor,
-        systemStatusBarContrastEnforced: upperOverlayStyle?.systemStatusBarContrastEnforced,
+        systemStatusBarContrastEnforced:
+            upperOverlayStyle?.systemStatusBarContrastEnforced,
         systemNavigationBarColor: lowerOverlayStyle?.systemNavigationBarColor,
-        systemNavigationBarDividerColor: lowerOverlayStyle?.systemNavigationBarDividerColor,
-        systemNavigationBarIconBrightness: lowerOverlayStyle?.systemNavigationBarIconBrightness,
-        systemNavigationBarContrastEnforced: lowerOverlayStyle?.systemNavigationBarContrastEnforced,
+        systemNavigationBarDividerColor:
+            lowerOverlayStyle?.systemNavigationBarDividerColor,
+        systemNavigationBarIconBrightness:
+            lowerOverlayStyle?.systemNavigationBarIconBrightness,
+        systemNavigationBarContrastEnforced:
+            lowerOverlayStyle?.systemNavigationBarContrastEnforced,
       );
       SystemChrome.setSystemUIOverlayStyle(overlayStyle);
     }
@@ -329,12 +336,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
+      properties.add(DiagnosticsNode.message(
+          'debug mode enabled - ${kIsWeb ? 'Web' : Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(DiagnosticsProperty<Size>(
+        'window size', _window.physicalSize,
+        tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty(
+        'device pixel ratio', _window.devicePixelRatio,
+        tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<ViewConfiguration>(
+        'configuration', configuration,
+        tooltip: 'in logical pixels'));
     if (_window.platformDispatcher.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }

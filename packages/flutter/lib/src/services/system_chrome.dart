@@ -56,7 +56,7 @@ enum DeviceOrientation {
 @immutable
 class ApplicationSwitcherDescription {
   /// Creates an ApplicationSwitcherDescription.
-  const ApplicationSwitcherDescription({ this.label, this.primaryColor });
+  const ApplicationSwitcherDescription({this.label, this.primaryColor});
 
   /// A label and description of the current state of the application.
   final String? label;
@@ -288,13 +288,16 @@ class SystemUiOverlayStyle {
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
-      'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
-      'systemNavigationBarContrastEnforced': systemNavigationBarContrastEnforced,
+      'systemNavigationBarIconBrightness':
+          systemNavigationBarIconBrightness?.toString(),
+      'systemNavigationBarContrastEnforced':
+          systemNavigationBarContrastEnforced,
     };
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
+  String toString() =>
+      '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
@@ -308,48 +311,58 @@ class SystemUiOverlayStyle {
     Brightness? systemNavigationBarIconBrightness,
   }) {
     return SystemUiOverlayStyle(
-      systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
-      systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
-      systemNavigationBarContrastEnforced: systemNavigationBarContrastEnforced ?? this.systemNavigationBarContrastEnforced,
+      systemNavigationBarColor:
+          systemNavigationBarColor ?? this.systemNavigationBarColor,
+      systemNavigationBarDividerColor: systemNavigationBarDividerColor ??
+          this.systemNavigationBarDividerColor,
+      systemNavigationBarContrastEnforced:
+          systemNavigationBarContrastEnforced ??
+              this.systemNavigationBarContrastEnforced,
       statusBarColor: statusBarColor ?? this.statusBarColor,
-      statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
+      statusBarIconBrightness:
+          statusBarIconBrightness ?? this.statusBarIconBrightness,
       statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
-      systemStatusBarContrastEnforced: systemStatusBarContrastEnforced ?? this.systemStatusBarContrastEnforced,
-      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
+      systemStatusBarContrastEnforced: systemStatusBarContrastEnforced ??
+          this.systemStatusBarContrastEnforced,
+      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ??
+          this.systemNavigationBarIconBrightness,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    systemNavigationBarColor,
-    systemNavigationBarDividerColor,
-    systemNavigationBarContrastEnforced,
-    statusBarColor,
-    statusBarBrightness,
-    statusBarIconBrightness,
-    systemStatusBarContrastEnforced,
-    systemNavigationBarIconBrightness,
-  );
+        systemNavigationBarColor,
+        systemNavigationBarDividerColor,
+        systemNavigationBarContrastEnforced,
+        statusBarColor,
+        statusBarBrightness,
+        statusBarIconBrightness,
+        systemStatusBarContrastEnforced,
+        systemNavigationBarIconBrightness,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is SystemUiOverlayStyle
-        && other.systemNavigationBarColor == systemNavigationBarColor
-        && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
-        && other.systemNavigationBarContrastEnforced == systemNavigationBarContrastEnforced
-        && other.statusBarColor == statusBarColor
-        && other.statusBarIconBrightness == statusBarIconBrightness
-        && other.statusBarBrightness == statusBarBrightness
-        && other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced
-        && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+    if (other.runtimeType != runtimeType) return false;
+    return other is SystemUiOverlayStyle &&
+        other.systemNavigationBarColor == systemNavigationBarColor &&
+        other.systemNavigationBarDividerColor ==
+            systemNavigationBarDividerColor &&
+        other.systemNavigationBarContrastEnforced ==
+            systemNavigationBarContrastEnforced &&
+        other.statusBarColor == statusBarColor &&
+        other.statusBarIconBrightness == statusBarIconBrightness &&
+        other.statusBarBrightness == statusBarBrightness &&
+        other.systemStatusBarContrastEnforced ==
+            systemStatusBarContrastEnforced &&
+        other.systemNavigationBarIconBrightness ==
+            systemNavigationBarIconBrightness;
   }
 }
 
 List<String> _stringify(List<dynamic> list) => <String>[
-  for (final dynamic item in list) item.toString(),
-];
+      for (final dynamic item in list) item.toString(),
+    ];
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
@@ -375,7 +388,8 @@ class SystemChrome {
   ///
   /// Should you decide to opt out of multitasking you can do this by
   /// setting "Requires full screen" to true in the Xcode Deployment Info.
-  static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
+  static Future<void> setPreferredOrientations(
+      List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
@@ -387,7 +401,8 @@ class SystemChrome {
   ///
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
-  static Future<void> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
+  static Future<void> setApplicationSwitcherDescription(
+      ApplicationSwitcherDescription description) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
       <String, dynamic>{
@@ -419,11 +434,10 @@ class SystemChrome {
   /// after a delay of 1 second. This can be achieved through [restoreSystemUIOverlays]
   /// or calling this again. Otherwise, the original UI overlay settings will be
   /// automatically restored only when the application loses and regains focus.
-  @Deprecated(
-    'Migrate to setEnabledSystemUIMode. '
-    'This feature was deprecated after v2.3.0-17.0.pre.'
-  )
-  static Future<void> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
+  @Deprecated('Migrate to setEnabledSystemUIMode. '
+      'This feature was deprecated after v2.3.0-17.0.pre.')
+  static Future<void> setEnabledSystemUIOverlays(
+      List<SystemUiOverlay> overlays) async {
     await setEnabledSystemUIMode(SystemUiMode.manual, overlays: overlays);
   }
 
@@ -459,7 +473,8 @@ class SystemChrome {
   /// is true, the application is not fullscreen. See
   /// [SystemChrome.setSystemUIChangeCallback] to respond to these changes in a
   /// fullscreen application.
-  static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
+  static Future<void> setEnabledSystemUIMode(SystemUiMode mode,
+      {List<SystemUiOverlay>? overlays}) async {
     if (mode != SystemUiMode.manual) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setEnabledSystemUIMode',
@@ -494,7 +509,8 @@ class SystemChrome {
   /// overlays have been disabled. This results in the same behavior as
   /// [SystemUiMode.leanBack].
   ///
-  static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
+  static Future<void> setSystemUIChangeCallback(
+      SystemUiChangeCallback? callback) async {
     ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {

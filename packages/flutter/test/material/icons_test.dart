@@ -17,7 +17,8 @@ import 'package:platform/platform.dart';
 void main() {
   testWidgets('IconData object test', (WidgetTester tester) async {
     expect(Icons.account_balance, isNot(equals(Icons.account_box)));
-    expect(Icons.account_balance.hashCode, isNot(equals(Icons.account_box.hashCode)));
+    expect(Icons.account_balance.hashCode,
+        isNot(equals(Icons.account_box.hashCode)));
     expect(Icons.account_balance, hasOneLineDescription);
   });
 
@@ -26,7 +27,8 @@ void main() {
     expect(Icons.search.fontFamily, 'MaterialIcons');
   });
 
-  testWidgets('Certain icons (and their variants) match text direction', (WidgetTester tester) async {
+  testWidgets('Certain icons (and their variants) match text direction',
+      (WidgetTester tester) async {
     expect(Icons.arrow_back.matchTextDirection, true);
     expect(Icons.arrow_back_rounded.matchTextDirection, true);
     expect(Icons.arrow_back_outlined.matchTextDirection, true);
@@ -38,7 +40,9 @@ void main() {
     expect(Icons.access_time_sharp.matchTextDirection, false);
   });
 
-  testWidgets('Adaptive icons are correct on cupertino platforms', (WidgetTester tester) async {
+  testWidgets(
+    'Adaptive icons are correct on cupertino platforms',
+    (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
     },
@@ -48,7 +52,9 @@ void main() {
     }),
   );
 
-  testWidgets('Adaptive icons are correct on non-cupertino platforms', (WidgetTester tester) async {
+  testWidgets(
+    'Adaptive icons are correct on non-cupertino platforms',
+    (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
     },
@@ -60,7 +66,8 @@ void main() {
     }),
   );
 
-  testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
+  testWidgets('A sample of icons look as expected',
+      (WidgetTester tester) async {
     await _loadIconFont();
 
     await tester.pumpWidget(MaterialApp(
@@ -80,11 +87,13 @@ void main() {
       ),
     ));
 
-    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
+    await expectLater(
+        find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
   // Regression test for https://github.com/flutter/flutter/issues/95886
-  testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
+  testWidgets('Another sample of icons look as expected',
+      (WidgetTester tester) async {
     await _loadIconFont();
 
     await tester.pumpWidget(MaterialApp(
@@ -101,7 +110,8 @@ void main() {
       ),
     ));
 
-    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
+    await expectLater(
+        find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
@@ -111,7 +121,8 @@ void main() {
 Future<void> _loadIconFont() async {
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
-  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
+  final Directory flutterRoot =
+      fs.directory(platform.environment['FLUTTER_ROOT']);
 
   final File iconFont = flutterRoot.childFile(
     fs.path.join(
@@ -124,7 +135,7 @@ Future<void> _loadIconFont() async {
   );
 
   final Future<ByteData> bytes = Future<ByteData>.value(
-      iconFont.readAsBytesSync().buffer.asByteData(),
+    iconFont.readAsBytesSync().buffer.asByteData(),
   );
 
   await (FontLoader('MaterialIcons')..addFont(bytes)).load();

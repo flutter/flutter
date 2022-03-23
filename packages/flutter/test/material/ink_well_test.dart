@@ -65,7 +65,8 @@ void main() {
     expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press']));
 
     log.clear();
-    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    TestGesture gesture =
+        await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['tap-down']));
     await gesture.up();
@@ -73,14 +74,16 @@ void main() {
     expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
 
     log.clear();
-    gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    gesture =
+        await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
     await tester.pump(const Duration(milliseconds: 100));
     await gesture.moveBy(const Offset(0.0, 200.0));
     await gesture.cancel();
     expect(log, equals(<String>['tap-down', 'tap-cancel']));
   });
 
-  testWidgets('InkWell only onTapDown enables gestures', (WidgetTester tester) async {
+  testWidgets('InkWell only onTapDown enables gestures',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96030
     bool downTapped = false;
     await tester.pumpWidget(Directionality(
@@ -100,7 +103,8 @@ void main() {
     expect(downTapped, true);
   });
 
-  testWidgets('InkWell invokes activation actions when expected', (WidgetTester tester) async {
+  testWidgets('InkWell invokes activation actions when expected',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(Directionality(
@@ -132,7 +136,8 @@ void main() {
     expect(log, equals(<String>['tap']));
   });
 
-  testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
+  testWidgets('long-press and tap on disabled should not throw',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Material(
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -160,24 +165,33 @@ void main() {
               splashColor: const Color(0xffff0000),
               focusColor: const Color(0xff0000ff),
               highlightColor: const Color(0xf00fffff),
-              onTap: () { },
-              onLongPress: () { },
-              onHover: (bool hover) { },
+              onTap: () {},
+              onLongPress: () {},
+              onHover: (bool hover) {},
             ),
           ),
         ),
       ),
     ));
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+        inkFeatures,
+        paints
+          ..rect(
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+              color: const Color(0xff00ff00)));
   });
 
-  testWidgets('ink well changes color on hover with overlayColor', (WidgetTester tester) async {
+  testWidgets('ink well changes color on hover with overlayColor',
+      (WidgetTester tester) async {
     // Same test as 'ink well changes color on hover' except that the
     // hover color is specified with the overlayColor parameter.
     await tester.pumpWidget(Material(
@@ -188,7 +202,8 @@ void main() {
             width: 100,
             height: 100,
             child: InkWell(
-              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              overlayColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.hovered))
                   return const Color(0xff00ff00);
                 if (states.contains(MaterialState.focused))
@@ -197,25 +212,35 @@ void main() {
                   return const Color(0xf00fffff);
                 return const Color(0xffbadbad); // Shouldn't happen.
               }),
-              onTap: () { },
-              onLongPress: () { },
-              onHover: (bool hover) { },
+              onTap: () {},
+              onLongPress: () {},
+              onHover: (bool hover) {},
             ),
           ),
         ),
       ),
     ));
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+        inkFeatures,
+        paints
+          ..rect(
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+              color: const Color(0xff00ff00)));
   });
 
-  testWidgets('ink response changes color on focus', (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+  testWidgets('ink response changes color on focus',
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       Material(
@@ -231,9 +256,9 @@ void main() {
                 splashColor: const Color(0xffff0000),
                 focusColor: const Color(0xff0000ff),
                 highlightColor: const Color(0xf00fffff),
-                onTap: () { },
-                onLongPress: () { },
-                onHover: (bool hover) { },
+                onTap: () {},
+                onLongPress: () {},
+                onHover: (bool hover) {},
               ),
             ),
           ),
@@ -241,20 +266,27 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(
       inkFeatures,
-      paints ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+      paints
+        ..rect(
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            color: const Color(0xff0000ff)),
     );
   });
 
-  testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
+  testWidgets('ink response changes color on focus with overlayColor',
+      (WidgetTester tester) async {
     // Same test as 'ink well changes color on focus' except that the
     // hover color is specified with the overlayColor parameter.
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       Material(
@@ -266,7 +298,8 @@ void main() {
               height: 100,
               child: InkWell(
                 focusNode: focusNode,
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                overlayColor: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered))
                     return const Color(0xff00ff00);
                   if (states.contains(MaterialState.focused))
@@ -276,9 +309,9 @@ void main() {
                   return const Color(0xffbadbad); // Shouldn't happen.
                 }),
                 highlightColor: const Color(0xf00fffff),
-                onTap: () { },
-                onLongPress: () { },
-                onHover: (bool hover) { },
+                onTap: () {},
+                onLongPress: () {},
+                onHover: (bool hover) {},
               ),
             ),
           ),
@@ -286,17 +319,23 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(
       inkFeatures,
-      paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+      paints
+        ..rect(
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            color: const Color(0xff0000ff)),
     );
   });
 
-  testWidgets('ink well changes color on pressed with overlayColor', (WidgetTester tester) async {
+  testWidgets('ink well changes color on pressed with overlayColor',
+      (WidgetTester tester) async {
     const Color pressedColor = Color(0xffdd00ff);
 
     await tester.pumpWidget(Material(
@@ -309,29 +348,44 @@ void main() {
             height: 100,
             child: InkWell(
               splashFactory: NoSplash.splashFactory,
-              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              overlayColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.pressed)) {
                   return pressedColor;
                 }
                 return const Color(0xffbadbad); // Shouldn't happen.
               }),
-              onTap: () { },
+              onTap: () {},
             ),
           ),
         ),
       ),
     ));
     await tester.pumpAndSettle();
-    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor.withAlpha(0)));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+        inkFeatures,
+        paints
+          ..rect(
+              rect: const Rect.fromLTRB(0, 0, 100, 100),
+              color: pressedColor.withAlpha(0)));
     await tester.pumpAndSettle(); // Let the press highlight animation finish.
-    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor));
+    expect(
+        inkFeatures,
+        paints
+          ..rect(
+              rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor));
     await gesture.up();
   });
 
-  testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+  testWidgets('ink response splashColor matches splashColor parameter',
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     const Color splashColor = Color(0xffff0000);
     await tester.pumpWidget(Material(
@@ -344,13 +398,13 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                  hoverColor: const Color(0xff00ff00),
-                  splashColor: splashColor,
-                  focusColor: const Color(0xff0000ff),
-                  highlightColor: const Color(0xf00fffff),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
+                hoverColor: const Color(0xff00ff00),
+                splashColor: splashColor,
+                focusColor: const Color(0xff0000ff),
+                highlightColor: const Color(0xf00fffff),
+                onTap: () {},
+                onLongPress: () {},
+                onHover: (bool hover) {},
               ),
             ),
           ),
@@ -358,18 +412,25 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-    await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final TestGesture gesture =
+        await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(
+        milliseconds: 200)); // unconfirmed splash is well underway
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
   });
 
-  testWidgets('ink response splashColor matches resolved overlayColor for MaterialState.pressed', (WidgetTester tester) async {
+  testWidgets(
+      'ink response splashColor matches resolved overlayColor for MaterialState.pressed',
+      (WidgetTester tester) async {
     // Same test as 'ink response splashColor matches splashColor
     // parameter' except that the splash color is specified with the
     // overlayColor parameter.
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     const Color splashColor = Color(0xffff0000);
     await tester.pumpWidget(Material(
@@ -382,18 +443,19 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                  overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
-                      return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.focused))
-                      return const Color(0xff0000ff);
-                    if (states.contains(MaterialState.pressed))
-                      return splashColor;
-                    return const Color(0xffbadbad); // Shouldn't happen.
-                  }),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
+                overlayColor: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered))
+                    return const Color(0xff00ff00);
+                  if (states.contains(MaterialState.focused))
+                    return const Color(0xff0000ff);
+                  if (states.contains(MaterialState.pressed))
+                    return splashColor;
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
+                onTap: () {},
+                onLongPress: () {},
+                onHover: (bool hover) {},
               ),
             ),
           ),
@@ -401,15 +463,21 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-    await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final TestGesture gesture =
+        await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(
+        milliseconds: 200)); // unconfirmed splash is well underway
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
   });
 
-  testWidgets('ink response uses radius for focus highlight', (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+  testWidgets('ink response uses radius for focus highlight',
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       Material(
@@ -423,7 +491,7 @@ void main() {
                 focusNode: focusNode,
                 radius: 20,
                 focusColor: const Color(0xff0000ff),
-                onTap: () { },
+                onTap: () {},
               ),
             ),
           ),
@@ -431,15 +499,20 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
+    expect(inkFeatures,
+        paints..circle(radius: 20, color: const Color(0xff0000ff)));
   });
 
-  testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+  testWidgets("ink response doesn't change color on focus when on touch device",
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(Material(
       child: Directionality(
@@ -454,24 +527,28 @@ void main() {
               splashColor: const Color(0xffff0000),
               focusColor: const Color(0xff0000ff),
               highlightColor: const Color(0xf00fffff),
-              onTap: () { },
-              onLongPress: () { },
-              onHover: (bool hover) { },
+              onTap: () {},
+              onLongPress: () {},
+              onHover: (bool hover) {},
             ),
           ),
         ),
       ),
     ));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+  testWidgets('InkWell.mouseCursor changes cursor on hover',
+      (WidgetTester tester) async {
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(1, 1));
     addTearDown(gesture.removePointer);
 
@@ -491,7 +568,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click);
 
     // Test default of InkWell()
     await tester.pumpWidget(
@@ -508,7 +586,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click);
 
     // Test disabled
     await tester.pumpWidget(
@@ -523,7 +602,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
 
     // Test default of InkResponse()
     await tester.pumpWidget(
@@ -540,7 +620,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click);
 
     // Test disabled
     await tester.pumpWidget(
@@ -555,7 +636,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
   });
 
   group('feedback', () {
@@ -575,8 +657,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () { },
-              onLongPress: () { },
+              onTap: () {},
+              onLongPress: () {},
             ),
           ),
         ),
@@ -603,8 +685,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () { },
-              onLongPress: () { },
+              onTap: () {},
+              onLongPress: () {},
               enableFeedback: false,
             ),
           ),
@@ -622,7 +704,8 @@ void main() {
     });
   });
 
-  testWidgets('splashing survives scrolling when keep-alive is enabled', (WidgetTester tester) async {
+  testWidgets('splashing survives scrolling when keep-alive is enabled',
+      (WidgetTester tester) async {
     Future<void> runTest(bool keepAlive) async {
       await tester.pumpWidget(
         Directionality(
@@ -635,7 +718,9 @@ void main() {
                 addAutomaticKeepAlives: keepAlive,
                 dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
-                  SizedBox(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
+                  SizedBox(
+                      height: 500.0,
+                      child: InkWell(onTap: () {}, child: const Placeholder())),
                   const SizedBox(height: 500.0),
                   const SizedBox(height: 500.0),
                 ],
@@ -644,11 +729,15 @@ void main() {
           ),
         ),
       );
-      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, isNot(paints..circle()));
+      expect(
+          tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+          isNot(paints..circle()));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
-      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, paints..circle());
+      expect(
+          tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+          paints..circle());
       await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
       await tester.pump(const Duration(milliseconds: 10));
       await tester.drag(find.byType(ListView), const Offset(0.0, 1000.0));
@@ -670,30 +759,38 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () { },
+          onTap: () {},
           child: const Text('Button'),
         ),
       ),
     ));
-    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(
+        semantics,
+        includesNodeWith(
+            label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () { },
+          onTap: () {},
           excludeFromSemantics: true,
           child: const Text('Button'),
         ),
       ),
     ));
-    expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(
+        semantics,
+        isNot(includesNodeWith(
+            label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap])));
 
     semantics.dispose();
   });
 
-  testWidgets("ink response doesn't focus when disabled", (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+  testWidgets("ink response doesn't focus when disabled",
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
@@ -728,8 +825,11 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('ink response accepts focus when disabled in directional navigation mode', (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+  testWidgets(
+      'ink response accepts focus when disabled in directional navigation mode',
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
@@ -774,8 +874,10 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets("ink response doesn't hover when disabled", (WidgetTester tester) async {
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+  testWidgets("ink response doesn't hover when disabled",
+      (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     final GlobalKey childKey = GlobalKey();
     bool hovering = false;
@@ -790,7 +892,9 @@ void main() {
               autofocus: true,
               onTap: () {},
               onLongPress: () {},
-              onHover: (bool value) { hovering = value; },
+              onHover: (bool value) {
+                hovering = value;
+              },
               focusNode: focusNode,
               child: SizedBox(key: childKey),
             ),
@@ -800,7 +904,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
@@ -816,7 +921,9 @@ void main() {
             height: 100,
             child: InkWell(
               focusNode: focusNode,
-              onHover: (bool value) { hovering = value; },
+              onHover: (bool value) {
+                hovering = value;
+              },
               child: SizedBox(key: childKey),
             ),
           ),
@@ -828,7 +935,9 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('When ink wells are nested, only the inner one is triggered by tap splash', (WidgetTester tester) async {
+  testWidgets(
+      'When ink wells are nested, only the inner one is triggered by tap splash',
+      (WidgetTester tester) async {
     final GlobalKey middleKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     Widget paddedInkWell({Key? key, Widget? child}) {
@@ -860,10 +969,12 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material =
+        Material.of(tester.element(find.byKey(innerKey)))!;
 
     // Press
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    final TestGesture gesture = await tester
+        .startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
@@ -888,13 +999,16 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Use a second pointer to press
-    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    final TestGesture gesture2 = await tester
+        .startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
     await gesture2.up();
   });
 
-  testWidgets('Reparenting parent should allow both inkwells to show splash afterwards', (WidgetTester tester) async {
+  testWidgets(
+      'Reparenting parent should allow both inkwells to show splash afterwards',
+      (WidgetTester tester) async {
     final GlobalKey middleKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     Widget paddedInkWell({Key? key, Widget? child}) {
@@ -933,10 +1047,12 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material =
+        Material.of(tester.element(find.byKey(innerKey)))!;
 
     // Press
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    final TestGesture gesture = await tester
+        .startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
@@ -977,12 +1093,14 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Use a second pointer to press the previous child
-    await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    await tester.startGesture(tester.getCenter(find.byKey(innerKey)),
+        pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
   });
 
-  testWidgets('Parent inkwell does not block child inkwells from splashes', (WidgetTester tester) async {
+  testWidgets('Parent inkwell does not block child inkwells from splashes',
+      (WidgetTester tester) async {
     final GlobalKey middleKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     Widget paddedInkWell({Key? key, Widget? child}) {
@@ -1014,20 +1132,26 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material =
+        Material.of(tester.element(find.byKey(innerKey)))!;
 
     // Press middle
-    await tester.startGesture(tester.getTopLeft(find.byKey(middleKey)) + const Offset(1, 1), pointer: 1);
+    await tester.startGesture(
+        tester.getTopLeft(find.byKey(middleKey)) + const Offset(1, 1),
+        pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Press inner
-    await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    await tester.startGesture(tester.getCenter(find.byKey(innerKey)),
+        pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
   });
 
-  testWidgets('Parent inkwell can count the number of pressed children to prevent splash', (WidgetTester tester) async {
+  testWidgets(
+      'Parent inkwell can count the number of pressed children to prevent splash',
+      (WidgetTester tester) async {
     final GlobalKey parentKey = GlobalKey();
     final GlobalKey leftKey = GlobalKey();
     final GlobalKey rightKey = GlobalKey();
@@ -1074,22 +1198,27 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(leftKey)))!;
+    final MaterialInkController material =
+        Material.of(tester.element(find.byKey(leftKey)))!;
 
-    final Offset parentPosition = tester.getTopLeft(find.byKey(parentKey)) + const Offset(1, 1);
+    final Offset parentPosition =
+        tester.getTopLeft(find.byKey(parentKey)) + const Offset(1, 1);
 
     // Press left child
-    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byKey(leftKey)), pointer: 1);
+    final TestGesture gesture1 = await tester
+        .startGesture(tester.getCenter(find.byKey(leftKey)), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Press right child
-    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(rightKey)), pointer: 2);
+    final TestGesture gesture2 = await tester
+        .startGesture(tester.getCenter(find.byKey(rightKey)), pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
 
     // Press parent
-    final TestGesture gesture3 = await tester.startGesture(parentPosition, pointer: 3);
+    final TestGesture gesture3 =
+        await tester.startGesture(parentPosition, pointer: 3);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
     await gesture3.up();
@@ -1117,7 +1246,9 @@ void main() {
     await gesture3.up();
   });
 
-  testWidgets('When ink wells are reparented, the old parent can display splash while the new parent can not', (WidgetTester tester) async {
+  testWidgets(
+      'When ink wells are reparented, the old parent can display splash while the new parent can not',
+      (WidgetTester tester) async {
     final GlobalKey innerKey = GlobalKey();
     final GlobalKey leftKey = GlobalKey();
     final GlobalKey rightKey = GlobalKey();
@@ -1134,7 +1265,7 @@ void main() {
           child: Align(
             alignment: Alignment.topLeft,
             child: SizedBox(
-              width: leftWidth+rightWidth,
+              width: leftWidth + rightWidth,
               height: 100,
               child: Row(
                 children: <Widget>[
@@ -1186,10 +1317,12 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material =
+        Material.of(tester.element(find.byKey(innerKey)))!;
 
     // Press inner
-    final TestGesture gesture = await tester.startGesture(const Offset(100, 50), pointer: 1);
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(100, 50), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
@@ -1207,7 +1340,8 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 0));
 
     // A second pointer presses inner
-    final TestGesture gesture2 = await tester.startGesture(const Offset(100, 50), pointer: 2);
+    final TestGesture gesture2 =
+        await tester.startGesture(const Offset(100, 50), pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
@@ -1229,7 +1363,9 @@ void main() {
     await gesture2.up();
   });
 
-  testWidgets("Ink wells's splash starts before tap is confirmed and disappear after tap is canceled", (WidgetTester tester) async {
+  testWidgets(
+      "Ink wells's splash starts before tap is confirmed and disappear after tap is canceled",
+      (WidgetTester tester) async {
     final GlobalKey innerKey = GlobalKey();
     await tester.pumpWidget(
       Material(
@@ -1260,10 +1396,12 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material =
+        Material.of(tester.element(find.byKey(innerKey)))!;
 
     // Press
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    final TestGesture gesture = await tester
+        .startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
@@ -1283,11 +1421,12 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
   });
 
-  testWidgets('disabled and hovered inkwell responds to mouse-exit', (WidgetTester tester) async {
+  testWidgets('disabled and hovered inkwell responds to mouse-exit',
+      (WidgetTester tester) async {
     int onHoverCount = 0;
     late bool hover;
 
-    Widget buildFrame({ required bool enabled }) {
+    Widget buildFrame({required bool enabled}) {
       return Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -1296,7 +1435,7 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                onTap: enabled ? () { } : null,
+                onTap: enabled ? () {} : null,
                 onHover: (bool value) {
                   onHoverCount += 1;
                   hover = value;
@@ -1309,7 +1448,8 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(enabled: true));
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
 
@@ -1340,21 +1480,24 @@ void main() {
     expect(onHoverCount, 2);
     expect(hover, false);
 
-    await gesture.moveTo(tester.getCenter(find.byType(InkWell)) - const Offset(1, 1));
+    await gesture
+        .moveTo(tester.getCenter(find.byType(InkWell)) - const Offset(1, 1));
     await tester.pumpAndSettle();
     // Moving the mouse a little within the InkWell doesn't change anything.
     expect(onHoverCount, 2);
     expect(hover, false);
   });
 
-  testWidgets('Changing InkWell.enabled should not trigger TextButton setState()', (WidgetTester tester) async {
-    Widget buildFrame({ required bool enabled }) {
+  testWidgets(
+      'Changing InkWell.enabled should not trigger TextButton setState()',
+      (WidgetTester tester) async {
+    Widget buildFrame({required bool enabled}) {
       return Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: TextButton(
-              onPressed: enabled ? () { } : null,
+              onPressed: enabled ? () {} : null,
               child: const Text('button'),
             ),
           ),
@@ -1364,7 +1507,8 @@ void main() {
 
     await tester.pumpWidget(buildFrame(enabled: false));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
@@ -1382,25 +1526,29 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('InkWell does not attach semantics handler for onTap if it was not provided an onTap handler', (WidgetTester tester) async {
+  testWidgets(
+      'InkWell does not attach semantics handler for onTap if it was not provided an onTap handler',
+      (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
         child: Center(
           child: InkWell(
-            onLongPress: () { },
+            onLongPress: () {},
             child: const Text('Foo'),
           ),
         ),
       ),
     ));
 
-    expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
-      label: 'Foo',
-      hasLongPressAction: true,
-      isFocusable: true,
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+        tester.getSemantics(find.bySemanticsLabel('Foo')),
+        matchesSemantics(
+          label: 'Foo',
+          hasLongPressAction: true,
+          isFocusable: true,
+          textDirection: TextDirection.ltr,
+        ));
 
     // Add tap handler and confirm addition to semantic actions.
     await tester.pumpWidget(Directionality(
@@ -1408,20 +1556,22 @@ void main() {
       child: Material(
         child: Center(
           child: InkWell(
-            onLongPress: () { },
-            onTap: () { },
+            onLongPress: () {},
+            onTap: () {},
             child: const Text('Foo'),
           ),
         ),
       ),
     ));
 
-    expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
-      label: 'Foo',
-      hasTapAction: true,
-      hasLongPressAction: true,
-      isFocusable: true,
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+        tester.getSemantics(find.bySemanticsLabel('Foo')),
+        matchesSemantics(
+          label: 'Foo',
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isFocusable: true,
+          textDirection: TextDirection.ltr,
+        ));
   });
 }

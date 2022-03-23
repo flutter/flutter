@@ -31,7 +31,8 @@ void main() {
       child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
-    await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
+    await tester.fling(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
     expect(
       find.byType(Scrollbar),
       paints
@@ -58,7 +59,8 @@ void main() {
       child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
-    await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
+    await tester.fling(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
     expect(
       find.byType(Scrollbar),
       paints
@@ -79,7 +81,8 @@ void main() {
     );
   });
 
-  testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
+  testWidgets('works with MaterialApp and Scaffold',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
@@ -96,7 +99,8 @@ void main() {
       ),
     ));
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.byType(ListView)));
     // On Android it should not overscroll.
     await gesture.moveBy(const Offset(0, 100));
     // Trigger fade in animation.
@@ -117,13 +121,15 @@ void main() {
           color: const Color(0x00000000),
         )
         ..rect(
-          rect: const Rect.fromLTWH(796.0, 0.0, 4.0, (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)),
+          rect: const Rect.fromLTWH(796.0, 0.0, 4.0,
+              (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)),
           color: _kAndroidThumbIdleColor,
         ),
     );
   });
 
-  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgets("should not paint when there isn't enough space",
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
@@ -140,7 +146,8 @@ void main() {
       ),
     ));
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.byType(ListView)));
     // On Android it should not overscroll.
     await gesture.moveBy(const Offset(0, 100));
     // Trigger fade in animation.
@@ -149,5 +156,4 @@ void main() {
 
     expect(find.byType(Scrollbar), isNot(paints..rect()));
   });
-
 }

@@ -123,9 +123,14 @@ class _ChipsTile extends StatelessWidget {
               container: true,
               child: Container(
                 alignment: Alignment.center,
-                constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+                constraints:
+                    const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.caption!.copyWith(fontStyle: FontStyle.italic)),
+                child: Text('None',
+                    style: Theme.of(context)
+                        .textTheme
+                        .caption!
+                        .copyWith(fontStyle: FontStyle.italic)),
               ),
             ),
         ],
@@ -292,7 +297,8 @@ class _ChipDemoState extends State<ChipDemo> {
       for (final String tool in _selectedTools) {
         allowedActions.addAll(_toolActions[tool]!);
       }
-      allowedActions = allowedActions.intersection(_materialActions[_selectedMaterial]!);
+      allowedActions =
+          allowedActions.intersection(_materialActions[_selectedMaterial]!);
     }
 
     final List<Widget> actionChips = allowedActions.map<Widget>((String name) {
@@ -310,9 +316,11 @@ class _ChipDemoState extends State<ChipDemo> {
       const SizedBox(height: 8.0, width: 0.0),
       _ChipsTile(label: 'Available Materials (Chip)', children: chips),
       _ChipsTile(label: 'Available Tools (InputChip)', children: inputChips),
-      _ChipsTile(label: 'Choose a Material (ChoiceChip)', children: choiceChips),
+      _ChipsTile(
+          label: 'Choose a Material (ChoiceChip)', children: choiceChips),
       _ChipsTile(label: 'Choose Tools (FilterChip)', children: filterChips),
-      _ChipsTile(label: 'Perform Allowed Action (ActionChip)', children: actionChips),
+      _ChipsTile(
+          label: 'Perform Allowed Action (ActionChip)', children: actionChips),
       const Divider(),
       Padding(
         padding: const EdgeInsets.all(8.0),
@@ -336,7 +344,8 @@ class _ChipDemoState extends State<ChipDemo> {
                 _showShapeBorder = !_showShapeBorder;
               });
             },
-            icon: const Icon(Icons.vignette, semanticLabel: 'Update border shape'),
+            icon: const Icon(Icons.vignette,
+                semanticLabel: 'Update border shape'),
           ),
         ],
       ),

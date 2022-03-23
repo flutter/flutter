@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Scroll flings twice in a row does not crash', (WidgetTester tester) async {
+  testWidgets('Scroll flings twice in a row does not crash',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -19,11 +20,12 @@ void main() {
     );
 
     final ScrollableState scrollable =
-      tester.state<ScrollableState>(find.byType(Scrollable));
+        tester.state<ScrollableState>(find.byType(Scrollable));
 
     expect(scrollable.position.pixels, equals(0.0));
 
-    await tester.flingFrom(const Offset(200.0, 300.0), const Offset(0.0, -200.0), 500.0);
+    await tester.flingFrom(
+        const Offset(200.0, 300.0), const Offset(0.0, -200.0), 500.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
 
@@ -31,7 +33,8 @@ void main() {
 
     final double oldOffset = scrollable.position.pixels;
 
-    await tester.flingFrom(const Offset(200.0, 300.0), const Offset(0.0, -200.0), 500.0);
+    await tester.flingFrom(
+        const Offset(200.0, 300.0), const Offset(0.0, -200.0), 500.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
 

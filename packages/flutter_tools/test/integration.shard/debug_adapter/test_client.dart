@@ -36,8 +36,9 @@ class DapTestClient {
           _logger?.call(
               'Application terminated without a response to ${_pendingRequests.length} requests');
         }
-        _pendingRequests.forEach((int id, _OutgoingRequest request) => request.completer.completeError(
-            'Application terminated without a response to request $id (${request.name})'));
+        _pendingRequests.forEach((int id, _OutgoingRequest request) =>
+            request.completer.completeError(
+                'Application terminated without a response to request $id (${request.name})'));
         _pendingRequests.clear();
       },
     );
@@ -48,20 +49,22 @@ class DapTestClient {
   final Logger? _logger;
   final bool captureVmServiceTraffic;
   final Map<int, _OutgoingRequest> _pendingRequests = <int, _OutgoingRequest>{};
-  final StreamController<Event> _eventController = StreamController<Event>.broadcast();
+  final StreamController<Event> _eventController =
+      StreamController<Event>.broadcast();
   int _seq = 1;
   late final Future<Uri?> vmServiceUri;
 
   /// Returns a stream of [OutputEventBody] events.
-  Stream<OutputEventBody> get outputEvents => events('output')
-      .map((Event e) => OutputEventBody.fromJson(e.body! as Map<String, Object?>));
+  Stream<OutputEventBody> get outputEvents => events('output').map(
+      (Event e) => OutputEventBody.fromJson(e.body! as Map<String, Object?>));
 
   /// Returns a stream of [StoppedEventBody] events.
-  Stream<StoppedEventBody> get stoppedEvents => events('stopped')
-      .map((Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
+  Stream<StoppedEventBody> get stoppedEvents => events('stopped').map(
+      (Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
 
   /// Returns a stream of the string output from [OutputEventBody] events.
-  Stream<String> get output => outputEvents.map((OutputEventBody output) => output.output);
+  Stream<String> get output =>
+      outputEvents.map((OutputEventBody output) => output.output);
 
   /// Returns a stream of the string output from [OutputEventBody] events with the category 'stdout'.
   Stream<String> get stdoutOutput => outputEvents
@@ -76,7 +79,8 @@ class DapTestClient {
   /// Returns a Future that completes with the next [event] event.
   Future<Event> event(String event) => _eventController.stream.firstWhere(
       (Event e) => e.event == event,
-      orElse: () => throw Exception('Did not receive $event event before stream closed'));
+      orElse: () =>
+          throw Exception('Did not receive $event event before stream closed'));
 
   /// Returns a stream for [event] events.
   Stream<Event> events(String event) {
@@ -117,7 +121,8 @@ class DapTestClient {
     String exceptionPauseMode = 'None',
     bool? supportsRunInTerminalRequest,
   }) async {
-    final List<ProtocolMessage> responses = await Future.wait(<Future<ProtocolMessage>>[
+    final List<ProtocolMessage> responses =
+        await Future.wait(<Future<ProtocolMessage>>[
       event('initialized'),
       sendRequest(InitializeRequestArguments(
         adapterID: 'test',
@@ -207,7 +212,8 @@ class DapTestClient {
   /// response.
   Future<Response> sendRequest(Object? arguments,
       {bool allowFailure = false, String? overrideCommand}) {
-    final String command = overrideCommand ?? commandTypes[arguments.runtimeType]!;
+    final String command =
+        overrideCommand ?? commandTypes[arguments.runtimeType]!;
     final Request request =
         Request(seq: _seq++, command: command, arguments: arguments);
     final Completer<Response> completer = Completer<Response>();
@@ -219,15 +225,19 @@ class DapTestClient {
 
   /// Returns a Future that completes with the next serviceExtensionAdded
   /// event for [extension].
-  Future<Map<String, Object?>> serviceExtensionAdded(String extension) => serviceExtensionAddedEvents.firstWhere(
-      (Map<String, Object?> body) => body['extensionRPC'] == extension,
-      orElse: () => throw Exception('Did not receive $extension extension added event before stream closed'));
+  Future<Map<String, Object?>> serviceExtensionAdded(String extension) =>
+      serviceExtensionAddedEvents.firstWhere(
+          (Map<String, Object?> body) => body['extensionRPC'] == extension,
+          orElse: () => throw Exception(
+              'Did not receive $extension extension added event before stream closed'));
 
   /// Returns a Future that completes with the next serviceExtensionStateChanged
   /// event for [extension].
-  Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) => serviceExtensionStateChangedEvents.firstWhere(
-      (Map<String, Object?> body) => body['extension'] == extension,
-      orElse: () => throw Exception('Did not receive $extension extension state changed event before stream closed'));
+  Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) =>
+      serviceExtensionStateChangedEvents.firstWhere(
+          (Map<String, Object?> body) => body['extension'] == extension,
+          orElse: () => throw Exception(
+              'Did not receive $extension extension state changed event before stream closed'));
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
   /// custom [launch] method.
@@ -254,7 +264,8 @@ class DapTestClient {
   /// of raising the appropriate event.
   Future<void> _handleMessage(Object? message) async {
     if (message is Response) {
-      final _OutgoingRequest? pendingRequest = _pendingRequests.remove(message.requestSeq);
+      final _OutgoingRequest? pendingRequest =
+          _pendingRequests.remove(message.requestSeq);
       if (pendingRequest == null) {
         return;
       }
@@ -283,7 +294,8 @@ class DapTestClient {
     bool captureVmServiceTraffic = false,
     Logger? logger,
   }) async {
-    final ByteStreamServerChannel channel = ByteStreamServerChannel(server.stream, server.sink, logger);
+    final ByteStreamServerChannel channel =
+        ByteStreamServerChannel(server.stream, server.sink, logger);
     return DapTestClient._(channel, logger,
         captureVmServiceTraffic: captureVmServiceTraffic);
   }
@@ -322,18 +334,18 @@ extension DapTestClientExtension on DapTestClient {
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialise) or [launch] to only
   /// customise the [launchRequest].
-  Future<List<OutputEventBody>> collectAllOutput({
-    String? program,
-    String? cwd,
-    Future<Response> Function()? start,
-    Future<Response> Function()? launch,
-    bool skipInitialPubGetOutput = true
-  }) async {
+  Future<List<OutputEventBody>> collectAllOutput(
+      {String? program,
+      String? cwd,
+      Future<Response> Function()? start,
+      Future<Response> Function()? launch,
+      bool skipInitialPubGetOutput = true}) async {
     assert(
       start == null || launch == null,
       'Only one of "start" or "launch" may be provided',
     );
-    final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
+    final Future<List<OutputEventBody>> outputEventsFuture =
+        outputEvents.toList();
 
     // Don't await these, in case they don't complete (eg. an error prevents
     // the app from starting).
@@ -350,7 +362,10 @@ extension DapTestClientExtension on DapTestClient {
     //   It may be possible to remove this if
     //   https://github.com/flutter/flutter/pull/91300 lands.
     return skipInitialPubGetOutput
-        ? output.skipWhile((OutputEventBody output) => output.output.startsWith('Running "flutter pub get"')).toList()
+        ? output
+            .skipWhile((OutputEventBody output) =>
+                output.output.startsWith('Running "flutter pub get"'))
+            .toList()
         : output;
   }
 
@@ -373,8 +388,10 @@ extension DapTestClientExtension on DapTestClient {
       'Only one of "start" or "launch" may be provided',
     );
 
-    final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
-    final Future<List<Map<String, Object?>>> testNotificationEventsFuture = testNotificationEvents.toList();
+    final Future<List<OutputEventBody>> outputEventsFuture =
+        outputEvents.toList();
+    final Future<List<Map<String, Object?>>> testNotificationEventsFuture =
+        testNotificationEvents.toList();
 
     if (start != null) {
       await start();
@@ -416,5 +433,4 @@ extension DapTestClientExtension on DapTestClient {
       ),
     );
   }
-
 }

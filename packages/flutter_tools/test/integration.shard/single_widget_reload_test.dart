@@ -29,35 +29,45 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('newly added code executes during hot reload with single widget reloads, but only invalidated widget', () async {
+  testWithoutContext(
+      'newly added code executes during hot reload with single widget reloads, but only invalidated widget',
+      () async {
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final StreamSubscription<String> subscription =
+        flutter.stdout.listen(stdout.writeln);
     await flutter.run(singleWidgetReloads: true);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotReload();
-      expect(stdout.toString(), allOf(
-        contains('(((TICK 1)))'),
-        contains('(((((RELOAD WORKED)))))'),
-        // Does not invalidate parent widget, so second tick is not output.
-        isNot(contains('(((TICK 2)))'),
-      )));
+      expect(
+          stdout.toString(),
+          allOf(
+              contains('(((TICK 1)))'),
+              contains('(((((RELOAD WORKED)))))'),
+              // Does not invalidate parent widget, so second tick is not output.
+              isNot(
+                contains('(((TICK 2)))'),
+              )));
     } finally {
       await subscription.cancel();
     }
   });
 
-  testWithoutContext('changes outside of the class body triggers a full reload', () async {
+  testWithoutContext('changes outside of the class body triggers a full reload',
+      () async {
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final StreamSubscription<String> subscription =
+        flutter.stdout.listen(stdout.writeln);
     await flutter.run(singleWidgetReloads: true);
     project.modifyFunction();
     try {
       await flutter.hotReload();
-      expect(stdout.toString(), allOf(
-        contains('(((TICK 1)))'),
-        contains('(((TICK 2)))'),
-      ));
+      expect(
+          stdout.toString(),
+          allOf(
+            contains('(((TICK 1)))'),
+            contains('(((TICK 2)))'),
+          ));
     } finally {
       await subscription.cancel();
     }

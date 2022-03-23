@@ -78,7 +78,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   })  : _fileSystem = fileSystem,
         ffiPlugin = ffiPlugin ?? false;
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
+  factory AndroidPlugin.fromYaml(
+      String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
@@ -142,9 +143,9 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'name': name,
       if (package != null) 'package': package,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage : defaultPackage,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
       // Mustache doesn't support complex types.
       'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
       'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
@@ -198,11 +199,10 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (mainPluginClass == null || !mainClassFound) {
       assert(mainClassCandidates.length <= 2);
       throwToolExit(
-        "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
-        "This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin's pubspec.yaml.\n"
-        'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
-        'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. '
-      );
+          "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
+          "This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin's pubspec.yaml.\n"
+          'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+          'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. ');
     }
 
     final String mainClassContent = mainPluginClass.readAsStringSync();
@@ -212,8 +212,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     } else {
       supportedEmbeddings.add('1');
     }
-    if (mainClassContent.contains('PluginRegistry')
-        && mainClassContent.contains('registerWith')) {
+    if (mainClassContent.contains('PluginRegistry') &&
+        mainClassContent.contains('registerWith')) {
       supportedEmbeddings.add('1');
     }
     return supportedEmbeddings;
@@ -241,7 +241,8 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   }) : ffiPlugin = ffiPlugin ?? false;
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
+    assert(validate(
+        yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
     return IOSPlugin(
       name: name,
       classPrefix: '',
@@ -289,9 +290,9 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'name': name,
       'prefix': classPrefix,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage : defaultPackage,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }
@@ -379,7 +380,9 @@ class WindowsPlugin extends PluginPlatform
     this.defaultPackage,
     this.variants = const <PluginPlatformVariant>{},
   })  : ffiPlugin = ffiPlugin ?? false,
-        assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
+        assert(pluginClass != null ||
+            dartPluginClass != null ||
+            defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -394,7 +397,8 @@ class WindowsPlugin extends PluginPlatform
       // If no variant list is provided assume Win32 for backward compatibility.
       variants.add(PluginPlatformVariant.win32);
     } else {
-      const Map<String, PluginPlatformVariant> variantByName = <String, PluginPlatformVariant>{
+      const Map<String, PluginPlatformVariant> variantByName =
+          <String, PluginPlatformVariant>{
         'win32': PluginPlatformVariant.win32,
         'uwp': PluginPlatformVariant.winuwp,
       };
@@ -474,7 +478,10 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     bool? ffiPlugin,
     this.defaultPackage,
   })  : ffiPlugin = ffiPlugin ?? false,
-        assert(pluginClass != null || dartPluginClass != null || (ffiPlugin ?? false) || defaultPackage != null);
+        assert(pluginClass != null ||
+            dartPluginClass != null ||
+            (ffiPlugin ?? false) ||
+            defaultPackage != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -585,8 +592,6 @@ class WebPlugin extends PluginPlatform {
 
 final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
-  return className.splitMapJoin(
-    _internalCapitalLetterRegex,
-    onMatch: (_) => '_',
-    onNonMatch: (String n) => n.toLowerCase());
+  return className.splitMapJoin(_internalCapitalLetterRegex,
+      onMatch: (_) => '_', onNonMatch: (String n) => n.toLowerCase());
 }

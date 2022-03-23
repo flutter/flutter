@@ -71,10 +71,10 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
-  }) : assert(radius == null || (minRadius == null && maxRadius == null)),
-       assert(backgroundImage != null || onBackgroundImageError == null),
-       assert(foregroundImage != null || onForegroundImageError== null),
-       super(key: key);
+  })  : assert(radius == null || (minRadius == null && maxRadius == null)),
+        assert(backgroundImage != null || onBackgroundImageError == null),
+        assert(foregroundImage != null || onForegroundImageError == null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -193,7 +193,8 @@ class CircleAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.subtitle1!.copyWith(color: foregroundColor);
+    TextStyle textStyle =
+        theme.primaryTextTheme.subtitle1!.copyWith(color: foregroundColor);
     Color? effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
@@ -227,12 +228,12 @@ class CircleAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
         image: backgroundImage != null
-          ? DecorationImage(
-              image: backgroundImage!,
-              onError: onBackgroundImageError,
-              fit: BoxFit.cover,
-            )
-          : null,
+            ? DecorationImage(
+                image: backgroundImage!,
+                onError: onBackgroundImageError,
+                fit: BoxFit.cover,
+              )
+            : null,
         shape: BoxShape.circle,
       ),
       foregroundDecoration: foregroundImage != null

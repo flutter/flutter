@@ -130,9 +130,12 @@ keep this 2
 
     expect(macosProjectMigration.migrate,
         throwsToolExit(message: 'Your Xcode project requires migration'));
-    expect(testUsage.events, contains(
-      const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
-    ));
+    expect(
+        testUsage.events,
+        contains(
+          const TestUsageEvent('macos-migration', 'remove-frameworks',
+              label: 'failure'),
+        ));
   });
 
   testWithoutContext(
@@ -149,15 +152,19 @@ keep this 2
     );
     expect(macosProjectMigration.migrate,
         throwsToolExit(message: 'Your Xcode project requires migration'));
-    expect(testUsage.events, contains(
-      const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
-    ));
+    expect(
+        testUsage.events,
+        contains(
+          const TestUsageEvent('macos-migration', 'remove-frameworks',
+              label: 'failure'),
+        ));
   });
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
-  File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
+  File xcodeProjectInfoFile =
+      MemoryFileSystem.test().file('xcodeProjectInfoFile');
 }
 
 class FakeMacOSMigrator extends ProjectMigrator {

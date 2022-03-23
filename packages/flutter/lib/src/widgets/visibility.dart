@@ -62,29 +62,29 @@ class Visibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
-  }) : assert(child != null),
-       assert(replacement != null),
-       assert(visible != null),
-       assert(maintainState != null),
-       assert(maintainAnimation != null),
-       assert(maintainSize != null),
-       assert(
-         maintainState == true || maintainAnimation == false,
-         'Cannot maintain animations if the state is not also maintained.',
-       ),
-       assert(
-         maintainAnimation == true || maintainSize == false,
-         'Cannot maintain size if animations are not maintained.',
-       ),
-       assert(
-         maintainSize == true || maintainSemantics == false,
-         'Cannot maintain semantics if size is not maintained.',
-       ),
-       assert(
-         maintainSize == true || maintainInteractivity == false,
-         'Cannot maintain interactivity if size is not maintained.',
-       ),
-       super(key: key);
+  })  : assert(child != null),
+        assert(replacement != null),
+        assert(visible != null),
+        assert(maintainState != null),
+        assert(maintainAnimation != null),
+        assert(maintainSize != null),
+        assert(
+          maintainState == true || maintainAnimation == false,
+          'Cannot maintain animations if the state is not also maintained.',
+        ),
+        assert(
+          maintainAnimation == true || maintainSize == false,
+          'Cannot maintain size if animations are not maintained.',
+        ),
+        assert(
+          maintainSize == true || maintainSemantics == false,
+          'Cannot maintain semantics if size is not maintained.',
+        ),
+        assert(
+          maintainSize == true || maintainInteractivity == false,
+          'Cannot maintain interactivity if size is not maintained.',
+        ),
+        super(key: key);
 
   /// The widget to show or hide, as controlled by [visible].
   ///
@@ -249,12 +249,18 @@ class Visibility extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
-    properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
-    properties.add(FlagProperty('maintainAnimation', value: maintainAnimation, ifFalse: 'maintainAnimation'));
-    properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
-    properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
-    properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+    properties.add(FlagProperty('visible',
+        value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
+    properties.add(FlagProperty('maintainState',
+        value: maintainState, ifFalse: 'maintainState'));
+    properties.add(FlagProperty('maintainAnimation',
+        value: maintainAnimation, ifFalse: 'maintainAnimation'));
+    properties.add(FlagProperty('maintainSize',
+        value: maintainSize, ifFalse: 'maintainSize'));
+    properties.add(FlagProperty('maintainSemantics',
+        value: maintainSemantics, ifFalse: 'maintainSemantics'));
+    properties.add(FlagProperty('maintainInteractivity',
+        value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
   }
 }
 
@@ -307,31 +313,31 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
-  }) : assert(sliver != null),
-       assert(replacementSliver != null),
-       assert(visible != null),
-       assert(maintainState != null),
-       assert(maintainAnimation != null),
-       assert(maintainSize != null),
-       assert(maintainSemantics != null),
-       assert(maintainInteractivity != null),
-       assert(
-         maintainState == true || maintainAnimation == false,
-         'Cannot maintain animations if the state is not also maintained.',
-       ),
-       assert(
-         maintainAnimation == true || maintainSize == false,
-         'Cannot maintain size if animations are not maintained.',
-       ),
-       assert(
-         maintainSize == true || maintainSemantics == false,
-         'Cannot maintain semantics if size is not maintained.',
-       ),
-       assert(
-         maintainSize == true || maintainInteractivity == false,
-         'Cannot maintain interactivity if size is not maintained.',
-       ),
-       super(key: key);
+  })  : assert(sliver != null),
+        assert(replacementSliver != null),
+        assert(visible != null),
+        assert(maintainState != null),
+        assert(maintainAnimation != null),
+        assert(maintainSize != null),
+        assert(maintainSemantics != null),
+        assert(maintainInteractivity != null),
+        assert(
+          maintainState == true || maintainAnimation == false,
+          'Cannot maintain animations if the state is not also maintained.',
+        ),
+        assert(
+          maintainAnimation == true || maintainSize == false,
+          'Cannot maintain size if animations are not maintained.',
+        ),
+        assert(
+          maintainSize == true || maintainSemantics == false,
+          'Cannot maintain semantics if size is not maintained.',
+        ),
+        assert(
+          maintainSize == true || maintainInteractivity == false,
+          'Cannot maintain interactivity if size is not maintained.',
+        ),
+        super(key: key);
 
   /// The sliver to show or hide, as controlled by [visible].
   final Widget sliver;
@@ -487,11 +493,17 @@ class SliverVisibility extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
-    properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
-    properties.add(FlagProperty('maintainAnimation', value: maintainAnimation, ifFalse: 'maintainAnimation'));
-    properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
-    properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
-    properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+    properties.add(FlagProperty('visible',
+        value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
+    properties.add(FlagProperty('maintainState',
+        value: maintainState, ifFalse: 'maintainState'));
+    properties.add(FlagProperty('maintainAnimation',
+        value: maintainAnimation, ifFalse: 'maintainAnimation'));
+    properties.add(FlagProperty('maintainSize',
+        value: maintainSize, ifFalse: 'maintainSize'));
+    properties.add(FlagProperty('maintainSemantics',
+        value: maintainSemantics, ifFalse: 'maintainSemantics'));
+    properties.add(FlagProperty('maintainInteractivity',
+        value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
   }
 }

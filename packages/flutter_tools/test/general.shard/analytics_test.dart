@@ -42,7 +42,8 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      tempDir = globals.fs.systemTempDirectory
+          .createTempSync('flutter_tools_analytics_test.');
       testConfig = Config.test();
     });
 
@@ -53,10 +54,11 @@ void main() {
     // Ensure we don't send anything when analytics is disabled.
     testUsingContext("doesn't send when disabled", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend
+          .listen((Map<String, dynamic> data) => count++);
 
       final FlutterCommand command = FakeFlutterCommand();
-      final CommandRunner<void>runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
       globals.flutterUsage.enabled = false;
       await runner.run(<String>['fake']);
@@ -77,16 +79,17 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(),
       Usage: () => Usage(
-        configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path,
-        runningOnBot: true,
-      ),
+            configDirOverride: tempDir.path,
+            logFile: tempDir.childFile('analytics.log').path,
+            runningOnBot: true,
+          ),
     });
 
     // Ensure we don't send for the 'flutter config' command.
     testUsingContext("config doesn't send", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend
+          .listen((Map<String, dynamic> data) => count++);
 
       globals.flutterUsage.enabled = false;
       final ConfigCommand command = ConfigCommand();
@@ -101,49 +104,55 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(),
       Usage: () => Usage(
-        configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path,
-        runningOnBot: true,
-      ),
+            configDirOverride: tempDir.path,
+            logFile: tempDir.childFile('analytics.log').path,
+            runningOnBot: true,
+          ),
     });
 
-    testUsingContext('Usage records one feature in experiment setting', () async {
+    testUsingContext('Usage records one feature in experiment setting',
+        () async {
       testConfig.setValue(flutterWebFeature.configSetting, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey =
+          cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
 
-      expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
+      expect(globals.fs.file('test').readAsStringSync(),
+          contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-      }),
+            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          }),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Usage records multiple features in experiment setting', () async {
+    testUsingContext('Usage records multiple features in experiment setting',
+        () async {
       testConfig.setValue(flutterWebFeature.configSetting, true);
       testConfig.setValue(flutterLinuxDesktopFeature.configSetting, true);
       testConfig.setValue(flutterMacOSDesktopFeature.configSetting, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey =
+          cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
 
       expect(
         globals.fs.file('test').readAsStringSync(),
-        contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
+        contains(
+            '$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-      }),
+            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          }),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -171,11 +180,16 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-      expect(testUsage.timings, contains(
-        const TestTimingEvent(
-            'flutter', 'doctor', Duration(milliseconds: 1000), label: 'success',
-        ),
-      ));
+      expect(
+          testUsage.timings,
+          contains(
+            const TestTimingEvent(
+              'flutter',
+              'doctor',
+              Duration(milliseconds: 1000),
+              label: 'success',
+            ),
+          ));
     }, overrides: <Type, Generator>{
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
@@ -189,12 +203,16 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-
-      expect(testUsage.timings, contains(
-        const TestTimingEvent(
-          'flutter', 'doctor', Duration(milliseconds: 1000), label: 'warning',
-        ),
-      ));
+      expect(
+          testUsage.timings,
+          contains(
+            const TestTimingEvent(
+              'flutter',
+              'doctor',
+              Duration(milliseconds: 1000),
+              label: 'warning',
+            ),
+          ));
     }, overrides: <Type, Generator>{
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
@@ -211,7 +229,8 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand();
-      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'] as FlutterCommand;
+      final FlutterCommand buildApkCommand =
+          buildCommand.subcommands['apk'] as FlutterCommand;
 
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
@@ -241,10 +260,10 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
-        },
-      ),
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+            },
+          ),
       Stdio: () => fakeStdio,
     });
 
@@ -271,10 +290,10 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
-        },
-      ),
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+            },
+          ),
       Stdio: () => fakeStdio,
     });
   });
@@ -283,7 +302,8 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
+      tempDir = globals.fs.systemTempDirectory
+          .createTempSync('flutter_tools_analytics_bots_test.');
     });
 
     tearDown(() {
@@ -292,36 +312,39 @@ void main() {
 
     testUsingContext("don't send on bots with unknown version", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend
+          .listen((Map<String, dynamic> data) => count++);
       await createTestCommandRunner().run(<String>['--version']);
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
       Usage: () => Usage(
-        settingsName: 'flutter_bot_test',
-        versionOverride: 'dev/unknown',
-        configDirOverride: tempDir.path,
-        runningOnBot: false,
-      ),
+            settingsName: 'flutter_bot_test',
+            versionOverride: 'dev/unknown',
+            configDirOverride: tempDir.path,
+            runningOnBot: false,
+          ),
     });
 
     testUsingContext("don't send on bots even when opted in", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend
+          .listen((Map<String, dynamic> data) => count++);
       globals.flutterUsage.enabled = true;
       await createTestCommandRunner().run(<String>['--version']);
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
       Usage: () => Usage(
-        settingsName: 'flutter_bot_test',
-        versionOverride: 'dev/unknown',
-        configDirOverride: tempDir.path,
-        runningOnBot: false,
-      ),
+            settingsName: 'flutter_bot_test',
+            versionOverride: 'dev/unknown',
+            configDirOverride: tempDir.path,
+            runningOnBot: false,
+          ),
     });
 
-    testUsingContext('Uses AnalyticsMock when .flutter cannot be created', () async {
+    testUsingContext('Uses AnalyticsMock when .flutter cannot be created',
+        () async {
       final Usage usage = Usage(
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/known',

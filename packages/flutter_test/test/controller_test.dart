@@ -23,7 +23,8 @@ class TestDragData {
 
 void main() {
   group('getSemanticsData', () {
-    testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+    testWidgets('throws when there are no semantics',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -35,7 +36,8 @@ void main() {
       expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
     }, semanticsEnabled: false);
 
-    testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+    testWidgets('throws when there are multiple results from the finder',
+        (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
 
       await tester.pumpWidget(
@@ -55,15 +57,16 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+    testWidgets('Returns the correct SemanticsData',
+        (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: OutlinedButton(
-                onPressed: () { },
-                child: const Text('hello'),
+              onPressed: () {},
+              child: const Text('hello'),
             ),
           ),
         ),
@@ -77,13 +80,14 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+    testWidgets('Can enable semantics for tests via semanticsEnabled',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: OutlinedButton(
-                onPressed: () { },
-                child: const Text('hello'),
+              onPressed: () {},
+              child: const Text('hello'),
             ),
           ),
         ),
@@ -123,7 +127,8 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+    testWidgets('Does not return partial semantics',
+        (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       final Key key = UniqueKey();
       await tester.pumpWidget(
@@ -362,7 +367,9 @@ void main() {
         ),
       );
 
-      for (int resultIndex = 0; resultIndex < offsetResults.length; resultIndex += 1) {
+      for (int resultIndex = 0;
+          resultIndex < offsetResults.length;
+          resultIndex += 1) {
         final TestDragData testResult = offsetResults[resultIndex];
         await tester.drag(
           find.text('test'),
@@ -374,21 +381,21 @@ void main() {
           testResult.expectedOffsets.length,
           dragOffsets.length,
           reason:
-            'There is a difference in the number of expected and actual split offsets for the drag with:\n'
-            'Touch Slop: ${testResult.slop}\n'
-            'Delta:      ${testResult.dragDistance}\n',
+              'There is a difference in the number of expected and actual split offsets for the drag with:\n'
+              'Touch Slop: ${testResult.slop}\n'
+              'Delta:      ${testResult.dragDistance}\n',
         );
-        for (int valueIndex = 0; valueIndex < offsetResults[resultIndex].expectedOffsets.length; valueIndex += 1) {
-          expect(
-            testResult.expectedOffsets[valueIndex],
-            offsetMoreOrLessEquals(dragOffsets[valueIndex]),
-            reason:
-              'There is a difference in the expected and actual value of the '
-              '${valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third'}'
-              ' split offset for the drag with:\n'
-              'Touch slop: ${testResult.slop}\n'
-              'Delta:      ${testResult.dragDistance}\n'
-          );
+        for (int valueIndex = 0;
+            valueIndex < offsetResults[resultIndex].expectedOffsets.length;
+            valueIndex += 1) {
+          expect(testResult.expectedOffsets[valueIndex],
+              offsetMoreOrLessEquals(dragOffsets[valueIndex]),
+              reason:
+                  'There is a difference in the expected and actual value of the '
+                  '${valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third'}'
+                  ' split offset for the drag with:\n'
+                  'Touch slop: ${testResult.slop}\n'
+                  'Delta:      ${testResult.dragDistance}\n');
         }
         dragOffsets.clear();
       }
@@ -404,9 +411,12 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) =>
+                logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) =>
+                logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -415,7 +425,7 @@ void main() {
       await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -435,9 +445,12 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) =>
+                logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) =>
+                logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -459,9 +472,12 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) =>
+                logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) =>
+                logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -471,7 +487,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -491,18 +507,22 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) =>
+                logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) =>
+                logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
       );
 
-      await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
+      await tester.drag(find.text('test'), const Offset(-150.0, 200.0),
+          buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -522,19 +542,23 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) =>
+                logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) =>
+                logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
       );
 
-      await tester.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0, buttons: kSecondaryMouseButton);
+      await tester.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0,
+          buttons: kSecondaryMouseButton);
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -546,30 +570,29 @@ void main() {
   );
 
   testWidgets(
-    'WidgetTester.fling produces strictly monotonically increasing timestamps, '
-    'when given a large velocity',
-    (WidgetTester tester) async {
-      // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
-      // same timestamp. This is more likely to happen when the velocity tracker
-      // has a small sample size.
-      final List<Duration> logs = <Duration>[];
+      'WidgetTester.fling produces strictly monotonically increasing timestamps, '
+      'when given a large velocity', (WidgetTester tester) async {
+    // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
+    // same timestamp. This is more likely to happen when the velocity tracker
+    // has a small sample size.
+    final List<Duration> logs = <Duration>[];
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Listener(
-            onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
-            child: const Text('test'),
-          ),
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Listener(
+          onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
+          child: const Text('test'),
         ),
-      );
+      ),
+    );
 
-      await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
-      await tester.pumpAndSettle();
+    await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
+    await tester.pumpAndSettle();
 
-      for (int i = 0; i + 1 < logs.length; i += 1) {
-        expect(logs[i + 1],  greaterThan(logs[i]));
-      }
+    for (int i = 0; i + 1 < logs.length; i += 1) {
+      expect(logs[i + 1], greaterThan(logs[i]));
+    }
   });
 
   testWidgets(
@@ -581,9 +604,12 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) =>
+                logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) =>
+                logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -598,7 +624,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -618,7 +644,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.pointer}'),
+            onPointerDown: (PointerDownEvent event) =>
+                logs.add('down ${event.pointer}'),
             child: const Text('test'),
           ),
         ),
@@ -656,7 +683,8 @@ void main() {
             body: ListView.builder(
               itemCount: 20,
               shrinkWrap: true,
-              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              itemBuilder: (BuildContext context, int i) =>
+                  ListTile(title: Text('Item $i')),
             ),
           ),
         ),
@@ -682,7 +710,8 @@ void main() {
               body: ListView.builder(
                 itemCount: 50,
                 shrinkWrap: true,
-                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+                itemBuilder: (BuildContext context, int i) =>
+                    ListTile(title: Text('Item $i')),
               ),
             ),
           ),
@@ -742,7 +771,8 @@ void main() {
               body: ListView.builder(
                 itemCount: 50,
                 shrinkWrap: true,
-                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+                itemBuilder: (BuildContext context, int i) =>
+                    ListTile(title: Text('Item $i')),
               ),
             ),
           ),
@@ -767,18 +797,23 @@ void main() {
           home: Scaffold(
             body: Column(
               children: <Widget>[
-                SizedBox(height: 200, child: ListView.builder(
-                  key: const Key('listView-a'),
-                  itemCount: 50,
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
-                )),
+                SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      key: const Key('listView-a'),
+                      itemCount: 50,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int i) =>
+                          ListTile(title: Text('Item a-$i')),
+                    )),
                 const Divider(thickness: 5),
-                Expanded(child: ListView.builder(
+                Expanded(
+                    child: ListView.builder(
                   key: const Key('listView-b'),
                   itemCount: 50,
                   shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                  itemBuilder: (BuildContext context, int i) =>
+                      ListTile(title: Text('Item b-$i')),
                 )),
               ],
             ),

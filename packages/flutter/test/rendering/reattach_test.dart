@@ -19,16 +19,22 @@ class TestTree {
         // relayout/repaint of the new parent node to satisfy the test.
         child: RenderRepaintBoundary(
           child: RenderConstrainedBox(
-            additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+            additionalConstraints:
+                const BoxConstraints.tightFor(height: 20.0, width: 20.0),
             child: RenderRepaintBoundary(
               child: RenderCustomPaint(
                 painter: TestCallbackPainter(
-                  onPaint: () { painted = true; },
+                  onPaint: () {
+                    painted = true;
+                  },
                 ),
                 child: RenderPositionedBox(
                   child: child = RenderConstrainedBox(
-                    additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-                    child: RenderSemanticsAnnotations(attributedLabel: AttributedString('Hello there foo'), textDirection: TextDirection.ltr),
+                    additionalConstraints: const BoxConstraints.tightFor(
+                        height: 20.0, width: 20.0),
+                    child: RenderSemanticsAnnotations(
+                        attributedLabel: AttributedString('Hello there foo'),
+                        textDirection: TextDirection.ltr),
                   ),
                 ),
               ),
@@ -44,7 +50,7 @@ class TestTree {
 }
 
 class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ required RenderBox child }) : super(child);
+  MutableCompositor({required RenderBox child}) : super(child);
   bool _alwaysComposite = false;
   @override
   bool get alwaysNeedsCompositing => _alwaysComposite;
@@ -63,10 +69,13 @@ class TestCompositingBitsTree {
           child: compositor = MutableCompositor(
             child: RenderCustomPaint(
               painter: TestCallbackPainter(
-                onPaint: () { painted = true; },
+                onPaint: () {
+                  painted = true;
+                },
               ),
               child: child = RenderConstrainedBox(
-                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+                additionalConstraints:
+                    const BoxConstraints.tightFor(height: 20.0, width: 20.0),
               ),
             ),
           ),
@@ -93,7 +102,7 @@ void main() {
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     testTree.child.additionalConstraints =
-      const BoxConstraints.tightFor(height: 5.0, width: 5.0);
+        const BoxConstraints.tightFor(height: 5.0, width: 5.0);
     // Lay out again
     layout(testTree.root);
     expect(testTree.child.size, equals(const Size(5.0, 5.0)));
@@ -132,7 +141,8 @@ void main() {
   test('objects can be detached and re-attached: semantics (no change)', () {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle =
+        TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },
@@ -155,7 +165,8 @@ void main() {
   test('objects can be detached and re-attached: semantics (with change)', () {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle =
+        TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },
@@ -168,7 +179,8 @@ void main() {
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     semanticsUpdateCount = 0;
-    testTree.child.additionalConstraints = const BoxConstraints.tightFor(height: 20.0, width: 30.0);
+    testTree.child.additionalConstraints =
+        const BoxConstraints.tightFor(height: 20.0, width: 30.0);
     testTree.child.markNeedsSemanticsUpdate();
     expect(semanticsUpdateCount, 0);
     // Lay out, composite, paint, and update semantics again

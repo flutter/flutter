@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({ Key? key }) : super(key: key);
+  const ListDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/material/list';
 
@@ -30,7 +30,8 @@ class ListDemo extends StatefulWidget {
 }
 
 class _ListDemoState extends State<ListDemo> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> scaffoldKey =
+      GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<void>? _bottomSheet;
   _MaterialListType? _itemType = _MaterialListType.threeLine;
@@ -40,18 +41,33 @@ class _ListDemoState extends State<ListDemo> {
   bool? _showDividers = false;
   bool _reverseSort = false;
   List<String> items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
   ];
 
   void changeItemType(_MaterialListType? type) {
     setState(() {
       _itemType = type;
     });
-    _bottomSheet?.setState!(() { });
+    _bottomSheet?.setState!(() {});
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey
+        .currentState!
+        .showBottomSheet<void>((BuildContext bottomSheetContext) {
       return Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.black26)),
@@ -65,7 +81,9 @@ class _ListDemoState extends State<ListDemo> {
                 dense: true,
                 title: const Text('One-line'),
                 trailing: Radio<_MaterialListType>(
-                  value: _showAvatars! ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
+                  value: _showAvatars!
+                      ? _MaterialListType.oneLineWithAvatar
+                      : _MaterialListType.oneLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 ),
@@ -103,9 +121,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showAvatars = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    final StateSetter? bottomSheetSetState =
+                        _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
+                      bottomSheetSetState(() {});
                     }
                   },
                 ),
@@ -121,9 +140,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showIcons = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    final StateSetter? bottomSheetSetState =
+                        _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
+                      bottomSheetSetState(() {});
                     }
                   },
                 ),
@@ -139,9 +159,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showDividers = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    final StateSetter? bottomSheetSetState =
+                        _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
+                      bottomSheetSetState(() {});
                     }
                   },
                 ),
@@ -157,9 +178,10 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _dense = value;
                     });
-                    final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
+                    final StateSetter? bottomSheetSetState =
+                        _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() { });
+                      bottomSheetSetState(() {});
                     }
                   },
                 ),
@@ -196,10 +218,14 @@ class _ListDemoState extends State<ListDemo> {
       child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
         dense: _dense,
-        leading: _showAvatars != null ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
+        leading: _showAvatars != null
+            ? ExcludeSemantics(child: CircleAvatar(child: Text(item)))
+            : null,
         title: Text('This item represents $item.'),
         subtitle: secondary,
-        trailing: _showIcons != null ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+        trailing: _showIcons != null
+            ? Icon(Icons.info, color: Theme.of(context).disabledColor)
+            : null,
       ),
     );
   }
@@ -223,7 +249,8 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
+    Iterable<Widget> listTiles =
+        items.map<Widget>((String item) => buildListTile(context, item));
     if (_showDividers != null)
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
@@ -239,7 +266,8 @@ class _ListDemoState extends State<ListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                items.sort((String a, String b) => _reverseSort ? b.compareTo(a) : a.compareTo(b));
+                items.sort((String a, String b) =>
+                    _reverseSort ? b.compareTo(a) : a.compareTo(b));
               });
             },
           ),

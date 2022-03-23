@@ -2,14 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
+import 'dart:ui'
+    show
+        Brightness,
+        DisplayFeature,
+        DisplayFeatureState,
+        DisplayFeatureType,
+        GestureSettings,
+        ViewConfiguration;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
+  testWidgets('MediaQuery does not have a default',
+      (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       Builder(
@@ -23,7 +31,7 @@ void main() {
     expect(tested, isTrue);
     final dynamic exception = tester.takeException();
     expect(exception, isNotNull);
-    expect(exception ,isFlutterError);
+    expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics.last, isA<ErrorHint>());
@@ -47,7 +55,8 @@ void main() {
     );
   });
 
-  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgets('MediaQuery.of finds a MediaQueryData when there is one',
+      (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -67,7 +76,8 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
+  testWidgets('MediaQuery.maybeOf defaults to null',
+      (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       Builder(
@@ -82,7 +92,8 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one',
+      (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -101,10 +112,14 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromWindow is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data =
+        MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
+    expect(
+        data.size,
+        equals(WidgetsBinding.instance.window.physicalSize /
+            WidgetsBinding.instance.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -115,8 +130,10 @@ void main() {
     expect(data.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  testWidgets('MediaQueryData.copyWith defaults to source',
+      (WidgetTester tester) async {
+    final MediaQueryData data =
+        MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -136,7 +153,8 @@ void main() {
     expect(copied.displayFeatures, data.displayFeatures);
   });
 
-  testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
+  testWidgets('MediaQuery.copyWith copies specified values',
+      (WidgetTester tester) async {
     // Random and unique double values are used to ensure that the correct
     // values are copied over exactly
     const Size customSize = Size(3.14, 2.72);
@@ -146,7 +164,8 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
-    const DeviceGestureSettings gestureSettings = DeviceGestureSettings(touchSlop: 8.0);
+    const DeviceGestureSettings gestureSettings =
+        DeviceGestureSettings(touchSlop: 8.0);
     const List<DisplayFeature> customDisplayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -155,7 +174,8 @@ void main() {
       ),
     ];
 
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data =
+        MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
@@ -192,13 +212,17 @@ void main() {
     expect(copied.displayFeatures, customDisplayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removePadding removes specified padding',
+      (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -260,13 +284,17 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removePadding only removes specified padding',
+      (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -325,13 +353,17 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewInsets removes specified viewInsets',
+      (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -393,13 +425,17 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets',
+      (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -458,13 +494,17 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding',
+      (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -526,13 +566,17 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding',
+      (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -699,7 +743,8 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromWindow creates a MediaQuery',
+      (WidgetTester tester) async {
     bool hasMediaQueryAsParentOutside = false;
     bool hasMediaQueryAsParentInside = false;
 
@@ -725,8 +770,10 @@ void main() {
     expect(hasMediaQueryAsParentInside, true);
   });
 
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  testWidgets('MediaQueryData.fromWindow is created using window values',
+      (WidgetTester tester) async {
+    final MediaQueryData windowData =
+        MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
@@ -744,30 +791,41 @@ void main() {
   });
 
   test('DeviceGestureSettings has reasonable hashCode', () {
-    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
-    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
-    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsA =
+        DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB =
+        DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC =
+        DeviceGestureSettings(touchSlop: nonconst(16));
 
     expect(settingsA.hashCode, settingsC.hashCode);
     expect(settingsA.hashCode, isNot(settingsB.hashCode));
   });
 
   test('DeviceGestureSettings has reasonable equality', () {
-    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
-    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
-    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsA =
+        DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB =
+        DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC =
+        DeviceGestureSettings(touchSlop: nonconst(16));
 
     expect(settingsA, equals(settingsC));
     expect(settingsA, isNot(settingsB));
   });
 
-  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
+  testWidgets(
+      'MediaQuery.removeDisplayFeatures removes specified display features and padding',
+      (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const List<DisplayFeature> displayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.fromLTRB(40, 0, 42, 40),
@@ -833,13 +891,18 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
+  testWidgets(
+      'MediaQuery.removePadding only removes specified display features and padding',
+      (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 46.0, bottom: 12.0);
-    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets padding =
+        EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding =
+        EdgeInsets.only(top: 6.0, right: 8.0, left: 46.0, bottom: 12.0);
+    const EdgeInsets viewInsets =
+        EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const DisplayFeature cutoutDisplayFeature = DisplayFeature(
       bounds: Rect.fromLTRB(70, 10, 74, 14),
       type: DisplayFeatureType.cutout,
@@ -900,7 +963,7 @@ void main() {
     );
     expect(
       subScreenMediaQuery.viewPadding,
-      const EdgeInsets.only(top: 6.0, left:4.0, right: 8.0, bottom: 12.0),
+      const EdgeInsets.only(top: 6.0, left: 4.0, right: 8.0, bottom: 12.0),
     );
     expect(
       subScreenMediaQuery.viewInsets,
@@ -912,15 +975,23 @@ void main() {
     expect(subScreenMediaQuery.disableAnimations, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
-    expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
+    expect(subScreenMediaQuery.displayFeatures,
+        <DisplayFeature>[cutoutDisplayFeature]);
   });
 
-  testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
+  testWidgets(
+      'MediaQueryData.gestureSettings is set from window.viewConfiguration',
+      (WidgetTester tester) async {
     tester.binding.window.viewConfigurationTestValue = const ViewConfiguration(
-      gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
+      gestureSettings:
+          GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    expect(
+        MediaQueryData.fromWindow(tester.binding.window)
+            .gestureSettings
+            .touchSlop,
+        closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
   });
 }

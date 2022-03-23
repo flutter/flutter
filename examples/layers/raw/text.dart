@@ -26,7 +26,8 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   // The paint method of Paragraph draws the contents of the paragraph onto the
   // given canvas.
-  canvas.drawParagraph(paragraph, ui.Offset(-paragraph.width / 2.0, (paragraph.width / 2.0) - 125.0));
+  canvas.drawParagraph(paragraph,
+      ui.Offset(-paragraph.width / 2.0, (paragraph.width / 2.0) - 125.0));
 
   return recorder.endRecording();
 }
@@ -46,7 +47,8 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds =
+      ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);
@@ -90,6 +92,6 @@ void main() {
 
   // Finally, we register our beginFrame callback and kick off the first frame.
   ui.PlatformDispatcher.instance
-      ..onBeginFrame = beginFrame
-      ..scheduleFrame();
+    ..onBeginFrame = beginFrame
+    ..scheduleFrame();
 }

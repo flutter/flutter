@@ -33,8 +33,10 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   double _flutterFrameRate = 0;
 
   Future<void> _summarizeStats() async {
-    final double? framesProduced = await channel.invokeMethod('getProducedFrameRate');
-    final double? framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
+    final double? framesProduced =
+        await channel.invokeMethod('getProducedFrameRate');
+    final double? framesConsumed =
+        await channel.invokeMethod('getConsumedFrameRate');
     _summary = '''
 Produced: ${framesProduced?.toStringAsFixed(1)}fps
 Consumed: ${framesConsumed?.toStringAsFixed(1)}fps
@@ -101,13 +103,15 @@ Widget builds: $_widgetBuilds''';
     Ticker? ticker;
     ticker = createTicker((Duration time) {
       tickCount += 1;
-      if (tickCount == calibrationTickCount) { // about 10 seconds
+      if (tickCount == calibrationTickCount) {
+        // about 10 seconds
         final Duration elapsed = DateTime.now().difference(startTime);
         ticker?.stop();
         ticker?.dispose();
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
-          debugPrint('Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
+          debugPrint(
+              'Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
           _summary = '''
 Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.
 Press play to produce texture frames.''';
@@ -116,7 +120,8 @@ Press play to produce texture frames.''';
         });
       } else {
         if ((tickCount % (calibrationTickCount ~/ 20)) == 0)
-          debugPrint('Calibrating... ${(100.0 * tickCount / calibrationTickCount).floor()}%');
+          debugPrint(
+              'Calibrating... ${(100.0 * tickCount / calibrationTickCount).floor()}%');
       }
     });
     ticker.start();
@@ -155,11 +160,13 @@ Press play to produce texture frames.''';
             ],
           ),
         ),
-        floatingActionButton: _icon == null ? null : FloatingActionButton(
-          key: const ValueKey<String>('fab'),
-          onPressed: _nextState,
-          child: Icon(_icon),
-        ),
+        floatingActionButton: _icon == null
+            ? null
+            : FloatingActionButton(
+                key: const ValueKey<String>('fab'),
+                onPressed: _nextState,
+                child: Icon(_icon),
+              ),
       ),
     );
   }

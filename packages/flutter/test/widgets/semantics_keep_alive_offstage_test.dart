@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler', (WidgetTester tester) async {
+  testWidgets(
+      'Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20313.
 
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -17,7 +19,8 @@ void main() {
     const String initialLabel = 'Foo';
     const double bottomScrollOffset = 3000.0;
 
-    final ScrollController controller = ScrollController(initialScrollOffset: bottomScrollOffset);
+    final ScrollController controller =
+        ScrollController(initialScrollOffset: bottomScrollOffset);
 
     await tester.pumpWidget(_buildTestWidget(
       extraPadding: false,
@@ -27,16 +30,21 @@ void main() {
     await tester.pumpAndSettle();
 
     // The ProblemWidget has been instantiated (it is on screen).
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel)), hasLength(1));
+    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel)),
+        hasLength(1));
     expect(semantics, includesNodeWith(label: initialLabel));
 
     controller.jumpTo(0.0);
     await tester.pumpAndSettle();
 
     // The ProblemWidget is not on screen...
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel)), hasLength(0));
+    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel)),
+        hasLength(0));
     // ... but still in the tree as offstage.
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel, skipOffstage: false)), hasLength(1));
+    expect(
+        tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel,
+            skipOffstage: false)),
+        hasLength(1));
     expect(semantics, isNot(includesNodeWith(label: initialLabel)));
 
     // Introduce a new Padding widget to offstage subtree that will not get its
@@ -46,7 +54,8 @@ void main() {
       text: initialLabel,
       controller: controller,
     ));
-    final RenderPadding renderPadding = tester.renderObject(find.byKey(paddingWidget, skipOffstage: false));
+    final RenderPadding renderPadding =
+        tester.renderObject(find.byKey(paddingWidget, skipOffstage: false));
     expect(renderPadding.hasSize, isFalse);
     expect(semantics, isNot(includesNodeWith(label: initialLabel)));
 
@@ -60,8 +69,14 @@ void main() {
     ));
 
     // The label has changed.
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel, skipOffstage: false)), hasLength(0));
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, newLabel, skipOffstage: false)), hasLength(1));
+    expect(
+        tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel,
+            skipOffstage: false)),
+        hasLength(0));
+    expect(
+        tester.widgetList(
+            find.widgetWithText(ProblemWidget, newLabel, skipOffstage: false)),
+        hasLength(1));
     expect(semantics, isNot(includesNodeWith(label: initialLabel)));
     expect(semantics, isNot(includesNodeWith(label: newLabel)));
 
@@ -69,8 +84,10 @@ void main() {
     controller.jumpTo(bottomScrollOffset);
     await tester.pumpAndSettle();
 
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel)), hasLength(0));
-    expect(tester.widgetList(find.widgetWithText(ProblemWidget, newLabel)), hasLength(1));
+    expect(tester.widgetList(find.widgetWithText(ProblemWidget, initialLabel)),
+        hasLength(0));
+    expect(tester.widgetList(find.widgetWithText(ProblemWidget, newLabel)),
+        hasLength(1));
     expect(semantics, isNot(includesNodeWith(label: initialLabel)));
     expect(semantics, includesNodeWith(label: newLabel));
 
@@ -102,10 +119,11 @@ Widget _buildTestWidget({
                   height: 250.0,
                   child: Text('Item $i'),
                 );
-              })..add(ProblemWidget(
-                extraPadding: extraPadding,
-                text: text,
-              )),
+              })
+                ..add(ProblemWidget(
+                  extraPadding: extraPadding,
+                  text: text,
+                )),
             ),
           ),
           Expanded(
@@ -131,7 +149,8 @@ class ProblemWidget extends StatefulWidget {
   State<ProblemWidget> createState() => ProblemWidgetState();
 }
 
-class ProblemWidgetState extends State<ProblemWidget> with AutomaticKeepAliveClientMixin<ProblemWidget> {
+class ProblemWidgetState extends State<ProblemWidget>
+    with AutomaticKeepAliveClientMixin<ProblemWidget> {
   @override
   Widget build(BuildContext context) {
     super.build(context);

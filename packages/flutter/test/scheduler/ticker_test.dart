@@ -101,7 +101,7 @@ void main() {
     late Ticker ticker;
 
     void testFunction() {
-      ticker = Ticker((Duration _) { });
+      ticker = Ticker((Duration _) {});
     }
 
     testFunction();
@@ -110,7 +110,8 @@ void main() {
     expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
   });
 
-  testWidgets('Ticker can be sped up with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be sped up with time dilation',
+      (WidgetTester tester) async {
     timeDilation = 0.5; // Move twice as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -126,7 +127,8 @@ void main() {
     ticker.dispose();
   });
 
-  testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be slowed down with time dilation',
+      (WidgetTester tester) async {
     timeDilation = 2.0; // Move half as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -142,7 +144,8 @@ void main() {
     ticker.dispose();
   });
 
-  testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
+  testWidgets('Ticker stops ticking when application is paused',
+      (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
@@ -165,7 +168,8 @@ void main() {
     setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
-  testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
+  testWidgets('Ticker can be created before application unpauses',
+      (WidgetTester tester) async {
     setAppLifeCycleState(AppLifecycleState.paused);
 
     int tickCount = 0;

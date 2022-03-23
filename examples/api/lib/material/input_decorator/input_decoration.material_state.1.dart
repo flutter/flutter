@@ -33,17 +33,18 @@ class MyStatelessWidget extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     return Theme(
       data: themeData.copyWith(
-        inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.focused)) {
-              return Colors.green;
-            } if (states.contains(MaterialState.error)) {
-              return Colors.red;
-            }
-            return Colors.grey;
-          }),
-        )
-      ),
+          inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
+        prefixIconColor:
+            MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
+            return Colors.green;
+          }
+          if (states.contains(MaterialState.error)) {
+            return Colors.red;
+          }
+          return Colors.grey;
+        }),
+      )),
       child: TextFormField(
         initialValue: 'abc',
         decoration: const InputDecoration(

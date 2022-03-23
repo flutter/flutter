@@ -80,7 +80,8 @@ class FlutterCompactFormatter {
       print(raw);
       return null;
     }
-    final Map<String, dynamic> decoded = json.decode(raw) as Map<String, dynamic>;
+    final Map<String, dynamic> decoded =
+        json.decode(raw) as Map<String, dynamic>;
     final TestResult? originalResult = _tests[decoded['testID']];
     switch (decoded['type'] as String) {
       case 'done':
@@ -90,7 +91,8 @@ class FlutterCompactFormatter {
             '$_green+$successes $_yellow~$skips $_red-$failures:$_bold$_gray Done.$_noColor');
         break;
       case 'testStart':
-        final Map<String, dynamic> testData = decoded['test'] as Map<String, dynamic>;
+        final Map<String, dynamic> testData =
+            decoded['test'] as Map<String, dynamic>;
         if (testData['url'] == null) {
           started += 1;
           stdout.write(_clearLine);
@@ -118,7 +120,7 @@ class FlutterCompactFormatter {
           originalResult.status = TestStatus.skipped;
         } else {
           if (decoded['result'] == 'success') {
-            originalResult.status =TestStatus.succeeded;
+            originalResult.status = TestStatus.succeeded;
             successes += 1;
           } else {
             originalResult.status = TestStatus.failed;
@@ -133,10 +135,8 @@ class FlutterCompactFormatter {
           originalResult.errorMessage = error;
           originalResult.stackTrace = stackTrace;
         } else {
-          if (error != null)
-            stderr.writeln(error);
-          if (stackTrace != null)
-            stderr.writeln(stackTrace);
+          if (error != null) stderr.writeln(error);
+          if (stackTrace != null) stderr.writeln(stackTrace);
         }
         break;
       case 'print':
@@ -185,7 +185,8 @@ class FlutterCompactFormatter {
     skipped.forEach(print);
     failed.forEach(print);
     if (failed.isEmpty) {
-      print('${_green}Completed, $successes test(s) passing ($skips skipped).$_noColor');
+      print(
+          '${_green}Completed, $successes test(s) passing ($skips skipped).$_noColor');
     } else {
       print('$_gray$failures test(s) failed.$_noColor');
     }
@@ -196,10 +197,13 @@ class FlutterCompactFormatter {
 enum TestStatus {
   /// Test execution has started.
   started,
+
   /// Test completed successfully.
   succeeded,
+
   /// Test failed.
   failed,
+
   /// Test was skipped.
   skipped,
 }
@@ -264,5 +268,6 @@ class TestResult {
   int get totalTime => (endTime ?? _stopwatch.elapsedMilliseconds) - startTime;
 
   @override
-  String toString() => '{$runtimeType: {$id, $name, ${totalTime}ms, $pathLineColumn}}';
+  String toString() =>
+      '{$runtimeType: {$id, $name, ${totalTime}ms, $pathLineColumn}}';
 }

@@ -52,12 +52,14 @@ class NetworkImage
   final Map<String, String>? headers;
 
   @override
-  Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
+  Future<NetworkImage> obtainKey(
+      image_provider.ImageConfiguration configuration) {
     return SynchronousFuture<NetworkImage>(this);
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter load(
+      image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -73,13 +75,15 @@ class NetworkImage
     );
   }
 
-  InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
+  InformationCollector? _imageStreamInformationCollector(
+      image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
-        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-      ];
+            DiagnosticsProperty<image_provider.ImageProvider>(
+                'Image provider', this),
+            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+          ];
       return true;
     }());
     return collector;

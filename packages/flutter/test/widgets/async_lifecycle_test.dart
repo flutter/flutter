@@ -9,10 +9,12 @@ class InvalidOnInitLifecycleWidget extends StatefulWidget {
   const InvalidOnInitLifecycleWidget({Key? key}) : super(key: key);
 
   @override
-  InvalidOnInitLifecycleWidgetState createState() => InvalidOnInitLifecycleWidgetState();
+  InvalidOnInitLifecycleWidgetState createState() =>
+      InvalidOnInitLifecycleWidgetState();
 }
 
-class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidget> {
+class InvalidOnInitLifecycleWidgetState
+    extends State<InvalidOnInitLifecycleWidget> {
   @override
   Future<void> initState() async {
     super.initState();
@@ -25,17 +27,21 @@ class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidg
 }
 
 class InvalidDidUpdateWidgetLifecycleWidget extends StatefulWidget {
-  const InvalidDidUpdateWidgetLifecycleWidget({Key? key, required this.id}) : super(key: key);
+  const InvalidDidUpdateWidgetLifecycleWidget({Key? key, required this.id})
+      : super(key: key);
 
   final int id;
 
   @override
-  InvalidDidUpdateWidgetLifecycleWidgetState createState() => InvalidDidUpdateWidgetLifecycleWidgetState();
+  InvalidDidUpdateWidgetLifecycleWidgetState createState() =>
+      InvalidDidUpdateWidgetLifecycleWidgetState();
 }
 
-class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateWidgetLifecycleWidget> {
+class InvalidDidUpdateWidgetLifecycleWidgetState
+    extends State<InvalidDidUpdateWidgetLifecycleWidget> {
   @override
-  Future<void> didUpdateWidget(InvalidDidUpdateWidgetLifecycleWidget oldWidget) async {
+  Future<void> didUpdateWidget(
+      InvalidDidUpdateWidgetLifecycleWidget oldWidget) async {
     super.didUpdateWidget(oldWidget);
   }
 
@@ -52,7 +58,8 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
+  testWidgets('async didUpdateWidget throws FlutterError',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 1));
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
 

@@ -40,8 +40,10 @@ class InProcessDapTestServer extends DapTestServer {
   }
 
   late final DapServer _server;
-  final StreamController<List<int>> stdinController = StreamController<List<int>>();
-  final StreamController<List<int>> stdoutController = StreamController<List<int>>();
+  final StreamController<List<int>> stdinController =
+      StreamController<List<int>>();
+  final StreamController<List<int>> stdoutController =
+      StreamController<List<int>>();
 
   @override
   StreamSink<List<int>> get sink => stdinController.sink;
@@ -77,7 +79,8 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // lock" or we're tearing down.
     _process.stderr
         .transform(utf8.decoder)
-        .where((String error) => !error.contains('Waiting for another flutter command to release the startup lock'))
+        .where((String error) => !error.contains(
+            'Waiting for another flutter command to release the startup lock'))
         .listen((String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
@@ -85,7 +88,8 @@ class OutOfProcessDapTestServer extends DapTestServer {
       }
     });
     unawaited(_process.exitCode.then((int code) {
-      final String message = 'Out-of-process DAP server terminated with code $code';
+      final String message =
+          'Out-of-process DAP server terminated with code $code';
       logger?.call(message);
       if (!_isShuttingDown && code != 0) {
         throw Exception(message);
@@ -117,14 +121,19 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // having to rebuild the flutter_tools snapshot.
     // runFromSource=false will run "flutter ..."
 
-    final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-    final String flutterToolsEntryScript = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'flutter_tools.dart');
+    final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!,
+        'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String flutterToolsEntryScript = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        'bin',
+        'flutter_tools.dart');
 
     // When running from source, run "dart bin/flutter_tools.dart debug_adapter"
     // instead of directly using "flutter debug_adapter".
-    final String executable = _runFromSource
-      ? Platform.resolvedExecutable
-      : flutterToolPath;
+    final String executable =
+        _runFromSource ? Platform.resolvedExecutable : flutterToolPath;
     final List<String> args = <String>[
       if (_runFromSource) flutterToolsEntryScript,
       'debug-adapter',

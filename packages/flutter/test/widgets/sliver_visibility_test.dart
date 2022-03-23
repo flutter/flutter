@@ -10,7 +10,8 @@ import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
-  const TestState({ Key? key, required this.child, required this.log }) : super(key: key);
+  const TestState({Key? key, required this.child, required this.log})
+      : super(key: key);
   final Widget child;
   final List<String> log;
   @override
@@ -23,6 +24,7 @@ class _TestStateState extends State<TestState> {
     super.initState();
     widget.log.add('created new state');
   }
+
   @override
   Widget build(BuildContext context) {
     return widget.child;
@@ -374,7 +376,8 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
     expect(find.text('a true', skipOffstage: false), findsOneWidget);
     expect(find.byType(SliverVisibility, skipOffstage: false), findsOneWidget);
-    expect(find.byType(SliverVisibility, skipOffstage: false), paints..paragraph());
+    expect(find.byType(SliverVisibility, skipOffstage: false),
+        paints..paragraph());
     renderViewport = tester.renderObject(find.byType(Viewport));
     renderSliver = renderViewport.lastChild!;
     expect(renderSliver.geometry!.scrollExtent, 14.0);

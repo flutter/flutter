@@ -54,32 +54,38 @@ const String kExampleManifest = r'''
 ''';
 
 void main() {
-  testWithoutContext('Project can parse the app version from the appx manifest', () {
+  testWithoutContext('Project can parse the app version from the appx manifest',
+      () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('winuwp/runner_uwp/appxmanifest.in')
       ..createSync(recursive: true)
       ..writeAsStringSync(kExampleManifest);
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(flutterProject.windowsUwp.packageVersion, '2.3.1.4');
   });
 
-  testWithoutContext('Project returns null if appx manifest does not exist', () {
+  testWithoutContext('Project returns null if appx manifest does not exist',
+      () {
     final FileSystem fileSystem = MemoryFileSystem.test();
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(flutterProject.windowsUwp.packageVersion, null);
   });
 
-  testWithoutContext('Project throws a tool exit if appxmanifest is not valid xml', () {
+  testWithoutContext(
+      'Project throws a tool exit if appxmanifest is not valid xml', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('winuwp/runner_uwp/appxmanifest.in')
       ..createSync(recursive: true)
       ..writeAsStringSync('[');
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(() => flutterProject.windowsUwp.packageVersion, throwsToolExit());
   });
@@ -106,12 +112,15 @@ set(PACKAGE_GUID "F941A77F-8AE1-4E3E-9611-68FBD3C62AE8")
 
 ''');
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    expect(flutterProject.windowsUwp.packageGuid, 'F941A77F-8AE1-4E3E-9611-68FBD3C62AE8');
+    expect(flutterProject.windowsUwp.packageGuid,
+        'F941A77F-8AE1-4E3E-9611-68FBD3C62AE8');
   });
 
-  testWithoutContext('Returns null if the PACKAGE_GUID cannot be found in the Cmake file', () {
+  testWithoutContext(
+      'Returns null if the PACKAGE_GUID cannot be found in the Cmake file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('winuwp/runner_uwp/CMakeLists.txt')
       ..createSync(recursive: true)
@@ -131,7 +140,8 @@ set(APP_MANIFEST_TARGET_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${APP_MANIFEST_NAME
 set(SHORT_NAME ${BINARY_NAME})
 ''');
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(flutterProject.windowsUwp.packageGuid, null);
   });

@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ required this.child, RouteSettings? settings }) : super(settings: settings);
+  TestRoute({required this.child, RouteSettings? settings})
+      : super(settings: settings);
 
   final Widget child;
 
@@ -23,7 +24,8 @@ class TestRoute<T> extends PageRoute<T> {
   bool get maintainState => false;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     return child;
   }
 }
@@ -48,7 +50,8 @@ void main() {
     expect(find.byType(CheckedModeBanner), findsOneWidget);
   });
 
-  testWidgets('showPerformanceOverlayOverride true', (WidgetTester tester) async {
+  testWidgets('showPerformanceOverlayOverride true',
+      (WidgetTester tester) async {
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     WidgetsApp.showPerformanceOverlayOverride = true;
     await pumpApp(tester);
@@ -59,7 +62,8 @@ void main() {
     WidgetsApp.showPerformanceOverlayOverride = false;
   });
 
-  testWidgets('showPerformanceOverlayOverride false', (WidgetTester tester) async {
+  testWidgets('showPerformanceOverlayOverride false',
+      (WidgetTester tester) async {
     WidgetsApp.showPerformanceOverlayOverride = true;
     expect(WidgetsApp.showPerformanceOverlayOverride, true);
     WidgetsApp.showPerformanceOverlayOverride = false;

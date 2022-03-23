@@ -16,16 +16,23 @@ import 'package:test_api/test_api.dart' as real_test show expect;
 
 class TestAPI {
   Future<Object?> testGuard1() {
-    return TestAsyncUtils.guard<Object?>(() async { return null; });
+    return TestAsyncUtils.guard<Object?>(() async {
+      return null;
+    });
   }
+
   Future<Object?> testGuard2() {
-    return TestAsyncUtils.guard<Object?>(() async { return null; });
+    return TestAsyncUtils.guard<Object?>(() async {
+      return null;
+    });
   }
 }
 
 class TestAPISubclass extends TestAPI {
   Future<Object?> testGuard3() {
-    return TestAsyncUtils.guard<Object?>(() async { return null; });
+    return TestAsyncUtils.guard<Object?>(() async {
+      return null;
+    });
   }
 }
 
@@ -50,12 +57,21 @@ void main() {
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.'));
-      real_test.expect(lines[3], matches(r'Then, the "testGuard2" method \(also from class TestAPI\) was called from .*test_async_utils_test.dart on line [0-9]+\.'));
-      real_test.expect(lines[4], 'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second method (TestAPI.testGuard2) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'Then, the "testGuard2" method \(also from class TestAPI\) was called from .*test_async_utils_test.dart on line [0-9]+\.'));
+      real_test.expect(lines[4],
+          'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second method (TestAPI.testGuard2) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
       real_test.expect(lines[5], '');
-      real_test.expect(lines[6], 'When the first method (TestAPI.testGuard1) was called, this was the stack:');
+      real_test.expect(lines[6],
+          'When the first method (TestAPI.testGuard1) was called, this was the stack:');
       real_test.expect(lines.length, greaterThan(6));
     }
     expect(await f1, isNull);
@@ -72,12 +88,21 @@ void main() {
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[3], matches(r'^Then, the "testGuard2" method \(also from class TestAPI\) was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[4], 'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second method (TestAPI.testGuard2) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'^Then, the "testGuard2" method \(also from class TestAPI\) was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(lines[4],
+          'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second method (TestAPI.testGuard2) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
       real_test.expect(lines[5], '');
-      real_test.expect(lines[6], 'When the first method (TestAPI.testGuard1) was called, this was the stack:');
+      real_test.expect(lines[6],
+          'When the first method (TestAPI.testGuard1) was called, this was the stack:');
       real_test.expect(lines.length, greaterThan(7));
     }
     expect(await f1, isNull);
@@ -94,12 +119,21 @@ void main() {
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[3], matches(r'^Then, the "testGuard3" method from class TestAPISubclass was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[4], 'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second method (TestAPISubclass.testGuard3) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'^Then, the "testGuard3" method from class TestAPISubclass was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(lines[4],
+          'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second method (TestAPISubclass.testGuard3) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
       real_test.expect(lines[5], '');
-      real_test.expect(lines[6], 'When the first method (TestAPI.testGuard1) was called, this was the stack:');
+      real_test.expect(lines[6],
+          'When the first method (TestAPI.testGuard1) was called, this was the stack:');
       real_test.expect(lines.length, greaterThan(7));
     }
     expect(await f1, isNull);
@@ -116,19 +150,30 @@ void main() {
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[3], matches(r'^Then, the "expect" function was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[4], 'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second function (expect) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
-      real_test.expect(lines[5], 'If you are confident that all test APIs are being called using "await", and this expect() call is not being called at the top level but is itself being called from some sort of callback registered before the testGuard1 method was called, then consider using expectSync() instead.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'^Then, the "expect" function was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(lines[4],
+          'The first method (TestAPI.testGuard1) had not yet finished executing at the time that the second function (expect) was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
+      real_test.expect(lines[5],
+          'If you are confident that all test APIs are being called using "await", and this expect() call is not being called at the top level but is itself being called from some sort of callback registered before the testGuard1 method was called, then consider using expectSync() instead.');
       real_test.expect(lines[6], '');
-      real_test.expect(lines[7], 'When the first method (TestAPI.testGuard1) was called, this was the stack:');
+      real_test.expect(lines[7],
+          'When the first method (TestAPI.testGuard1) was called, this was the stack:');
       real_test.expect(lines.length, greaterThan(7));
     }
     expect(await f1, isNull);
   });
 
-  testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - expect() catches pending async work',
+      (WidgetTester tester) async {
     Future<Object?>? f1, f2;
     try {
       f1 = tester.pump();
@@ -137,16 +182,26 @@ void main() {
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[3], matches(r'^Then, it was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
-      real_test.expect(lines[4], 'The first method had not yet finished executing at the time that the second method was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'^Then, it was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
+      real_test.expect(lines[4],
+          'The first method had not yet finished executing at the time that the second method was called. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called. Typically, this is achieved by putting an "await" statement in front of the call to the first.');
       real_test.expect(lines[5], '');
-      real_test.expect(lines[6], 'When the first method was called, this was the stack:');
+      real_test.expect(
+          lines[6], 'When the first method was called, this was the stack:');
       real_test.expect(lines.length, greaterThan(7));
       // TODO(jacobr): add more tests like this if they are useful.
 
-      final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder propertiesBuilder =
+          DiagnosticPropertiesBuilder();
       e.debugFillProperties(propertiesBuilder);
       final List<DiagnosticsNode> information = propertiesBuilder.properties;
       real_test.expect(information.length, 6);
@@ -162,15 +217,18 @@ void main() {
       real_test.expect(information[3], isA<DiagnosticsProperty<void>>());
       real_test.expect(information[4], isA<DiagnosticsProperty<void>>());
       real_test.expect(information[5], isA<DiagnosticsStackTrace>());
-      final DiagnosticsStackTrace stackTraceProperty = information[5] as DiagnosticsStackTrace;
-      real_test.expect(stackTraceProperty.name, '\nWhen the first method was called, this was the stack');
+      final DiagnosticsStackTrace stackTraceProperty =
+          information[5] as DiagnosticsStackTrace;
+      real_test.expect(stackTraceProperty.name,
+          '\nWhen the first method was called, this was the stack');
       real_test.expect(stackTraceProperty.value, isA<StackTrace>());
     }
     await f1;
     await f2;
   });
 
-  testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - expect() catches pending async work',
+      (WidgetTester tester) async {
     Future<Object?>? f1;
     try {
       f1 = tester.pump();
@@ -178,12 +236,21 @@ void main() {
       fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
-      real_test.expect(lines[0], 'Asynchronous call to guarded function leaked.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+, but never completed before its parent scope closed\.$'));
-      real_test.expect(lines[3], matches(r'^The guarded method "pump" from class AutomatedTestWidgetsFlutterBinding was called from [^ ]+ on line [0-9]+, but never completed before its parent scope closed\.'));
+      real_test.expect(
+          lines[0], 'Asynchronous call to guarded function leaked.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+, but never completed before its parent scope closed\.$'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'^The guarded method "pump" from class AutomatedTestWidgetsFlutterBinding was called from [^ ]+ on line [0-9]+, but never completed before its parent scope closed\.'));
       real_test.expect(lines.length, 4);
-      final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder propertiesBuilder =
+          DiagnosticPropertiesBuilder();
       e.debugFillProperties(propertiesBuilder);
       final List<DiagnosticsNode> information = propertiesBuilder.properties;
       real_test.expect(information.length, 4);
@@ -195,7 +262,8 @@ void main() {
     await f1;
   });
 
-  testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - expect() catches pending async work',
+      (WidgetTester tester) async {
     Future<Object?>? f1;
     try {
       f1 = tester.pump();
@@ -203,12 +271,21 @@ void main() {
       fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
-      real_test.expect(lines[0], 'Asynchronous call to guarded function leaked.');
-      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
-      real_test.expect(lines[2], matches(r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+, but never completed before its parent scope closed\.$'));
-      real_test.expect(lines[3], matches(r'^The guarded method "pump" from class AutomatedTestWidgetsFlutterBinding was called from [^ ]+ on line [0-9]+, but never completed before its parent scope closed\.'));
+      real_test.expect(
+          lines[0], 'Asynchronous call to guarded function leaked.');
+      real_test.expect(lines[1],
+          'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(
+          lines[2],
+          matches(
+              r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+, but never completed before its parent scope closed\.$'));
+      real_test.expect(
+          lines[3],
+          matches(
+              r'^The guarded method "pump" from class AutomatedTestWidgetsFlutterBinding was called from [^ ]+ on line [0-9]+, but never completed before its parent scope closed\.'));
       real_test.expect(lines.length, 4);
-      final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder propertiesBuilder =
+          DiagnosticPropertiesBuilder();
       e.debugFillProperties(propertiesBuilder);
       final List<DiagnosticsNode> information = propertiesBuilder.properties;
       real_test.expect(information.length, 4);
@@ -220,10 +297,12 @@ void main() {
     await f1;
   });
 
-  testWidgets('TestAsyncUtils - guard body can throw', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - guard body can throw',
+      (WidgetTester tester) async {
     try {
       await _guardedThrower();
-      expect(false, true); // _guardedThrower should throw and we shouldn't reach here
+      expect(false,
+          true); // _guardedThrower should throw and we shouldn't reach here
     } on RecognizableTestException catch (e) {
       expect(e, const RecognizableTestException());
     }

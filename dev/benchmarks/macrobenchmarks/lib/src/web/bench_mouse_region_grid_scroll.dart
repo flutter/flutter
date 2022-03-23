@@ -41,7 +41,8 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
+      SchedulerBinding.instance
+          .addPostFrameCallback((Duration timeStamp) async {
         _tester.start();
         registerDidStop(_tester.stop);
       });
@@ -122,20 +123,25 @@ class _Tester {
       kind: PointerDeviceKind.mouse,
     );
   }
+
   TestGesture? _gesture;
 
   Duration currentTime = Duration.zero;
 
   Future<void> _scroll(Offset start, Offset offset, Duration duration) async {
     final int durationMs = duration.inMilliseconds;
-    final Duration fullFrameDuration = const Duration(seconds: 1) ~/ scrollFrequency;
+    final Duration fullFrameDuration =
+        const Duration(seconds: 1) ~/ scrollFrequency;
     final int frameDurationMs = fullFrameDuration.inMilliseconds;
 
     final int fullFrames = duration.inMilliseconds ~/ frameDurationMs;
-    final Offset fullFrameOffset = offset * ((frameDurationMs as double) / durationMs);
+    final Offset fullFrameOffset =
+        offset * ((frameDurationMs as double) / durationMs);
 
-    final Duration finalFrameDuration = duration - fullFrameDuration * fullFrames;
-    final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
+    final Duration finalFrameDuration =
+        duration - fullFrameDuration * fullFrames;
+    final Offset finalFrameOffset =
+        offset - fullFrameOffset * (fullFrames as double);
 
     await gesture.down(start, timeStamp: currentTime);
 

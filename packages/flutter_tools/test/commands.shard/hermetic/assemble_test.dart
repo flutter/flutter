@@ -28,10 +28,12 @@ void main() {
   final StackTrace stackTrace = StackTrace.current;
 
   testUsingContext('flutter assemble can run a build', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     ));
-    await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(
+        <String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
 
     expect(testLogger.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
@@ -40,13 +42,20 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble can parse defines whose values contain =', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-        expect(environment.defines, containsPair('FooBar', 'fizz=2'));
-      })
-    ));
-    await commandRunner.run(<String>['assemble', '-o Output', '-dFooBar=fizz=2', 'debug_macos_bundle_flutter_assets']);
+  testUsingContext('flutter assemble can parse defines whose values contain =',
+      () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true),
+                (Target target, Environment environment) {
+      expect(environment.defines, containsPair('FooBar', 'fizz=2'));
+    })));
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '-dFooBar=fizz=2',
+      'debug_macos_bundle_flutter_assets'
+    ]);
 
     expect(testLogger.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
@@ -57,11 +66,17 @@ void main() {
 
   testUsingContext('flutter assemble can parse inputs', () async {
     final AssembleCommand command = AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-        expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
+        buildSystem: TestBuildSystem.all(BuildResult(success: true),
+            (Target target, Environment environment) {
+      expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
     }));
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-    await commandRunner.run(<String>['assemble', '-o Output', '-iFoo=Bar.txt', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '-iFoo=Bar.txt',
+      'debug_macos_bundle_flutter_assets'
+    ]);
 
     expect(testLogger.traceText, contains('build succeeded.'));
     expect(await command.requiredArtifacts, isEmpty);
@@ -71,11 +86,19 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble sets required artifacts from target platform', () async {
+  testUsingContext(
+      'flutter assemble sets required artifacts from target platform',
+      () async {
     final AssembleCommand command = AssembleCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)));
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin', '-dDarwinArchs=x86_64', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '-dTargetPlatform=darwin',
+      '-dDarwinArchs=x86_64',
+      'debug_macos_bundle_flutter_assets'
+    ]);
 
     expect(await command.requiredArtifacts, <DevelopmentArtifact>{
       DevelopmentArtifact.macOS,
@@ -87,20 +110,28 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('flutter assemble throws ToolExit if not provided with output', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+  testUsingContext(
+      'flutter assemble throws ToolExit if not provided with output', () async {
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     ));
 
-    expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsToolExit());
+    expect(
+        commandRunner
+            .run(<String>['assemble', 'debug_macos_bundle_flutter_assets']),
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble throws ToolExit if dart-defines are not base64 encoded', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+  testUsingContext(
+      'flutter assemble throws ToolExit if dart-defines are not base64 encoded',
+      () async {
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     ));
 
@@ -112,37 +143,50 @@ void main() {
       'debug_macos_bundle_flutter_assets',
     ];
     expect(
-      commandRunner.run(command),
-      throwsToolExit(message: 'Error parsing assemble command: your generated configuration may be out of date')
-    );
+        commandRunner.run(command),
+        throwsToolExit(
+            message:
+                'Error parsing assemble command: your generated configuration may be out of date'));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble throws ToolExit if called with non-existent rule', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+  testUsingContext(
+      'flutter assemble throws ToolExit if called with non-existent rule',
+      () async {
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     ));
 
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']),
-      throwsToolExit());
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble does not log stack traces during build failure', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-        'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
-      }))
-    ));
+  testUsingContext(
+      'flutter assemble does not log stack traces during build failure',
+      () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(
+                success: false,
+                exceptions: <String, ExceptionMeasurement>{
+          'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+        }))));
 
-    await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
-      throwsToolExit());
+    await expectLater(
+        commandRunner.run(<String>[
+          'assemble',
+          '-o Output',
+          'debug_macos_bundle_flutter_assets'
+        ]),
+        throwsToolExit());
     expect(testLogger.errorText, isNot(contains('bar')));
     expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
@@ -151,18 +195,23 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble outputs JSON performance data to provided file', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+  testUsingContext(
+      'flutter assemble outputs JSON performance data to provided file',
+      () async {
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(
-        BuildResult(success: true, performance: <String, PerformanceMeasurement>{
-          'hello': PerformanceMeasurement(
-            target: 'hello',
-            analyticsName: 'bar',
-            elapsedMilliseconds: 123,
-            skipped: false,
-            succeeded: true,
-          ),
-        }),
+        BuildResult(
+            success: true,
+            performance: <String, PerformanceMeasurement>{
+              'hello': PerformanceMeasurement(
+                target: 'hello',
+                analyticsName: 'bar',
+                elapsedMilliseconds: 123,
+                skipped: false,
+                succeeded: true,
+              ),
+            }),
       ),
     ));
 
@@ -176,9 +225,11 @@ void main() {
     expect(globals.fs.file('out.json'), exists);
     expect(
       json.decode(globals.fs.file('out.json').readAsStringSync()),
-      containsPair('targets', contains(
-        containsPair('name', 'bar'),
-      )),
+      containsPair(
+          'targets',
+          contains(
+            containsPair('name', 'bar'),
+          )),
     );
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -186,13 +237,17 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble does not inject engine revision with local-engine', () async {
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-        expect(environment.engineVersion, isNull);
-      })
-    ));
-    await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
+  testUsingContext(
+      'flutter assemble does not inject engine revision with local-engine',
+      () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true),
+                (Target target, Environment environment) {
+      expect(environment.engineVersion, isNull);
+    })));
+    await commandRunner.run(
+        <String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -200,7 +255,9 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('flutter assemble only writes input and output files when the values change', () async {
+  testUsingContext(
+      'flutter assemble only writes input and output files when the values change',
+      () async {
     final BuildSystem buildSystem = TestBuildSystem.list(<BuildResult>[
       BuildResult(
         success: true,
@@ -214,11 +271,19 @@ void main() {
       ),
       BuildResult(
         success: true,
-        inputFiles: <File>[globals.fs.file('foo'), globals.fs.file('fizz')..createSync()],
-        outputFiles: <File>[globals.fs.file('bar'), globals.fs.file(globals.fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)],
+        inputFiles: <File>[
+          globals.fs.file('foo'),
+          globals.fs.file('fizz')..createSync()
+        ],
+        outputFiles: <File>[
+          globals.fs.file('bar'),
+          globals.fs.file(globals.fs.path.join('.dart_tool', 'fizz2'))
+            ..createSync(recursive: true)
+        ],
       ),
     ]);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(buildSystem: buildSystem));
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(AssembleCommand(buildSystem: buildSystem));
     await commandRunner.run(<String>[
       'assemble',
       '-o Output',
@@ -263,8 +328,10 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
-    final List<PerformanceMeasurement> performanceMeasurement = <PerformanceMeasurement>[
+  testWithoutContext(
+      'writePerformanceData outputs performance data in JSON form', () {
+    final List<PerformanceMeasurement> performanceMeasurement =
+        <PerformanceMeasurement>[
       PerformanceMeasurement(
         analyticsName: 'foo',
         target: 'hidden',
@@ -274,9 +341,8 @@ void main() {
       )
     ];
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File outFile = fileSystem.currentDirectory
-      .childDirectory('foo')
-      .childFile('out.json');
+    final File outFile =
+        fileSystem.currentDirectory.childDirectory('foo').childFile('out.json');
 
     writePerformanceData(performanceMeasurement, outFile);
 

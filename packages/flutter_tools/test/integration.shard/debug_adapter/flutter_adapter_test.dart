@@ -37,23 +37,25 @@ void main() {
   });
 
   group('launch', () {
-    testWithoutContext('can run and terminate a Flutter app in debug mode', () async {
+    testWithoutContext('can run and terminate a Flutter app in debug mode',
+        () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Once the "topLevelFunction" output arrives, we can terminate the app.
       unawaited(
         dap.client.output
-            .firstWhere((String output) => output.startsWith('topLevelFunction'))
+            .firstWhere(
+                (String output) => output.startsWith('topLevelFunction'))
             .whenComplete(() => dap.client.terminate()),
       );
 
-      final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
-        launch: () => dap.client
-            .launch(
-              cwd: project.dir.path,
-              toolArgs: <String>['-d', 'flutter-tester'],
-            ),
+      final List<OutputEventBody> outputEvents =
+          await dap.client.collectAllOutput(
+        launch: () => dap.client.launch(
+          cwd: project.dir.path,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
       );
 
       final String output = _uniqueOutputLines(outputEvents);
@@ -67,24 +69,26 @@ void main() {
       ]);
     });
 
-    testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
+    testWithoutContext('can run and terminate a Flutter app in noDebug mode',
+        () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Once the "topLevelFunction" output arrives, we can terminate the app.
       unawaited(
         dap.client.stdoutOutput
-            .firstWhere((String output) => output.startsWith('topLevelFunction'))
+            .firstWhere(
+                (String output) => output.startsWith('topLevelFunction'))
             .whenComplete(() => dap.client.terminate()),
       );
 
-      final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
-        launch: () => dap.client
-            .launch(
-              cwd: project.dir.path,
-              noDebug: true,
-              toolArgs: <String>['-d', 'flutter-tester'],
-            ),
+      final List<OutputEventBody> outputEvents =
+          await dap.client.collectAllOutput(
+        launch: () => dap.client.launch(
+          cwd: project.dir.path,
+          noDebug: true,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
       );
 
       final String output = _uniqueOutputLines(outputEvents);
@@ -97,16 +101,17 @@ void main() {
       ]);
     });
 
-    testWithoutContext('correctly outputs launch errors and terminates', () async {
+    testWithoutContext('correctly outputs launch errors and terminates',
+        () async {
       final CompileErrorProject project = CompileErrorProject();
       await project.setUpIn(tempDir);
 
-      final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
-        launch: () => dap.client
-            .launch(
-              cwd: project.dir.path,
-              toolArgs: <String>['-d', 'flutter-tester'],
-            ),
+      final List<OutputEventBody> outputEvents =
+          await dap.client.collectAllOutput(
+        launch: () => dap.client.launch(
+          cwd: project.dir.path,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
       );
 
       final String output = _uniqueOutputLines(outputEvents);
@@ -117,37 +122,43 @@ void main() {
 
     /// Helper that tests exception output in either debug or noDebug mode.
     Future<void> testExceptionOutput({required bool noDebug}) async {
-        final BasicProjectThatThrows project = BasicProjectThatThrows();
-        await project.setUpIn(tempDir);
+      final BasicProjectThatThrows project = BasicProjectThatThrows();
+      await project.setUpIn(tempDir);
 
-        final List<OutputEventBody> outputEvents =
-            await dap.client.collectAllOutput(launch: () {
-          // Terminate the app after we see the exception because otherwise
-          // it will keep running and `collectAllOutput` won't end.
-          dap.client.output
-              .firstWhere((String output) => output.contains(endOfErrorOutputMarker))
-              .then((_) => dap.client.terminate());
-          return dap.client.launch(
-            noDebug: noDebug,
-            cwd: project.dir.path,
-            toolArgs: <String>['-d', 'flutter-tester'],
-          );
-        });
+      final List<OutputEventBody> outputEvents =
+          await dap.client.collectAllOutput(launch: () {
+        // Terminate the app after we see the exception because otherwise
+        // it will keep running and `collectAllOutput` won't end.
+        dap.client.output
+            .firstWhere(
+                (String output) => output.contains(endOfErrorOutputMarker))
+            .then((_) => dap.client.terminate());
+        return dap.client.launch(
+          noDebug: noDebug,
+          cwd: project.dir.path,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        );
+      });
 
-        final String output = _uniqueOutputLines(outputEvents);
-        final List<String> outputLines = output.split('\n');
-        expect( outputLines, containsAllInOrder(<String>[
+      final String output = _uniqueOutputLines(outputEvents);
+      final List<String> outputLines = output.split('\n');
+      expect(
+          outputLines,
+          containsAllInOrder(<String>[
             '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════',
             'The following _Exception was thrown building App(dirty):',
             'Exception: c',
             'The relevant error-causing widget was:',
-        ]));
-        expect(output, contains('App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'));
+          ]));
+      expect(output,
+          contains('App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'));
     }
 
-    testWithoutContext('correctly outputs exceptions in debug mode', () => testExceptionOutput(noDebug: false));
+    testWithoutContext('correctly outputs exceptions in debug mode',
+        () => testExceptionOutput(noDebug: false));
 
-    testWithoutContext('correctly outputs exceptions in noDebug mode', () => testExceptionOutput(noDebug: true));
+    testWithoutContext('correctly outputs exceptions in noDebug mode',
+        () => testExceptionOutput(noDebug: true));
 
     testWithoutContext('can hot reload', () async {
       final BasicProject project = BasicProject();
@@ -155,7 +166,8 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere(
+            (String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -176,11 +188,11 @@ void main() {
       await dap.client.hotReload();
 
       expectLines(
-          (await outputEventsFuture).join(),
-          <Object>[
-            startsWith('Reloaded'),
-            'topLevelFunction',
-          ],
+        (await outputEventsFuture).join(),
+        <Object>[
+          startsWith('Reloaded'),
+          'topLevelFunction',
+        ],
       );
 
       await dap.client.terminate();
@@ -192,7 +204,8 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere(
+            (String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -213,17 +226,18 @@ void main() {
       await dap.client.hotRestart();
 
       expectLines(
-          (await outputEventsFuture).join(),
-          <Object>[
-            startsWith('Restarted application'),
-            'topLevelFunction',
-          ],
+        (await outputEventsFuture).join(),
+        <Object>[
+          startsWith('Restarted application'),
+          'topLevelFunction',
+        ],
       );
 
       await dap.client.terminate();
     });
 
-    testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
+    testWithoutContext(
+        'can hot restart when exceptions occur on outgoing isolates', () async {
       final BasicProjectThatThrows project = BasicProjectThatThrows();
       await project.setUpIn(tempDir);
 
@@ -231,7 +245,8 @@ void main() {
       late int originalThreadId, newThreadId;
       await Future.wait(<Future<void>>[
         // Capture the thread ID of the stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId!),
+        dap.client.stoppedEvents.first.then(
+            (StoppedEventBody event) => originalThreadId = event.threadId!),
         dap.client.start(
           exceptionPauseMode: 'All', // Ensure we stop on all exceptions
           launch: () => dap.client.launch(
@@ -245,7 +260,8 @@ void main() {
       // to pause.
       await Future.wait(<Future<void>>[
         // Capture the thread ID of the newly stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId!),
+        dap.client.stoppedEvents.first
+            .then((StoppedEventBody event) => newThreadId = event.threadId!),
         dap.client.hotRestart(),
       ], eagerError: true);
 
@@ -270,7 +286,8 @@ void main() {
       // Launch the app and wait for it to print "topLevelFunction" so we know
       // it's up and running.
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere(
+            (String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -297,8 +314,10 @@ void main() {
       );
 
       // Ensure the event occurred, and its value was as expected.
-      final Map<String, Object?> stateChangeEvent = await stateChangeEventFuture;
-      expect(stateChangeEvent['value'], 'true'); // extension state change values are always strings
+      final Map<String, Object?> stateChangeEvent =
+          await stateChangeEventFuture;
+      expect(stateChangeEvent['value'],
+          'true'); // extension state change values are always strings
 
       await dap.client.terminate();
     });
@@ -314,7 +333,8 @@ void main() {
       await project.setUpIn(tempDir);
       testProcess = await SimpleFlutterRunner.start(tempDir);
 
-      breakpointFilePath = globals.fs.path.join(project.dir.path, 'lib', 'main.dart');
+      breakpointFilePath =
+          globals.fs.path.join(project.dir.path, 'lib', 'main.dart');
       breakpointLine = project.buildMethodBreakpointLine;
     });
 
@@ -323,12 +343,14 @@ void main() {
       await testProcess.process.exitCode;
     });
 
-    testWithoutContext('can attach to an already-running Flutter app and reload', () async {
+    testWithoutContext(
+        'can attach to an already-running Flutter app and reload', () async {
       final Uri vmServiceUri = await testProcess.vmServiceUri;
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere(
+            (String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.attach(
             cwd: project.dir.path,
@@ -348,23 +370,26 @@ void main() {
       // by printed output, to ensure the app is running again.
       await dap.client.hotReload();
       expectLines(
-          (await outputEventsFuture).join(),
-          <Object>[
-            startsWith('Reloaded'),
-            'topLevelFunction',
-          ],
-          allowExtras: true,
+        (await outputEventsFuture).join(),
+        <Object>[
+          startsWith('Reloaded'),
+          'topLevelFunction',
+        ],
+        allowExtras: true,
       );
 
       await dap.client.terminate();
     });
 
-    testWithoutContext('can attach to an already-running Flutter app and hit breakpoints', () async {
+    testWithoutContext(
+        'can attach to an already-running Flutter app and hit breakpoints',
+        () async {
       final Uri vmServiceUri = await testProcess.vmServiceUri;
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere(
+            (String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.attach(
             cwd: project.dir.path,
@@ -375,7 +400,8 @@ void main() {
       ], eagerError: true);
 
       // Set a breakpoint and expect to hit it.
-      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents
+          .firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
       await Future.wait(<Future<void>>[
         stoppedFuture,
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
@@ -398,10 +424,9 @@ String _uniqueOutputLines(List<OutputEventBody> outputEvents) {
   return outputEvents
       .map((OutputEventBody e) => e.output)
       .where((String output) {
-        // Skip the item if it's the same as the previous one.
-        final bool isDupe = output == lastItem;
-        lastItem = output;
-        return !isDupe;
-      })
-      .join();
+    // Skip the item if it's the same as the previous one.
+    final bool isDupe = output == lastItem;
+    lastItem = output;
+    return !isDupe;
+  }).join();
 }

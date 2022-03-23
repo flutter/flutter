@@ -95,13 +95,15 @@ void main() {
 
   testWithoutContext(
       'correctly parse sample result json when there are issues.', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssues);
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 2);
     expect(result.issues.first.type, XCResultIssueType.error);
     expect(result.issues.first.subType, 'Semantic Issue');
     expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
-    expect(result.issues.first.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
+    expect(result.issues.first.location,
+        '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
     expect(result.issues.last.type, XCResultIssueType.warning);
     expect(result.issues.last.subType, 'Warning');
     expect(result.issues.last.message,
@@ -111,15 +113,18 @@ void main() {
   });
 
   testWithoutContext(
-      'correctly parse sample result json when there are issues but invalid url.', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssuesAndInvalidUrl);
+      'correctly parse sample result json when there are issues but invalid url.',
+      () async {
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssuesAndInvalidUrl);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 2);
     expect(result.issues.first.type, XCResultIssueType.error);
     expect(result.issues.first.subType, 'Semantic Issue');
     expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
     expect(result.issues.first.location, isNull);
-    expect(result.issues.first.warnings.first, '(XCResult) The `url` exists but it was failed to be parsed. url: 3:00');
+    expect(result.issues.first.warnings.first,
+        '(XCResult) The `url` exists but it was failed to be parsed. url: 3:00');
     expect(result.issues.last.type, XCResultIssueType.warning);
     expect(result.issues.last.subType, 'Warning');
     expect(result.issues.last.message,
@@ -130,51 +135,71 @@ void main() {
 
   testWithoutContext(
       'correctly parse sample result json and discard all warnings', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
-    final XCResult result = await generator.generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssues);
+    final XCResultIssueDiscarder discarder =
+        XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
+    final XCResult result = await generator
+        .generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
     expect(result.issues.length, 1);
     expect(result.issues.first.type, XCResultIssueType.error);
     expect(result.issues.first.subType, 'Semantic Issue');
     expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
-    expect(result.issues.first.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
+    expect(result.issues.first.location,
+        '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
     expect(result.parseSuccess, isTrue);
     expect(result.parsingErrorMessage, isNull);
   });
 
   testWithoutContext(
-      'correctly parse sample result json and discard base on subType', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(subTypeMatcher: RegExp(r'^Warning$'));
-    final XCResult result = await generator.generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
+      'correctly parse sample result json and discard base on subType',
+      () async {
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssues);
+    final XCResultIssueDiscarder discarder =
+        XCResultIssueDiscarder(subTypeMatcher: RegExp(r'^Warning$'));
+    final XCResult result = await generator
+        .generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
     expect(result.issues.length, 1);
     expect(result.issues.first.type, XCResultIssueType.error);
     expect(result.issues.first.subType, 'Semantic Issue');
     expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
-    expect(result.issues.first.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
+    expect(result.issues.first.location,
+        '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
     expect(result.parseSuccess, isTrue);
     expect(result.parsingErrorMessage, isNull);
   });
 
   testWithoutContext(
-      'correctly parse sample result json and discard base on message', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(messageMatcher: RegExp(r"^The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.$"));
-    final XCResult result = await generator.generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
+      'correctly parse sample result json and discard base on message',
+      () async {
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssues);
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
+        messageMatcher: RegExp(
+            r"^The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.$"));
+    final XCResult result = await generator
+        .generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
     expect(result.issues.length, 1);
     expect(result.issues.first.type, XCResultIssueType.error);
     expect(result.issues.first.subType, 'Semantic Issue');
     expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
-    expect(result.issues.first.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
+    expect(result.issues.first.location,
+        '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56');
     expect(result.parseSuccess, isTrue);
     expect(result.parsingErrorMessage, isNull);
   });
 
   testWithoutContext(
-      'correctly parse sample result json and discard base on location', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(locationMatcher: RegExp(r'/Users/m/Projects/test_create/ios/Runner/AppDelegate.m'));
-    final XCResult result = await generator.generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
+      'correctly parse sample result json and discard base on location',
+      () async {
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssues);
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
+        locationMatcher:
+            RegExp(r'/Users/m/Projects/test_create/ios/Runner/AppDelegate.m'));
+    final XCResult result = await generator
+        .generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
     expect(result.issues.length, 1);
     expect(result.issues.first.type, XCResultIssueType.warning);
     expect(result.issues.first.subType, 'Warning');
@@ -186,10 +211,17 @@ void main() {
 
   testWithoutContext(
       'correctly parse sample result json with multiple discarders.', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final XCResultIssueDiscarder discardWarnings = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
-    final XCResultIssueDiscarder discardSemanticIssues = XCResultIssueDiscarder(subTypeMatcher: RegExp(r'^Semantic Issue$'));
-    final XCResult result = await generator.generate(issueDiscarders: <XCResultIssueDiscarder>[discardWarnings, discardSemanticIssues]);
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonWithIssues);
+    final XCResultIssueDiscarder discardWarnings =
+        XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
+    final XCResultIssueDiscarder discardSemanticIssues =
+        XCResultIssueDiscarder(subTypeMatcher: RegExp(r'^Semantic Issue$'));
+    final XCResult result = await generator.generate(
+        issueDiscarders: <XCResultIssueDiscarder>[
+          discardWarnings,
+          discardSemanticIssues
+        ]);
     expect(result.issues, isEmpty);
     expect(result.parseSuccess, isTrue);
     expect(result.parsingErrorMessage, isNull);
@@ -197,7 +229,8 @@ void main() {
 
   testWithoutContext('correctly parse sample result json when no issues.',
       () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonNoIssues);
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonNoIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
     expect(result.parseSuccess, isTrue);
@@ -251,7 +284,8 @@ void main() {
   });
 
   testWithoutContext('error: invalid issue map', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonInvalidIssuesMap);
+    final XCResultGenerator generator =
+        _setupGenerator(resultJson: kSampleResultJsonInvalidIssuesMap);
 
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);

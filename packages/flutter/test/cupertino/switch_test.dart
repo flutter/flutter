@@ -47,13 +47,15 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
+  testWidgets('Switch emits light haptic vibration on tap',
+      (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -84,17 +86,23 @@ void main() {
     await tester.pump();
 
     expect(log, hasLength(1));
-    expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    expect(
+        log.single,
+        isMethodCall('HapticFeedback.vibrate',
+            arguments: 'HapticFeedbackType.lightImpact'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+  testWidgets(
+      'Using other widgets that rebuild the switch will not cause vibrations',
+      (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     final Key switchKey2 = UniqueKey();
     bool value = false;
     bool value2 = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -137,32 +145,45 @@ void main() {
     await tester.pump();
 
     expect(log, hasLength(1));
-    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    expect(
+        log[0],
+        isMethodCall('HapticFeedback.vibrate',
+            arguments: 'HapticFeedbackType.lightImpact'));
 
     await tester.tap(find.byKey(switchKey2));
     await tester.pump();
 
     expect(log, hasLength(2));
-    expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    expect(
+        log[1],
+        isMethodCall('HapticFeedback.vibrate',
+            arguments: 'HapticFeedbackType.lightImpact'));
 
     await tester.tap(find.byKey(switchKey));
     await tester.pump();
 
     expect(log, hasLength(3));
-    expect(log[2], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    expect(
+        log[2],
+        isMethodCall('HapticFeedback.vibrate',
+            arguments: 'HapticFeedbackType.lightImpact'));
 
     await tester.tap(find.byKey(switchKey2));
     await tester.pump();
 
     expect(log, hasLength(4));
-    expect(log[3], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    expect(
+        log[3],
+        isMethodCall('HapticFeedback.vibrate',
+            arguments: 'HapticFeedbackType.lightImpact'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
     bool value = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -193,15 +214,20 @@ void main() {
     await tester.pump();
 
     expect(log, hasLength(1));
-    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    expect(
+        log[0],
+        isMethodCall('HapticFeedback.vibrate',
+            arguments: 'HapticFeedbackType.lightImpact'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('No haptic vibration triggers from a programmatic value change', (WidgetTester tester) async {
+  testWidgets('No haptic vibration triggers from a programmatic value change',
+      (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -292,7 +318,8 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
+  testWidgets('Switch can drag with dragStartBehavior',
+      (WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
@@ -450,7 +477,8 @@ void main() {
     );
 
     // Move a little to the right, not past the middle.
-    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
+    TestGesture gesture = await tester
+        .startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
     await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
     await tester.pump();
     await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
@@ -459,7 +487,9 @@ void main() {
     await tester.pump();
     expect(value, isFalse);
     // ignore: avoid_dynamic_calls
-    final CurvedAnimation position = (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
+    final CurvedAnimation position =
+        (tester.state(find.byType(CupertinoSwitch)) as dynamic).position
+            as CurvedAnimation;
     expect(position.value, lessThan(0.5));
     await tester.pump();
     await tester.pumpAndSettle();
@@ -467,7 +497,8 @@ void main() {
     expect(position.value, 0);
 
     // Move past the middle.
-    gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
+    gesture = await tester
+        .startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
     await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
     await tester.pump();
     await gesture.up();
@@ -481,7 +512,8 @@ void main() {
     expect(position.value, 1.0);
 
     // Now move back to the left, the revert animation should play.
-    gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
+    gesture = await tester
+        .startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
     await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
     await tester.pump();
     await gesture.up();
@@ -495,7 +527,8 @@ void main() {
     expect(position.value, 1.0);
   });
 
-  testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
+  testWidgets('Switch is translucent when disabled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -513,7 +546,8 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
 
-  testWidgets('Switch is using track color when set', (WidgetTester tester) async {
+  testWidgets('Switch is using track color when set',
+      (WidgetTester tester) async {
     const Color trackColor = Color(0xFF00FF00);
 
     await tester.pumpWidget(
@@ -531,11 +565,14 @@ void main() {
     );
 
     expect(find.byType(CupertinoSwitch), findsOneWidget);
-    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).trackColor, trackColor);
+    expect(
+        tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).trackColor,
+        trackColor);
     expect(find.byType(CupertinoSwitch), paints..rrect(color: trackColor));
   });
 
-  testWidgets('Switch is using default thumb color', (WidgetTester tester) async {
+  testWidgets('Switch is using default thumb color',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -549,7 +586,9 @@ void main() {
     );
 
     expect(find.byType(CupertinoSwitch), findsOneWidget);
-    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, null);
+    expect(
+        tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor,
+        null);
     expect(
       find.byType(CupertinoSwitch),
       paints
@@ -561,7 +600,8 @@ void main() {
     );
   });
 
-  testWidgets('Switch is using thumb color when set', (WidgetTester tester) async {
+  testWidgets('Switch is using thumb color when set',
+      (WidgetTester tester) async {
     const Color thumbColor = Color(0xFF000000);
     await tester.pumpWidget(
       const Directionality(
@@ -577,7 +617,9 @@ void main() {
     );
 
     expect(find.byType(CupertinoSwitch), findsOneWidget);
-    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, thumbColor);
+    expect(
+        tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor,
+        thumbColor);
     expect(
       find.byType(CupertinoSwitch),
       paints
@@ -607,7 +649,8 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
-  testWidgets('Switch turns translucent after becoming disabled', (WidgetTester tester) async {
+  testWidgets('Switch turns translucent after becoming disabled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -638,7 +681,8 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
 
-  testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
+  testWidgets('Switch turns opaque after becoming enabled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -669,7 +713,8 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
-  testWidgets('Switch renders correctly before, during, and after being tapped', (WidgetTester tester) async {
+  testWidgets('Switch renders correctly before, during, and after being tapped',
+      (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
@@ -719,7 +764,8 @@ void main() {
     );
   });
 
-  testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {
+  testWidgets('Switch renders correctly in dark mode',
+      (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
@@ -764,7 +810,9 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets(
+      'Hovering over Cupertino switch updates cursor to clickable on Web',
+      (WidgetTester tester) async {
     const bool value = false;
     // Disabled CupertinoSwitch does not update cursor on Web.
     await tester.pumpWidget(
@@ -784,11 +832,14 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    final Offset cupertinoSwitch = tester.getCenter(find.byType(CupertinoSwitch));
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final Offset cupertinoSwitch =
+        tester.getCenter(find.byType(CupertinoSwitch));
     await gesture.addPointer(location: cupertinoSwitch);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
 
     // Enabled CupertinoSwitch updates cursor when hovering on Web.
     await tester.pumpWidget(
@@ -800,7 +851,7 @@ void main() {
               child: CupertinoSwitch(
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) { },
+                onChanged: (bool newValue) {},
               ),
             );
           },
@@ -810,7 +861,8 @@ void main() {
 
     await gesture.moveTo(const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
 
     await gesture.moveTo(cupertinoSwitch);
     addTearDown(gesture.removePointer);

@@ -10,12 +10,15 @@ const int _kNumIterations = 1000;
 const int _kNumWarmUp = 100;
 
 void main() {
-  final List<String> words = 'Lorem Ipsum is simply dummy text of the printing and'
-    " typesetting industry. Lorem Ipsum has been the industry's"
-    ' standard dummy text ever since the 1500s, when an unknown'
-    ' printer took a galley of type and scrambled it to make a'
-    ' type specimen book'.split(' ');
-  final List<InlineSpanSemanticsInformation> data = <InlineSpanSemanticsInformation>[];
+  final List<String> words =
+      'Lorem Ipsum is simply dummy text of the printing and'
+              " typesetting industry. Lorem Ipsum has been the industry's"
+              ' standard dummy text ever since the 1500s, when an unknown'
+              ' printer took a galley of type and scrambled it to make a'
+              ' type specimen book'
+          .split(' ');
+  final List<InlineSpanSemanticsInformation> data =
+      <InlineSpanSemanticsInformation>[];
   for (int i = 0; i < words.length; i++) {
     if (i.isEven) {
       data.add(
@@ -77,14 +80,15 @@ String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
   return result;
 }
 
-
-Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<InlineSpanSemanticsInformation> inputs) sync* {
+Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(
+    List<InlineSpanSemanticsInformation> inputs) sync* {
   String workingText = '';
   String? workingLabel;
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
       if (workingText != null) {
-        yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText);
+        yield InlineSpanSemanticsInformation(workingText,
+            semanticsLabel: workingLabel ?? workingText);
         workingText = '';
         workingLabel = null;
       }
@@ -101,20 +105,24 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
     }
   }
   if (workingText != null) {
-    yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel);
+    yield InlineSpanSemanticsInformation(workingText,
+        semanticsLabel: workingLabel);
   } else {
     assert(workingLabel != null);
   }
 }
 
-Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpanSemanticsInformation> inputs) {
+Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(
+    List<InlineSpanSemanticsInformation> inputs) {
   String workingText = '';
   String? workingLabel;
-  final List<InlineSpanSemanticsInformation> result = <InlineSpanSemanticsInformation>[];
+  final List<InlineSpanSemanticsInformation> result =
+      <InlineSpanSemanticsInformation>[];
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
       if (workingText != null) {
-        result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText));
+        result.add(InlineSpanSemanticsInformation(workingText,
+            semanticsLabel: workingLabel ?? workingText));
         workingText = '';
         workingLabel = null;
       }
@@ -131,7 +139,8 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
     }
   }
   if (workingText != null) {
-    result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel));
+    result.add(InlineSpanSemanticsInformation(workingText,
+        semanticsLabel: workingLabel));
   } else {
     assert(workingLabel != null);
   }

@@ -25,7 +25,9 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testWithoutContext('DevtoolsLauncher launches DevTools from the SDK and saves the URI', () async {
+  testWithoutContext(
+      'DevtoolsLauncher launches DevTools from the SDK and saves the URI',
+      () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
@@ -49,7 +51,9 @@ void main() {
     expect(address.port, 9100);
   });
 
-  testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
+  testWithoutContext(
+      'DevtoolsLauncher does not launch a new DevTools instance if one is already active',
+      () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
@@ -78,8 +82,10 @@ void main() {
     expect(address.port, 9100);
   });
 
-  testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+  testWithoutContext(
+      'DevtoolsLauncher can launch devtools with a memory profile', () async {
+    final FakeProcessManager processManager =
+        FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'dart',
@@ -98,13 +104,16 @@ void main() {
       processManager: processManager,
     );
 
-    await launcher.launch(Uri.parse('localhost:8181/abcdefg'), additionalArguments: <String>['--profile-memory=foo']);
+    await launcher.launch(Uri.parse('localhost:8181/abcdefg'),
+        additionalArguments: <String>['--profile-memory=foo']);
 
     expect(launcher.processStart, completes);
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('DevtoolsLauncher prints error if exception is thrown during launch', () async {
+  testWithoutContext(
+      'DevtoolsLauncher prints error if exception is thrown during launch',
+      () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
       logger: logger,
@@ -124,10 +133,13 @@ void main() {
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
 
-    expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
+    expect(logger.errorText,
+        contains('Failed to launch DevTools: ProcessException'));
   });
 
-  testWithoutContext('DevtoolsLauncher handles failure of DevTools process on a bot', () async {
+  testWithoutContext(
+      'DevtoolsLauncher handles failure of DevTools process on a bot',
+      () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',

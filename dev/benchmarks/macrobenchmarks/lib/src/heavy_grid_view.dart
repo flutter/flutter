@@ -11,7 +11,8 @@ class HeavyGridViewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       itemCount: 1000,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+      gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
       itemBuilder: (BuildContext context, int index) => HeavyWidget(index),
     ).build(context);
   }

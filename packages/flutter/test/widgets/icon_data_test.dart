@@ -10,11 +10,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('IconDataDiagnosticsProperty includes valueProperties in JSON', () {
     IconDataProperty property = IconDataProperty('foo', const IconData(101010));
-    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties']! as Map<String, Object>;
+    final Map<String, Object> valueProperties = property.toJsonMap(
+            const DiagnosticsSerializationDelegate())['valueProperties']!
+        as Map<String, Object>;
     expect(valueProperties['codePoint'], 101010);
 
     property = IconDataProperty('foo', null);
-    final Map<String, Object?> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
+    final Map<String, Object?> json =
+        property.toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json.containsKey('valueProperties'), isFalse);
   });
 }

@@ -12,7 +12,8 @@ const int _kNumIterations = 10000000;
 const int _kNumWarmUp = 100000;
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false,
+      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   print('MatrixUtils.transformRect and .transformPoint benchmark...');
 
   Matrix4 _makePerspective(double radius, double angle, double perspective) {
@@ -24,14 +25,18 @@ void main() {
   }
 
   final List<Matrix4> affineTransforms = <Matrix4>[
-    Matrix4.identity()..scale(1.2, 1.3, 1.0)..rotateZ(0.1),
+    Matrix4.identity()
+      ..scale(1.2, 1.3, 1.0)
+      ..rotateZ(0.1),
     Matrix4.identity()..translate(12.0, 13.0, 10.0),
-    Matrix4.identity()..scale(1.2, 1.3, 1.0)..translate(12.0, 13.0, 10.0),
+    Matrix4.identity()
+      ..scale(1.2, 1.3, 1.0)
+      ..translate(12.0, 13.0, 10.0),
   ];
   final List<Matrix4> perspectiveTransforms = <Matrix4>[
     _makePerspective(10.0, math.pi / 8.0, 0.3),
-    _makePerspective( 8.0, math.pi / 8.0, 0.2),
-    _makePerspective( 1.0, math.pi / 4.0, 0.1)..rotateX(0.1),
+    _makePerspective(8.0, math.pi / 8.0, 0.2),
+    _makePerspective(1.0, math.pi / 4.0, 0.1)..rotateX(0.1),
   ];
   final List<Rect> rectangles = <Rect>[
     const Rect.fromLTRB(1.1, 1.2, 1.5, 1.8),

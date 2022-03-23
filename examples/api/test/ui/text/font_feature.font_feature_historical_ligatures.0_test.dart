@@ -5,7 +5,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/ui/text/font_feature.font_feature_historical_ligatures.0.dart' as example;
+import 'package:flutter_api_samples/ui/text/font_feature.font_feature_historical_ligatures.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,8 +18,13 @@ void main() {
     );
 
     expect(find.byType(Text), findsOneWidget);
-    expect((tester.widget(find.byType(Text).first) as Text).style!.fontFamily, equals('Sorts Mill Goudy'));
-    expect((tester.widget(find.byType(Text).first) as Text).style!.fontFeatures,
-        equals(const <FontFeature>[FontFeature.historicalForms(), FontFeature.historicalLigatures()]));
+    expect((tester.widget(find.byType(Text).first) as Text).style!.fontFamily,
+        equals('Sorts Mill Goudy'));
+    expect(
+        (tester.widget(find.byType(Text).first) as Text).style!.fontFeatures,
+        equals(const <FontFeature>[
+          FontFeature.historicalForms(),
+          FontFeature.historicalLigatures()
+        ]));
   });
 }

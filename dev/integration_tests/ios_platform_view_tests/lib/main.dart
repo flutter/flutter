@@ -90,7 +90,7 @@ class PlatformViewPage extends StatelessWidget {
           ElevatedButton(
             key: button,
             child: const Text('button'),
-            onPressed: (){},
+            onPressed: () {},
           )
         ],
       ),

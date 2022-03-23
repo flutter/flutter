@@ -10,13 +10,15 @@ import 'gesture_tester.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testGesture('do not crash on up event for a pending pointer after winning arena for another pointer', (GestureTester tester) {
+  testGesture(
+      'do not crash on up event for a pending pointer after winning arena for another pointer',
+      (GestureTester tester) {
     // Regression test for https://github.com/flutter/flutter/issues/75061.
 
     final VerticalDragGestureRecognizer v = VerticalDragGestureRecognizer()
-      ..onStart = (_) { };
+      ..onStart = (_) {};
     final HorizontalDragGestureRecognizer h = HorizontalDragGestureRecognizer()
-      ..onStart = (_) { };
+      ..onStart = (_) {};
 
     const PointerDownEvent down90 = PointerDownEvent(
       pointer: 90,
@@ -45,36 +47,46 @@ void main() {
     GestureBinding.instance.gestureArena.close(91);
     tester.async.flushMicrotasks();
 
-    GestureBinding.instance.handleEvent(up90, HitTestEntry(MockHitTestTarget()));
-    GestureBinding.instance.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance
+        .handleEvent(up90, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance
+        .handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
-  testWidgets('VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+  testWidgets(
+      'VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set',
+      (WidgetTester tester) async {
     expect(
       () {
         VerticalDragGestureRecognizer(
           kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having(
+            (AssertionError error) => error.toString(),
+            'description',
+            contains('kind == null || supportedDevices == null')),
       ),
     );
   });
 
-  testWidgets('HorizontalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+  testWidgets(
+      'HorizontalDragGestureRecognizer asserts when kind and supportedDevices are both set',
+      (WidgetTester tester) async {
     expect(
       () {
         HorizontalDragGestureRecognizer(
           kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having(
+            (AssertionError error) => error.toString(),
+            'description',
+            contains('kind == null || supportedDevices == null')),
       ),
     );
   });
@@ -82,5 +94,5 @@ void main() {
 
 class MockHitTestTarget implements HitTestTarget {
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) { }
+  void handleEvent(PointerEvent event, HitTestEntry entry) {}
 }

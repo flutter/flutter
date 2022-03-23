@@ -19,22 +19,25 @@ class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super(verboseHelp: verboseHelp) {
+  })  : _operatingSystemUtils = operatingSystemUtils,
+        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     final String defaultTargetPlatform =
-        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?
-            'linux-arm64' : 'linux-x64';
-    argParser.addOption('target-platform',
+        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
+            ? 'linux-arm64'
+            : 'linux-x64';
+    argParser.addOption(
+      'target-platform',
       defaultsTo: defaultTargetPlatform,
       allowed: <String>['linux-arm64', 'linux-x64'],
       help: 'The target platform for which the app is compiled.',
     );
-    argParser.addOption('target-sysroot',
+    argParser.addOption(
+      'target-sysroot',
       defaultsTo: '/',
       help: 'The root filesystem path of target platform for which '
-            'the app is compiled. This option is valid only '
-            'if the current host and target architectures are different.',
+          'the app is compiled. This option is valid only '
+          'if the current host and target architectures are different.',
     );
   }
 
@@ -47,9 +50,10 @@ class BuildLinuxCommand extends BuildSubCommand {
   bool get hidden => !featureFlags.isLinuxEnabled || !globals.platform.isLinux;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.linux,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      <DevelopmentArtifact>{
+        DevelopmentArtifact.linux,
+      };
 
   @override
   String get description => 'Build a Linux desktop application.';
@@ -61,11 +65,12 @@ class BuildLinuxCommand extends BuildSubCommand {
     final TargetPlatform targetPlatform =
         getTargetPlatformForName(stringArg('target-platform')!);
     final bool needCrossBuild =
-        getNameForHostPlatformArch(_operatingSystemUtils.hostPlatform)
-            != getNameForTargetPlatformArch(targetPlatform);
+        getNameForHostPlatformArch(_operatingSystemUtils.hostPlatform) !=
+            getNameForTargetPlatformArch(targetPlatform);
 
     if (!featureFlags.isLinuxEnabled) {
-      throwToolExit('"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');
+      throwToolExit(
+          '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');
     }
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');

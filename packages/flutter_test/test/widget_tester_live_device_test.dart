@@ -14,9 +14,11 @@ void _expectStartsWith(List<String?> actual, List<String?> matcher) {
 }
 
 void main() {
-  final _MockLiveTestWidgetsFlutterBinding binding = _MockLiveTestWidgetsFlutterBinding();
+  final _MockLiveTestWidgetsFlutterBinding binding =
+      _MockLiveTestWidgetsFlutterBinding();
 
-  testWidgets('Should print message on pointer events', (WidgetTester tester) async {
+  testWidgets('Should print message on pointer events',
+      (WidgetTester tester) async {
     final List<String?> printedMessages = <String?>[];
 
     int invocations = 0;
@@ -50,21 +52,30 @@ void main() {
     await tester.pump();
     expect(invocations, 0);
 
-    _expectStartsWith(printedMessages, '''
+    _expectStartsWith(
+        printedMessages,
+        '''
 Some possible finders for the widgets at Offset(400.0, 300.0):
   find.text('Test')
-'''.trim().split('\n'));
+'''
+            .trim()
+            .split('\n'));
     printedMessages.clear();
 
     await binding.collectDebugPrints(printedMessages, () async {
       await tester.tapAt(const Offset(1, 1));
     });
-    expect(printedMessages, equals('''
+    expect(
+        printedMessages,
+        equals('''
 No widgets found at Offset(1.0, 1.0).
-'''.trim().split('\n')));
+'''
+            .trim()
+            .split('\n')));
   });
 
-  testWidgets('Should print message on pointer events with setSurfaceSize', (WidgetTester tester) async {
+  testWidgets('Should print message on pointer events with setSurfaceSize',
+      (WidgetTester tester) async {
     final List<String?> printedMessages = <String?>[];
 
     int invocations = 0;
@@ -72,7 +83,7 @@ No widgets found at Offset(1.0, 1.0).
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child:GestureDetector(
+          child: GestureDetector(
             onTap: () {
               invocations++;
             },
@@ -97,18 +108,26 @@ No widgets found at Offset(1.0, 1.0).
       await tester.pump();
       expect(invocations, 0);
 
-      _expectStartsWith(printedMessages, '''
+      _expectStartsWith(
+          printedMessages,
+          '''
 Some possible finders for the widgets at Offset(1000.0, 900.0):
   find.text('Test')
-'''.trim().split('\n'));
+'''
+              .trim()
+              .split('\n'));
       printedMessages.clear();
 
       await binding.collectDebugPrints(printedMessages, () async {
         await tester.tapAt(const Offset(1, 1));
       });
-      expect(printedMessages, equals('''
+      expect(
+          printedMessages,
+          equals('''
 No widgets found at Offset(1.0, 1.0).
-'''.trim().split('\n')));
+'''
+              .trim()
+              .split('\n')));
     } finally {
       await tester.binding.setSurfaceSize(originalSize);
     }
@@ -126,7 +145,8 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
     // real devices touches sends event in the global coordinate system.
     // See the documentation of [handlePointerEventForSource] for details.
     if (source == TestBindingEventSource.test) {
-      final PointerEvent globalEvent = event.copyWith(position: localToGlobal(event.position));
+      final PointerEvent globalEvent =
+          event.copyWith(position: localToGlobal(event.position));
       return super.handlePointerEventForSource(globalEvent);
     }
     return super.handlePointerEventForSource(event, source: source);
@@ -138,11 +158,13 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
   DebugPrintCallback get debugPrintOverride {
     return _storeDebugPrints == null
         ? super.debugPrintOverride
-        : ((String? message, { int? wrapWidth }) => _storeDebugPrints!.add(message));
+        : ((String? message, {int? wrapWidth}) =>
+            _storeDebugPrints!.add(message));
   }
 
   // Execute `task` while redirecting [debugPrint] to appending to `store`.
-  Future<void> collectDebugPrints(List<String?>? store, AsyncValueGetter<void> task) async {
+  Future<void> collectDebugPrints(
+      List<String?>? store, AsyncValueGetter<void> task) async {
     _storeDebugPrints = store;
     try {
       await task();

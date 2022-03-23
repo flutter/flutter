@@ -24,15 +24,18 @@ import 'theme.dart';
 const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
-  _TextSpanEditingController({required TextSpan textSpan}):
-    assert(textSpan != null),
-    _textSpan = textSpan,
-    super(text: textSpan.toPlainText(includeSemanticsLabels: false));
+  _TextSpanEditingController({required TextSpan textSpan})
+      : assert(textSpan != null),
+        _textSpan = textSpan,
+        super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+  TextSpan buildTextSpan(
+      {required BuildContext context,
+      TextStyle? style,
+      required bool withComposing}) {
     // This does not care about composing.
     return TextSpan(
       style: style,
@@ -47,11 +50,12 @@ class _TextSpanEditingController extends TextEditingController {
   }
 }
 
-class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
+class _SelectableTextSelectionGestureDetectorBuilder
+    extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
     required _SelectableTextState state,
-  }) : _state = state,
-       super(delegate: state);
+  })  : _state = state,
+        super(delegate: state);
 
   final _SelectableTextState _state;
 
@@ -204,7 +208,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-  }) :  assert(showCursor != null),
+  })  : assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
         assert(selectionHeightStyle != null),
@@ -221,10 +225,10 @@ class SelectableText extends StatefulWidget {
         ),
         textSpan = null,
         toolbarOptions = toolbarOptions ??
-          const ToolbarOptions(
-            selectAll: true,
-            copy: true,
-          ),
+            const ToolbarOptions(
+              selectAll: true,
+              copy: true,
+            ),
         super(key: key);
 
   /// Creates a selectable text widget with a [TextSpan].
@@ -262,26 +266,26 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-  }) :  assert(showCursor != null),
-    assert(autofocus != null),
-    assert(dragStartBehavior != null),
-    assert(maxLines == null || maxLines > 0),
-    assert(minLines == null || minLines > 0),
-    assert(
-      (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-      "minLines can't be greater than maxLines",
-    ),
-    assert(
-      textSpan != null,
-      'A non-null TextSpan must be provided to a SelectableText.rich widget.',
-    ),
-    data = null,
-    toolbarOptions = toolbarOptions ??
-      const ToolbarOptions(
-        selectAll: true,
-        copy: true,
-      ),
-    super(key: key);
+  })  : assert(showCursor != null),
+        assert(autofocus != null),
+        assert(dragStartBehavior != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          "minLines can't be greater than maxLines",
+        ),
+        assert(
+          textSpan != null,
+          'A non-null TextSpan must be provided to a SelectableText.rich widget.',
+        ),
+        data = null,
+        toolbarOptions = toolbarOptions ??
+            const ToolbarOptions(
+              selectAll: true,
+              copy: true,
+            ),
+        super(key: key);
 
   /// The text to display.
   ///
@@ -431,29 +435,52 @@ class SelectableText extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
-    properties.add(DiagnosticsProperty<String>('semanticsLabel', semanticsLabel, defaultValue: null));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
+    properties
+        .add(DiagnosticsProperty<String>('data', data, defaultValue: null));
+    properties.add(DiagnosticsProperty<String>('semanticsLabel', semanticsLabel,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
+        defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor,
+        defaultValue: false));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
-    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
-    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(
+        EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+        defaultValue: null));
+    properties.add(
+        DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties
+        .add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties
+        .add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor,
+        defaultValue: null));
+    properties.add(FlagProperty('selectionEnabled',
+        value: selectionEnabled,
+        defaultValue: true,
+        ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>(
+        'selectionControls', selectionControls,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollPhysics>(
+        'scrollPhysics', scrollPhysics,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>(
+        'textHeightBehavior', textHeightBehavior,
+        defaultValue: null));
   }
 }
 
-class _SelectableTextState extends State<SelectableText> implements TextSelectionGestureDetectorBuilderDelegate {
+class _SelectableTextState extends State<SelectableText>
+    implements TextSelectionGestureDetectorBuilderDelegate {
   EditableTextState? get _editableText => editableTextKey.currentState;
 
   late _TextSpanEditingController _controller;
@@ -464,14 +491,16 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
 
   bool _showSelectionHandles = false;
 
-  late _SelectableTextSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+  late _SelectableTextSelectionGestureDetectorBuilder
+      _selectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
 
   @override
-  final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+  final GlobalKey<EditableTextState> editableTextKey =
+      GlobalKey<EditableTextState>();
 
   @override
   bool get selectionEnabled => widget.selectionEnabled;
@@ -480,9 +509,10 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
+    _selectionGestureDetectorBuilder =
+        _SelectableTextSelectionGestureDetectorBuilder(state: this);
     _controller = _TextSpanEditingController(
-        textSpan: widget.textSpan ?? TextSpan(text: widget.data),
+      textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
     _controller.addListener(_onControllerChanged);
   }
@@ -490,10 +520,11 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   @override
   void didUpdateWidget(SelectableText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
+    if (widget.data != oldWidget.data ||
+        widget.textSpan != oldWidget.textSpan) {
       _controller.removeListener(_onControllerChanged);
       _controller = _TextSpanEditingController(
-          textSpan: widget.textSpan ?? TextSpan(text: widget.data),
+        textSpan: widget.textSpan ?? TextSpan(text: widget.data),
       );
       _controller.addListener(_onControllerChanged);
     }
@@ -512,8 +543,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   }
 
   void _onControllerChanged() {
-    final bool showSelectionHandles = !_effectiveFocusNode.hasFocus
-      || !_controller.selection.isCollapsed;
+    final bool showSelectionHandles =
+        !_effectiveFocusNode.hasFocus || !_controller.selection.isCollapsed;
     if (showSelectionHandles == _showSelectionHandles) {
       return;
     }
@@ -524,7 +555,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
 
   TextSelection? _lastSeenTextSelection;
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(
+      TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -533,7 +565,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     }
     // TODO(chunhtai): The selection may be the same. We should remove this
     // check once this is fixed https://github.com/flutter/flutter/issues/76349.
-    if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
+    if (widget.onSelectionChanged != null &&
+        _lastSeenTextSelection != selection) {
       widget.onSelectionChanged!(selection, cause);
     }
     _lastSeenTextSelection = selection;
@@ -566,17 +599,13 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
       return false;
 
-    if (_controller.selection.isCollapsed)
-      return false;
+    if (_controller.selection.isCollapsed) return false;
 
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
+    if (cause == SelectionChangedCause.keyboard) return false;
 
-    if (cause == SelectionChangedCause.longPress)
-      return true;
+    if (cause == SelectionChangedCause.longPress) return true;
 
-    if (_controller.text.isNotEmpty)
-      return true;
+    if (_controller.text.isNotEmpty) return true;
 
     return false;
   }
@@ -591,16 +620,19 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(
-      !(widget.style != null && widget.style!.inherit == false &&
-          (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
+      !(widget.style != null &&
+          widget.style!.inherit == false &&
+          (widget.style!.fontSize == null ||
+              widget.style!.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
 
     final ThemeData theme = Theme.of(context);
-    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    final TextSelectionThemeData selectionTheme =
+        TextSelectionTheme.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 
-    TextSelectionControls? textSelectionControls =  widget.selectionControls;
+    TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
     final bool cursorOpacityAnimates;
     Offset? cursorOffset;
@@ -615,10 +647,13 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??=
+            selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ??
+            cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(
+            iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
       case TargetPlatform.macOS:
@@ -627,10 +662,13 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??=
+            selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ??
+            cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(
+            iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
       case TargetPlatform.android:
@@ -640,7 +678,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        selectionColor = selectionTheme.selectionColor ??
+            theme.colorScheme.primary.withOpacity(0.40);
         break;
 
       case TargetPlatform.linux:
@@ -650,7 +689,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        selectionColor = selectionTheme.selectionColor ??
+            theme.colorScheme.primary.withOpacity(0.40);
         break;
     }
 
@@ -659,20 +699,24 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     if (effectiveTextStyle == null || effectiveTextStyle.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     if (MediaQuery.boldTextOverride(context))
-      effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+      effectiveTextStyle = effectiveTextStyle
+          .merge(const TextStyle(fontWeight: FontWeight.bold));
     final Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
         style: effectiveTextStyle,
         readOnly: true,
-        textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
-        textHeightBehavior: widget.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
+        textWidthBasis:
+            widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
+        textHeightBehavior:
+            widget.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
         showSelectionHandles: _showSelectionHandles,
         showCursor: widget.showCursor,
         controller: _controller,
         focusNode: focusNode,
         strutStyle: widget.strutStyle ?? const StrutStyle(),
-        textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+        textAlign:
+            widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
         textScaleFactor: widget.textScaleFactor,
         autofocus: widget.autofocus,
@@ -681,7 +725,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         minLines: widget.minLines,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: selectionColor,
-        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+        selectionControls:
+            widget.selectionEnabled ? textSelectionControls : null,
         onSelectionChanged: _handleSelectionChanged,
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         rendererIgnoresPointer: true,

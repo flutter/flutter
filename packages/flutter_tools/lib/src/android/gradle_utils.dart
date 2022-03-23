@@ -31,7 +31,8 @@ const String templateDefaultGradleVersion = '6.7';
 const String templateAndroidGradlePluginVersion = '4.1.0';
 const String templateKotlinGradlePluginVersion = '1.6.10';
 
-final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
+final RegExp _androidPluginRegExp =
+    RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
 /// Provides utilities to run a Gradle task, such as finding the Gradle executable
 /// or constructing a Gradle project.
@@ -42,11 +43,11 @@ class GradleUtils {
     required FileSystem fileSystem,
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils;
+  })  : _platform = platform,
+        _logger = logger,
+        _cache = cache,
+        _fileSystem = fileSystem,
+        _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
   final FileSystem _fileSystem;
@@ -71,35 +72,31 @@ class GradleUtils {
       return gradle.absolute.path;
     }
     throwToolExit(
-      'Unable to locate gradlew script. Please check that ${gradle.path} '
-      'exists or that ${gradle.dirname} can be read.'
-    );
+        'Unable to locate gradlew script. Please check that ${gradle.path} '
+        'exists or that ${gradle.dirname} can be read.');
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    copyDirectory(
-      _cache.getArtifactDirectory('gradle_wrapper'),
-      directory,
-      shouldCopyFile: (File sourceFile, File destinationFile) {
-        // Don't override the existing files in the project.
-        return !destinationFile.existsSync();
-      },
-      onFileCopied: (File source, File dest) {
-        _operatingSystemUtils.makeExecutable(dest);
-      }
-    );
+    copyDirectory(_cache.getArtifactDirectory('gradle_wrapper'), directory,
+        shouldCopyFile: (File sourceFile, File destinationFile) {
+      // Don't override the existing files in the project.
+      return !destinationFile.existsSync();
+    }, onFileCopied: (File source, File dest) {
+      _operatingSystemUtils.makeExecutable(dest);
+    });
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
-    final Directory propertiesDirectory = directory
-      .childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
-    final File propertiesFile = propertiesDirectory
-      .childFile('gradle-wrapper.properties');
+    final Directory propertiesDirectory =
+        directory.childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
+    final File propertiesFile =
+        propertiesDirectory.childFile('gradle-wrapper.properties');
 
     if (propertiesFile.existsSync()) {
       return;
     }
     propertiesDirectory.createSync(recursive: true);
-    final String gradleVersion = getGradleVersionForAndroidPlugin(directory, _logger);
+    final String gradleVersion =
+        getGradleVersionForAndroidPlugin(directory, _logger);
     final String propertyContents = '''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -119,13 +116,16 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    logger.printTrace("$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace(
+        "$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
-  final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
+  final Iterable<Match> pluginMatches =
+      _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace(
+        "$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
@@ -233,10 +233,12 @@ void updateLocalProperties({
 
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
+    changeIfNecessary(
+        'sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary(
+      'flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
@@ -265,15 +267,18 @@ void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
+    settings.values['sdk.dir'] =
+        globals.fsUtils.escapePath(androidSdk.directory.path);
   }
   settings.writeContents(properties);
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project', type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
-  throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
-    'Try setting the ANDROID_SDK_ROOT environment variable.'
-  );
+  BuildEvent('unsupported-project',
+          type: 'gradle',
+          eventError: 'android-sdk-not-found',
+          flutterUsage: globals.flutterUsage)
+      .send();
+  throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
+      'Try setting the ANDROID_SDK_ROOT environment variable.');
 }

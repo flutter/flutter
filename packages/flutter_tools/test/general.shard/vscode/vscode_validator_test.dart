@@ -11,13 +11,16 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('VsCode search locations on windows supports an empty environment', () {
-    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+  testWithoutContext(
+      'VsCode search locations on windows supports an empty environment', () {
+    final FileSystem fileSystem =
+        MemoryFileSystem.test(style: FileSystemStyle.windows);
     final Platform platform = FakePlatform(
       operatingSystem: 'windows',
       environment: <String, String>{},
     );
 
-    expect(VsCode.allInstalled(fileSystem, platform, FakeProcessManager.any()), isEmpty);
+    expect(VsCode.allInstalled(fileSystem, platform, FakeProcessManager.any()),
+        isEmpty);
   });
 }

@@ -70,7 +70,8 @@ class Xcode {
       processManager: processManager,
       fileSystem: fileSystem ?? MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      xcodeProjectInterpreter: xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+      xcodeProjectInterpreter: xcodeProjectInterpreter ??
+          XcodeProjectInterpreter.test(processManager: processManager),
     );
   }
 
@@ -79,15 +80,19 @@ class Xcode {
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
-  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck =>
+      _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
   String? _xcodeSelectPath;
   String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = _processUtils.runSync(
-          <String>['/usr/bin/xcode-select', '--print-path'],
-        ).stdout.trim();
+        _xcodeSelectPath = _processUtils
+            .runSync(
+              <String>['/usr/bin/xcode-select', '--print-path'],
+            )
+            .stdout
+            .trim();
       } on ProcessException {
         // Ignored, return null below.
       } on ArgumentError {
@@ -104,6 +109,7 @@ class Xcode {
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;
+
   /// Has the EULA been signed?
   bool get eulaSigned {
     if (_eulaSigned == null) {
@@ -180,7 +186,12 @@ class Xcode {
   Future<String> sdkLocation(EnvironmentType environmentType) async {
     assert(environmentType != null);
     final RunResult runResult = await _processUtils.run(
-      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
+      <String>[
+        ...xcrunCommand(),
+        '--sdk',
+        getSDKNameForIOSEnvironmentType(environmentType),
+        '--show-sdk-path'
+      ],
     );
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find SDK location: ${runResult.stderr}');
@@ -193,17 +204,21 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    final String appPath =
+        _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
     return _fileSystem.directory(appPath).existsSync() ? appPath : null;
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+EnvironmentType? environmentTypeFromSdkroot(
+    String sdkroot, FileSystem fileSystem) {
   assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {
-    return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+    return sdkName.contains('simulator')
+        ? EnvironmentType.simulator
+        : EnvironmentType.physical;
   }
   assert(false);
   return null;

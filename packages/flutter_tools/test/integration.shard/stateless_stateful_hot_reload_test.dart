@@ -35,7 +35,8 @@ void main() {
     await flutter.run();
     await flutter.hotReload();
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final StreamSubscription<String> subscription =
+        flutter.stdout.listen(stdout.writeln);
 
     // switch to stateful.
     project.toggleState();

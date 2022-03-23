@@ -16,7 +16,8 @@ void main() {
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager =
+        TestRenderSliverBoxChildManager(
       children: children,
     );
     final RenderViewport root = RenderViewport(
@@ -52,22 +53,26 @@ void main() {
 
     test('should be 0 when item extent is 0', () {
       const double offsetValueWhichDoesntCare = 1234;
-      final int actual = testGetMaxChildIndexForScrollOffset(offsetValueWhichDoesntCare, 0);
+      final int actual =
+          testGetMaxChildIndexForScrollOffset(offsetValueWhichDoesntCare, 0);
       expect(actual, 0);
     });
 
     test('should be 0 when offset is 0', () {
-      final int actual = testGetMaxChildIndexForScrollOffset(0, genericItemExtent);
+      final int actual =
+          testGetMaxChildIndexForScrollOffset(0, genericItemExtent);
       expect(actual, 0);
     });
 
     test('should be 0 when offset is equal to item extent', () {
-      final int actual = testGetMaxChildIndexForScrollOffset(genericItemExtent, genericItemExtent);
+      final int actual = testGetMaxChildIndexForScrollOffset(
+          genericItemExtent, genericItemExtent);
       expect(actual, 0);
     });
 
     test('should be 1 when offset is greater than item extent', () {
-      final int actual = testGetMaxChildIndexForScrollOffset(genericItemExtent + 1, genericItemExtent);
+      final int actual = testGetMaxChildIndexForScrollOffset(
+          genericItemExtent + 1, genericItemExtent);
       expect(actual, 1);
     });
 
@@ -79,8 +84,11 @@ void main() {
       expect(actual, 1);
     });
 
-    test('should be 4 when offset is four times and a half greater than item extent', () {
-      final int actual = testGetMaxChildIndexForScrollOffset(genericItemExtent * 4.5, genericItemExtent);
+    test(
+        'should be 4 when offset is four times and a half greater than item extent',
+        () {
+      final int actual = testGetMaxChildIndexForScrollOffset(
+          genericItemExtent * 4.5, genericItemExtent);
       expect(actual, 4);
     });
 
@@ -93,10 +101,14 @@ void main() {
       expect(actual, 5);
     });
 
-    test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
-      const double itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
+    test(
+        'should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals',
+        () {
+      const double itemExtentSpecificForAProblematicScreenSize =
+          411.42857142857144;
       final int actual = testGetMaxChildIndexForScrollOffset(
-        itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
+        itemExtentSpecificForAProblematicScreenSize * 6 +
+            extraValueToHaveRoundingIssues,
         itemExtentSpecificForAProblematicScreenSize,
       );
       expect(actual, 5);
@@ -112,8 +124,10 @@ void main() {
   });
 }
 
-int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-  final TestRenderSliverFixedExtentBoxAdaptor renderSliver = TestRenderSliverFixedExtentBoxAdaptor();
+int testGetMaxChildIndexForScrollOffset(
+    double scrollOffset, double itemExtent) {
+  final TestRenderSliverFixedExtentBoxAdaptor renderSliver =
+      TestRenderSliverFixedExtentBoxAdaptor();
   return renderSliver.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
 }
 
@@ -136,9 +150,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
-      return;
+  void createChild(int index, {required RenderBox? after}) {
+    if (index < 0 || index >= children.length) return;
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject!.insert(children[index], after: after);
@@ -161,7 +174,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     double? trailingScrollOffset,
   }) {
     assert(lastIndex! >= firstIndex!);
-    return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
+    return children.length *
+        (trailingScrollOffset! - leadingScrollOffset!) /
+        (lastIndex! - firstIndex! + 1);
   }
 
   @override
@@ -170,17 +185,21 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+    final SliverMultiBoxAdaptorParentData childParentData =
+        child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
   @override
-  void setDidUnderflow(bool value) { }
+  void setDidUnderflow(bool value) {}
 }
 
-class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
+class TestRenderSliverFixedExtentBoxAdaptor
+    extends RenderSliverFixedExtentBoxAdaptor {
   TestRenderSliverFixedExtentBoxAdaptor()
-    :super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
+      : super(
+            childManager:
+                TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   @override
   // ignore: unnecessary_overrides

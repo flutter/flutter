@@ -77,7 +77,8 @@ void main() {
           restorationId: 'list',
           cacheExtent: 0,
           itemCount: 50,
-          separatorBuilder: (BuildContext context, int index) => const SizedBox.shrink(),
+          separatorBuilder: (BuildContext context, int index) =>
+              const SizedBox.shrink(),
           itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
@@ -117,7 +118,8 @@ void main() {
         child: GridView(
           restorationId: 'grid',
           cacheExtent: 0,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1),
           children: List<Widget>.generate(
             50,
             (int index) => SizedBox(
@@ -138,7 +140,8 @@ void main() {
         child: GridView.builder(
           restorationId: 'grid',
           cacheExtent: 0,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1),
           itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
@@ -156,7 +159,8 @@ void main() {
         child: GridView.custom(
           restorationId: 'grid',
           cacheExtent: 0,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1),
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
@@ -244,7 +248,9 @@ void main() {
 
     await tester.restartAndRestore();
 
-    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 525);
+    expect(
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+        525);
     expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, -525));
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
 
@@ -257,7 +263,9 @@ void main() {
 
     await tester.restoreFrom(data);
 
-    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 525);
+    expect(
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+        525);
     expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, -525));
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
   });
@@ -332,7 +340,8 @@ void main() {
     await restoreScrollAndVerify(tester, secondOffset: 542);
   });
 
-  testWidgets('ListWheelScrollView.useDelegate restoration', (WidgetTester tester) async {
+  testWidgets('ListWheelScrollView.useDelegate restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListWheelScrollView.useDelegate(
@@ -361,10 +370,12 @@ void main() {
           height: 200,
           child: NestedScrollView(
             restorationId: 'outer',
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                   sliver: SliverAppBar(
                     title: const Text('Books'),
                     pinned: true,
@@ -390,20 +401,35 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        150);
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -500));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
     await tester.restartAndRestore();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
@@ -411,18 +437,29 @@ void main() {
     await tester.drag(find.byType(NestedScrollView), const Offset(0, 600));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        150);
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.restoreFrom(data);
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
   });
 
-  testWidgets('RestorationData is flushed even if no frame is scheduled', (WidgetTester tester) async {
+  testWidgets('RestorationData is flushed even if no frame is scheduled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView(
@@ -446,7 +483,8 @@ void main() {
     expect(find.text('Tile 12'), findsNothing);
 
     final TestRestorationData initialData = await tester.getRestorationData();
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await gesture.moveBy(const Offset(0, -525));
     await tester.pump();
 
@@ -470,7 +508,10 @@ Future<void> pageViewScrollAndRestore(WidgetTester tester) async {
   expect(find.text('Tile 0'), findsOneWidget);
   expect(find.text('Tile 10'), findsNothing);
 
-  tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(50.0 * 10);
+  tester
+      .state<ScrollableState>(find.byType(Scrollable))
+      .position
+      .jumpTo(50.0 * 10);
   await tester.pumpAndSettle();
 
   expect(find.text('Tile 0'), findsNothing);
@@ -478,7 +519,8 @@ Future<void> pageViewScrollAndRestore(WidgetTester tester) async {
 
   await tester.restartAndRestore();
 
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 50.0 * 10);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      50.0 * 10);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
 
@@ -491,13 +533,16 @@ Future<void> pageViewScrollAndRestore(WidgetTester tester) async {
 
   await tester.restoreFrom(data);
 
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 50.0 * 10);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      50.0 * 10);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
 }
 
-Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 525}) async {
-  final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is Scrollable);
+Future<void> restoreScrollAndVerify(WidgetTester tester,
+    {double secondOffset = 525}) async {
+  final Finder findScrollable =
+      find.byElementPredicate((Element e) => e.widget is Scrollable);
 
   expect(find.text('Tile 0'), findsOneWidget);
   expect(find.text('Tile 1'), findsOneWidget);
@@ -516,7 +561,8 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 
   await tester.restartAndRestore();
 
-  expect(tester.state<ScrollableState>(findScrollable).position.pixels, secondOffset);
+  expect(tester.state<ScrollableState>(findScrollable).position.pixels,
+      secondOffset);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 1'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
@@ -535,7 +581,8 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 
   await tester.restoreFrom(data);
 
-  expect(tester.state<ScrollableState>(findScrollable).position.pixels, secondOffset);
+  expect(tester.state<ScrollableState>(findScrollable).position.pixels,
+      secondOffset);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 1'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
@@ -544,7 +591,8 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 }
 
 class TestHarness extends StatelessWidget {
-  const TestHarness({Key? key, required this.child, this.height = 100}) : super(key: key);
+  const TestHarness({Key? key, required this.child, this.height = 100})
+      : super(key: key);
 
   final Widget child;
   final double height;

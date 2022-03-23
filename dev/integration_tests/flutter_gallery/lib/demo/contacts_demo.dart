@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
-  const _ContactCategory({ Key? key, this.icon, this.children }) : super(key: key);
+  const _ContactCategory({Key? key, this.icon, this.children})
+      : super(key: key);
 
   final IconData? icon;
   final List<Widget>? children;
@@ -17,8 +18,7 @@ class _ContactCategory extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: themeData.dividerColor))
-      ),
+          border: Border(bottom: BorderSide(color: themeData.dividerColor))),
       child: DefaultTextStyle(
         style: Theme.of(context).textTheme.subtitle1!,
         child: SafeArea(
@@ -42,9 +42,10 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  const _ContactItem({ Key? key, this.icon, required this.lines, this.tooltip, this.onPressed })
-    : assert(lines.length > 1),
-      super(key: key);
+  const _ContactItem(
+      {Key? key, this.icon, required this.lines, this.tooltip, this.onPressed})
+      : assert(lines.length > 1),
+        super(key: key);
 
   final IconData? icon;
   final List<String> lines;
@@ -64,7 +65,9 @@ class _ContactItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ...lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)),
+                  ...lines
+                      .sublist(0, lines.length - 1)
+                      .map<Widget>((String line) => Text(line)),
                   Text(lines.last, style: themeData.textTheme.caption),
                 ],
               ),
@@ -115,7 +118,8 @@ class ContactsDemoState extends State<ContactsDemo> {
             SliverAppBar(
               expandedHeight: _appBarHeight,
               pinned: _appBarBehavior == AppBarBehavior.pinned,
-              floating: _appBarBehavior == AppBarBehavior.floating || _appBarBehavior == AppBarBehavior.snapping,
+              floating: _appBarBehavior == AppBarBehavior.floating ||
+                  _appBarBehavior == AppBarBehavior.snapping,
               snap: _appBarBehavior == AppBarBehavior.snapping,
               actions: <Widget>[
                 IconButton(
@@ -133,7 +137,8 @@ class ContactsDemoState extends State<ContactsDemo> {
                       _appBarBehavior = value;
                     });
                   },
-                  itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuItem<AppBarBehavior>>[
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
                       child: Text('App bar scrolls away'),
@@ -190,8 +195,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                         icon: Icons.message,
                         tooltip: 'Send message',
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Pretend that this opened your SMS application.'),
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'Pretend that this opened your SMS application.'),
                           ));
                         },
                         lines: const <String>[
@@ -203,7 +210,8 @@ class ContactsDemoState extends State<ContactsDemo> {
                         icon: Icons.message,
                         tooltip: 'Send message',
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
                             content: Text('A messaging app appears.'),
                           ));
                         },
@@ -216,8 +224,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                         icon: Icons.message,
                         tooltip: 'Send message',
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Imagine if you will, a messaging application.'),
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'Imagine if you will, a messaging application.'),
                           ));
                         },
                         lines: const <String>[
@@ -235,8 +245,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.email,
                       tooltip: 'Send personal e-mail',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Here, your e-mail application would open.'),
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content:
+                              Text('Here, your e-mail application would open.'),
                         ));
                       },
                       lines: const <String>[
@@ -248,8 +260,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.email,
                       tooltip: 'Send work e-mail',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Summon your favorite e-mail application here.'),
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text(
+                              'Summon your favorite e-mail application here.'),
                         ));
                       },
                       lines: const <String>[
@@ -266,8 +280,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('This would show a map of San Francisco.'),
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content:
+                              Text('This would show a map of San Francisco.'),
                         ));
                       },
                       lines: const <String>[
@@ -280,8 +296,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('This would show a map of Mountain View.'),
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content:
+                              Text('This would show a map of Mountain View.'),
                         ));
                       },
                       lines: const <String>[
@@ -294,8 +312,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('This would also show a map, if this was not a demo.'),
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text(
+                              'This would also show a map, if this was not a demo.'),
                         ));
                       },
                       lines: const <String>[

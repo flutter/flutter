@@ -19,7 +19,8 @@ import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
-  AnalyzeBase(this.argResults, {
+  AnalyzeBase(
+    this.argResults, {
     required this.repoRoots,
     required this.repoPackages,
     required this.fileSystem,
@@ -55,7 +56,8 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fileSystem.file(argResults['write']).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile =
+            fileSystem.file(argResults['write']).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -63,7 +65,8 @@ abstract class AnalyzeBase {
           resultsFile.close();
         }
       } on Exception catch (e) {
-        logger.printError('Failed to save output to "${argResults['write']}": $e');
+        logger.printError(
+            'Failed to save output to "${argResults['write']}": $e');
       }
     }
   }
@@ -86,6 +89,7 @@ abstract class AnalyzeBase {
     }
     return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
   }
+
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
 
@@ -97,8 +101,8 @@ abstract class AnalyzeBase {
     required String seconds,
   }) {
     final StringBuffer errorsMessage = StringBuffer(issueCount > 0
-      ? '$issueCount ${pluralize('issue', issueCount)} found.'
-      : 'No issues found!');
+        ? '$issueCount ${pluralize('issue', issueCount)} found.'
+        : 'No issues found!');
 
     // Only [AnalyzeContinuously] has issueDiff message.
     if (issueDiff != null) {
@@ -128,9 +132,11 @@ class PackageDependency {
     add(packagePath, pubSpecYamlPath);
     canonicalSource = pubSpecYamlPath;
   }
+
   void add(String packagePath, String sourcePath) {
     values.putIfAbsent(packagePath, () => <String>[]).add(sourcePath);
   }
+
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
     final String? flutterRoot = Cache.flutterRoot;
@@ -145,14 +151,17 @@ class PackageDependency {
     }
     return false;
   }
+
   void describeConflict(StringBuffer result) {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
-    targets.sort((String a, String b) => values[b]!.length.compareTo(values[a]!.length));
+    targets.sort(
+        (String a, String b) => values[b]!.length.compareTo(values[a]!.length));
     for (final String target in targets) {
       final List<String> targetList = values[target]!;
       final int count = targetList.length;
-      result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
+      result.writeln(
+          '  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
       bool canonical = false;
       for (final String source in targetList) {
         result.writeln('    $source');
@@ -161,16 +170,22 @@ class PackageDependency {
         }
       }
       if (canonical) {
-        result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
+        result.writeln(
+            '    (This is the actual package definition, so it is considered the canonical "right answer".)');
       }
     }
   }
+
   String get target => values.keys.single;
 }
 
 class PackageDependencyTracker {
   /// Packages whose source is defined in the vended SDK.
-  static const List<String> _vendedSdkPackages = <String>['analyzer', 'front_end', 'kernel'];
+  static const List<String> _vendedSdkPackages = <String>[
+    'analyzer',
+    'front_end',
+    'kernel'
+  ];
 
   // This is a map from package names to objects that track the paths
   // involved (sources and targets).
@@ -182,54 +197,69 @@ class PackageDependencyTracker {
 
   /// Read the .packages file in [directory] and add referenced packages to [dependencies].
   void addDependenciesFromPackagesFileIn(Directory directory) {
-    final String dotPackagesPath = globals.fs.path.join(directory.path, '.packages');
+    final String dotPackagesPath =
+        globals.fs.path.join(directory.path, '.packages');
     final File dotPackages = globals.fs.file(dotPackagesPath);
     if (dotPackages.existsSync()) {
       // this directory has opinions about what we should be using
       final Iterable<String> lines = dotPackages
-        .readAsStringSync()
-        .split('\n')
-        .where((String line) => !line.startsWith(RegExp(r'^ *#')));
+          .readAsStringSync()
+          .split('\n')
+          .where((String line) => !line.startsWith(RegExp(r'^ *#')));
       for (final String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {
           final String packageName = line.substring(0, colon);
-          final String packagePath = globals.fs.path.fromUri(line.substring(colon+1));
+          final String packagePath =
+              globals.fs.path.fromUri(line.substring(colon + 1));
           // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local
           // globals.fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
           // since they would produce spurious conflicts.
-          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..')) {
-            add(packageName, globals.fs.path.normalize(globals.fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
+          if (!_vendedSdkPackages.contains(packageName) ||
+              packagePath.startsWith('..')) {
+            add(
+                packageName,
+                globals.fs.path.normalize(
+                    globals.fs.path.absolute(directory.path, packagePath)),
+                dotPackagesPath);
           }
         }
       }
     }
   }
 
-  void addCanonicalCase(String packageName, String packagePath, String pubSpecYamlPath) {
-    getPackageDependency(packageName).addCanonicalCase(packagePath, pubSpecYamlPath);
+  void addCanonicalCase(
+      String packageName, String packagePath, String pubSpecYamlPath) {
+    getPackageDependency(packageName)
+        .addCanonicalCase(packagePath, pubSpecYamlPath);
   }
 
   void add(String packageName, String packagePath, String dotPackagesPath) {
     getPackageDependency(packageName).add(packagePath, dotPackagesPath);
   }
 
-  void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
+  void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories,
+      PackageDependencyTracker dependencies) {
     for (final Directory directory in pubSpecDirectories) {
-      final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
+      final String pubSpecYamlPath =
+          globals.fs.path.join(directory.path, 'pubspec.yaml');
       final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        final dynamic pubSpecYaml = yaml.loadYaml(globals.fs.file(pubSpecYamlPath).readAsStringSync());
+        final dynamic pubSpecYaml =
+            yaml.loadYaml(globals.fs.file(pubSpecYamlPath).readAsStringSync());
         if (pubSpecYaml is yaml.YamlMap) {
           final dynamic packageName = pubSpecYaml['name'];
           if (packageName is String) {
-            final String packagePath = globals.fs.path.normalize(globals.fs.path.absolute(globals.fs.path.join(directory.path, 'lib')));
-            dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
+            final String packagePath = globals.fs.path.normalize(globals.fs.path
+                .absolute(globals.fs.path.join(directory.path, 'lib')));
+            dependencies.addCanonicalCase(
+                packageName, packagePath, pubSpecYamlPath);
           } else {
-            throwToolExit('pubspec.yaml is malformed. The name should be a String.');
+            throwToolExit(
+                'pubspec.yaml is malformed. The name should be a String.');
           }
         } else {
           throwToolExit('pubspec.yaml is malformed.');
@@ -242,28 +272,29 @@ class PackageDependencyTracker {
     if (dependencies.hasConflicts) {
       final StringBuffer message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());
-      message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
+      message.writeln(
+          'Make sure you have run "pub upgrade" in all the directories mentioned above.');
       if (dependencies.hasConflictsAffectingFlutterRepo) {
         message.writeln(
-          'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
-          'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
-          '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)'
-        );
+            'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
+            'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
+            '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)');
       }
       message.write(
-        'If this does not help, to track down the conflict you can use '
-        '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.'
-      );
+          'If this does not help, to track down the conflict you can use '
+          '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
       throwToolExit(message.toString());
     }
   }
 
   bool get hasConflicts {
-    return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
+    return packages.values
+        .any((PackageDependency dependency) => dependency.hasConflict);
   }
 
   bool get hasConflictsAffectingFlutterRepo {
-    return packages.values.any((PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
+    return packages.values.any((PackageDependency dependency) =>
+        dependency.hasConflictAffectingFlutterRepo);
   }
 
   String generateConflictReport() {

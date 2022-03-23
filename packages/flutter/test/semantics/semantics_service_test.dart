@@ -15,18 +15,35 @@ void main() {
     final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
     Future<dynamic> handleMessage(dynamic mockMessage) async {
-      final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> message =
+          mockMessage as Map<dynamic, dynamic>;
       log.add(message);
     }
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockDecodedMessageHandler<dynamic>(
+            SystemChannels.accessibility, handleMessage);
 
     await SemanticsService.announce('announcement 1', TextDirection.ltr);
     await SemanticsService.announce('announcement 2', TextDirection.rtl);
 
-    expect(log, equals(<Map<String, dynamic>>[
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1}},
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0}},
-    ]));
+    expect(
+        log,
+        equals(<Map<String, dynamic>>[
+          <String, dynamic>{
+            'type': 'announce',
+            'data': <String, dynamic>{
+              'message': 'announcement 1',
+              'textDirection': 1
+            }
+          },
+          <String, dynamic>{
+            'type': 'announce',
+            'data': <String, dynamic>{
+              'message': 'announcement 2',
+              'textDirection': 0
+            }
+          },
+        ]));
   });
 }

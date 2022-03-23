@@ -46,7 +46,9 @@ void main() {
     expect(boundary.debugLayer!.attached, isTrue); // this time it did again!
   });
 
-  test('updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree', () {
+  test(
+      'updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree',
+      () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();
     final ContainerLayer c = ContainerLayer();
@@ -92,7 +94,9 @@ void main() {
     expect(f.debugSubtreeNeedsAddToScene, false);
   });
 
-  test('updateSubtreeNeedsAddToScene propagates Layer._needsAddToScene up the tree', () {
+  test(
+      'updateSubtreeNeedsAddToScene propagates Layer._needsAddToScene up the tree',
+      () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();
     final ContainerLayer c = ContainerLayer();
@@ -100,7 +104,15 @@ void main() {
     final ContainerLayer e = ContainerLayer();
     final ContainerLayer f = ContainerLayer();
     final ContainerLayer g = ContainerLayer();
-    final List<ContainerLayer> allLayers = <ContainerLayer>[a, b, c, d, e, f, g];
+    final List<ContainerLayer> allLayers = <ContainerLayer>[
+      a,
+      b,
+      c,
+      d,
+      e,
+      f,
+      g
+    ];
 
     // The tree is like the following where b and j are dirty:
     //        a____
@@ -169,7 +181,9 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view = RenderView(
+        configuration: const ViewConfiguration(),
+        window: RendererBinding.instance.window);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -182,7 +196,9 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view = RenderView(
+        configuration: const ViewConfiguration(),
+        window: RendererBinding.instance.window);
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -257,7 +273,7 @@ void main() {
     final LayerLink link = LayerLink();
     late RenderLeaderLayer leader;
     final RenderRepaintBoundary root = RenderRepaintBoundary(
-      child:RenderRepaintBoundary(
+      child: RenderRepaintBoundary(
         child: leader = RenderLeaderLayer(link: link),
       ),
     );
@@ -338,11 +354,13 @@ void main() {
     layer.debugFillProperties(builder);
     return builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
+    expect(_getDebugInfo(ClipRectLayer()),
+        contains('clipBehavior: Clip.hardEdge'));
     expect(
       _getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
@@ -350,7 +368,8 @@ void main() {
   });
 
   test('ClipRRectLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(_getDebugInfo(ClipRRectLayer()),
+        contains('clipBehavior: Clip.antiAlias'));
     expect(
       _getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
@@ -358,7 +377,8 @@ void main() {
   });
 
   test('ClipPathLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(_getDebugInfo(ClipPathLayer()),
+        contains('clipBehavior: Clip.antiAlias'));
     expect(
       _getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
@@ -377,7 +397,8 @@ void main() {
     final List<String> info = _getDebugInfo(layer);
     expect(info, contains('picture: ${describeIdentity(picture)}'));
     expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
-    expect(info, contains('raster cache hints: isComplex = true, willChange = false'));
+    expect(info,
+        contains('raster cache hints: isComplex = true, willChange = false'));
   });
 
   test('Layer prints engineLayer if it is not null in debug info', () {
@@ -387,7 +408,8 @@ void main() {
 
     layer.engineLayer = FakeEngineLayer();
     info = _getDebugInfo(layer);
-    expect(info, contains('engine layer: ${describeIdentity(layer.engineLayer)}'));
+    expect(
+        info, contains('engine layer: ${describeIdentity(layer.engineLayer)}'));
   });
 
   test('mutating PictureLayer fields triggers needsAddToScene', () {
@@ -478,14 +500,17 @@ void main() {
       colorFilter: const ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
     );
     checkNeedsAddToScene(layer, () {
-      layer.colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color);
+      layer.colorFilter =
+          const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color);
     });
   });
 
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
-    const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
+    const Gradient gradient =
+        RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);
-    final ShaderMaskLayer layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
+    final ShaderMaskLayer layer = ShaderMaskLayer(
+        shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
     checkNeedsAddToScene(layer, () {
       layer.maskRect = unitRect;
     });
@@ -498,7 +523,8 @@ void main() {
   });
 
   test('mutating BackdropFilterLayer fields triggers needsAddToScene', () {
-    final BackdropFilterLayer layer = BackdropFilterLayer(filter: ImageFilter.blur());
+    final BackdropFilterLayer layer =
+        BackdropFilterLayer(filter: ImageFilter.blur());
     checkNeedsAddToScene(layer, () {
       layer.filter = ImageFilter.blur(sigmaX: 1.0);
     });
@@ -543,7 +569,9 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
@@ -647,7 +675,8 @@ void main() {
     expect(() => holder.layer = layer, throwsAssertionError);
   });
 
-  test('OpacityLayer does not push an OffsetLayer if there are no children', () {
+  test('OpacityLayer does not push an OffsetLayer if there are no children',
+      () {
     final OpacityLayer layer = OpacityLayer(alpha: 128);
     final FakeSceneBuilder builder = FakeSceneBuilder();
     layer.addToScene(builder);
@@ -749,21 +778,24 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
 
   bool pushedOpacity = false;
   @override
-  OpacityEngineLayer pushOpacity(int alpha, {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
+  OpacityEngineLayer pushOpacity(int alpha,
+      {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
     pushedOpacity = true;
     return FakeOpacityEngineLayer();
   }
 
   bool pushedOffset = false;
   @override
-  OffsetEngineLayer pushOffset(double x, double y, {OffsetEngineLayer? oldLayer}) {
+  OffsetEngineLayer pushOffset(double x, double y,
+      {OffsetEngineLayer? oldLayer}) {
     pushedOffset = true;
     return FakeOffsetEngineLayer();
   }
 
   bool addedPicture = false;
   @override
-  void addPicture(Offset offset, Picture picture, {bool isComplexHint = false, bool willChangeHint = false}) {
+  void addPicture(Offset offset, Picture picture,
+      {bool isComplexHint = false, bool willChangeHint = false}) {
     addedPicture = true;
   }
 
@@ -771,6 +803,8 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
   void pop() {}
 }
 
-class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}
+class FakeOpacityEngineLayer extends FakeEngineLayer
+    implements OpacityEngineLayer {}
 
-class FakeOffsetEngineLayer extends FakeEngineLayer implements OffsetEngineLayer {}
+class FakeOffsetEngineLayer extends FakeEngineLayer
+    implements OffsetEngineLayer {}

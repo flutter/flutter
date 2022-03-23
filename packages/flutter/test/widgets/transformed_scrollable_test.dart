@@ -136,7 +136,8 @@ void main() {
     expect(controller.offset, 30.0); // 100.0 - 70.0
   });
 
-  testWidgets('Perspective transform on scrollable', (WidgetTester tester) async {
+  testWidgets('Perspective transform on scrollable',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(

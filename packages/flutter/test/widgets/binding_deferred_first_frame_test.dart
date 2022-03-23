@@ -13,7 +13,8 @@ const String _actualContent = 'Actual Content';
 const String _loading = 'Loading...';
 
 void main() {
-  testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
+  testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine',
+      (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer = Completer<void>();
@@ -26,7 +27,8 @@ void main() {
         ),
       ),
     );
-    final _DeferringWidgetState state = tester.state<_DeferringWidgetState>(find.byType(_DeferringWidget));
+    final _DeferringWidgetState state =
+        tester.state<_DeferringWidgetState>(find.byType(_DeferringWidget));
 
     expect(find.text(_loading), findsOneWidget);
     expect(find.text(_actualContent), findsNothing);
@@ -88,7 +90,8 @@ void main() {
 }
 
 class _DeferringWidget extends StatefulWidget {
-  const _DeferringWidget({required Key key, required this.loader}) : super(key: key);
+  const _DeferringWidget({required Key key, required this.loader})
+      : super(key: key);
 
   final Future<void> loader;
 
@@ -113,8 +116,6 @@ class _DeferringWidgetState extends State<_DeferringWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return doneLoading
-        ? const Text(_actualContent)
-        : const Text(_loading);
+    return doneLoading ? const Text(_actualContent) : const Text(_loading);
   }
 }

@@ -42,30 +42,30 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         actions: <Widget>[
           // This button presents popup menu items.
           PopupMenuButton<Menu>(
-          // Callback that sets the selected popup menu item.
-          onSelected: (Menu item) {
-            setState(() {
-              _selectedMenu = item.name;
-            });
-          },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
-            const PopupMenuItem<Menu>(
-              value: Menu.itemOne,
-              child: Text('Item 1'),
-            ),
-            const PopupMenuItem<Menu>(
-              value: Menu.itemTwo,
-              child: Text('Item 2'),
-            ),
-            const PopupMenuItem<Menu>(
-              value: Menu.itemThree,
-              child: Text('Item 3'),
-            ),
-            const PopupMenuItem<Menu>(
-              value: Menu.itemFour,
-              child: Text('Item 4'),
-            ),
-          ])
+              // Callback that sets the selected popup menu item.
+              onSelected: (Menu item) {
+                setState(() {
+                  _selectedMenu = item.name;
+                });
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
+                    const PopupMenuItem<Menu>(
+                      value: Menu.itemOne,
+                      child: Text('Item 1'),
+                    ),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.itemTwo,
+                      child: Text('Item 2'),
+                    ),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.itemThree,
+                      child: Text('Item 3'),
+                    ),
+                    const PopupMenuItem<Menu>(
+                      value: Menu.itemFour,
+                      child: Text('Item 4'),
+                    ),
+                  ])
         ],
       ),
       body: Center(

@@ -7,36 +7,37 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/link.dart';
 
-
 import 'recorder.dart';
 
 /// Creates an infinite list of Link widgets and scrolls it.
 class BenchLinkInfiniteScroll extends WidgetRecorder {
   BenchLinkInfiniteScroll.forward()
-    : initialOffset = 0.0,
-      finalOffset = 30000.0,
-      super(name: benchmarkName);
+      : initialOffset = 0.0,
+        finalOffset = 30000.0,
+        super(name: benchmarkName);
 
   BenchLinkInfiniteScroll.backward()
-    : initialOffset = 30000.0,
-      finalOffset = 0.0,
-      super(name: benchmarkNameBackward);
+      : initialOffset = 30000.0,
+        finalOffset = 0.0,
+        super(name: benchmarkNameBackward);
 
   static const String benchmarkName = 'bench_link_infinite_scroll';
-  static const String benchmarkNameBackward = 'bench_link_infinite_scroll_backward';
+  static const String benchmarkNameBackward =
+      'bench_link_infinite_scroll_backward';
 
   final double initialOffset;
   final double finalOffset;
 
   @override
   Widget createWidget() => MaterialApp(
-    title: 'Infinite Link Scroll Benchmark',
-    home: _InfiniteScrollLinks(initialOffset, finalOffset),
-  );
+        title: 'Infinite Link Scroll Benchmark',
+        home: _InfiniteScrollLinks(initialOffset, finalOffset),
+      );
 }
 
 class _InfiniteScrollLinks extends StatefulWidget {
-  const _InfiniteScrollLinks(this.initialOffset, this.finalOffset, {Key? key}) : super(key: key);
+  const _InfiniteScrollLinks(this.initialOffset, this.finalOffset, {Key? key})
+      : super(key: key);
 
   final double initialOffset;
   final double finalOffset;
@@ -87,7 +88,8 @@ class _InfiniteScrollLinksState extends State<_InfiniteScrollLinks> {
           height: 100.0,
           child: Link(
             uri: Uri.parse('https://www.google.com'),
-            builder: (BuildContext context, FollowLink? followLink) => ElevatedButton(
+            builder: (BuildContext context, FollowLink? followLink) =>
+                ElevatedButton(
               onPressed: followLink,
               child: const Text('Google'),
             ),

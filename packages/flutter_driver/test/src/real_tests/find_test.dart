@@ -22,7 +22,8 @@ void main() {
     expect(a.serialize(), <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text"}',
-      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
+      'matching':
+          '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     });
@@ -32,7 +33,8 @@ void main() {
     final Map<String, String> serialized = <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text"}',
-      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
+      'matching':
+          '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     };
@@ -57,7 +59,8 @@ void main() {
     expect(a.serialize(), <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',
-      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
+      'matching':
+          '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     });
@@ -67,7 +70,8 @@ void main() {
     final Map<String, String> serialized = <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',
-      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
+      'matching':
+          '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     };
@@ -80,4 +84,4 @@ void main() {
   });
 }
 
-class FakeDeserialize extends Fake with DeserializeFinderFactory { }
+class FakeDeserialize extends Fake with DeserializeFinderFactory {}

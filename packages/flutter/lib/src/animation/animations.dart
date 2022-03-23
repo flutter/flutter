@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -18,16 +17,16 @@ class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
 
   @override
-  void addListener(VoidCallback listener) { }
+  void addListener(VoidCallback listener) {}
 
   @override
-  void removeListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) {}
 
   @override
-  void addStatusListener(AnimationStatusListener listener) { }
+  void addStatusListener(AnimationStatusListener listener) {}
 
   @override
-  void removeStatusListener(AnimationStatusListener listener) { }
+  void removeStatusListener(AnimationStatusListener listener) {}
 
   @override
   AnimationStatus get status => AnimationStatus.completed;
@@ -50,16 +49,16 @@ class _AlwaysDismissedAnimation extends Animation<double> {
   const _AlwaysDismissedAnimation();
 
   @override
-  void addListener(VoidCallback listener) { }
+  void addListener(VoidCallback listener) {}
 
   @override
-  void removeListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) {}
 
   @override
-  void addStatusListener(AnimationStatusListener listener) { }
+  void addStatusListener(AnimationStatusListener listener) {}
 
   @override
-  void removeStatusListener(AnimationStatusListener listener) { }
+  void removeStatusListener(AnimationStatusListener listener) {}
 
   @override
   AnimationStatus get status => AnimationStatus.dismissed;
@@ -95,16 +94,16 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
   final T value;
 
   @override
-  void addListener(VoidCallback listener) { }
+  void addListener(VoidCallback listener) {}
 
   @override
-  void removeListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) {}
 
   @override
-  void addStatusListener(AnimationStatusListener listener) { }
+  void addStatusListener(AnimationStatusListener listener) {}
 
   @override
-  void removeStatusListener(AnimationStatusListener listener) { }
+  void removeStatusListener(AnimationStatusListener listener) {}
 
   @override
   AnimationStatus get status => AnimationStatus.forward;
@@ -146,12 +145,14 @@ mixin AnimationWithParentMixin<T> {
   /// Calls listener every time the status of the animation changes.
   ///
   /// Listeners can be removed with [removeStatusListener].
-  void addStatusListener(AnimationStatusListener listener) => parent.addStatusListener(listener);
+  void addStatusListener(AnimationStatusListener listener) =>
+      parent.addStatusListener(listener);
 
   /// Stops calling the listener every time the status of the animation changes.
   ///
   /// Listeners can be added with [addStatusListener].
-  void removeStatusListener(AnimationStatusListener listener) => parent.removeStatusListener(listener);
+  void removeStatusListener(AnimationStatusListener listener) =>
+      parent.removeStatusListener(listener);
 
   /// The current status of this animation.
   AnimationStatus get status => parent.status;
@@ -164,8 +165,10 @@ mixin AnimationWithParentMixin<T> {
 /// object, and then later change the animation from which the proxy receives
 /// its value.
 class ProxyAnimation extends Animation<double>
-  with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
-
+    with
+        AnimationLazyListenerMixin,
+        AnimationLocalListenersMixin,
+        AnimationLocalStatusListenersMixin {
   /// Creates a proxy animation.
   ///
   /// If the animation argument is omitted, the proxy animation will have the
@@ -188,22 +191,17 @@ class ProxyAnimation extends Animation<double>
   Animation<double>? get parent => _parent;
   Animation<double>? _parent;
   set parent(Animation<double>? value) {
-    if (value == _parent)
-      return;
+    if (value == _parent) return;
     if (_parent != null) {
       _status = _parent!.status;
       _value = _parent!.value;
-      if (isListening)
-        didStopListening();
+      if (isListening) didStopListening();
     }
     _parent = value;
     if (_parent != null) {
-      if (isListening)
-        didStartListening();
-      if (_value != _parent!.value)
-        notifyListeners();
-      if (_status != _parent!.status)
-        notifyStatusListeners(_parent!.status);
+      if (isListening) didStartListening();
+      if (_value != _parent!.value) notifyListeners();
+      if (_status != _parent!.status) notifyStatusListeners(_parent!.status);
       _status = null;
       _value = null;
     }
@@ -255,13 +253,11 @@ class ProxyAnimation extends Animation<double>
 ///  * [CurvedAnimation], which can take separate curves for when the animation
 ///    is going forward than for when it is going in reverse.
 class ReverseAnimation extends Animation<double>
-  with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
-
+    with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
   /// Creates a reverse animation.
   ///
   /// The parent argument must not be null.
-  ReverseAnimation(this.parent)
-    : assert(parent != null);
+  ReverseAnimation(this.parent) : assert(parent != null);
 
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
@@ -301,10 +297,14 @@ class ReverseAnimation extends Animation<double>
   AnimationStatus _reverseStatus(AnimationStatus status) {
     assert(status != null);
     switch (status) {
-      case AnimationStatus.forward: return AnimationStatus.reverse;
-      case AnimationStatus.reverse: return AnimationStatus.forward;
-      case AnimationStatus.completed: return AnimationStatus.dismissed;
-      case AnimationStatus.dismissed: return AnimationStatus.completed;
+      case AnimationStatus.forward:
+        return AnimationStatus.reverse;
+      case AnimationStatus.reverse:
+        return AnimationStatus.forward;
+      case AnimationStatus.completed:
+        return AnimationStatus.dismissed;
+      case AnimationStatus.dismissed:
+        return AnimationStatus.completed;
     }
   }
 
@@ -365,7 +365,8 @@ class ReverseAnimation extends Animation<double>
 ///    [AnimationController].
 ///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
 ///    [Curve].
-class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+class CurvedAnimation extends Animation<double>
+    with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
   ///
   /// The parent and curve arguments must not be null.
@@ -373,8 +374,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     required this.parent,
     required this.curve,
     this.reverseCurve,
-  }) : assert(parent != null),
-       assert(curve != null) {
+  })  : assert(parent != null),
+        assert(curve != null) {
     _updateCurveDirection(parent.status);
     parent.addStatusListener(_updateCurveDirection);
   }
@@ -427,7 +428,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   }
 
   bool get _useForwardCurve {
-    return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
+    return reverseCurve == null ||
+        (_curveDirection ?? parent.status) != AnimationStatus.reverse;
   }
 
   /// Cleans up any listeners added by this CurvedAnimation.
@@ -441,12 +443,12 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     final Curve? activeCurve = _useForwardCurve ? curve : reverseCurve;
 
     final double t = parent.value;
-    if (activeCurve == null)
-      return t;
+    if (activeCurve == null) return t;
     if (t == 0.0 || t == 1.0) {
       assert(() {
         final double transformedValue = activeCurve.transform(t);
-        final double roundedTransformedValue = transformedValue.round().toDouble();
+        final double roundedTransformedValue =
+            transformedValue.round().toDouble();
         if (roundedTransformedValue != t) {
           throw FlutterError(
             'Invalid curve endpoint at $t.\n'
@@ -464,8 +466,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   @override
   String toString() {
-    if (reverseCurve == null)
-      return '$parent\u27A9$curve';
+    if (reverseCurve == null) return '$parent\u27A9$curve';
     if (_useForwardCurve)
       return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
     return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
@@ -493,8 +494,10 @@ enum _TrainHoppingMode { minimize, maximize }
 /// removed, it exposes a [dispose()] method. Call this method to shut this
 /// object down.
 class TrainHoppingAnimation extends Animation<double>
-  with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
-
+    with
+        AnimationEagerListenerMixin,
+        AnimationLocalListenersMixin,
+        AnimationLocalStatusListenersMixin {
   /// Creates a train-hopping animation.
   ///
   /// The current train argument must not be null but the next train argument
@@ -581,8 +584,7 @@ class TrainHoppingAnimation extends Animation<double>
       _lastValue = newValue;
     }
     assert(_lastValue != null);
-    if (hop && onSwitchedTrain != null)
-      onSwitchedTrain!();
+    if (hop && onSwitchedTrain != null) onSwitchedTrain!();
   }
 
   @override
@@ -622,14 +624,17 @@ class TrainHoppingAnimation extends Animation<double>
 /// [next] animation if [next] is moving, and the status of the [first]
 /// animation otherwise.
 abstract class CompoundAnimation<T> extends Animation<T>
-  with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
+    with
+        AnimationLazyListenerMixin,
+        AnimationLocalListenersMixin,
+        AnimationLocalStatusListenersMixin {
   /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
   /// be a CompoundAnimation itself to combine multiple animations.
   CompoundAnimation({
     required this.first,
     required this.next,
-  }) : assert(first != null),
-       assert(next != null);
+  })  : assert(first != null),
+        assert(next != null);
 
   /// The first sub-animation. Its status takes precedence if neither are
   /// animating.
@@ -660,8 +665,8 @@ abstract class CompoundAnimation<T> extends Animation<T>
   /// Otherwise, default to [first].
   @override
   AnimationStatus get status {
-    if (next.status == AnimationStatus.forward || next.status == AnimationStatus.reverse)
-      return next.status;
+    if (next.status == AnimationStatus.forward ||
+        next.status == AnimationStatus.reverse) return next.status;
     return first.status;
   }
 
@@ -714,7 +719,8 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMax] itself
   /// to combine multiple animations.
-  AnimationMax(Animation<T> first, Animation<T> next) : super(first: first, next: next);
+  AnimationMax(Animation<T> first, Animation<T> next)
+      : super(first: first, next: next);
 
   @override
   T get value => math.max(first.value, next.value);
@@ -729,7 +735,8 @@ class AnimationMin<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMin] itself
   /// to combine multiple animations.
-  AnimationMin(Animation<T> first, Animation<T> next) : super(first: first, next: next);
+  AnimationMin(Animation<T> first, Animation<T> next)
+      : super(first: first, next: next);
 
   @override
   T get value => math.min(first.value, next.value);

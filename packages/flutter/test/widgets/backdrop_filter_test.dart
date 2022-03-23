@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets("BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
+  testWidgets("BackdropFilter's cull rect does not shrink",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -49,7 +50,8 @@ void main() {
     );
   });
 
-  testWidgets('BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
+  testWidgets('BackdropFilter blendMode on saveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

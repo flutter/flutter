@@ -83,18 +83,19 @@ class CupertinoPicker extends StatefulWidget {
     required List<Widget> children,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
     bool looping = false,
-  }) : assert(children != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnification > 0),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       assert(squeeze != null),
-       assert(squeeze > 0),
-       childDelegate = looping
-                       ? ListWheelChildLoopingListDelegate(children: children)
-                       : ListWheelChildListDelegate(children: children),
-       super(key: key);
+  })  : assert(children != null),
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0,
+            RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(magnification > 0),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        assert(squeeze != null),
+        assert(squeeze > 0),
+        childDelegate = looping
+            ? ListWheelChildLoopingListDelegate(children: children)
+            : ListWheelChildListDelegate(children: children),
+        super(key: key);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -127,16 +128,18 @@ class CupertinoPicker extends StatefulWidget {
     required NullableIndexedWidgetBuilder itemBuilder,
     int? childCount,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
-  }) : assert(itemBuilder != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(magnification > 0),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       assert(squeeze != null),
-       assert(squeeze > 0),
-       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
-       super(key: key);
+  })  : assert(itemBuilder != null),
+        assert(diameterRatio != null),
+        assert(diameterRatio > 0.0,
+            RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(magnification > 0),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        assert(squeeze != null),
+        assert(squeeze > 0),
+        childDelegate = ListWheelChildBuilderDelegate(
+            builder: itemBuilder, childCount: childCount),
+        super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -228,7 +231,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     super.didUpdateWidget(oldWidget);
     if (widget.scrollController != null && oldWidget.scrollController == null) {
       _controller = null;
-    } else if (widget.scrollController == null && oldWidget.scrollController != null) {
+    } else if (widget.scrollController == null &&
+        oldWidget.scrollController != null) {
       assert(_controller == null);
       _controller = FixedExtentScrollController();
     }
@@ -283,7 +287,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
+    final Color? resolvedBackgroundColor =
+        CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
     assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
     final Widget result = DefaultTextStyle(
@@ -339,7 +344,6 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 ///
 ///  * [CupertinoPicker], which uses this widget as its default [CupertinoPicker.selectionOverlay].
 class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
-
   /// Creates an iOS 14 style selection overlay that highlights the magnified
   /// area (or the currently selected item, depending on how you described it
   /// elsewhere) of a [CupertinoPicker].
@@ -356,10 +360,10 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
     this.background = CupertinoColors.tertiarySystemFill,
     this.capStartEdge = true,
     this.capEndEdge = true,
-  }) : assert(background != null),
-       assert(capStartEdge != null),
-       assert(capEndEdge != null),
-       super(key: key);
+  })  : assert(background != null),
+        assert(capStartEdge != null),
+        assert(capEndEdge != null),
+        super(key: key);
 
   /// Whether to use the default use rounded corners and margin on the start side.
   final bool capStartEdge;
@@ -419,11 +423,13 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    return _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context));
+    return _RenderCupertinoPickerSemantics(
+        scrollController, Directionality.of(context));
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+  void updateRenderObject(BuildContext context,
+      covariant _RenderCupertinoPickerSemantics renderObject) {
     assert(debugCheckHasDirectionality(context));
     renderObject
       ..textDirection = Directionality.of(context)
@@ -432,18 +438,20 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
 }
 
 class _RenderCupertinoPickerSemantics extends RenderProxyBox {
-  _RenderCupertinoPickerSemantics(FixedExtentScrollController controller, this._textDirection) {
+  _RenderCupertinoPickerSemantics(
+      FixedExtentScrollController controller, this._textDirection) {
     _updateController(null, controller);
   }
 
   FixedExtentScrollController get controller => _controller;
   late FixedExtentScrollController _controller;
-  set controller(FixedExtentScrollController value) => _updateController(_controller, value);
+  set controller(FixedExtentScrollController value) =>
+      _updateController(_controller, value);
 
   // This method exists to allow controller to be non-null. It is only called with a null oldValue from constructor.
-  void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
-    if (value == oldValue)
-      return;
+  void _updateController(FixedExtentScrollController? oldValue,
+      FixedExtentScrollController value) {
+    if (value == oldValue) return;
     if (oldValue != null)
       oldValue.removeListener(_handleScrollUpdate);
     else
@@ -455,8 +463,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (textDirection == value)
-      return;
+    if (textDirection == value) return;
     _textDirection = value;
     markNeedsSemanticsUpdate();
   }
@@ -468,17 +475,16 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   }
 
   void _handleDecrease() {
-    if (_currentIndex == 0)
-      return;
+    if (_currentIndex == 0) return;
     controller.jumpToItem(_currentIndex - 1);
   }
 
   void _handleScrollUpdate() {
-    if (controller.selectedItem == _currentIndex)
-      return;
+    if (controller.selectedItem == _currentIndex) return;
     _currentIndex = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -487,7 +493,8 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config,
+      Iterable<SemanticsNode> children) {
     if (children.isEmpty)
       return super.assembleSemanticsNode(node, config, children);
     final SemanticsNode scrollable = children.first;

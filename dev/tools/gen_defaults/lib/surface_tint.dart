@@ -5,7 +5,8 @@
 import 'template.dart';
 
 class SurfaceTintTemplate extends TokenTemplate {
-  const SurfaceTintTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const SurfaceTintTemplate(String fileName, Map<String, dynamic> tokens)
+      : super(fileName, tokens);
 
   @override
   String generate() => '''

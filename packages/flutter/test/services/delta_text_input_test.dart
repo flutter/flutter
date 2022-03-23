@@ -30,8 +30,10 @@ void main() {
       'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
       () async {
         // Assemble a TextInputConnection so we can verify its change in state.
-        final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-        const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+        final FakeDeltaTextInputClient client =
+            FakeDeltaTextInputClient(TextEditingValue.empty);
+        const TextInputConfiguration configuration =
+            TextInputConfiguration(enableDeltaModel: true);
         TextInput.attach(client, configuration);
         expect(client.configuration.enableDeltaModel, true);
 
@@ -50,17 +52,19 @@ void main() {
             ' "composingExtent": -1}';
 
         // Send updateEditingValueWithDeltas message.
-        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        final ByteData? messageBytes =
+            const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'args': <dynamic>[
             1,
             jsonDecode('{"deltas": [$jsonDelta]}'),
           ],
           'method': 'TextInputClient.updateEditingStateWithDeltas',
         });
-        await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        await ServicesBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage(
           'flutter/textinput',
           messageBytes,
-              (ByteData? _) {},
+          (ByteData? _) {},
         );
 
         expect(client.latestMethodCall, 'updateEditingValueWithDeltas');
@@ -130,5 +134,6 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
     latestMethodCall = 'showToolbar';
   }
 
-  TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
+  TextInputConfiguration get configuration =>
+      const TextInputConfiguration(enableDeltaModel: true);
 }

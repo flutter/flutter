@@ -29,7 +29,8 @@ const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 /// This mixin is used to implement the material components for [Switch],
 /// [Checkbox], and [Radio] controls.
 @optionalTypeArgs
-mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
+mixin ToggleableStateMixin<S extends StatefulWidget>
+    on TickerProviderStateMixin<S> {
   /// Used by subclasses to manipulate the visual value of the control.
   ///
   /// Some controls respond to user input by updating their visual value. For
@@ -183,8 +184,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// visual representation of the Toggleable matches the current [value].
   void animateToValue() {
     if (tristate) {
-      if (value == null)
-        _positionController.value = 0.0;
+      if (value == null) _positionController.value = 0.0;
       if (value ?? true)
         _positionController.forward();
       else
@@ -223,8 +223,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   }
 
   void _handleTap([Intent? _]) {
-    if (!isInteractive)
-      return;
+    if (!isInteractive) return;
     switch (value) {
       case false:
         onChanged!(true);
@@ -241,7 +240,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   void _handleTapEnd([TapUpDetails? _]) {
     if (_downPosition != null) {
-      setState(() { _downPosition = null; });
+      setState(() {
+        _downPosition = null;
+      });
     }
     _reactionController.reverse();
   }
@@ -249,7 +250,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
-      setState(() { _focused = focused; });
+      setState(() {
+        _focused = focused;
+      });
       if (focused) {
         _reactionFocusFadeController.forward();
       } else {
@@ -261,7 +264,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   bool _hovering = false;
   void _handleHoverChanged(bool hovering) {
     if (hovering != _hovering) {
-      setState(() { _hovering = hovering; });
+      setState(() {
+        _hovering = hovering;
+      });
       if (hovering) {
         _reactionHoverFadeController.forward();
       } else {
@@ -279,11 +284,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///  * [MaterialState.focused], if the Toggleable has input focus
   ///  * [MaterialState.selected], if [value] is true or null
   Set<MaterialState> get states => <MaterialState>{
-    if (!isInteractive) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (value ?? true) MaterialState.selected,
-  };
+        if (!isInteractive) MaterialState.disabled,
+        if (_hovering) MaterialState.hovered,
+        if (_focused) MaterialState.focused,
+        if (value ?? true) MaterialState.selected,
+      };
 
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
@@ -339,7 +344,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 /// Subclasses must implement the [paint] method to draw the actual visuals of
 /// the Toggleable. In their [paint] method subclasses may call
 /// [paintRadialReaction] to draw a radial ink reaction for this control.
-abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
+abstract class ToggleablePainter extends ChangeNotifier
+    implements CustomPainter {
   /// The visual value of the control.
   ///
   /// Usually set to [ToggleableStateMixin.position].
@@ -544,7 +550,9 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     Offset offset = Offset.zero,
     required Offset origin,
   }) {
-    if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
+    if (!reaction.isDismissed ||
+        !reactionFocusFade.isDismissed ||
+        !reactionHoverFade.isDismissed) {
       final Paint reactionPaint = Paint()
         ..color = Color.lerp(
           Color.lerp(
@@ -555,7 +563,8 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
           focusColor,
           reactionFocusFade.value,
         )!;
-      final Offset center = Offset.lerp(downPosition ?? origin, origin, reaction.value)!;
+      final Offset center =
+          Offset.lerp(downPosition ?? origin, origin, reaction.value)!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
@@ -568,7 +577,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
       }
     }
   }
-
 
   @override
   void dispose() {

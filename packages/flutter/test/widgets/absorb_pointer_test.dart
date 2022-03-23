@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
+  testWidgets('AbsorbPointers do not block siblings',
+      (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(
       Column(
@@ -38,7 +39,10 @@ void main() {
         ),
       ),
     );
-    expect(semantics, hasSemantics(TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+    expect(
+        semantics,
+        hasSemantics(TestSemantics.root(),
+            ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(
       AbsorbPointer(
@@ -50,19 +54,21 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            label: 'test',
-            textDirection: TextDirection.ltr,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                label: 'test',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
           ),
-        ],
-      ),
-      ignoreId: true,
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
     semantics.dispose();
   });
 }

@@ -20,7 +20,8 @@ Iterable<Element> collectAllElementsFrom(
   Element rootElement, {
   required bool skipOffstage,
 }) {
-  return CachingIterable<Element>(_DepthFirstChildIterator(rootElement, skipOffstage));
+  return CachingIterable<Element>(
+      _DepthFirstChildIterator(rootElement, skipOffstage));
 }
 
 /// Provides a recursive, efficient, depth first search of an element tree.
@@ -62,8 +63,7 @@ class _DepthFirstChildIterator implements Iterator<Element> {
 
   @override
   bool moveNext() {
-    if (_stack.isEmpty)
-      return false;
+    if (_stack.isEmpty) return false;
 
     _current = _stack.removeLast();
     _fillChildren(_current);

@@ -20,7 +20,8 @@ class TestWidget extends LeafRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     // This string is searched for verbatim by dev/bots/test.dart:
-    properties.add(MessageProperty('test', 'TestWidget.debugFillProperties called'));
+    properties
+        .add(MessageProperty('test', 'TestWidget.debugFillProperties called'));
   }
 }
 
@@ -38,10 +39,10 @@ class RenderTest extends RenderBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     // This string is searched for verbatim by dev/bots/test.dart:
-    properties.add(MessageProperty('test', 'RenderTest.debugFillProperties called'));
+    properties
+        .add(MessageProperty('test', 'RenderTest.debugFillProperties called'));
   }
 }
-
 
 Future<void> main() async {
   // This section introduces strings that we can search for in dev/bots/test.dart

@@ -26,13 +26,15 @@ class Tracing {
     required Logger logger,
   }) : _logger = logger;
 
-  static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
+  static const String firstUsefulFrameEventName =
+      kFirstFrameRasterizedEventName;
 
   final FlutterVmService vmService;
   final Logger _logger;
 
   Future<void> startTracing() async {
-    await vmService.setTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
+    await vmService
+        .setTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
     await vmService.service.clearVMTimeline();
   }
 
@@ -47,7 +49,8 @@ class Tracing {
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
         try {
-          await vmService.service.streamListen(vm_service.EventStreams.kExtension);
+          await vmService.service
+              .streamListen(vm_service.EventStreams.kExtension);
         } on vm_service.RPCError {
           // It is safe to ignore this error because we expect an error to be
           // thrown if we're already subscribed.
@@ -64,8 +67,8 @@ class Tracing {
         final List<FlutterView> views = await vmService.getFlutterViews();
         for (final FlutterView view in views) {
           final String? uiIsolateId = view.uiIsolate?.id;
-          if (uiIsolateId != null && await vmService
-              .flutterAlreadyPaintedFirstUsefulFrame(
+          if (uiIsolateId != null &&
+              await vmService.flutterAlreadyPaintedFirstUsefulFrame(
                 isolateId: uiIsolateId,
               )) {
             done = true;
@@ -74,7 +77,8 @@ class Tracing {
         }
         if (!done) {
           final Timer timer = Timer(const Duration(seconds: 10), () async {
-            _logger.printStatus('First frame is taking longer than expected...');
+            _logger
+                .printStatus('First frame is taking longer than expected...');
             for (final FlutterView view in views) {
               final String? isolateId = view.uiIsolate?.id;
               _logger.printTrace('View ID: ${view.id}');
@@ -82,7 +86,8 @@ class Tracing {
                 _logger.printTrace('No isolate ID associated with the view.');
                 continue;
               }
-              final vm_service.Isolate? isolate = await vmService.getIsolateOrNull(isolateId);
+              final vm_service.Isolate? isolate =
+                  await vmService.getIsolateOrNull(isolateId);
               if (isolate == null) {
                 _logger.printTrace('Isolate $isolateId not found.');
                 continue;
@@ -101,8 +106,9 @@ class Tracing {
           await whenFirstFrameRendered.future;
           timer.cancel();
         }
-      // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) { // ignore: avoid_catches_without_on_clauses
+        // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) {
+        // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -122,7 +128,8 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to `$output/start_up_info.json`.
-Future<void> downloadStartupTrace(FlutterVmService vmService, {
+Future<void> downloadStartupTrace(
+  FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   required Logger logger,
   required Directory output,
@@ -139,7 +146,8 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
 
   final Tracing tracing = Tracing(vmService: vmService, logger: logger);
 
-  final Map<String, Object?> timeline = await tracing.stopTracingAndDownloadTimeline(
+  final Map<String, Object?> timeline =
+      await tracing.stopTracingAndDownloadTimeline(
     awaitFirstFrame: awaitFirstFrame,
   );
 
@@ -147,11 +155,13 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
   traceTimelineFile.writeAsStringSync(toPrettyJson(timeline));
 
   int? extractInstantEventTimestamp(String eventName) {
-    final List<Object?>? traceEvents = timeline['traceEvents'] as List<Object?>?;
+    final List<Object?>? traceEvents =
+        timeline['traceEvents'] as List<Object?>?;
     if (traceEvents == null) {
       return null;
     }
-    final List<Map<String, Object?>> events = List<Map<String, Object?>>.from(traceEvents);
+    final List<Map<String, Object?>> events =
+        List<Map<String, Object?>>.from(traceEvents);
     Map<String, Object?>? matchedEvent;
     for (final Map<String, Object?> event in events) {
       if (event['name'] == eventName) {
@@ -163,12 +173,16 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
 
   String message = 'No useful metrics were gathered.';
 
-  final int? engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
-  final int? frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
+  final int? engineEnterTimestampMicros =
+      extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
+  final int? frameworkInitTimestampMicros =
+      extractInstantEventTimestamp(kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
-    logger.printTrace('Engine start event is missing in the timeline: $timeline');
-    throwToolExit('Engine start event is missing in the timeline. Cannot compute startup time.');
+    logger
+        .printTrace('Engine start event is missing in the timeline: $timeline');
+    throwToolExit(
+        'Engine start event is missing in the timeline. Cannot compute startup time.');
   }
 
   final Map<String, Object?> traceInfo = <String, Object?>{
@@ -176,29 +190,38 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
   };
 
   if (frameworkInitTimestampMicros != null) {
-    final int timeToFrameworkInitMicros = frameworkInitTimestampMicros - engineEnterTimestampMicros;
+    final int timeToFrameworkInitMicros =
+        frameworkInitTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFrameworkInitMicros'] = timeToFrameworkInitMicros;
     message = 'Time to framework init: ${timeToFrameworkInitMicros ~/ 1000}ms.';
   }
 
   if (awaitFirstFrame) {
-    final int? firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(kFirstFrameBuiltEventName);
-    final int? firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(kFirstFrameRasterizedEventName);
-    if (firstFrameBuiltTimestampMicros == null || firstFrameRasterizedTimestampMicros == null) {
-      logger.printTrace('First frame events are missing in the timeline: $timeline');
-      throwToolExit('First frame events are missing in the timeline. Cannot compute startup time.');
+    final int? firstFrameBuiltTimestampMicros =
+        extractInstantEventTimestamp(kFirstFrameBuiltEventName);
+    final int? firstFrameRasterizedTimestampMicros =
+        extractInstantEventTimestamp(kFirstFrameRasterizedEventName);
+    if (firstFrameBuiltTimestampMicros == null ||
+        firstFrameRasterizedTimestampMicros == null) {
+      logger.printTrace(
+          'First frame events are missing in the timeline: $timeline');
+      throwToolExit(
+          'First frame events are missing in the timeline. Cannot compute startup time.');
     }
 
     // To keep our old benchmarks valid, we'll preserve the
     // timeToFirstFrameMicros as the firstFrameBuiltTimestampMicros.
     // Additionally, we add timeToFirstFrameRasterizedMicros for a more accurate
     // benchmark.
-    traceInfo['timeToFirstFrameRasterizedMicros'] = firstFrameRasterizedTimestampMicros - engineEnterTimestampMicros;
-    final int timeToFirstFrameMicros = firstFrameBuiltTimestampMicros - engineEnterTimestampMicros;
+    traceInfo['timeToFirstFrameRasterizedMicros'] =
+        firstFrameRasterizedTimestampMicros - engineEnterTimestampMicros;
+    final int timeToFirstFrameMicros =
+        firstFrameBuiltTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
     if (frameworkInitTimestampMicros != null) {
-      traceInfo['timeAfterFrameworkInitMicros'] = firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
+      traceInfo['timeAfterFrameworkInitMicros'] =
+          firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
     }
   }
 

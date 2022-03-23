@@ -19,8 +19,8 @@ String camelCase(String str) {
   int index = str.indexOf('_');
   while (index != -1 && index < str.length - 2) {
     str = str.substring(0, index) +
-      str.substring(index + 1, index + 2).toUpperCase() +
-      str.substring(index + 2);
+        str.substring(index + 1, index + 2).toUpperCase() +
+        str.substring(index + 2);
     index = str.indexOf('_');
   }
   return str;
@@ -29,7 +29,7 @@ String camelCase(String str) {
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str, [ String sep = '_' ]) {
+String snakeCase(String str, [String sep = '_']) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
 }
@@ -69,7 +69,8 @@ final NumberFormat kSecondsFormat = NumberFormat('0.0');
 final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
-  final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
+  final double seconds =
+      duration.inMilliseconds / Duration.millisecondsPerSecond;
   return '${kSecondsFormat.format(seconds)}s';
 }
 
@@ -86,14 +87,15 @@ String getSizeAsMB(int bytesLength) {
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier(): _items = <T>{};
+  ItemListNotifier() : _items = <T>{};
 
   ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items);
 
   Set<T> _items;
 
   final StreamController<T> _addedController = StreamController<T>.broadcast();
-  final StreamController<T> _removedController = StreamController<T>.broadcast();
+  final StreamController<T> _removedController =
+      StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -200,7 +202,8 @@ const int kMinColumnWidth = 10;
 /// If the amount of indentation (from the text, [indent], and [hangingIndent])
 /// is such that less than [kMinColumnWidth] characters can fit in the
 /// [columnWidth], then the indent is truncated to allow the text to fit.
-String wrapText(String text, {
+String wrapText(
+  String text, {
   required int columnWidth,
   required bool shouldWrap,
   int? hangingIndent,
@@ -216,7 +219,8 @@ String wrapText(String text, {
   final List<String> result = <String>[];
   for (final String line in splitText) {
     String trimmedText = line.trimLeft();
-    final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
+    final String leadingWhitespace =
+        line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
     if (hangingIndent != 0) {
       // When we have a hanging indent, we want to wrap the first line at one
@@ -232,7 +236,8 @@ String wrapText(String text, {
       if (trimmedText.isNotEmpty) {
         notIndented.addAll(_wrapTextAsLines(
           trimmedText,
-          columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
+          columnWidth:
+              columnWidth - leadingWhitespace.length - indent - hangingIndent,
           shouldWrap: shouldWrap,
         ));
       }
@@ -251,9 +256,11 @@ String wrapText(String text, {
         if (line.isEmpty) {
           return '';
         }
-        String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
+        String truncatedIndent =
+            '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
         if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
-          truncatedIndent = truncatedIndent.substring(0, math.max(columnWidth - kMinColumnWidth, 0));
+          truncatedIndent = truncatedIndent.substring(
+              0, math.max(columnWidth - kMinColumnWidth, 0));
         }
         final String result = '$truncatedIndent$line';
         hangingIndentString ??= ' ' * hangingIndent!;
@@ -290,7 +297,8 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, {
+List<String> _wrapTextAsLines(
+  String text, {
   int start = 0,
   required int columnWidth,
   required bool shouldWrap,
@@ -306,7 +314,8 @@ List<String> _wrapTextAsLines(String text, {
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
+    final RegExp characterOrCode =
+        RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
     List<_AnsiRun> result = <_AnsiRun>[];
     final StringBuffer current = StringBuffer();
     for (final Match match in characterOrCode.allMatches(input)) {
@@ -331,8 +340,12 @@ List<String> _wrapTextAsLines(String text, {
     return result;
   }
 
-  String joinRun(List<_AnsiRun> list, int start, [ int? end ]) {
-    return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
+  String joinRun(List<_AnsiRun> list, int start, [int? end]) {
+    return list
+        .sublist(start, end)
+        .map<String>((_AnsiRun run) => run.original)
+        .join()
+        .trim();
   }
 
   final List<String> result = <String>[];
@@ -354,7 +367,8 @@ List<String> _wrapTextAsLines(String text, {
     int? lastWhitespace;
     // Find the start of the current line.
     for (int index = 0; index < splitLine.length; ++index) {
-      if (splitLine[index].character.isNotEmpty && _isWhitespace(splitLine[index])) {
+      if (splitLine[index].character.isNotEmpty &&
+          _isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
 
@@ -421,7 +435,8 @@ final RegExp _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
 /// final interpolated2 = _interpolateString(r'ping -n 1 ${_host}', {'host': 'raspberrypi'});
 /// print(interpolated2); // will print 'ping -n 1 '
 /// ```
-String interpolateString(String toInterpolate, Map<String, String> replacementValues) {
+String interpolateString(
+    String toInterpolate, Map<String, String> replacementValues) {
   return toInterpolate.replaceAllMapped(_interpolationRegex, (Match match) {
     /// The name of the variable to be inserted into the string.
     /// Example: If the source string is 'ping -n 1 ${host}',
@@ -449,8 +464,11 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
 /// final interpolated2 = _interpolateString(['ping', '-n', '1', r'${_host}'], {'host': 'raspberrypi'});
 /// print(interpolated2); // will print '[ping, -n, 1, ]'
 /// ```
-List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
-  return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
+List<String> interpolateStringList(
+    List<String> toInterpolate, Map<String, String> replacementValues) {
+  return toInterpolate
+      .map((String s) => interpolateString(s, replacementValues))
+      .toList();
 }
 
 /// Returns the first line-based match for [regExp] in [file].

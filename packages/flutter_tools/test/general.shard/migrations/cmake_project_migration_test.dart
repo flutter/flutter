@@ -13,17 +13,21 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-void main () {
+void main() {
   group('CMake project migration', () {
     testWithoutContext('migrators succeed', () {
-      final FakeCmakeMigrator fakeCmakeMigrator = FakeCmakeMigrator(succeeds: true);
-      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeCmakeMigrator]);
+      final FakeCmakeMigrator fakeCmakeMigrator =
+          FakeCmakeMigrator(succeeds: true);
+      final ProjectMigration migration =
+          ProjectMigration(<ProjectMigrator>[fakeCmakeMigrator]);
       expect(migration.run(), isTrue);
     });
 
     testWithoutContext('migrators fail', () {
-      final FakeCmakeMigrator fakeCmakeMigrator = FakeCmakeMigrator(succeeds: false);
-      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeCmakeMigrator]);
+      final FakeCmakeMigrator fakeCmakeMigrator =
+          FakeCmakeMigrator(succeeds: false);
+      final ProjectMigration migration =
+          ProjectMigration(<ProjectMigrator>[fakeCmakeMigrator]);
       expect(migration.run(), isFalse);
     });
 
@@ -46,23 +50,29 @@ void main () {
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+        final CmakeCustomCommandMigration cmakeProjectMigration =
+            CmakeCustomCommandMigration(
           mockCmakeProject,
           testLogger,
         );
         expect(cmakeProjectMigration.migrate(), isTrue);
         expect(managedCmakeFile.existsSync(), isFalse);
 
-        expect(testLogger.traceText, contains('CMake project not found, skipping add_custom_command() VERBATIM migration'));
+        expect(
+            testLogger.traceText,
+            contains(
+                'CMake project not found, skipping add_custom_command() VERBATIM migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
       testWithoutContext('skipped if nothing to migrate', () {
         const String contents = 'Nothing to migrate';
         managedCmakeFile.writeAsStringSync(contents);
-        final DateTime projectLastModified = managedCmakeFile.lastModifiedSync();
+        final DateTime projectLastModified =
+            managedCmakeFile.lastModifiedSync();
 
-        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+        final CmakeCustomCommandMigration cmakeProjectMigration =
+            CmakeCustomCommandMigration(
           mockCmakeProject,
           testLogger,
         );
@@ -87,9 +97,11 @@ add_custom_command(
 )
 ''';
         managedCmakeFile.writeAsStringSync(contents);
-        final DateTime projectLastModified = managedCmakeFile.lastModifiedSync();
+        final DateTime projectLastModified =
+            managedCmakeFile.lastModifiedSync();
 
-        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+        final CmakeCustomCommandMigration cmakeProjectMigration =
+            CmakeCustomCommandMigration(
           mockCmakeProject,
           testLogger,
         );
@@ -113,7 +125,8 @@ add_custom_command(
 )
 ''');
 
-        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+        final CmakeCustomCommandMigration cmakeProjectMigration =
+            CmakeCustomCommandMigration(
           mockCmakeProject,
           testLogger,
         );
@@ -131,7 +144,10 @@ add_custom_command(
 )
 ''');
 
-        expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
+        expect(
+            testLogger.statusText,
+            contains(
+                'add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
       });
 
       testWithoutContext('is migrated to use FLUTTER_TARGET_PLATFORM', () {
@@ -147,7 +163,8 @@ add_custom_command(
 )
 ''');
 
-        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+        final CmakeCustomCommandMigration cmakeProjectMigration =
+            CmakeCustomCommandMigration(
           mockCmakeProject,
           testLogger,
         );
@@ -165,7 +182,10 @@ add_custom_command(
 )
 ''');
 
-        expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
+        expect(
+            testLogger.statusText,
+            contains(
+                'add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
       });
     });
   });
@@ -179,8 +199,7 @@ class FakeCmakeProject extends Fake implements CmakeBasedProject {
 }
 
 class FakeCmakeMigrator extends ProjectMigrator {
-  FakeCmakeMigrator({required this.succeeds})
-    : super(BufferLogger.test());
+  FakeCmakeMigrator({required this.succeeds}) : super(BufferLogger.test());
 
   final bool succeeds;
 

@@ -38,7 +38,8 @@ void main() {
       BuildAppBundleCommand(),
       BuildFuchsiaCommand(verboseHelp: false),
       BuildAarCommand(verboseHelp: false),
-      BuildIOSFrameworkCommand(verboseHelp: false, buildSystem: globals.buildSystem),
+      BuildIOSFrameworkCommand(
+          verboseHelp: false, buildSystem: globals.buildSystem),
       AttachCommand(),
     ];
 
@@ -53,7 +54,8 @@ void main() {
     }
   });
 
-  testUsingContext('BuildSubCommand displays current null safety mode', () async {
+  testUsingContext('BuildSubCommand displays current null safety mode',
+      () async {
     const BuildInfo unsound = BuildInfo(
       BuildMode.debug,
       '',
@@ -67,11 +69,13 @@ void main() {
     );
 
     FakeBuildSubCommand().test(unsound);
-    expect(testLogger.statusText, contains('Building without sound null safety'));
+    expect(
+        testLogger.statusText, contains('Building without sound null safety'));
 
     testLogger.clear();
     FakeBuildSubCommand().test(sound);
-    expect(testLogger.statusText, contains('💪 Building with sound null safety 💪'));
+    expect(testLogger.statusText,
+        contains('💪 Building with sound null safety 💪'));
   });
 
   testUsingContext('Include only supported sub commands', () {

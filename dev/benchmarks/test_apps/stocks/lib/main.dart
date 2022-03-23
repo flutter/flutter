@@ -5,12 +5,13 @@
 library stocks;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show
-  debugPaintSizeEnabled,
-  debugPaintBaselinesEnabled,
-  debugPaintLayerBordersEnabled,
-  debugPaintPointersEnabled,
-  debugRepaintRainbowEnabled;
+import 'package:flutter/rendering.dart'
+    show
+        debugPaintSizeEnabled,
+        debugPaintBaselinesEnabled,
+        debugPaintLayerBordersEnabled,
+        debugPaintPointersEnabled,
+        debugRepaintRainbowEnabled;
 
 import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
@@ -68,7 +69,8 @@ class StocksAppState extends State<StocksApp> {
       final String? symbol = settings.arguments as String?;
       return MaterialPageRoute<void>(
         settings: settings,
-        builder: (BuildContext context) => StockSymbolPage(symbol: symbol!, stocks: stocks),
+        builder: (BuildContext context) =>
+            StockSymbolPage(symbol: symbol!, stocks: stocks),
       );
     }
     // The other paths we support are in the routes table.
@@ -94,8 +96,10 @@ class StocksAppState extends State<StocksApp> {
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
+        '/': (BuildContext context) =>
+            StockHome(stocks, _configuration, configurationUpdater),
+        '/settings': (BuildContext context) =>
+            StockSettings(_configuration, configurationUpdater),
       },
       onGenerateRoute: _getRoute,
     );

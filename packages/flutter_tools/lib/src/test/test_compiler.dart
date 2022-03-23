@@ -40,26 +40,27 @@ class TestCompiler {
   ///
   /// If [precompiledDillPath] is passed, it will be used to initialize the
   /// compiler.
-  TestCompiler(
-    this.buildInfo,
-    this.flutterProject,
-    { String precompiledDillPath }
-  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
-        flutterProject.directory.path,
-        getBuildDirectory(),
-        'test_cache',
-        getDefaultCachedKernelPath(
-          trackWidgetCreation: buildInfo.trackWidgetCreation,
-          dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        )),
-       shouldCopyDillFile = precompiledDillPath == null {
+  TestCompiler(this.buildInfo, this.flutterProject,
+      {String precompiledDillPath})
+      : testFilePath = precompiledDillPath ??
+            globals.fs.path.join(
+                flutterProject.directory.path,
+                getBuildDirectory(),
+                'test_cache',
+                getDefaultCachedKernelPath(
+                  trackWidgetCreation: buildInfo.trackWidgetCreation,
+                  dartDefines: buildInfo.dartDefines,
+                  extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+                )),
+        shouldCopyDillFile = precompiledDillPath == null {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
+    final Directory outputDillDirectory =
+        globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
     outputDill = outputDillDirectory.childFile('output.dill');
-    globals.printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
+    globals.printTrace(
+        'Compiler will use the following file as its incremental dill file: ${outputDill.path}');
     globals.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(_onCompilationRequest, onDone: () {
       globals.printTrace('Deleting ${outputDillDirectory.path}...');
@@ -67,13 +68,13 @@ class TestCompiler {
     });
   }
 
-  final StreamController<CompilationRequest> compilerController = StreamController<CompilationRequest>();
+  final StreamController<CompilationRequest> compilerController =
+      StreamController<CompilationRequest>();
   final List<CompilationRequest> compilationQueue = <CompilationRequest>[];
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
   final bool shouldCopyDillFile;
-
 
   ResidentCompiler compiler;
   File outputDill;
@@ -148,8 +149,9 @@ class TestCompiler {
       final List<Uri> invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
         // Update the generated registrant to use the test target's main.
-        final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
-          ?? request.mainUri.toString();
+        final String mainUriString =
+            buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+                request.mainUri.toString();
         await generateMainDartWithPluginRegistrant(
           flutterProject,
           buildInfo.packageConfig,
@@ -157,7 +159,8 @@ class TestCompiler {
           globals.fs.file(request.mainUri),
           throwOnPluginPubspecError: false,
         );
-        invalidatedRegistrantFiles.add(flutterProject.dartPluginRegistrant.absolute.uri);
+        invalidatedRegistrantFiles
+            .add(flutterProject.dartPluginRegistrant.absolute.uri);
       }
 
       final CompilerOutput compilerOutput = await compiler.recompile(
@@ -180,11 +183,14 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
+          final String path =
+              request.mainUri.toFilePath(windows: globals.platform.isWindows);
           final File outputFile = globals.fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = globals.fs.file(testFilePath);
-          if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+          if (firstCompile ||
+              !testCache.existsSync() ||
+              (testCache.lengthSync() < outputFile.lengthSync())) {
             // The idea is to keep the cache file up-to-date and include as
             // much as possible in an effort to re-use as many packages as
             // possible.
@@ -200,7 +206,8 @@ class TestCompiler {
         compiler.accept();
         compiler.reset();
       }
-      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      globals.printTrace(
+          'Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }

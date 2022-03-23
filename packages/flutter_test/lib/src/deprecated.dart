@@ -27,7 +27,8 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMessageHandler(String channel, MessageHandler? handler) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(channel, handler);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockMessageHandler(channel, handler);
   }
 
   /// Shim for `TestDefaultBinaryMessenger.checkMockMessageHandler`.
@@ -38,7 +39,8 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMessageHandler(String channel, Object? handler) {
-    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(channel, handler);
+    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(channel, handler);
   }
 }
 
@@ -59,7 +61,8 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMessageHandler(Future<T> Function(T? message)? handler) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<T>(this, handler);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockDecodedMessageHandler<T>(this, handler);
   }
 
   /// Shim for `TestDefaultBinaryMessenger.checkMockMessageHandler`.
@@ -71,7 +74,8 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMessageHandler(Object? handler) {
-    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
+    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(name, handler);
   }
 }
 
@@ -91,8 +95,10 @@ extension TestMethodChannelExtension on MethodChannel {
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
-  void setMockMethodCallHandler(Future<dynamic>? Function(MethodCall call)? handler) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(this, handler);
+  void setMockMethodCallHandler(
+      Future<dynamic>? Function(MethodCall call)? handler) {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockMethodCallHandler(this, handler);
   }
 
   /// Shim for `TestDefaultBinaryMessenger.checkMockMessageHandler`.
@@ -104,6 +110,7 @@ extension TestMethodChannelExtension on MethodChannel {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMethodCallHandler(Object? handler) {
-    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
+    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(name, handler);
   }
 }

@@ -27,12 +27,12 @@ class AnalysisServer {
     required Platform platform,
     required Terminal terminal,
     String? protocolTrafficLog,
-  }) : _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _platform = platform,
-       _terminal = terminal,
-       _protocolTrafficLog = protocolTrafficLog;
+  })  : _fileSystem = fileSystem,
+        _processManager = processManager,
+        _logger = logger,
+        _platform = platform,
+        _terminal = terminal,
+        _protocolTrafficLog = protocolTrafficLog;
 
   final String sdkPath;
   final List<String> directories;
@@ -160,7 +160,8 @@ class AnalysisServer {
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = castStringKeyedMap(response['error'])!;
+        final Map<String, dynamic> error =
+            castStringKeyedMap(response['error'])!;
         _logger.printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
@@ -173,7 +174,8 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
+      final bool isAnalyzing = (statusInfo['analysis']
+          as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
   }
@@ -192,15 +194,16 @@ class AnalysisServer {
     final String file = issueInfo['file'] as String;
     final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors = errorsList
-        .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
+        .map<Map<String, dynamic>>(
+            (dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
         .map<AnalysisError>((Map<String, dynamic> json) {
-          return AnalysisError(WrittenError.fromJson(json),
-            fileSystem: _fileSystem,
-            platform: _platform,
-            terminal: _terminal,
-          );
-        })
-        .toList();
+      return AnalysisError(
+        WrittenError.fromJson(json),
+        fileSystem: _fileSystem,
+        platform: _platform,
+        terminal: _terminal,
+      );
+    }).toList();
     if (!_errorsController.isClosed) {
       _errorsController.add(FileAnalysisErrors(file, errors));
     }
@@ -227,9 +230,9 @@ class AnalysisError implements Comparable<AnalysisError> {
     required Platform platform,
     required Terminal terminal,
     required FileSystem fileSystem,
-  }) : _platform = platform,
-       _terminal = terminal,
-       _fileSystem = fileSystem;
+  })  : _platform = platform,
+        _terminal = terminal,
+        _fileSystem = fileSystem;
 
   final WrittenError writtenError;
   final Platform _platform;
@@ -316,7 +319,8 @@ class WrittenError {
   ///      "hasFix":false
   ///  }
   static WrittenError fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
+    final Map<String, dynamic> location =
+        json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,
       type: json['type'] as String,
@@ -339,7 +343,8 @@ class WrittenError {
   final int startColumn;
   final int offset;
 
-  static final Map<String, AnalysisSeverity> _severityMap = <String, AnalysisSeverity>{
+  static final Map<String, AnalysisSeverity> _severityMap =
+      <String, AnalysisSeverity>{
     'INFO': AnalysisSeverity.info,
     'WARNING': AnalysisSeverity.warning,
     'ERROR': AnalysisSeverity.error,

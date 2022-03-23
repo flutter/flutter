@@ -11,7 +11,8 @@ import '../common.dart';
 const int _kNumIters = 10000;
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  assert(false,
+      "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   runApp(MaterialApp(
     home: Scaffold(
       body: GridView.count(
@@ -49,12 +50,19 @@ Future<void> main() async {
 
   final Stopwatch watch = Stopwatch();
 
-  print('flutter_test allElements benchmark... (${WidgetsBinding.instance.renderViewElement})');
+  print(
+      'flutter_test allElements benchmark... (${WidgetsBinding.instance.renderViewElement})');
   // Make sure we get enough elements to process for consistent benchmark runs
-  int elementCount = collectAllElementsFrom(WidgetsBinding.instance.renderViewElement!, skipOffstage: false).length;
+  int elementCount = collectAllElementsFrom(
+          WidgetsBinding.instance.renderViewElement!,
+          skipOffstage: false)
+      .length;
   while (elementCount < 2458) {
     await Future<void>.delayed(Duration.zero);
-    elementCount = collectAllElementsFrom(WidgetsBinding.instance.renderViewElement!, skipOffstage: false).length;
+    elementCount = collectAllElementsFrom(
+            WidgetsBinding.instance.renderViewElement!,
+            skipOffstage: false)
+        .length;
   }
   print('element count: $elementCount');
 

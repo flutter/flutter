@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+class TestSliverPersistentHeaderDelegate
+    extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
 
   final double _maxExtent;
@@ -18,7 +19,8 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
   double get minExtent => 16.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Column(
       children: <Widget>[
         Container(height: minExtent),
@@ -35,7 +37,8 @@ class TestBehavior extends ScrollBehavior {
   const TestBehavior();
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
@@ -45,7 +48,7 @@ class TestBehavior extends ScrollBehavior {
 }
 
 class TestScrollPhysics extends ClampingScrollPhysics {
-  const TestScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const TestScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -94,38 +97,66 @@ void main() {
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPadding(
                         padding: const EdgeInsets.all(50.0),
-                        sliver: SliverToBoxAdapter(child: Container(height: 520.0)),
+                        sliver:
+                            SliverToBoxAdapter(child: Container(height: 520.0)),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          floating: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverToBoxAdapter(key: centerKey, child: Container(height: 520.0)), // ------------------------ CENTER ------------------------
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), pinned: true),
+                      SliverToBoxAdapter(
+                          key: centerKey,
+                          child: Container(
+                              height:
+                                  520.0)), // ------------------------ CENTER ------------------------
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPadding(
                         padding: const EdgeInsets.all(50.0),
-                        sliver: SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                        sliver: SliverPersistentHeader(
+                            delegate: TestSliverPersistentHeaderDelegate(250.0),
+                            pinned: true),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          floating: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          floating: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
                       SliverList(
                         delegate: SliverChildListDelegate(<Widget>[
@@ -146,12 +177,16 @@ void main() {
                           Container(height: 50.0),
                         ]),
                       ),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                        sliver: SliverToBoxAdapter(child: Container(height: 520.0)),
+                        sliver:
+                            SliverToBoxAdapter(child: Container(height: 520.0)),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
@@ -165,41 +200,47 @@ void main() {
         ),
       ),
     );
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
-    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0,
+        curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(-10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(-10000.0,
+        curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0,
+        curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(-10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
+    position.animateTo(-10000.0,
+        curve: Curves.linear, duration: const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
+    position.animateTo(10000.0,
+        curve: Curves.linear, duration: const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
-
   });
 
-  testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
+  testWidgets('Removing offscreen items above and rescrolling does not crash',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         cacheExtent: 0.0,
@@ -225,7 +266,8 @@ void main() {
 
     // Screen is 600px high. Moved bottom item 500px up. It's now at the top.
     expect(tester.getTopLeft(find.widgetWithText(Container, '5')).dy, 0.0);
-    expect(tester.getBottomLeft(find.widgetWithText(Container, '10')).dy, 600.0);
+    expect(
+        tester.getBottomLeft(find.widgetWithText(Container, '10')).dy, 600.0);
 
     // Stop returning the first 3 items.
     await tester.pumpWidget(MaterialApp(

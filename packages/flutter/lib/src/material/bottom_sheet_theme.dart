@@ -100,14 +100,15 @@ class BottomSheetThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomSheetThemeData? lerp(BottomSheetThemeData? a, BottomSheetThemeData? b, double t) {
+  static BottomSheetThemeData? lerp(
+      BottomSheetThemeData? a, BottomSheetThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
+    if (a == null && b == null) return null;
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      modalBackgroundColor: Color.lerp(a?.modalBackgroundColor, b?.modalBackgroundColor, t),
+      modalBackgroundColor:
+          Color.lerp(a?.modalBackgroundColor, b?.modalBackgroundColor, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
@@ -117,40 +118,45 @@ class BottomSheetThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    elevation,
-    modalBackgroundColor,
-    modalElevation,
-    shape,
-    clipBehavior,
-    constraints,
-  );
+        backgroundColor,
+        elevation,
+        modalBackgroundColor,
+        modalElevation,
+        shape,
+        clipBehavior,
+        constraints,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is BottomSheetThemeData
-        && other.backgroundColor == backgroundColor
-        && other.elevation == elevation
-        && other.modalBackgroundColor == modalBackgroundColor
-        && other.modalElevation == modalElevation
-        && other.shape == shape
-        && other.clipBehavior == clipBehavior
-        && other.constraints == constraints;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is BottomSheetThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.elevation == elevation &&
+        other.modalBackgroundColor == modalBackgroundColor &&
+        other.modalElevation == modalElevation &&
+        other.shape == shape &&
+        other.clipBehavior == clipBehavior &&
+        other.constraints == constraints;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(
+        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor, defaultValue: null));
-    properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
-    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor,
+        defaultValue: null));
+    properties.add(
+        DoubleProperty('modalElevation', modalElevation, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>(
+        'constraints', constraints,
+        defaultValue: null));
   }
 }

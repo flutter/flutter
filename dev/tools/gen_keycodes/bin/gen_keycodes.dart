@@ -25,25 +25,29 @@ import 'package:path/path.dart' as path;
 /// Get contents of the file that contains the physical key mapping in Chromium
 /// source.
 Future<String> getChromiumCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
+  final Uri keyCodesUri = Uri.parse(
+      'https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the logical key mapping in Chromium
 /// source.
 Future<String> getChromiumKeys() async {
-  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
+  final Uri keyCodesUri = Uri.parse(
+      'https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the key codes in Android source.
 Future<String> getAndroidKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h?format=TEXT');
+  final Uri keyCodesUri = Uri.parse(
+      'https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 Future<String> getWindowsKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.10240.0/um/WinUser.h');
+  final Uri keyCodesUri = Uri.parse(
+      'https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.10240.0/um/WinUser.h');
   return http.read(keyCodesUri);
 }
 
@@ -54,17 +58,20 @@ Future<String> getWindowsKeyCodes() async {
 /// common keyboards. Other than some special keyboards and game pads, this
 /// should be OK.
 Future<String> getAndroidScanCodes() async {
-  final Uri scanCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/base/+/master/data/keyboards/Generic.kl?format=TEXT');
+  final Uri scanCodesUri = Uri.parse(
+      'https://android.googlesource.com/platform/frameworks/base/+/master/data/keyboards/Generic.kl?format=TEXT');
   return utf8.decode(base64.decode(await http.read(scanCodesUri)));
 }
 
 Future<String> getGlfwKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/glfw/glfw/master/include/GLFW/glfw3.h');
+  final Uri keyCodesUri = Uri.parse(
+      'https://raw.githubusercontent.com/glfw/glfw/master/include/GLFW/glfw3.h');
   return http.read(keyCodesUri);
 }
 
 Future<String> getGtkKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
+  final Uri keyCodesUri = Uri.parse(
+      'https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
   return http.read(keyCodesUri);
 }
 
@@ -116,7 +123,8 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'code',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.dart'),
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src',
+        'services', 'keyboard_key.dart'),
     help: 'The path to where the output "keyboard_key.dart" file should be '
         'written. If --code is not specified, the output will be written to the '
         'correct directory in the flutter tree. If the output directory does not '
@@ -124,11 +132,12 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'maps',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_maps.dart'),
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src',
+        'services', 'keyboard_maps.dart'),
     help: 'The path to where the output "keyboard_maps.dart" file should be '
-      'written. If --maps is not specified, the output will be written to the '
-      'correct directory in the flutter tree. If the output directory does not '
-      'exist, it, and the path to it, will be created.',
+        'written. If --maps is not specified, the output will be written to the '
+        'correct directory in the flutter tree. If the output directory does not '
+        'exist, it, and the path to it, will be created.',
   );
   argParser.addFlag(
     'collect',
@@ -158,9 +167,11 @@ Future<void> main(List<String> rawArguments) async {
   if (parsedArguments['collect'] as bool) {
     // Physical
     final String baseHidCodes = await getChromiumCodes();
-    final String supplementalHidCodes = readDataFile('supplemental_hid_codes.inc');
+    final String supplementalHidCodes =
+        readDataFile('supplemental_hid_codes.inc');
     final String androidScanCodes = await getAndroidScanCodes();
-    final String androidToDomKey = readDataFile('android_key_name_to_name.json');
+    final String androidToDomKey =
+        readDataFile('android_key_name_to_name.json');
     physicalData = PhysicalKeyData(
       <String>[baseHidCodes, supplementalHidCodes].join('\n'),
       androidScanCodes,
@@ -170,12 +181,16 @@ Future<void> main(List<String> rawArguments) async {
     // Logical
     final String gtkKeyCodes = await getGtkKeyCodes();
     final String webLogicalKeys = await getChromiumKeys();
-    final String supplementalKeyData = readDataFile('supplemental_key_data.inc');
+    final String supplementalKeyData =
+        readDataFile('supplemental_key_data.inc');
     final String gtkToDomKey = readDataFile('gtk_logical_name_mapping.json');
     final String windowsKeyCodes = await getWindowsKeyCodes();
-    final String windowsToDomKey = readDataFile('windows_logical_to_window_vk.json');
-    final String macosLogicalToPhysical = readDataFile('macos_logical_to_physical.json');
-    final String iosLogicalToPhysical = readDataFile('ios_logical_to_physical.json');
+    final String windowsToDomKey =
+        readDataFile('windows_logical_to_window_vk.json');
+    final String macosLogicalToPhysical =
+        readDataFile('macos_logical_to_physical.json');
+    final String iosLogicalToPhysical =
+        readDataFile('ios_logical_to_physical.json');
     final String androidKeyCodes = await getAndroidKeyCodes();
     final String glfwKeyCodes = await getGlfwKeyCodes();
     final String glfwToDomKey = readDataFile('glfw_key_name_to_name.json');
@@ -198,12 +213,18 @@ Future<void> main(List<String> rawArguments) async {
     // Write data files
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final String physicalJson = encoder.convert(physicalData.toJson());
-    File(parsedArguments['physical-data'] as String).writeAsStringSync('$physicalJson\n');
+    File(parsedArguments['physical-data'] as String)
+        .writeAsStringSync('$physicalJson\n');
     final String logicalJson = encoder.convert(logicalData.toJson());
-    File(parsedArguments['logical-data'] as String).writeAsStringSync('$logicalJson\n');
+    File(parsedArguments['logical-data'] as String)
+        .writeAsStringSync('$logicalJson\n');
   } else {
-    physicalData = PhysicalKeyData.fromJson(json.decode(await File(parsedArguments['physical-data'] as String).readAsString()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
+    physicalData = PhysicalKeyData.fromJson(json.decode(
+        await File(parsedArguments['physical-data'] as String)
+            .readAsString()) as Map<String, dynamic>);
+    logicalData = LogicalKeyData.fromJson(json.decode(
+        await File(parsedArguments['logical-data'] as String)
+            .readAsString()) as Map<String, dynamic>);
   }
 
   final File codeFile = File(parsedArguments['code'] as String);
@@ -211,14 +232,16 @@ Future<void> main(List<String> rawArguments) async {
     codeFile.createSync(recursive: true);
   }
   print('Writing ${'key codes'.padRight(15)}${codeFile.absolute}');
-  await codeFile.writeAsString(KeyboardKeysCodeGenerator(physicalData, logicalData).generate());
+  await codeFile.writeAsString(
+      KeyboardKeysCodeGenerator(physicalData, logicalData).generate());
 
   final File mapsFile = File(parsedArguments['maps'] as String);
   if (!mapsFile.existsSync()) {
     mapsFile.createSync(recursive: true);
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
-  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
+  await mapsFile.writeAsString(
+      KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
   final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'));
@@ -226,9 +249,11 @@ Future<void> main(List<String> rawArguments) async {
     mapsFile.createSync(recursive: true);
   }
   print('Writing ${'engine key codes'.padRight(15)}${mapsFile.absolute}');
-  await keyCodesFile.writeAsString(KeyCodesCcGenerator(physicalData, logicalData).generate());
+  await keyCodesFile
+      .writeAsString(KeyCodesCcGenerator(physicalData, logicalData).generate());
 
-  final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
+  final Map<String, PlatformCodeGenerator> platforms =
+      <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(
       physicalData,
       logicalData,
@@ -241,11 +266,8 @@ Future<void> main(List<String> rawArguments) async {
       physicalData,
       logicalData,
     ),
-    'windows': WindowsCodeGenerator(
-      physicalData,
-      logicalData,
-      readDataFile('windows_scancode_logical_map.json')
-    ),
+    'windows': WindowsCodeGenerator(physicalData, logicalData,
+        readDataFile('windows_scancode_logical_map.json')),
     'linux': GtkCodeGenerator(
       physicalData,
       logicalData,
@@ -258,7 +280,8 @@ Future<void> main(List<String> rawArguments) async {
       readDataFile('web_logical_location_mapping.json'),
     ),
   };
-  await Future.wait(platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
+  await Future.wait(
+      platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
     final String platform = entry.key;
     final PlatformCodeGenerator codeGenerator = entry.value;
     final File platformFile = File(codeGenerator.outputPath(platform));

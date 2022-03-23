@@ -26,7 +26,8 @@ void main() {
       }
 
       fuchsiaVmServiceConnectionFunction = fakeServiceFunction;
-      final DartVm vm = await DartVm.connect(Uri.parse('http://this.whatever/ws'));
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://this.whatever/ws'));
       expect(vm, isNot(null));
       await vm.stop();
       expect(service.disposed, true);
@@ -80,12 +81,14 @@ void main() {
         Uri uri, {
         Duration? timeout,
       }) {
-        fakeService.flutterListViews = vms.Response.parse(flutterViewCannedResponses);
+        fakeService.flutterListViews =
+            vms.Response.parse(flutterViewCannedResponses);
         return Future<vms.VmService>(() => fakeService);
       }
 
       fuchsiaVmServiceConnectionFunction = fakeVmConnectionFunction;
-      final DartVm vm = await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
       final List<FlutterView> views = await vm.getAllFlutterViews();
       expect(views.length, 3);
@@ -136,12 +139,14 @@ void main() {
         Uri uri, {
         Duration? timeout,
       }) {
-        fakeService.flutterListViews = vms.Response.parse(flutterViewCannedResponses);
+        fakeService.flutterListViews =
+            vms.Response.parse(flutterViewCannedResponses);
         return Future<vms.VmService>(() => fakeService);
       }
 
       fuchsiaVmServiceConnectionFunction = fakeVmConnectionFunction;
-      final DartVm vm = await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
       final List<FlutterView> views = await vm.getAllFlutterViews();
       expect(views.length, 3);
@@ -157,7 +162,8 @@ void main() {
     });
 
     test('invalid flutter view missing ID', () async {
-      final Map<String, dynamic> flutterViewCannedResponseMissingId = <String, dynamic>{
+      final Map<String, dynamic> flutterViewCannedResponseMissingId =
+          <String, dynamic>{
         'views': <Map<String, dynamic>>[
           // Valid flutter view.
           <String, dynamic>{
@@ -183,12 +189,14 @@ void main() {
         Uri uri, {
         Duration? timeout,
       }) {
-        fakeService.flutterListViews = vms.Response.parse(flutterViewCannedResponseMissingId);
+        fakeService.flutterListViews =
+            vms.Response.parse(flutterViewCannedResponseMissingId);
         return Future<vms.VmService>(() => fakeService);
       }
 
       fuchsiaVmServiceConnectionFunction = fakeVmConnectionFunction;
-      final DartVm vm = await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
       Future<void> failingFunction() async {
         await vm.getAllFlutterViews();
@@ -239,16 +247,20 @@ void main() {
       }
 
       fuchsiaVmServiceConnectionFunction = fakeVmConnectionFunction;
-      final DartVm vm = await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
-      final List<IsolateRef> matchingFlutterIsolates = await vm.getMainIsolatesByPattern('flutterBinary.cmx');
+      final List<IsolateRef> matchingFlutterIsolates =
+          await vm.getMainIsolatesByPattern('flutterBinary.cmx');
       expect(matchingFlutterIsolates.length, 1);
-      final List<IsolateRef> allIsolates = await vm.getMainIsolatesByPattern('');
+      final List<IsolateRef> allIsolates =
+          await vm.getMainIsolatesByPattern('');
       expect(allIsolates.length, 4);
     });
 
     test('invalid flutter view missing ID', () async {
-      final Map<String, dynamic> flutterViewCannedResponseMissingIsolateName = <String, dynamic>{
+      final Map<String, dynamic> flutterViewCannedResponseMissingIsolateName =
+          <String, dynamic>{
         'views': <Map<String, dynamic>>[
           // Missing isolate name.
           <String, dynamic>{
@@ -268,12 +280,14 @@ void main() {
         Uri uri, {
         Duration? timeout,
       }) {
-        fakeService.flutterListViews = vms.Response.parse(flutterViewCannedResponseMissingIsolateName);
+        fakeService.flutterListViews =
+            vms.Response.parse(flutterViewCannedResponseMissingIsolateName);
         return Future<vms.VmService>(() => fakeService);
       }
 
       fuchsiaVmServiceConnectionFunction = fakeVmConnectionFunction;
-      final DartVm vm = await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
       Future<void> failingFunction() async {
         await vm.getAllFlutterViews();
@@ -299,7 +313,8 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Response> callMethod(String method, {String? isolateId, Map<String, dynamic>? args}) async {
+  Future<vms.Response> callMethod(String method,
+      {String? isolateId, Map<String, dynamic>? args}) async {
     if (method == '_flutter.listViews') {
       return flutterListViews!;
     }

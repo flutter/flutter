@@ -14,7 +14,8 @@ import 'framework.dart';
 /// [NotificationListener] is useful when listening scroll events
 /// in [ListView],[NestedScrollView],[GridView] or any Scrolling widgets.
 /// Used by [NotificationListener.onNotification].
-typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
+typedef NotificationListenerCallback<T extends Notification> = bool Function(
+    T notification);
 
 /// A notification that can bubble up the widget tree.
 ///
@@ -78,7 +79,7 @@ abstract class Notification {
   /// method, as in `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillDescription(List<String> description) {}
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.
@@ -120,7 +121,8 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
 }
 
 /// An element used to host [NotificationListener] elements.
-class _NotificationElement<T extends Notification> extends ProxyElement with NotifiableElementMixin {
+class _NotificationElement<T extends Notification> extends ProxyElement
+    with NotifiableElementMixin {
   _NotificationElement(NotificationListener<T> widget) : super(widget);
 
   @override

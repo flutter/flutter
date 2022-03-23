@@ -83,4 +83,5 @@ const String materialFactoryArguments =
 
 const String materialSupportedLanguagesConstant = 'kMaterialSupportedLanguages';
 
-const String materialSupportedLanguagesDocMacro = 'flutter.localizations.material.languages';
+const String materialSupportedLanguagesDocMacro =
+    'flutter.localizations.material.languages';

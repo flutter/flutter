@@ -46,6 +46,7 @@ class NewGalleryWebCompileTest {
 
     rmTree(galleryParentDir);
 
-    return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+    return TaskResult.success(metrics,
+        benchmarkScoreKeys: metrics.keys.toList());
   }
 }

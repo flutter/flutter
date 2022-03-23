@@ -90,15 +90,18 @@ class IOCallbackManager implements CallbackManager {
   @override
   Future<Map<String, dynamic>> takeScreenshot(String screenshot) async {
     if (Platform.isAndroid && !_isSurfaceRendered) {
-      throw StateError('Call convertFlutterSurfaceToImage() before taking a screenshot');
+      throw StateError(
+          'Call convertFlutterSurfaceToImage() before taking a screenshot');
     }
     integrationTestChannel.setMethodCallHandler(_onMethodChannelCall);
-    final List<int>? rawBytes = await integrationTestChannel.invokeMethod<List<int>>(
+    final List<int>? rawBytes =
+        await integrationTestChannel.invokeMethod<List<int>>(
       'captureScreenshot',
       <String, dynamic>{'name': screenshot},
     );
     if (rawBytes == null) {
-      throw StateError('Expected a list of bytes, but instead captureScreenshot returned null');
+      throw StateError(
+          'Expected a list of bytes, but instead captureScreenshot returned null');
     }
     return <String, dynamic>{
       'screenshotName': screenshot,

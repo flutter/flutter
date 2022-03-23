@@ -14,8 +14,7 @@ import 'process.dart';
 
 /// A snapshot build configuration.
 class SnapshotType {
-  SnapshotType(this.platform, this.mode)
-    : assert(mode != null);
+  SnapshotType(this.platform, this.mode) : assert(mode != null);
 
   final TargetPlatform? platform;
   final BuildMode mode;
@@ -30,15 +29,16 @@ class GenSnapshot {
     required Artifacts artifacts,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _artifacts = artifacts,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  })  : _artifacts = artifacts,
+        _processUtils =
+            ProcessUtils(logger: logger, processManager: processManager);
 
   final Artifacts _artifacts;
   final ProcessUtils _processUtils;
 
   String getSnapshotterPath(SnapshotType snapshotType) {
-    return _artifacts.getArtifactPath(
-        Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
+    return _artifacts.getArtifactPath(Artifact.genSnapshot,
+        platform: snapshotType.platform, mode: snapshotType.mode);
   }
 
   /// Ignored warning messages from gen_snapshot.
@@ -74,7 +74,8 @@ class GenSnapshot {
 
     return _processUtils.stream(
       <String>[snapshotterPath, ...args],
-      mapFunction: (String line) =>  kIgnoredWarnings.contains(line) ? null : line,
+      mapFunction: (String line) =>
+          kIgnoredWarnings.contains(line) ? null : line,
     );
   }
 }
@@ -87,14 +88,14 @@ class AOTSnapshotter {
     required Xcode xcode,
     required ProcessManager processManager,
     required Artifacts artifacts,
-  }) : _logger = logger,
-      _fileSystem = fileSystem,
-      _xcode = xcode,
-      _genSnapshot = GenSnapshot(
-        artifacts: artifacts,
-        processManager: processManager,
-        logger: logger,
-      );
+  })  : _logger = logger,
+        _fileSystem = fileSystem,
+        _xcode = xcode,
+        _genSnapshot = GenSnapshot(
+          artifacts: artifacts,
+          processManager: processManager,
+          logger: logger,
+        );
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -127,7 +128,8 @@ class AOTSnapshotter {
     }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
-      _logger.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
+      _logger.printError(
+          '${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
     }
 
@@ -143,7 +145,8 @@ class AOTSnapshotter {
     bool shouldStrip = true;
 
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
-      _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
+      _logger
+          .printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       for (final String option in extraGenSnapshotOptions) {
         if (option == '--no-strip') {
           shouldStrip = false;
@@ -153,14 +156,16 @@ class AOTSnapshotter {
       }
     }
 
-    final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
+    final String assembly =
+        _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
       ]);
     } else {
-      final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
+      final String aotSharedLibrary =
+          _fileSystem.path.join(outputDir.path, 'app.so');
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-elf',
         '--elf=$aotSharedLibrary',
@@ -171,7 +176,8 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--strip');
     }
 
-    if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
+    if (platform == TargetPlatform.android_arm ||
+        darwinArch == DarwinArch.armv7) {
       // Use softfp for Android armv7 devices.
       // This is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
@@ -184,12 +190,12 @@ class AOTSnapshotter {
     // The name of the debug file must contain additional information about
     // the architecture, since a single build command may produce
     // multiple debug files.
-    final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
+    final String archName =
+        getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {
-      _fileSystem.directory(splitDebugInfo)
-        .createSync(recursive: true);
+      _fileSystem.directory(splitDebugInfo).createSync(recursive: true);
     }
 
     // Optimization arguments.
@@ -199,8 +205,7 @@ class AOTSnapshotter {
         '--dwarf-stack-traces',
         '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}'
       ],
-      if (dartObfuscation)
-        '--obfuscate',
+      if (dartObfuscation) '--obfuscate',
     ]);
 
     genSnapshotArgs.add(mainPath);
@@ -212,7 +217,8 @@ class AOTSnapshotter {
       darwinArch: darwinArch,
     );
     if (genSnapshotExitCode != 0) {
-      _logger.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
+      _logger.printError(
+          'Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
     }
 
@@ -237,15 +243,14 @@ class AOTSnapshotter {
 
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
-  Future<RunResult> _buildFramework({
-    required DarwinArch appleArch,
-    required bool isIOS,
-    String? sdkRoot,
-    required String assemblyPath,
-    required String outputPath,
-    required bool bitcode,
-    required bool quiet
-  }) async {
+  Future<RunResult> _buildFramework(
+      {required DarwinArch appleArch,
+      required bool isIOS,
+      String? sdkRoot,
+      required String assemblyPath,
+      required String outputPath,
+      required bool bitcode,
+      required bool quiet}) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
       _logger.printStatus('Building App.framework for $targetArch...');
@@ -266,7 +271,8 @@ class AOTSnapshotter {
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';
-    final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
+    final String assemblyO =
+        _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
 
     final RunResult compileResult = await _xcode.cc(<String>[
       ...commonBuildOptions,
@@ -277,26 +283,37 @@ class AOTSnapshotter {
       assemblyO,
     ]);
     if (compileResult.exitCode != 0) {
-      _logger.printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
+      _logger.printError(
+          'Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
     }
 
-    final String frameworkDir = _fileSystem.path.join(outputPath, 'App.framework');
+    final String frameworkDir =
+        _fileSystem.path.join(outputPath, 'App.framework');
     _fileSystem.directory(frameworkDir).createSync(recursive: true);
     final String appLib = _fileSystem.path.join(frameworkDir, 'App');
     final List<String> linkArgs = <String>[
       ...commonBuildOptions,
       '-dynamiclib',
-      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-      '-install_name', '@rpath/App.framework/App',
+      '-Xlinker',
+      '-rpath',
+      '-Xlinker',
+      '@executable_path/Frameworks',
+      '-Xlinker',
+      '-rpath',
+      '-Xlinker',
+      '@loader_path/Frameworks',
+      '-install_name',
+      '@rpath/App.framework/App',
       if (bitcode) embedBitcodeArg,
-      '-o', appLib,
+      '-o',
+      appLib,
       assemblyO,
     ];
     final RunResult linkResult = await _xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
-      _logger.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+      _logger.printError(
+          'Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }
     return linkResult;
   }

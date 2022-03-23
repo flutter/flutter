@@ -23,17 +23,19 @@ class MyApp extends StatelessWidget {
 }
 
 class RefreshIndicatorExample extends StatefulWidget {
-  const RefreshIndicatorExample({Key? key, required this.title}) : super(key: key);
+  const RefreshIndicatorExample({Key? key, required this.title})
+      : super(key: key);
 
   final String title;
 
   @override
-  State<RefreshIndicatorExample> createState() => _RefreshIndicatorExampleState();
+  State<RefreshIndicatorExample> createState() =>
+      _RefreshIndicatorExampleState();
 }
 
 class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-    GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   Widget build(BuildContext context) {

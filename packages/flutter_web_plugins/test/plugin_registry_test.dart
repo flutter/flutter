@@ -30,7 +30,8 @@ class TestPlugin {
 
 void main() {
   // Disabling tester emulation because this test relies on real message channel communication.
-  ui.debugEmulateFlutterTesterEnvironment = false; // ignore: undefined_prefixed_name
+  ui.debugEmulateFlutterTesterEnvironment =
+      false; // ignore: undefined_prefixed_name
 
   group('Plugin Registry', () {
     setUp(() {
@@ -43,8 +44,7 @@ void main() {
     test('can register a plugin', () {
       TestPlugin.calledMethods.clear();
 
-      const MethodChannel frameworkChannel =
-          MethodChannel('test_plugin');
+      const MethodChannel frameworkChannel = MethodChannel('test_plugin');
       frameworkChannel.invokeMethod<void>('test1');
 
       expect(TestPlugin.calledMethods, equals(<String>['test1']));

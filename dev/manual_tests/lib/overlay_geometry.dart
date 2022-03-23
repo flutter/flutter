@@ -49,8 +49,7 @@ class _MarkerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MarkerPainter oldPainter) {
-    return oldPainter.size != size
-        || oldPainter.type != type;
+    return oldPainter.size != size || oldPainter.type != type;
   }
 }
 
@@ -92,25 +91,28 @@ class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => OverlayGeometryAppState();
 }
 
-typedef CardTapCallback = void Function(GlobalKey targetKey, Offset globalPosition);
+typedef CardTapCallback = void Function(
+    GlobalKey targetKey, Offset globalPosition);
 
 class CardBuilder extends SliverChildDelegate {
-  CardBuilder({List<CardModel>? cardModels, this.onTapUp }) : cardModels = cardModels ?? <CardModel>[];
+  CardBuilder({List<CardModel>? cardModels, this.onTapUp})
+      : cardModels = cardModels ?? <CardModel>[];
 
   final List<CardModel> cardModels;
   final CardTapCallback? onTapUp;
 
-  static const TextStyle cardLabelStyle =
-    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+  static const TextStyle cardLabelStyle = TextStyle(
+      color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index >= cardModels.length)
-      return null;
+    if (index >= cardModels.length) return null;
     final CardModel cardModel = cardModels[index];
     return GestureDetector(
       key: cardModel.key,
-      onTapUp: (TapUpDetails details) { onTapUp!(cardModel.targetKey, details.globalPosition); },
+      onTapUp: (TapUpDetails details) {
+        onTapUp!(cardModel.targetKey, details.globalPosition);
+      },
       child: Card(
         key: cardModel.targetKey,
         color: cardModel.color,
@@ -141,12 +143,37 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void initState() {
     super.initState();
     final List<double> cardHeights = <double>[
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+      48.0,
+      63.0,
+      82.0,
+      146.0,
+      60.0,
+      55.0,
+      84.0,
+      96.0,
+      50.0,
+      48.0,
+      63.0,
+      82.0,
+      146.0,
+      60.0,
+      55.0,
+      84.0,
+      96.0,
+      50.0,
+      48.0,
+      63.0,
+      82.0,
+      146.0,
+      60.0,
+      55.0,
+      84.0,
+      96.0,
+      50.0,
     ];
     cardModels = List<CardModel>.generate(cardHeights.length, (int i) {
-      final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
+      final Color? color = Color.lerp(
+          Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
       return CardModel(i, cardHeights[i], color!);
     });
   }
@@ -154,7 +181,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   bool handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && notification.depth == 0) {
       setState(() {
-        final double dy = markersScrollOffset - notification.metrics.extentBefore;
+        final double dy =
+            markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
         markers.forEach((MarkerType type, Offset oldPosition) {
           markers[type] = oldPosition.translate(0.0, dy);
@@ -167,10 +195,12 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void handleTapUp(GlobalKey target, Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
-      final RenderBox? box = target.currentContext?.findRenderObject() as RenderBox?;
+      final RenderBox? box =
+          target.currentContext?.findRenderObject() as RenderBox?;
       markers[MarkerType.topLeft] = box!.localToGlobal(Offset.zero);
       final Size size = box.size;
-      markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
+      markers[MarkerType.bottomRight] =
+          box.localToGlobal(Offset(size.width, size.height));
       final ScrollableState? scrollable = Scrollable.of(target.currentContext!);
       markersScrollOffset = scrollable!.position.pixels;
     });
@@ -183,7 +213,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         Scaffold(
           appBar: AppBar(title: const Text('Tap a Card')),
           body: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
             child: NotificationListener<ScrollNotification>(
               onNotification: handleScrollNotification,
               child: ListView.custom(

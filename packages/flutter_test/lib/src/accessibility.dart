@@ -17,8 +17,8 @@ import 'widget_tester.dart';
 class Evaluation {
   /// Create a passing evaluation.
   const Evaluation.pass()
-    : passed = true,
-      reason = null;
+      : passed = true,
+        reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
@@ -38,16 +38,15 @@ class Evaluation {
   /// The [reason] will be concatenated with a newline, and [passed] will be
   /// combined with an `&&` operator.
   Evaluation operator +(Evaluation? other) {
-    if (other == null)
-      return this;
+    if (other == null) return this;
     final StringBuffer buffer = StringBuffer();
     if (reason != null) {
       buffer.write(reason);
       buffer.write(' ');
     }
-    if (other.reason != null)
-      buffer.write(other.reason);
-    return Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
+    if (other.reason != null) buffer.write(other.reason);
+    return Evaluation._(
+        passed && other.passed, buffer.isEmpty ? null : buffer.toString());
   }
 }
 
@@ -80,48 +79,53 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final SemanticsNode root =
+        tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
     Evaluation traverse(SemanticsNode node) {
       Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
         result += traverse(child);
         return true;
       });
-      if (node.isMergedIntoParent)
-        return result;
+      if (node.isMergedIntoParent) return result;
       final SemanticsData data = node.getSemanticsData();
       // Skip node if it has no actions, or is marked as hidden.
-      if ((!data.hasAction(ui.SemanticsAction.longPress)
-        && !data.hasAction(ui.SemanticsAction.tap))
-        || data.hasFlag(ui.SemanticsFlag.isHidden))
-        return result;
+      if ((!data.hasAction(ui.SemanticsAction.longPress) &&
+              !data.hasAction(ui.SemanticsAction.tap)) ||
+          data.hasFlag(ui.SemanticsFlag.isHidden)) return result;
       // Skip links https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
-      if (data.hasFlag(ui.SemanticsFlag.isLink))
-        return result;
+      if (data.hasFlag(ui.SemanticsFlag.isLink)) return result;
       Rect paintBounds = node.rect;
       SemanticsNode? current = node;
       while (current != null) {
         if (current.transform != null)
-          paintBounds = MatrixUtils.transformRect(current.transform!, paintBounds);
+          paintBounds =
+              MatrixUtils.transformRect(current.transform!, paintBounds);
         current = current.parent;
       }
       // skip node if it is touching the edge of the screen, since it might
       // be partially scrolled offscreen.
       const double delta = 0.001;
-      if (paintBounds.left <= delta
-        || paintBounds.top <= delta
-        || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
-        return result;
+      if (paintBounds.left <= delta ||
+          paintBounds.top <= delta ||
+          (paintBounds.bottom - tester.binding.window.physicalSize.height)
+                  .abs() <=
+              delta ||
+          (paintBounds.right - tester.binding.window.physicalSize.width)
+                  .abs() <=
+              delta) return result;
       // shrink by device pixel ratio.
-      final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
-      if (candidateSize.width < size.width - delta || candidateSize.height < size.height - delta) {
+      final Size candidateSize =
+          paintBounds.size / tester.binding.window.devicePixelRatio;
+      if (candidateSize.width < size.width - delta ||
+          candidateSize.height < size.height - delta) {
         result += Evaluation.fail(
-          '$node: expected tap target size of at least $size, but found $candidateSize\n'
-          'See also: $link');
+            '$node: expected tap target size of at least $size, but found $candidateSize\n'
+            'See also: $link');
       }
       return result;
     }
+
     return traverse(root);
   }
 
@@ -140,19 +144,21 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final SemanticsNode root =
+        tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
     Evaluation traverse(SemanticsNode node) {
       Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
         result += traverse(child);
         return true;
       });
-      if (node.isMergedIntoParent || node.isInvisible || node.hasFlag(ui.SemanticsFlag.isHidden))
-        return result;
+      if (node.isMergedIntoParent ||
+          node.isInvisible ||
+          node.hasFlag(ui.SemanticsFlag.isHidden)) return result;
       final SemanticsData data = node.getSemanticsData();
       // Skip node if it has no actions, or is marked as hidden.
-      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
-        return result;
+      if (!data.hasAction(ui.SemanticsAction.longPress) &&
+          !data.hasAction(ui.SemanticsAction.tap)) return result;
       if (data.label == null || data.label.isEmpty) {
         result += Evaluation.fail(
           '$node: expected tappable node to have semantic label, but none was found\n',
@@ -160,6 +166,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
       }
       return result;
     }
+
     return traverse(root);
   }
 }
@@ -198,14 +205,17 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final SemanticsNode root =
+        tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
     ui.Image? image;
-    final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
+    final ByteData byteData =
+        (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
+      image = await layer.toImage(renderView.paintBounds,
+          pixelRatio: 1 / tester.binding.window.devicePixelRatio);
       return image!.toByteData();
     }))!;
     assert(image != null);
@@ -215,8 +225,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (node.isInvisible ||
           node.isMergedIntoParent ||
           node.hasFlag(ui.SemanticsFlag.isHidden) ||
-          (node.hasFlag(ui.SemanticsFlag.hasEnabledState) && !node.hasFlag(ui.SemanticsFlag.isEnabled)))
-        return result;
+          (node.hasFlag(ui.SemanticsFlag.hasEnabledState) &&
+              !node.hasFlag(ui.SemanticsFlag.isEnabled))) return result;
       final SemanticsData data = node.getSemanticsData();
       final List<SemanticsNode> children = <SemanticsNode>[];
       node.visitChildren((SemanticsNode child) {
@@ -235,22 +245,27 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       double? fontSize;
       bool isBold;
       final String text = data.label.isEmpty ? data.value : data.label;
-      final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
+      final List<Element> elements =
+          find.text(text).hitTestable().evaluate().toList();
       Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
-        assert(element.renderObject != null && element.renderObject is RenderBox);
+        assert(
+            element.renderObject != null && element.renderObject is RenderBox);
         final RenderBox renderObject = element.renderObject! as RenderBox;
         paintBounds = Rect.fromPoints(
-          renderObject.localToGlobal(renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-          renderObject.localToGlobal(renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(
+              renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(
+              renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
         );
         final Widget widget = element.widget;
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
-          final TextStyle effectiveTextStyle = widget.style == null || widget.style!.inherit
-              ? defaultTextStyle.style.merge(widget.style)
-              : widget.style!;
+          final TextStyle effectiveTextStyle =
+              widget.style == null || widget.style!.inherit
+                  ? defaultTextStyle.style.merge(widget.style)
+                  : widget.style!;
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
         } else if (widget is EditableText) {
@@ -260,7 +275,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           throw StateError('Unexpected widget type: ${widget.runtimeType}');
         }
       } else if (elements.length > 1) {
-        return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
+        return Evaluation.fail(
+            'Multiple nodes with the same label: ${data.label}\n');
       } else {
         // If we can't find the text node then assume the label does not
         // correspond to actual text.
@@ -270,7 +286,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return result;
       }
-      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
+      final List<int> subset =
+          _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
         return result;
@@ -283,7 +300,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
-      if ((isBold && (fontSize ?? _kDefaultFontSize) > kBoldTextMinimumSize) || (fontSize ?? _kDefaultFontSize) > kLargeTextMinimumSize) {
+      if ((isBold && (fontSize ?? _kDefaultFontSize) > kBoldTextMinimumSize) ||
+          (fontSize ?? _kDefaultFontSize) > kLargeTextMinimumSize) {
         targetContrastRatio = kMinimumRatioLargeText;
       } else {
         targetContrastRatio = kMinimumRatioNormalText;
@@ -291,23 +309,21 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (contrastRatio - targetContrastRatio >= delta) {
         return result + const Evaluation.pass();
       }
-      return result + Evaluation.fail(
-        '$node:\nExpected contrast ratio of at least '
-        '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
-        'The computed light color was: ${report.lightColor}, '
-        'The computed dark color was: ${report.darkColor}\n'
-        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
-      );
+      return result +
+          Evaluation.fail('$node:\nExpected contrast ratio of at least '
+              '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
+              'The computed light color was: ${report.lightColor}, '
+              'The computed dark color was: ${report.darkColor}\n'
+              'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
     }
+
     return evaluateNode(root);
   }
 
   // Skip routes which might have labels, and nodes without any text.
   bool _shouldSkipNode(SemanticsData data) {
-    if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
-      return true;
-    if (data.label.trim().isEmpty && data.value.trim().isEmpty)
-      return true;
+    if (data.hasFlag(ui.SemanticsFlag.scopesRoute)) return true;
+    if (data.label.trim().isEmpty && data.value.trim().isEmpty) return true;
     return false;
   }
 
@@ -317,10 +333,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   // get all the data from this node? allow a small delta overlap before
   // culling the node.
   bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    return paintBounds.top < -50.0
-      || paintBounds.left <  -50.0
-      || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
-      || paintBounds.right > (window.physicalSize.width * window.devicePixelRatio)  + 50.0;
+    return paintBounds.top < -50.0 ||
+        paintBounds.left < -50.0 ||
+        paintBounds.bottom >
+            (window.physicalSize.height * window.devicePixelRatio) + 50.0 ||
+        paintBounds.right >
+            (window.physicalSize.width * window.devicePixelRatio) + 50.0;
   }
 
   @override
@@ -377,10 +395,12 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
     ui.Image? image;
-    final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
+    final ByteData byteData =
+        (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
+      image = await layer.toImage(renderView.paintBounds,
+          pixelRatio: 1 / tester.binding.window.devicePixelRatio);
       return image!.toByteData();
     }))!;
     assert(image != null);
@@ -399,7 +419,8 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
         renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
 
-      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
+      final List<int> subset =
+          _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
 
       if (subset.isEmpty) {
         return const Evaluation.pass();
@@ -411,13 +432,11 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
       if (report.isEmptyRect || contrastRatio >= minimumRatio - tolerance) {
         return const Evaluation.pass();
       } else {
-        return Evaluation.fail(
-            '$element:\nExpected contrast ratio of at least '
-                '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
-                'The computed light color was: ${report.lightColor}, '
-                'The computed dark color was: ${report.darkColor}\n'
-                '$description'
-        );
+        return Evaluation.fail('$element:\nExpected contrast ratio of at least '
+            '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
+            'The computed light color was: ${report.lightColor}, '
+            'The computed dark color was: ${report.darkColor}\n'
+            '$description');
       }
     }
 
@@ -544,15 +563,15 @@ class _ContrastReport {
     if (r <= 0.03928)
       r /= 12.92;
     else
-      r = math.pow((r + 0.055)/ 1.055, 2.4).toDouble();
+      r = math.pow((r + 0.055) / 1.055, 2.4).toDouble();
     if (g <= 0.03928)
       g /= 12.92;
     else
-      g = math.pow((g + 0.055)/ 1.055, 2.4).toDouble();
+      g = math.pow((g + 0.055) / 1.055, 2.4).toDouble();
     if (b <= 0.03928)
       b /= 12.92;
     else
-      b = math.pow((b + 0.055)/ 1.055, 2.4).toDouble();
+      b = math.pow((b + 0.055) / 1.055, 2.4).toDouble();
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 }
@@ -568,14 +587,15 @@ class _ContrastReport {
 ///
 /// In the returned list, each color is represented as a 32-bit integer
 /// in ARGB format, similar to the parameter for the [Color] constructor.
-List<int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, int height) {
+List<int> _colorsWithinRect(
+    ByteData data, Rect paintBounds, int width, int height) {
   final Rect truePaintBounds = paintBounds.intersect(
     Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
   );
 
-  final int leftX   = truePaintBounds.left.floor();
-  final int rightX  = truePaintBounds.right.ceil();
-  final int topY    = truePaintBounds.top.floor();
+  final int leftX = truePaintBounds.left.floor();
+  final int rightX = truePaintBounds.right.ceil();
+  final int topY = truePaintBounds.top.floor();
   final int bottomY = truePaintBounds.bottom.ceil();
 
   final List<int> buffer = <int>[];
@@ -587,14 +607,15 @@ List<int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, int heig
     final int b = data.getUint8(offset + 2);
     final int a = data.getUint8(offset + 3);
     final int color = (((a & 0xff) << 24) |
-    ((r & 0xff) << 16) |
-    ((g & 0xff) << 8)  |
-    ((b & 0xff) << 0)) & 0xFFFFFFFF;
+            ((r & 0xff) << 16) |
+            ((g & 0xff) << 8) |
+            ((b & 0xff) << 0)) &
+        0xFFFFFFFF;
     return color;
   }
 
-  for (int x = leftX; x < rightX; x ++) {
-    for (int y = topY; y < bottomY; y ++) {
+  for (int x = leftX; x < rightX; x++) {
+    for (int y = topY; y < bottomY; y++) {
       buffer.add(_getPixel(data, x, y));
     }
   }
@@ -607,7 +628,8 @@ List<int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, int heig
 /// See also:
 ///
 ///  * [Android tap target guidelines](https://support.google.com/accessibility/android/answer/7101858?hl=en).
-const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideline._(
+const AccessibilityGuideline androidTapTargetGuideline =
+    MinimumTapTargetGuideline._(
   Size(48.0, 48.0),
   'https://support.google.com/accessibility/android/answer/7101858?hl=en',
 );
@@ -617,7 +639,8 @@ const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideli
 /// See also:
 ///
 ///   * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/).
-const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._(
+const AccessibilityGuideline iOSTapTargetGuideline =
+    MinimumTapTargetGuideline._(
   Size(44.0, 44.0),
   'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
 );
@@ -631,8 +654,10 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._
 /// frequently occurring color in each partition as a representative of the
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
-const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline._();
+const AccessibilityGuideline textContrastGuideline =
+    MinimumTextContrastGuideline._();
 
 /// A guideline which enforces that all nodes with a tap or long press action
 /// also have a label.
-const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
+const AccessibilityGuideline labeledTapTargetGuideline =
+    LabeledTapTargetGuideline._();

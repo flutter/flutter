@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedList', (WidgetTester tester) async {
-    Widget builder(BuildContext context, int index, Animation<double> animation) {
+    Widget builder(
+        BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
         child: Center(
@@ -16,6 +17,7 @@ void main() {
         ),
       );
     }
+
     final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
@@ -30,9 +32,9 @@ void main() {
     );
 
     expect(find.byWidgetPredicate((Widget widget) {
-      return widget is SliverAnimatedList
-         && widget.initialItemCount == 2
-         && widget.itemBuilder == builder;
+      return widget is SliverAnimatedList &&
+          widget.initialItemCount == 2 &&
+          widget.itemBuilder == builder;
     }), findsOneWidget);
 
     listKey.currentState!.insertItem(0);
@@ -69,7 +71,8 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 initialItemCount: 2,
-                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index,
+                    Animation<double> animation) {
                   animations[index] = animation;
                   return SizedBox(
                     height: 100.0,
@@ -93,7 +96,8 @@ void main() {
     });
 
     testWidgets('insert', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey =
+          GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -102,7 +106,8 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 key: listKey,
-                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index,
+                    Animation<double> animation) {
                   return SizeTransition(
                     key: ValueKey<int>(index),
                     sizeFactor: animation,
@@ -118,9 +123,15 @@ void main() {
         ),
       );
 
-      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
-      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
-      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemHeight(int index) => tester
+          .getSize(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .height;
+      double itemTop(int index) => tester
+          .getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .dy;
+      double itemBottom(int index) => tester
+          .getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .dy;
 
       listKey.currentState!.insertItem(
         0,
@@ -178,10 +189,12 @@ void main() {
     });
 
     testWidgets('remove', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey =
+          GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
 
-      Widget buildItem(BuildContext context, int item, Animation<double> animation) {
+      Widget buildItem(
+          BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
           key: ValueKey<int>(item),
           sizeFactor: animation,
@@ -202,7 +215,8 @@ void main() {
               SliverAnimatedList(
                 key: listKey,
                 initialItemCount: 3,
-                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index,
+                    Animation<double> animation) {
                   return buildItem(context, items[index], animation);
                 },
               ),
@@ -211,8 +225,10 @@ void main() {
         ),
       );
 
-      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index))).dy;
-      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index))).dy;
+      double itemTop(int index) =>
+          tester.getTopLeft(find.byKey(ValueKey<int>(index))).dy;
+      double itemBottom(int index) =>
+          tester.getBottomLeft(find.byKey(ValueKey<int>(index))).dy;
 
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item 1'), findsOneWidget);
@@ -221,7 +237,8 @@ void main() {
       items.removeAt(0);
       listKey.currentState!.removeItem(
         0,
-        (BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
+        (BuildContext context, Animation<double> animation) =>
+            buildItem(context, 0, animation),
         duration: const Duration(milliseconds: 100),
       );
 
@@ -253,8 +270,10 @@ void main() {
       expect(itemBottom(2), 200.0);
     });
 
-    testWidgets('works in combination with other slivers', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+    testWidgets('works in combination with other slivers',
+        (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey =
+          GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -270,7 +289,8 @@ void main() {
               SliverAnimatedList(
                 key: listKey,
                 initialItemCount: 3,
-                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index,
+                    Animation<double> animation) {
                   return SizedBox(
                     height: 100,
                     child: Text('item $index'),
@@ -289,7 +309,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text('item 3')).dy, 500);
 
-      listKey.currentState!.removeItem(0,
+      listKey.currentState!.removeItem(
+        0,
         (BuildContext context, Animation<double> animation) {
           return SizeTransition(
             sizeFactor: animation,
@@ -364,7 +385,9 @@ void main() {
     },
   );
 
-  testWidgets('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  testWidgets(
+      'AnimatedList.clipBehavior is forwarded to its inner CustomScrollView',
+      (WidgetTester tester) async {
     const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
@@ -385,6 +408,10 @@ void main() {
       ),
     );
 
-    expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
+    expect(
+        tester
+            .widget<CustomScrollView>(find.byType(CustomScrollView))
+            .clipBehavior,
+        clipBehavior);
   });
 }

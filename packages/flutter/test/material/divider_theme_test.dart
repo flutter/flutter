@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('DividerThemeData copyWith, ==, hashCode basics', () {
     expect(const DividerThemeData(), const DividerThemeData().copyWith());
-    expect(const DividerThemeData().hashCode, const DividerThemeData().copyWith().hashCode);
+    expect(const DividerThemeData().hashCode,
+        const DividerThemeData().copyWith().hashCode);
   });
 
   test('DividerThemeData null fields by default', () {
@@ -21,7 +22,8 @@ void main() {
     expect(dividerTheme.endIndent, null);
   });
 
-  testWidgets('Default DividerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DividerThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DividerThemeData().debugFillProperties(builder);
 
@@ -33,7 +35,8 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('DividerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('DividerThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DividerThemeData(
       color: Color(0xFFFFFFFF),
@@ -58,7 +61,8 @@ void main() {
   });
 
   group('Horizontal Divider', () {
-    testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgets('Passing no DividerThemeData returns defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: Divider(),
@@ -81,7 +85,8 @@ void main() {
       expect(lineRect.right, dividerRect.right);
     });
 
-    testWidgets('Uses values from DividerThemeData', (WidgetTester tester) async {
+    testWidgets('Uses values from DividerThemeData',
+        (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
@@ -104,7 +109,8 @@ void main() {
       expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
     });
 
-    testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgets('Widget properties take priority over theme',
+        (WidgetTester tester) async {
       const Color color = Colors.purple;
       const double height = 10.0;
       const double thickness = 5.0;
@@ -141,14 +147,16 @@ void main() {
   });
 
   group('Vertical Divider', () {
-    testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgets('Passing no DividerThemeData returns defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: VerticalDivider(),
         ),
       ));
 
-      final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+      final RenderBox box =
+          tester.firstRenderObject(find.byType(VerticalDivider));
       expect(box.size.width, 16.0);
 
       final Container container = tester.widget(find.byType(Container));
@@ -165,7 +173,8 @@ void main() {
       expect(lineRect.bottom, dividerRect.bottom);
     });
 
-    testWidgets('Uses values from DividerThemeData', (WidgetTester tester) async {
+    testWidgets('Uses values from DividerThemeData',
+        (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
@@ -174,7 +183,8 @@ void main() {
         ),
       ));
 
-      final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+      final RenderBox box =
+          tester.firstRenderObject(find.byType(VerticalDivider));
       expect(box.size.width, dividerTheme.space);
 
       final Container container = tester.widget(find.byType(Container));
@@ -189,7 +199,8 @@ void main() {
       expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
     });
 
-    testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgets('Widget properties take priority over theme',
+        (WidgetTester tester) async {
       const Color color = Colors.purple;
       const double width = 10.0;
       const double thickness = 5.0;
@@ -210,7 +221,8 @@ void main() {
         ),
       ));
 
-      final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+      final RenderBox box =
+          tester.firstRenderObject(find.byType(VerticalDivider));
       expect(box.size.width, width);
 
       final Container container = tester.widget(find.byType(Container));

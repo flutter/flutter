@@ -39,10 +39,10 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
-  }) : assert(isExpanded != null),
-       assert(size != null),
-       assert(padding != null),
-       super(key: key);
+  })  : assert(isExpanded != null),
+        assert(size != null),
+        assert(padding != null),
+        super(key: key);
 
   /// Whether the icon is in an expanded state.
   ///
@@ -66,7 +66,6 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry padding;
-
 
   /// The color of the icon.
   ///
@@ -100,17 +99,20 @@ class ExpandIcon extends StatefulWidget {
   State<ExpandIcon> createState() => _ExpandIconState();
 }
 
-class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
+class _ExpandIconState extends State<ExpandIcon>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _iconTurns;
 
-  static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
-    .chain(CurveTween(curve: Curves.fastOutSlowIn));
+  static final Animatable<double> _iconTurnTween =
+      Tween<double>(begin: 0.0, end: 0.5)
+          .chain(CurveTween(curve: Curves.fastOutSlowIn));
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
+    _controller =
+        AnimationController(duration: kThemeAnimationDuration, vsync: this);
     _iconTurns = _controller.drive(_iconTurnTween);
     // If the widget is initially expanded, rotate the icon without animating it.
     if (widget.isExpanded) {
@@ -154,7 +156,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       return widget.color!;
     }
 
-    switch(Theme.of(context).brightness) {
+    switch (Theme.of(context).brightness) {
       case Brightness.light:
         return Colors.black54;
       case Brightness.dark:
@@ -166,8 +168,11 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
+    final String onTapHint = widget.isExpanded
+        ? localizations.expandedIconTapHint
+        : localizations.collapsedIconTapHint;
 
     return Semantics(
       onTapHint: widget.onPressed == null ? null : onTapHint,

@@ -48,10 +48,13 @@ mixin ScrollMetrics {
     AxisDirection? axisDirection,
   }) {
     return FixedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
-      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+      minScrollExtent: minScrollExtent ??
+          (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ??
+          (hasContentDimensions ? this.maxScrollExtent : null),
       pixels: pixels ?? (hasPixels ? this.pixels : null),
-      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+      viewportDimension: viewportDimension ??
+          (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
     );
   }
@@ -115,10 +118,12 @@ mixin ScrollMetrics {
   double get extentInside {
     assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
-      // "above" overscroll value
-      - (minScrollExtent - pixels).clamp(0, viewportDimension)
-      // "below" overscroll value
-      - (pixels - maxScrollExtent).clamp(0, viewportDimension);
+        // "above" overscroll value
+        -
+        (minScrollExtent - pixels).clamp(0, viewportDimension)
+        // "below" overscroll value
+        -
+        (pixels - maxScrollExtent).clamp(0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
@@ -137,10 +142,10 @@ class FixedScrollMetrics with ScrollMetrics {
     required double? pixels,
     required double? viewportDimension,
     required this.axisDirection,
-  }) : _minScrollExtent = minScrollExtent,
-       _maxScrollExtent = maxScrollExtent,
-       _pixels = pixels,
-       _viewportDimension = viewportDimension;
+  })  : _minScrollExtent = minScrollExtent,
+        _maxScrollExtent = maxScrollExtent,
+        _pixels = pixels,
+        _viewportDimension = viewportDimension;
 
   @override
   double get minScrollExtent => _minScrollExtent!;
@@ -151,7 +156,8 @@ class FixedScrollMetrics with ScrollMetrics {
   final double? _maxScrollExtent;
 
   @override
-  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
+  bool get hasContentDimensions =>
+      _minScrollExtent != null && _maxScrollExtent != null;
 
   @override
   double get pixels => _pixels!;

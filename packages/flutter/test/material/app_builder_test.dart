@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
+  testWidgets("builder doesn't get called if app doesn't change",
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Widget app = MaterialApp(
       theme: ThemeData(
@@ -37,7 +38,8 @@ void main() {
     expect(log, <String>['build']);
   });
 
-  testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
+  testWidgets("builder doesn't get called if app doesn't change",
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(

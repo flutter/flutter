@@ -49,20 +49,21 @@ class IconData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is IconData
-        && other.codePoint == codePoint
-        && other.fontFamily == fontFamily
-        && other.fontPackage == fontPackage
-        && other.matchTextDirection == matchTextDirection;
+    if (other.runtimeType != runtimeType) return false;
+    return other is IconData &&
+        other.codePoint == codePoint &&
+        other.fontFamily == fontFamily &&
+        other.fontPackage == fontPackage &&
+        other.matchTextDirection == matchTextDirection;
   }
 
   @override
-  int get hashCode => Object.hash(codePoint, fontFamily, fontPackage, matchTextDirection);
+  int get hashCode =>
+      Object.hash(codePoint, fontFamily, fontPackage, matchTextDirection);
 
   @override
-  String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
+  String toString() =>
+      'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
 }
 
 /// [DiagnosticsProperty] that has an [IconData] as value.
@@ -77,15 +78,17 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
     bool showName = true,
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null),
-       super(name, value,
-         showName: showName,
-         ifNull: ifNull,
-         style: style,
-         level: level,
-       );
+  })  : assert(showName != null),
+        assert(style != null),
+        assert(level != null),
+        super(
+          name,
+          value,
+          showName: showName,
+          ifNull: ifNull,
+          style: style,
+          level: level,
+        );
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

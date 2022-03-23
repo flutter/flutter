@@ -21,18 +21,22 @@ import 'package:watcher/watcher.dart';
 // If you update this version, also update it in dev/bots/docs.sh
 const String _snippetsActivateVersion = '0.2.5';
 
-final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
-final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
-final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String _flutterRoot =
+    path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String _defaultFlutterPackage =
+    path.join(_flutterRoot, 'packages', 'flutter', 'lib');
+final String _defaultDartUiLocation =
+    path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
+final String _flutter = path.join(
+    _flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
 Future<void> main(List<String> arguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp',
     help: 'A location where temporary files may be written. Defaults to a '
-          'directory in the system temp folder. If specified, will not be '
-          'automatically removed at the end of execution.',
+        'directory in the system temp folder. If specified, will not be '
+        'automatically removed at the end of execution.',
   );
   argParser.addFlag(
     'verbose',
@@ -42,10 +46,11 @@ Future<void> main(List<String> arguments) async {
   argParser.addOption(
     'dart-ui-location',
     defaultsTo: _defaultDartUiLocation,
-    help: 'A location where the dart:ui dart files are to be found. Defaults to '
-          'the sky_engine directory installed in this flutter repo. This '
-          'is typically the engine/src/flutter/lib/ui directory in an engine dev setup. '
-          'Implies --include-dart-ui.',
+    help:
+        'A location where the dart:ui dart files are to be found. Defaults to '
+        'the sky_engine directory installed in this flutter repo. This '
+        'is typically the engine/src/flutter/lib/ui directory in an engine dev setup. '
+        'Implies --include-dart-ui.',
   );
   argParser.addFlag(
     'include-dart-ui',
@@ -65,8 +70,9 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag(
     'global-activate-snippets',
     defaultsTo: true,
-    help: 'Whether or not to "pub global activate" the snippets package. If set, will '
-          'activate version $_snippetsActivateVersion',
+    help:
+        'Whether or not to "pub global activate" the snippets package. If set, will '
+        'activate version $_snippetsActivateVersion',
   );
 
   final ArgResults parsedArguments = argParser.parse(arguments);
@@ -85,11 +91,12 @@ Future<void> main(List<String> arguments) async {
     flutterPackage = Directory(_defaultFlutterPackage);
   }
 
-  final bool includeDartUi = parsedArguments.wasParsed('dart-ui-location') || parsedArguments['include-dart-ui'] as bool;
+  final bool includeDartUi = parsedArguments.wasParsed('dart-ui-location') ||
+      parsedArguments['include-dart-ui'] as bool;
   late Directory dartUiLocation;
   if (((parsedArguments['dart-ui-location'] ?? '') as String).isNotEmpty) {
-    dartUiLocation = Directory(
-        path.absolute(parsedArguments['dart-ui-location'] as String));
+    dartUiLocation =
+        Directory(path.absolute(parsedArguments['dart-ui-location'] as String));
   } else {
     dartUiLocation = Directory(_defaultDartUiLocation);
   }
@@ -101,9 +108,11 @@ Future<void> main(List<String> arguments) async {
   Directory? tempDirectory;
   if (parsedArguments.wasParsed('temp')) {
     final String tempArg = parsedArguments['temp'] as String;
-    tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)));
+    tempDirectory = Directory(
+        path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)));
     if (path.basename(tempArg) != tempArg) {
-      stderr.writeln('Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
+      stderr.writeln(
+          'Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
     }
     print('Leaving temporary output in ${tempDirectory.absolute.path}.');
     // Make sure that any directory left around from a previous run is cleared
@@ -131,7 +140,8 @@ Future<void> main(List<String> arguments) async {
         exit(activateResult.exitCode);
       }
     } on ProcessException catch (e) {
-      stderr.writeln('Unable to global activate snippets package at version $_snippetsActivateVersion: $e');
+      stderr.writeln(
+          'Unable to global activate snippets package at version $_snippetsActivateVersion: $e');
       exit(1);
     }
   }
@@ -185,8 +195,7 @@ class TaskQueue<T> {
   /// Creates a task queue with a maximum number of simultaneous jobs.
   /// The [maxJobs] parameter defaults to the number of CPU cores on the
   /// system.
-  TaskQueue({int? maxJobs})
-      : maxJobs = maxJobs ?? Platform.numberOfProcessors;
+  TaskQueue({int? maxJobs}) : maxJobs = maxJobs ?? Platform.numberOfProcessors;
 
   /// The maximum number of jobs that this queue will run simultaneously.
   final int maxJobs;
@@ -306,9 +315,10 @@ class SampleChecker {
     Directory? tempDirectory,
     this.verbose = false,
     Directory? dartUiLocation,
-  }) : _tempDirectory = tempDirectory ?? Directory.systemTemp.createTempSync('flutter_analyze_sample_code.'),
-       _keepTmp = tempDirectory != null,
-       _dartUiLocation = dartUiLocation;
+  })  : _tempDirectory = tempDirectory ??
+            Directory.systemTemp.createTempSync('flutter_analyze_sample_code.'),
+        _keepTmp = tempDirectory != null,
+        _dartUiLocation = dartUiLocation;
 
   /// The prefix of each comment line
   static const String _dartDocPrefix = '///';
@@ -317,7 +327,8 @@ class SampleChecker {
   static const String _dartDocPrefixWithSpace = '$_dartDocPrefix ';
 
   /// A RegExp that matches the beginning of a dartdoc snippet or sample.
-  static final RegExp _dartDocSampleBeginRegex = RegExp(r'{@tool (sample|snippet|dartpad)(?:| ([^}]*))}');
+  static final RegExp _dartDocSampleBeginRegex =
+      RegExp(r'{@tool (sample|snippet|dartpad)(?:| ([^}]*))}');
 
   /// A RegExp that matches the end of a dartdoc snippet or sample.
   static final RegExp _dartDocSampleEndRegex = RegExp(r'{@end-tool}');
@@ -329,10 +340,12 @@ class SampleChecker {
   static final RegExp _codeBlockEndRegex = RegExp(r'///\s+```\s*$');
 
   /// A RegExp that matches a Dart constructor.
-  static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
+  static final RegExp _constructorRegExp =
+      RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
 
   /// A RegExp that matches a dart version specification in an example preamble.
-  static final RegExp _dartVersionRegExp = RegExp(r'\/\/ \/\/ @dart = ([0-9]+\.[0-9]+)');
+  static final RegExp _dartVersionRegExp =
+      RegExp(r'\/\/ \/\/ @dart = ([0-9]+\.[0-9]+)');
 
   /// Whether or not to print verbose output.
   final bool verbose;
@@ -360,8 +373,13 @@ class SampleChecker {
   /// generate them.
   int _expressionId = 0;
 
-  static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
-    return directory.listSync(recursive: recursive, followLinks: false).whereType<File>().where((File file) => path.extension(file.path) == '.dart').toList();
+  static List<File> _listDartFiles(Directory directory,
+      {bool recursive = false}) {
+    return directory
+        .listSync(recursive: recursive, followLinks: false)
+        .whereType<File>()
+        .where((File file) => path.extension(file.path) == '.dart')
+        .toList();
   }
 
   /// Computes the headers needed for each sample file.
@@ -380,7 +398,10 @@ class SampleChecker {
       "import 'package:flutter_test/flutter_test.dart';",
       for (final File file in _listDartFiles(Directory(_defaultFlutterPackage)))
         "import 'package:flutter/${path.basename(file.path)}';",
-    ].map<Line>((String code) => Line.generated(code: code, filename: 'headers')).toList();
+    ]
+        .map<Line>(
+            (String code) => Line.generated(code: code, filename: 'headers'))
+        .toList();
   }
 
   List<Line>? _headers;
@@ -392,23 +413,28 @@ class SampleChecker {
       final Map<String, Section> sections = <String, Section>{};
       final Map<String, Sample> snippets = <String, Sample>{};
       if (_dartUiLocation != null && !_dartUiLocation!.existsSync()) {
-        stderr.writeln('Unable to analyze engine dart samples at ${_dartUiLocation!.path}.');
+        stderr.writeln(
+            'Unable to analyze engine dart samples at ${_dartUiLocation!.path}.');
       }
       final List<File> filesToAnalyze = <File>[
         ..._listDartFiles(_flutterPackage, recursive: true),
-        if (_dartUiLocation != null && _dartUiLocation!.existsSync()) ... _listDartFiles(_dartUiLocation!, recursive: true),
+        if (_dartUiLocation != null && _dartUiLocation!.existsSync())
+          ..._listDartFiles(_dartUiLocation!, recursive: true),
       ];
-      await _extractSamples(filesToAnalyze, sectionMap: sections, sampleMap: snippets);
+      await _extractSamples(filesToAnalyze,
+          sectionMap: sections, sampleMap: snippets);
       analysisResult = _analyze(_tempDirectory, sections, snippets);
     } finally {
       if (analysisResult != null && analysisResult.errors.isNotEmpty) {
         for (final String filePath in analysisResult.errors.keys) {
           analysisResult.errors[filePath]!.forEach(stderr.writeln);
         }
-        stderr.writeln('\nFound ${analysisResult.errors.length} sample code errors.');
+        stderr.writeln(
+            '\nFound ${analysisResult.errors.length} sample code errors.');
       }
       if (_keepTmp) {
-        print('Leaving temporary directory ${_tempDirectory.path} around for your perusal.');
+        print(
+            'Leaving temporary directory ${_tempDirectory.path} around for your perusal.');
       } else {
         try {
           _tempDirectory.deleteSync(recursive: true);
@@ -440,7 +466,8 @@ class SampleChecker {
       if (verbose) {
         print(<String>[_flutter, '--version', '--machine'].join(' '));
       }
-      final ProcessResult versionResult = Process.runSync(_flutter, <String>['--version', '--machine']);
+      final ProcessResult versionResult =
+          Process.runSync(_flutter, <String>['--version', '--machine']);
       if (verbose) {
         stdout.write(versionResult.stdout);
         stderr.write(versionResult.stderr);
@@ -468,7 +495,8 @@ class SampleChecker {
       ],
       workingDirectory: workingDirectory,
       environment: <String, String>{
-        if (!Platform.environment.containsKey('FLUTTER_ROOT')) 'FLUTTER_ROOT': _flutterRoot,
+        if (!Platform.environment.containsKey('FLUTTER_ROOT'))
+          'FLUTTER_ROOT': _flutterRoot,
         if (_flutterVersion!.isNotEmpty) 'FLUTTER_VERSION': _flutterVersion!,
       },
     );
@@ -478,7 +506,8 @@ class SampleChecker {
   /// returns the output file.
   Future<File> _writeSample(Sample sample) async {
     // Generate the snippet.
-    final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
+    final String sampleId = _createNameFromSource(
+        'sample', sample.start.filename, sample.start.line);
     final String inputName = '$sampleId.input';
     // Now we have a filename like 'lib.src.material.foo_widget.123.dart' for each snippet.
     final String inputFilePath = path.join(_tempDirectory.path, inputName);
@@ -490,7 +519,8 @@ class SampleChecker {
       stdout.writeln('Writing $inputFilePath.');
     }
     inputFile.writeAsStringSync(sample.input.join('\n'));
-    final File outputFile = File(path.join(_tempDirectory.path, '$sampleId.dart'));
+    final File outputFile =
+        File(path.join(_tempDirectory.path, '$sampleId.dart'));
     final List<String> args = <String>[
       '--output=${outputFile.absolute.path}',
       '--input=${inputFile.absolute.path}',
@@ -500,7 +530,8 @@ class SampleChecker {
       ...sample.args,
     ];
     if (verbose) {
-      print('Generating sample for ${sample.start.filename}:${sample.start.line}');
+      print(
+          'Generating sample for ${sample.start.filename}:${sample.start.line}');
     }
     final Process process = await _runSnippetsScript(args);
     if (verbose) {
@@ -508,7 +539,8 @@ class SampleChecker {
     }
     process.stderr.transform(utf8.decoder).forEach(stderr.write);
     const Duration timeoutDuration = Duration(minutes: 5);
-    final int exitCode = await process.exitCode.timeout(timeoutDuration, onTimeout: () {
+    final int exitCode =
+        await process.exitCode.timeout(timeoutDuration, onTimeout: () {
       stderr.writeln('Snippet script timed out after $timeoutDuration.');
       return -1;
     });
@@ -537,7 +569,8 @@ class SampleChecker {
     int sampleCount = 0;
 
     for (final File file in files) {
-      final String relativeFilePath = path.relative(file.path, from: _flutterRoot);
+      final String relativeFilePath =
+          path.relative(file.path, from: _flutterRoot);
       final List<String> sampleLines = file.readAsLinesSync();
       final List<Section> preambleSections = <Section>[];
       // Whether or not we're in the file-wide preamble section ("Examples can assume").
@@ -558,7 +591,8 @@ class SampleChecker {
         final String trimmedLine = line.trim();
         if (inSnippet) {
           if (!trimmedLine.startsWith(_dartDocPrefix)) {
-            throw SampleCheckerException('Snippet section unterminated.', file: relativeFilePath, line: lineNumber);
+            throw SampleCheckerException('Snippet section unterminated.',
+                file: relativeFilePath, line: lineNumber);
           }
           if (_dartDocSampleEndRegex.hasMatch(trimmedLine)) {
             samples.add(
@@ -586,7 +620,10 @@ class SampleChecker {
             }
             block.clear();
           } else if (!line.startsWith('// ')) {
-            throw SampleCheckerException('Unexpected content in sample code preamble.', file: relativeFilePath, line: lineNumber);
+            throw SampleCheckerException(
+                'Unexpected content in sample code preamble.',
+                file: relativeFilePath,
+                line: lineNumber);
           } else if (_dartVersionRegExp.hasMatch(line)) {
             dartVersionOverride = line.substring(3);
           } else {
@@ -595,7 +632,10 @@ class SampleChecker {
         } else if (inSampleSection) {
           if (_dartDocSampleEndRegex.hasMatch(trimmedLine)) {
             if (inDart) {
-              throw SampleCheckerException("Dart section didn't terminate before end of sample", file: relativeFilePath, line: lineNumber);
+              throw SampleCheckerException(
+                  "Dart section didn't terminate before end of sample",
+                  file: relativeFilePath,
+                  line: lineNumber);
             }
             inSampleSection = false;
           }
@@ -603,8 +643,11 @@ class SampleChecker {
             if (_codeBlockEndRegex.hasMatch(trimmedLine)) {
               inDart = false;
               final Section processed = _processBlock(startLine, block);
-              final Section combinedSection = preambleSections.isEmpty ? processed : Section.combine(preambleSections..add(processed));
-              sections.add(combinedSection.copyWith(dartVersionOverride: dartVersionOverride));
+              final Section combinedSection = preambleSections.isEmpty
+                  ? processed
+                  : Section.combine(preambleSections..add(processed));
+              sections.add(combinedSection.copyWith(
+                  dartVersionOverride: dartVersionOverride));
               block.clear();
             } else if (trimmedLine == _dartDocPrefix) {
               block.add('');
@@ -624,19 +667,23 @@ class SampleChecker {
             startLine = Line(
               filename: relativeFilePath,
               line: lineNumber + 1,
-              indent: line.indexOf(_dartDocPrefixWithSpace) + _dartDocPrefixWithSpace.length,
+              indent: line.indexOf(_dartDocPrefixWithSpace) +
+                  _dartDocPrefixWithSpace.length,
             );
             inDart = true;
           }
         }
         if (!inSampleSection) {
-          final RegExpMatch? sampleMatch = _dartDocSampleBeginRegex.firstMatch(trimmedLine);
+          final RegExpMatch? sampleMatch =
+              _dartDocSampleBeginRegex.firstMatch(trimmedLine);
           if (line == '// Examples can assume:') {
             assert(block.isEmpty);
-            startLine = Line.generated(filename: relativeFilePath, line: lineNumber + 1, indent: 3);
+            startLine = Line.generated(
+                filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
-            inSnippet = sampleMatch != null && (sampleMatch[1] == 'sample' || sampleMatch[1] == 'dartpad');
+            inSnippet = sampleMatch != null &&
+                (sampleMatch[1] == 'sample' || sampleMatch[1] == 'dartpad');
             if (inSnippet) {
               if (sampleMatch[1] == 'sample') {
                 sampleCount++;
@@ -647,7 +694,8 @@ class SampleChecker {
               startLine = Line(
                 filename: relativeFilePath,
                 line: lineNumber + 1,
-                indent: line.indexOf(_dartDocPrefixWithSpace) + _dartDocPrefixWithSpace.length,
+                indent: line.indexOf(_dartDocPrefixWithSpace) +
+                    _dartDocPrefixWithSpace.length,
               );
               if (sampleMatch[2] != null) {
                 // There are arguments to the snippet tool to keep track of.
@@ -657,7 +705,8 @@ class SampleChecker {
               }
             }
             inSampleSection = !inSnippet;
-          } else if (RegExp(r'///\s*#+\s+[Ss]ample\s+[Cc]ode:?$').hasMatch(trimmedLine)) {
+          } else if (RegExp(r'///\s*#+\s+[Ss]ample\s+[Cc]ode:?$')
+              .hasMatch(trimmedLine)) {
             throw SampleCheckerException(
               "Found deprecated '## Sample code' section: use {@tool snippet}...{@end-tool} instead.",
               file: relativeFilePath,
@@ -673,12 +722,12 @@ class SampleChecker {
           '$dartpadCount dartpad sections.');
     for (final Section section in sections) {
       final String path = _writeSection(section).path;
-      if (sectionMap != null)
-        sectionMap[path] = section;
+      if (sectionMap != null) sectionMap[path] = section;
     }
     final TaskQueue<File> sampleQueue = TaskQueue<File>();
     for (final Sample sample in samples) {
-      final Future<File> futureFile = sampleQueue.add(() => _writeSample(sample));
+      final Future<File> futureFile =
+          sampleQueue.add(() => _writeSample(sample));
       if (sampleMap != null) {
         sampleQueue.add(() async {
           final File snippetFile = await futureFile;
@@ -754,7 +803,8 @@ dev_dependencies:
     }
 
     // Import the analysis options from the Flutter root.
-    final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'));
+    final File analysisOptions =
+        File(path.join(directory.path, 'analysis_options.yaml'));
     if (!analysisOptions.existsSync()) {
       analysisOptions.createSync(recursive: true);
       analysisOptions.writeAsStringSync('''
@@ -776,38 +826,54 @@ analyzer:
 
   /// Writes out a sample section to the disk and returns the file.
   File _writeSection(Section section) {
-    final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
-    final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
+    final String sectionId = _createNameFromSource(
+        'snippet', section.start.filename, section.start.line);
+    final File outputFile =
+        File(path.join(_tempDirectory.path, '$sectionId.dart'))
+          ..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
-      Line.generated(code: section.dartVersionOverride ?? '', filename: section.start.filename),
+      Line.generated(
+          code: section.dartVersionOverride ?? '',
+          filename: section.start.filename),
       ...headers,
       Line.generated(filename: section.start.filename),
-      Line.generated(code: '// From: ${section.start.filename}:${section.start.line}', filename: section.start.filename),
+      Line.generated(
+          code: '// From: ${section.start.filename}:${section.start.line}',
+          filename: section.start.filename),
       ...section.code,
     ];
-    outputFile.writeAsStringSync(mainContents.map<String>((Line line) => line.code).join('\n'));
+    outputFile.writeAsStringSync(
+        mainContents.map<String>((Line line) => line.code).join('\n'));
     return outputFile;
   }
 
   /// Invokes the analyzer on the given [directory] and returns the stdout.
-  int _runAnalyzer(Directory directory, {bool silent = true, required List<String> output}) {
-    if (!silent)
-      print('Starting analysis of code samples.');
+  int _runAnalyzer(Directory directory,
+      {bool silent = true, required List<String> output}) {
+    if (!silent) print('Starting analysis of code samples.');
     _createConfigurationFiles(directory);
     final ProcessResult result = Process.runSync(
       _flutter,
-      <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', '.'],
+      <String>[
+        '--no-wrap',
+        'analyze',
+        '--no-preamble',
+        '--no-congratulate',
+        '.'
+      ],
       workingDirectory: directory.absolute.path,
     );
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
     // Remove output from building the flutter tool.
     stderr.removeWhere((String line) {
-      return line.startsWith('Building flutter tool...')
-          || line.startsWith('Waiting for another flutter command to release the startup lock...');
+      return line.startsWith('Building flutter tool...') ||
+          line.startsWith(
+              'Waiting for another flutter command to release the startup lock...');
     });
     // Check out the stderr to see if the analyzer had it's own issues.
-    if (stderr.isNotEmpty && stderr.first.contains(RegExp(r' issues? found\. \(ran in '))) {
+    if (stderr.isNotEmpty &&
+        stderr.first.contains(RegExp(r' issues? found\. \(ran in '))) {
       stderr.removeAt(0);
       if (stderr.isNotEmpty && stderr.last.isEmpty) {
         stderr.removeLast();
@@ -819,7 +885,8 @@ analyzer:
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
       stdout.removeAt(0);
     }
-    if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
+    if (stdout.isNotEmpty &&
+        stdout.first.startsWith('Running "flutter pub get" in ')) {
       stdout.removeAt(0);
     }
     output.addAll(stdout);
@@ -837,7 +904,8 @@ analyzer:
     final List<String> errors = <String>[];
     int exitCode = _runAnalyzer(directory, silent: silent, output: errors);
 
-    final Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
+    final Map<String, List<AnalysisError>> analysisErrors =
+        <String, List<AnalysisError>>{};
     void addAnalysisError(File file, AnalysisError error) {
       if (analysisErrors.containsKey(file.path)) {
         analysisErrors[file.path]!.add(error);
@@ -866,14 +934,16 @@ analyzer:
       }
       final String type = match.namedGroup('type')!;
       final String message = match.namedGroup('description')!;
-      final File file = File(path.join(_tempDirectory.path, match.namedGroup('file')));
+      final File file =
+          File(path.join(_tempDirectory.path, match.namedGroup('file')));
       final List<String> fileContents = file.readAsLinesSync();
       final bool isSnippet = path.basename(file.path).startsWith('snippet.');
       final bool isSample = path.basename(file.path).startsWith('sample.');
       final String line = match.namedGroup('line')!;
       final String column = match.namedGroup('column')!;
       final String errorCode = match.namedGroup('code')!;
-      final int lineNumber = int.parse(line, radix: 10) - (isSnippet ? headerLength : 0);
+      final int lineNumber =
+          int.parse(line, radix: 10) - (isSnippet ? headerLength : 0);
       final int columnNumber = int.parse(column, radix: 10);
 
       // For when errors occur outside of the things we're trying to analyze.
@@ -925,7 +995,8 @@ analyzer:
               Line(filename: file.path, line: lineNumber),
             ),
           );
-          throw SampleCheckerException('Failed to parse error message: $error', file: file.path, line: lineNumber);
+          throw SampleCheckerException('Failed to parse error message: $error',
+              file: file.path, line: lineNumber);
         }
 
         final Section actualSection = sections[file.path]!;
@@ -952,10 +1023,12 @@ analyzer:
             // trailing comma on the previous line, and so we want to provide a better message
             // and the previous line as the error location, since that appears in the original
             // source, and can be more easily located.
-            final Line previousCodeLine = sections[file.path]!.code[lineNumber - 2];
+            final Line previousCodeLine =
+                sections[file.path]!.code[lineNumber - 2];
             if (previousCodeLine.code.contains(RegExp(r',\s*$'))) {
               line = previousCodeLine.line;
-              column = previousCodeLine.indent + previousCodeLine.code.length - 1;
+              column =
+                  previousCodeLine.indent + previousCodeLine.code.length - 1;
               errorMessage = 'Unexpected comma at end of sample code.';
               source = previousCodeLine;
             }
@@ -981,8 +1054,7 @@ analyzer:
       exitCode = 0;
     }
     if (exitCode == 0) {
-      if (!silent)
-        print('No analysis errors in samples!');
+      if (!silent) print('No analysis errors in samples!');
       assert(analysisErrors.isEmpty);
     }
     return AnalysisResult(exitCode, analysisErrors);
@@ -994,19 +1066,30 @@ analyzer:
   /// into valid Dart code.
   Section _processBlock(Line line, List<String> block) {
     if (block.isEmpty) {
-      throw SampleCheckerException('$line: Empty ```dart block in sample code.');
+      throw SampleCheckerException(
+          '$line: Empty ```dart block in sample code.');
     }
-    if (block.first.startsWith('new ') || block.first.startsWith(_constructorRegExp)) {
+    if (block.first.startsWith('new ') ||
+        block.first.startsWith(_constructorRegExp)) {
       _expressionId += 1;
-      return Section.surround(line, 'dynamic expression$_expressionId = ', block.toList(), ';');
+      return Section.surround(
+          line, 'dynamic expression$_expressionId = ', block.toList(), ';');
     } else if (block.first.startsWith('await ')) {
       _expressionId += 1;
-      return Section.surround(line, 'Future<void> expression$_expressionId() async { ', block.toList(), ' }');
-    } else if (block.first.startsWith('class ') || block.first.startsWith('enum ')) {
+      return Section.surround(
+          line,
+          'Future<void> expression$_expressionId() async { ',
+          block.toList(),
+          ' }');
+    } else if (block.first.startsWith('class ') ||
+        block.first.startsWith('enum ')) {
       return Section.fromStrings(line, block.toList());
-    } else if ((block.first.startsWith('_') || block.first.startsWith('final ')) && block.first.contains(' = ')) {
+    } else if ((block.first.startsWith('_') ||
+            block.first.startsWith('final ')) &&
+        block.first.contains(' = ')) {
       _expressionId += 1;
-      return Section.surround(line, 'void expression$_expressionId() { ', block.toList(), ' }');
+      return Section.surround(
+          line, 'void expression$_expressionId() { ', block.toList(), ' }');
     } else {
       final List<String> buffer = <String>[];
       int subblocks = 0;
@@ -1017,7 +1100,8 @@ analyzer:
         // treated as a separate code block.
         if (block[index] == '' || block[index] == '// ...') {
           if (subline == null)
-            throw SampleCheckerException('${Line(filename: line.filename, line: line.line + index, indent: line.indent)}: '
+            throw SampleCheckerException(
+                '${Line(filename: line.filename, line: line.line + index, indent: line.indent)}: '
                 'Unexpected blank line or "// ..." line near start of subblock in sample code.');
           subblocks += 1;
           subsections.add(_processBlock(subline, buffer));
@@ -1026,7 +1110,8 @@ analyzer:
           subline = null;
         } else if (block[index].startsWith('// ')) {
           if (buffer.length > 1) // don't include leading comments
-            buffer.add('/${block[index]}'); // so that it doesn't start with "// " and get caught in this again
+            buffer.add(
+                '/${block[index]}'); // so that it doesn't start with "// " and get caught in this again
         } else {
           subline ??= Line(
             code: block[index],
@@ -1052,9 +1137,11 @@ analyzer:
 
 /// A class to represent a line of input code.
 class Line {
-  const Line({this.code = '', required this.filename, this.line = -1, this.indent = 0})
+  const Line(
+      {this.code = '', required this.filename, this.line = -1, this.indent = 0})
       : generated = false;
-  const Line.generated({this.code = '', required this.filename, this.line = -1, this.indent = 0})
+  const Line.generated(
+      {this.code = '', required this.filename, this.line = -1, this.indent = 0})
       : generated = true;
 
   /// The file that this line came from, or the file that the line was generated for, if [generated] is true.
@@ -1079,9 +1166,8 @@ class Line {
 class Section {
   const Section(this.code, {this.dartVersionOverride});
   factory Section.combine(List<Section> sections) {
-    final List<Line> code = sections
-      .expand((Section section) => section.code)
-      .toList();
+    final List<Line> code =
+        sections.expand((Section section) => section.code).toList();
     return Section(code);
   }
   factory Section.fromStrings(Line firstLine, List<String> code) {
@@ -1098,7 +1184,8 @@ class Section {
     }
     return Section(codeLines);
   }
-  factory Section.surround(Line firstLine, String prefix, List<String> code, String postfix) {
+  factory Section.surround(
+      Line firstLine, String prefix, List<String> code, String postfix) {
     assert(prefix != null);
     assert(postfix != null);
     final List<Line> codeLines = <Line>[];
@@ -1123,7 +1210,8 @@ class Section {
   final String? dartVersionOverride;
 
   Section copyWith({String? dartVersionOverride}) {
-    return Section(code, dartVersionOverride: dartVersionOverride ?? this.dartVersionOverride);
+    return Section(code,
+        dartVersionOverride: dartVersionOverride ?? this.dartVersionOverride);
   }
 }
 
@@ -1200,19 +1288,22 @@ Future<void> _runInteractive({
   required String filePath,
   required Directory? dartUiLocation,
 }) async {
-  filePath = path.isAbsolute(filePath) ? filePath : path.join(path.current, filePath);
+  filePath =
+      path.isAbsolute(filePath) ? filePath : path.join(path.current, filePath);
   final File file = File(filePath);
   if (!file.existsSync()) {
     throw 'Path ${file.absolute.path} does not exist ($filePath).';
   }
   if (!path.isWithin(_flutterRoot, file.absolute.path) &&
-      (dartUiLocation == null || !path.isWithin(dartUiLocation.path, file.absolute.path))) {
+      (dartUiLocation == null ||
+          !path.isWithin(dartUiLocation.path, file.absolute.path))) {
     throw 'Path ${file.absolute.path} is not within the flutter root: '
         '$_flutterRoot${dartUiLocation != null ? ' or the dart:ui location: $dartUiLocation' : ''}';
   }
 
   if (tempDir == null) {
-    tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
+    tempDir =
+        Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
     ProcessSignal.sigint.watch().listen((_) {
       print('Deleting temp files...');
       tempDir!.deleteSync(recursive: true);
@@ -1220,14 +1311,18 @@ Future<void> _runInteractive({
     });
     print('Using temp dir ${tempDir.path}');
   }
-  print('Starting up in interactive mode on ${path.relative(filePath, from: _flutterRoot)} ...');
+  print(
+      'Starting up in interactive mode on ${path.relative(filePath, from: _flutterRoot)} ...');
 
   Future<void> analyze(SampleChecker checker, File file) async {
     final Map<String, Section> sections = <String, Section>{};
     final Map<String, Sample> snippets = <String, Sample>{};
-    await checker._extractSamples(<File>[file], silent: true, sectionMap: sections, sampleMap: snippets);
-    final AnalysisResult analysisResult = checker._analyze(checker._tempDirectory, sections, snippets, silent: true);
-    stderr.writeln('\u001B[2J\u001B[H'); // Clears the old results from the terminal.
+    await checker._extractSamples(<File>[file],
+        silent: true, sectionMap: sections, sampleMap: snippets);
+    final AnalysisResult analysisResult = checker
+        ._analyze(checker._tempDirectory, sections, snippets, silent: true);
+    stderr.writeln(
+        '\u001B[2J\u001B[H'); // Clears the old results from the terminal.
     if (analysisResult.errors.isNotEmpty) {
       for (final String filePath in analysisResult.errors.keys) {
         analysisResult.errors[filePath]!.forEach(stderr.writeln);
@@ -1238,8 +1333,9 @@ Future<void> _runInteractive({
     }
   }
 
-  final SampleChecker checker = SampleChecker(flutterPackage, tempDirectory: tempDir)
-    .._createConfigurationFiles(tempDir);
+  final SampleChecker checker =
+      SampleChecker(flutterPackage, tempDirectory: tempDir)
+        .._createConfigurationFiles(tempDir);
   await analyze(checker, file);
 
   print('Type "q" to quit, or "r" to delete temp dir and manually reload.');

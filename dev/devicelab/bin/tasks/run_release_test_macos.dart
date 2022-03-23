@@ -20,7 +20,8 @@ void main() {
     final Device device = await devices.workingDevice;
     // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
     // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
-    final Directory appDir = dir(path.join(flutterDirectory.path, 'examples/hello_world'));
+    final Directory appDir =
+        dir(path.join(flutterDirectory.path, 'examples/hello_world'));
     await inDirectory(appDir, () async {
       final Completer<void> ready = Completer<void>();
       final List<String> stdout = <String>[];
@@ -39,34 +40,34 @@ void main() {
       );
       int? runExitCode;
       run.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('run:stdout: $line');
-          if (
-            !line.startsWith('Building flutter tool...') &&
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        print('run:stdout: $line');
+        if (!line.startsWith('Building flutter tool...') &&
             !line.startsWith('Running "flutter pub get" in ui...') &&
             !line.startsWith('Resolving dependencies...') &&
             // Catch engine piped output from unrelated concurrent Flutter apps
             !line.contains(RegExp(r'[A-Z]\/flutter \([0-9]+\):')) &&
             // Empty lines could be due to the progress spinner breaking up.
-            line.length > 1
-          ) {
-            stdout.add(line);
-          }
-          if (line.contains('Quit (terminate the application on the device).')) {
-            ready.complete();
-          }
-        });
+            line.length > 1) {
+          stdout.add(line);
+        }
+        if (line.contains('Quit (terminate the application on the device).')) {
+          ready.complete();
+        }
+      });
       run.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('run:stderr: $line');
-          stderr.add(line);
-        });
-      unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
-      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        print('run:stderr: $line');
+        stderr.add(line);
+      });
+      unawaited(run.exitCode.then<void>((int exitCode) {
+        runExitCode = exitCode;
+      }));
+      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
       }
@@ -76,13 +77,16 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.startsWith('Launching lib/main.dart on ') && line.endsWith(' in release mode...'),
+        (String line) =>
+            line.startsWith('Launching lib/main.dart on ') &&
+            line.endsWith(' in release mode...'),
         'Launching lib/main.dart on',
       );
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.contains('Quit (terminate the application on the device).'),
+        (String line) =>
+            line.contains('Quit (terminate the application on the device).'),
         'q Quit (terminate the application on the device)',
       );
 
@@ -96,11 +100,8 @@ void main() {
   });
 }
 
-void _findNextMatcherInList(
-  List<String> list,
-  bool Function(String testLine) matcher,
-  String errorMessageExpectedLine
-) {
+void _findNextMatcherInList(List<String> list,
+    bool Function(String testLine) matcher, String errorMessageExpectedLine) {
   final List<String> copyOfListForErrorMessage = List<String>.from(list);
 
   while (list.isNotEmpty) {

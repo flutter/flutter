@@ -36,9 +36,11 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  TestImageProvider.image =
+      await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
-  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+  testWidgets('DecoratedBox handles loading images',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -103,7 +105,8 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
+  testWidgets('Bordered Container insets its child',
+      (WidgetTester tester) async {
     const Key key = Key('outerContainer');
     await tester.pumpWidget(
       Center(
@@ -120,7 +123,8 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
   });
 
-  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('BoxDecoration paints its border correctly',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
     const Key key = Key('Container with BoxDecoration');
@@ -138,30 +142,41 @@ Future<void> main() async {
     const Color black = Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(Border.all()));
-    expect(find.byKey(key), paints..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
+    expect(
+        find.byKey(key),
+        paints
+          ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
 
     await tester.pumpWidget(buildFrame(Border.all(width: 0.0)));
-    expect(find.byKey(key), paints..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
+    expect(
+        find.byKey(key),
+        paints
+          ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
     const Color green = Color(0xFF00FF00);
     const BorderSide greenSide = BorderSide(color: green, width: 10.0);
 
     await tester.pumpWidget(buildFrame(const Border(top: greenSide)));
-    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
+    expect(
+        find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     await tester.pumpWidget(buildFrame(const Border(left: greenSide)));
-    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
+    expect(
+        find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     await tester.pumpWidget(buildFrame(const Border(right: greenSide)));
-    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
+    expect(
+        find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     await tester.pumpWidget(buildFrame(const Border(bottom: greenSide)));
-    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
+    expect(
+        find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     const Color blue = Color(0xFF0000FF);
     const BorderSide blueSide = BorderSide(color: blue, width: 0.0);
 
-    await tester.pumpWidget(buildFrame(const Border(top: blueSide, right: greenSide, bottom: greenSide)));
+    await tester.pumpWidget(buildFrame(
+        const Border(top: blueSide, right: greenSide, bottom: greenSide)));
     expect(
       find.byKey(key),
       paints
@@ -171,7 +186,8 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('BoxDecoration paints its border correctly',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12165
     await tester.pumpWidget(
       Column(
@@ -239,30 +255,37 @@ Future<void> main() async {
         ],
       ),
     );
-    expect(find.byType(Column), paints
-      ..path()
-      ..path()
-      ..path()
-      ..path()
-      ..rect(rect: const Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
-      ..drrect(
-        outer: RRect.fromLTRBAndCorners(
-          350.0, 200.0, 450.0, 300.0,
-          topRight: const Radius.circular(10.0),
-        ),
-        inner: RRect.fromLTRBAndCorners(
-          360.0, 210.0, 440.0, 290.0,
-          topLeft: const Radius.circular(-10.0),
-          bottomRight: const Radius.circular(-10.0),
-          bottomLeft: const Radius.circular(-10.0),
-        ),
-      )
-      ..circle(x: 400.0, y: 350.0, radius: 45.0),
+    expect(
+      find.byType(Column),
+      paints
+        ..path()
+        ..path()
+        ..path()
+        ..path()
+        ..rect(rect: const Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(
+            350.0,
+            200.0,
+            450.0,
+            300.0,
+            topRight: const Radius.circular(10.0),
+          ),
+          inner: RRect.fromLTRBAndCorners(
+            360.0,
+            210.0,
+            440.0,
+            290.0,
+            topLeft: const Radius.circular(-10.0),
+            bottomRight: const Radius.circular(-10.0),
+            bottomLeft: const Radius.circular(-10.0),
+          ),
+        )
+        ..circle(x: 400.0, y: 350.0, radius: 45.0),
     );
   });
 
   testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
-
     late List<int> itemsTapped;
 
     const Key key = Key('Container with BoxDecoration');
@@ -291,15 +314,14 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1]);
 
     await tester.tapAt(const Offset(350.0, 275.0));
-    expect(itemsTapped, <int>[1,1]);
+    expect(itemsTapped, <int>[1, 1]);
 
     await tester.tapAt(const Offset(449.0, 324.0));
-    expect(itemsTapped, <int>[1,1,1]);
-
+    expect(itemsTapped, <int>[1, 1, 1]);
   });
 
-  testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
-
+  testWidgets('Can hit test on BoxDecoration circle',
+      (WidgetTester tester) async {
     late List<int> itemsTapped;
 
     const Key key = Key('Container with BoxDecoration');
@@ -307,8 +329,8 @@ Future<void> main() async {
       itemsTapped = <int>[];
       return Center(
         child: GestureDetector(
-            behavior: HitTestBehavior.deferToChild,
-            child: Container(
+          behavior: HitTestBehavior.deferToChild,
+          child: Container(
             key: key,
             width: 100.0,
             height: 50.0,
@@ -334,11 +356,11 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1]);
 
     await tester.tap(find.byKey(key));
-    expect(itemsTapped, <int>[1,1]);
-
+    expect(itemsTapped, <int>[1, 1]);
   });
 
-  testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration border',
+      (WidgetTester tester) async {
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
@@ -350,7 +372,9 @@ Future<void> main() async {
             key: key,
             width: 100.0,
             height: 50.0,
-            decoration: BoxDecoration(border: border, borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+            decoration: BoxDecoration(
+                border: border,
+                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -373,10 +397,11 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1]);
 
     await tester.tap(find.byKey(key));
-    expect(itemsTapped, <int>[1,1]);
+    expect(itemsTapped, <int>[1, 1]);
   });
 
-  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration not tap outside rounded angles - Top Left',
+      (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -393,7 +418,8 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border,borderRadius: BorderRadius.circular(radius)),
+            decoration: BoxDecoration(
+                border: border, borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -407,8 +433,8 @@ Future<void> main() async {
     expect(itemsTapped, isEmpty);
     // x, y
     const Offset topLeft = Offset.zero;
-    const Offset borderTopTangent = Offset(radius-1, 0.0);
-    const Offset borderLeftTangent = Offset(0.0,radius-1);
+    const Offset borderTopTangent = Offset(radius - 1, 0.0);
+    const Offset borderLeftTangent = Offset(0.0, radius - 1);
     //the borderDiagonalOffset is the backslash line
     //\\######@@@
     //#\\###@####
@@ -417,7 +443,8 @@ Future<void> main() async {
     //@##########
     //@##########
     const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
-    const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset,borderDiagonalOffset);
+    const Offset fartherBorderRadiusPoint =
+        Offset(borderDiagonalOffset, borderDiagonalOffset);
 
     await tester.tapAt(topLeft);
     expect(itemsTapped, isEmpty, reason: 'top left tapped');
@@ -433,10 +460,10 @@ Future<void> main() async {
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1]);
-
   });
 
-  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration tap inside rounded angles - Top Left',
+      (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -453,7 +480,8 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border,borderRadius: BorderRadius.circular(radius)),
+            decoration: BoxDecoration(
+                border: border, borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -467,24 +495,26 @@ Future<void> main() async {
     expect(itemsTapped, isEmpty);
     // x, y
     const Offset borderTopTangent = Offset(radius, 0.0);
-    const Offset borderLeftTangent = Offset(0.0,radius);
+    const Offset borderLeftTangent = Offset(0.0, radius);
     const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
-    const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset+1,borderDiagonalOffset+1);
+    const Offset fartherBorderRadiusPoint =
+        Offset(borderDiagonalOffset + 1, borderDiagonalOffset + 1);
 
     await tester.tapAt(borderTopTangent);
     expect(itemsTapped, <int>[1], reason: 'border Top not tapped');
 
     await tester.tapAt(borderLeftTangent);
-    expect(itemsTapped, <int>[1,1], reason: 'border Left not tapped');
+    expect(itemsTapped, <int>[1, 1], reason: 'border Left not tapped');
 
     await tester.tapAt(fartherBorderRadiusPoint);
-    expect(itemsTapped, <int>[1,1,1], reason: 'border center not tapped');
+    expect(itemsTapped, <int>[1, 1, 1], reason: 'border center not tapped');
 
     await tester.tap(find.byKey(key));
-    expect(itemsTapped, <int>[1,1,1,1]);
+    expect(itemsTapped, <int>[1, 1, 1, 1]);
   });
 
-  testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
+  testWidgets('BoxDecoration rounded angles other corner works',
+      (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 20;
@@ -501,7 +531,8 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border,borderRadius: BorderRadius.circular(radius)),
+            decoration: BoxDecoration(
+                border: border, borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -519,40 +550,41 @@ Future<void> main() async {
 
     // x, y
     const Offset topRightOutside = Offset(width, 0.0);
-    const Offset topRightInside = Offset(width-radius, radius);
+    const Offset topRightInside = Offset(width - radius, radius);
     const Offset bottomRightOutside = Offset(width, height);
-    const Offset bottomRightInside = Offset(width-radius, height-radius);
+    const Offset bottomRightInside = Offset(width - radius, height - radius);
     const Offset bottomLeftOutside = Offset(0, height);
-    const Offset bottomLeftInside = Offset(radius, height-radius);
+    const Offset bottomLeftInside = Offset(radius, height - radius);
     const Offset topLeftOutside = Offset.zero;
     const Offset topLeftInside = Offset(radius, radius);
 
     await tester.tapAt(topRightInside);
-    expect(itemsTapped, <int>[1,1], reason: 'top right not tapped');
+    expect(itemsTapped, <int>[1, 1], reason: 'top right not tapped');
 
     await tester.tapAt(topRightOutside);
-    expect(itemsTapped, <int>[1,1], reason: 'top right tapped');
+    expect(itemsTapped, <int>[1, 1], reason: 'top right tapped');
 
     await tester.tapAt(bottomRightInside);
-    expect(itemsTapped, <int>[1,1,1], reason: 'bottom right not tapped');
+    expect(itemsTapped, <int>[1, 1, 1], reason: 'bottom right not tapped');
 
     await tester.tapAt(bottomRightOutside);
-    expect(itemsTapped, <int>[1,1,1], reason: 'bottom right tapped');
+    expect(itemsTapped, <int>[1, 1, 1], reason: 'bottom right tapped');
 
     await tester.tapAt(bottomLeftInside);
-    expect(itemsTapped, <int>[1,1,1,1], reason: 'bottom left not tapped');
+    expect(itemsTapped, <int>[1, 1, 1, 1], reason: 'bottom left not tapped');
 
     await tester.tapAt(bottomLeftOutside);
-    expect(itemsTapped, <int>[1,1,1,1], reason: 'bottom left tapped');
+    expect(itemsTapped, <int>[1, 1, 1, 1], reason: 'bottom left tapped');
 
     await tester.tapAt(topLeftInside);
-    expect(itemsTapped, <int>[1,1,1,1,1], reason: 'top left not tapped');
+    expect(itemsTapped, <int>[1, 1, 1, 1, 1], reason: 'top left not tapped');
 
     await tester.tapAt(topLeftOutside);
-    expect(itemsTapped, <int>[1,1,1,1,1], reason: 'top left tapped');
+    expect(itemsTapped, <int>[1, 1, 1, 1, 1], reason: 'top left tapped');
   });
 
-  testWidgets("BoxDecoration doesn't crash with BorderRadiusDirectional", (WidgetTester tester) async {
+  testWidgets("BoxDecoration doesn't crash with BorderRadiusDirectional",
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88039
 
     await tester.pumpWidget(

@@ -27,12 +27,14 @@ class BuildWindowsUwpCommand extends BuildSubCommand {
   final String name = 'winuwp';
 
   @override
-  bool get hidden => !featureFlags.isWindowsUwpEnabled || !globals.platform.isWindows;
+  bool get hidden =>
+      !featureFlags.isWindowsUwpEnabled || !globals.platform.isWindows;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.windowsUwp,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      <DevelopmentArtifact>{
+        DevelopmentArtifact.windowsUwp,
+      };
 
   @override
   String get description => 'Build a Windows UWP desktop application.';

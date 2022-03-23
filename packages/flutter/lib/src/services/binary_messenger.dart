@@ -49,7 +49,8 @@ abstract class BinaryMessenger {
   //   'or TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.handlePlatformMessage. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
-  Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
+  Future<void> handlePlatformMessage(String channel, ByteData? data,
+      ui.PlatformMessageResponseCallback? callback);
 
   /// Send a binary message to the platform plugins on the given channel.
   ///

@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
-  test('ContainerLayer.findAllAnnotations returns all results from its children', () {
+  test(
+      'ContainerLayer.findAllAnnotations returns all results from its children',
+      () {
     final Layer root = _Layers(
       ContainerLayer(),
       children: <Object>[
@@ -43,7 +45,9 @@ void main() {
     expect(result, 3);
   });
 
-  test('ContainerLayer.findAllAnnotations returns empty result when finding nothing', () {
+  test(
+      'ContainerLayer.findAllAnnotations returns empty result when finding nothing',
+      () {
     final Layer root = _Layers(
       ContainerLayer(),
       children: <Object>[
@@ -53,7 +57,8 @@ void main() {
       ],
     ).build();
 
-    expect(root.findAllAnnotations<double>(Offset.zero).entries.isEmpty, isTrue);
+    expect(
+        root.findAllAnnotations<double>(Offset.zero).entries.isEmpty, isTrue);
   });
 
   test('ContainerLayer.find returns null when finding nothing', () {
@@ -88,7 +93,8 @@ void main() {
     );
   });
 
-  test("ContainerLayer.findAllAnnotations returns children's opacity (true)", () {
+  test("ContainerLayer.findAllAnnotations returns children's opacity (true)",
+      () {
     final Layer root = _withBackgroundAnnotation(
       1000,
       _Layers(
@@ -107,7 +113,8 @@ void main() {
     );
   });
 
-  test("ContainerLayer.findAllAnnotations returns children's opacity (false)", () {
+  test("ContainerLayer.findAllAnnotations returns children's opacity (false)",
+      () {
     final Layer root = _withBackgroundAnnotation(
       1000,
       _Layers(
@@ -122,12 +129,15 @@ void main() {
       root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset.zero),
-        const AnnotationEntry<int>(annotation: 1000, localPosition: Offset.zero),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: Offset.zero),
       ]),
     );
   });
 
-  test('ContainerLayer.findAllAnnotations returns false as opacity when finding nothing', () {
+  test(
+      'ContainerLayer.findAllAnnotations returns false as opacity when finding nothing',
+      () {
     final Layer root = _withBackgroundAnnotation(
       1000,
       _Layers(
@@ -141,7 +151,8 @@ void main() {
     expect(
       root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: Offset.zero),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: Offset.zero),
       ]),
     );
   });
@@ -169,7 +180,8 @@ void main() {
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(5, 5)),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: Offset(5, 5)),
       ]),
     );
   });
@@ -196,13 +208,15 @@ void main() {
     expect(
       root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
@@ -236,13 +250,15 @@ void main() {
     expect(
       root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
@@ -281,13 +297,15 @@ void main() {
     expect(
       root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
@@ -295,7 +313,8 @@ void main() {
   test('TransformLayer.findAllAnnotations respects transform', () {
     // Matrix `transform` enlarges the target by (2x, 4x), then shift it by
     // (10, 20).
-    final Matrix4 transform = Matrix4.diagonal3Values(2, 4, 1)..setTranslation(Vector3(10, 20, 0));
+    final Matrix4 transform = Matrix4.diagonal3Values(2, 4, 1)
+      ..setTranslation(Vector3(10, 20, 0));
     // The original region is Offset(10, 10) & Size(10, 10)
     // The transformed region is Offset(30, 60) & Size(20, 40)
     const Offset insidePosition = Offset(40, 80);
@@ -319,18 +338,22 @@ void main() {
     expect(
       root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1, localPosition: Offset(15, 15)),
+        const AnnotationEntry<int>(
+            annotation: 1, localPosition: Offset(15, 15)),
       ]),
     );
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
 
-  test('TransformLayer.findAllAnnotations correctly transforms with perspective', () {
+  test(
+      'TransformLayer.findAllAnnotations correctly transforms with perspective',
+      () {
     // Test the 4 corners of a transformed annotated region.
     final Matrix4 transform = Matrix4.identity()
       ..setEntry(3, 2, 0.005)
@@ -361,7 +384,8 @@ void main() {
         root.findAllAnnotations<int>(globalPosition).entries.toList(),
         _equalToAnnotationResult<int>(
           <AnnotationEntry<int>>[
-            AnnotationEntry<int>(annotation: value, localPosition: localPosition),
+            AnnotationEntry<int>(
+                annotation: value, localPosition: localPosition),
           ],
           maxCoordinateRelativeDiff: 0.005,
         ),
@@ -413,7 +437,8 @@ void main() {
     );
   });
 
-  test('TransformLayer.findAllAnnotations skips when transform is irreversible', () {
+  test('TransformLayer.findAllAnnotations skips when transform is irreversible',
+      () {
     final Matrix4 transform = Matrix4.diagonal3Values(1, 0, 1);
 
     final Layer root = _withBackgroundAnnotation(
@@ -429,7 +454,8 @@ void main() {
     expect(
       root.findAllAnnotations<int>(Offset.zero).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: Offset.zero),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: Offset.zero),
       ]),
     );
   });
@@ -473,13 +499,15 @@ void main() {
     expect(
       root.findAllAnnotations<int>(insidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
@@ -510,7 +538,8 @@ void main() {
     expect(
       root.findAllAnnotations<int>(outsidePosition).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
+        const AnnotationEntry<int>(
+            annotation: 1000, localPosition: outsidePosition),
       ]),
     );
   });
@@ -568,7 +597,8 @@ void main() {
     },
   );
 
-  test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false', () {
+  test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false',
+      () {
     const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
@@ -727,7 +757,8 @@ void main() {
         root.findAllAnnotations<int>(position).entries.toList(),
         _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
           const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1, localPosition: Offset(10, 10)),
+          const AnnotationEntry<int>(
+              annotation: 1, localPosition: Offset(10, 10)),
           const AnnotationEntry<int>(annotation: 1000, localPosition: position),
         ]),
       );
@@ -803,7 +834,8 @@ class _Layers {
         } else if (child is _Layers) {
           layer = child.build();
         } else {
-          assert(false, 'Element of _Layers.children must be instance of Layer or _Layers');
+          assert(false,
+              'Element of _Layers.children must be instance of Layer or _Layers');
         }
         root.append(layer);
       }
@@ -858,13 +890,12 @@ class _TestAnnotatedLayer extends Layer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (S != int)
-      return false;
-    if (size != null && !(offset & size!).contains(localPosition))
-      return false;
+    if (S != int) return false;
+    if (size != null && !(offset & size!).contains(localPosition)) return false;
     final Object untypedValue = value;
     final S typedValue = untypedValue as S;
-    result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));
+    result.add(AnnotationEntry<S>(
+        annotation: typedValue, localPosition: localPosition));
     return opaque;
   }
 }
@@ -882,9 +913,11 @@ Matcher _equalToAnnotationResult<T>(
   return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
     list,
     (AnnotationEntry<int> a, AnnotationEntry<int> b) {
-      return a.annotation == b.annotation
-          && _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff)
-          && _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
+      return a.annotation == b.annotation &&
+          _almostEqual(a.localPosition.dx, b.localPosition.dx,
+              maxCoordinateRelativeDiff) &&
+          _almostEqual(a.localPosition.dy, b.localPosition.dy,
+              maxCoordinateRelativeDiff);
     },
     'equal to',
   );

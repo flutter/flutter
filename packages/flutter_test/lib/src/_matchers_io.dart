@@ -37,7 +37,8 @@ class MatchesGoldenFile extends AsyncMatcher {
   const MatchesGoldenFile(this.key, this.version);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version)
+      : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
@@ -61,7 +62,8 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(buffer, testNameUri);
+        final bool success =
+            await goldenFileComparator.compare(buffer, testNameUri);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
@@ -81,24 +83,28 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
       imageFuture = captureImage(elements.single);
     } else {
-      throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
+      throw AssertionError(
+          'must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding =
+        TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {
         throw AssertionError('Future<Image> completed to null');
       }
-      final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
-        return 'could not encode screenshot.';
+      final ByteData? bytes =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      if (bytes == null) return 'could not encode screenshot.';
       if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
+        await goldenFileComparator.update(
+            testNameUri, bytes.buffer.asUint8List());
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+        final bool success = await goldenFileComparator.compare(
+            bytes.buffer.asUint8List(), testNameUri);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
@@ -109,6 +115,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   @override
   Description describe(Description description) {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
-    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
+    return description.add(
+        'one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }

@@ -62,16 +62,17 @@ void main() {
 
   double _textOpacity(WidgetTester tester, String textValue) {
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.text(textValue),
-        matching: find.byType(FadeTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.text(textValue),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
     );
     return opacityWidget.opacity.value;
   }
 
   group('InputDatePickerFormField', () {
-
     testWidgets('Initial date is the default', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
@@ -86,7 +87,8 @@ void main() {
       expect(inputDate, equals(initialDate));
     });
 
-    testWidgets('Changing initial date is reflected in text value', (WidgetTester tester) async {
+    testWidgets('Changing initial date is reflected in text value',
+        (WidgetTester tester) async {
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
       final DateTime updatedInitialDate = DateTime(2016, DateTime.february, 23);
       await tester.pumpWidget(_inputDatePickerField(
@@ -114,7 +116,8 @@ void main() {
       expect(inputDate, equals(DateTime(2016, DateTime.february, 21)));
     });
 
-    testWidgets('Invalid text entry shows errorFormat text', (WidgetTester tester) async {
+    testWidgets('Invalid text entry shows errorFormat text',
+        (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(_inputDatePickerField(
@@ -141,7 +144,9 @@ void main() {
       expect(find.text('That is not a date.'), findsOneWidget);
     });
 
-    testWidgets('Valid text entry, but date outside first or last date shows bounds shows errorInvalid text', (WidgetTester tester) async {
+    testWidgets(
+        'Valid text entry, but date outside first or last date shows bounds shows errorInvalid text',
+        (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(_inputDatePickerField(
@@ -176,7 +181,9 @@ void main() {
       expect(find.text('Not in given range.'), findsOneWidget);
     });
 
-    testWidgets('selectableDatePredicate will be used to show errorInvalid if date is not selectable', (WidgetTester tester) async {
+    testWidgets(
+        'selectableDatePredicate will be used to show errorInvalid if date is not selectable',
+        (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(_inputDatePickerField(
@@ -202,7 +209,8 @@ void main() {
       expect(find.text('Out of range.'), findsNothing);
     });
 
-    testWidgets('Empty field shows hint text when focused', (WidgetTester tester) async {
+    testWidgets('Empty field shows hint text when focused',
+        (WidgetTester tester) async {
       await tester.pumpWidget(_inputDatePickerField());
       // Focus on it
       await tester.tap(find.byType(TextField));
@@ -216,7 +224,8 @@ void main() {
       expect(_textOpacity(tester, 'mm/dd/yyyy'), equals(1.0));
 
       // Change to a different hint text
-      await tester.pumpWidget(_inputDatePickerField(fieldHintText: 'Enter some date'));
+      await tester
+          .pumpWidget(_inputDatePickerField(fieldHintText: 'Enter some date'));
       await tester.pumpAndSettle();
       expect(find.text('mm/dd/yyyy'), findsNothing);
       expect(_textOpacity(tester, 'Enter some date'), equals(1.0));
@@ -243,27 +252,31 @@ void main() {
 
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform, mockClipboard.handleMethodCall);
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
-      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+      addTearDown(() => tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null));
 
       await tester.pumpWidget(_inputDatePickerField(autofocus: true));
       await tester.pumpAndSettle();
 
-      expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
-        label: 'Enter Date\nmm/dd/yyyy',
-        isTextField: true,
-        isFocused: true,
-        value: '01/15/2016',
-        hasTapAction: true,
-        hasSetTextAction: true,
-        hasSetSelectionAction: true,
-        hasCopyAction: true,
-        hasCutAction: true,
-        hasPasteAction: true,
-        hasMoveCursorBackwardByCharacterAction: true,
-        hasMoveCursorBackwardByWordAction: true,
-      ));
+      expect(
+          tester.getSemantics(find.byType(EditableText)),
+          matchesSemantics(
+            label: 'Enter Date\nmm/dd/yyyy',
+            isTextField: true,
+            isFocused: true,
+            value: '01/15/2016',
+            hasTapAction: true,
+            hasSetTextAction: true,
+            hasSetSelectionAction: true,
+            hasCopyAction: true,
+            hasCutAction: true,
+            hasPasteAction: true,
+            hasMoveCursorBackwardByCharacterAction: true,
+            hasMoveCursorBackwardByWordAction: true,
+          ));
     });
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
@@ -280,16 +293,21 @@ void main() {
       // Get the border and container color from the painter of the _BorderContainer
       // (this was cribbed from input_decorator_test.dart).
       final CustomPaint customPaint = tester.widget(find.descendant(
-        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+        of: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_BorderContainer'),
         matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
       ));
-      final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+      final dynamic /*_InputBorderPainter*/ inputBorderPainter =
+          customPaint.foregroundPainter;
       // ignore: avoid_dynamic_calls
-      final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+      final dynamic /*_InputBorderTween*/ inputBorderTween =
+          inputBorderPainter.border;
       // ignore: avoid_dynamic_calls
-      final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      final Animation<double> animation =
+          inputBorderPainter.borderAnimation as Animation<double>;
       // ignore: avoid_dynamic_calls
-      final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      final InputBorder actualBorder =
+          inputBorderTween.evaluate(animation) as InputBorder;
       // ignore: avoid_dynamic_calls
       final Color containerColor = inputBorderPainter.blendedColor as Color;
 
@@ -299,6 +317,5 @@ void main() {
       // It shouldn't be filled, so the color should be transparent
       expect(containerColor, equals(Colors.transparent));
     });
-
   });
 }

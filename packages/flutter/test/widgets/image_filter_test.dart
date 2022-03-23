@@ -48,10 +48,10 @@ void main() {
                 title: const Text('Matrix ImageFilter Test'),
               ),
               body: const Center(
-                child:Text('Hooray!'),
+                child: Text('Hooray!'),
               ),
               floatingActionButton: FloatingActionButton(
-                onPressed: () { },
+                onPressed: () {},
                 tooltip: 'Increment',
                 child: const Icon(Icons.add),
               ),
@@ -79,8 +79,10 @@ void main() {
     }
 
     await pumpWithSigma(5.0);
-    final RenderObject renderObject = tester.firstRenderObject(find.byType(ImageFiltered));
-    final ImageFilterLayer originalLayer = renderObject.debugLayer! as ImageFilterLayer;
+    final RenderObject renderObject =
+        tester.firstRenderObject(find.byType(ImageFiltered));
+    final ImageFilterLayer originalLayer =
+        renderObject.debugLayer! as ImageFilterLayer;
 
     // Change blur sigma to force a repaint.
     await pumpWithSigma(10.0);

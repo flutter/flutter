@@ -45,8 +45,11 @@ void main() {
         buildDirectory.createSync(recursive: true);
       });
 
-      testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS', () async {
-        final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
+      testUsingContext(
+          '$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS',
+          () async {
+        final FlutterProject projectUnderTest =
+            setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
         xcodeProjectInterpreter.version = Version(1000, 0, 0);
@@ -58,10 +61,14 @@ void main() {
 
         expect(projectUnderTest.ios.ephemeralDirectory, isNot(exists));
         expect(projectUnderTest.ios.ephemeralModuleDirectory, isNot(exists));
-        expect(projectUnderTest.ios.generatedXcodePropertiesFile, isNot(exists));
-        expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript, isNot(exists));
-        expect(projectUnderTest.ios.deprecatedCompiledDartFramework, isNot(exists));
-        expect(projectUnderTest.ios.deprecatedProjectFlutterFramework, isNot(exists));
+        expect(
+            projectUnderTest.ios.generatedXcodePropertiesFile, isNot(exists));
+        expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript,
+            isNot(exists));
+        expect(projectUnderTest.ios.deprecatedCompiledDartFramework,
+            isNot(exists));
+        expect(projectUnderTest.ios.deprecatedProjectFlutterFramework,
+            isNot(exists));
         expect(projectUnderTest.ios.flutterPodspec, isNot(exists));
 
         expect(projectUnderTest.linux.ephemeralDirectory, isNot(exists));
@@ -72,7 +79,7 @@ void main() {
         expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
         expect(projectUnderTest.packagesFile, isNot(exists));
 
-      expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+        expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
         ]);
@@ -83,7 +90,8 @@ void main() {
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
+      testUsingContext('$CleanCommand cleans Xcode verbosely for iOS and macOS',
+          () async {
         setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
@@ -114,7 +122,8 @@ void main() {
         fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
       });
 
-      testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
+      testUsingContext(
+          '$CleanCommand prints a helpful error message on Windows', () async {
         xcodeProjectInterpreter.isInstalled = false;
 
         final File file = fileSystem.file('file')..createSync();
@@ -126,7 +135,8 @@ void main() {
 
         final CleanCommand command = CleanCommand();
         command.deleteFile(file);
-        expect(testLogger.errorText, contains('A program may still be using a file'));
+        expect(testLogger.errorText,
+            contains('A program may still be using a file'));
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
         Xcode: () => xcode,
@@ -134,19 +144,24 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('$CleanCommand handles missing delete permissions', () async {
+      testUsingContext('$CleanCommand handles missing delete permissions',
+          () async {
         final FileExceptionHandler handler = FileExceptionHandler();
-        final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-        final File throwingFile = fileSystem.file('bad')
-          ..createSync();
-        handler.addError(throwingFile, FileSystemOp.delete, const FileSystemException('OS error: Access Denied'));
+        final FileSystem fileSystem =
+            MemoryFileSystem.test(opHandle: handler.opHandle);
+        final File throwingFile = fileSystem.file('bad')..createSync();
+        handler.addError(throwingFile, FileSystemOp.delete,
+            const FileSystemException('OS error: Access Denied'));
 
         xcodeProjectInterpreter.isInstalled = false;
 
         final CleanCommand command = CleanCommand();
         command.deleteFile(throwingFile);
 
-        expect(testLogger.errorText, contains('Failed to remove bad. A program may still be using a file in the directory or the directory itself'));
+        expect(
+            testLogger.errorText,
+            contains(
+                'Failed to remove bad. A program may still be using a file in the directory or the directory itself'));
         expect(throwingFile, exists);
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
@@ -158,7 +173,8 @@ void main() {
 
 FlutterProject setupProjectUnderTest(Directory currentDirectory) {
   // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
-  final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
+  final FlutterProject projectUnderTest =
+      FlutterProject.fromDirectory(currentDirectory);
   projectUnderTest.ios.xcodeWorkspace.createSync(recursive: true);
   projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
@@ -169,9 +185,12 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory) {
   projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
   projectUnderTest.ios.ephemeralModuleDirectory.createSync(recursive: true);
   projectUnderTest.ios.generatedXcodePropertiesFile.createSync(recursive: true);
-  projectUnderTest.ios.generatedEnvironmentVariableExportScript.createSync(recursive: true);
-  projectUnderTest.ios.deprecatedCompiledDartFramework.createSync(recursive: true);
-  projectUnderTest.ios.deprecatedProjectFlutterFramework.createSync(recursive: true);
+  projectUnderTest.ios.generatedEnvironmentVariableExportScript
+      .createSync(recursive: true);
+  projectUnderTest.ios.deprecatedCompiledDartFramework
+      .createSync(recursive: true);
+  projectUnderTest.ios.deprecatedProjectFlutterFramework
+      .createSync(recursive: true);
   projectUnderTest.ios.flutterPodspec.createSync(recursive: true);
 
   projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
@@ -183,7 +202,8 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory) {
   return projectUnderTest;
 }
 
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+class FakeXcodeProjectInterpreter extends Fake
+    implements XcodeProjectInterpreter {
   @override
   bool isInstalled = true;
 
@@ -191,14 +211,17 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Version version = Version(0, 0, 0);
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
-    return XcodeProjectInfo(null, null, <String>['Runner'], BufferLogger.test());
+  Future<XcodeProjectInfo> getInfo(String projectPath,
+      {String projectFilename}) async {
+    return XcodeProjectInfo(
+        null, null, <String>['Runner'], BufferLogger.test());
   }
 
   final List<CleanWorkspaceCall> workspaces = <CleanWorkspaceCall>[];
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme,
+      {bool verbose = false}) async {
     workspaces.add(CleanWorkspaceCall(workspacePath, scheme, verbose));
     return;
   }
@@ -213,10 +236,11 @@ class CleanWorkspaceCall {
   final bool verbose;
 
   @override
-  bool operator ==(Object other) => other is CleanWorkspaceCall &&
-    workspacePath == other.workspacePath &&
-    scheme == other.scheme &&
-    verbose == other.verbose;
+  bool operator ==(Object other) =>
+      other is CleanWorkspaceCall &&
+      workspacePath == other.workspacePath &&
+      scheme == other.scheme &&
+      verbose == other.verbose;
 
   @override
   int get hashCode => Object.hash(workspacePath, scheme, verbose);

@@ -59,23 +59,29 @@ void main() {
     );
     expect((b1 + b2).dimensions, const EdgeInsets.all(2.0));
     const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
-    expect((Canvas canvas) => (b1 + b2).paint(canvas, rect), paints
-      ..rect(rect: rect.deflate(0.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) => (b1 + b2).paint(canvas, rect),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b1.top.color),
     );
     expect((b1 + b2 + b1).dimensions, const EdgeInsets.all(3.0));
-    expect((Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect), paints
-      ..rect(rect: rect.deflate(0.5), color: b1.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(2.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b1.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(2.5), color: b1.top.color),
     );
   });
 
   test('Compound borders', () {
     const BorderSide side1 = BorderSide(color: Color(0xFF00FF00));
     const BorderSide side2 = BorderSide(color: Color(0xFF0000FF));
-    const BorderDirectional b1 = BorderDirectional(top: side1, start: side1, end: side1, bottom: side1);
-    const BorderDirectional b2 = BorderDirectional(top: side2, start: side2, end: side2, bottom: side2);
+    const BorderDirectional b1 =
+        BorderDirectional(top: side1, start: side1, end: side1, bottom: side1);
+    const BorderDirectional b2 =
+        BorderDirectional(top: side2, start: side2, end: side2, bottom: side2);
     expect(
       (b1 + b2).toString(),
       'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
@@ -122,17 +128,25 @@ void main() {
       'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
       'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))',
     );
-    expect((b1 + b2).dimensions, const EdgeInsetsDirectional.fromSTEB(2.0, 2.0, 2.0, 2.0));
+    expect((b1 + b2).dimensions,
+        const EdgeInsetsDirectional.fromSTEB(2.0, 2.0, 2.0, 2.0));
     const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
-    expect((Canvas canvas) => (b1 + b2).paint(canvas, rect, textDirection: TextDirection.rtl), paints
-      ..rect(rect: rect.deflate(0.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) =>
+          (b1 + b2).paint(canvas, rect, textDirection: TextDirection.rtl),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b1.top.color),
     );
-    expect((b1 + b2 + b1).dimensions, const EdgeInsetsDirectional.fromSTEB(3.0, 3.0, 3.0, 3.0));
-    expect((Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect, textDirection: TextDirection.rtl), paints
-      ..rect(rect: rect.deflate(0.5), color: b1.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(2.5), color: b1.top.color),
+    expect((b1 + b2 + b1).dimensions,
+        const EdgeInsetsDirectional.fromSTEB(3.0, 3.0, 3.0, 3.0));
+    expect(
+      (Canvas canvas) =>
+          (b1 + b2 + b1).paint(canvas, rect, textDirection: TextDirection.rtl),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b1.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(2.5), color: b1.top.color),
     );
   });
 }

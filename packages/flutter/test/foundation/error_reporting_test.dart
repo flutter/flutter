@@ -45,7 +45,7 @@ Future<void> main() async {
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String? message, { int? wrapWidth }) {
+    debugPrint = (String? message, {int? wrapWidth}) {
       console.add(message);
     };
   });
@@ -67,24 +67,27 @@ Future<void> main() async {
         yield ErrorHint('line 2 of extra information\n');
       },
     ));
-    expect(console.join('\n'), matches(
-      r'^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
-      r'The following assertion was thrown testing the error handling logic:\n'
-      r'Message goes here\.\n'
-      r"'[^']+flutter/test/foundation/error_reporting_test\.dart':\n"
-      r"Failed assertion: line [0-9]+ pos [0-9]+: 'false'\n"
-      r'\n'
-      r'When the exception was thrown, this was the stack:\n'
-      r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-    ));
+    expect(
+        console.join('\n'),
+        matches(
+          r'^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
+          r'The following assertion was thrown testing the error handling logic:\n'
+          r'Message goes here\.\n'
+          r"'[^']+flutter/test/foundation/error_reporting_test\.dart':\n"
+          r"Failed assertion: line [0-9]+ pos [0-9]+: 'false'\n"
+          r'\n'
+          r'When the exception was thrown, this was the stack:\n'
+          r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+          r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+          r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+          r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+        ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: getAssertionErrorWithMessage(),
     ));
-    expect(console.join('\n'), 'Another exception was thrown: Message goes here.');
+    expect(
+        console.join('\n'), 'Another exception was thrown: Message goes here.');
     console.clear();
     FlutterError.resetErrorCount();
   });
@@ -94,18 +97,20 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: getAssertionErrorWithLongMessage(),
     ));
-    expect(console.join('\n'), matches(
-      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      r'The following assertion was thrown:\n'
-      r'word word word word word word word word word word word word word word word word word word word word\n'
-      r'word word word word word word word word word word word word word word word word word word word word\n'
-      r'word word word word word word word word word word word word word word word word word word word word\n'
-      r'word word word word word word word word word word word word word word word word word word word word\n'
-      r'word word word word word word word word word word word word word word word word word word word word\n'
-      r"'[^']+flutter/test/foundation/error_reporting_test\.dart':\n"
-      r"Failed assertion: line [0-9]+ pos [0-9]+: 'false'\n"
-      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
-    ));
+    expect(
+        console.join('\n'),
+        matches(
+          r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+          r'The following assertion was thrown:\n'
+          r'word word word word word word word word word word word word word word word word word word word word\n'
+          r'word word word word word word word word word word word word word word word word word word word word\n'
+          r'word word word word word word word word word word word word word word word word word word word word\n'
+          r'word word word word word word word word word word word word word word word word word word word word\n'
+          r'word word word word word word word word word word word word word word word word word word word word\n'
+          r"'[^']+flutter/test/foundation/error_reporting_test\.dart':\n"
+          r"Failed assertion: line [0-9]+ pos [0-9]+: 'false'\n"
+          r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
+        ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: getAssertionErrorWithLongMessage(),
@@ -132,43 +137,52 @@ Future<void> main() async {
       context: ErrorDescription('testing the error handling logic'),
       informationCollector: () sync* {
         yield ErrorDescription('line 1 of extra information');
-        yield ErrorDescription('line 2 of extra information\n'); // the trailing newlines here are intentional
+        yield ErrorDescription(
+            'line 2 of extra information\n'); // the trailing newlines here are intentional
       },
     ));
-    expect(console.join('\n'), matches(
-      r'^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
-      r'The following assertion was thrown testing the error handling logic:\n'
-      r"'[^']+flutter/test/foundation/error_reporting_test\.dart':[\n ]"
-      r"Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]'false':[\n ]is[\n ]not[\n ]true\.\n"
-      r'\n'
-      r'When the exception was thrown, this was the stack:\n'
-      r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-    ));
+    expect(
+        console.join('\n'),
+        matches(
+          r'^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
+          r'The following assertion was thrown testing the error handling logic:\n'
+          r"'[^']+flutter/test/foundation/error_reporting_test\.dart':[\n ]"
+          r"Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]'false':[\n ]is[\n ]not[\n ]true\.\n"
+          r'\n'
+          r'When the exception was thrown, this was the stack:\n'
+          r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+          r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+          r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+          r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+        ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: getAssertionErrorWithoutMessage(),
     ));
-    expect(console.join('\n'), matches(r"Another exception was thrown: '[^']+flutter/test/foundation/error_reporting_test\.dart': Failed assertion: line [0-9]+ pos [0-9]+: 'false': is not true\."));
+    expect(
+        console.join('\n'),
+        matches(
+            r"Another exception was thrown: '[^']+flutter/test/foundation/error_reporting_test\.dart': Failed assertion: line [0-9]+ pos [0-9]+: 'false': is not true\."));
     console.clear();
     FlutterError.resetErrorCount();
   });
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final Object exception = NoSuchMethodError.withInvocation(5, Invocation.method(#foo, <dynamic>[2, 4]));
+    final Object exception = NoSuchMethodError.withInvocation(
+        5, Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
     ));
-    expect(console.join('\n'), matches(
-      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      r'The following NoSuchMethodError was thrown:\n'
-      r'int has no foo method accepting arguments \(_, _\)\n'
-      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
-    ));
+    expect(
+        console.join('\n'),
+        matches(
+          r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+          r'The following NoSuchMethodError was thrown:\n'
+          r'int has no foo method accepting arguments \(_, _\)\n'
+          r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
+        ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
@@ -186,12 +200,14 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
       exception: 'hello',
     ));
-    expect(console.join('\n'), matches(
-      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      r'The following message was thrown:\n'
-      r'hello\n'
-      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
-    ));
+    expect(
+        console.join('\n'),
+        matches(
+          r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+          r'The following message was thrown:\n'
+          r'hello\n'
+          r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
+        ));
     console.clear();
     FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
       exception: 'hello again',
@@ -208,14 +224,16 @@ Future<void> main() async {
       exception: 'exception - empty stack',
       stack: StackTrace.fromString(''),
     ));
-    expect(console.join('\n'), matches(
-      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      r'The following message was thrown:\n'
-      r'exception - empty stack\n'
-      r'\n'
-      r'When the exception was thrown, this was the stack\n'
-      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
-    ));
+    expect(
+        console.join('\n'),
+        matches(
+          r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+          r'The following message was thrown:\n'
+          r'exception - empty stack\n'
+          r'\n'
+          r'When the exception was thrown, this was the stack\n'
+          r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
+        ));
     console.clear();
     FlutterError.resetErrorCount();
   });
@@ -240,7 +258,10 @@ Future<void> main() async {
       stack: StackTrace.fromString(stackString),
     ));
     final String x = console.join('\n');
-    expect(x, startsWith('''
+    expect(
+        x,
+        startsWith(
+          '''
 ══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════
 The following assertion was thrown:
 Assertion failed: "Test assertion"
@@ -254,7 +275,7 @@ When the exception was thrown, this was the stack:
 #7      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
 #8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
 #9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)''',
-    ));
+        ));
     console.clear();
     FlutterError.resetErrorCount();
   });

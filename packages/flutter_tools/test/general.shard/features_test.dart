@@ -55,9 +55,12 @@ void main() {
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
-      const FeatureChannelSetting masterSetting = FeatureChannelSetting(available: true);
-      const FeatureChannelSetting betaSetting = FeatureChannelSetting(available: true);
-      const FeatureChannelSetting stableSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting masterSetting =
+          FeatureChannelSetting(available: true);
+      const FeatureChannelSetting betaSetting =
+          FeatureChannelSetting(available: true);
+      const FeatureChannelSetting stableSetting =
+          FeatureChannelSetting(available: true);
       const Feature feature = Feature(
         name: 'example',
         master: masterSetting,
@@ -82,29 +85,33 @@ void main() {
     });
 
     testWithoutContext('Flutter web help string', () {
-      expect(flutterWebFeature.generateHelpMessage(),
-      'Enable or disable Flutter for web. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      expect(
+          flutterWebFeature.generateHelpMessage(),
+          'Enable or disable Flutter for web. '
+          'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on macOS. '
-      'This setting will take effect on the master, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      expect(
+          flutterMacOSDesktopFeature.generateHelpMessage(),
+          'Enable or disable beta-quality support for desktop on macOS. '
+          'This setting will take effect on the master, beta, and stable channels. '
+          'Newer beta versions are available on the beta channel.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on Linux. '
-      'This setting will take effect on the master, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      expect(
+          flutterLinuxDesktopFeature.generateHelpMessage(),
+          'Enable or disable beta-quality support for desktop on Linux. '
+          'This setting will take effect on the master, beta, and stable channels. '
+          'Newer beta versions are available on the beta channel.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Windows. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      expect(
+          flutterWindowsDesktopFeature.generateHelpMessage(),
+          'Enable or disable support for desktop on Windows. '
+          'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('help string on multiple channels', () {
@@ -116,7 +123,9 @@ void main() {
         configSetting: 'foo',
       );
 
-      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example. '
+      expect(
+          testWithoutContextFeature.generateHelpMessage(),
+          'Enable or disable example. '
           'This setting will take effect on the master, beta, and stable channels.');
     });
 
@@ -135,7 +144,8 @@ void main() {
       expect(featureFlags.isWebEnabled, true);
     });
 
-    testWithoutContext('Flutter web enabled with environment variable on master', () {
+    testWithoutContext(
+        'Flutter web enabled with environment variable on master', () {
       final FeatureFlags featureFlags = createFlags('master');
       platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
@@ -155,8 +165,9 @@ void main() {
       expect(featureFlags.isWebEnabled, true);
     });
 
-    testWithoutContext('Flutter web not enabled with environment variable on beta', () {
-     final FeatureFlags featureFlags = createFlags('beta');
+    testWithoutContext(
+        'Flutter web not enabled with environment variable on beta', () {
+      final FeatureFlags featureFlags = createFlags('beta');
       platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
@@ -176,7 +187,8 @@ void main() {
       expect(featureFlags.isWebEnabled, true);
     });
 
-    testWithoutContext('Flutter web not enabled with environment variable on stable', () {
+    testWithoutContext(
+        'Flutter web not enabled with environment variable on stable', () {
       final FeatureFlags featureFlags = createFlags('stable');
       platform.environment = <String, String>{'FLUTTER_WEB': 'enabled'};
 
@@ -191,14 +203,17 @@ void main() {
       expect(featureFlags.isMacOSEnabled, false);
     });
 
-    testWithoutContext('Flutter macos desktop enabled with config on master', () {
+    testWithoutContext('Flutter macos desktop enabled with config on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-macos-desktop', true);
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
-    testWithoutContext('Flutter macos desktop enabled with environment variable on master', () {
+    testWithoutContext(
+        'Flutter macos desktop enabled with environment variable on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
       platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
@@ -218,7 +233,8 @@ void main() {
       expect(featureFlags.isMacOSEnabled, true);
     });
 
-    testWithoutContext('Flutter macos desktop enabled with environment variable on beta', () {
+    testWithoutContext(
+        'Flutter macos desktop enabled with environment variable on beta', () {
       final FeatureFlags featureFlags = createFlags('beta');
       platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
@@ -231,14 +247,17 @@ void main() {
       expect(featureFlags.isMacOSEnabled, false);
     });
 
-    testWithoutContext('Flutter macos desktop enabled with config on stable', () {
+    testWithoutContext('Flutter macos desktop enabled with config on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-macos-desktop', true);
 
       expect(featureFlags.isMacOSEnabled, true);
     });
 
-    testWithoutContext('Flutter macos desktop enabled with environment variable on stable', () {
+    testWithoutContext(
+        'Flutter macos desktop enabled with environment variable on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
       platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
 
@@ -252,14 +271,17 @@ void main() {
       expect(featureFlags.isLinuxEnabled, false);
     });
 
-    testWithoutContext('Flutter linux desktop enabled with config on master', () {
+    testWithoutContext('Flutter linux desktop enabled with config on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-linux-desktop', true);
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
-    testWithoutContext('Flutter linux desktop enabled with environment variable on master', () {
+    testWithoutContext(
+        'Flutter linux desktop enabled with environment variable on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
       platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
@@ -279,7 +301,8 @@ void main() {
       expect(featureFlags.isLinuxEnabled, true);
     });
 
-    testWithoutContext('Flutter linux desktop enabled with environment variable on beta', () {
+    testWithoutContext(
+        'Flutter linux desktop enabled with environment variable on beta', () {
       final FeatureFlags featureFlags = createFlags('beta');
       platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
@@ -292,14 +315,17 @@ void main() {
       expect(featureFlags.isLinuxEnabled, false);
     });
 
-    testWithoutContext('Flutter linux desktop enabled with config on stable', () {
+    testWithoutContext('Flutter linux desktop enabled with config on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-linux-desktop', true);
 
       expect(featureFlags.isLinuxEnabled, true);
     });
 
-    testWithoutContext('Flutter linux desktop enabled with environment variable on stable', () {
+    testWithoutContext(
+        'Flutter linux desktop enabled with environment variable on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
       platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
 
@@ -313,14 +339,17 @@ void main() {
       expect(featureFlags.isWindowsEnabled, false);
     });
 
-    testWithoutContext('Flutter Windows desktop enabled with config on master', () {
+    testWithoutContext('Flutter Windows desktop enabled with config on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
-    testWithoutContext('Flutter Windows desktop enabled with environment variable on master', () {
+    testWithoutContext(
+        'Flutter Windows desktop enabled with environment variable on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
       platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
@@ -333,14 +362,17 @@ void main() {
       expect(featureFlags.isWindowsEnabled, false);
     });
 
-    testWithoutContext('Flutter Windows desktop enabled with config on beta', () {
+    testWithoutContext('Flutter Windows desktop enabled with config on beta',
+        () {
       final FeatureFlags featureFlags = createFlags('beta');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
-    testWithoutContext('Flutter Windows desktop enabled with environment variable on beta', () {
+    testWithoutContext(
+        'Flutter Windows desktop enabled with environment variable on beta',
+        () {
       final FeatureFlags featureFlags = createFlags('beta');
       platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
@@ -353,14 +385,17 @@ void main() {
       expect(featureFlags.isWindowsEnabled, false);
     });
 
-    testWithoutContext('Flutter Windows desktop enabled with config on stable', () {
+    testWithoutContext('Flutter Windows desktop enabled with config on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-windows-desktop', true);
 
       expect(featureFlags.isWindowsEnabled, true);
     });
 
-    testWithoutContext('Flutter Windows desktop enabled with environment variable on stable', () {
+    testWithoutContext(
+        'Flutter Windows desktop enabled with environment variable on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
       platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
@@ -369,26 +404,30 @@ void main() {
 
     // Windows UWP desktop
 
-    testWithoutContext('Flutter Windows UWP desktop off by default on master', () {
+    testWithoutContext('Flutter Windows UWP desktop off by default on master',
+        () {
       final FeatureFlags featureFlags = createFlags('master');
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
 
-    testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
+    testWithoutContext(
+        'Flutter Windows UWP desktop enabled with config on master', () {
       final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-windows-uwp-desktop', true);
 
       expect(featureFlags.isWindowsUwpEnabled, true);
     });
 
-    testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
+    testWithoutContext('Flutter Windows UWP desktop off by default on stable',
+        () {
       final FeatureFlags featureFlags = createFlags('stable');
 
       expect(featureFlags.isWindowsUwpEnabled, false);
     });
 
-    testWithoutContext('Flutter Windows UWP desktop not enabled with config on stable', () {
+    testWithoutContext(
+        'Flutter Windows UWP desktop not enabled with config on stable', () {
       final FeatureFlags featureFlags = createFlags('stable');
       testConfig.setValue('enable-windows-uwp-desktop', true);
 

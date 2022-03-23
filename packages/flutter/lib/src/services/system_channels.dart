@@ -56,8 +56,8 @@ class SystemChannels {
   ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
   static const MethodChannel navigation = OptionalMethodChannel(
-      'flutter/navigation',
-      JSONMethodCodec(),
+    'flutter/navigation',
+    JSONMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
@@ -130,8 +130,8 @@ class SystemChannels {
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel platform = OptionalMethodChannel(
-      'flutter/platform',
-      JSONMethodCodec(),
+    'flutter/platform',
+    JSONMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for handling text input.
@@ -216,8 +216,8 @@ class SystemChannels {
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel textInput = OptionalMethodChannel(
-      'flutter/textinput',
-      JSONMethodCodec(),
+    'flutter/textinput',
+    JSONMethodCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.
@@ -240,9 +240,10 @@ class SystemChannels {
   ///  * [RawKeyboard], which uses this channel to expose key data.
   ///  * [RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
-      'flutter/keyevent',
-      JSONMessageCodec(),
+  static const BasicMessageChannel<Object?> keyEvent =
+      BasicMessageChannel<Object?>(
+    'flutter/keyevent',
+    JSONMessageCodec(),
   );
 
   /// A string [BasicMessageChannel] for lifecycle events.
@@ -255,9 +256,10 @@ class SystemChannels {
   ///
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
   ///    whenever a message is received on this channel.
-  static const BasicMessageChannel<String?> lifecycle = BasicMessageChannel<String?>(
-      'flutter/lifecycle',
-      StringCodec(),
+  static const BasicMessageChannel<String?> lifecycle =
+      BasicMessageChannel<String?>(
+    'flutter/lifecycle',
+    StringCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for system events.
@@ -271,9 +273,10 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<Object?> system = BasicMessageChannel<Object?>(
-      'flutter/system',
-      JSONMessageCodec(),
+  static const BasicMessageChannel<Object?> system =
+      BasicMessageChannel<Object?>(
+    'flutter/system',
+    JSONMessageCodec(),
   );
 
   /// A [BasicMessageChannel] for accessibility events.
@@ -283,7 +286,8 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<Object?> accessibility = BasicMessageChannel<Object?>(
+  static const BasicMessageChannel<Object?> accessibility =
+      BasicMessageChannel<Object?>(
     'flutter/accessibility',
     StandardMessageCodec(),
   );

@@ -9,10 +9,10 @@ import 'package:yaml/yaml.dart';
 import 'utils.dart';
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
-Manifest loadTaskManifest([ String? yaml ]) {
+Manifest loadTaskManifest([String? yaml]) {
   final dynamic manifestYaml = yaml == null
-    ? loadYaml(file('manifest.yaml').readAsStringSync())
-    : loadYamlNode(yaml);
+      ? loadYaml(file('manifest.yaml').readAsStringSync())
+      : loadYamlNode(yaml);
 
   _checkType(manifestYaml is YamlMap, manifestYaml, 'Manifest', 'dictionary');
   return _validateAndParseManifest(manifestYaml as YamlMap);
@@ -41,7 +41,8 @@ class ManifestTask {
     _checkIsNotBlank(name, 'Task name', taskName);
     _checkIsNotBlank(description, 'Task description', taskName);
     _checkIsNotBlank(stage, 'Task stage', taskName);
-    _checkIsNotBlank(requiredAgentCapabilities, 'requiredAgentCapabilities', taskName);
+    _checkIsNotBlank(
+        requiredAgentCapabilities, 'requiredAgentCapabilities', taskName);
   }
 
   /// Task name as it appears on the dashboard.
@@ -70,13 +71,12 @@ class ManifestTask {
   /// Whether the task is supported by the current host platform
   bool isSupportedByHost() {
     final Set<String> supportedHosts = Set<String>.from(
-      requiredAgentCapabilities.map<String>(
-        (String str) => str.split('/')[0]
-      )
-    );
+        requiredAgentCapabilities
+            .map<String>((String str) => str.split('/')[0]));
     String hostPlatform = Platform.operatingSystem;
     if (hostPlatform == 'macos') {
-      hostPlatform = 'mac'; // package:platform uses 'macos' while manifest.yaml uses 'mac'
+      hostPlatform =
+          'mac'; // package:platform uses 'macos' while manifest.yaml uses 'mac'
     }
     return supportedHosts.contains(hostPlatform);
   }
@@ -101,13 +101,18 @@ Manifest _validateAndParseManifest(YamlMap manifestYaml) {
 
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is YamlMap, tasksYaml, 'Value of "tasks"', 'dictionary');
-  final List<String> sortedKeys = (tasksYaml as YamlMap).keys.toList().cast<String>()..sort();
+  final List<String> sortedKeys =
+      (tasksYaml as YamlMap).keys.toList().cast<String>()..sort();
   // ignore: avoid_dynamic_calls
-  return sortedKeys.map<ManifestTask>((String taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  return sortedKeys
+      .map<ManifestTask>((String taskName) =>
+          _validateAndParseTask(taskName, tasksYaml[taskName]))
+      .toList();
 }
 
 ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
-  _checkType(taskYaml is YamlMap, taskYaml, 'Value of task "$taskName"', 'dictionary');
+  _checkType(
+      taskYaml is YamlMap, taskYaml, 'Value of task "$taskName"', 'dictionary');
   _checkKeys(taskYaml as YamlMap, 'Value of task "$taskName"', const <String>[
     'description',
     'stage',
@@ -125,11 +130,13 @@ ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
   // ignore: avoid_dynamic_calls
   final dynamic timeoutInMinutes = taskYaml['timeout_in_minutes'];
   if (timeoutInMinutes != null) {
-    _checkType(timeoutInMinutes is int, timeoutInMinutes, 'timeout_in_minutes', 'integer');
+    _checkType(timeoutInMinutes is int, timeoutInMinutes, 'timeout_in_minutes',
+        'integer');
   }
 
   // ignore: avoid_dynamic_calls
-  final List<dynamic> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
+  final List<dynamic> capabilities = _validateAndParseCapabilities(
+      taskName, taskYaml['required_agent_capabilities']);
 
   // ignore: avoid_dynamic_calls
   final dynamic onLuci = taskYaml['on_luci'];
@@ -150,17 +157,21 @@ ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
   );
 }
 
-List<String> _validateAndParseCapabilities(String taskName, dynamic capabilitiesYaml) {
-  _checkType(capabilitiesYaml is List, capabilitiesYaml, 'required_agent_capabilities', 'list');
+List<String> _validateAndParseCapabilities(
+    String taskName, dynamic capabilitiesYaml) {
+  _checkType(capabilitiesYaml is List, capabilitiesYaml,
+      'required_agent_capabilities', 'list');
   final List<dynamic> capabilities = capabilitiesYaml as List<dynamic>;
   for (int i = 0; i < capabilities.length; i++) {
     final dynamic capability = capabilities[i];
-    _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
+    _checkType(capability is String, capability,
+        'required_agent_capabilities[$i]', 'string');
   }
   return capabilitiesYaml.cast<String>();
 }
 
-void _checkType(bool isValid, dynamic value, String variableName, String typeName) {
+void _checkType(
+    bool isValid, dynamic value, String variableName, String typeName) {
   if (!isValid) {
     throw ManifestError(
       '$variableName must be a $typeName but was ${value.runtimeType}: $value',
@@ -169,17 +180,19 @@ void _checkType(bool isValid, dynamic value, String variableName, String typeNam
 }
 
 void _checkIsNotBlank(dynamic value, String variableName, String ownerName) {
-  if (value == null || value is String && value.isEmpty || value is List<dynamic> && value.isEmpty) {
+  if (value == null ||
+      value is String && value.isEmpty ||
+      value is List<dynamic> && value.isEmpty) {
     throw ManifestError('$variableName must not be empty in $ownerName.');
   }
 }
 
-void _checkKeys(Map<dynamic, dynamic> map, String variableName, List<String> allowedKeys) {
+void _checkKeys(
+    Map<dynamic, dynamic> map, String variableName, List<String> allowedKeys) {
   for (final String key in map.keys.cast<String>()) {
     if (!allowedKeys.contains(key)) {
-      throw ManifestError(
-        'Unrecognized property "$key" in $variableName. '
-        'Allowed properties: ${allowedKeys.join(', ')}');
+      throw ManifestError('Unrecognized property "$key" in $variableName. '
+          'Allowed properties: ${allowedKeys.join(', ')}');
     }
   }
 }

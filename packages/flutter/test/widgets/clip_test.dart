@@ -20,9 +20,9 @@ class PathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     log.add('getClip');
-    return Path()
-      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
+
   @override
   bool shouldReclip(PathClipper oldClipper) => false;
 }
@@ -58,8 +58,11 @@ class NotifyClipper<T> extends CustomClipper<T> {
 }
 
 void main() {
-  testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+  testWidgets(
+      'ClipRect with a FittedBox child sized to zero works with semantics',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: ClipRect(
           child: FittedBox(
@@ -77,10 +80,12 @@ void main() {
     expect(find.byType(FittedBox), findsOneWidget);
   });
 
-  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipRect updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRect());
 
-    final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    final RenderClipRect renderClip =
+        tester.allRenderObjects.whereType<RenderClipRect>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
 
@@ -99,10 +104,12 @@ void main() {
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
 
-  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipRRect updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRRect());
 
-    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+    final RenderClipRRect renderClip =
+        tester.allRenderObjects.whereType<RenderClipRRect>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
@@ -115,10 +122,12 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipOval updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipOval());
 
-    final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
+    final RenderClipOval renderClip =
+        tester.allRenderObjects.whereType<RenderClipOval>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
@@ -131,10 +140,12 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipPath updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipPath());
 
-    final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+    final RenderClipPath renderClip =
+        tester.allRenderObjects.whereType<RenderClipPath>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
@@ -153,7 +164,9 @@ void main() {
         clipper: PathClipper(),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () { log.add('tap'); },
+          onTap: () {
+            log.add('tap');
+          },
         ),
       ),
     );
@@ -173,7 +186,9 @@ void main() {
       ClipOval(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () { log.add('tap'); },
+          onTap: () {
+            log.add('tap');
+          },
         ),
       ),
     );
@@ -195,7 +210,9 @@ void main() {
         child: ClipOval(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () { log.add('tap'); },
+            onTap: () {
+              log.add('tap');
+            },
           ),
         ),
       ),
@@ -219,10 +236,13 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -243,10 +263,13 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -261,10 +284,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -279,10 +305,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -297,10 +326,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -315,10 +347,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -340,18 +375,22 @@ void main() {
         child: Placeholder(),
       ),
     );
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
     debugPaintSizeEnabled = true;
-    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..paragraph(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).debugPaint,
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+        ..paragraph(),
     );
     debugPaintSizeEnabled = false;
   });
@@ -399,7 +438,8 @@ void main() {
     );
   });
 
-  testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+  testWidgets('ClipRect save, overlay, and antialiasing',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: Stack(
@@ -615,7 +655,8 @@ void main() {
     );
   }
 
-  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.antiAlias',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -623,7 +664,8 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.hardEdge',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -633,7 +675,8 @@ void main() {
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
-  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -724,7 +767,8 @@ void main() {
     );
   }
 
-  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.antiAlias',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -732,7 +776,8 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.hardEdge',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -740,7 +785,8 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -796,13 +842,16 @@ void main() {
 
   testWidgets('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+    final ShapeBorder shape = TestBorder((String message) {
+      logs.add(message);
+    });
     Widget buildClipPath() {
       return ClipPath.shape(
         shape: shape,
         child: const SizedBox(width: 100.0, height: 100.0),
       );
     }
+
     final Widget clipPath = buildClipPath();
     // verify that a regular clip works as one would expect
     logs.add('--0');
@@ -851,8 +900,10 @@ void main() {
     ]);
   });
 
-  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
-    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+  testWidgets('CustomClipper reclips when notified',
+      (WidgetTester tester) async {
+    final ValueNotifier<Rect> clip =
+        ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
 
     await tester.pumpWidget(
       ClipRect(
@@ -861,26 +912,30 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
 
     expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
     clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
     expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
 
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
   });
 }

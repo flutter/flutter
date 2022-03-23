@@ -36,27 +36,23 @@ class DowngradeCommand extends FlutterCommand {
     Terminal? terminal,
     Stdio? stdio,
     FileSystem? fileSystem,
-  }) : _terminal = terminal,
-       _flutterVersion = flutterVersion,
-       _persistentToolState = persistentToolState,
-       _processManager = processManager,
-       _stdio = stdio,
-       _logger = logger,
-       _fileSystem = fileSystem {
-    argParser.addOption(
-      'working-directory',
-      hide: !verboseHelp,
-      help: 'Override the downgrade working directory. '
-            'This is only intended to enable integration testing of the tool itself.'
-    );
-    argParser.addFlag(
-      'prompt',
-      defaultsTo: true,
-      hide: !verboseHelp,
-      help: 'Show the downgrade prompt. '
+  })  : _terminal = terminal,
+        _flutterVersion = flutterVersion,
+        _persistentToolState = persistentToolState,
+        _processManager = processManager,
+        _stdio = stdio,
+        _logger = logger,
+        _fileSystem = fileSystem {
+    argParser.addOption('working-directory',
+        hide: !verboseHelp,
+        help: 'Override the downgrade working directory. '
+            'This is only intended to enable integration testing of the tool itself.');
+    argParser.addFlag('prompt',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Show the downgrade prompt. '
             'The ability to disable this using "--no-prompt" is only provided for '
-            'integration testing of the tool itself.'
-    );
+            'integration testing of the tool itself.');
   }
 
   Terminal? _terminal;
@@ -69,7 +65,8 @@ class DowngradeCommand extends FlutterCommand {
   FileSystem? _fileSystem;
 
   @override
-  String get description => 'Downgrade Flutter to the last active version for the current channel.';
+  String get description =>
+      'Downgrade Flutter to the last active version for the current channel.';
 
   @override
   String get name => 'downgrade';
@@ -87,7 +84,8 @@ class DowngradeCommand extends FlutterCommand {
     _flutterVersion ??= globals.flutterVersion;
     _persistentToolState ??= globals.persistentToolState;
     _processManager ??= globals.processManager;
-    _processUtils ??= ProcessUtils(processManager: _processManager!, logger: _logger!);
+    _processUtils ??=
+        ProcessUtils(processManager: _processManager!, logger: _logger!);
     _stdio ??= globals.stdio;
     _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot!;
@@ -105,23 +103,29 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
     final PersistentToolState persistentToolState = _persistentToolState!;
-    final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
+    final String? lastFlutterVersion =
+        persistentToolState.lastActiveVersion(channel);
     final String? currentFlutterVersion = _flutterVersion?.frameworkRevision;
-    if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
-      final String trailing = await _createErrorMessage(workingDirectory, channel);
+    if (lastFlutterVersion == null ||
+        currentFlutterVersion == lastFlutterVersion) {
+      final String trailing =
+          await _createErrorMessage(workingDirectory, channel);
       throwToolExit(
-        'There is no previously recorded version for channel "$currentChannel".\n'
-        '$trailing'
-      );
+          'There is no previously recorded version for channel "$currentChannel".\n'
+          '$trailing');
     }
 
     // Detect unknown versions.
     final ProcessUtils processUtils = _processUtils!;
     final RunResult parseResult = await processUtils.run(<String>[
-      'git', 'describe', '--tags', lastFlutterVersion,
+      'git',
+      'describe',
+      '--tags',
+      lastFlutterVersion,
     ], workingDirectory: workingDirectory);
     if (parseResult.exitCode != 0) {
-      throwToolExit('Failed to parse version for downgrade:\n${parseResult.stderr}');
+      throwToolExit(
+          'Failed to parse version for downgrade:\n${parseResult.stderr}');
     }
     final String humanReadableVersion = parseResult.stdout;
 
@@ -140,7 +144,8 @@ class DowngradeCommand extends FlutterCommand {
         return FlutterCommandResult.success();
       }
     } else {
-      logger.printStatus('Downgrading Flutter to version $humanReadableVersion');
+      logger
+          .printStatus('Downgrading Flutter to version $humanReadableVersion');
     }
 
     // To downgrade the tool, we perform a git checkout --hard, and then
@@ -154,11 +159,10 @@ class DowngradeCommand extends FlutterCommand {
       );
     } on ProcessException catch (error) {
       throwToolExit(
-        'Unable to downgrade Flutter: The tool could not update to the version '
-        '$humanReadableVersion. This may be due to git not being installed or an '
-        'internal error. Please ensure that git is installed on your computer and '
-        'retry again.\nError: $error.'
-      );
+          'Unable to downgrade Flutter: The tool could not update to the version '
+          '$humanReadableVersion. This may be due to git not being installed or an '
+          'internal error. Please ensure that git is installed on your computer and '
+          'retry again.\nError: $error.');
     }
     try {
       await processUtils.run(
@@ -168,11 +172,10 @@ class DowngradeCommand extends FlutterCommand {
       );
     } on ProcessException catch (error) {
       throwToolExit(
-        'Unable to downgrade Flutter: The tool could not switch to the channel '
-        '$currentChannel. This may be due to git not being installed or an '
-        'internal error. Please ensure that git is installed on your computer '
-        'and retry again.\nError: $error.'
-      );
+          'Unable to downgrade Flutter: The tool could not switch to the channel '
+          '$currentChannel. This may be due to git not being installed or an '
+          'internal error. Please ensure that git is installed on your computer '
+          'and retry again.\nError: $error.');
     }
     await FlutterVersion.resetFlutterVersionFreshnessCheck();
     logger.printStatus('Success');
@@ -180,7 +183,8 @@ class DowngradeCommand extends FlutterCommand {
   }
 
   // Formats an error message that lists the currently stored versions.
-  Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
+  Future<String> _createErrorMessage(
+      String workingDirectory, Channel currentChannel) async {
     final StringBuffer buffer = StringBuffer();
     for (final Channel channel in Channel.values) {
       if (channel == currentChannel) {
@@ -191,10 +195,14 @@ class DowngradeCommand extends FlutterCommand {
         continue;
       }
       final RunResult parseResult = await _processUtils!.run(<String>[
-        'git', 'describe', '--tags', sha,
+        'git',
+        'describe',
+        '--tags',
+        sha,
       ], workingDirectory: workingDirectory);
       if (parseResult.exitCode == 0) {
-        buffer.writeln('Channel "${getNameForChannel(channel)}" was previously on: ${parseResult.stdout}.');
+        buffer.writeln(
+            'Channel "${getNameForChannel(channel)}" was previously on: ${parseResult.stdout}.');
       }
     }
     return buffer.toString();

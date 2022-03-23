@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -110,9 +109,9 @@ class _OffsetTransformPart extends _TransformPart {
 class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
-     : _path = <HitTestEntry>[],
-       _transforms = <Matrix4>[Matrix4.identity()],
-       _localTransforms = <_TransformPart>[];
+      : _path = <HitTestEntry>[],
+        _transforms = <Matrix4>[Matrix4.identity()],
+        _localTransforms = <_TransformPart>[];
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -121,9 +120,9 @@ class HitTestResult {
   /// added to the wrapped `result` (both share the same underlying data
   /// structure to store [HitTestEntry]s).
   HitTestResult.wrap(HitTestResult result)
-     : _path = result._path,
-       _transforms = result._transforms,
-       _localTransforms = result._localTransforms;
+      : _path = result._path,
+        _transforms = result._transforms,
+        _localTransforms = result._localTransforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -212,7 +211,8 @@ class HitTestResult {
     assert(transform != null);
     assert(
       _debugVectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
-      _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
+          _debugVectorMoreOrLessEquals(
+              transform.getColumn(2), Vector4(0, 0, 1, 0)),
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
       'point is directly under the pointing device. Did you forget to run the paint '
@@ -275,16 +275,19 @@ class HitTestResult {
     assert(_transforms.isNotEmpty);
   }
 
-  bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
+  bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b,
+      {double epsilon = precisionErrorTolerance}) {
     bool result = true;
     assert(() {
       final Vector4 difference = a - b;
-      result = difference.storage.every((double component) => component.abs() < epsilon);
+      result = difference.storage
+          .every((double component) => component.abs() < epsilon);
       return true;
     }());
     return result;
   }
 
   @override
-  String toString() => 'HitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})';
+  String toString() =>
+      'HitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})';
 }

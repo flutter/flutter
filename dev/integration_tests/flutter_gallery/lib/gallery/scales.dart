@@ -13,11 +13,10 @@ class GalleryTextScaleValue {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is GalleryTextScaleValue
-        && other.scale == scale
-        && other.label == label;
+    if (other.runtimeType != runtimeType) return false;
+    return other is GalleryTextScaleValue &&
+        other.scale == scale &&
+        other.label == label;
   }
 
   @override
@@ -27,10 +26,10 @@ class GalleryTextScaleValue {
   String toString() {
     return '$runtimeType($label)';
   }
-
 }
 
-const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScaleValue>[
+const List<GalleryTextScaleValue> kAllGalleryTextScaleValues =
+    <GalleryTextScaleValue>[
   GalleryTextScaleValue(null, 'System Default'),
   GalleryTextScaleValue(0.8, 'Small'),
   GalleryTextScaleValue(1.0, 'Normal'),
@@ -47,11 +46,10 @@ class GalleryVisualDensityValue {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is GalleryVisualDensityValue
-        && other.visualDensity == visualDensity
-        && other.label == label;
+    if (other.runtimeType != runtimeType) return false;
+    return other is GalleryVisualDensityValue &&
+        other.visualDensity == visualDensity &&
+        other.label == label;
   }
 
   @override
@@ -61,12 +59,13 @@ class GalleryVisualDensityValue {
   String toString() {
     return '$runtimeType($label)';
   }
-
 }
 
-const List<GalleryVisualDensityValue> kAllGalleryVisualDensityValues = <GalleryVisualDensityValue>[
+const List<GalleryVisualDensityValue> kAllGalleryVisualDensityValues =
+    <GalleryVisualDensityValue>[
   GalleryVisualDensityValue(VisualDensity.standard, 'System Default'),
   GalleryVisualDensityValue(VisualDensity.comfortable, 'Comfortable'),
   GalleryVisualDensityValue(VisualDensity.compact, 'Compact'),
-  GalleryVisualDensityValue(VisualDensity(horizontal: -3, vertical: -3), 'Very Compact'),
+  GalleryVisualDensityValue(
+      VisualDensity(horizontal: -3, vertical: -3), 'Very Compact'),
 ];

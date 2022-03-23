@@ -20,12 +20,14 @@ RenderEditable findRenderEditable(WidgetTester tester) {
     }
     child.visitChildren(recursiveFinder);
   }
+
   root.visitChildren(recursiveFinder);
   expect(renderEditable, isNotNull);
   return renderEditable;
 }
 
-List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+List<TextSelectionPoint> globalize(
+    Iterable<TextSelectionPoint> points, RenderBox box) {
   return points.map<TextSelectionPoint>((TextSelectionPoint point) {
     return TextSelectionPoint(
       box.localToGlobal(point.point),

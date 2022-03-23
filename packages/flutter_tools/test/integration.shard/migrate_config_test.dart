@@ -15,7 +15,6 @@ import 'test_data/migrate_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
-
 void main() {
   Directory tempDir;
   FlutterRunTestDriver flutter;
@@ -69,18 +68,34 @@ migration:
     - lib/file1/etc.dart
     - android/my_file.java
 ''', flush: true);
-    FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
+    FlutterProjectMetadata metadata =
+        FlutterProjectMetadata(metadataFile, logger);
 
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.root]
+            .createRevision,
+        equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(
+        metadata
+            .migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision,
+        equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.android]
+            .createRevision,
+        equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.android]
+            .baseRevision,
+        equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
     expect(metadata.migrateConfig.unmanagedFiles[0], equals('lib/main.dart'));
-    expect(metadata.migrateConfig.unmanagedFiles[1], equals('ios/Runner.xcodeproj/project.pbxproj'));
-    expect(metadata.migrateConfig.unmanagedFiles[2], equals('lib/file1/etc.dart'));
-    expect(metadata.migrateConfig.unmanagedFiles[3], equals('android/my_file.java'));
+    expect(metadata.migrateConfig.unmanagedFiles[1],
+        equals('ios/Runner.xcodeproj/project.pbxproj'));
+    expect(
+        metadata.migrateConfig.unmanagedFiles[2], equals('lib/file1/etc.dart'));
+    expect(metadata.migrateConfig.unmanagedFiles[3],
+        equals('android/my_file.java'));
 
     metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.
@@ -107,10 +122,14 @@ project_type: app
     const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
     MigrateConfig config = MigrateConfig(
       platformConfigs: <SupportedPlatform, MigratePlatformConfig>{
-        SupportedPlatform.android: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.ios: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.root: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.windows: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.android: MigratePlatformConfig(
+            createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.ios: MigratePlatformConfig(
+            createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.root: MigratePlatformConfig(
+            createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.windows: MigratePlatformConfig(
+            createRevision: testCreateRevision, baseRevision: testBaseRevision),
       },
       unmanagedFiles: <String>[
         'lib/main.dart',
@@ -164,7 +183,8 @@ migration:
     const String currentRevision = 'test_base_revision';
     const String createRevision = 'test_create_revision';
 
-    final FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
+    final FlutterProjectMetadata metadata =
+        FlutterProjectMetadata(metadataFile, logger);
     metadata.migrateConfig.populate(
       projectDirectory: tempDir,
       currentRevision: currentRevision,
@@ -176,19 +196,38 @@ migration:
 
     expect(metadata.migrateConfig.platformConfigs.length, equals(3));
 
-    final List<SupportedPlatform> keyList = List<SupportedPlatform>.from(metadata.migrateConfig.platformConfigs.keys);
+    final List<SupportedPlatform> keyList = List<SupportedPlatform>.from(
+        metadata.migrateConfig.platformConfigs.keys);
 
     expect(keyList[0], equals(SupportedPlatform.root));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals(currentRevision));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals(createRevision));
+    expect(
+        metadata
+            .migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision,
+        equals(currentRevision));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.root]
+            .createRevision,
+        equals(createRevision));
 
     expect(keyList[1], equals(SupportedPlatform.android));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals(currentRevision));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals(createRevision));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.android]
+            .baseRevision,
+        equals(currentRevision));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.android]
+            .createRevision,
+        equals(createRevision));
 
     expect(keyList[2], equals(SupportedPlatform.ios));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].baseRevision, equals(currentRevision));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].createRevision, equals(createRevision));
+    expect(
+        metadata
+            .migrateConfig.platformConfigs[SupportedPlatform.ios].baseRevision,
+        equals(currentRevision));
+    expect(
+        metadata.migrateConfig.platformConfigs[SupportedPlatform.ios]
+            .createRevision,
+        equals(createRevision));
 
     final File metadataFileOutput = tempDir.childFile('.metadata_output');
     metadata.writeFile(outputFile: metadataFileOutput);

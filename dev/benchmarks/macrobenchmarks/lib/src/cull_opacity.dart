@@ -11,7 +11,8 @@ class CullOpacityPage extends StatefulWidget {
   State<StatefulWidget> createState() => _CullOpacityPageState();
 }
 
-class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProviderStateMixin {
+class _CullOpacityPageState extends State<CullOpacityPage>
+    with SingleTickerProviderStateMixin {
   late Animation<double> _offsetY;
   late AnimationController _controller;
 
@@ -19,14 +20,16 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
   void initState() {
     super.initState();
 
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2));
     // Animations are typically implemented using the AnimatedBuilder widget.
     // This code uses a manual listener for historical reasons and will remain
     // in order to preserve compatibility with the history of measurements for
     // this benchmark.
-    _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller)..addListener(() {
-      setState(() {});
-    });
+    _offsetY = Tween<double>(begin: 0, end: -1000.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      });
     _controller.repeat();
   }
 
@@ -38,19 +41,22 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: List<Widget>.generate(50, (int i) => Positioned(
-      left: 0,
-      top: (200 * i).toDouble() + _offsetY.value,
-      child: Opacity(
-        opacity: 0.5,
-        child: RepaintBoundary(
-          child: Container(
-            // Slightly change width to invalidate raster cache.
-            width: 1000 - (_offsetY.value / 100),
-            height: 100, color: Colors.red,
-          ),
-        ),
-      ),
-    )));
+    return Stack(
+        children: List<Widget>.generate(
+            50,
+            (int i) => Positioned(
+                  left: 0,
+                  top: (200 * i).toDouble() + _offsetY.value,
+                  child: Opacity(
+                    opacity: 0.5,
+                    child: RepaintBoundary(
+                      child: Container(
+                        // Slightly change width to invalidate raster cache.
+                        width: 1000 - (_offsetY.value / 100),
+                        height: 100, color: Colors.red,
+                      ),
+                    ),
+                  ),
+                )));
   }
 }

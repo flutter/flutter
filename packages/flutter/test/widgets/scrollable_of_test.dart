@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ScrollPositionListener extends StatefulWidget {
-  const ScrollPositionListener({ Key? key, required this.child, required this.log}) : super(key: key);
+  const ScrollPositionListener(
+      {Key? key, required this.child, required this.log})
+      : super(key: key);
 
   final Widget child;
   final ValueChanged<String> log;
@@ -39,11 +41,12 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   void listener() {
     widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
   }
-
 }
 
 void main() {
-  testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
+  testWidgets(
+      'Scrollable.of() dependent rebuilds when Scrollable position changes',
+      (WidgetTester tester) async {
     late String logValue;
     final ScrollController controller = ScrollController();
 
@@ -55,7 +58,9 @@ void main() {
         controller: controller,
         physics: physics,
         child: ScrollPositionListener(
-          log: (String s) { logValue = s; },
+          log: (String s) {
+            logValue = s;
+          },
           child: const SizedBox(height: 400.0),
         ),
       );
@@ -83,7 +88,8 @@ void main() {
     expect(logValue, 'listener 400.0');
   });
 
-  testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
+  testWidgets('Scrollable.of() is possible using ScrollNotification context',
+      (WidgetTester tester) async {
     late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
@@ -99,7 +105,9 @@ void main() {
     await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
-    final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
-    expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
+    final StatefulElement scrollableElement =
+        find.byType(Scrollable).evaluate().first as StatefulElement;
+    expect(
+        Scrollable.of(notification.context!), equals(scrollableElement.state));
   });
 }

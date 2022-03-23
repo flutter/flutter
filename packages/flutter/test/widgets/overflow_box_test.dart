@@ -25,12 +25,14 @@ void main() {
         ),
       ),
     ));
-    final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox box =
+        inner.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(Offset.zero), equals(const Offset(745.0, 565.0)));
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('OverflowBox implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
@@ -40,7 +42,8 @@ void main() {
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString()).toList();
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
     expect(description, <String>[
       'alignment: Alignment.center',
       'minWidth: 1.0',
@@ -62,7 +65,8 @@ void main() {
         ),
       ),
     ));
-    final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox box =
+        inner.currentContext!.findRenderObject()! as RenderBox;
     expect(box.size, equals(const Size(50.0, 50.0)));
     expect(
       box.localToGlobal(box.size.center(Offset.zero)),
@@ -73,7 +77,8 @@ void main() {
     );
   });
 
-  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+  testWidgets('SizedOverflowBox alignment (direction-sensitive)',
+      (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
@@ -85,7 +90,8 @@ void main() {
         ),
       ),
     ));
-    final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox box =
+        inner.currentContext!.findRenderObject()! as RenderBox;
     expect(box.size, equals(const Size(50.0, 50.0)));
     expect(
       box.localToGlobal(box.size.center(Offset.zero)),

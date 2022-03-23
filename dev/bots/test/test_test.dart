@@ -17,7 +17,8 @@ import 'common.dart';
 /// will include the process result's stdio in the failure message.
 void expectExitCode(ProcessResult result, int expectedExitCode) {
   if (result.exitCode != expectedExitCode) {
-    fail('Failure due to exit code ${result.exitCode}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}');
+    fail(
+        'Failure due to exit code ${result.exitCode}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}');
   }
 }
 
@@ -74,7 +75,8 @@ void main() {
 
   group('flutter/plugins version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-    final fs.File pluginsVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_plugins.version'));
+    final fs.File pluginsVersionFile = memoryFileSystem
+        .file(path.join('bin', 'internal', 'flutter_plugins.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
     setUpAll(() {
       pluginsVersionFile.createSync(recursive: true);
@@ -82,13 +84,17 @@ void main() {
 
     test('commit hash', () async {
       pluginsVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      final String actualHash = await getFlutterPluginsVersion(
+          fileSystem: memoryFileSystem,
+          pluginsVersionFile: pluginsVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
       pluginsVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      final String actualHash = await getFlutterPluginsVersion(
+          fileSystem: memoryFileSystem,
+          pluginsVersionFile: pluginsVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });
@@ -97,7 +103,8 @@ void main() {
     const ProcessManager processManager = LocalProcessManager();
 
     Future<ProcessResult> runScript(
-        [Map<String, String>? environment, List<String> otherArgs = const <String>[]]) async {
+        [Map<String, String>? environment,
+        List<String> otherArgs = const <String>[]]) async {
       final String dart = path.absolute(
           path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
@@ -115,13 +122,15 @@ void main() {
         <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 1 of 3 (range 1-3 of 8)'));
+      expect(result.stdout,
+          contains('Selecting subshard 1 of 3 (range 1-3 of 8)'));
 
       result = await runScript(
         <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 3 of 3 (range 7-8 of 8)'));
+      expect(result.stdout,
+          contains('Selecting subshard 3 of 3 (range 7-8 of 8)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {

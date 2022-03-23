@@ -35,6 +35,7 @@ abstract class ProjectMigrator {
   bool _migrationRequired = false;
 
   @protected
+
   /// Calls [migrateLine] per line, then [migrateFileContents]
   /// including the line migrations.
   void processFileLines(File file) {
@@ -61,9 +62,12 @@ abstract class ProjectMigrator {
       newProjectContents.writeln(newProjectLine);
     }
 
-    final String projectContentsWithMigratedLines = newProjectContents.toString();
-    final String projectContentsWithMigratedContents = migrateFileContents(projectContentsWithMigratedLines);
-    if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
+    final String projectContentsWithMigratedLines =
+        newProjectContents.toString();
+    final String projectContentsWithMigratedContents =
+        migrateFileContents(projectContentsWithMigratedLines);
+    if (projectContentsWithMigratedLines !=
+        projectContentsWithMigratedContents) {
       logger.printTrace('Migrating $basename contents');
       _migrationRequired = true;
     }

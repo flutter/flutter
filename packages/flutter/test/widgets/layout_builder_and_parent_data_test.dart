@@ -56,14 +56,20 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Applying parent data inside a LayoutBuilder',
+      (WidgetTester tester) async {
     int frame = 1;
-    await tester.pumpWidget(SizeChanger( // when this is triggered, the child LayoutBuilder will build again
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return Column(children: <Widget>[Expanded(
-          flex: frame, // this is different after the next pump, so that the parentData has to be applied again
-          child: Container(height: 100.0),
-        )]);
+    await tester.pumpWidget(SizeChanger(
+      // when this is triggered, the child LayoutBuilder will build again
+      child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+        return Column(children: <Widget>[
+          Expanded(
+            flex:
+                frame, // this is different after the next pump, so that the parentData has to be applied again
+            child: Container(height: 100.0),
+          )
+        ]);
       }),
     ));
     frame += 1;

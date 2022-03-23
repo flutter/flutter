@@ -37,7 +37,8 @@ final platform.TargetPlatform? _testPlatform = () {
 // 0.20ms. As `defaultTargetPlatform` is routinely called dozens of times per
 // frame this value should be cached.
 final platform.TargetPlatform _browserPlatform = () {
-  final String navigatorPlatform = html.window.navigator.platform?.toLowerCase() ?? '';
+  final String navigatorPlatform =
+      html.window.navigator.platform?.toLowerCase() ?? '';
   if (navigatorPlatform.startsWith('mac')) {
     return platform.TargetPlatform.macOS;
   }

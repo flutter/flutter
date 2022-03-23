@@ -52,12 +52,11 @@ class Divider extends StatelessWidget {
     this.indent,
     this.endIndent,
     this.color,
-  }) : assert(height == null || height >= 0.0),
-       assert(thickness == null || thickness >= 0.0),
-       assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
-
+  })  : assert(height == null || height >= 0.0),
+        assert(thickness == null || thickness >= 0.0),
+        assert(indent == null || indent >= 0.0),
+        assert(endIndent == null || endIndent >= 0.0),
+        super(key: key);
 
   /// The divider's height extent.
   ///
@@ -133,12 +132,15 @@ class Divider extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  static BorderSide createBorderSide(BuildContext? context, { Color? color, double? width }) {
-    final Color? effectiveColor = color
-        ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null);
-    final double effectiveWidth =  width
-        ?? (context != null ? DividerTheme.of(context).thickness : null)
-        ?? 0.0;
+  static BorderSide createBorderSide(BuildContext? context,
+      {Color? color, double? width}) {
+    final Color? effectiveColor = color ??
+        (context != null
+            ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor)
+            : null);
+    final double effectiveWidth = width ??
+        (context != null ? DividerTheme.of(context).thickness : null) ??
+        0.0;
 
     // Prevent assertion since it is possible that context is null and no color
     // is specified.
@@ -213,11 +215,11 @@ class VerticalDivider extends StatelessWidget {
     this.indent,
     this.endIndent,
     this.color,
-  }) : assert(width == null || width >= 0.0),
-       assert(thickness == null || thickness >= 0.0),
-       assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+  })  : assert(width == null || width >= 0.0),
+        assert(thickness == null || thickness >= 0.0),
+        assert(indent == null || indent >= 0.0),
+        assert(endIndent == null || endIndent >= 0.0),
+        super(key: key);
 
   /// The divider's width.
   ///
@@ -280,7 +282,8 @@ class VerticalDivider extends StatelessWidget {
           margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
             border: Border(
-              left: Divider.createBorderSide(context, color: color, width: thickness),
+              left: Divider.createBorderSide(context,
+                  color: color, width: thickness),
             ),
           ),
         ),

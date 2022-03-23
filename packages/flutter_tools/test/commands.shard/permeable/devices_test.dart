@@ -32,7 +32,9 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testUsingContext('devices can display no connected devices with the --machine flag', () async {
+  testUsingContext(
+      'devices can display no connected devices with the --machine flag',
+      () async {
     final DevicesCommand command = DevicesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['devices', '--machine']);
@@ -56,25 +58,23 @@ void main() {
 
     expect(
       json.decode(logger.statusText),
-      contains(equals(
-        <String, Object>{
-          'name': 'Web Server',
-          'id': 'web-server',
-          'isSupported': true,
-          'targetPlatform': 'web-javascript',
-          'emulator': false,
-          'sdk': 'Flutter Tools',
-          'capabilities': <String, Object>{
-            'hotReload': true,
-            'hotRestart': true,
-            'screenshot': false,
-            'fastStart': false,
-            'flutterExit': false,
-            'hardwareRendering': false,
-            'startPaused': true
-          }
+      contains(equals(<String, Object>{
+        'name': 'Web Server',
+        'id': 'web-server',
+        'isSupported': true,
+        'targetPlatform': 'web-javascript',
+        'emulator': false,
+        'sdk': 'Flutter Tools',
+        'capabilities': <String, Object>{
+          'hotReload': true,
+          'hotRestart': true,
+          'screenshot': false,
+          'fastStart': false,
+          'flutterExit': false,
+          'hardwareRendering': false,
+          'startPaused': true
         }
-      )),
+      })),
     );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),

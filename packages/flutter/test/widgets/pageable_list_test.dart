@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
-final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
+final List<GlobalKey> globalKeys =
+    defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
 int? currentPage;
 
 Widget buildPage(int page) {
@@ -26,7 +27,9 @@ Widget buildFrame({
 }) {
   final PageView child = PageView(
     reverse: reverse,
-    onPageChanged: (int page) { currentPage = page; },
+    onPageChanged: (int page) {
+      currentPage = page;
+    },
     children: pages.map<Widget>(buildPage).toList(),
   );
 
@@ -36,7 +39,9 @@ Widget buildFrame({
     textDirection: textDirection,
     child: Center(
       child: SizedBox(
-        width: pageSize.width, height: pageSize.height, child: child,
+        width: pageSize.width,
+        height: pageSize.height,
+        child: child,
       ),
     ),
   );
@@ -100,7 +105,8 @@ void main() {
 
   testWidgets('PageView with reverse (LTR)', (WidgetTester tester) async {
     currentPage = null;
-    await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.ltr));
+    await tester.pumpWidget(
+        buildFrame(reverse: true, textDirection: TextDirection.ltr));
     await pageRight(tester);
     expect(currentPage, equals(1));
 
@@ -168,7 +174,8 @@ void main() {
 
   testWidgets('PageView with reverse (RTL)', (WidgetTester tester) async {
     currentPage = null;
-    await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl));
+    await tester.pumpWidget(
+        buildFrame(reverse: true, textDirection: TextDirection.rtl));
     expect(currentPage, isNull);
     await pageLeft(tester);
     expect(currentPage, equals(1));

@@ -55,10 +55,14 @@ void main() {
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
-    testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
+    testWithoutContext(
+        'AndroidDevice.startApp allows release builds on $targetPlatform',
+        () async {
       final String arch = getNameForAndroidArch(
-        getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
-      final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
+          getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+      final AndroidDevice device = AndroidDevice(
+        '1234',
+        modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
@@ -82,13 +86,38 @@ void main() {
         stdout: '[ro.product.cpu.abi]: [$arch]',
       ));
       processManager.addCommand(const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          'am',
+          'force-stop',
+          'FlutterApp'
+        ],
       ));
       processManager.addCommand(const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          'pm',
+          'list',
+          'packages',
+          'FlutterApp'
+        ],
       ));
       processManager.addCommand(const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app.apk'],
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'install',
+          '-t',
+          '-r',
+          'app.apk'
+        ],
       ));
       processManager.addCommand(kShaCommand);
       processManager.addCommand(const FakeCommand(
@@ -103,7 +132,9 @@ void main() {
           'android.intent.action.RUN',
           '-f',
           '0x20000000',
-          '--ez', 'enable-dart-profiling', 'true',
+          '--ez',
+          'enable-dart-profiling',
+          'true',
           'FlutterActivity',
         ],
       ));
@@ -122,8 +153,11 @@ void main() {
     });
   }
 
-  testWithoutContext('AndroidDevice.startApp does not allow release builds on x86', () async {
-    final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
+  testWithoutContext(
+      'AndroidDevice.startApp does not allow release builds on x86', () async {
+    final AndroidDevice device = AndroidDevice(
+      '1234',
+      modelID: 'TestModel',
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
@@ -160,8 +194,12 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
-    final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
+  testWithoutContext(
+      'AndroidDevice.startApp forwards all supported debugging options',
+      () async {
+    final AndroidDevice device = AndroidDevice(
+      '1234',
+      modelID: 'TestModel',
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
@@ -183,10 +221,31 @@ void main() {
       command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
     ));
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', '--user', '10', 'FlutterApp'],
+      command: <String>[
+        'adb',
+        '-s',
+        '1234',
+        'shell',
+        'am',
+        'force-stop',
+        '--user',
+        '10',
+        'FlutterApp'
+      ],
     ));
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'FlutterApp'],
+      command: <String>[
+        'adb',
+        '-s',
+        '1234',
+        'shell',
+        'pm',
+        'list',
+        'packages',
+        '--user',
+        '10',
+        'FlutterApp'
+      ],
     ));
     processManager.addCommand(const FakeCommand(
       command: <String>[
@@ -200,7 +259,8 @@ void main() {
         '10',
         'app.apk'
       ],
-      stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
+      stdout:
+          '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
     ));
     processManager.addCommand(kShaCommand);
     processManager.addCommand(const FakeCommand(

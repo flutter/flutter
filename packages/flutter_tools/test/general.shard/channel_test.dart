@@ -73,9 +73,9 @@ void main() {
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       expect(testLogger.errorText, hasLength(0));
       // format the status text for a simpler assertion.
-      final Iterable<String> rows = testLogger.statusText
-        .split('\n')
-        .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
+      final Iterable<String> rows = testLogger.statusText.split('\n').map(
+          (String line) =>
+              line.substring(2)); // remove '* ' or '  ' from output
       expect(rows, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
@@ -98,9 +98,9 @@ void main() {
       expect(rows, containsAllInOrder(kOfficialChannels));
       expect(testLogger.errorText, hasLength(0));
       // format the status text for a simpler assertion.
-      final Iterable<String> rows2 = testLogger.statusText
-        .split('\n')
-        .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
+      final Iterable<String> rows2 = testLogger.statusText.split('\n').map(
+          (String line) =>
+              line.substring(2)); // remove '* ' or '  ' from output
       expect(rows2, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
@@ -130,7 +130,6 @@ void main() {
           prev = next;
         }
       }
-
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
@@ -156,12 +155,13 @@ void main() {
 
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
-        .split('\n')
-        .map((String line) => line.trim())
-        .where((String line) => line?.isNotEmpty == true)
-        .skip(1); // remove `Flutter channels:` line
+          .split('\n')
+          .map((String line) => line.trim())
+          .where((String line) => line?.isNotEmpty == true)
+          .skip(1); // remove `Flutter channels:` line
 
-      expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
+      expect(rows,
+          <String>['beta', 'stable', 'Currently not on an official channel.']);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
@@ -173,11 +173,15 @@ void main() {
           command: <String>['git', 'fetch'],
         ),
         const FakeCommand(
-          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+          command: <String>[
+            'git',
+            'show-ref',
+            '--verify',
+            '--quiet',
+            'refs/heads/beta'
+          ],
         ),
-        const FakeCommand(
-            command: <String>['git', 'checkout', 'beta', '--']
-        ),
+        const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
       ]);
 
       final ChannelCommand command = ChannelCommand();
@@ -196,11 +200,15 @@ void main() {
           command: <String>['git', 'fetch'],
         ),
         const FakeCommand(
-          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
+          command: <String>[
+            'git',
+            'show-ref',
+            '--verify',
+            '--quiet',
+            'refs/heads/stable'
+          ],
         ),
-        const FakeCommand(
-            command: <String>['git', 'checkout', 'stable', '--']
-        ),
+        const FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
       ]);
 
       await runner.run(<String>['channel', 'stable']);
@@ -211,17 +219,22 @@ void main() {
       ProcessManager: () => fakeProcessManager,
     });
 
-    testUsingContext('switching channels prompts to run flutter upgrade', () async {
+    testUsingContext('switching channels prompts to run flutter upgrade',
+        () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'fetch'],
         ),
         const FakeCommand(
-          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+          command: <String>[
+            'git',
+            'show-ref',
+            '--verify',
+            '--quiet',
+            'refs/heads/beta'
+          ],
         ),
-        const FakeCommand(
-            command: <String>['git', 'checkout', 'beta', '--']
-        ),
+        const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
       ]);
 
       final ChannelCommand command = ChannelCommand();
@@ -230,13 +243,13 @@ void main() {
 
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
+        containsIgnoringWhitespace(
+            "Successfully switched to flutter channel 'beta'."),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace(
-          "To ensure that you're on the latest build "
-          "from this channel, run 'flutter upgrade'"),
+        containsIgnoringWhitespace("To ensure that you're on the latest build "
+            "from this channel, run 'flutter upgrade'"),
       );
       expect(testLogger.errorText, hasLength(0));
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -247,17 +260,22 @@ void main() {
 
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
     // doesn't return.
-    testUsingContext('removes version stamp file when switching channels', () async {
+    testUsingContext('removes version stamp file when switching channels',
+        () async {
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'fetch'],
         ),
         const FakeCommand(
-          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+          command: <String>[
+            'git',
+            'show-ref',
+            '--verify',
+            '--quiet',
+            'refs/heads/beta'
+          ],
         ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', 'beta', '--']
-        ),
+        const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
       ]);
 
       final File versionCheckFile = globals.cache.getStampFileFor(
@@ -278,7 +296,8 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
-      expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
+      expect(
+          testLogger.statusText, isNot(contains('A new version of Flutter')));
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);

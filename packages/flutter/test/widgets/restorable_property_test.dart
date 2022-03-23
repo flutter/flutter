@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
+  testWidgets('value is not accessible when not registered',
+      (WidgetTester tester) async {
     expect(() => RestorableNum<num>(0).value, throwsAssertionError);
     expect(() => RestorableDouble(1.0).value, throwsAssertionError);
     expect(() => RestorableInt(1).value, throwsAssertionError);
@@ -18,16 +19,20 @@ void main() {
     expect(() => RestorableStringN('hello').value, throwsAssertionError);
     expect(() => RestorableBoolN(true).value, throwsAssertionError);
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
-    expect(() => RestorableDateTime(DateTime(2020, 4, 3)).value, throwsAssertionError);
-    expect(() => RestorableDateTimeN(DateTime(2020, 4, 3)).value, throwsAssertionError);
+    expect(() => RestorableDateTime(DateTime(2020, 4, 3)).value,
+        throwsAssertionError);
+    expect(() => RestorableDateTimeN(DateTime(2020, 4, 3)).value,
+        throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
-  testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+  testWidgets('work when not in restoration scope',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const _RestorableWidget());
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     // Initialized to default values.
     expect(state.numValue.value, 99);
@@ -171,7 +176,8 @@ void main() {
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     // Modify values.
     state.setProperties(() {
@@ -193,7 +199,8 @@ void main() {
     await tester.pump();
     expect(find.text('guten tag'), findsOneWidget);
 
-    final TestRestorationData restorationData = await tester.getRestorationData();
+    final TestRestorationData restorationData =
+        await tester.getRestorationData();
 
     // Modify values.
     state.setProperties(() {
@@ -261,7 +268,8 @@ void main() {
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     final List<String> notifyLog = <String>[];
 
@@ -416,14 +424,16 @@ void main() {
     expect(notifyLog, isEmpty);
   });
 
-  testWidgets('RestorableValue calls didUpdateValue', (WidgetTester tester) async {
+  testWidgets('RestorableValue calls didUpdateValue',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     expect(state.objectValue.didUpdateValueCallCount, 0);
 
@@ -440,15 +450,16 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
-
-  testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
+  testWidgets('RestorableN types are properly defined',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
     state.setProperties(() {
       state.nullableIntValue.value = 24;
       state.nullableDoubleValue.value = 1.5;
@@ -510,20 +521,23 @@ class _RestorableWidget extends StatefulWidget {
   State<_RestorableWidget> createState() => _RestorableWidgetState();
 }
 
-class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
+class _RestorableWidgetState extends State<_RestorableWidget>
+    with RestorationMixin {
   final RestorableNum<num> numValue = RestorableNum<num>(99);
   final RestorableDouble doubleValue = RestorableDouble(123.2);
   final RestorableInt intValue = RestorableInt(42);
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
-  final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
+  final RestorableDateTime dateTimeValue =
+      RestorableDateTime(DateTime(2021, 3, 16));
   final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
   final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
   final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(null);
-  final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
+  final RestorableTextEditingController controllerValue =
+      RestorableTextEditingController(text: 'FooBar');
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override

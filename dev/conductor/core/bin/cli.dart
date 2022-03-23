@@ -13,7 +13,8 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-const String readmeUrl = 'https://github.com/flutter/flutter/tree/master/dev/conductor/README.md';
+const String readmeUrl =
+    'https://github.com/flutter/flutter/tree/master/dev/conductor/README.md';
 
 Future<void> main(List<String> args) async {
   const FileSystem fileSystem = LocalFileSystem();
@@ -35,7 +36,7 @@ Future<void> main(List<String> args) async {
   final CommandRunner<void> runner = CommandRunner<void>(
     'conductor',
     'A tool for coordinating Flutter releases. For more documentation on '
-    'usage, please see $readmeUrl.',
+        'usage, please see $readmeUrl.',
     usageLineLength: 80,
   );
 
@@ -43,7 +44,8 @@ Future<void> main(List<String> args) async {
     <String>['rev-parse'],
     'Get the revision of the current Flutter SDK',
     workingDirectory: _localFlutterRoot.path,
-  )).trim();
+  ))
+      .trim();
 
   <Command<void>>[
     CodesignCommand(

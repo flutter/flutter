@@ -37,7 +37,8 @@ const Object contextKey = _Key.key;
 /// context will not have any values associated with it.
 ///
 /// This is guaranteed to never return `null`.
-AppContext get context => Zone.current[contextKey] as AppContext? ?? AppContext._root;
+AppContext get context =>
+    Zone.current[contextKey] as AppContext? ?? AppContext._root;
 
 /// A lookup table (mapping types to values) and an implied scope, in which
 /// code is run.
@@ -69,7 +70,8 @@ class AppContext {
 
   dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
 
-  dynamic _unboxNull(dynamic value) => value == _BoxedNull.instance ? null : value;
+  dynamic _unboxNull(dynamic value) =>
+      value == _BoxedNull.instance ? null : value;
 
   /// Returns the generated value for [type] if such a generator exists.
   ///

@@ -138,7 +138,8 @@ void main() {
     expect(state, same(tester.state(find.byType(_StatefulTestWidget))));
   });
 
-  testWidgets('does not jump when interrupted - forward', (WidgetTester tester) async {
+  testWidgets('does not jump when interrupted - forward',
+      (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
@@ -202,7 +203,8 @@ void main() {
     expect(_getOpacity(tester), 1.0);
   });
 
-  testWidgets('does not jump when interrupted - reverse', (WidgetTester tester) async {
+  testWidgets('does not jump when interrupted - reverse',
+      (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       value: 1.0,
       vsync: const TestVSync(),

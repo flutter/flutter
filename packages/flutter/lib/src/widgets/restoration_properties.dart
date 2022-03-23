@@ -80,6 +80,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
     assert(isRegistered);
     return _value as T;
   }
+
   T? _value;
   set value(T newValue) {
     assert(isRegistered);
@@ -111,8 +112,8 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
 // See [_RestorablePrimitiveValue] for the non-nullable version of this class.
 class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
   _RestorablePrimitiveValueN(this._defaultValue)
-    : assert(debugIsSerializableForRestoration(_defaultValue)),
-      super();
+      : assert(debugIsSerializableForRestoration(_defaultValue)),
+        super();
 
   final T _defaultValue;
 
@@ -134,11 +135,12 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
 
 // _RestorablePrimitiveValue and its subclasses are non-nullable.
 // See [_RestorablePrimitiveValueN] for the nullable version of this class.
-class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
+class _RestorablePrimitiveValue<T extends Object>
+    extends _RestorablePrimitiveValueN<T> {
   _RestorablePrimitiveValue(T defaultValue)
-    : assert(defaultValue != null),
-      assert(debugIsSerializableForRestoration(defaultValue)),
-      super(defaultValue);
+      : assert(defaultValue != null),
+        assert(debugIsSerializableForRestoration(defaultValue)),
+        super(defaultValue);
 
   @override
   set value(T value) {
@@ -184,7 +186,9 @@ class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// If no restoration data is available to restore the value in this property
   /// from, the property will be initialized with the provided `defaultValue`.
   /// {@endtemplate}
-  RestorableNum(T defaultValue) : assert(defaultValue != null), super(defaultValue);
+  RestorableNum(T defaultValue)
+      : assert(defaultValue != null),
+        super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [double].
@@ -198,7 +202,9 @@ class RestorableDouble extends RestorableNum<double> {
   /// Creates a [RestorableDouble].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableDouble(double defaultValue) : assert(defaultValue != null), super(defaultValue);
+  RestorableDouble(double defaultValue)
+      : assert(defaultValue != null),
+        super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore an [int].
@@ -212,7 +218,9 @@ class RestorableInt extends RestorableNum<int> {
   /// Creates a [RestorableInt].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableInt(int defaultValue) : assert(defaultValue != null), super(defaultValue);
+  RestorableInt(int defaultValue)
+      : assert(defaultValue != null),
+        super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [String].
@@ -226,7 +234,9 @@ class RestorableString extends _RestorablePrimitiveValue<String> {
   /// Creates a [RestorableString].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableString(String defaultValue) : assert(defaultValue != null), super(defaultValue);
+  RestorableString(String defaultValue)
+      : assert(defaultValue != null),
+        super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [bool].
@@ -240,7 +250,9 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
+  RestorableBool(bool defaultValue)
+      : assert(defaultValue != null),
+        super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [bool] that is
@@ -343,7 +355,8 @@ class RestorableDateTime extends RestorableValue<DateTime> {
   }
 
   @override
-  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
+  DateTime fromPrimitives(Object? data) =>
+      DateTime.fromMillisecondsSinceEpoch(data! as int);
 
   @override
   Object? toPrimitives() => value.millisecondsSinceEpoch;
@@ -371,7 +384,8 @@ class RestorableDateTimeN extends RestorableValue<DateTime?> {
   }
 
   @override
-  DateTime? fromPrimitives(Object? data) => data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
+  DateTime? fromPrimitives(Object? data) =>
+      data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
 
   @override
   Object? toPrimitives() => value?.millisecondsSinceEpoch;
@@ -388,7 +402,8 @@ class RestorableDateTimeN extends RestorableValue<DateTime?> {
 /// [toPrimitives] whenever the wrapped [Listenable] notifies its listeners to
 /// update the information that this property has stored in the restoration
 /// data.
-abstract class RestorableListenable<T extends Listenable> extends RestorableProperty<T> {
+abstract class RestorableListenable<T extends Listenable>
+    extends RestorableProperty<T> {
   /// The [Listenable] stored in this property.
   ///
   /// A representation of the current value of the [Listenable] is stored in the
@@ -403,6 +418,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
     assert(isRegistered);
     return _value!;
   }
+
   T? _value;
 
   @override
@@ -435,7 +451,8 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// Furthermore, the property will dispose the wrapped [ChangeNotifier] when
 /// either the property itself is disposed or its value is replaced with another
 /// [ChangeNotifier] instance.
-abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
+abstract class RestorableChangeNotifier<T extends ChangeNotifier>
+    extends RestorableListenable<T> {
   @override
   void initWithValue(T value) {
     _disposeOldValue();
@@ -464,21 +481,24 @@ abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends Restor
 /// state restoration, the property will restore [TextEditingController.text] to
 /// the value it had when the restoration data it is getting restored from was
 /// collected.
-class RestorableTextEditingController extends RestorableChangeNotifier<TextEditingController> {
+class RestorableTextEditingController
+    extends RestorableChangeNotifier<TextEditingController> {
   /// Creates a [RestorableTextEditingController].
   ///
   /// This constructor treats a null `text` argument as if it were the empty
   /// string.
-  factory RestorableTextEditingController({String? text}) => RestorableTextEditingController.fromValue(
-    text == null ? TextEditingValue.empty : TextEditingValue(text: text),
-  );
+  factory RestorableTextEditingController({String? text}) =>
+      RestorableTextEditingController.fromValue(
+        text == null ? TextEditingValue.empty : TextEditingValue(text: text),
+      );
 
   /// Creates a [RestorableTextEditingController] from an initial
   /// [TextEditingValue].
   ///
   /// This constructor treats a null `value` argument as if it were
   /// [TextEditingValue.empty].
-  RestorableTextEditingController.fromValue(TextEditingValue value) : _initialValue = value;
+  RestorableTextEditingController.fromValue(TextEditingValue value)
+      : _initialValue = value;
 
   final TextEditingValue _initialValue;
 

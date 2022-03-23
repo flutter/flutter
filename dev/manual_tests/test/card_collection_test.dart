@@ -13,13 +13,13 @@ import 'mock_image_http.dart';
 void main() {
   testWidgets('Card Collection smoke test', (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
-      card_collection.main(); // builds the app and schedules a frame but doesn't trigger one
+      card_collection
+          .main(); // builds the app and schedules a frame but doesn't trigger one
       await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
       await tester.pump(); // triggers a frame
 
       final Finder navigationMenu = find.byWidgetPredicate((Widget widget) {
-        if (widget is Tooltip)
-          return widget.message == 'Open navigation menu';
+        if (widget is Tooltip) return widget.message == 'Open navigation menu';
         return false;
       });
 
@@ -27,7 +27,8 @@ void main() {
 
       await tester.tap(navigationMenu);
       await tester.pump(); // start opening menu
-      await tester.pump(const Duration(seconds: 1)); // wait til it's really opened
+      await tester
+          .pump(const Duration(seconds: 1)); // wait til it's really opened
 
       // smoke test for various checkboxes
       await tester.tap(find.text('Make card labels editable'));

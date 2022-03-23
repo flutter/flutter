@@ -5,7 +5,6 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +20,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello',
+            child: const Text(
+              'Hello',
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xffff0000)),
@@ -45,7 +45,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello world how are you today',
+            child: const Text(
+              'Hello world how are you today',
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xffff0000)),
@@ -61,7 +62,6 @@ void main() {
     );
   });
 
-
   testWidgets('Text Foreground', (WidgetTester tester) async {
     const Color black = Color(0xFF000000);
     const Color red = Color(0xFFFF0000);
@@ -74,7 +74,8 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: RepaintBoundary(
-          child: Text('Hello',
+          child: Text(
+            'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               foreground: Paint()
@@ -95,7 +96,8 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: RepaintBoundary(
-          child: Text('Hello',
+          child: Text(
+            'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               foreground: Paint()
@@ -117,7 +119,8 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: RepaintBoundary(
-          child: Text('Hello',
+          child: Text(
+            'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               foreground: Paint()
@@ -160,16 +163,14 @@ void main() {
                 text: 'text1 ',
                 style: TextStyle(
                   color: translucentGreen,
-                  background: Paint()
-                    ..color = red.withOpacity(0.5),
+                  background: Paint()..color = red.withOpacity(0.5),
                 ),
                 children: <InlineSpan>[
                   TextSpan(
                     text: 'text2',
                     style: TextStyle(
                       color: translucentDarkRed,
-                      background: Paint()
-                        ..color = blue.withOpacity(0.5),
+                      background: Paint()..color = blue.withOpacity(0.5),
                     ),
                   ),
                 ],
@@ -189,25 +190,24 @@ void main() {
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: RepaintBoundary(
-              child: Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.green,
-                  child: Center(
-                    child: Container(
-                      width: 100.0,
-                      color: Colors.blue,
-                      child: const Text(
-                        'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
-                        style: TextStyle(color: Colors.black),
-                        maxLines: 3,
-                        overflow: TextOverflow.fade,
-                      ),
+      MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: RepaintBoundary(
+            child: Center(
+              child: Container(
+                width: 200.0,
+                height: 200.0,
+                color: Colors.green,
+                child: Center(
+                  child: Container(
+                    width: 100.0,
+                    color: Colors.blue,
+                    child: const Text(
+                      'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                      style: TextStyle(color: Colors.black),
+                      maxLines: 3,
+                      overflow: TextOverflow.fade,
                     ),
                   ),
                 ),
@@ -215,6 +215,7 @@ void main() {
             ),
           ),
         ),
+      ),
     );
 
     await expectLater(
@@ -233,7 +234,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: const Text(
+              'Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(),
@@ -258,7 +260,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine2\nLine3',
+            child: const Text(
+              'Hello\nLine2\nLine3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -285,7 +288,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: const Text(
+              'Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -365,7 +369,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: const Text(
+              'Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -531,7 +536,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -555,7 +561,7 @@ void main() {
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -624,7 +630,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'My name is: ',
@@ -633,11 +640,15 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(
+                              width: 70, height: 25, child: TextField()),
                         ),
-                        TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
+                        TextSpan(
+                            text: ', and my favorite city is: ',
+                            style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(
+                              width: 70, height: 25, child: TextField()),
                         ),
                       ],
                     ),
@@ -670,7 +681,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'outer',
@@ -688,7 +700,8 @@ void main() {
                                   child: Text.rich(
                                     TextSpan(
                                       text: 'inner2',
-                                      style: TextStyle(color: Color(0xf003ffff)),
+                                      style:
+                                          TextStyle(color: Color(0xf003ffff)),
                                       children: <InlineSpan>[
                                         WidgetSpan(
                                           child: SizedBox(
@@ -699,7 +712,7 @@ void main() {
                                                 color: Color(0xffffff30),
                                               ),
                                               child: Center(
-                                                child:SizedBox(
+                                                child: SizedBox(
                                                   width: 10.0,
                                                   height: 15.0,
                                                   child: DecoratedBox(
@@ -725,7 +738,7 @@ void main() {
                                         color: Color(0xff5fff00),
                                       ),
                                       child: Center(
-                                        child:SizedBox(
+                                        child: SizedBox(
                                           width: 10.0,
                                           height: 15.0,
                                           child: DecoratedBox(
@@ -744,7 +757,8 @@ void main() {
                         ),
                         TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(
+                              width: 70, height: 25, child: TextField()),
                         ),
                         WidgetSpan(
                           child: SizedBox(
@@ -755,7 +769,7 @@ void main() {
                                 color: Color(0xffff00ff),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -799,7 +813,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -827,7 +842,7 @@ void main() {
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -906,7 +921,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -934,7 +950,7 @@ void main() {
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -1013,7 +1029,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -1041,7 +1058,7 @@ void main() {
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -1120,7 +1137,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -1148,7 +1166,7 @@ void main() {
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -1227,7 +1245,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -1255,7 +1274,7 @@ void main() {
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -1332,11 +1351,13 @@ void main() {
             ),
             child: Column(
               children: const <Widget>[
-                Text('Hello\nLine 2\nLine 3',
+                Text(
+                  'Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5),
                 ),
-                Text('Hello\nLine 2\nLine 3',
+                Text(
+                  'Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(
@@ -1344,7 +1365,8 @@ void main() {
                     applyHeightToLastDescent: false,
                   ),
                 ),
-                Text('Hello',
+                Text(
+                  'Hello',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(

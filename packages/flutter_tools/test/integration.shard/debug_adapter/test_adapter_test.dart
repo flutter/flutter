@@ -45,7 +45,8 @@ void main() {
 
     // Check the printed output shows that the run finished, and it's exit
     // code (which is 1 due to the failing test).
-    final String output = outputEvents.output.map((OutputEventBody e) => e.output).join();
+    final String output =
+        outputEvents.output.map((OutputEventBody e) => e.output).join();
     expectLines(
       output,
       <Object>[
@@ -74,7 +75,8 @@ void main() {
 
     // Check the printed output shows that the run finished, and it's exit
     // code (which is 1 due to the failing test).
-    final String output = outputEvents.output.map((OutputEventBody e) => e.output).join();
+    final String output =
+        outputEvents.output.map((OutputEventBody e) => e.output).join();
     expectLines(
       output,
       _testsProjectExpectedOutput,
@@ -106,7 +108,8 @@ void main() {
 
     final List<Object> testsNames = outputEvents.testNotifications
         .where((Map<String, Object?> e) => e['type'] == 'testStart')
-        .map((Map<String, Object?> e) => (e['test']! as Map<String, Object?>)['name']!)
+        .map((Map<String, Object?> e) =>
+            (e['test']! as Map<String, Object?>)['name']!)
         .toList();
 
     expect(testsNames, contains('Flutter tests can pass'));
@@ -137,8 +140,9 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
 void _expectStandardTestsProjectResults(TestEvents events) {
   // Check we received all expected test events passed through from
   // package:test.
-  final List<Object> eventNames =
-      events.testNotifications.map((Map<String, Object?> e) => e['type']!).toList();
+  final List<Object> eventNames = events.testNotifications
+      .map((Map<String, Object?> e) => e['type']!)
+      .toList();
 
   // start/done should always be first/last.
   expect(eventNames.first, equals('start'));

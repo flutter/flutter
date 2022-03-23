@@ -76,19 +76,20 @@ class RawMaterialButton extends StatefulWidget {
     MaterialTapTargetSize? materialTapTargetSize,
     this.child,
     this.enableFeedback = true,
-  }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
-       assert(shape != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(focusElevation != null && focusElevation >= 0.0),
-       assert(hoverElevation != null && hoverElevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
-       assert(padding != null),
-       assert(constraints != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(key: key);
+  })  : materialTapTargetSize =
+            materialTapTargetSize ?? MaterialTapTargetSize.padded,
+        assert(shape != null),
+        assert(elevation != null && elevation >= 0.0),
+        assert(focusElevation != null && focusElevation >= 0.0),
+        assert(hoverElevation != null && hoverElevation >= 0.0),
+        assert(highlightElevation != null && highlightElevation >= 0.0),
+        assert(disabledElevation != null && disabledElevation >= 0.0),
+        assert(padding != null),
+        assert(constraints != null),
+        assert(animationDuration != null),
+        assert(clipBehavior != null),
+        assert(autofocus != null),
+        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -315,8 +316,8 @@ class RawMaterialButton extends StatefulWidget {
   State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
-class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin {
-
+class _RawMaterialButtonState extends State<RawMaterialButton>
+    with MaterialStateMixin {
   @override
   void initState() {
     super.initState();
@@ -356,23 +357,29 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
-    final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
+    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(
+        widget.textStyle?.color, materialStates);
+    final ShapeBorder? effectiveShape =
+        MaterialStateProperty.resolveAs<ShapeBorder?>(
+            widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
-    final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
-    final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
+    final BoxConstraints effectiveConstraints =
+        widget.visualDensity.effectiveConstraints(widget.constraints);
+    final MouseCursor? effectiveMouseCursor =
+        MaterialStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       materialStates,
     );
-    final EdgeInsetsGeometry padding = widget.padding.add(
-      EdgeInsets.only(
-        left: densityAdjustment.dx,
-        top: densityAdjustment.dy,
-        right: densityAdjustment.dx,
-        bottom: densityAdjustment.dy,
-      ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
-
+    final EdgeInsetsGeometry padding = widget.padding
+        .add(
+          EdgeInsets.only(
+            left: densityAdjustment.dx,
+            top: densityAdjustment.dy,
+            right: densityAdjustment.dx,
+            bottom: densityAdjustment.dy,
+          ),
+        )
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
@@ -382,8 +389,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         shape: effectiveShape,
         color: widget.fillColor,
         // For compatibility during the M3 migration the default shadow needs to be passed.
-        shadowColor: Theme.of(context).useMaterial3 ? Theme.of(context).shadowColor : null,
-        type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+        shadowColor: Theme.of(context).useMaterial3
+            ? Theme.of(context).shadowColor
+            : null,
+        type: widget.fillColor == null
+            ? MaterialType.transparency
+            : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
         child: InkWell(
@@ -391,7 +402,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
           canRequestFocus: widget.enabled,
           onFocusChange: updateMaterialState(MaterialState.focused),
           autofocus: widget.autofocus,
-          onHighlightChanged: updateMaterialState(MaterialState.pressed, onChanged: widget.onHighlightChanged),
+          onHighlightChanged: updateMaterialState(MaterialState.pressed,
+              onChanged: widget.onHighlightChanged),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
@@ -463,7 +475,8 @@ class _InputPadding extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+  void updateRenderObject(
+      BuildContext context, covariant _RenderInputPadding renderObject) {
     renderObject.minSize = minSize;
   }
 }
@@ -474,8 +487,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
-      return;
+    if (_minSize == value) return;
     _minSize = value;
     markNeedsLayout();
   }
@@ -508,7 +520,9 @@ class _RenderInputPadding extends RenderShiftedBox {
     return 0.0;
   }
 
-  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  Size _computeSize(
+      {required BoxConstraints constraints,
+      required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
       final double height = math.max(childSize.width, minSize.width);
@@ -534,12 +548,13 @@ class _RenderInputPadding extends RenderShiftedBox {
     );
     if (child != null) {
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
+      childParentData.offset =
+          Alignment.center.alongOffset(size - child!.size as Offset);
     }
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (super.hitTest(result, position: position)) {
       return true;
     }

@@ -5,23 +5,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   test('MaterialStateProperty.resolveWith()', () {
-    final MaterialStateProperty<MaterialState> value = MaterialStateProperty.resolveWith<MaterialState>(
+    final MaterialStateProperty<MaterialState> value =
+        MaterialStateProperty.resolveWith<MaterialState>(
       (Set<MaterialState> states) => states.first,
     );
-    expect(value.resolve(<MaterialState>{MaterialState.hovered}), MaterialState.hovered);
-    expect(value.resolve(<MaterialState>{MaterialState.focused}), MaterialState.focused);
-    expect(value.resolve(<MaterialState>{MaterialState.pressed}), MaterialState.pressed);
-    expect(value.resolve(<MaterialState>{MaterialState.dragged}), MaterialState.dragged);
-    expect(value.resolve(<MaterialState>{MaterialState.selected}), MaterialState.selected);
-    expect(value.resolve(<MaterialState>{MaterialState.disabled}), MaterialState.disabled);
-    expect(value.resolve(<MaterialState>{MaterialState.error}), MaterialState.error);
+    expect(value.resolve(<MaterialState>{MaterialState.hovered}),
+        MaterialState.hovered);
+    expect(value.resolve(<MaterialState>{MaterialState.focused}),
+        MaterialState.focused);
+    expect(value.resolve(<MaterialState>{MaterialState.pressed}),
+        MaterialState.pressed);
+    expect(value.resolve(<MaterialState>{MaterialState.dragged}),
+        MaterialState.dragged);
+    expect(value.resolve(<MaterialState>{MaterialState.selected}),
+        MaterialState.selected);
+    expect(value.resolve(<MaterialState>{MaterialState.disabled}),
+        MaterialState.disabled);
+    expect(value.resolve(<MaterialState>{MaterialState.error}),
+        MaterialState.error);
   });
 
   test('MaterialStateProperty.all()', () {
-    final MaterialStateProperty<int> value = MaterialStateProperty.all<int>(123);
+    final MaterialStateProperty<int> value =
+        MaterialStateProperty.all<int>(123);
     expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.pressed}), 123);

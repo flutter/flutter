@@ -19,7 +19,8 @@ class TextStyleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle nameStyle = theme.textTheme.caption!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle nameStyle = theme.textTheme.caption!
+        .copyWith(color: theme.textTheme.caption!.color);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
       child: Row(
@@ -48,17 +49,42 @@ class TypographyDemo extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
       if (MediaQuery.of(context).size.width > 500.0)
-        TextStyleItem(name: 'Headline 1', style: textTheme.headline1!, text: 'Light 112sp'),
-      TextStyleItem(name: 'Headline 2', style: textTheme.headline2!, text: 'Regular 56sp'),
-      TextStyleItem(name: 'Headline 3', style: textTheme.headline3!, text: 'Regular 45sp'),
-      TextStyleItem(name: 'Headline 4', style: textTheme.headline4!, text: 'Regular 34sp'),
-      TextStyleItem(name: 'Headline 5', style: textTheme.headline5!, text: 'Regular 24sp'),
-      TextStyleItem(name: 'Headline 6', style: textTheme.headline6!, text: 'Medium 20sp'),
-      TextStyleItem(name: 'Subtitle 1', style: textTheme.subtitle1!, text: 'Regular 16sp'),
-      TextStyleItem(name: 'Body 1', style: textTheme.bodyText1!, text: 'Medium 14sp'),
-      TextStyleItem(name: 'Body 2', style: textTheme.bodyText2!, text: 'Regular 14sp'),
-      TextStyleItem(name: 'Caption', style: textTheme.caption!, text: 'Regular 12sp'),
-      TextStyleItem(name: 'Button', style: textTheme.button!, text: 'MEDIUM (ALL CAPS) 14sp'),
+        TextStyleItem(
+            name: 'Headline 1',
+            style: textTheme.headline1!,
+            text: 'Light 112sp'),
+      TextStyleItem(
+          name: 'Headline 2',
+          style: textTheme.headline2!,
+          text: 'Regular 56sp'),
+      TextStyleItem(
+          name: 'Headline 3',
+          style: textTheme.headline3!,
+          text: 'Regular 45sp'),
+      TextStyleItem(
+          name: 'Headline 4',
+          style: textTheme.headline4!,
+          text: 'Regular 34sp'),
+      TextStyleItem(
+          name: 'Headline 5',
+          style: textTheme.headline5!,
+          text: 'Regular 24sp'),
+      TextStyleItem(
+          name: 'Headline 6', style: textTheme.headline6!, text: 'Medium 20sp'),
+      TextStyleItem(
+          name: 'Subtitle 1',
+          style: textTheme.subtitle1!,
+          text: 'Regular 16sp'),
+      TextStyleItem(
+          name: 'Body 1', style: textTheme.bodyText1!, text: 'Medium 14sp'),
+      TextStyleItem(
+          name: 'Body 2', style: textTheme.bodyText2!, text: 'Regular 14sp'),
+      TextStyleItem(
+          name: 'Caption', style: textTheme.caption!, text: 'Regular 12sp'),
+      TextStyleItem(
+          name: 'Button',
+          style: textTheme.button!,
+          text: 'MEDIUM (ALL CAPS) 14sp'),
     ];
 
     return Scaffold(

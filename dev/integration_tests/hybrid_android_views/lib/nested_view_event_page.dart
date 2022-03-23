@@ -13,7 +13,9 @@ import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
   const NestedViewEventPage({Key? key})
-      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'), key: key);
+      : super('Nested View Event Tests',
+            const ValueKey<String>('NestedViewEventTile'),
+            key: key);
 
   @override
   Widget build(BuildContext context) => const NestedViewEventBody();
@@ -26,11 +28,7 @@ class NestedViewEventBody extends StatefulWidget {
   State<NestedViewEventBody> createState() => NestedViewEventBodyState();
 }
 
-enum _LastTestStatus {
-  pending,
-  success,
-  error
-}
+enum _LastTestStatus { pending, success, error }
 
 class NestedViewEventBodyState extends State<NestedViewEventBody> {
   MethodChannel? viewChannel;
@@ -50,15 +48,16 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
         children: <Widget>[
           SizedBox(
             height: 300,
-              child: showPlatformView ?
-                AndroidPlatformView(
-                  key: const ValueKey<String>('PlatformView'),
-                  viewType: 'simple_view',
-                  onPlatformViewCreated: onPlatformViewCreated,
-                ) : null,
+            child: showPlatformView
+                ? AndroidPlatformView(
+                    key: const ValueKey<String>('PlatformView'),
+                    viewType: 'simple_view',
+                    onPlatformViewCreated: onPlatformViewCreated,
+                  )
+                : null,
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
-          if (viewChannel != null) ... <Widget>[
+          if (viewChannel != null) ...<Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
               onPressed: onShowAlertDialogPressed,
@@ -83,8 +82,8 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                 ),
                 if (nestedViewClickCount > 0)
                   Text(
-                      'Click count: $nestedViewClickCount',
-                      key: const ValueKey<String>('NestedViewClickCount'),
+                    'Click count: $nestedViewClickCount',
+                    key: const ValueKey<String>('NestedViewClickCount'),
                   ),
               ],
             ),
@@ -96,14 +95,18 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
 
   Widget _statusWidget() {
     assert(_lastTestStatus != _LastTestStatus.pending);
-    final String message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError!;
+    final String message =
+        _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError!;
     return Container(
-      color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
+      color: _lastTestStatus == _LastTestStatus.success
+          ? Colors.green
+          : Colors.red,
       child: Text(
         message,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
-          color: _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
+          color:
+              _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
         ),
       ),
     );
@@ -120,7 +123,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       setState(() {
         _lastTestStatus = _LastTestStatus.success;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -140,7 +143,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       setState(() {
         nestedViewClickCount++;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -166,7 +169,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     setState(() {
       viewChannel = MethodChannel('simple_view/$id');
     });
-    driverDataHandler.registerHandler('hierarchy')
-      .complete(() async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
+    driverDataHandler.registerHandler('hierarchy').complete(
+        () async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
   }
 }

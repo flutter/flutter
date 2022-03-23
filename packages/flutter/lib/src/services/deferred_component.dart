@@ -63,10 +63,11 @@ class DeferredComponent {
   ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
   ///    the dart method to trigger the installation of the corresponding deferred component that
   ///    contains the dart library.
-  static Future<void> installDeferredComponent({required String componentName}) async {
+  static Future<void> installDeferredComponent(
+      {required String componentName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'installDeferredComponent',
-      <String, dynamic>{ 'loadingUnitId': -1, 'componentName': componentName },
+      <String, dynamic>{'loadingUnitId': -1, 'componentName': componentName},
     );
   }
 
@@ -91,10 +92,11 @@ class DeferredComponent {
   ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
   ///    the dart method to trigger the installation of the corresponding deferred component that
   ///    contains the dart library.
-  static Future<void> uninstallDeferredComponent({required String componentName}) async {
+  static Future<void> uninstallDeferredComponent(
+      {required String componentName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'uninstallDeferredComponent',
-      <String, dynamic>{ 'loadingUnitId': -1, 'componentName': componentName },
+      <String, dynamic>{'loadingUnitId': -1, 'componentName': componentName},
     );
   }
 }

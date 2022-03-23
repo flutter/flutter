@@ -15,7 +15,8 @@ import '../../src/common.dart';
 void main() {
   group('convertToChunks', () {
     test('works correctly', () async {
-      final StreamController<Uint8List> controller = StreamController<Uint8List>();
+      final StreamController<Uint8List> controller =
+          StreamController<Uint8List>();
       final Stream<Uint8List> chunked = convertToChunks(controller.stream, 4);
       final Future<List<Uint8List>> chunkedListFuture = chunked.toList();
 
@@ -95,19 +96,22 @@ void main() {
       expect(adler32.hash, adler32Hash(utf8.encode('abcdefg')));
     });
 
-    test('currentBlock returns the correct entry when read less than one block', () {
+    test('currentBlock returns the correct entry when read less than one block',
+        () {
       final RollingAdler32 adler32 = RollingAdler32(7);
       utf8.encode('abcd').forEach(adler32.push);
       expect(adler32.currentBlock(), utf8.encode('abcd'));
     });
 
-    test('currentBlock returns the correct entry when read exactly one block', () {
+    test('currentBlock returns the correct entry when read exactly one block',
+        () {
       final RollingAdler32 adler32 = RollingAdler32(7);
       utf8.encode('abcdefg').forEach(adler32.push);
       expect(adler32.currentBlock(), utf8.encode('abcdefg'));
     });
 
-    test('currentBlock returns the correct entry when read more than one block', () {
+    test('currentBlock returns the correct entry when read more than one block',
+        () {
       final RollingAdler32 adler32 = RollingAdler32(7);
       utf8.encode('123456789abcdefg').forEach(adler32.push);
       expect(adler32.currentBlock(), utf8.encode('abcdefg'));
@@ -133,7 +137,8 @@ void main() {
     test('calculateBlockHashesOfFile works normally', () async {
       final File file = fileSystem.file('test')..writeAsStringSync(content1);
 
-      final BlockHashes hashes = await FileTransfer().calculateBlockHashesOfFile(file, blockSize: 4);
+      final BlockHashes hashes =
+          await FileTransfer().calculateBlockHashesOfFile(file, blockSize: 4);
       expect(hashes.blockSize, 4);
       expect(hashes.totalSize, content1.length);
       expect(hashes.adler32, hasLength(5));
@@ -159,8 +164,10 @@ void main() {
       final File file1 = fileSystem.file('file1')..writeAsStringSync(content1);
       final File file2 = fileSystem.file('file1')..writeAsStringSync(content1);
 
-      final BlockHashes hashes = await FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
-      final List<FileDeltaBlock> delta = await FileTransfer().computeDelta(file2, hashes);
+      final BlockHashes hashes =
+          await FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
+      final List<FileDeltaBlock> delta =
+          await FileTransfer().computeDelta(file2, hashes);
 
       expect(delta, isEmpty);
     });
@@ -169,21 +176,28 @@ void main() {
       final File file1 = fileSystem.file('file1')..writeAsStringSync(content1);
       final File file2 = fileSystem.file('file2')..writeAsStringSync(content2);
 
-      final BlockHashes hashes = await FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
-      final List<FileDeltaBlock> delta = await FileTransfer().computeDelta(file2, hashes);
+      final BlockHashes hashes =
+          await FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
+      final List<FileDeltaBlock> delta =
+          await FileTransfer().computeDelta(file2, hashes);
 
       expect(delta, expectedDelta);
     });
 
     test('binaryForRebuilding returns the correct binary', () async {
       final File file = fileSystem.file('file')..writeAsStringSync(content2);
-      final List<int> binaryForRebuilding = await FileTransfer().binaryForRebuilding(file, expectedDelta);
+      final List<int> binaryForRebuilding =
+          await FileTransfer().binaryForRebuilding(file, expectedDelta);
       expect(binaryForRebuilding, utf8.encode(expectedBinaryForRebuilding));
     });
 
     test('rebuildFile can rebuild the correct file', () async {
       final File file = fileSystem.file('file')..writeAsStringSync(content1);
-      await FileTransfer().rebuildFile(file, expectedDelta, Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(expectedBinaryForRebuilding)]));
+      await FileTransfer().rebuildFile(
+          file,
+          expectedDelta,
+          Stream<List<int>>.fromIterable(
+              <List<int>>[utf8.encode(expectedBinaryForRebuilding)]));
       expect(file.readAsStringSync(), content2);
     });
   });

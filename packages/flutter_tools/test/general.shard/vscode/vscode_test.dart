@@ -13,11 +13,16 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('VsCodeInstallLocation equality', () {
-    const VsCodeInstallLocation installLocation1 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
-    const VsCodeInstallLocation installLocation2 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
-    const VsCodeInstallLocation installLocation3 = VsCodeInstallLocation('cba', 'zyx', edition: '123');
-    const VsCodeInstallLocation installLocation4 = VsCodeInstallLocation('abc', 'xyz', edition: '123');
-    const VsCodeInstallLocation installLocation5 = VsCodeInstallLocation('abc', 'xyz', edition: '321');
+    const VsCodeInstallLocation installLocation1 =
+        VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const VsCodeInstallLocation installLocation2 =
+        VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const VsCodeInstallLocation installLocation3 =
+        VsCodeInstallLocation('cba', 'zyx', edition: '123');
+    const VsCodeInstallLocation installLocation4 =
+        VsCodeInstallLocation('abc', 'xyz', edition: '123');
+    const VsCodeInstallLocation installLocation5 =
+        VsCodeInstallLocation('abc', 'xyz', edition: '321');
 
     expect(installLocation1, installLocation2);
     expect(installLocation1.hashCode, installLocation2.hashCode);
@@ -29,10 +34,13 @@ void main() {
     expect(installLocation1.hashCode, isNot(installLocation5.hashCode));
   });
 
-  testWithoutContext('VsCode.fromDirectory does not crash when packages.json is malformed', () {
+  testWithoutContext(
+      'VsCode.fromDirectory does not crash when packages.json is malformed',
+      () {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     // Create invalid JSON file.
-    fileSystem.file(fileSystem.path.join('', 'resources', 'app', 'package.json'))
+    fileSystem
+        .file(fileSystem.path.join('', 'resources', 'app', 'package.json'))
       ..createSync(recursive: true)
       ..writeAsStringSync('{');
 
@@ -44,41 +52,64 @@ void main() {
   testWithoutContext('can locate VS Code installed via Snap', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     const String home = '/home/me';
-    final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
+    final Platform platform =
+        FakePlatform(environment: <String, String>{'HOME': home});
 
-    fileSystem.directory(fileSystem.path.join('/snap/code/current/', '.vscode')).createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join('/snap/code/current/', '.vscode'))
+        .createSync(recursive: true);
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager =
+        FakeProcessManager.list(<FakeCommand>[]);
 
-    final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
+    final List<VsCode> installed =
+        VsCode.allInstalled(fileSystem, platform, processManager);
     expect(installed.length, 1);
   });
 
   testWithoutContext('can locate installations on macOS', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     const String home = '/home/me';
-    final Platform platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{'HOME': home});
+    final Platform platform = FakePlatform(
+        operatingSystem: 'macos', environment: <String, String>{'HOME': home});
 
     final String randomLocation = fileSystem.path.join(
       '/',
       'random',
       'Visual Studio Code.app',
     );
-    fileSystem.directory(fileSystem.path.join(randomLocation, 'Contents')).createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join(randomLocation, 'Contents'))
+        .createSync(recursive: true);
 
     final String randomInsidersLocation = fileSystem.path.join(
       '/',
       'random',
       'Visual Studio Code - Insiders.app',
     );
-    fileSystem.directory(fileSystem.path.join(randomInsidersLocation, 'Contents')).createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join(randomInsidersLocation, 'Contents'))
+        .createSync(recursive: true);
 
-    fileSystem.directory(fileSystem.path.join('/', 'Applications', 'Visual Studio Code.app', 'Contents')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('/', 'Applications', 'Visual Studio Code - Insiders.app', 'Contents')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join(home, 'Applications', 'Visual Studio Code.app', 'Contents')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join(home, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents')).createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path
+            .join('/', 'Applications', 'Visual Studio Code.app', 'Contents'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join('/', 'Applications',
+            'Visual Studio Code - Insiders.app', 'Contents'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path
+            .join(home, 'Applications', 'Visual Studio Code.app', 'Contents'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join(home, 'Applications',
+            'Visual Studio Code - Insiders.app', 'Contents'))
+        .createSync(recursive: true);
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager =
+        FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
           'mdfind',
@@ -95,7 +126,8 @@ void main() {
       ),
     ]);
 
-    final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
+    final List<VsCode> installed =
+        VsCode.allInstalled(fileSystem, platform, processManager);
     expect(installed.length, 6);
     expect(processManager, hasNoRemainingExpectations);
   });

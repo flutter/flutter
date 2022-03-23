@@ -21,20 +21,22 @@ class SharedObject {
 
   static void reset(BuildContext context) {
     // Calling SharedAppData.setValue() causes dependent widgets to be rebuilt.
-    SharedAppData.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
+    SharedAppData.setValue<Object, SharedObject>(
+        context, _sharedObjectKey, SharedObject._());
   }
 
   static SharedObject of(BuildContext context) {
     // If a value for _sharedObjectKey has never been set then the third
     // callback parameter is used to generate an initial value.
-    return SharedAppData.getValue<Object, SharedObject>(context, _sharedObjectKey, () => SharedObject._());
+    return SharedAppData.getValue<Object, SharedObject>(
+        context, _sharedObjectKey, () => SharedObject._());
   }
 }
 
 // An example of a widget which depends on the SharedObject's value,
 // which might be provided - along with SharedObject - in a Dart package.
 class CustomWidget extends StatelessWidget {
-  const CustomWidget({ Key? key }) : super(key: key);
+  const CustomWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +51,12 @@ class CustomWidget extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(
-        child: CustomWidget()
-      ),
+      body: Center(child: CustomWidget()),
     );
   }
 }

@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlign to underlying CupertinoTextField',
+      (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
@@ -29,7 +30,8 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
-  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes scrollPhysics to underlying TextField',
+      (WidgetTester tester) async {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
@@ -49,7 +51,8 @@ void main() {
     expect(textFieldWidget.scrollPhysics, scrollPhysics);
   });
 
-  testWidgets('Passes textAlignVertical to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlignVertical to underlying CupertinoTextField',
+      (WidgetTester tester) async {
     const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 
     await tester.pumpWidget(
@@ -69,7 +72,8 @@ void main() {
     expect(textFieldWidget.textAlignVertical, textAlignVertical);
   });
 
-  testWidgets('Passes textInputAction to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textInputAction to underlying CupertinoTextField',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -87,7 +91,8 @@ void main() {
     expect(textFieldWidget.textInputAction, TextInputAction.next);
   });
 
-  testWidgets('Passes onEditingComplete to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes onEditingComplete to underlying CupertinoTextField',
+      (WidgetTester tester) async {
     void onEditingComplete() {}
 
     await tester.pumpWidget(
@@ -107,7 +112,8 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgets('Passes cursor attributes to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes cursor attributes to underlying CupertinoTextField',
+      (WidgetTester tester) async {
     const double cursorWidth = 3.14;
     const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(2);
@@ -135,7 +141,8 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgets('onFieldSubmit callbacks are called',
+      (WidgetTester tester) async {
     bool called = false;
 
     await tester.pumpWidget(
@@ -176,7 +183,8 @@ void main() {
     expect(value, 'Soup');
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super',
+      (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -199,7 +207,8 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
+  testWidgets('validate is called if widget is enabled',
+      (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -223,7 +232,8 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgets('readonly text form field will hide cursor by default',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -262,7 +272,9 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
@@ -290,7 +302,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
+  testWidgets('reset resets the text fields value to the initialValue',
+      (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoTextFormFieldRow(
@@ -299,9 +312,11 @@ void main() {
       ),
     ));
 
-    await tester.enterText(find.byType(CupertinoTextFormFieldRow), 'changedValue');
+    await tester.enterText(
+        find.byType(CupertinoTextFormFieldRow), 'changedValue');
 
-    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
+    final FormFieldState<String> state = tester
+        .state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
     state.reset();
 
     expect(find.text('changedValue'), findsNothing);
@@ -309,7 +324,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
+  testWidgets('didChange changes text fields value',
+      (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoTextFormFieldRow(
@@ -328,7 +344,8 @@ void main() {
     expect(find.text('changedValue'), findsOneWidget);
   });
 
-  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync',
+      (WidgetTester tester) async {
     bool called = false;
 
     late FormFieldState<String> state;
@@ -367,10 +384,12 @@ void main() {
 
     final CupertinoTextField widget =
         tester.widget(find.byType(CupertinoTextField));
-    expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+    expect(widget.autofillHints,
+        equals(const <String>[AutofillHints.countryName]));
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super',
+      (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -393,7 +412,8 @@ void main() {
     expect(validateCalled, 1);
   });
 
-  testWidgets('AutovalidateMode.always mode shows error from the start', (WidgetTester tester) async {
+  testWidgets('AutovalidateMode.always mode shows error from the start',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -413,7 +433,8 @@ void main() {
     expect(errorText.data, 'Error');
   });
 
-  testWidgets('Shows error text upon invalid input', (WidgetTester tester) async {
+  testWidgets('Shows error text upon invalid input',
+      (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: '');
 
     await tester.pumpWidget(
@@ -459,7 +480,8 @@ void main() {
     expect(errorText.data, 'Enter Value');
   });
 
-  testWidgets('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textDirection to underlying CupertinoTextField',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -473,7 +495,8 @@ void main() {
     final Finder ltrTextFieldFinder = find.byType(CupertinoTextField);
     expect(ltrTextFieldFinder, findsOneWidget);
 
-    final CupertinoTextField ltrTextFieldWidget = tester.widget(ltrTextFieldFinder);
+    final CupertinoTextField ltrTextFieldWidget =
+        tester.widget(ltrTextFieldFinder);
     expect(ltrTextFieldWidget.textDirection, TextDirection.ltr);
 
     await tester.pumpWidget(
@@ -489,7 +512,8 @@ void main() {
     final Finder rtlTextFieldFinder = find.byType(CupertinoTextField);
     expect(rtlTextFieldFinder, findsOneWidget);
 
-    final CupertinoTextField rtlTextFieldWidget = tester.widget(rtlTextFieldFinder);
+    final CupertinoTextField rtlTextFieldWidget =
+        tester.widget(rtlTextFieldFinder);
     expect(rtlTextFieldWidget.textDirection, TextDirection.rtl);
   });
 }

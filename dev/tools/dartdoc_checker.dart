@@ -25,7 +25,8 @@ import 'package:path/path.dart' as path;
 void checkForUnresolvedDirectives(String htmlOutputPath) {
   final Directory dartDocDir = Directory(htmlOutputPath);
   if (!dartDocDir.existsSync()) {
-    throw Exception('Directory with dartdoc output (${dartDocDir.path}) does not exist.');
+    throw Exception(
+        'Directory with dartdoc output (${dartDocDir.path}) does not exist.');
   }
 
   // Makes sure that the path we were given contains some of the expected
@@ -66,21 +67,25 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
   }
 
   if (canaryLibraries.isNotEmpty) {
-    throw Exception('Did not find docs for the following libraries: ${canaryLibraries.join(', ')}.');
+    throw Exception(
+        'Did not find docs for the following libraries: ${canaryLibraries.join(', ')}.');
   }
   if (canaryFiles.isNotEmpty) {
-    throw Exception('Did not find docs for the following files: ${canaryFiles.join(', ')}.');
+    throw Exception(
+        'Did not find docs for the following files: ${canaryFiles.join(', ')}.');
   }
   if (count > 0) {
-    throw Exception('Found $count unresolved dartdoc directives (see log above).');
+    throw Exception(
+        'Found $count unresolved dartdoc directives (see log above).');
   }
   print('No unresolved dartdoc directives detected.');
 }
 
 int _scanFile(File file) {
   assert(path.extension(file.path) == '.html');
-  final Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
-      .map((RegExpMatch m ) => m.group(0)!);
+  final Iterable<String> matches = _pattern
+      .allMatches(file.readAsStringSync())
+      .map((RegExpMatch m) => m.group(0)!);
 
   if (matches.isNotEmpty) {
     stderr.writeln('Found unresolved dartdoc directives in ${file.path}:');
@@ -107,10 +112,12 @@ final RegExp _pattern = RegExp(r'({@[^}\n]*}?)(?![^<>]*</code)');
 // program.
 void main(List<String> args) {
   if (args.length != 1) {
-    throw Exception('Must provide the path to the dartdoc HTML output as argument.');
+    throw Exception(
+        'Must provide the path to the dartdoc HTML output as argument.');
   }
   if (!Directory(args.single).existsSync()) {
-    throw Exception('The dartdoc HTML output directory ${args.single} does not exist.');
+    throw Exception(
+        'The dartdoc HTML output directory ${args.single} does not exist.');
   }
   checkForUnresolvedDirectives(args.single);
 }

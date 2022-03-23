@@ -56,14 +56,18 @@ void main() {
           fileSystem: memoryFileSystem,
           processManager: FakeProcessManager.any(),
         );
-        rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
+        rootOverride
+            .childDirectory('bin')
+            .childDirectory('internal')
+            .childFile('engine.version')
           ..createSync(recursive: true)
           ..writeAsStringSync(engineRevision);
       });
 
       testUsingContext('version unknown', () async {
         const String frameworkVersion = '0.0.0-unknown';
-        final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
+        final FakeFlutterVersion fakeFlutterVersion =
+            FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -73,7 +77,9 @@ void main() {
           verboseHelp: false,
         );
 
-        expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+        expect(
+            () =>
+                command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
             throwsToolExit(message: 'Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
@@ -102,7 +108,9 @@ void main() {
           verboseHelp: false,
         );
 
-        expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+        expect(
+            () =>
+                command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
             throwsToolExit(message: 'Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
@@ -128,7 +136,9 @@ void main() {
           verboseHelp: false,
         );
 
-        expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+        expect(
+            () =>
+                command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
             throwsToolExit(message: 'Could not find license'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
@@ -168,9 +178,11 @@ void main() {
               cache: cache,
               verboseHelp: false,
             );
-            command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory,
+                force: true);
 
-            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final File expectedPodspec =
+                outputDirectory.childFile('Flutter.podspec');
             expect(expectedPodspec.existsSync(), isTrue);
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
@@ -204,7 +216,8 @@ void main() {
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final File expectedPodspec =
+                outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
             expect(podspecContents, contains("'1.13.1113'"));
             expect(podspecContents, contains('# $frameworkVersion'));
@@ -224,9 +237,13 @@ void main() {
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final File expectedPodspec =
+                outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios/artifacts.zip'"));
+            expect(
+                podspecContents,
+                contains(
+                    "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -242,9 +259,13 @@ void main() {
             );
             command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
-            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final File expectedPodspec =
+                outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-profile/artifacts.zip'"));
+            expect(
+                podspecContents,
+                contains(
+                    "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-profile/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -260,9 +281,13 @@ void main() {
             );
             command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
-            final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
+            final File expectedPodspec =
+                outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-release/artifacts.zip'"));
+            expect(
+                podspecContents,
+                contains(
+                    "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-release/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),

@@ -9,8 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
+    await tester.pumpWidget(
+        RawKeyboardListener(focusNode: focusNode, child: Container()));
+    await tester.pumpWidget(
+        RawKeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(Container());
   });
 
@@ -36,11 +38,15 @@ void main() {
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(RawKeyDownEvent));
     expect(events[0].data.runtimeType, equals(RawKeyEventDataFuchsia));
-    final RawKeyEventDataFuchsia typedData = events[0].data as RawKeyEventDataFuchsia;
+    final RawKeyEventDataFuchsia typedData =
+        events[0].data as RawKeyEventDataFuchsia;
     expect(typedData.hidUsage, 0x700e3);
     expect(typedData.codePoint, 0x0);
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
-    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
+    expect(
+        typedData.isModifierPressed(ModifierKey.metaModifier,
+            side: KeyboardSide.left),
+        isTrue);
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
@@ -62,7 +68,8 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'web'); // ignore: avoid_redundant_argument_values
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft,
+        platform: 'web'); // ignore: avoid_redundant_argument_values
     await tester.idle();
 
     expect(events.length, 2);
@@ -71,13 +78,17 @@ void main() {
     final RawKeyEventDataWeb typedData = events[0].data as RawKeyEventDataWeb;
     expect(typedData.code, 'MetaLeft');
     expect(typedData.metaState, RawKeyEventDataWeb.modifierMeta);
-    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
+    expect(
+        typedData.isModifierPressed(ModifierKey.metaModifier,
+            side: KeyboardSide.left),
+        isTrue);
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 
-  testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
+  testWidgets('Defunct listeners do not receive events',
+      (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = FocusNode();

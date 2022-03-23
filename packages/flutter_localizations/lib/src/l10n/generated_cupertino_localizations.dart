@@ -36,16 +36,16 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Opletberig';
@@ -193,16 +193,16 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'ማንቂያ';
@@ -350,16 +350,16 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'تنبيه';
@@ -507,16 +507,16 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'সতৰ্কবাৰ্তা';
@@ -664,16 +664,16 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Bildiriş';
@@ -821,16 +821,16 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Абвестка';
@@ -978,16 +978,16 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Сигнал';
@@ -1135,16 +1135,16 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'সতর্কতা';
@@ -1216,7 +1216,8 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'সব বেছে নিন';
 
   @override
-  String get tabSemanticsLabelRaw => r'$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব';
+  String get tabSemanticsLabelRaw =>
+      r'$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব';
 
   @override
   String? get timerPickerHourLabelFew => null;
@@ -1292,16 +1293,16 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Upozorenje';
@@ -1449,16 +1450,16 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -1606,16 +1607,16 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Upozornění';
@@ -1763,16 +1764,16 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Underretning';
@@ -1920,16 +1921,16 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Benachrichtigung';
@@ -2077,16 +2078,16 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get modalBarrierDismissLabel => 'Schliessen';
@@ -2108,16 +2109,16 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Ειδοποίηση';
@@ -2265,16 +2266,16 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alert';
@@ -2422,16 +2423,16 @@ class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2456,16 +2457,16 @@ class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2490,16 +2491,16 @@ class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2524,16 +2525,16 @@ class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2558,16 +2559,16 @@ class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2592,16 +2593,16 @@ class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2626,16 +2627,16 @@ class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2660,16 +2661,16 @@ class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2694,16 +2695,16 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -2851,16 +2852,16 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2894,16 +2895,16 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2937,16 +2938,16 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2980,16 +2981,16 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3023,16 +3024,16 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3066,16 +3067,16 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3109,16 +3110,16 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3152,16 +3153,16 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3195,16 +3196,16 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3238,16 +3239,16 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3281,16 +3282,16 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3324,16 +3325,16 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3367,16 +3368,16 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3410,16 +3411,16 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3453,16 +3454,16 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3496,16 +3497,16 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3539,16 +3540,16 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3582,16 +3583,16 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3625,16 +3626,16 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3668,16 +3669,16 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3711,16 +3712,16 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Märguanne';
@@ -3868,16 +3869,16 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -4025,16 +4026,16 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'هشدار';
@@ -4182,16 +4183,16 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Ilmoitus';
@@ -4339,16 +4340,16 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerto';
@@ -4496,16 +4497,16 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerte';
@@ -4653,16 +4654,16 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour heure';
@@ -4705,16 +4706,16 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -4862,16 +4863,16 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Benachrichtigung';
@@ -5019,16 +5020,16 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'અલર્ટ';
@@ -5176,16 +5177,16 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'התראה';
@@ -5333,16 +5334,16 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'अलर्ट';
@@ -5490,16 +5491,16 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Upozorenje';
@@ -5647,16 +5648,16 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Értesítés';
@@ -5804,16 +5805,16 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Ծանուցում';
@@ -5961,16 +5962,16 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Notifikasi';
@@ -6118,16 +6119,16 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Tilkynning';
@@ -6275,16 +6276,16 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Avviso';
@@ -6432,16 +6433,16 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => '通知';
@@ -6589,16 +6590,16 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'გაფრთხილება';
@@ -6746,16 +6747,16 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Дабыл';
@@ -6903,16 +6904,16 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'ជូនដំណឹង';
@@ -7060,28 +7061,31 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
-  String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
+  String get alertDialogLabel =>
+      '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
 
   @override
-  String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+  String get anteMeridiemAbbreviation =>
+      '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get cutButtonLabel =>
+      '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -7096,10 +7100,12 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerHourSemanticsLabelMany => null;
 
   @override
-  String? get datePickerHourSemanticsLabelOne => '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
+  String? get datePickerHourSemanticsLabelOne =>
+      '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
-  String get datePickerHourSemanticsLabelOther => '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
+  String get datePickerHourSemanticsLabelOther =>
+      '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
   String? get datePickerHourSemanticsLabelTwo => null;
@@ -7114,10 +7120,12 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String? get datePickerMinuteSemanticsLabelOne => '\u{31}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
+  String? get datePickerMinuteSemanticsLabelOne =>
+      '\u{31}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
 
   @override
-  String get datePickerMinuteSemanticsLabelOther => '\u{24}\u{6d}\u{69}\u{6e}\u{75}\u{74}\u{65}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{cc1}';
+  String get datePickerMinuteSemanticsLabelOther =>
+      '\u{24}\u{6d}\u{69}\u{6e}\u{75}\u{74}\u{65}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String? get datePickerMinuteSemanticsLabelTwo => null;
@@ -7126,7 +7134,8 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+  String get modalBarrierDismissLabel =>
+      '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
@@ -7135,13 +7144,16 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
 
   @override
-  String get searchTextFieldPlaceholderLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
+  String get searchTextFieldPlaceholderLabel =>
+      '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get selectAllButtonLabel =>
+      '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get tabSemanticsLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
+  String get tabSemanticsLabelRaw =>
+      '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
 
   @override
   String? get timerPickerHourLabelFew => null;
@@ -7153,7 +7165,8 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get timerPickerHourLabelOne => '\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
-  String get timerPickerHourLabelOther => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{cc1}';
+  String get timerPickerHourLabelOther =>
+      '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String? get timerPickerHourLabelTwo => null;
@@ -7171,7 +7184,8 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get timerPickerMinuteLabelOne => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
 
   @override
-  String get timerPickerMinuteLabelOther => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
+  String get timerPickerMinuteLabelOther =>
+      '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
 
   @override
   String? get timerPickerMinuteLabelTwo => null;
@@ -7217,16 +7231,16 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => '알림';
@@ -7374,16 +7388,16 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Эскертүү';
@@ -7531,16 +7545,16 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'ການເຕືອນ';
@@ -7688,16 +7702,16 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Įspėjimas';
@@ -7845,16 +7859,16 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Brīdinājums';
@@ -8002,16 +8016,16 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Предупредување';
@@ -8159,16 +8173,16 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'മുന്നറിയിപ്പ്';
@@ -8316,16 +8330,16 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Сэрэмжлүүлэг';
@@ -8473,16 +8487,16 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'सूचना';
@@ -8630,16 +8644,16 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Makluman';
@@ -8787,16 +8801,16 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'သတိပေးချက်';
@@ -8944,16 +8958,16 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Varsel';
@@ -9101,16 +9115,16 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'अलर्ट';
@@ -9258,16 +9272,16 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Melding';
@@ -9415,16 +9429,16 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Varsel';
@@ -9572,16 +9586,16 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'ଆଲର୍ଟ';
@@ -9729,16 +9743,16 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
@@ -9886,16 +9900,16 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alert';
@@ -10043,16 +10057,16 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -10200,16 +10214,16 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get searchTextFieldPlaceholderLabel => 'Pesquise';
@@ -10249,16 +10263,16 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alertă';
@@ -10406,16 +10420,16 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Оповещение';
@@ -10563,16 +10577,16 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'ඇඟවීම';
@@ -10720,16 +10734,16 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Upozornenie';
@@ -10877,16 +10891,16 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Opozorilo';
@@ -11034,16 +11048,16 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Sinjalizim';
@@ -11191,16 +11205,16 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Обавештење';
@@ -11348,16 +11362,16 @@ class CupertinoLocalizationSrCyrl extends CupertinoLocalizationSr {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
@@ -11376,16 +11390,16 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Obaveštenje';
@@ -11482,16 +11496,16 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Varning';
@@ -11639,16 +11653,16 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Arifa';
@@ -11796,16 +11810,16 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'விழிப்பூட்டல்';
@@ -11953,16 +11967,16 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'అలర్ట్';
@@ -12110,16 +12124,16 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'การแจ้งเตือน';
@@ -12267,16 +12281,16 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Alerto';
@@ -12424,16 +12438,16 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Uyarı';
@@ -12581,16 +12595,16 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Сповіщення';
@@ -12738,16 +12752,16 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'الرٹ';
@@ -12895,16 +12909,16 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Ogohlantirish';
@@ -13052,16 +13066,16 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Thông báo';
@@ -13209,16 +13223,16 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => '提醒';
@@ -13366,16 +13380,16 @@ class CupertinoLocalizationZhHans extends CupertinoLocalizationZh {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -13394,16 +13408,16 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => '通知';
@@ -13473,16 +13487,16 @@ class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -13501,16 +13515,16 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get tabSemanticsLabelRaw => r'第 $tabIndex 個分頁標籤，共 $tabCount 個';
@@ -13553,16 +13567,16 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat,
+        );
 
   @override
   String get alertDialogLabel => 'Isexwayiso';
@@ -13705,7 +13719,8 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 /// See also:
 ///
 ///  * [getCupertinoTranslation], whose documentation describes these values.
-final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
+final Set<String> kCupertinoSupportedLanguages =
+    HashSet<String>.from(const <String>[
   'af', // Afrikaans
   'am', // Amharic
   'ar', // Arabic
@@ -13889,267 +13904,1207 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
 ) {
   switch (locale.languageCode) {
     case 'af':
-      return CupertinoLocalizationAf(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAf(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'am':
-      return CupertinoLocalizationAm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAm(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ar':
-      return CupertinoLocalizationAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAr(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'as':
-      return CupertinoLocalizationAs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAs(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'az':
-      return CupertinoLocalizationAz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAz(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'be':
-      return CupertinoLocalizationBe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBe(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'bg':
-      return CupertinoLocalizationBg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBg(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'bn':
-      return CupertinoLocalizationBn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBn(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'bs':
-      return CupertinoLocalizationBs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBs(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ca':
-      return CupertinoLocalizationCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationCa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'cs':
-      return CupertinoLocalizationCs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationCs(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'da':
-      return CupertinoLocalizationDa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'de': {
-      switch (locale.countryCode) {
-        case 'CH':
-          return CupertinoLocalizationDeCh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationDa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
+    case 'de':
+      {
+        switch (locale.countryCode) {
+          case 'CH':
+            return CupertinoLocalizationDeCh(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+        }
+        return CupertinoLocalizationDe(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationDe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
     case 'el':
-      return CupertinoLocalizationEl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'en': {
-      switch (locale.countryCode) {
-        case 'AU':
-          return CupertinoLocalizationEnAu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'CA':
-          return CupertinoLocalizationEnCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'GB':
-          return CupertinoLocalizationEnGb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'IE':
-          return CupertinoLocalizationEnIe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'IN':
-          return CupertinoLocalizationEnIn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'NZ':
-          return CupertinoLocalizationEnNz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'SG':
-          return CupertinoLocalizationEnSg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'ZA':
-          return CupertinoLocalizationEnZa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'AU':
+            return CupertinoLocalizationEnAu(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'CA':
+            return CupertinoLocalizationEnCa(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'GB':
+            return CupertinoLocalizationEnGb(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'IE':
+            return CupertinoLocalizationEnIe(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'IN':
+            return CupertinoLocalizationEnIn(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'NZ':
+            return CupertinoLocalizationEnNz(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'SG':
+            return CupertinoLocalizationEnSg(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'ZA':
+            return CupertinoLocalizationEnZa(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+        }
+        return CupertinoLocalizationEn(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationEn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
-    case 'es': {
-      switch (locale.countryCode) {
-        case '419':
-          return CupertinoLocalizationEs419(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'AR':
-          return CupertinoLocalizationEsAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'BO':
-          return CupertinoLocalizationEsBo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'CL':
-          return CupertinoLocalizationEsCl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'CO':
-          return CupertinoLocalizationEsCo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'CR':
-          return CupertinoLocalizationEsCr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'DO':
-          return CupertinoLocalizationEsDo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'EC':
-          return CupertinoLocalizationEsEc(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'GT':
-          return CupertinoLocalizationEsGt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'HN':
-          return CupertinoLocalizationEsHn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'MX':
-          return CupertinoLocalizationEsMx(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'NI':
-          return CupertinoLocalizationEsNi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'PA':
-          return CupertinoLocalizationEsPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'PE':
-          return CupertinoLocalizationEsPe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'PR':
-          return CupertinoLocalizationEsPr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'PY':
-          return CupertinoLocalizationEsPy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'SV':
-          return CupertinoLocalizationEsSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'US':
-          return CupertinoLocalizationEsUs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'UY':
-          return CupertinoLocalizationEsUy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'VE':
-          return CupertinoLocalizationEsVe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'es':
+      {
+        switch (locale.countryCode) {
+          case '419':
+            return CupertinoLocalizationEs419(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'AR':
+            return CupertinoLocalizationEsAr(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'BO':
+            return CupertinoLocalizationEsBo(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'CL':
+            return CupertinoLocalizationEsCl(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'CO':
+            return CupertinoLocalizationEsCo(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'CR':
+            return CupertinoLocalizationEsCr(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'DO':
+            return CupertinoLocalizationEsDo(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'EC':
+            return CupertinoLocalizationEsEc(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'GT':
+            return CupertinoLocalizationEsGt(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'HN':
+            return CupertinoLocalizationEsHn(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'MX':
+            return CupertinoLocalizationEsMx(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'NI':
+            return CupertinoLocalizationEsNi(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'PA':
+            return CupertinoLocalizationEsPa(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'PE':
+            return CupertinoLocalizationEsPe(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'PR':
+            return CupertinoLocalizationEsPr(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'PY':
+            return CupertinoLocalizationEsPy(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'SV':
+            return CupertinoLocalizationEsSv(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'US':
+            return CupertinoLocalizationEsUs(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'UY':
+            return CupertinoLocalizationEsUy(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'VE':
+            return CupertinoLocalizationEsVe(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+        }
+        return CupertinoLocalizationEs(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationEs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
     case 'et':
-      return CupertinoLocalizationEt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEt(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'eu':
-      return CupertinoLocalizationEu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEu(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'fa':
-      return CupertinoLocalizationFa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'fi':
-      return CupertinoLocalizationFi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFi(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'fil':
-      return CupertinoLocalizationFil(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'fr': {
-      switch (locale.countryCode) {
-        case 'CA':
-          return CupertinoLocalizationFrCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFil(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
+    case 'fr':
+      {
+        switch (locale.countryCode) {
+          case 'CA':
+            return CupertinoLocalizationFrCa(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+        }
+        return CupertinoLocalizationFr(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
     case 'gl':
-      return CupertinoLocalizationGl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationGl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'gsw':
-      return CupertinoLocalizationGsw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationGsw(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'gu':
-      return CupertinoLocalizationGu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationGu(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'he':
-      return CupertinoLocalizationHe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHe(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'hi':
-      return CupertinoLocalizationHi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHi(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'hr':
-      return CupertinoLocalizationHr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHr(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'hu':
-      return CupertinoLocalizationHu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHu(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'hy':
-      return CupertinoLocalizationHy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHy(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'id':
-      return CupertinoLocalizationId(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationId(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'is':
-      return CupertinoLocalizationIs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationIs(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'it':
-      return CupertinoLocalizationIt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationIt(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ja':
-      return CupertinoLocalizationJa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationJa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ka':
-      return CupertinoLocalizationKa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'kk':
-      return CupertinoLocalizationKk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKk(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'km':
-      return CupertinoLocalizationKm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKm(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'kn':
-      return CupertinoLocalizationKn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKn(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ko':
-      return CupertinoLocalizationKo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKo(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ky':
-      return CupertinoLocalizationKy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKy(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'lo':
-      return CupertinoLocalizationLo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationLo(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'lt':
-      return CupertinoLocalizationLt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationLt(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'lv':
-      return CupertinoLocalizationLv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationLv(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'mk':
-      return CupertinoLocalizationMk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMk(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ml':
-      return CupertinoLocalizationMl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'mn':
-      return CupertinoLocalizationMn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMn(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'mr':
-      return CupertinoLocalizationMr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMr(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ms':
-      return CupertinoLocalizationMs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMs(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'my':
-      return CupertinoLocalizationMy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMy(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'nb':
-      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNb(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ne':
-      return CupertinoLocalizationNe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNe(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'nl':
-      return CupertinoLocalizationNl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'no':
-      return CupertinoLocalizationNo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNo(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'or':
-      return CupertinoLocalizationOr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationOr(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'pa':
-      return CupertinoLocalizationPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationPa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'pl':
-      return CupertinoLocalizationPl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'pt': {
-      switch (locale.countryCode) {
-        case 'PT':
-          return CupertinoLocalizationPtPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationPl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'PT':
+            return CupertinoLocalizationPtPt(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+        }
+        return CupertinoLocalizationPt(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
     case 'ro':
-      return CupertinoLocalizationRo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationRo(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ru':
-      return CupertinoLocalizationRu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationRu(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'si':
-      return CupertinoLocalizationSi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSi(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'sk':
-      return CupertinoLocalizationSk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSk(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'sl':
-      return CupertinoLocalizationSl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'sq':
-      return CupertinoLocalizationSq(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'sr': {
-      switch (locale.scriptCode) {
-        case 'Cyrl': {
-          return CupertinoLocalizationSrCyrl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSq(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
+    case 'sr':
+      {
+        switch (locale.scriptCode) {
+          case 'Cyrl':
+            {
+              return CupertinoLocalizationSrCyrl(
+                  fullYearFormat: fullYearFormat,
+                  dayFormat: dayFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  singleDigitHourFormat: singleDigitHourFormat,
+                  singleDigitMinuteFormat: singleDigitMinuteFormat,
+                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                  singleDigitSecondFormat: singleDigitSecondFormat,
+                  decimalFormat: decimalFormat);
+            }
+          case 'Latn':
+            {
+              return CupertinoLocalizationSrLatn(
+                  fullYearFormat: fullYearFormat,
+                  dayFormat: dayFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  singleDigitHourFormat: singleDigitHourFormat,
+                  singleDigitMinuteFormat: singleDigitMinuteFormat,
+                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                  singleDigitSecondFormat: singleDigitSecondFormat,
+                  decimalFormat: decimalFormat);
+            }
         }
-        case 'Latn': {
-          return CupertinoLocalizationSrLatn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        }
+        return CupertinoLocalizationSr(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationSr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
     case 'sv':
-      return CupertinoLocalizationSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSv(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'sw':
-      return CupertinoLocalizationSw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSw(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ta':
-      return CupertinoLocalizationTa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTa(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'te':
-      return CupertinoLocalizationTe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTe(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'th':
-      return CupertinoLocalizationTh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTh(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'tl':
-      return CupertinoLocalizationTl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTl(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'tr':
-      return CupertinoLocalizationTr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTr(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'uk':
-      return CupertinoLocalizationUk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationUk(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'ur':
-      return CupertinoLocalizationUr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationUr(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'uz':
-      return CupertinoLocalizationUz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationUz(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
     case 'vi':
-      return CupertinoLocalizationVi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'zh': {
-      switch (locale.scriptCode) {
-        case 'Hans': {
-          return CupertinoLocalizationZhHans(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationVi(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hans':
+            {
+              return CupertinoLocalizationZhHans(
+                  fullYearFormat: fullYearFormat,
+                  dayFormat: dayFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  singleDigitHourFormat: singleDigitHourFormat,
+                  singleDigitMinuteFormat: singleDigitMinuteFormat,
+                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                  singleDigitSecondFormat: singleDigitSecondFormat,
+                  decimalFormat: decimalFormat);
+            }
+          case 'Hant':
+            {
+              switch (locale.countryCode) {
+                case 'HK':
+                  return CupertinoLocalizationZhHantHk(
+                      fullYearFormat: fullYearFormat,
+                      dayFormat: dayFormat,
+                      mediumDateFormat: mediumDateFormat,
+                      singleDigitHourFormat: singleDigitHourFormat,
+                      singleDigitMinuteFormat: singleDigitMinuteFormat,
+                      doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                      singleDigitSecondFormat: singleDigitSecondFormat,
+                      decimalFormat: decimalFormat);
+                case 'TW':
+                  return CupertinoLocalizationZhHantTw(
+                      fullYearFormat: fullYearFormat,
+                      dayFormat: dayFormat,
+                      mediumDateFormat: mediumDateFormat,
+                      singleDigitHourFormat: singleDigitHourFormat,
+                      singleDigitMinuteFormat: singleDigitMinuteFormat,
+                      doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                      singleDigitSecondFormat: singleDigitSecondFormat,
+                      decimalFormat: decimalFormat);
+              }
+              return CupertinoLocalizationZhHant(
+                  fullYearFormat: fullYearFormat,
+                  dayFormat: dayFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  singleDigitHourFormat: singleDigitHourFormat,
+                  singleDigitMinuteFormat: singleDigitMinuteFormat,
+                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                  singleDigitSecondFormat: singleDigitSecondFormat,
+                  decimalFormat: decimalFormat);
+            }
         }
-        case 'Hant': {
-          switch (locale.countryCode) {
-            case 'HK':
-              return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-            case 'TW':
-              return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-          }
-          return CupertinoLocalizationZhHant(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        switch (locale.countryCode) {
+          case 'HK':
+            return CupertinoLocalizationZhHantHk(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
+          case 'TW':
+            return CupertinoLocalizationZhHantTw(
+                fullYearFormat: fullYearFormat,
+                dayFormat: dayFormat,
+                mediumDateFormat: mediumDateFormat,
+                singleDigitHourFormat: singleDigitHourFormat,
+                singleDigitMinuteFormat: singleDigitMinuteFormat,
+                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+                singleDigitSecondFormat: singleDigitSecondFormat,
+                decimalFormat: decimalFormat);
         }
+        return CupertinoLocalizationZh(
+            fullYearFormat: fullYearFormat,
+            dayFormat: dayFormat,
+            mediumDateFormat: mediumDateFormat,
+            singleDigitHourFormat: singleDigitHourFormat,
+            singleDigitMinuteFormat: singleDigitMinuteFormat,
+            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+            singleDigitSecondFormat: singleDigitSecondFormat,
+            decimalFormat: decimalFormat);
       }
-      switch (locale.countryCode) {
-        case 'HK':
-          return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-        case 'TW':
-          return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-      }
-      return CupertinoLocalizationZh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    }
     case 'zu':
-      return CupertinoLocalizationZu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationZu(
+          fullYearFormat: fullYearFormat,
+          dayFormat: dayFormat,
+          mediumDateFormat: mediumDateFormat,
+          singleDigitHourFormat: singleDigitHourFormat,
+          singleDigitMinuteFormat: singleDigitMinuteFormat,
+          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+          singleDigitSecondFormat: singleDigitSecondFormat,
+          decimalFormat: decimalFormat);
   }
-  assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
+  assert(false,
+      'getCupertinoTranslation() called for unsupported locale "$locale"');
   return null;
 }

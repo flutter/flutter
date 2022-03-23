@@ -86,8 +86,7 @@ abstract class GoldenFileComparator {
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
   Uri getTestUri(Uri key, int? version) {
-    if (version == null)
-      return key;
+    if (version == null) return key;
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
     return Uri.parse('${keyString.split(extension).join()}.$version$extension');
@@ -95,7 +94,8 @@ abstract class GoldenFileComparator {
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
-  static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
+  static Future<ComparisonResult> compareLists(
+      List<int> test, List<int> master) {
     return goldens.compareLists(test, master);
   }
 }
@@ -193,8 +193,7 @@ abstract class WebGoldenComparator {
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
   Uri getTestUri(Uri key, int? version) {
-    if (version == null)
-      return key;
+    if (version == null) return key;
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
     return Uri.parse('${keyString.split(extension).join()}.$version$extension');
@@ -231,7 +230,8 @@ abstract class WebGoldenComparator {
 ///  * [goldenFileComparator], the comparator used when tests are not running on
 ///    a web browser.
 WebGoldenComparator get webGoldenComparator => _webGoldenComparator;
-WebGoldenComparator _webGoldenComparator = const _TrivialWebGoldenComparator._();
+WebGoldenComparator _webGoldenComparator =
+    const _TrivialWebGoldenComparator._();
 set webGoldenComparator(WebGoldenComparator value) {
   _webGoldenComparator = value;
 }

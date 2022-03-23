@@ -64,11 +64,12 @@ Future<void> run(List<String> args) async {
 
   final String assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle assets = await buildAssets(
-    manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
-    assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages] as String,
-    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
-  );
+      manifestPath:
+          argResults[_kOptionManifest] as String ?? defaultManifestPath,
+      assetDirPath: assetDir,
+      packagesPath: argResults[_kOptionPackages] as String,
+      targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
+      );
 
   if (assets == null) {
     throwToolExit('Unable to find assets.', exitCode: 1);
@@ -76,20 +77,24 @@ Future<void> run(List<String> args) async {
 
   final List<Future<void>> calls = <Future<void>>[];
   assets.entries.forEach((String fileName, DevFSContent content) {
-    final libfs.File outputFile = globals.fs.file(globals.fs.path.join(assetDir, fileName));
+    final libfs.File outputFile =
+        globals.fs.file(globals.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut] as String;
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String,
+      outputMan, argResults[_kOptionComponentName] as String);
 
   if (argResults.options.contains(_kOptionDepfile)) {
-    await writeDepfile(assets, outputMan, argResults[_kOptionDepfile] as String);
+    await writeDepfile(
+        assets, outputMan, argResults[_kOptionDepfile] as String);
   }
 }
 
-Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depfilePath) async {
+Future<void> writeDepfile(
+    AssetBundle assets, String outputManifest, String depfilePath) async {
   final Depfile depfileContent = Depfile(
     assets.inputFiles,
     <libfs.File>[globals.fs.file(outputManifest)],
@@ -104,8 +109,8 @@ Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depf
   depfileService.writeToFile(depfileContent, depfile);
 }
 
-Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
-
+Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase,
+    String fileDest, String componentName) async {
   final libfs.File destFile = globals.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();
