@@ -694,7 +694,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenu
   /// determine if the current platform has a given default menu item.
   ///
   /// If the platform does not support the given [type], then the menu item will
-  /// throw an [ArgumentError].
+  /// throw an [ArgumentError] in debug mode.
   final PlatformProvidedMenuItemType type;
 
   /// True if this [PlatformProvidedMenuItem] should be enabled or not.
@@ -707,12 +707,9 @@ class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenu
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
-        return false;
       case TargetPlatform.linux:
-        return const <PlatformProvidedMenuItemType>{
-          PlatformProvidedMenuItemType.about,
-          PlatformProvidedMenuItemType.quit,
-        }.contains(menu);
+      case TargetPlatform.windows:
+        return false;
       case TargetPlatform.macOS:
         return const <PlatformProvidedMenuItemType>{
           PlatformProvidedMenuItemType.about,
@@ -728,11 +725,6 @@ class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenu
           PlatformProvidedMenuItemType.zoomWindow,
           PlatformProvidedMenuItemType.arrangeWindowInFront,
         }.contains(menu);
-      case TargetPlatform.windows:
-        return const <PlatformProvidedMenuItemType>{
-          PlatformProvidedMenuItemType.about,
-          PlatformProvidedMenuItemType.quit,
-        }.contains(menu);
     }
   }
 
@@ -743,13 +735,16 @@ class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenu
     required int count,
     required DefaultPlatformMenuDelegateSerializableIdGenerator getId,
   }) {
-    if (!hasMenu(type)) {
-      throw ArgumentError(
-        'Platform ${defaultTargetPlatform.name} has no standard menu for '
-        '$type. Call StandardMenuItem.hasMenu to determine this before '
-        'instantiating one.',
-      );
-    }
+    assert(() {
+      if (!hasMenu(type)) {
+        throw ArgumentError(
+          'Platform ${defaultTargetPlatform.name} has no standard menu for '
+          '$type. Call PlatformProvidedMenuItem.hasMenu to determine this before '
+          'instantiating one.',
+        );
+      }
+      return true;
+    }());
 
     return <Map<String, Object?>>[
       <String, Object?>{
