@@ -591,6 +591,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get longestLine {
+    assert(!_debugNeedsLayout);
     return _paragraph!.longestLine;
   }
 
