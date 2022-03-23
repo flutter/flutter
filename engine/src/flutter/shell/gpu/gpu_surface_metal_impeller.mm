@@ -121,4 +121,9 @@ bool GPUSurfaceMetalImpeller::AllowsDrawingWhenGpuDisabled() const {
   return delegate_->AllowsDrawingWhenGpuDisabled();
 }
 
+// |Surface|
+bool GPUSurfaceMetalImpeller::EnableRasterCache() const {
+  return false;
+}
+
 }  // namespace flutter

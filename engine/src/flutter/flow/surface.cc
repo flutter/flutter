@@ -22,4 +22,8 @@ bool Surface::AllowsDrawingWhenGpuDisabled() const {
   return true;
 }
 
+bool Surface::EnableRasterCache() const {
+  return true;
+}
+
 }  // namespace flutter
