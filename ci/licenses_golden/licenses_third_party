@@ -1,4 +1,4 @@
-Signature: 19c0363b435b6a2b9b3b00934ef76861
+Signature: 58d8ec8e3dcf9550c10e949c68b4fffe
 
 UNUSED LICENSES:
 
@@ -10152,6 +10152,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/developer.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/errors_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/expando_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/function.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/growable_list.dart
