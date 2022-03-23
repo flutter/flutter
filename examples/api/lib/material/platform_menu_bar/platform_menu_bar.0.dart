@@ -20,7 +20,6 @@ class SampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'MenuBar Sample',
       home: Scaffold(body: MyMenuBarApp()),
     );
   }
@@ -74,14 +73,18 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
               members: <MenuItem>[
                 PlatformMenuItem(
                   label: 'About',
-                  onSelected: () => _handleMenuSelection(MenuSelection.about),
+                  onSelected: () {
+                    _handleMenuSelection(MenuSelection.about);
+                  },
                 )
               ],
             ),
             PlatformMenuItemGroup(
               members: <MenuItem>[
                 PlatformMenuItem(
-                  onSelected: () => _handleMenuSelection(MenuSelection.showMessage),
+                  onSelected: () {
+                    _handleMenuSelection(MenuSelection.showMessage);
+                  },
                   label: _showMessage ? 'Hide Message' : 'Show Message',
                 ),
                 PlatformMenu(
