@@ -32,6 +32,7 @@ class TooltipSample extends StatelessWidget {
     final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
 
     return Scaffold(
+      appBar: AppBar(title: Text(title)),
       body: Center(
         child: Tooltip(
           // Provide a global key with the "TooltipState" type to show
