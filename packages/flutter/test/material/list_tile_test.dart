@@ -1305,13 +1305,13 @@ void main() {
                 color: Colors.white,
                 child: ListTile(
                   onTap: () {},
-                  splashColor: const Color(0xff88ff88),                  
+                  splashColor: const Color(0xff88ff88),
                 ),
               );
             }),
           ),
         ),
-      );    
+      );
 
     await tester.pumpWidget(buildApp);
     await tester.pumpAndSettle();
