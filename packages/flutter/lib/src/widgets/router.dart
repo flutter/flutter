@@ -491,6 +491,10 @@ enum RouteInformationReportingType {
   navigate,
 }
 
+class _DiscardTransaction implements Exception {
+  const _DiscardTransaction();
+}
+
 class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   Object? _currentRouteInformationParserTransaction;
   Object? _currentRouterDelegateTransaction;
@@ -632,7 +636,10 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
       .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
       .then<void>(delegateRouteSetter())
       .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<void>(_rebuild);
+      .then<void>(_rebuild)
+      .onError<_DiscardTransaction>((_DiscardTransaction e, StackTrace trace) {
+        return;
+      });
   }
 
   void _handleRouteInformationProviderNotification() {
@@ -652,8 +659,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
       });
   }
 
-  static final Future<dynamic> _never = Completer<dynamic>().future; // won't ever complete
-
   _AsyncPassthrough<T> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
     return (T data) {
       if (transaction == _currentRouteInformationParserTransaction &&
@@ -663,7 +668,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
           widget.routerDelegate == originalWidget.routerDelegate) {
         return SynchronousFuture<T>(data);
       }
-      return _never as Future<T>;
+      throw const _DiscardTransaction();
     };
   }
 
@@ -675,7 +680,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
           widget.routeInformationParser == originalWidget.routeInformationParser &&
           widget.routerDelegate == originalWidget.routerDelegate)
         return SynchronousFuture<void>(data);
-      return _never;
+      throw const _DiscardTransaction();
     };
   }
 
