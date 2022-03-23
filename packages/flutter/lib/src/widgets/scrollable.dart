@@ -318,7 +318,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [FocusNode.scrollRevealPadding] which specifies the [padding] used when
+  ///  * [FocusNode.ensureVisiblePadding] which specifies the [padding] used when
   ///    a widget is focused via focus traversal.
   static Future<void> ensureVisible(
     BuildContext context, {

@@ -1876,10 +1876,10 @@ void main() {
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a vertical scrollable applies ensure visible padding.', (WidgetTester tester) async {
-      tester.binding.focusManager.defaultScrollRevealPadding = const EdgeInsets.all(50.0);
+      tester.binding.focusManager.defaultEnsureVisiblePadding = const EdgeInsets.all(50.0);
 
       addTearDown(() {
-        tester.binding.focusManager.defaultScrollRevealPadding = EdgeInsets.zero;
+        tester.binding.focusManager.defaultEnsureVisiblePadding = EdgeInsets.zero;
       });
 
       const double minScrollExtent = 0.0;
@@ -1982,10 +1982,10 @@ void main() {
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable applies ensure visible padding.', (WidgetTester tester) async {
-      tester.binding.focusManager.defaultScrollRevealPadding = const EdgeInsets.all(50.0);
+      tester.binding.focusManager.defaultEnsureVisiblePadding = const EdgeInsets.all(50.0);
 
       addTearDown(() {
-        tester.binding.focusManager.defaultScrollRevealPadding = EdgeInsets.zero;
+        tester.binding.focusManager.defaultEnsureVisiblePadding = EdgeInsets.zero;
       });
 
       const double minScrollExtent = 0.0;
@@ -2092,10 +2092,10 @@ void main() {
       const double leadingPadding = 25.0;
       const double trailingPadding = 50.0;
 
-      tester.binding.focusManager.defaultScrollRevealPadding = const EdgeInsets.only(top: leadingPadding, bottom: trailingPadding);
+      tester.binding.focusManager.defaultEnsureVisiblePadding = const EdgeInsets.only(top: leadingPadding, bottom: trailingPadding);
 
       addTearDown(() {
-        tester.binding.focusManager.defaultScrollRevealPadding = EdgeInsets.zero;
+        tester.binding.focusManager.defaultEnsureVisiblePadding = EdgeInsets.zero;
       });
 
       const double minScrollExtent = 0.0;
@@ -2201,10 +2201,10 @@ void main() {
       const double leadingPadding = 25.0;
       const double trailingPadding = 50.0;
 
-      tester.binding.focusManager.defaultScrollRevealPadding = const EdgeInsets.only(left: leadingPadding, right: trailingPadding);
+      tester.binding.focusManager.defaultEnsureVisiblePadding = const EdgeInsets.only(left: leadingPadding, right: trailingPadding);
 
       addTearDown(() {
-        tester.binding.focusManager.defaultScrollRevealPadding = EdgeInsets.zero;
+        tester.binding.focusManager.defaultEnsureVisiblePadding = EdgeInsets.zero;
       });
 
       const double minScrollExtent = 0.0;
