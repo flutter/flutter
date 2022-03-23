@@ -2606,7 +2606,6 @@ targets:
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/99940
     timeout: 60
     properties:
       caches: >-
