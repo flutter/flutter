@@ -586,8 +586,8 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           color: Colors.red,
   ///         )
   ///       : ElevatedButton(
-  ///           child: const Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
+  ///           child: const Text('Show Rectangle'),
   ///         );
   ///
   ///     return Scaffold(
