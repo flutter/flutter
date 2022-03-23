@@ -399,6 +399,9 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     if (command.index_count == 0u) {
       continue;
     }
+    if (command.instance_count == 0u) {
+      continue;
+    }
 
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
@@ -505,6 +508,12 @@ bool RenderPassMTL::AddCommand(Command command) {
   }
 
   if (command.index_count == 0u) {
+    // Essentially a no-op. Don't record the command but this is not necessary
+    // an error either.
+    return true;
+  }
+
+  if (command.instance_count == 0u) {
     // Essentially a no-op. Don't record the command but this is not necessary
     // an error either.
     return true;

@@ -67,7 +67,7 @@ bool TextContents::Render(const ContentContext& renderer,
 
   // Information shared by all glyph draw calls.
   Command cmd;
-  cmd.label = "Glyph";
+  cmd.label = "TextRun";
   cmd.primitive_type = PrimitiveType::kTriangle;
   cmd.pipeline =
       renderer.GetGlyphAtlasPipeline(OptionsFromPassAndEntity(pass, entity));
@@ -121,8 +121,20 @@ bool TextContents::Render(const ContentContext& renderer,
     cmd.BindVertices(std::move(vertex_buffer));
   }
 
+  size_t instance_count = 0u;
+  std::vector<Matrix> glyph_positions;
+  std::vector<Point> glyph_sizes;
+  std::vector<Point> atlas_positions;
+  std::vector<Point> atlas_glyph_sizes;
+
   // Iterate through all the runs in the blob.
   for (const auto& run : frame_.GetRuns()) {
+    instance_count = 0u;
+    glyph_positions.clear();
+    glyph_sizes.clear();
+    atlas_positions.clear();
+    atlas_glyph_sizes.clear();
+
     auto font = run.GetFont();
     auto glyph_size = ISize::Ceil(font.GetMetrics().GetBoundingBox().size);
     // Draw each glyph individually. This should probably be batched.
@@ -133,21 +145,29 @@ bool TextContents::Render(const ContentContext& renderer,
         VALIDATION_LOG << "Could not find glyph position in the atlas.";
         return false;
       }
+      instance_count++;
+      glyph_positions.emplace_back(glyph_position.position.Translate(
+          {font.GetMetrics().min_extent.x, font.GetMetrics().ascent, 0.0}));
+      glyph_sizes.emplace_back(Point{static_cast<Scalar>(glyph_size.width),
+                                     static_cast<Scalar>(glyph_size.height)});
+      atlas_positions.emplace_back(atlas_glyph_pos->origin);
+      atlas_glyph_sizes.emplace_back(
+          Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height});
+    }
 
-      VS::GlyphInfo glyph_info;
-      glyph_info.position = glyph_position.position.Translate(
-          {font.GetMetrics().min_extent.x, font.GetMetrics().ascent, 0.0});
-      glyph_info.glyph_size = {static_cast<Scalar>(glyph_size.width),
-                               static_cast<Scalar>(glyph_size.height)};
-      glyph_info.atlas_position = atlas_glyph_pos->origin;
-      glyph_info.atlas_glyph_size = {atlas_glyph_pos->size.width,
-                                     atlas_glyph_pos->size.height};
-      VS::BindGlyphInfo(cmd,
-                        pass.GetTransientsBuffer().EmplaceUniform(glyph_info));
+    cmd.instance_count = instance_count;
+    VS::BindGlyphPositions(
+        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_positions));
+    VS::BindGlyphSizes(
+        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_sizes));
+    VS::BindAtlasPositions(
+        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_positions));
+    VS::BindAtlasGlyphSizes(
+        cmd,
+        pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_glyph_sizes));
 
-      if (!pass.AddCommand(cmd)) {
-        return false;
-      }
+    if (!pass.AddCommand(cmd)) {
+      return false;
     }
   }
 
