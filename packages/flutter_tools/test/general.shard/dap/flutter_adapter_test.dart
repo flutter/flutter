@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'mocks.dart';
 
@@ -21,6 +23,84 @@ void main() {
       Cache.flutterRoot = globals.platform.isWindows
           ? r'C:\fake\flutter'
           : '/fake/flutter';
+    });
+
+
+  group('launchRequest', () {
+    test('runs "flutter run" with --machine', () async {
+      final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.processArgs, containsAllInOrder(<String>['run', '--machine']));
+      });
+
+      test('does not record the VMs PID for terminating', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        // Trigger a fake debuggerConnected with a pid that we expect the
+        // adapter _not_ to record, because it may be on another device.
+        await adapter.debuggerConnected(_FakeVm(pid: 123));
+
+        // Ensure the VM's pid was not recorded.
+        expect(adapter.pidsToTerminate, isNot(contains(123)));
+      });
+    });
+
+
+  group('attachRequest', () {
+    test('runs "flutter attach" with --machine', () async {
+      final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
+          cwd: '/project',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.attachRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(adapter.processArgs, containsAllInOrder(<String>['attach', '--machine']));
+      });
+
+      test('does not record the VMs PID for terminating', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(fileSystem: globals.fs, platform: globals.platform);
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
+          cwd: '/project',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.attachRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        // Trigger a fake debuggerConnected with a pid that we expect the
+        // adapter _not_ to record, because it may be on another device.
+        await adapter.debuggerConnected(_FakeVm(pid: 123));
+
+        // Ensure the VM's pid was not recorded.
+        expect(adapter.pidsToTerminate, isNot(contains(123)));
+      });
     });
 
     group('--start-paused', () {
@@ -155,4 +235,9 @@ void main() {
       });
     });
   });
+}
+
+class _FakeVm extends Fake implements VM {
+  final int pid;
+  _FakeVm({this.pid = 1});
 }
