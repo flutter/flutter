@@ -31,6 +31,7 @@ import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
