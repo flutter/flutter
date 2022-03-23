@@ -436,6 +436,8 @@ FILE: ../../../flutter/impeller/compiler/utilities.cc
 FILE: ../../../flutter/impeller/compiler/utilities.h
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.h
+FILE: ../../../flutter/impeller/display_list/display_list_playground.cc
+FILE: ../../../flutter/impeller/display_list/display_list_playground.h
 FILE: ../../../flutter/impeller/display_list/display_list_unittests.cc
 FILE: ../../../flutter/impeller/docs/shader_pipeline.png
 FILE: ../../../flutter/impeller/entity/contents/clear_contents.cc
@@ -446,8 +448,12 @@ FILE: ../../../flutter/impeller/entity/contents/content_context.cc
 FILE: ../../../flutter/impeller/entity/contents/content_context.h
 FILE: ../../../flutter/impeller/entity/contents/contents.cc
 FILE: ../../../flutter/impeller/entity/contents/contents.h
-FILE: ../../../flutter/impeller/entity/contents/filter_contents.cc
-FILE: ../../../flutter/impeller/entity/contents/filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/blend_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/blend_filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.h
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.cc
@@ -489,6 +495,8 @@ FILE: ../../../flutter/impeller/fixtures/boston.jpg
 FILE: ../../../flutter/impeller/fixtures/box_fade.frag
 FILE: ../../../flutter/impeller/fixtures/box_fade.vert
 FILE: ../../../flutter/impeller/fixtures/embarcadero.jpg
+FILE: ../../../flutter/impeller/fixtures/instanced_draw.frag
+FILE: ../../../flutter/impeller/fixtures/instanced_draw.vert
 FILE: ../../../flutter/impeller/fixtures/kalimba.jpg
 FILE: ../../../flutter/impeller/fixtures/sample.vert
 FILE: ../../../flutter/impeller/fixtures/test_texture.frag
@@ -651,6 +659,8 @@ FILE: ../../../flutter/impeller/typographer/glyph.cc
 FILE: ../../../flutter/impeller/typographer/glyph.h
 FILE: ../../../flutter/impeller/typographer/glyph_atlas.cc
 FILE: ../../../flutter/impeller/typographer/glyph_atlas.h
+FILE: ../../../flutter/impeller/typographer/lazy_glyph_atlas.cc
+FILE: ../../../flutter/impeller/typographer/lazy_glyph_atlas.h
 FILE: ../../../flutter/impeller/typographer/text_frame.cc
 FILE: ../../../flutter/impeller/typographer/text_frame.h
 FILE: ../../../flutter/impeller/typographer/text_render_context.cc
