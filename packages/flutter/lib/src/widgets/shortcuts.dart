@@ -121,7 +121,7 @@ class KeySet<T extends KeyboardKey> {
         : Object.hash(h2, h1);
     }
 
-    // Sort key hash codes and feed to hashList to ensure the aggregate
+    // Sort key hash codes and feed to Object.hashAll to ensure the aggregate
     // hash code does not depend on the key order.
     final List<int> sortedHashes = length == 3
       ? _tempHashStore3

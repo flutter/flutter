@@ -2511,7 +2511,7 @@ class FollowerLayer extends ContainerLayer {
     final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
     // Further transforms the coordinate system to a hypothetical child (null)
     // of the leader layer, to account for the leader's additional paint offset
-    // and layer offset (LeaderLayer._lastOffset).
+    // and layer offset (LeaderLayer.offset).
     leader.applyTransform(null, forwardTransform);
     forwardTransform.translate(linkedOffset!.dx, linkedOffset!.dy);
 

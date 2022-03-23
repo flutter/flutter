@@ -3752,9 +3752,9 @@ void main() {
     await tester.enterText(find.byType(EditableText), 'AAA');
     await tester.pump();
 
-    tester.binding.window.brieflyShowPasswordTestValue = false;
+    tester.binding.platformDispatcher.brieflyShowPasswordTestValue = false;
     addTearDown(() {
-      tester.binding.window.brieflyShowPasswordTestValue = true;
+      tester.binding.platformDispatcher.brieflyShowPasswordTestValue = true;
     });
     expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
     await tester.pump(const Duration(milliseconds: 500));
@@ -11849,7 +11849,7 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
     return Container();
   }
 
@@ -11876,8 +11876,10 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int pasteCount = 0;
   int copyCount = 0;
 
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     copyCount += 1;
   }
 
@@ -11886,8 +11888,10 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     pasteCount += 1;
   }
 
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     cutCount += 1;
   }
 

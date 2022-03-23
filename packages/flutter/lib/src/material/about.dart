@@ -167,8 +167,9 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
-/// [showDialog], the documentation for which discusses how it is used.
+/// The [context], [useRootNavigator], [routeSettings] and [anchorPoint]
+/// arguments are passed to [showDialog], the documentation for which discusses
+/// how it is used.
 void showAboutDialog({
   required BuildContext context,
   String? applicationName,
@@ -178,6 +179,7 @@ void showAboutDialog({
   List<Widget>? children,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
@@ -194,6 +196,7 @@ void showAboutDialog({
       );
     },
     routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
   );
 }
 

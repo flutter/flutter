@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
+import 'package:dds/dap.dart' hide PidTracker;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
@@ -19,7 +19,7 @@ import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
 class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker, PackageConfigUtils {
+    with PidTracker {
   FlutterDebugAdapter(
     ByteStreamServerChannel channel, {
     required this.fileSystem,
@@ -36,7 +36,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           logger: logger,
         );
 
-  @override
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
@@ -223,9 +222,27 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           case 'Flutter.ServiceExtensionStateChanged':
             _sendServiceExtensionStateChanged(event.extensionData);
             break;
+          case 'Flutter.Error':
+            _handleFlutterErrorEvent(event.extensionData);
+            break;
         }
         break;
     }
+  }
+
+  /// Sends OutputEvents to the client for a Flutter.Error event.
+  void _handleFlutterErrorEvent(vm.ExtensionData? data) {
+    final Map<String, dynamic>? errorData = data?.data;
+    if (errorData == null) {
+      return;
+    }
+
+    final String errorText = (errorData['renderedErrorText'] as String?)
+        ?? (errorData['description'] as String?)
+        // We should never not error text, but if we do at least send something
+        // so it's not just completely silent.
+        ?? 'Unknown error in Flutter.Error event';
+    sendOutput('stderr', '$errorText\n');
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
@@ -240,6 +257,12 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       'run',
       '--machine',
       if (enableDebugger) '--start-paused',
+      // Structured errors are enabled by default, but since we don't connect
+      // the VM Service for noDebug, we need to disable them so that error text
+      // is sent to stderr. Otherwise the user will not see any exception text
+      // (because nobody is listening for Flutter.Error events).
+      if (!enableDebugger)
+        '--dart-define=flutter.inspector.structuredErrors=false',
     ];
 
     await _startProcess(

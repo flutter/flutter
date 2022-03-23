@@ -200,15 +200,12 @@ Future<List<String>> _xcodeBuildSettingsLines({
       xcodeBuildSettings.add('ARCHS=$arch');
     }
   }
-  if (useMacOSConfig) {
-    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
-    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
-  } else {
-    String excludedSimulatorArchs = 'i386';
 
+  if (!useMacOSConfig) {
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
+    String excludedSimulatorArchs = 'i386';
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }

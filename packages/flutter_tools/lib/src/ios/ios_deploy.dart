@@ -383,7 +383,7 @@ class IOSDeployDebugger {
           // To avoid all lines being double spaced, if the last line from the
           // debugger was not an empty line, skip this empty line.
           // This will still cause "legit" logged newlines to be doubled...
-        } else {
+        } else if (!_debuggerOutput.isClosed) {
           _debuggerOutput.add(line);
         }
         lastLineFromDebugger = line;
@@ -413,11 +413,15 @@ class IOSDeployDebugger {
     } on ProcessException catch (exception, stackTrace) {
       _logger.printTrace('ios-deploy failed: $exception');
       _debuggerState = _IOSDeployDebuggerState.detached;
-      _debuggerOutput.addError(exception, stackTrace);
+      if (!_debuggerOutput.isClosed) {
+        _debuggerOutput.addError(exception, stackTrace);
+      }
     } on ArgumentError catch (exception, stackTrace) {
       _logger.printTrace('ios-deploy failed: $exception');
       _debuggerState = _IOSDeployDebuggerState.detached;
-      _debuggerOutput.addError(exception, stackTrace);
+      if (!_debuggerOutput.isClosed) {
+        _debuggerOutput.addError(exception, stackTrace);
+      }
     }
     // Wait until the debugger attaches, or the attempt fails.
     return debuggerCompleter.future;

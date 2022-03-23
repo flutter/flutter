@@ -1,5 +1,5 @@
 {
-  "version": "v0_86",
+  "version": "v0_90",
 
   "md.comp.dialog.action.focus.label-text.color": "primary",
   "md.comp.dialog.action.focus.state-layer.color": "primary",
@@ -15,7 +15,7 @@
   "md.comp.dialog.container.color": "surface",
   "md.comp.dialog.container.elevation": "md.sys.elevation.level3",
   "md.comp.dialog.container.shape": "md.sys.shape.corner.extra-large",
-  "md.comp.dialog.container.surface-tint-layer.color": "surfaceTintColor",
+  "md.comp.dialog.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.dialog.subhead.color": "onSurface",
   "md.comp.dialog.subhead.text-style": "headlineSmall",
   "md.comp.dialog.supporting-text.color": "onSurfaceVariant",

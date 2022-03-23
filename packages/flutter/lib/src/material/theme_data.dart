@@ -26,6 +26,7 @@ import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'ink_sparkle.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
@@ -51,6 +52,36 @@ import 'tooltip_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
+
+/// An interface that defines custom additions to a [ThemeData] object.
+///
+/// Typically used for custom colors. To use, subclass [ThemeExtension],
+/// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
+/// [lerp] methods. The latter will ensure smooth transitions of properties when
+/// switching themes.
+///
+/// {@tool dartpad}
+/// This sample shows how to create and use a subclass of [ThemeExtension] that
+/// defines two colors.
+///
+/// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+/// {@end-tool}
+abstract class ThemeExtension<T extends ThemeExtension<T>> {
+  /// Enable const constructor for subclasses.
+  const ThemeExtension();
+
+  /// The extension's type.
+  Object get type => T;
+
+  /// Creates a copy of this theme extension with the given fields
+  /// replaced by the non-null parameter values.
+  ThemeExtension<T> copyWith();
+
+  /// Linearly interpolate with another [ThemeExtension] object.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t);
+}
 
 // Deriving these values is black magic. The spec claims that pressed buttons
 // have a highlight of 0x66999999, but that's clearly wrong. The videos in the
@@ -81,7 +112,6 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlinedButton]
 ///   * [TextButton]
 ///   * [ElevatedButton]
-///   * [OutlineButton]
 ///   * [FlatButton]
 ///   * [RaisedButton]
 ///   * The time picker widget ([showTimePicker])
@@ -240,9 +270,9 @@ class ThemeData with Diagnosticable {
   ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // GENERAL CONFIGURATION
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -387,9 +417,15 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    extensions ??= <ThemeExtension<dynamic>>[];
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -406,9 +442,10 @@ class ThemeData with Diagnosticable {
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    splashFactory ??= InkSplash.splashFactory;
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
+    final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
+    splashFactory ??= (useMaterial3 && useInkSparkle) ? InkSparkle.splashFactory : InkSplash.splashFactory;
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
@@ -438,7 +475,7 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor ??= colorScheme.background;
       indicatorColor ??= onPrimarySurfaceColor;
       errorColor ??= colorScheme.error;
-      applyElevationOverlayColor ??= isDark;
+      applyElevationOverlayColor ??= brightness == Brightness.dark;
     }
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
@@ -558,9 +595,9 @@ class ThemeData with Diagnosticable {
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator: androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
+      extensions: _themeExtensionIterableToMap(extensions),
       inputDecorationTheme: inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
@@ -646,6 +683,7 @@ class ThemeData with Diagnosticable {
       buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
+      androidOverscrollIndicator: androidOverscrollIndicator,
     );
   }
 
@@ -661,9 +699,9 @@ class ThemeData with Diagnosticable {
     // operator == and in the Object.hash method and in the order of fields
     // in this class, and in the lerp() method.
     // GENERAL CONFIGURATION
-    required this.androidOverscrollIndicator,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
+    required this.extensions,
     required this.inputDecorationTheme,
     required this.materialTapTargetSize,
     required this.pageTransitionsTheme,
@@ -804,8 +842,14 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     required this.primaryColorBrightness,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    required this.androidOverscrollIndicator,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
+       assert(extensions != null),
        assert(inputDecorationTheme != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
@@ -923,6 +967,7 @@ class ThemeData with Diagnosticable {
   factory ThemeData.from({
     required ColorScheme colorScheme,
     TextTheme? textTheme,
+    bool? useMaterial3,
   }) {
     final bool isDark = colorScheme.brightness == Brightness.dark;
 
@@ -948,6 +993,7 @@ class ThemeData with Diagnosticable {
       errorColor: colorScheme.error,
       textTheme: textTheme,
       applyElevationOverlayColor: isDark,
+      useMaterial3: useMaterial3,
     );
   }
 
@@ -993,16 +1039,28 @@ class ThemeData with Diagnosticable {
   /// [MaterialScrollBehavior.androidOverscrollIndicator] is
   /// [AndroidOverscrollIndicator.glow].
   ///
+  /// This property is deprecated. Use the [useMaterial3] flag instead, or
+  /// override [ScrollBehavior.buildOverscrollIndicator].
+  ///
   /// See also:
   ///
   ///   * [StretchingOverscrollIndicator], a material design edge effect
   ///     that transforms the contents of a scrollable when overscrolled.
   ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
   ///     over the contents of a scrollable when overscrolled.
+  @Deprecated(
+    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+    'This feature was deprecated after v2.13.0-0.0.pre.'
+  )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
   /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
+  ///
+  /// If [useMaterial3] is true, then this flag is ignored as there is a new
+  /// [Material.surfaceTintColor] used to create an overlay for Material 3.
+  /// This flag is meant only for the Material 2 elevation overlay for dark
+  /// themes.
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
@@ -1044,6 +1102,32 @@ class ThemeData with Diagnosticable {
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
+
+  /// Arbitrary additions to this theme.
+  ///
+  /// To define extensions, pass an [Iterable] containing one or more [ThemeExtension]
+  /// subclasses to [ThemeData.new] or [copyWith].
+  ///
+  /// To obtain an extension, use [extension].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to create and use a subclass of [ThemeExtension] that
+  /// defines two colors.
+  ///
+  /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [extension], a convenience function for obtaining a specific extension.
+  final Map<Object, ThemeExtension<dynamic>> extensions;
+
+  /// Used to obtain a particular [ThemeExtension] from [extensions].
+  ///
+  /// Obtain with `Theme.of(context).extension<MyThemeExtension>()`.
+  ///
+  /// See [extensions] for an interactive example.
+  T? extension<T>() => extensions[T] as T;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.
@@ -1103,6 +1187,8 @@ class ThemeData with Diagnosticable {
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
   ///    more aggressively than the default.
+  ///  * [InkSparkle.splashFactory], which defines a more aggressive and organic
+  ///    splash with sparkle effects.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// The density value for specifying the compactness of various UI components.
@@ -1140,8 +1226,15 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// If true, the default Typography will be [Typography.material2021],
-  /// otherwise it will default to [Typography.material2014].
+  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
+  /// some properties will get special defaults. However, just copying a [ThemeData]
+  /// with [useMaterial3] set to true will not change any of these properties in the
+  /// resulting [ThemeData]. These properties are:
+  /// | Property | [useMaterial3] default | fallback default |
+  /// |:---|:---|:---|
+  /// | [typography] | [Typography.material2021] | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* | [InkSplash] |
+  /// *if and only if the target platform is Android and the app is not running on the web.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
@@ -1155,8 +1248,15 @@ class ThemeData with Diagnosticable {
   ///
   /// Components that have been migrated to Material 3 are:
   ///
+  ///   * [AlertDialog]
+  ///   * [Card]
+  ///   * [Dialog]
   ///   * [FloatingActionButton]
+  ///   * [Material]
   ///   * [NavigationBar]
+  ///   * [NavigationRail]
+  ///   * [StretchingOverscrollIndicator], replacing the
+  ///     [GlowingOverscrollIndicator]
   ///
   /// See also:
   ///
@@ -1564,9 +1664,9 @@ class ThemeData with Diagnosticable {
   /// The [brightness] value is applied to the [colorScheme].
   ThemeData copyWith({
     // GENERAL CONFIGURATION
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
@@ -1708,13 +1808,18 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
+      extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
@@ -1800,6 +1905,7 @@ class ThemeData with Diagnosticable {
       buttonColor: buttonColor ?? this.buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
 
@@ -1868,6 +1974,34 @@ class ThemeData with Diagnosticable {
     return Brightness.dark;
   }
 
+  /// Linearly interpolate between two [extensions].
+  ///
+  /// Includes all theme extensions in [a] and [b].
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static Map<Object, ThemeExtension<dynamic>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
+    // Lerp [a].
+    final Map<Object, ThemeExtension<dynamic>> newExtensions = a.extensions.map((Object id, ThemeExtension<dynamic> extensionA) {
+        final ThemeExtension<dynamic>? extensionB = b.extensions[id];
+        return MapEntry<Object, ThemeExtension<dynamic>>(id, extensionA.lerp(extensionB, t));
+      });
+    // Add [b]-only extensions.
+    newExtensions.addEntries(b.extensions.entries.where(
+      (MapEntry<Object, ThemeExtension<dynamic>> entry) =>
+          !a.extensions.containsKey(entry.key)));
+
+    return newExtensions;
+  }
+
+  /// Convert the [extensionsIterable] passed to [ThemeData.new] or [copyWith]
+  /// to the stored [extensions] map, where each entry's key consists of the extension's type.
+  static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<ThemeExtension<dynamic>> extensionsIterable) {
+    return Map<Object, ThemeExtension<dynamic>>.unmodifiable(<Object, ThemeExtension<dynamic>>{
+      // Strangely, the cast is necessary for tests to run.
+      for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>
+    });
+  }
+
   /// Linearly interpolate between two themes.
   ///
   /// The arguments must not be null.
@@ -1882,9 +2016,9 @@ class ThemeData with Diagnosticable {
     // the class and in the lerp() method.
     return ThemeData.raw(
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
+      extensions: _lerpThemeExtensions(a, b, t),
       inputDecorationTheme:t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
       materialTapTargetSize:t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme:t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
@@ -1970,6 +2104,7 @@ class ThemeData with Diagnosticable {
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
+      androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
     );
   }
 
@@ -1982,9 +2117,9 @@ class ThemeData with Diagnosticable {
     // the class and in the lerp() method.
     return other is ThemeData &&
         // GENERAL CONFIGURATION
-        other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
+        mapEquals(other.extensions, extensions) &&
         other.inputDecorationTheme == inputDecorationTheme &&
         other.materialTapTargetSize == materialTapTargetSize &&
         other.pageTransitionsTheme == pageTransitionsTheme &&
@@ -2069,7 +2204,8 @@ class ThemeData with Diagnosticable {
         other.accentIconTheme == accentIconTheme &&
         other.buttonColor == buttonColor &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
-        other.primaryColorBrightness == primaryColorBrightness;
+        other.primaryColorBrightness == primaryColorBrightness &&
+        other.androidOverscrollIndicator == androidOverscrollIndicator;
   }
 
   @override
@@ -2079,9 +2215,10 @@ class ThemeData with Diagnosticable {
     // and in the order of fields in the class and in the lerp() method.
     final List<Object?> values = <Object?>[
       // GENERAL CONFIGURATION
-      androidOverscrollIndicator,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
+      hashList(extensions.keys),
+      hashList(extensions.values),
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
@@ -2167,6 +2304,7 @@ class ThemeData with Diagnosticable {
       buttonColor,
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
+      androidOverscrollIndicator,
     ];
     return Object.hashAll(values);
   }
@@ -2176,9 +2314,9 @@ class ThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
     // GENERAL CONFIGURATION
-    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
+    properties.add(IterableProperty<ThemeExtension<dynamic>>('extensions', extensions.values, defaultValue: defaultData.extensions.values, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
@@ -2264,6 +2402,7 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
@@ -2467,7 +2606,6 @@ class _FifoCache<K, V> {
 ///  * [InputDecorator] (which gives density support to [TextField], etc.)
 ///  * [ListTile]
 ///  * [MaterialButton]
-///  * [OutlineButton]
 ///  * [OutlinedButton]
 ///  * [Radio]
 ///  * [RawMaterialButton]

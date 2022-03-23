@@ -31,14 +31,14 @@ Future<Map<String, double>> readJsonResults(Process process) {
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) async {
-    print(line);
+    print('[STDOUT] $line');
 
     if (line.contains(jsonStart)) {
       jsonStarted = true;
       return;
     }
 
-    if (line.contains(jsonEnd)) {
+    if (jsonStarted && line.contains(jsonEnd)) {
       final String jsonOutput = jsonBuf.toString();
 
       // If we end up here and have already parsed the results, it suggests that

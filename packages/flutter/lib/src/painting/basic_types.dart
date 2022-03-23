@@ -41,7 +41,8 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
-  // TODO(werainkhatri): remove these after all the dependencies are migrated
+  // TODO(werainkhatri): remove these after their deprecation period in engine
+  // https://github.com/flutter/flutter/pull/99505
   hashValues,
   hashList;
 

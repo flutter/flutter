@@ -8,6 +8,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
@@ -239,11 +240,15 @@ class FlutterVersion {
     if (!kOfficialChannels.contains(channel)) {
       return;
     }
+    // Don't perform the update check if the tracking remote is not standard.
+    if (VersionUpstreamValidator(version: this, platform: globals.platform).run() != null) {
+      return;
+    }
     DateTime localFrameworkCommitDate;
     try {
+      // Don't perform the update check if fetching the latest local commit failed.
       localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate());
     } on VersionCheckError {
-      // Don't perform the update check if the version check failed.
       return;
     }
     final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
@@ -402,6 +407,91 @@ class FlutterVersion {
       );
       return null;
     }
+  }
+}
+
+/// Checks if the provided [version] is tracking a standard remote.
+///
+/// A "standard remote" is one having the same url as(in order of precedence):
+///  * The value of `FLUTTER_GIT_URL` environment variable.
+///  * The HTTPS or SSH url of the Flutter repository as provided by GitHub.
+///
+/// To initiate the validation check, call [run].
+///
+/// This prevents the tool to check for version freshness from the standard
+/// remote but fetch updates from the upstream of current branch/channel, both
+/// of which can be different.
+///
+/// This also prevents unnecessary freshness check from a forked repo unless the
+/// user explicitly configures the environment to do so.
+class VersionUpstreamValidator {
+  VersionUpstreamValidator({
+    required this.version,
+    required this.platform,
+  });
+
+  final Platform platform;
+  final FlutterVersion version;
+
+  /// Performs the validation against the tracking remote of the [version].
+  ///
+  /// Returns [VersionCheckError] if the tracking remote is not standard.
+  VersionCheckError? run(){
+    final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? repositoryUrl = version.repositoryUrl;
+
+    if (repositoryUrl == null) {
+      return VersionCheckError(
+        'The tool could not determine the remote upstream which is being '
+        'tracked by the SDK.'
+      );
+    }
+
+    // Strip `.git` suffix before comparing the remotes
+    final List<String> sanitizedStandardRemotes = <String>[
+      if (flutterGit != null) flutterGit,
+      'https://github.com/flutter/flutter.git',
+      'git@github.com:flutter/flutter.git',
+    ].map((String remote) => stripDotGit(remote)).toList();
+
+    final String sanitizedRepositoryUrl = stripDotGit(repositoryUrl);
+
+    if (!sanitizedStandardRemotes.contains(sanitizedRepositoryUrl)) {
+      if (platform.environment.containsKey('FLUTTER_GIT_URL')) {
+        // If `FLUTTER_GIT_URL` is set, inform to either remove the
+        // `FLUTTER_GIT_URL` environment variable or set it to the current
+        // tracking remote.
+        return VersionCheckError(
+          'The Flutter SDK is tracking "$repositoryUrl" but "FLUTTER_GIT_URL" '
+          'is set to "$flutterGit".\n'
+          'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
+          '"$repositoryUrl". '
+          'If this is intentional, it is recommended to use "git" directly to '
+          'manage the SDK.'
+        );
+      }
+      // If `FLUTTER_GIT_URL` is unset, inform to set the environment variable.
+      return VersionCheckError(
+        'The Flutter SDK is tracking a non-standard remote "$repositoryUrl".\n'
+        'Set the environment variable "FLUTTER_GIT_URL" to '
+        '"$repositoryUrl". '
+        'If this is intentional, it is recommended to use "git" directly to '
+        'manage the SDK.'
+      );
+    }
+    return null;
+  }
+
+  // Strips ".git" suffix from a given string, preferably an url.
+  // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
+  // URLs without ".git" suffix will remain unaffected.
+  static final RegExp _patternUrlDotGit = RegExp(r'(.*)(\.git)$');
+  static String stripDotGit(String url) {
+    final RegExpMatch? match = _patternUrlDotGit.firstMatch(url);
+    if (match == null) {
+      return url;
+    }
+    return match.group(1)!;
   }
 }
 
