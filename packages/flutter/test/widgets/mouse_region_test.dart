@@ -77,23 +77,7 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/73330
-  testWidgets('hitTestBehavior test - default to HitTestBehavior.opaque', (WidgetTester tester) async {
-    bool onEnter = false;
-    await tester.pumpWidget(Center(
-      child: MouseRegion(
-        onEnter: (_) => onEnter = true,
-      ),
-    ));
-
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
-    await tester.pump();
-
-    expect(onEnter, true);
-  });
-
-  testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild', (WidgetTester tester) async {
+  testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild/opaque', (WidgetTester tester) async {
     bool onEnter = false;
     await tester.pumpWidget(Center(
       child: MouseRegion(
@@ -107,7 +91,17 @@ void main() {
     addTearDown(gesture.removePointer);
     await tester.pump();
 
+    // The child is null, so `onEnter` does not trigger.
     expect(onEnter, false);
+
+    // Update to the default value `HitTestBehavior.opaque`
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        onEnter: (_) => onEnter = true,
+      ),
+    ));
+
+    expect(onEnter, true);
   });
 
   testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild and non-opaque', (WidgetTester tester) async {
