@@ -2605,6 +2605,7 @@ targets:
     scheduler: luci
 
   - name: Mac dart_plugin_registry_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/100643
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
