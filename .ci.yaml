@@ -3327,7 +3327,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios route_test_ios
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
