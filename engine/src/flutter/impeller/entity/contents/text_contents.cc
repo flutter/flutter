@@ -67,7 +67,7 @@ bool TextContents::Render(const ContentContext& renderer,
 
   // Information shared by all glyph draw calls.
   Command cmd;
-  cmd.label = "TextRun";
+  cmd.label = "TextFrame";
   cmd.primitive_type = PrimitiveType::kTriangle;
   cmd.pipeline =
       renderer.GetGlyphAtlasPipeline(OptionsFromPassAndEntity(pass, entity));
@@ -91,13 +91,11 @@ bool TextContents::Render(const ContentContext& renderer,
   );
 
   // Common vertex information for all glyphs.
-  // Currently, glyphs are being drawn individually. This can be batched later.
-  // But we don't want to give each glyph unique vertex information. So all
-  // glyphs are given the same vertex information in the form of a unit-sized
-  // quad. The size of the glyph is specified in uniform data and the vertex
-  // shader uses this to size the glyph correctly. The interpolated vertex
-  // information is also used in the fragment shader to sample from the glyph
-  // atlas.
+  // All glyphs are given the same vertex information in the form of a
+  // unit-sized quad. The size of the glyph is specified in per instance data
+  // and the vertex shader uses this to size the glyph correctly. The
+  // interpolated vertex information is also used in the fragment shader to
+  // sample from the glyph atlas.
   {
     VertexBufferBuilder<VS::PerVertexData> vertex_builder;
     if (!Tessellator{}.Tessellate(
@@ -127,17 +125,9 @@ bool TextContents::Render(const ContentContext& renderer,
   std::vector<Point> atlas_positions;
   std::vector<Point> atlas_glyph_sizes;
 
-  // Iterate through all the runs in the blob.
   for (const auto& run : frame_.GetRuns()) {
-    instance_count = 0u;
-    glyph_positions.clear();
-    glyph_sizes.clear();
-    atlas_positions.clear();
-    atlas_glyph_sizes.clear();
-
     auto font = run.GetFont();
     auto glyph_size = ISize::Ceil(font.GetMetrics().GetBoundingBox().size);
-    // Draw each glyph individually. This should probably be batched.
     for (const auto& glyph_position : run.GetGlyphPositions()) {
       FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
       auto atlas_glyph_pos = atlas->FindFontGlyphPosition(font_glyph_pair);
@@ -154,21 +144,20 @@ bool TextContents::Render(const ContentContext& renderer,
       atlas_glyph_sizes.emplace_back(
           Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height});
     }
+  }
 
-    cmd.instance_count = instance_count;
-    VS::BindGlyphPositions(
-        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_positions));
-    VS::BindGlyphSizes(
-        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_sizes));
-    VS::BindAtlasPositions(
-        cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_positions));
-    VS::BindAtlasGlyphSizes(
-        cmd,
-        pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_glyph_sizes));
+  cmd.instance_count = instance_count;
+  VS::BindGlyphPositions(
+      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_positions));
+  VS::BindGlyphSizes(
+      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_sizes));
+  VS::BindAtlasPositions(
+      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_positions));
+  VS::BindAtlasGlyphSizes(
+      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_glyph_sizes));
 
-    if (!pass.AddCommand(cmd)) {
-      return false;
-    }
+  if (!pass.AddCommand(cmd)) {
+    return false;
   }
 
   return true;
