@@ -36,6 +36,7 @@ class MinimumFrameDurationMigration extends ProjectMigrator {
       // No migration needed if the key already exits.
       return fileContents;
     }
+    logger.printTrace('Adding $_kDisableMinimumFrameDurationKey to Info.plist');
     const String plistEnd = '''
 </dict>
 </plist>
