@@ -22,13 +22,13 @@ class _TokenDefaultsM3 extends CardTheme {
   final BuildContext context;
 
   @override
-  Color? get color => Theme.of(context).colorScheme.${color("md.comp.elevated-card.container")};
+  Color? get color => ${componentColor("md.comp.elevated-card.container")};
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.${tokens["md.comp.elevated-card.container.shadow-color"]};
+  Color? get shadowColor => ${color("md.comp.elevated-card.container.shadow-color")};
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.${tokens["md.comp.elevated-card.container.surface-tint-layer.color"]};
+  Color? get surfaceTintColor => ${color("md.comp.elevated-card.container.surface-tint-layer.color")};
 }
 ''';
 }

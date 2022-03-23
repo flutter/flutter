@@ -12,6 +12,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'navigation_bar.dart';
 import 'navigation_rail_theme.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 /// A material widget that is meant to be displayed at the left or right of an
@@ -951,12 +952,10 @@ class _DefaultsM2 extends NavigationRailThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_90
+// Generated version v0_92
 class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(BuildContext context)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
+  _TokenDefaultsM3(this.context)
+      : super(
           elevation: 0.0,
           groupAlignment: -1,
           labelType: NavigationRailLabelType.none,
@@ -965,17 +964,18 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
           minExtendedWidth: 256,
         );
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override Color? get backgroundColor => _colors.surface;
 
   @override TextStyle? get unselectedLabelTextStyle {
-    return _theme.textTheme.labelMedium!.copyWith(color: _colors.onSurface);
+    return _textTheme.labelMedium!.copyWith(color: _colors.onSurface);
   }
 
   @override TextStyle? get selectedLabelTextStyle {
-    return _theme.textTheme.labelMedium!.copyWith(color: _colors.onSurface);
+    return _textTheme.labelMedium!.copyWith(color: _colors.onSurface);
   }
 
   @override IconThemeData? get unselectedIconTheme {

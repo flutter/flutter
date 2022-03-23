@@ -5,16 +5,18 @@
 import 'template.dart';
 
 class NavigationRailTemplate extends TokenTemplate {
-  const NavigationRailTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const NavigationRailTemplate(String fileName, Map<String, dynamic> tokens)
+    : super(fileName, tokens,
+        colorSchemePrefix: '_colors.',
+        textThemePrefix: '_textTheme.',
+      );
 
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
 class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(BuildContext context)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
+  _TokenDefaultsM3(this.context)
+      : super(
           elevation: ${elevation("md.comp.navigation-rail.container")},
           groupAlignment: -1,
           labelType: NavigationRailLabelType.none,
@@ -23,34 +25,35 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
           minExtendedWidth: 256,
         );
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  @override Color? get backgroundColor => _colors.${color("md.comp.navigation-rail.container")};
+  @override Color? get backgroundColor => ${componentColor("md.comp.navigation-rail.container")};
 
   @override TextStyle? get unselectedLabelTextStyle {
-    return _theme.textTheme.${textStyle("md.comp.navigation-rail.label-text")}!.copyWith(color: _colors.${color("md.comp.navigation-rail.inactive.focus.label-text")});
+    return ${textStyle("md.comp.navigation-rail.label-text")}!.copyWith(color: ${componentColor("md.comp.navigation-rail.inactive.focus.label-text")});
   }
 
   @override TextStyle? get selectedLabelTextStyle {
-    return _theme.textTheme.${textStyle("md.comp.navigation-rail.label-text")}!.copyWith(color: _colors.${color("md.comp.navigation-rail.active.focus.label-text")});
+    return ${textStyle("md.comp.navigation-rail.label-text")}!.copyWith(color: ${componentColor("md.comp.navigation-rail.active.focus.label-text")});
   }
 
   @override IconThemeData? get unselectedIconTheme {
     return IconThemeData(
       size: ${tokens["md.comp.navigation-rail.icon.size"]},
-      color: _colors.${color("md.comp.navigation-rail.inactive.icon")},
+      color: ${componentColor("md.comp.navigation-rail.inactive.icon")},
     );
   }
 
   @override IconThemeData? get selectedIconTheme {
     return IconThemeData(
       size: ${tokens["md.comp.navigation-rail.icon.size"]},
-      color: _colors.${color("md.comp.navigation-rail.active.icon")},
+      color: ${componentColor("md.comp.navigation-rail.active.icon")},
     );
   }
 
-  @override Color? get indicatorColor => _colors.${color("md.comp.navigation-rail.active-indicator")};
+  @override Color? get indicatorColor => ${componentColor("md.comp.navigation-rail.active-indicator")};
 
 }
 ''';
