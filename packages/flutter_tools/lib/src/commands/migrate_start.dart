@@ -4,9 +4,9 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../migrate/migrate_compute.dart';
@@ -18,7 +18,8 @@ import 'migrate.dart';
 class MigrateStartCommand extends FlutterCommand {
   MigrateStartCommand({
     bool verbose = false,
-    this.logger,
+    required this.logger,
+    required this.fileSystem,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -69,6 +70,8 @@ class MigrateStartCommand extends FlutterCommand {
 
   final Logger logger;
 
+  final FileSystem fileSystem;
+
   @override
   final String name = 'start';
 
@@ -85,7 +88,26 @@ class MigrateStartCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = FlutterProject.current();
     if (project.isModule || project.isPlugin) {
-      globals.logger.printError('Migrate tool only supports app projects. This project is a ${project.isModule ? 'module' : 'plugin'}');
+      logger.printError('Migrate tool only supports app projects. This project is a ${project.isModule ? 'module' : 'plugin'}');
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
+
+    if (!await checkGitRepoExists(project.directory.path, logger)) {
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
+
+    final Directory workingDir = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    if (workingDir.existsSync()) {
+      logger.printStatus('Old migration already in progress.', emphasis: true);
+      logger.printStatus('Pending migration files exist in `${workingDir.path}/$kDefaultMigrateWorkingDirectoryName`');
+      logger.printStatus('Resolve merge conflicts and accept changes with by running:');
+      MigrateUtils.printCommandText('flutter migrate apply', logger);
+      logger.printStatus('You may also abandon the existing migration and start a new one with:');
+      MigrateUtils.printCommandText('flutter migrate abandon', logger);
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
+
+    if (!await checkUncommittedChanges(project.directory.path, logger)) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 

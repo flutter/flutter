@@ -8,16 +8,21 @@ import 'dart:typed_data';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../cache.dart';
 
-// TODO: support windows.
+// TODO(garyq): support windows.
 
 /// Utility class that contains static methods that wrap git and other shell commands.
 class MigrateUtils {
   MigrateUtils();
 
+  /// Creates a temporary directory.
+  ///
+  /// This directory should be deleted after use.
   static Future<Directory> createTempDirectory(String name) async {
     ProcessResult result = await Process.run('mktemp', ['-d', '-t', name]);
     checkForErrors(result);
@@ -26,6 +31,7 @@ class MigrateUtils {
     return dir;
   }
 
+  /// Calls `git diff` on two files and returns the diff as a DiffResult.
   static Future<DiffResult> diffFiles(File one, File two, {String? outputPath}) async {
     if (one.existsSync() && !two.existsSync()) {
       return DiffResult.deletion();
@@ -65,6 +71,7 @@ class MigrateUtils {
     return true;
   }
 
+  /// Calls `flutter create` as a re-entrant command.
   static Future<String> createFromTemplates(String flutterBinPath, {
     required String name,
     required String androidLanguage,
@@ -102,31 +109,27 @@ class MigrateUtils {
     return result.stdout as String;
   }
 
+  /// Runs the git 3-way merge on three files and returns the results as a MergeResult.
   static Future<MergeResult> gitMergeFile({
-    required String ancestor,
+    required String base,
     required String current,
-    required String other,
+    required String target,
     required String localPath
   }) async {
-    List<String> cmdArgs = ['merge-file', '-p', current, ancestor, other];
+    List<String> cmdArgs = ['merge-file', '-p', current, base, target];
     final ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     return MergeResult(result, localPath);
   }
 
-  static Future<String> getGitHash(String projectPath, [String tag = 'HEAD']) async {
-    List<String> cmdArgs = ['rev-parse', tag];
-    ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: projectPath);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
-    return result.stdout as String;
-  }
-
+  /// Calls `git init` on the workingDirectory.
   static Future<void> gitInit(String workingDirectory) async {
     List<String> cmdArgs = ['init'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
   }
 
+  /// Returns true if the workingDirectory git repo has any uncommited changes.
   static Future<bool> hasUncommitedChanges(String workingDirectory) async {
     List<String> cmdArgs = ['diff', '--quiet', 'HEAD'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
@@ -137,6 +140,18 @@ class MigrateUtils {
     return true;
   }
 
+  /// Returns true if the workingDirectory is a git repo.
+  static Future<bool> isGitRepo(String workingDirectory) async {
+    List<String> cmdArgs = ['rev-parse', '--is-inside-work-tree'];
+    final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    if (result.exitCode == 0) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Returns true if the file at `filePath` is covered by the `.gitignore`
   static Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
     List<String> cmdArgs = ['check-ignore', filePath];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
@@ -144,6 +159,7 @@ class MigrateUtils {
     return result.exitCode == 0;
   }
 
+  /// Deletes the files or directories at the provided paths.
   static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
     for (Directory d in directories) {
       d.deleteSync(recursive: true);
@@ -157,7 +173,7 @@ class MigrateUtils {
     // -1 in allowed exit codes means all exit codes are valid.
     if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
       if (!silent) {
-        globals.printError('Command encountered an error.');
+        globals.printError('Command encountered an error with exit code ${result.exitCode}.');
         if (commandDescription != null) {
           globals.printError('Command:');
           globals.printError(commandDescription, indent: 2);
@@ -168,13 +184,14 @@ class MigrateUtils {
         globals.printError(result.stderr as String, indent: 2);
       }
       if (exit) {
-        throwToolExit('Git command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
+        throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
       }
       return false;
     }
     return true;
   }
 
+  /// Returns true if the file does not contain any git conflit markers.
   static bool conflictsResolved(String contents) {
     if (contents.contains('>>>>>>>') || contents.contains('=======') || contents.contains('<<<<<<<')) {
       return false;
@@ -182,6 +199,15 @@ class MigrateUtils {
     return true;
   }
 
+  /// Prints a command to logger with appropriate formatting.
+  static void printCommandText(String command, Logger logger) {
+    logger.printStatus(
+      '\n\$ $command\n',
+      color: TerminalColor.grey,
+      indent: 4,
+      newline: false,
+    );
+  }
 }
 
 /// Tracks the output of a git diff command or any special cases such as addition of a new

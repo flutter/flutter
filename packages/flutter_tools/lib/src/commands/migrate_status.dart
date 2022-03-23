@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
+import '../base/terminal.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../migrate/migrate_manifest.dart';
@@ -14,10 +14,12 @@ import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate.dart';
 
+/// Flutter migrate subcommand to check the migration status of the project.
 class MigrateStatusCommand extends FlutterCommand {
   MigrateStatusCommand({
     bool verbose = false,
-    this.logger,
+    required this.logger,
+    required this.fileSystem,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -31,6 +33,8 @@ class MigrateStatusCommand extends FlutterCommand {
   final bool _verbose;
 
   final Logger logger;
+
+  final FileSystem fileSystem;
 
   @override
   final String name = 'status';
@@ -46,18 +50,36 @@ class MigrateStatusCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    final FlutterProject project = FlutterProject.current();
+    Directory workingDir = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
-      workingDir = globals.fs.directory(stringArg('working-directory'));
+      workingDir = fileSystem.directory(stringArg('working-directory'));
     }
     if (!workingDir.existsSync()) {
-      logger.printStatus('No migration in progress. Start a new migration with:\n');
-      logger.printStatus('    \$ flutter migrate start\n');
+      logger.printStatus('No migration in progress. Start a new migration with:');
+      MigrateUtils.printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+
+    for (final String localPath in manifest.mergedFiles) {
+      DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDir.childFile(localPath));
+      if (result.diff != '') {
+        for (final String line in result.diff.split('\n')) {
+          if (line.startsWith('-')) {
+            logger.printStatus(line, color: TerminalColor.red);
+            continue;
+          }
+          if (line.startsWith('+')) {
+            logger.printStatus(line, color: TerminalColor.green);
+            continue;
+          }
+          logger.printStatus(line);
+        }
+      }
+    }
 
     checkAndPrintMigrateStatus(manifest, workingDir);
 
