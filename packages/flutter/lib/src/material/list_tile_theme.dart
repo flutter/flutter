@@ -5,13 +5,13 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'material_state.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// Used with [ListTileTheme] to define default property values for
 /// descendant [ListTile] widgets, as well as classes that build
