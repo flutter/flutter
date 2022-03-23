@@ -14,7 +14,7 @@ void main() {
       const example.MyApp(),
     );
 
-    // Tooltip is not visible before tapping button.
+    // Tooltip is not visible before tapping the button.
     expect(find.text(tooltipText), findsNothing);
     // Tap on the button and wait for the tooltip to appear.
     await tester.tap(find.byType(FloatingActionButton));

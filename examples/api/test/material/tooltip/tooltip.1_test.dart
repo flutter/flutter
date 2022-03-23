@@ -28,19 +28,19 @@ void main() {
     // Move the mouse over the text and wait for the tooltip to appear.
     final Finder tooltip = find.byType(Tooltip);
     await gesture.moveTo(tester.getCenter(tooltip));
-    // Wait half a second and tooltip should still not be visible.
+    // Wait half a second and the tooltip should still not be visible.
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text(tooltipText), findsNothing);
-    // Wait another half a second and tooltip should be visible now.
+    // Wait another half a second and the tooltip should be visible now.
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text(tooltipText), findsOneWidget);
     // Move the mouse away and wait for the tooltip to disappear.
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
-    // Wait a second and tooltip should still be visible.
+    // Wait a second and the tooltip should still be visible.
     await tester.pump(const Duration(seconds: 1));
     expect(find.text(tooltipText), findsOneWidget);
-    // Wait another second and tooltip should be gone.
+    // Wait another second and the tooltip should be gone.
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     await gesture.removePointer();
