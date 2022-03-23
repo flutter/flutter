@@ -77,7 +77,7 @@ class DraggableScrollableController extends ChangeNotifier {
   /// If this is false, then members that interact with the [ScrollPosition],
   /// such as [sizeToPixels], [size], [animateTo], and [jumpTo], must not be
   /// called.
-  bool get isAttached => _attachedController != null;
+  bool get isAttached => _attachedController != null && _attachedController!.hasClients;
 
   /// Convert a sheet's pixel height to size (fractional value of parent container height).
   double pixelsToSize(double pixels) {
