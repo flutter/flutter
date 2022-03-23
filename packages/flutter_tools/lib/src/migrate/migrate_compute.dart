@@ -138,16 +138,6 @@ Future<MigrateResult?> computeMigration({
   if (logger == null) {
     logger = globals.logger;
   }
-  final Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-  if (workingDir.existsSync()) {
-    logger.printStatus('Old migration already in progress.', emphasis: true);
-    logger.printStatus('Pending migration files exist in `<your_project_root_dir>/$kDefaultMigrateWorkingDirectoryName`');
-    logger.printStatus('Resolve merge conflicts and accept changes with by running:\n');
-    logger.printStatus('\$ flutter migrate apply\n', color: TerminalColor.grey, indent: 4);
-    logger.printStatus('You may also abandon the existing migration and start a new one with:\n');
-    logger.printStatus('\$ flutter migrate abandon', color: TerminalColor.grey, indent: 4);
-    return null;
-  }
   if (flutterProject == null) {
     flutterProject = FlutterProject.current();
   }
@@ -166,7 +156,6 @@ Future<MigrateResult?> computeMigration({
   final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
   final Set<String> revisions = Set<String>();
   if (baseRevision == null) {
-    print(config.platformConfigs.keys);
     for (final MigratePlatformConfig platform in config.platformConfigs.values) {
       String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
       if (platform.platform == SupportedPlatform.root) {
@@ -395,11 +384,17 @@ Future<MigrateResult?> computeMigration({
     }
     final File baseTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-    final DiffResult userDiff = await MigrateUtils.diffFiles(baseTemplateFile, currentFile);
+    final DiffResult userDiff = await MigrateUtils.diffFiles(currentFile, baseTemplateFile);
+    final DiffResult targetDiff = await MigrateUtils.diffFiles(currentFile, targetTemplateFile);
+    if (targetDiff.exitCode == 0) {
+      // current file is already the same as the target file.
+      continue;
+    }
 
     if (userDiff.exitCode == 0) {
       // Current file unchanged by user
       if (diffMap.containsKey(localPath)) {
+        // File changed between base and target
         if (diffMap[localPath]!.isDeletion) {
           // File is deleted in new template
           migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
@@ -429,6 +424,7 @@ Future<MigrateResult?> computeMigration({
       continue;
     }
 
+    // File changed by user
     if (diffMap.containsKey(localPath)) {
       MergeResult? result;
       for (final CustomMerge customMerge in customMerges) {
@@ -438,14 +434,16 @@ Future<MigrateResult?> computeMigration({
         }
       }
       if (result == null) {
+        print('using git merge');
         result = await MigrateUtils.gitMergeFile(
-          ancestor: globals.fs.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath),
+          base: globals.fs.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath),
           current: currentFile.path,
-          other: globals.fs.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
+          target: globals.fs.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
           localPath: localPath,
         );
       }
       migrateResult.mergeResults.add(result);
+      print('DIFF: ${targetDiff.diff}');
       if (verbose) logger.printStatus('$localPath was merged.');
       continue;
     }
@@ -464,6 +462,7 @@ Future<MigrateResult?> computeMigration({
   return migrateResult;
 }
 
+/// Returns a base revision to fallback to in case a true base revision is unknown.
 String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
   if (metadata.versionRevision != null) {
     return metadata.versionRevision!;

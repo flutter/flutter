@@ -4,7 +4,7 @@
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
+import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../cache.dart';
@@ -14,7 +14,8 @@ import 'migrate.dart';
 class MigrateAbandonCommand extends FlutterCommand {
   MigrateAbandonCommand({
     bool verbose = false,
-    this.logger,
+    required this.logger,
+    required this.fileSystem,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -28,6 +29,8 @@ class MigrateAbandonCommand extends FlutterCommand {
   final bool _verbose;
 
   final Logger logger;
+
+  final FileSystem fileSystem;
 
   @override
   final String name = 'abandon';
@@ -45,17 +48,17 @@ class MigrateAbandonCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
-      workingDir = globals.fs.directory(stringArg('working-directory'));
+      workingDir = fileSystem.directory(stringArg('working-directory'));
     }
     if (!workingDir.existsSync()) {
-      globals.printStatus('No migration in progress. Start a new migration with:\n');
-      globals.printStatus('    \$ flutter migrate start\n');
+      logger.printStatus('No migration in progress. Start a new migration with:');
+      MigrateUtils.printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
-    globals.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDir.path}');
+    logger.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDir.path}');
     workingDir.deleteSync(recursive: true);
-    globals.printStatus('Abandon complete. Start a new migration with:\n');
-    globals.printStatus('    \$ flutter migrate start\n');
+    logger.printStatus('\nAbandon complete. Start a new migration with:');
+    MigrateUtils.printCommandText('flutter migrate start', logger);
     return const FlutterCommandResult(ExitStatus.success);
   }
 }
