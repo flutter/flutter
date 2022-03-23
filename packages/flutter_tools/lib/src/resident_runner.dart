@@ -126,6 +126,7 @@ class FlutterDevice {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
         ),
+        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
@@ -168,6 +169,7 @@ class FlutterDevice {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
         ),
+        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
         processManager: globals.processManager,

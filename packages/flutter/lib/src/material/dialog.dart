@@ -1007,6 +1007,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1041,6 +1043,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/dialogs.html>
 Future<T?> showDialog<T>({
   required BuildContext context,
@@ -1051,6 +1055,7 @@ Future<T?> showDialog<T>({
   bool useSafeArea = true,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(builder != null);
   assert(barrierDismissible != null);
@@ -1075,6 +1080,7 @@ Future<T?> showDialog<T>({
     useSafeArea: useSafeArea,
     settings: routeSettings,
     themes: themes,
+    anchorPoint: anchorPoint,
   ));
 }
 
@@ -1113,11 +1119,15 @@ Future<T?> showDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// See also:
 ///
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 class DialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route with Material entrance and exit animations,
   /// modal barrier color, and modal barrier behavior (dialog is dismissible
@@ -1131,6 +1141,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     RouteSettings? settings,
+    Offset? anchorPoint,
   }) : assert(barrierDismissible != null),
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1147,6 +1158,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
          transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
          settings: settings,
+         anchorPoint: anchorPoint,
        );
 }
 
@@ -1189,7 +1201,7 @@ class _DefaultsM2 extends DialogTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_86
+// Generated version v0_90
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
     : _colors = Theme.of(context).colorScheme,

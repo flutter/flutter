@@ -134,6 +134,12 @@ class IosProject extends XcodeBasedProject {
 
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
+  /// True, if the app project is using swift.
+  bool get isSwift {
+    final File appDelegateSwift = _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
+    return appDelegateSwift.existsSync();
+  }
+
   /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
   Future<bool> pluginsSupportArmSimulator() async {
     final Directory podXcodeProject = hostAppRoot
