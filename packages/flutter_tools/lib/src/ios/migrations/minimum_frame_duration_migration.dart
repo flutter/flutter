@@ -22,7 +22,7 @@ class MinimumFrameDurationMigration extends ProjectMigrator {
   @override
   bool migrate() {
     if (!_infoPlist.existsSync()) {
-      logger.printTrace('info.plist not found, skipping minimum frame duration migration.');
+      logger.printTrace('Info.plist not found, skipping minimum frame duration migration.');
       return true;
     }
 
