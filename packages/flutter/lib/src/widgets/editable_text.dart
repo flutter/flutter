@@ -1740,7 +1740,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        bringIntoView(textEditingValue.selection.extent);
+        if (mounted) {
+          bringIntoView(textEditingValue.selection.extent);
+        }
       });
       hideToolbar();
     }
