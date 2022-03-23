@@ -576,8 +576,11 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       }
     }
 
-    RasterStatus raster_status =
-        compositor_frame->Raster(layer_tree, false, damage.get());
+    RasterStatus raster_status = compositor_frame->Raster(
+        layer_tree,                      // layer tree
+        !surface_->EnableRasterCache(),  // ignore raster cache
+        damage.get()                     // frame damage
+    );
     if (raster_status == RasterStatus::kFailed ||
         raster_status == RasterStatus::kSkipAndRetry) {
       return raster_status;
