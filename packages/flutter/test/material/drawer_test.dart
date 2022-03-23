@@ -446,8 +446,7 @@ void main() {
     expect(find.text('endDrawer'), findsNothing);
   });
 
-  testWidgets('Drawer width defaults to Material spec',
-      (WidgetTester tester) async {
+  testWidgets('Drawer width defaults to Material spec', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
