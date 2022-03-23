@@ -12,6 +12,7 @@ import 'semantics_tester.dart';
 import 'states.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;

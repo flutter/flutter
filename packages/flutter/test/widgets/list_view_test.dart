@@ -112,6 +112,7 @@ void main() {
     expect(finderCalled, true);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;

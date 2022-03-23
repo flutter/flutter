@@ -1126,18 +1126,15 @@ class ListView extends BoxScrollView {
   /// efficient, however, is to create the instances on demand using this
   /// constructor's `itemBuilder` callback.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
-  /// null. The `findChildIndexCallback` argument corresponds to the
-  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
-  ///
-  /// [ListView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [ListView] or [ListView.custom].
+  /// null.
   ListView.builder({
     Key? key,
     Axis scrollDirection = Axis.vertical,
@@ -1214,6 +1211,8 @@ class ListView extends BoxScrollView {
   /// view's children are created in advance, or all at once when the [ListView]
   /// itself is created, it is more efficient to use the [ListView] constructor.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// {@tool snippet}
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
@@ -1238,8 +1237,7 @@ class ListView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
-  /// null. The `findChildIndexCallback` argument corresponds to the
-  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
+  /// null.
   ListView.separated({
     Key? key,
     Axis scrollDirection = Axis.vertical,
@@ -1803,14 +1801,15 @@ class GridView extends BoxScrollView {
   /// `itemBuilder` will be called only with indices greater than or equal to
   /// zero and less than `itemCount`.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// The [gridDelegate] argument must not be null.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null. The `findChildIndexCallback` argument corresponds to the
-  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
+  /// be null.
   GridView.builder({
     Key? key,
     Axis scrollDirection = Axis.vertical,

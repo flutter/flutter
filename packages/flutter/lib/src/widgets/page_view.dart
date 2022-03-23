@@ -665,12 +665,14 @@ class PageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   ///
-  /// [PageView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [PageView] or [PageView.custom].
-  ///
-  /// The `findChildIndexCallback` argument corresponds to the
-  /// [SliverChildBuilderDelegate.findChildIndexCallback] property.
+  /// {@template flutter.widgets.PageView.findChildIndexCallback}
+  /// [findChildIndexCallback] corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property. If null,
+  /// a child widget may not map to its existing [RenderObject] when the order
+  /// in which children are returned from the children builder changes.
+  /// This may result in state-loss. This callback needs to be implemented if
+  /// the order of the children may change at a later time.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.builder({
