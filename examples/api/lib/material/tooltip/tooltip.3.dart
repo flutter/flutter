@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   static const String _title = 'Tooltip Sample';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class TooltipSample extends StatelessWidget {
-  const TooltipSample({super.key, required this.title});
+  const TooltipSample({Key? key, required this.title}) : super(key: key);
 
   final String title;
 

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   static const String _title = 'Tooltip Sample';
 
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class TooltipSample extends StatelessWidget {
-  const TooltipSample({super.key});
+  const TooltipSample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
