@@ -1821,7 +1821,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_spellCheckEnabled!) {
       SpellCheckService? spellCheckService = widget.spellCheckService ?? SpellCheckConfiguration.getDefaultSpellCheckService(defaultTargetPlatform);
-      SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? SpellCheckConfiguration.getDefaultSpellCheckHandler(defaultTargetPlatform);
+      SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
       _spellCheckConfiguration = SpellCheckConfiguration(
           spellCheckService: spellCheckService,
           spellCheckSuggestionsHandler: spellCheckSuggestionsHandler);
@@ -2949,7 +2949,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     //TODO(camillesimon): Clean up messy logic.
     if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-      if (_spellCheckEnabled!) {
+      if (!_spellCheckEnabled!) {
         return false;
       }
       _selectionOverlay!.showToolbar(toolbarType, 

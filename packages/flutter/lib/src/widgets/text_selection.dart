@@ -1801,6 +1801,6 @@ enum ToolbarType {
   copyPasteControls,
 
   /// The toolbar that will provide suggestions for misspelled words and a click
-  /// and replace option.
+  /// and replace option for Android.
   spellCheckerSuggestionsControls,
 }

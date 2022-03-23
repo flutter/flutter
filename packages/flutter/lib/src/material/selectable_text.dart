@@ -84,7 +84,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   @override
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar(ToolbarType.copyPasteControls);
-    // editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
