@@ -35,7 +35,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _DesktopTextSelectionControlsToolbar(
@@ -73,6 +73,12 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
            value.text.isNotEmpty &&
            !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {
+    super.handleSelectAll(delegate);
+    delegate.hideToolbar();
+  }
 }
 
 /// Text selection controls that loosely follows Material design conventions.
@@ -95,7 +101,7 @@ class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.lastSecondaryTapDownPosition,
   }) : super(key: key);
 
-  final ValueListenable<ClipboardStatus>? clipboardStatus;
+  final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;
@@ -332,6 +338,8 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
       child: TextButton(
         style: TextButton.styleFrom(
           alignment: Alignment.centerLeft,
+          enabledMouseCursor: SystemMouseCursors.basic,
+          disabledMouseCursor: SystemMouseCursors.basic,
           primary: primary,
           shape: const RoundedRectangleBorder(),
           minimumSize: const Size(kMinInteractiveDimension, 36.0),

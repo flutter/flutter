@@ -619,7 +619,7 @@ class PageTransitionsTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode => hashList(_all(builders));
+  int get hashCode => Object.hashAll(_all(builders));
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

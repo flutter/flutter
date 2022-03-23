@@ -736,6 +736,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (ignorePointer) {
       return false;
     }
+
     // The thumb is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
@@ -745,7 +746,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    return _thumbRect!.contains(position!);
+    return _trackRect!.contains(position!);
   }
 
   @override
@@ -968,8 +969,8 @@ class RawScrollbar extends StatefulWidget {
   /// scrollbar dragging for multiple independent ListViews:
   ///
   /// ```dart
-  /// final ScrollController _controllerOne = ScrollController();
-  /// final ScrollController _controllerTwo = ScrollController();
+  /// final ScrollController controllerOne = ScrollController();
+  /// final ScrollController controllerTwo = ScrollController();
   ///
   /// Widget build(BuildContext context) {
   ///   return Column(
@@ -977,9 +978,9 @@ class RawScrollbar extends StatefulWidget {
   ///       SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
-  ///          controller: _controllerOne,
+  ///          controller: controllerOne,
   ///          child: ListView.builder(
-  ///            controller: _controllerOne,
+  ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) => Text('item $index'),
   ///          ),
@@ -988,9 +989,9 @@ class RawScrollbar extends StatefulWidget {
   ///      SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
-  ///          controller: _controllerTwo,
+  ///          controller: controllerTwo,
   ///          child: ListView.builder(
-  ///            controller: _controllerTwo,
+  ///            controller: controllerTwo,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) => Text('list 2 item $index'),
   ///          ),
@@ -1029,8 +1030,8 @@ class RawScrollbar extends StatefulWidget {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// final ScrollController _controllerOne = ScrollController();
-  /// final ScrollController _controllerTwo = ScrollController();
+  /// final ScrollController controllerOne = ScrollController();
+  /// final ScrollController controllerTwo = ScrollController();
   ///
   /// Widget build(BuildContext context) {
   /// return Column(
@@ -1039,9 +1040,9 @@ class RawScrollbar extends StatefulWidget {
   ///        height: 200,
   ///        child: Scrollbar(
   ///          thumbVisibility: true,
-  ///          controller: _controllerOne,
+  ///          controller: controllerOne,
   ///          child: ListView.builder(
-  ///            controller: _controllerOne,
+  ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
   ///              return  Text('item $index');
@@ -1053,9 +1054,9 @@ class RawScrollbar extends StatefulWidget {
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          thumbVisibility: true,
-  ///          controller: _controllerTwo,
+  ///          controller: controllerTwo,
   ///          child: SingleChildScrollView(
-  ///            controller: _controllerTwo,
+  ///            controller: controllerTwo,
   ///            child: const SizedBox(
   ///              height: 2000,
   ///              width: 500,
@@ -1111,8 +1112,8 @@ class RawScrollbar extends StatefulWidget {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// final ScrollController _controllerOne = ScrollController();
-  /// final ScrollController _controllerTwo = ScrollController();
+  /// final ScrollController controllerOne = ScrollController();
+  /// final ScrollController controllerTwo = ScrollController();
   ///
   /// Widget build(BuildContext context) {
   /// return Column(
@@ -1121,9 +1122,9 @@ class RawScrollbar extends StatefulWidget {
   ///        height: 200,
   ///        child: Scrollbar(
   ///          thumbVisibility: true,
-  ///          controller: _controllerOne,
+  ///          controller: controllerOne,
   ///          child: ListView.builder(
-  ///            controller: _controllerOne,
+  ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
   ///              return  Text('item $index');
@@ -1135,9 +1136,9 @@ class RawScrollbar extends StatefulWidget {
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          thumbVisibility: true,
-  ///          controller: _controllerTwo,
+  ///          controller: controllerTwo,
   ///          child: SingleChildScrollView(
-  ///            controller: _controllerTwo,
+  ///            controller: controllerTwo,
   ///            child: const SizedBox(
   ///              height: 2000,
   ///              width: 500,

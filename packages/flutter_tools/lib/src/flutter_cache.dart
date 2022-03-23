@@ -74,7 +74,7 @@ class PubDependencies extends ArtifactSet {
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
-       super(DevelopmentArtifact.web);
+       super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;

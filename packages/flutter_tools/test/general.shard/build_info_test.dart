@@ -80,6 +80,18 @@ void main() {
     });
   });
 
+  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
+    expect(getDartNameForDarwinArch(DarwinArch.armv7),  'armv7');
+    expect(getDartNameForDarwinArch(DarwinArch.arm64),  'arm64');
+    expect(getDartNameForDarwinArch(DarwinArch.x86_64), 'x64');
+  });
+
+  testWithoutContext('getNameForDarwinArch returns Apple names', () {
+    expect(getNameForDarwinArch(DarwinArch.armv7),  'armv7');
+    expect(getNameForDarwinArch(DarwinArch.arm64),  'arm64');
+    expect(getNameForDarwinArch(DarwinArch.x86_64), 'x86_64');
+  });
+
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');

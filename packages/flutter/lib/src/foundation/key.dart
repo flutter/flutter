@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:meta/meta.dart';
 
 /// A [Key] is an identifier for [Widget]s, [Element]s and [SemanticsNode]s.
@@ -29,7 +27,7 @@ abstract class Key {
 
   /// Default constructor, used by subclasses.
   ///
-  /// Useful so that subclasses can call us, because the [new Key] factory
+  /// Useful so that subclasses can call us, because the [Key.new] factory
   /// constructor shadows the implicit constructor.
   @protected
   const Key.empty();
@@ -79,7 +77,7 @@ class ValueKey<T> extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, value);
+  int get hashCode => Object.hash(runtimeType, value);
 
   @override
   String toString() {

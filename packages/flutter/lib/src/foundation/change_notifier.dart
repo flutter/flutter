@@ -47,7 +47,7 @@ import 'diagnostics.dart';
 ///  * [InheritedNotifier], an abstract superclass for widgets that use a
 ///    [Listenable]'s notifications to trigger rebuilds in descendant widgets
 ///    that declare a dependency on them, using the [InheritedWidget] mechanism.
-///  * [new Listenable.merge], which creates a [Listenable] that triggers
+///  * [Listenable.merge], which creates a [Listenable] that triggers
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.
 abstract class Listenable {
@@ -97,6 +97,8 @@ abstract class ValueListenable<T> extends Listenable {
 ///
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
+///
+/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
 ///
 /// See also:
 ///
