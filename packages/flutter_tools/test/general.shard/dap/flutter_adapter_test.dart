@@ -238,6 +238,8 @@ void main() {
 }
 
 class _FakeVm extends Fake implements VM {
-  final int pid;
   _FakeVm({this.pid = 1});
+
+  @override
+  final int pid;
 }
