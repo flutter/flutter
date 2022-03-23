@@ -6180,6 +6180,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
+    this.hitTestBehavior,
     Widget? child,
   }) : assert(cursor != null),
        assert(opaque != null),
@@ -6330,6 +6331,11 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// This defaults to true.
   final bool opaque;
 
+  /// How to behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.opaque] if null.
+  final HitTestBehavior? hitTestBehavior;
+
   @override
   RenderMouseRegion createRenderObject(BuildContext context) {
     return RenderMouseRegion(
@@ -6338,6 +6344,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onExit: onExit,
       cursor: cursor,
       opaque: opaque,
+      hitTestBehavior: hitTestBehavior,
     );
   }
 
@@ -6348,7 +6355,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       ..onHover = onHover
       ..onExit = onExit
       ..cursor = cursor
-      ..opaque = opaque;
+      ..opaque = opaque
+      ..hitTestBehavior = hitTestBehavior;
   }
 
   @override

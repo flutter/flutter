@@ -2958,7 +2958,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 ///
 ///  * [MouseRegion], a widget that listens to hover events using
 ///    [RenderMouseRegion].
-class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation {
+class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements MouseTrackerAnnotation {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
   /// All parameters are optional. By default this method creates an opaque
@@ -2972,16 +2972,13 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     bool validForMouseTracker = true,
     bool opaque = true,
     RenderBox? child,
+    HitTestBehavior? hitTestBehavior = HitTestBehavior.opaque,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
        _validForMouseTracker = validForMouseTracker,
        _opaque = opaque,
-       super(child);
-
-  @protected
-  @override
-  bool hitTestSelf(Offset position) => true;
+       super(behavior: hitTestBehavior ?? HitTestBehavior.opaque, child: child);
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
@@ -3014,6 +3011,19 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   set opaque(bool value) {
     if (_opaque != value) {
       _opaque = value;
+      // Trigger [MouseTracker]'s device update to recalculate mouse states.
+      markNeedsPaint();
+    }
+  }
+
+  /// How to behave during hit testing.
+  ///
+  /// This defaults to [HitTestBehavior.opaque] if null.
+  HitTestBehavior? get hitTestBehavior => behavior;
+  set hitTestBehavior(HitTestBehavior? value) {
+    final HitTestBehavior newValue = value ?? HitTestBehavior.opaque;
+    if (behavior != newValue) {
+      behavior = newValue;
       // Trigger [MouseTracker]'s device update to recalculate mouse states.
       markNeedsPaint();
     }
