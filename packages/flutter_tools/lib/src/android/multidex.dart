@@ -42,7 +42,7 @@ void ensureMultiDexApplicationExists(final Directory projectDir) {
 
 package io.flutter.app;
 
-import android.app.application;
+import android.app.Application;
 import android.content.Context;
 import androidx.annotation.CallSuper;
 import androidx.multidex.MultiDex;
