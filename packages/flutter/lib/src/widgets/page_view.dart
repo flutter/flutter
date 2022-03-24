@@ -666,10 +666,10 @@ class PageView extends StatefulWidget {
   /// zero and less than [itemCount].
   ///
   /// {@template flutter.widgets.PageView.findChildIndexCallback}
-  /// [findChildIndexCallback] corresponds to the
+  /// The [findChildIndexCallback] corresponds to the
   /// [SliverChildBuilderDelegate.findChildIndexCallback] property. If null,
   /// a child widget may not map to its existing [RenderObject] when the order
-  /// in which children are returned from the children builder changes.
+  /// of children returned from the children builder changes.
   /// This may result in state-loss. This callback needs to be implemented if
   /// the order of the children may change at a later time.
   /// {@endtemplate}
