@@ -175,10 +175,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: TextField(autofocus: true),
+            child: const TextField(autofocus: true),
           ),
         ),
       ),
@@ -232,10 +232,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: TextField(cursorColor: cursorColor),
+            child: const TextField(cursorColor: cursorColor),
           ),
         ),
       ),
@@ -249,10 +249,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: SelectableText('foobar', cursorColor: cursorColor),
+            child: const SelectableText('foobar', cursorColor: cursorColor),
           ),
         ),
       ),

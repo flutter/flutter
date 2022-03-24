@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
-import 'text_selection_theme.dart';
 import 'theme.dart';
 
 /// An eyeballed value that moves the cursor slightly left of where it is
@@ -359,9 +358,16 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;
 
-  /// The color to use when painting the cursor.
+  /// The color of the cursor.
   ///
-  /// Defaults to the theme's `cursorColor` when null.
+  /// The cursor indicates the current location of text insertion point in
+  /// the field.
+  ///
+  /// If this is null it will default to the ambient
+  /// [DefaultSelectionStyle.cursorColor]. If that is null, and the
+  /// [ThemeData.platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS]
+  /// it will use [CupertinoThemeData.primaryColor]. Otherwise it will use
+  /// the value of [ColorScheme.primary] of [ThemeData.colorScheme].
   final Color? cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -597,7 +603,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     );
 
     final ThemeData theme = Theme.of(context);
-    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
+    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 
     TextSelectionControls? textSelectionControls =  widget.selectionControls;
@@ -615,8 +621,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??= selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
@@ -627,8 +633,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??= selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
@@ -639,8 +645,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
       case TargetPlatform.linux:
@@ -649,8 +655,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
     }
 

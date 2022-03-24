@@ -30,6 +30,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'selection.dart';
 import 'shortcuts.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
@@ -960,6 +961,9 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
+  ///
+  /// If this property is null, this widget gets the selection color from the
+  /// [DefaultSelectionStyle].
   ///
   /// For [CupertinoTextField]s, the value is set to the ambient
   /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
@@ -3250,6 +3254,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
+    final Color? effectiveSelectionColor = widget.selectionColor ?? DefaultSelectionStyle.of(context).selectionColor;
+
     final TextSelectionControls? controls = widget.selectionControls;
     return MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -3311,7 +3317,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         minLines: widget.minLines,
                         expands: widget.expands,
                         strutStyle: widget.strutStyle,
-                        selectionColor: widget.selectionColor,
+                        selectionColor: effectiveSelectionColor,
                         textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                         textAlign: widget.textAlign,
                         textDirection: _textDirection,

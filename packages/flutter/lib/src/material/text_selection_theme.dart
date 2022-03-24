@@ -134,11 +134,20 @@ class TextSelectionTheme extends InheritedTheme {
   /// selection properties for all widgets below it in the widget tree.
   ///
   /// The data argument must not be null.
-  const TextSelectionTheme({
+  TextSelectionTheme({
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : assert(data != null),
+      super(key: key, child: _wrapsWithDefaultSelectionStyle(data, child));
+
+  static Widget _wrapsWithDefaultSelectionStyle(TextSelectionThemeData data, Widget child) {
+    return DefaultSelectionStyle(
+      selectionColor: data.selectionColor,
+      cursorColor: data.cursorColor,
+      child: child,
+    );
+  }
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;

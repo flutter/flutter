@@ -586,10 +586,14 @@ class _CupertinoAppState extends State<CupertinoApp> {
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
           data: effectiveThemeData,
-          child: HeroControllerScope(
-            controller: _heroController,
-            child: Builder(
-              builder: _buildWidgetApp,
+          child: DefaultSelectionStyle(
+            selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
+            cursorColor: effectiveThemeData.primaryColor,
+            child: HeroControllerScope(
+              controller: _heroController,
+              child: Builder(
+                builder: _buildWidgetApp,
+              ),
             ),
           ),
         ),
