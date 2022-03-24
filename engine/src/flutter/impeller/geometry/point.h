@@ -180,6 +180,8 @@ struct TPoint {
     return {x / length, y / length};
   }
 
+  constexpr TPoint Abs() const { return {std::fabs(x), std::fabs(y)}; }
+
   constexpr Type Cross(const TPoint& p) const { return (x * p.y) - (y * p.x); }
 
   constexpr Type Dot(const TPoint& p) const { return (x * p.x) + (y * p.y); }

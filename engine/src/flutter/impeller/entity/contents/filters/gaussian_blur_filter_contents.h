@@ -5,6 +5,7 @@
 #pragma once
 
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/geometry/matrix.h"
 
 namespace impeller {
 
@@ -14,25 +15,19 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
   ~DirectionalGaussianBlurFilterContents() override;
 
-  void SetRadius(Scalar radius);
+  void SetBlurVector(Vector2 blur_vector);
 
-  void SetDirection(Vector2 direction);
-
-  void SetClipBorder(bool clip);
+  // |Contents|
+  Rect GetBounds(const Entity& entity) const override;
 
  private:
   // |FilterContents|
-  bool RenderFilter(const std::vector<std::shared_ptr<Texture>>& input_textures,
+  bool RenderFilter(const std::vector<Snapshot>& input_textures,
                     const ContentContext& renderer,
-                    RenderPass& pass) const override;
+                    RenderPass& pass,
+                    const Matrix& transform) const override;
 
-  // |FilterContents|
-  virtual ISize GetOutputSize(
-      const InputTextures& input_textures) const override;
-
-  Scalar radius_ = 0;
-  Vector2 direction_;
-  bool clip_ = false;
+  Vector2 blur_vector_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DirectionalGaussianBlurFilterContents);
 };

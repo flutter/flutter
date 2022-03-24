@@ -10,7 +10,6 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/geometry/rect.h"
 
 namespace impeller {
 
