@@ -318,4 +318,63 @@ void main() {
       contains('LeaderLayer anchor must come before FollowerLayer in paint order'),
     );
   });
+
+  testWidgets(
+      '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
+      (tester) async {
+    final link = LayerLink();
+    await tester.pumpWidget(
+      CompositedTransformTarget(
+        link: link,
+        child: CompositedTransformFollower(
+          link: link,
+          child: _CustomWidget(),
+        ),
+      ),
+    );
+  });
+}
+
+class _CustomWidget extends SingleChildRenderObjectWidget {
+  const _CustomWidget({Key? key, Widget? child}) : super(key: key, child: child);
+
+  @override
+  _CustomRenderObject createRenderObject(BuildContext context) => _CustomRenderObject();
+
+  @override
+  void updateRenderObject(BuildContext context, _CustomRenderObject renderObject) {}
+}
+
+class _CustomRenderObject extends RenderProxyBox {
+  _CustomRenderObject({RenderBox? child}) : super(child);
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (layer == null) {
+      layer = _CustomLayer(
+        computeSomething: _computeSomething,
+      );
+    } else {
+      (layer as _CustomLayer?)?.computeSomething = _computeSomething;
+    }
+
+    context.pushLayer(layer!, super.paint, Offset.zero);
+  }
+
+  void _computeSomething() {
+    // indeed, use `globalToLocal` to compute some useful data
+    globalToLocal(Offset.zero);
+  }
+}
+
+class _CustomLayer extends ContainerLayer {
+  _CustomLayer({required this.computeSomething});
+
+  VoidCallback computeSomething;
+
+  @override
+  void addToScene(ui.SceneBuilder builder) {
+    computeSomething(); // indeed, need to use result of this function
+    super.addToScene(builder);
+  }
 }
