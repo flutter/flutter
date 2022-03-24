@@ -30,6 +30,13 @@ class Remote {
         assert(url != null),
         assert(url != '');
 
+  factory Remote.mirror(String url) {
+    return Remote(
+      name: RemoteName.mirror,
+      url: url,
+    );
+  }
+
   final RemoteName _name;
 
   /// The name of the remote.

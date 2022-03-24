@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 const String kTokenOption = 'token';
 const String kGithubClient = 'github-client';
+const String kMirrorUrl = 'mirror';
 
 Future<void> main(List<String> args) async {
   final ArgParser parser = ArgParser();
@@ -19,16 +20,28 @@ Future<void> main(List<String> args) async {
   );
   parser.addOption(
     kGithubClient,
-    help: 'Path to GitHub CLI client.',
-    mandatory: true,
+    help: 'Path to GitHub CLI client. If not provided, it is assumed `gh` is '
+      'present on the PATH.',
+  );
+  parser.addOption(
+    kMirrorUrl,
+    help: '',
+    defaultsTo: 'https://github.com/christopherfujino/flutter.git', // TODO remove default, make mandatory
   );
 
-  final FrameworkRepository framework = FrameworkRepository(_localCheckouts);
   final ArgResults results = parser.parse(args);
+
+  final String mirrorUrl = results[kMirrorUrl] as String;
+
+  final FrameworkRepository framework = FrameworkRepository(
+    _localCheckouts,
+    mirrorRemote: Remote.mirror(mirrorUrl),
+  );
+
   await PackageAutoroller(
     framework: framework,
-    githubClient: results[kGithubClient] as String,
-    token: results[kTokenOption] as String,
+    githubClient: results[kGithubClient] as String? ?? 'gh',
+    token: (results[kTokenOption] as String).trim(),
   ).roll();
 }
 

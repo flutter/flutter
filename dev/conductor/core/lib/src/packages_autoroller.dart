@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'globals.dart';
+//import 'globals.dart';
 import 'repository.dart';
 
 // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
@@ -14,6 +14,7 @@ class PackageAutoroller {
     required this.githubClient,
     required this.token,
     required this.framework,
+    this.featureBranchname = 'package-autoroller',
   }) {
     if (token.trim().isEmpty) {
       throw Exception('empty token!');
@@ -33,11 +34,35 @@ class PackageAutoroller {
 
   static const String hostname = 'github.com';
 
+  final String featureBranchname;
+
   Future<void> roll() async {
     await authLogout(); // TODO delete
     await authLogin();
-    await createPr(workingDirectory: workingDirectory); // use framework
+    await updatePackages();
+    await pushBranch();
+    await createPr(
+      repository: await framework.checkoutDirectory,
+      orgName: 'christopherfujino', // TODO wire through args
+    );
     await authLogout();
+  }
+
+  Future<void> updatePackages() async {
+    await framework.newBranch(featureBranchname);
+    // TODO actually update the packages
+    await (await framework.checkoutDirectory)
+        .childFile('new-file.txt')
+        .writeAsString('foo bar\n');
+    await framework.commit('dummy commit', addFirst: true);
+  }
+
+  Future<void> pushBranch() async {
+    await framework.pushRef(
+      fromRef: featureBranchname,
+      toRef: featureBranchname,
+      remote: framework.mirrorRemote!.url,
+    );
   }
 
   Future<void> authLogout() {
@@ -108,23 +133,29 @@ class PackageAutoroller {
   ///   $ gh pr create --reviewer monalisa,hubot  --reviewer myorg/team-name
   ///   $ gh pr create --project "Roadmap"
   ///   $ gh pr create --base develop --head monalisa:feature
-  Future<void> createPr({required String workingDirectory}) async {
-    const String title = 'A PR Title';
-    const String body = 'A PR Body';
-    const String headBranch = 'developmoar';
-
+  Future<void> createPr({
+    required Directory repository,
+    String title = 'A PR Title',
+    String body = 'A PR Body',
+    String base = 'master',
+    required String orgName,
+  }) async {
+    // TODO ensure title and body don't have quotes
+    assert(orgName.isNotEmpty);
     await cli(
       <String>[
         'pr',
         'create',
         '--title',
-        title,
+        '"$title"',
         '--body',
-        body,
+        '"$body"',
         '--head',
-        headBranch,
+        '$orgName:$featureBranchname',
+        '--base',
+        base,
       ],
-      workingDirectory: workingDirectory,
+      workingDirectory: repository.path,
     );
   }
 
@@ -150,21 +181,23 @@ class PackageAutoroller {
     );
     final List<String> stderrStrings = <String>[];
     final List<String> stdoutStrings = <String>[];
-    unawaited(process.stdout.transform(utf8.decoder).forEach((String line) {
-      print('[STDOUT] $line');
-      stdoutStrings.add(line);
-    }));
-    unawaited(process.stderr.transform(utf8.decoder).forEach((String line) {
-      print('[STDERR] $line');
-      stderrStrings.add(line);
-    }));
+    final Future<void> stdoutFuture = process.stdout
+        .transform(utf8.decoder)
+        .forEach(stdoutStrings.add);
+    final Future<void> stderrFuture = process.stderr
+        .transform(utf8.decoder)
+        .forEach(stderrStrings.add);
     if (stdin != null) {
-      print('passing STDIN: $stdin');
+      print('passing STDIN: "$stdin"');
       process.stdin.write(stdin);
       await process.stdin.flush();
       await process.stdin.close();
     }
     final int exitCode = await process.exitCode;
+    await Future.wait(<Future<Object?>>[
+      stdoutFuture,
+      stderrFuture,
+    ]);
     final String stderr = stderrStrings.join();
     final String stdout = stdoutStrings.join();
     if (!allowFailure && exitCode != 0) {
@@ -188,13 +221,4 @@ class PackageAutoroller {
   //    'gh',
   //  ].join(Platform.pathSeparator);
   //}
-}
-
-String get workingDirectory {
-  final String workingDirectory = Platform.environment['WORKING_DIR']!.trim();
-  if (!Directory(workingDirectory).existsSync()) {
-    print('Whoops! $workingDirectory does not exist!');
-    exit(1);
-  }
-  return workingDirectory;
 }
