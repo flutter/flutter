@@ -109,15 +109,17 @@ static int OpenFdExec(const std::string& path, int dirfd) {
     // fdio_open_fd_at does not support AT_FDCWD, by design.  Use fdio_open_fd
     // and expect an absolute path for that usage pattern.
     dart_utils::Check(path[0] == '/', LOG_TAG);
-    result = fdio_open_fd(
-        path.c_str(),
-        fuchsia::io::OPEN_RIGHT_READABLE | fuchsia::io::OPEN_RIGHT_EXECUTABLE,
-        &fd);
+    result =
+        fdio_open_fd(path.c_str(),
+                     static_cast<uint32_t>(fuchsia::io::OPEN_RIGHT_READABLE |
+                                           fuchsia::io::OPEN_RIGHT_EXECUTABLE),
+                     &fd);
   } else {
     dart_utils::Check(path[0] != '/', LOG_TAG);
     result = fdio_open_fd_at(
         dirfd, path.c_str(),
-        fuchsia::io::OPEN_RIGHT_READABLE | fuchsia::io::OPEN_RIGHT_EXECUTABLE,
+        static_cast<uint32_t>(fuchsia::io::OPEN_RIGHT_READABLE |
+                              fuchsia::io::OPEN_RIGHT_EXECUTABLE),
         &fd);
   }
   if (result != ZX_OK) {
