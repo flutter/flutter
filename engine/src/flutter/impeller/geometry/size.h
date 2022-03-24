@@ -47,6 +47,10 @@ struct TSize {
             static_cast<Scalar>(height) / scale};
   }
 
+  constexpr TSize operator/(const TSize& s) const {
+    return {width / s.width, height / s.height};
+  }
+
   constexpr bool operator==(const TSize& s) const {
     return s.width == width && s.height == height;
   }

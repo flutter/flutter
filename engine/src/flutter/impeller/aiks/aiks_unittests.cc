@@ -442,6 +442,7 @@ TEST_F(AiksTest, TransformMultipliesCorrectly) {
              -3,   0,   0,   0,
               0,   0,   0,   0,
            -500, 400,   0,   1));
+  // clang-format on
 }
 
 }  // namespace testing
