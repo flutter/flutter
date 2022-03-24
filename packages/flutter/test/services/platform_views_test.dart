@@ -18,7 +18,7 @@ void main() {
     });
 
     test('create Android view of unregistered type', () async {
-      expectLater(
+      expect(
         () {
           return PlatformViewsService.initAndroidView(
             id: 0,
@@ -29,25 +29,16 @@ void main() {
         throwsA(isA<PlatformException>()),
       );
 
-      try {
-        await PlatformViewsService.initSurfaceAndroidView(
-          id: 0,
-          viewType: 'web',
-          layoutDirection: TextDirection.ltr,
-        ).create();
-      } catch (e) {
-        expect(false, isTrue, reason: 'did not expected any exception, but instead got `$e`');
-      }
-
-      try {
-        await PlatformViewsService.initAndroidView(
-          id: 0,
-          viewType: 'web',
-          layoutDirection: TextDirection.ltr,
-        ).create();
-      } catch (e) {
-        expect(false, isTrue, reason: 'did not expected any exception, but instead got `$e`');
-      }
+      expect(
+        () {
+          return PlatformViewsService.initSurfaceAndroidView(
+            id: 0,
+            viewType: 'web',
+            layoutDirection: TextDirection.ltr,
+          ).create();
+        },
+        throwsA(isA<PlatformException>()),
+      );
     });
 
     test('create Android views', () async {
@@ -56,13 +47,13 @@ void main() {
           .setSize(const Size(100.0, 100.0));
       await PlatformViewsService.initAndroidView( id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
           .setSize(const Size(200.0, 300.0));
-      // This platform view isn't created until the size is set.
       await PlatformViewsService.initSurfaceAndroidView(id: 2, viewType: 'webview', layoutDirection: TextDirection.rtl).create();
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
           const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl, null),
+          const FakeAndroidPlatformView(2, 'webview', null, AndroidViewController.kAndroidLayoutDirectionRtl, true),
         ]),
       );
     });
@@ -74,12 +65,26 @@ void main() {
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
       ).setSize(const Size(100.0, 100.0));
-      expectLater(
+      expect(
         () => PlatformViewsService.initAndroidView(
           id: 0,
           viewType: 'web',
           layoutDirection: TextDirection.ltr,
         ).setSize(const Size(100.0, 100.0)),
+        throwsA(isA<PlatformException>()),
+      );
+
+      await PlatformViewsService.initSurfaceAndroidView(
+        id: 1,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      ).create();
+      expect(
+        () => PlatformViewsService.initSurfaceAndroidView(
+          id: 1,
+          viewType: 'web',
+          layoutDirection: TextDirection.ltr,
+        ).create(),
         throwsA(isA<PlatformException>()),
       );
     });
@@ -234,6 +239,11 @@ void main() {
       PlatformViewsService.initAndroidView(id: 7, viewType: 'webview', layoutDirection: TextDirection.ltr);
       await viewController.setOffset(const Offset(10, 20));
       expect(viewsController.offsets, equals(<int, Offset>{}));
+    });
+
+    test('synchronizeToNativeViewHierarchy', () async {
+      await PlatformViewsService.synchronizeToNativeViewHierarchy(false);
+      expect(viewsController.synchronizeToNativeViewHierarchy, false);
     });
   });
 
