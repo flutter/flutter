@@ -48,7 +48,7 @@ class TestStdio extends Stdio {
   @override
   String readLineSync() {
     if (stdin.isEmpty) {
-      throw Exception('Unexpected call to readLineSync! Last stdout was ${logs.last}');
+      throw Exception('Unexpected call to readLineSync!');
     }
     return stdin.removeAt(0);
   }
