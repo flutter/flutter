@@ -732,7 +732,7 @@ keep this 3
         expect(iosProjectMigration.migrate(), isTrue);
         expect(infoPlistFile.existsSync(), isFalse);
 
-        expect(testLogger.traceText, contains('info.plist not found, skipping minimum frame duration migration.'));
+        expect(testLogger.traceText, contains('Info.plist not found, skipping minimum frame duration migration.'));
         expect(testLogger.statusText, isEmpty);
       });
 
