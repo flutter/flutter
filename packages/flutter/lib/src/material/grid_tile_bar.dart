@@ -79,9 +79,7 @@ class GridTileBar extends StatelessWidget {
           child: Row(
             children: <Widget>[
               if (leading != null)
-                Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 8.0),
-                    child: leading),
+                Padding(padding: const EdgeInsetsDirectional.only(end: 8.0), child: leading),
               if (title != null && subtitle != null)
                 Expanded(
                   child: Column(
@@ -113,9 +111,7 @@ class GridTileBar extends StatelessWidget {
                   ),
                 ),
               if (trailing != null)
-                Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8.0),
-                    child: trailing),
+                Padding(padding: const EdgeInsetsDirectional.only(start: 8.0), child: trailing),
             ],
           ),
         ),

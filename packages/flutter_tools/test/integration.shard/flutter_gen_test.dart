@@ -29,25 +29,23 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('can correctly reference flutter generated code.',
-      () async {
+  testWithoutContext('can correctly reference flutter generated code.', () async {
     await flutter.run();
     final dynamic jsonContent = json.decode(project.dir
         .childDirectory('.dart_tool')
         .childFile('package_config.json')
         .readAsStringSync());
-    final Map<String, dynamic> collection =
-        ((jsonContent as Map<String, dynamic>)['packages'] as Iterable<dynamic>)
-                .firstWhere((dynamic entry) =>
-                    (entry as Map<String, dynamic>)['name'] == 'collection')
-            as Map<String, dynamic>;
+    final Map<String, dynamic> collection = ((jsonContent as Map<String, dynamic>)['packages'] as Iterable<dynamic>)
+        .firstWhere((dynamic entry) => (entry as Map<String, dynamic>)['name'] == 'collection') as Map<String, dynamic>;
     expect(
       Uri.parse(collection['rootUri'] as String).isAbsolute,
       isTrue,
       reason: 'The generated package_config.json should use absolute root urls',
     );
-    expect(collection['packageUri'] as String, 'lib/',
-        reason:
-            'The generated package_config.json should have package urls ending with /');
+    expect(
+      collection['packageUri'] as String,
+      'lib/',
+      reason: 'The generated package_config.json should have package urls ending with /'
+    );
   });
 }

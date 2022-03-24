@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'Button tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                      'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
                       style: const TextStyle(fontSize: 17.0),
                     ),
                     Padding(
@@ -77,8 +77,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: ElevatedButton(
                         onPressed: _launchPlatformCount,
                         child: Platform.isIOS
-                            ? const Text('Continue in iOS view')
-                            : const Text('Continue in Android view'),
+                          ? const Text('Continue in iOS view')
+                          : const Text('Continue in Android view'),
                       ),
                     ),
                   ],

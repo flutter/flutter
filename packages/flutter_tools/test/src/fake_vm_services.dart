@@ -7,12 +7,10 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:test_api/test_api.dart'
-    hide test; // ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-export 'package:test_api/test_api.dart'
-    hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
 
 /// A fake implementation of a vm_service that mocks the JSON-RPC request
 /// and response structure.
@@ -22,29 +20,21 @@ class FakeVmServiceHost {
     Uri? httpAddress,
     Uri? wsAddress,
   }) : _requests = requests {
-    _vmService = FlutterVmService(
-        vm_service.VmService(
-          _input.stream,
-          _output.add,
-        ),
-        httpAddress: httpAddress,
-        wsAddress: wsAddress);
+    _vmService = FlutterVmService(vm_service.VmService(
+      _input.stream,
+      _output.add,
+    ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
-      final Map<String, Object?> request =
-          json.decode(data) as Map<String, Object?>;
+      final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
-      final FakeVmServiceRequest fakeRequest =
-          _requests.removeAt(0) as FakeVmServiceRequest;
-      expect(
-          request,
-          isA<Map<String, Object?>>()
-              .having((Map<String, Object?> request) => request['method'],
-                  'method', fakeRequest.method)
-              .having((Map<String, Object?> request) => request['params'],
-                  'args', fakeRequest.args));
+      final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
+      expect(request, isA<Map<String, Object?>>()
+        .having((Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
+        .having((Map<String, Object?> request) => request['params'], 'args', fakeRequest.args)
+      );
       if (fakeRequest.close) {
         unawaited(_vmService.dispose());
         expect(_requests, isEmpty);
@@ -54,8 +44,7 @@ class FakeVmServiceHost {
         _input.add(json.encode(<String, Object?>{
           'jsonrpc': '2.0',
           'id': request['id'],
-          'result':
-              fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
+          'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
         }));
       } else {
         _input.add(json.encode(<String, Object?>{
@@ -78,14 +67,14 @@ class FakeVmServiceHost {
   FlutterVmService get vmService => _vmService;
   late final FlutterVmService _vmService;
 
+
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 
   // remove FakeStreamResponse objects from _requests until it is empty
   // or until we hit a FakeRequest
   void _applyStreamListen() {
     while (_requests.isNotEmpty && !_requests.first.isRequest) {
-      final FakeVmServiceStreamResponse response =
-          _requests.removeAt(0) as FakeVmServiceStreamResponse;
+      final FakeVmServiceStreamResponse response = _requests.removeAt(0) as FakeVmServiceStreamResponse;
       _input.add(json.encode(<String, Object>{
         'jsonrpc': '2.0',
         'method': 'streamNotify',

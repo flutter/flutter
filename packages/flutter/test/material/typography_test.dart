@@ -11,76 +11,22 @@ void main() {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final Typography typography = Typography.material2018(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
-      expect(typography.black, isNotNull,
-          reason: 'null black typography for $platform');
-      expect(typography.white, isNotNull,
-          reason: 'null white typography for $platform');
+      expect(typography.black, isNotNull, reason: 'null black typography for $platform');
+      expect(typography.white, isNotNull, reason: 'null white typography for $platform');
     }
   });
 
   test('Typography on non-Apple platforms defaults to the correct font', () {
     expect(Typography.material2018().black.titleLarge!.fontFamily, 'Roboto');
-    expect(
-        Typography.material2018(platform: TargetPlatform.fuchsia)
-            .black
-            .titleLarge!
-            .fontFamily,
-        'Roboto');
-    expect(
-        Typography.material2018(platform: TargetPlatform.linux)
-            .black
-            .titleLarge!
-            .fontFamily,
-        'Roboto');
-    expect(
-        Typography.material2018(platform: TargetPlatform.linux)
-            .black
-            .titleLarge!
-            .fontFamilyFallback,
-        <String>[
-          'Ubuntu',
-          'Cantarell',
-          'DejaVu Sans',
-          'Liberation Sans',
-          'Arial'
-        ]);
-    expect(
-        Typography.material2018(platform: TargetPlatform.windows)
-            .black
-            .titleLarge!
-            .fontFamily,
-        'Segoe UI');
+    expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
+    expect(Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily, 'Segoe UI');
     expect(Typography.material2018().white.titleLarge!.fontFamily, 'Roboto');
-    expect(
-        Typography.material2018(platform: TargetPlatform.fuchsia)
-            .white
-            .titleLarge!
-            .fontFamily,
-        'Roboto');
-    expect(
-        Typography.material2018(platform: TargetPlatform.linux)
-            .white
-            .titleLarge!
-            .fontFamily,
-        'Roboto');
-    expect(
-        Typography.material2018(platform: TargetPlatform.linux)
-            .white
-            .titleLarge!
-            .fontFamilyFallback,
-        <String>[
-          'Ubuntu',
-          'Cantarell',
-          'DejaVu Sans',
-          'Liberation Sans',
-          'Arial'
-        ]);
-    expect(
-        Typography.material2018(platform: TargetPlatform.windows)
-            .white
-            .titleLarge!
-            .fontFamily,
-        'Segoe UI');
+    expect(Typography.material2018(platform: TargetPlatform.fuchsia).white.titleLarge!.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
+    expect(Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily, 'Segoe UI');
   });
 
   // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
@@ -96,14 +42,9 @@ void main() {
     return s.fontFamily == '.AppleSystemUIFont';
   }, 'Uses macOS system meta-font');
 
-  test('Typography on iOS defaults to the correct SF font family based on size',
-      () {
-    final Typography typography =
-        Typography.material2018(platform: TargetPlatform.iOS);
-    for (final TextTheme textTheme in <TextTheme>[
-      typography.black,
-      typography.white
-    ]) {
+  test('Typography on iOS defaults to the correct SF font family based on size', () {
+    final Typography typography = Typography.material2018(platform: TargetPlatform.iOS);
+    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.displayLarge, isSanFranciscoDisplayFont);
       expect(textTheme.displayMedium, isSanFranciscoDisplayFont);
       expect(textTheme.displaySmall, isSanFranciscoDisplayFont);
@@ -123,12 +64,8 @@ void main() {
   });
 
   test('Typography on macOS defaults to the system UI meta-font', () {
-    final Typography typography =
-        Typography.material2018(platform: TargetPlatform.macOS);
-    for (final TextTheme textTheme in <TextTheme>[
-      typography.black,
-      typography.white
-    ]) {
+    final Typography typography = Typography.material2018(platform: TargetPlatform.macOS);
+    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.displayLarge, isMacOSSanFranciscoMetaFont);
       expect(textTheme.displayMedium, isMacOSSanFranciscoMetaFont);
       expect(textTheme.displaySmall, isMacOSSanFranciscoMetaFont);
@@ -147,8 +84,7 @@ void main() {
     }
   });
 
-  testWidgets('Typography implements debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,
@@ -159,20 +95,17 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> nonDefaultPropertyNames = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.name!)
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.name!).toList();
 
-    expect(nonDefaultPropertyNames,
-        <String>['black', 'white', 'englishLike', 'dense', 'tall']);
+    expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 
   test('englishLike2018 TextTheme matches Material Design spec', () {
     // Check the default material text theme against the style values
     // shown https://material.io/design/typography/#type-scale.
 
-    final TextTheme theme =
-        Typography.englishLike2018.merge(Typography.blackMountainView);
+    final TextTheme theme = Typography.englishLike2018.merge(Typography.blackMountainView);
     const FontWeight light = FontWeight.w300;
     const FontWeight regular = FontWeight.w400;
     const FontWeight medium = FontWeight.w500;
@@ -273,8 +206,7 @@ void main() {
     // shown https://m3.material.io/styles/typography/tokens.
     //
     // This may need to be updated if the token values change.
-    final TextTheme theme =
-        Typography.englishLike2021.merge(Typography.blackMountainView);
+    final TextTheme theme = Typography.englishLike2021.merge(Typography.blackMountainView);
 
     // Display large
     expect(theme.displayLarge!.fontFamily, 'Roboto');
@@ -283,8 +215,7 @@ void main() {
     expect(theme.displayLarge!.letterSpacing, -0.25);
     expect(theme.displayLarge!.height, 1.12);
     expect(theme.displayLarge!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.displayLarge!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.displayLarge!.leadingDistribution, TextLeadingDistribution.even);
 
     // Display medium
     expect(theme.displayMedium!.fontFamily, 'Roboto');
@@ -293,8 +224,7 @@ void main() {
     expect(theme.displayMedium!.letterSpacing, 0.0);
     expect(theme.displayMedium!.height, 1.16);
     expect(theme.displayMedium!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.displayMedium!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.displayMedium!.leadingDistribution, TextLeadingDistribution.even);
 
     // Display small
     expect(theme.displaySmall!.fontFamily, 'Roboto');
@@ -303,8 +233,7 @@ void main() {
     expect(theme.displaySmall!.letterSpacing, 0.0);
     expect(theme.displaySmall!.height, 1.22);
     expect(theme.displaySmall!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.displaySmall!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.displaySmall!.leadingDistribution, TextLeadingDistribution.even);
 
     // Headline large
     expect(theme.headlineLarge!.fontFamily, 'Roboto');
@@ -313,8 +242,7 @@ void main() {
     expect(theme.headlineLarge!.letterSpacing, 0.0);
     expect(theme.headlineLarge!.height, 1.25);
     expect(theme.headlineLarge!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.headlineLarge!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.headlineLarge!.leadingDistribution, TextLeadingDistribution.even);
 
     // Headline medium
     expect(theme.headlineMedium!.fontFamily, 'Roboto');
@@ -323,8 +251,7 @@ void main() {
     expect(theme.headlineMedium!.letterSpacing, 0.0);
     expect(theme.headlineMedium!.height, 1.29);
     expect(theme.headlineMedium!.textBaseline, TextBaseline.alphabetic);
-    expect(theme.headlineMedium!.leadingDistribution,
-        TextLeadingDistribution.even);
+    expect(theme.headlineMedium!.leadingDistribution, TextLeadingDistribution.even);
 
     // Headline small
     expect(theme.headlineSmall!.fontFamily, 'Roboto');
@@ -333,8 +260,7 @@ void main() {
     expect(theme.headlineSmall!.letterSpacing, 0.0);
     expect(theme.headlineSmall!.height, 1.33);
     expect(theme.headlineSmall!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.headlineSmall!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.headlineSmall!.leadingDistribution, TextLeadingDistribution.even);
 
     // Title large
     expect(theme.titleLarge!.fontFamily, 'Roboto');
@@ -352,8 +278,7 @@ void main() {
     expect(theme.titleMedium!.letterSpacing, 0.15);
     expect(theme.titleMedium!.height, 1.50);
     expect(theme.titleMedium!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.titleMedium!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.titleMedium!.leadingDistribution, TextLeadingDistribution.even);
 
     // Title small
     expect(theme.titleSmall!.fontFamily, 'Roboto');
@@ -380,8 +305,7 @@ void main() {
     expect(theme.labelMedium!.letterSpacing, 0.5);
     expect(theme.labelMedium!.height, 1.33);
     expect(theme.labelMedium!.textBaseline, TextBaseline.alphabetic);
-    expect(
-        theme.labelMedium!.leadingDistribution, TextLeadingDistribution.even);
+    expect(theme.labelMedium!.leadingDistribution, TextLeadingDistribution.even);
 
     // Label small
     expect(theme.labelSmall!.fontFamily, 'Roboto');

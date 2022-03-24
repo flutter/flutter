@@ -17,8 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/test_api.dart' as test_package;
 
 void main() {
-  final AutomatedTestWidgetsFlutterBinding binding =
-      AutomatedTestWidgetsFlutterBinding();
+  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
 
   group(TestViewConfiguration, () {
     test('is initialized with top-level window if one is not provided', () {
@@ -29,8 +28,7 @@ void main() {
 
   group(AutomatedTestWidgetsFlutterBinding, () {
     test('allows setting defaultTestTimeout to 5 minutes', () {
-      binding.defaultTestTimeout =
-          const test_package.Timeout(Duration(minutes: 5));
+      binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
   });

@@ -28,8 +28,7 @@ class StubProberCommand extends CommandWithTarget {
   StubProberCommand(SerializableFinder finder, this.times, {Duration? timeout})
       : super(finder, timeout: timeout);
 
-  StubProberCommand.deserialize(
-      Map<String, String> json, DeserializeFinderFactory finderFactory)
+  StubProberCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
       : times = int.parse(json['times']!),
         super.deserialize(json, finderFactory);
 

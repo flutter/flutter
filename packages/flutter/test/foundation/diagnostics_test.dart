@@ -23,17 +23,18 @@ class TestTree extends Object with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-        for (final TestTree child in children)
-          child.toDiagnosticsNode(
-            name: 'child ${child.name}',
-            style: child.style,
-          ),
-      ];
+    for (final TestTree child in children)
+      child.toDiagnosticsNode(
+        name: 'child ${child.name}',
+        style: child.style,
+      ),
+  ];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (style != null) properties.defaultDiagnosticsTreeStyle = style!;
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style!;
     this.properties.forEach(properties.add);
   }
 }
@@ -47,32 +48,27 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(
-          json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate())))
-      as Map<String, Object?>;
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
   validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
 }
 
-void validateNodeJsonSerializationHelper(
-    Map<String, Object?> json, DiagnosticsNode node) {
+void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
   expect(json['name'], equals(node.name));
   expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
   expect(json['level'] ?? DiagnosticLevel.info.name, equals(node.level.name));
   expect(json['showName'] ?? true, equals(node.showName));
   expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
-  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name,
-      equals(node.style!.name));
+  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name, equals(node.style!.name));
   expect(json['type'], equals(node.runtimeType.toString()));
   expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
 
 void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
-  validatePropertyJsonSerializationHelper(
-      simulateJsonSerialization(property), property);
+  validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
 }
 
 void validateStringPropertyJsonSerialization(StringProperty property) {
@@ -112,8 +108,7 @@ void validateDoublePropertyJsonSerialization(DoubleProperty property) {
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateObjectFlagPropertyJsonSerialization(
-    ObjectFlagProperty<Object> property) {
+void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.ifPresent != null) {
     expect(json['ifPresent'], equals(property.ifPresent));
@@ -124,18 +119,14 @@ void validateObjectFlagPropertyJsonSerialization(
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateIterableFlagsPropertyJsonSerialization(
-    FlagsSummary<Object?> property) {
+void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value.isNotEmpty) {
-    expect(
-        json['values'],
-        equals(
-          property.value.entries
-              .where((MapEntry<String, Object?> entry) => entry.value != null)
-              .map((MapEntry<String, Object?> entry) => entry.key)
-              .toList(),
-        ));
+    expect(json['values'], equals(
+      property.value.entries
+        .where((MapEntry<String, Object?> entry) => entry.value != null)
+        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
+    ));
   } else {
     expect(json.containsKey('values'), isFalse);
   }
@@ -143,14 +134,11 @@ void validateIterableFlagsPropertyJsonSerialization(
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateIterablePropertyJsonSerialization(
-    IterableProperty<Object> property) {
+void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value != null) {
     final List<Object?> valuesJson = json['values']! as List<Object?>;
-    final List<String> expectedValues = property.value!
-        .map<String>((Object value) => value.toString())
-        .toList();
+    final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
     expect(json.containsKey('values'), isFalse);
@@ -159,8 +147,7 @@ void validateIterablePropertyJsonSerialization(
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validatePropertyJsonSerializationHelper(
-    final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
+void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
   if (property.defaultValue != kNoDefaultValue) {
     expect(json['defaultValue'], equals(property.defaultValue.toString()));
   } else {
@@ -234,69 +221,74 @@ void main() {
     goldenStyleTest(
       'dense',
       style: DiagnosticsTreeStyle.dense,
-      golden: 'TestTree#00000\n'
-          '├child node A: TestTree#00000\n'
-          '├child node B: TestTree#00000\n'
-          '│├child node B1: TestTree#00000\n'
-          '│├child node B2: TestTree#00000\n'
-          '│└child node B3: TestTree#00000\n'
-          '└child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000\n'
+      '├child node A: TestTree#00000\n'
+      '├child node B: TestTree#00000\n'
+      '│├child node B1: TestTree#00000\n'
+      '│├child node B2: TestTree#00000\n'
+      '│└child node B3: TestTree#00000\n'
+      '└child node C: TestTree#00000\n',
     );
 
     goldenStyleTest(
       'sparse',
       style: DiagnosticsTreeStyle.sparse,
-      golden: 'TestTree#00000\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ └─child node B3: TestTree#00000\n'
-          ' └─child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' └─child node C: TestTree#00000\n',
     );
 
     goldenStyleTest(
       'dashed',
       style: DiagnosticsTreeStyle.offstage,
-      golden: 'TestTree#00000\n'
-          ' ╎╌child node A: TestTree#00000\n'
-          ' ╎╌child node B: TestTree#00000\n'
-          ' ╎ ╎╌child node B1: TestTree#00000\n'
-          ' ╎ ╎╌child node B2: TestTree#00000\n'
-          ' ╎ └╌child node B3: TestTree#00000\n'
-          ' └╌child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000\n'
+      ' ╎╌child node A: TestTree#00000\n'
+      ' ╎╌child node B: TestTree#00000\n'
+      ' ╎ ╎╌child node B1: TestTree#00000\n'
+      ' ╎ ╎╌child node B2: TestTree#00000\n'
+      ' ╎ └╌child node B3: TestTree#00000\n'
+      ' └╌child node C: TestTree#00000\n',
     );
 
     goldenStyleTest(
       'leaf children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ ╘═╦══ child node B3 ═══\n'
-          ' │   ║ TestTree#00000\n'
-          ' │   ╚═══════════\n'
-          ' ╘═╦══ child node C ═══\n'
-          '   ║ TestTree#00000\n'
-          '   ╚═══════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ ╘═╦══ child node B3 ═══\n'
+      ' │   ║ TestTree#00000\n'
+      ' │   ╚═══════════\n'
+      ' ╘═╦══ child node C ═══\n'
+      '   ║ TestTree#00000\n'
+      '   ╚═══════════\n',
     );
 
     goldenStyleTest(
       'error children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.error,
-      golden: 'TestTree#00000\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
-          ' │   ╚══════════════════════════════════════════════════════════════════\n'
-          ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
-          '   ╚══════════════════════════════════════════════════════════════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      ' │   ╚══════════════════════════════════════════════════════════════════\n'
+      ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '   ╚══════════════════════════════════════════════════════════════════\n',
     );
 
     // You would never really want to make everything a transition child like
@@ -306,57 +298,59 @@ void main() {
     goldenStyleTest(
       'transition',
       style: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000:\n'
-          '  ╞═╦══ child node A ═══\n'
-          '  │ ║ TestTree#00000\n'
-          '  │ ╚═══════════\n'
-          '  ╞═╦══ child node B ═══\n'
-          '  │ ║ TestTree#00000:\n'
-          '  │ ║   ╞═╦══ child node B1 ═══\n'
-          '  │ ║   │ ║ TestTree#00000\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╞═╦══ child node B2 ═══\n'
-          '  │ ║   │ ║ TestTree#00000\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╘═╦══ child node B3 ═══\n'
-          '  │ ║     ║ TestTree#00000\n'
-          '  │ ║     ╚═══════════\n'
-          '  │ ╚═══════════\n'
-          '  ╘═╦══ child node C ═══\n'
-          '    ║ TestTree#00000\n'
-          '    ╚═══════════\n',
+      golden:
+      'TestTree#00000:\n'
+      '  ╞═╦══ child node A ═══\n'
+      '  │ ║ TestTree#00000\n'
+      '  │ ╚═══════════\n'
+      '  ╞═╦══ child node B ═══\n'
+      '  │ ║ TestTree#00000:\n'
+      '  │ ║   ╞═╦══ child node B1 ═══\n'
+      '  │ ║   │ ║ TestTree#00000\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╞═╦══ child node B2 ═══\n'
+      '  │ ║   │ ║ TestTree#00000\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╘═╦══ child node B3 ═══\n'
+      '  │ ║     ║ TestTree#00000\n'
+      '  │ ║     ╚═══════════\n'
+      '  │ ╚═══════════\n'
+      '  ╘═╦══ child node C ═══\n'
+      '    ║ TestTree#00000\n'
+      '    ╚═══════════\n',
     );
 
     goldenStyleTest(
       'error',
       style: DiagnosticsTreeStyle.error,
       golden:
-          '══╡ TESTTREE#00000 ╞═════════════════════════════════════════════\n'
-          '╞═╦══╡ CHILD NODE A: TESTTREE#00000 ╞════════════════════════════════\n'
-          '│ ╚══════════════════════════════════════════════════════════════════\n'
-          '╞═╦══╡ CHILD NODE B: TESTTREE#00000 ╞════════════════════════════════\n'
-          '│ ║ ╞═╦══╡ CHILD NODE B1: TESTTREE#00000 ╞═══════════════════════════════\n'
-          '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
-          '│ ║ ╞═╦══╡ CHILD NODE B2: TESTTREE#00000 ╞═══════════════════════════════\n'
-          '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
-          '│ ║ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
-          '│ ║   ╚══════════════════════════════════════════════════════════════════\n'
-          '│ ╚══════════════════════════════════════════════════════════════════\n'
-          '╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
-          '  ╚══════════════════════════════════════════════════════════════════\n'
-          '═════════════════════════════════════════════════════════════════\n',
+      '══╡ TESTTREE#00000 ╞═════════════════════════════════════════════\n'
+      '╞═╦══╡ CHILD NODE A: TESTTREE#00000 ╞════════════════════════════════\n'
+      '│ ╚══════════════════════════════════════════════════════════════════\n'
+      '╞═╦══╡ CHILD NODE B: TESTTREE#00000 ╞════════════════════════════════\n'
+      '│ ║ ╞═╦══╡ CHILD NODE B1: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ║ ╞═╦══╡ CHILD NODE B2: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ║ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║   ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ╚══════════════════════════════════════════════════════════════════\n'
+      '╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '  ╚══════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
 
     goldenStyleTest(
       'whitespace',
       style: DiagnosticsTreeStyle.whitespace,
-      golden: 'TestTree#00000:\n'
-          '  child node A: TestTree#00000\n'
-          '  child node B: TestTree#00000:\n'
-          '    child node B1: TestTree#00000\n'
-          '    child node B2: TestTree#00000\n'
-          '    child node B3: TestTree#00000\n'
-          '  child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000:\n'
+      '  child node A: TestTree#00000\n'
+      '  child node B: TestTree#00000:\n'
+      '    child node B1: TestTree#00000\n'
+      '    child node B2: TestTree#00000\n'
+      '    child node B3: TestTree#00000\n'
+      '  child node C: TestTree#00000\n',
     );
 
     // Single line mode does not display children.
@@ -378,20 +372,13 @@ void main() {
     }) {
       final TestTree tree = TestTree(
         properties: <DiagnosticsNode>[
-          StringProperty('stringProperty1', 'value1',
-              quoted: false, style: propertyStyle),
+          StringProperty('stringProperty1', 'value1', quoted: false, style: propertyStyle),
           DoubleProperty('doubleProperty1', 42.5, style: propertyStyle),
           DoubleProperty('roundedProperty', 1.0 / 3.0, style: propertyStyle),
-          StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW',
-              level: DiagnosticLevel.hidden,
-              quoted: false,
-              style: propertyStyle),
-          DiagnosticsProperty<Object>('DO_NOT_SHOW_NULL', null,
-              defaultValue: null, style: propertyStyle),
-          DiagnosticsProperty<Object>('nullProperty', null,
-              style: propertyStyle),
-          StringProperty('node_type', '<root node>',
-              showName: false, quoted: false, style: propertyStyle),
+          StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false, style: propertyStyle),
+          DiagnosticsProperty<Object>('DO_NOT_SHOW_NULL', null, defaultValue: null, style: propertyStyle),
+          DiagnosticsProperty<Object>('nullProperty', null, style: propertyStyle),
+          StringProperty('node_type', '<root node>', showName: false, quoted: false, style: propertyStyle),
         ],
         children: <TestTree>[
           TestTree(name: 'node A', style: style),
@@ -405,17 +392,13 @@ void main() {
               TestTree(name: 'node B1', style: style),
               TestTree(
                 name: 'node B2',
-                properties: <DiagnosticsNode>[
-                  StringProperty('property1', 'value1',
-                      quoted: false, style: propertyStyle)
-                ],
+                properties: <DiagnosticsNode>[StringProperty('property1', 'value1', quoted: false, style: propertyStyle)],
                 style: style,
               ),
               TestTree(
                 name: 'node B3',
                 properties: <DiagnosticsNode>[
-                  StringProperty('node_type', '<leaf node>',
-                      showName: false, quoted: false, style: propertyStyle),
+                  StringProperty('node_type', '<leaf node>', showName: false, quoted: false, style: propertyStyle),
                   IntProperty('foo', 42, style: propertyStyle),
                 ],
                 style: lastChildStyle ?? style,
@@ -426,8 +409,7 @@ void main() {
           TestTree(
             name: 'node C',
             properties: <DiagnosticsNode>[
-              StringProperty('foo', 'multi\nline\nvalue!',
-                  quoted: false, style: propertyStyle),
+              StringProperty('foo', 'multi\nline\nvalue!', quoted: false, style: propertyStyle),
             ],
             style: lastChildStyle ?? style,
           ),
@@ -451,302 +433,309 @@ void main() {
     goldenStyleTest(
       'sparse',
       style: DiagnosticsTreeStyle.sparse,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ └─child node B3: TestTree#00000\n'
-          ' │     <leaf node>\n'
-          ' │     foo: 42\n'
-          ' │\n'
-          ' └─child node C: TestTree#00000\n'
-          '     foo:\n'
-          '       multi\n'
-          '       line\n'
-          '       value!\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' │     <leaf node>\n'
+      ' │     foo: 42\n'
+      ' │\n'
+      ' └─child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
       'sparse with indented single line properties',
       style: DiagnosticsTreeStyle.sparse,
       propertyStyle: DiagnosticsTreeStyle.errorProperty,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1:\n'
-          ' │   value1\n'
-          ' │ doubleProperty1:\n'
-          ' │   42.5\n'
-          ' │ roundedProperty:\n'
-          ' │   0.3\n'
-          ' │ nullProperty:\n'
-          ' │   null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1:\n'
-          ' │ │   v1\n'
-          ' │ │ p2:\n'
-          ' │ │   v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1:\n'
-          ' │ │     value1\n'
-          ' │ │\n'
-          ' │ └─child node B3: TestTree#00000\n'
-          ' │     <leaf node>\n'
-          ' │     foo:\n'
-          ' │       42\n'
-          ' │\n'
-          ' └─child node C: TestTree#00000\n'
-          '     foo:\n'
-          '       multi\n'
-          '       line\n'
-          '       value!\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1:\n'
+      ' │   value1\n'
+      ' │ doubleProperty1:\n'
+      ' │   42.5\n'
+      ' │ roundedProperty:\n'
+      ' │   0.3\n'
+      ' │ nullProperty:\n'
+      ' │   null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1:\n'
+      ' │ │   v1\n'
+      ' │ │ p2:\n'
+      ' │ │   v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1:\n'
+      ' │ │     value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' │     <leaf node>\n'
+      ' │     foo:\n'
+      ' │       42\n'
+      ' │\n'
+      ' └─child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
       'dense',
       style: DiagnosticsTreeStyle.dense,
       golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n'
-          '├child node A: TestTree#00000\n'
-          '├child node B: TestTree#00000(p1: v1, p2: v2)\n'
-          '│├child node B1: TestTree#00000\n'
-          '│├child node B2: TestTree#00000(property1: value1)\n'
-          '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-          '└child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+        'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n'
+        '├child node A: TestTree#00000\n'
+        '├child node B: TestTree#00000(p1: v1, p2: v2)\n'
+        '│├child node B1: TestTree#00000\n'
+        '│├child node B2: TestTree#00000(property1: value1)\n'
+        '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
+        '└child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
 
     goldenStyleTest(
       'dashed',
       style: DiagnosticsTreeStyle.offstage,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ╎╌child node A: TestTree#00000\n'
-          ' ╎╌child node B: TestTree#00000\n'
-          ' ╎ │ p1: v1\n'
-          ' ╎ │ p2: v2\n'
-          ' ╎ │\n'
-          ' ╎ ╎╌child node B1: TestTree#00000\n'
-          ' ╎ ╎╌child node B2: TestTree#00000\n'
-          ' ╎ ╎   property1: value1\n'
-          ' ╎ ╎\n'
-          ' ╎ └╌child node B3: TestTree#00000\n'
-          ' ╎     <leaf node>\n'
-          ' ╎     foo: 42\n'
-          ' ╎\n'
-          ' └╌child node C: TestTree#00000\n'
-          '     foo:\n'
-          '       multi\n'
-          '       line\n'
-          '       value!\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ╎╌child node A: TestTree#00000\n'
+      ' ╎╌child node B: TestTree#00000\n'
+      ' ╎ │ p1: v1\n'
+      ' ╎ │ p2: v2\n'
+      ' ╎ │\n'
+      ' ╎ ╎╌child node B1: TestTree#00000\n'
+      ' ╎ ╎╌child node B2: TestTree#00000\n'
+      ' ╎ ╎   property1: value1\n'
+      ' ╎ ╎\n'
+      ' ╎ └╌child node B3: TestTree#00000\n'
+      ' ╎     <leaf node>\n'
+      ' ╎     foo: 42\n'
+      ' ╎\n'
+      ' └╌child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
       'transition children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ ╘═╦══ child node B3 ═══\n'
-          ' │   ║ TestTree#00000:\n'
-          ' │   ║   <leaf node>\n'
-          ' │   ║   foo: 42\n'
-          ' │   ╚═══════════\n'
-          ' ╘═╦══ child node C ═══\n'
-          '   ║ TestTree#00000:\n'
-          '   ║   foo:\n'
-          '   ║     multi\n'
-          '   ║     line\n'
-          '   ║     value!\n'
-          '   ╚═══════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ ╘═╦══ child node B3 ═══\n'
+      ' │   ║ TestTree#00000:\n'
+      ' │   ║   <leaf node>\n'
+      ' │   ║   foo: 42\n'
+      ' │   ╚═══════════\n'
+      ' ╘═╦══ child node C ═══\n'
+      '   ║ TestTree#00000:\n'
+      '   ║   foo:\n'
+      '   ║     multi\n'
+      '   ║     line\n'
+      '   ║     value!\n'
+      '   ╚═══════════\n',
     );
 
     goldenStyleTest(
       'error children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.error,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
-          ' │   ║ <leaf node>\n'
-          ' │   ║ foo: 42\n'
-          ' │   ╚══════════════════════════════════════════════════════════════════\n'
-          ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
-          '   ║ foo:\n'
-          '   ║   multi\n'
-          '   ║   line\n'
-          '   ║   value!\n'
-          '   ╚══════════════════════════════════════════════════════════════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      ' │   ║ <leaf node>\n'
+      ' │   ║ foo: 42\n'
+      ' │   ╚══════════════════════════════════════════════════════════════════\n'
+      ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '   ║ foo:\n'
+      '   ║   multi\n'
+      '   ║   line\n'
+      '   ║   value!\n'
+      '   ╚══════════════════════════════════════════════════════════════════\n',
     );
+
 
     // You would never really want to make everything a transition child like
     // this but you can and still get a readable tree.
     goldenStyleTest(
       'transition',
       style: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000:\n'
-          '  stringProperty1: value1\n'
-          '  doubleProperty1: 42.5\n'
-          '  roundedProperty: 0.3\n'
-          '  nullProperty: null\n'
-          '  <root node>\n'
-          '  ╞═╦══ child node A ═══\n'
-          '  │ ║ TestTree#00000\n'
-          '  │ ╚═══════════\n'
-          '  ╞═╦══ child node B ═══\n'
-          '  │ ║ TestTree#00000:\n'
-          '  │ ║   p1: v1\n'
-          '  │ ║   p2: v2\n'
-          '  │ ║   ╞═╦══ child node B1 ═══\n'
-          '  │ ║   │ ║ TestTree#00000\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╞═╦══ child node B2 ═══\n'
-          '  │ ║   │ ║ TestTree#00000:\n'
-          '  │ ║   │ ║   property1: value1\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╘═╦══ child node B3 ═══\n'
-          '  │ ║     ║ TestTree#00000:\n'
-          '  │ ║     ║   <leaf node>\n'
-          '  │ ║     ║   foo: 42\n'
-          '  │ ║     ╚═══════════\n'
-          '  │ ╚═══════════\n'
-          '  ╘═╦══ child node C ═══\n'
-          '    ║ TestTree#00000:\n'
-          '    ║   foo:\n'
-          '    ║     multi\n'
-          '    ║     line\n'
-          '    ║     value!\n'
-          '    ╚═══════════\n',
+      golden:
+      'TestTree#00000:\n'
+      '  stringProperty1: value1\n'
+      '  doubleProperty1: 42.5\n'
+      '  roundedProperty: 0.3\n'
+      '  nullProperty: null\n'
+      '  <root node>\n'
+      '  ╞═╦══ child node A ═══\n'
+      '  │ ║ TestTree#00000\n'
+      '  │ ╚═══════════\n'
+      '  ╞═╦══ child node B ═══\n'
+      '  │ ║ TestTree#00000:\n'
+      '  │ ║   p1: v1\n'
+      '  │ ║   p2: v2\n'
+      '  │ ║   ╞═╦══ child node B1 ═══\n'
+      '  │ ║   │ ║ TestTree#00000\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╞═╦══ child node B2 ═══\n'
+      '  │ ║   │ ║ TestTree#00000:\n'
+      '  │ ║   │ ║   property1: value1\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╘═╦══ child node B3 ═══\n'
+      '  │ ║     ║ TestTree#00000:\n'
+      '  │ ║     ║   <leaf node>\n'
+      '  │ ║     ║   foo: 42\n'
+      '  │ ║     ╚═══════════\n'
+      '  │ ╚═══════════\n'
+      '  ╘═╦══ child node C ═══\n'
+      '    ║ TestTree#00000:\n'
+      '    ║   foo:\n'
+      '    ║     multi\n'
+      '    ║     line\n'
+      '    ║     value!\n'
+      '    ╚═══════════\n',
     );
 
     goldenStyleTest(
       'whitespace',
       style: DiagnosticsTreeStyle.whitespace,
-      golden: 'TestTree#00000:\n'
-          '  stringProperty1: value1\n'
-          '  doubleProperty1: 42.5\n'
-          '  roundedProperty: 0.3\n'
-          '  nullProperty: null\n'
-          '  <root node>\n'
-          '  child node A: TestTree#00000\n'
-          '  child node B: TestTree#00000:\n'
-          '    p1: v1\n'
-          '    p2: v2\n'
-          '    child node B1: TestTree#00000\n'
-          '    child node B2: TestTree#00000:\n'
-          '      property1: value1\n'
-          '    child node B3: TestTree#00000:\n'
-          '      <leaf node>\n'
-          '      foo: 42\n'
-          '  child node C: TestTree#00000:\n'
-          '    foo:\n'
-          '      multi\n'
-          '      line\n'
-          '      value!\n',
+      golden:
+        'TestTree#00000:\n'
+        '  stringProperty1: value1\n'
+        '  doubleProperty1: 42.5\n'
+        '  roundedProperty: 0.3\n'
+        '  nullProperty: null\n'
+        '  <root node>\n'
+        '  child node A: TestTree#00000\n'
+        '  child node B: TestTree#00000:\n'
+        '    p1: v1\n'
+        '    p2: v2\n'
+        '    child node B1: TestTree#00000\n'
+        '    child node B2: TestTree#00000:\n'
+        '      property1: value1\n'
+        '    child node B3: TestTree#00000:\n'
+        '      <leaf node>\n'
+        '      foo: 42\n'
+        '  child node C: TestTree#00000:\n'
+        '    foo:\n'
+        '      multi\n'
+        '      line\n'
+        '      value!\n',
     );
 
     goldenStyleTest(
       'flat',
       style: DiagnosticsTreeStyle.flat,
-      golden: 'TestTree#00000:\n'
-          'stringProperty1: value1\n'
-          'doubleProperty1: 42.5\n'
-          'roundedProperty: 0.3\n'
-          'nullProperty: null\n'
-          '<root node>\n'
-          'child node A: TestTree#00000\n'
-          'child node B: TestTree#00000:\n'
-          'p1: v1\n'
-          'p2: v2\n'
-          'child node B1: TestTree#00000\n'
-          'child node B2: TestTree#00000:\n'
-          'property1: value1\n'
-          'child node B3: TestTree#00000:\n'
-          '<leaf node>\n'
-          'foo: 42\n'
-          'child node C: TestTree#00000:\n'
-          'foo:\n'
-          '  multi\n'
-          '  line\n'
-          '  value!\n',
+      golden:
+      'TestTree#00000:\n'
+      'stringProperty1: value1\n'
+      'doubleProperty1: 42.5\n'
+      'roundedProperty: 0.3\n'
+      'nullProperty: null\n'
+      '<root node>\n'
+      'child node A: TestTree#00000\n'
+      'child node B: TestTree#00000:\n'
+      'p1: v1\n'
+      'p2: v2\n'
+      'child node B1: TestTree#00000\n'
+      'child node B2: TestTree#00000:\n'
+      'property1: value1\n'
+      'child node B3: TestTree#00000:\n'
+      '<leaf node>\n'
+      'foo: 42\n'
+      'child node C: TestTree#00000:\n'
+      'foo:\n'
+      '  multi\n'
+      '  line\n'
+      '  value!\n',
     );
     // Single line mode does not display children.
     goldenStyleTest(
       'single line',
       style: DiagnosticsTreeStyle.singleLine,
-      golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
     goldenStyleTest(
       'single line',
       name: 'some name',
       style: DiagnosticsTreeStyle.singleLine,
-      golden:
-          'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+      golden: 'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
     // No name so we don't indent.
     goldenStyleTest(
       'indented single line',
       style: DiagnosticsTreeStyle.errorProperty,
-      golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
     );
 
     goldenStyleTest(
       'indented single line',
       name: 'some name',
       style: DiagnosticsTreeStyle.errorProperty,
-      golden: 'some name:\n'
-          '  TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+      golden:
+      'some name:\n'
+      '  TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
     );
 
     // TODO(jacobr): this is an ugly test case.
@@ -757,24 +746,25 @@ void main() {
       'single line last child',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.singleLine,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-          ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
+      ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
 
     // TODO(jacobr): this is an ugly test case.
@@ -788,26 +778,27 @@ void main() {
       'indented single line last child',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.errorProperty,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ └─child node B3:\n'
-          ' │     TestTree#00000(<leaf node>, foo: 42)\n'
-          ' └─child node C:\n'
-          '     TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3:\n'
+      ' │     TestTree#00000(<leaf node>, foo: 42)\n'
+      ' └─child node C:\n'
+      '     TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
   });
 
@@ -817,10 +808,8 @@ void main() {
         StringProperty('stringProperty1', 'value1', quoted: false),
         DoubleProperty('doubleProperty1', 42.5),
         DoubleProperty('roundedProperty', 1.0 / 3.0),
-        StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW',
-            level: DiagnosticLevel.hidden, quoted: false),
-        StringProperty('DEBUG_ONLY', 'DEBUG_ONLY',
-            level: DiagnosticLevel.debug, quoted: false),
+        StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false),
+        StringProperty('DEBUG_ONLY', 'DEBUG_ONLY', level: DiagnosticLevel.debug, quoted: false),
       ],
       // child to verify that children are not included in the toString.
       children: <TestTree>[TestTree(name: 'node A')],
@@ -828,14 +817,12 @@ void main() {
 
     expect(
       tree.toString(),
-      equalsIgnoringHashCodes(
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3)'),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3)'),
     );
 
     expect(
       tree.toString(minLevel: DiagnosticLevel.debug),
-      equalsIgnoringHashCodes(
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
     );
   });
 
@@ -857,23 +844,19 @@ void main() {
               properties: <DiagnosticsNode>[
                 DiagnosticsProperty<bool>('survived', true),
               ],
-            ).toDiagnosticsNode(
-                name: 'tree property', style: DiagnosticsTreeStyle.whitespace),
+            ).toDiagnosticsNode(name: 'tree property', style: DiagnosticsTreeStyle.whitespace),
           ],
           children: <TestTree>[
             TestTree(name: 'dense child', style: DiagnosticsTreeStyle.dense),
             TestTree(
               name: 'dense',
-              properties: <DiagnosticsNode>[
-                StringProperty('property1', 'value1')
-              ],
+              properties: <DiagnosticsNode>[StringProperty('property1', 'value1')],
               style: DiagnosticsTreeStyle.dense,
             ),
             TestTree(
               name: 'node B3',
               properties: <DiagnosticsNode>[
-                StringProperty('node_type', '<leaf node>',
-                    showName: false, quoted: false),
+                StringProperty('node_type', '<leaf node>', showName: false, quoted: false),
                 IntProperty('foo', 42),
               ],
               style: DiagnosticsTreeStyle.dense,
@@ -970,16 +953,9 @@ void main() {
       equals('<hidden>'),
     );
 
-    expect(
-        StringProperty('name', null).isFiltered(DiagnosticLevel.info), isFalse);
-    expect(
-        StringProperty('name', 'value', level: DiagnosticLevel.hidden)
-            .isFiltered(DiagnosticLevel.info),
-        isTrue);
-    expect(
-        StringProperty('name', null, defaultValue: null)
-            .isFiltered(DiagnosticLevel.info),
-        isTrue);
+    expect(StringProperty('name', null).isFiltered(DiagnosticLevel.info), isFalse);
+    expect(StringProperty('name', 'value', level: DiagnosticLevel.hidden).isFiltered(DiagnosticLevel.info), isTrue);
+    expect(StringProperty('name', null, defaultValue: null).isFiltered(DiagnosticLevel.info), isTrue);
     final StringProperty quoted = StringProperty(
       'name',
       'value',
@@ -1003,10 +979,8 @@ void main() {
   });
 
   test('bool property test', () {
-    final DiagnosticsProperty<bool> trueProperty =
-        DiagnosticsProperty<bool>('name', true);
-    final DiagnosticsProperty<bool> falseProperty =
-        DiagnosticsProperty<bool>('name', false);
+    final DiagnosticsProperty<bool> trueProperty = DiagnosticsProperty<bool>('name', true);
+    final DiagnosticsProperty<bool> falseProperty = DiagnosticsProperty<bool>('name', false);
     expect(trueProperty.toString(), equals('name: true'));
     expect(trueProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(trueProperty.value, isTrue);
@@ -1030,20 +1004,10 @@ void main() {
       equals('true'),
     );
 
-    expect(
-        DiagnosticsProperty<bool>('name', null)
-            .isFiltered(DiagnosticLevel.info),
-        isFalse);
-    expect(
-        DiagnosticsProperty<bool>('name', true, level: DiagnosticLevel.hidden)
-            .isFiltered(DiagnosticLevel.info),
-        isTrue);
-    expect(
-        DiagnosticsProperty<bool>('name', null, defaultValue: null)
-            .isFiltered(DiagnosticLevel.info),
-        isTrue);
-    final DiagnosticsProperty<bool> missingBool =
-        DiagnosticsProperty<bool>('name', null, ifNull: 'missing');
+    expect(DiagnosticsProperty<bool>('name', null).isFiltered(DiagnosticLevel.info), isFalse);
+    expect(DiagnosticsProperty<bool>('name', true, level: DiagnosticLevel.hidden).isFiltered(DiagnosticLevel.info), isTrue);
+    expect(DiagnosticsProperty<bool>('name', null, defaultValue: null).isFiltered(DiagnosticLevel.info), isTrue);
+    final DiagnosticsProperty<bool> missingBool = DiagnosticsProperty<bool>('name', null, ifNull: 'missing');
     expect(
       missingBool.toString(),
       equals('name: missing'),
@@ -1080,7 +1044,7 @@ void main() {
       tooltip: 'tooltip',
     );
     expect(
-      withTooltip.toString(),
+     withTooltip.toString(),
       equals('name: value (tooltip)'),
     );
     expect(withTooltip.value, equals('value'));
@@ -1101,28 +1065,24 @@ void main() {
     expect(DoubleProperty('name', 1.3333).toString(), equals('name: 1.3'));
 
     expect(DoubleProperty('name', null).toString(), equals('name: null'));
-    expect(DoubleProperty('name', null).isFiltered(DiagnosticLevel.info),
-        equals(false));
+    expect(DoubleProperty('name', null).isFiltered(DiagnosticLevel.info), equals(false));
 
     expect(
       DoubleProperty('name', null, ifNull: 'missing').toString(),
       equals('name: missing'),
     );
 
-    final DoubleProperty doubleWithUnit =
-        DoubleProperty('name', 42.0, unit: 'px');
+    final DoubleProperty doubleWithUnit = DoubleProperty('name', 42.0, unit: 'px');
     expect(doubleWithUnit.toString(), equals('name: 42.0px'));
     validateDoublePropertyJsonSerialization(doubleWithUnit);
   });
 
   test('double.infinity serialization test', () {
-    final DoubleProperty infProperty1 =
-        DoubleProperty('double1', double.infinity);
+    final DoubleProperty infProperty1 = DoubleProperty('double1', double.infinity);
     validateDoublePropertyJsonSerialization(infProperty1);
     expect(infProperty1.toString(), equals('double1: Infinity'));
 
-    final DoubleProperty infProperty2 =
-        DoubleProperty('double2', double.negativeInfinity);
+    final DoubleProperty infProperty2 = DoubleProperty('double2', double.negativeInfinity);
     validateDoublePropertyJsonSerialization(infProperty2);
     expect(infProperty2.toString(), equals('double2: -Infinity'));
   });
@@ -1130,7 +1090,7 @@ void main() {
   test('unsafe double property test', () {
     final DoubleProperty safe = DoubleProperty.lazy(
       'name',
-      () => 42.0,
+        () => 42.0,
     );
     expect(safe.toString(), equals('name: 42.0'));
     expect(safe.isFiltered(DiagnosticLevel.info), isFalse);
@@ -1152,8 +1112,7 @@ void main() {
 
     final DoubleProperty throwingProperty = DoubleProperty.lazy(
       'name',
-      () => throw FlutterError.fromParts(
-          <DiagnosticsNode>[ErrorSummary('Invalid constraints')]),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Invalid constraints')]),
     );
     // TODO(jacobr): it would be better if throwingProperty.object threw an
     // exception.
@@ -1173,8 +1132,7 @@ void main() {
       equals('name: 40.0%'),
     );
 
-    final PercentProperty complexPercentProperty = PercentProperty('name', 0.99,
-        unit: 'invisible', tooltip: 'almost transparent');
+    final PercentProperty complexPercentProperty = PercentProperty('name', 0.99, unit: 'invisible', tooltip: 'almost transparent');
     expect(
       complexPercentProperty.toString(),
       equals('name: 99.0% invisible (almost transparent)'),
@@ -1238,7 +1196,7 @@ void main() {
   });
 
   test('callback property test', () {
-    void onClick() {}
+    void onClick() { }
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -1260,7 +1218,7 @@ void main() {
   });
 
   test('missing callback property test', () {
-    void onClick() {}
+    void onClick() { }
 
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
@@ -1485,8 +1443,7 @@ void main() {
     );
     expect(simple.value, equals(rect));
     expect(simple.level, equals(DiagnosticLevel.info));
-    expect(
-        simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
+    expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
     validatePropertyJsonSerialization(simple);
 
     final DiagnosticsProperty<Rect> withDescription = DiagnosticsProperty<Rect>(
@@ -1499,8 +1456,7 @@ void main() {
     expect(withDescription.toString(), equals('name: small rect'));
     validatePropertyJsonSerialization(withDescription);
 
-    final DiagnosticsProperty<Object> nullProperty =
-        DiagnosticsProperty<Object>(
+    final DiagnosticsProperty<Object> nullProperty = DiagnosticsProperty<Object>(
       'name',
       null,
     );
@@ -1509,8 +1465,7 @@ void main() {
     expect(nullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(nullProperty);
 
-    final DiagnosticsProperty<Object> hideNullProperty =
-        DiagnosticsProperty<Object>(
+    final DiagnosticsProperty<Object> hideNullProperty = DiagnosticsProperty<Object>(
       'name',
       null,
       defaultValue: null,
@@ -1520,8 +1475,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsProperty<Object> nullDescription =
-        DiagnosticsProperty<Object>(
+    final DiagnosticsProperty<Object> nullDescription = DiagnosticsProperty<Object>(
       'name',
       null,
       ifNull: 'missing',
@@ -1568,8 +1522,7 @@ void main() {
     expect(simple.toString(), equals('name: small rect'));
     validatePropertyJsonSerialization(simple);
 
-    final DiagnosticsProperty<Object> nullProperty =
-        DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> nullProperty = DiagnosticsProperty<Object>.lazy(
       'name',
       () => null,
       description: 'missing',
@@ -1579,8 +1532,7 @@ void main() {
     expect(nullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(nullProperty);
 
-    final DiagnosticsProperty<Object> hideNullProperty =
-        DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> hideNullProperty = DiagnosticsProperty<Object>.lazy(
       'name',
       () => null,
       description: 'missing',
@@ -1602,11 +1554,9 @@ void main() {
     expect(hideName.toString(), equals('small rect'));
     validatePropertyJsonSerialization(hideName);
 
-    final DiagnosticsProperty<Object> throwingWithDescription =
-        DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> throwingWithDescription = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError.fromParts(
-          <DiagnosticsNode>[ErrorSummary('Property not available')]),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Property not available')]),
       description: 'missing',
       defaultValue: null,
     );
@@ -1616,18 +1566,15 @@ void main() {
     expect(throwingWithDescription.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(throwingWithDescription);
 
-    final DiagnosticsProperty<Object> throwingProperty =
-        DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> throwingProperty = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError.fromParts(
-          <DiagnosticsNode>[ErrorSummary('Property not available')]),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Property not available')]),
       defaultValue: null,
     );
     expect(throwingProperty.value, isNull);
     expect(throwingProperty.exception, isFlutterError);
     expect(throwingProperty.isFiltered(DiagnosticLevel.info), false);
-    expect(
-        throwingProperty.toString(), equals('name: EXCEPTION (FlutterError)'));
+    expect(throwingProperty.toString(), equals('name: EXCEPTION (FlutterError)'));
     validatePropertyJsonSerialization(throwingProperty);
   });
 
@@ -1683,7 +1630,7 @@ void main() {
   });
 
   test('has property test', () {
-    void onClick() {}
+    void onClick() { }
     final ObjectFlagProperty<Function> has = ObjectFlagProperty<Function>.has(
       'onClick',
       onClick,
@@ -1694,8 +1641,7 @@ void main() {
     expect(has.toString(), equals('has onClick'));
     validateObjectFlagPropertyJsonSerialization(has);
 
-    final ObjectFlagProperty<Function> missing =
-        ObjectFlagProperty<Function>.has(
+    final ObjectFlagProperty<Function> missing = ObjectFlagProperty<Function>.has(
       'onClick',
       null,
     );
@@ -1709,8 +1655,8 @@ void main() {
   test('iterable flags property test', () {
     // Normal property
     {
-      void onClick() {}
-      void onMove() {}
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'click': onClick,
         'move': onMove,
@@ -1728,8 +1674,8 @@ void main() {
 
     // Reversed-order property
     {
-      void onClick() {}
-      void onMove() {}
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'move': onMove,
         'click': onClick,
@@ -1745,7 +1691,7 @@ void main() {
 
     // Partially empty property
     {
-      void onClick() {}
+      void onClick() { }
       final Map<String, Function?> value = <String, Function?>{
         'move': null,
         'click': onClick,
@@ -1789,7 +1735,7 @@ void main() {
   });
 
   test('iterable property test', () {
-    final List<int> ints = <int>[1, 2, 3];
+    final List<int> ints = <int>[1,2,3];
     final IterableProperty<int> intsProperty = IterableProperty<int>(
       'ints',
       ints,
@@ -1798,7 +1744,7 @@ void main() {
     expect(intsProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(intsProperty.toString(), equals('ints: 1, 2, 3'));
 
-    final List<double> doubles = <double>[1, 2, 3];
+    final List<double> doubles = <double>[1,2,3];
     final IterableProperty<double> doublesProperty = IterableProperty<double>(
       'doubles',
       doubles,
@@ -1901,9 +1847,7 @@ void main() {
 
     // Iterable with a single entry. Verify that rendering is sensible and that
     // multi line rendering isn't used even though it is not helpful.
-    final List<Object> singleElementList = <Object>[
-      const Color.fromARGB(255, 255, 255, 255)
-    ];
+    final List<Object> singleElementList = <Object>[const Color.fromARGB(255, 255, 255, 255)];
 
     final IterableProperty<Object> objectProperty = IterableProperty<Object>(
       'object',
@@ -1951,8 +1895,7 @@ void main() {
     );
 
     expect(
-      DiagnosticsStackTrace('-- callback 2 --', stack, showSeparator: false)
-          .toStringDeep(),
+      DiagnosticsStackTrace('-- callback 2 --', stack, showSeparator: false).toStringDeep(),
       equalsIgnoringHashCodes(
         '-- callback 2 --\n'
         '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
@@ -1970,14 +1913,12 @@ void main() {
     expect(message.showName, isFalse);
     validateNodeJsonSerialization(message);
 
-    final DiagnosticsNode messageProperty =
-        MessageProperty('diagnostics', 'hello world');
+    final DiagnosticsNode messageProperty = MessageProperty('diagnostics', 'hello world');
     expect(messageProperty.toString(), equals('diagnostics: hello world'));
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-    validatePropertyJsonSerialization(
-        messageProperty as DiagnosticsProperty<Object?>);
+    validatePropertyJsonSerialization(messageProperty as DiagnosticsProperty<Object?>);
   });
 
   test('error message style wrap test', () {
@@ -1990,7 +1931,7 @@ void main() {
         name: 'Test tree',
         properties: <DiagnosticsNode>[
           DiagnosticsNode.message(
-            '--- example property at max length --',
+          '--- example property at max length --',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -2039,9 +1980,9 @@ void main() {
           DiagnosticsProperty<String>(
             'multi-line value',
             '[1.0, 0.0, 0.0, 0.0]\n'
-                '[1.0, 1.0, 0.0, 0.0]\n'
-                '[1.0, 0.0, 1.0, 0.0]\n'
-                '[1.0, 0.0, 0.0, 1.0]\n',
+            '[1.0, 1.0, 0.0, 0.0]\n'
+            '[1.0, 0.0, 1.0, 0.0]\n'
+            '[1.0, 0.0, 0.0, 1.0]\n',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -2051,8 +1992,8 @@ void main() {
           DiagnosticsProperty<String>(
             'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names',
             'This is a very long message that must wrap as it cannot fit on one line. '
-                'This is a very long message that must wrap as it cannot fit on one line. '
-                'This is a very long message that must wrap as it cannot fit on one line.',
+            'This is a very long message that must wrap as it cannot fit on one line. '
+            'This is a very long message that must wrap as it cannot fit on one line.',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -2062,9 +2003,9 @@ void main() {
           DiagnosticsProperty<String>(
             'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names',
             '[1.0, 0.0, 0.0, 0.0]\n'
-                '[1.0, 1.0, 0.0, 0.0]\n'
-                '[1.0, 0.0, 1.0, 0.0]\n'
-                '[1.0, 0.0, 0.0, 1.0]\n',
+            '[1.0, 1.0, 0.0, 0.0]\n'
+            '[1.0, 0.0, 1.0, 0.0]\n'
+            '[1.0, 0.0, 0.0, 1.0]\n',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -2080,8 +2021,7 @@ void main() {
       ).toDiagnosticsNode(style: rootStyle);
     }
 
-    final TextTreeRenderer renderer =
-        TextTreeRenderer(wrapWidth: 40, wrapWidthProperties: 40);
+    final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 40, wrapWidthProperties: 40);
     expect(
       renderer.render(createTreeWithWrappingNodes(
         rootStyle: DiagnosticsTreeStyle.error,
@@ -2314,8 +2254,7 @@ void main() {
     expect(json['name'], 'int2');
     expect(json['value'], 20);
 
-    DiagnosticsProperty<double> doubleProperty =
-        DiagnosticsProperty<double>('double', 33.3);
+    DiagnosticsProperty<double> doubleProperty = DiagnosticsProperty<double>('double', 33.3);
     json = simulateJsonSerialization(doubleProperty);
     expect(json['name'], 'double');
     expect(json['value'], 33.3);
@@ -2325,14 +2264,12 @@ void main() {
     expect(json['name'], 'double2');
     expect(json['value'], 33.3);
 
-    final DiagnosticsProperty<bool> boolProperty =
-        DiagnosticsProperty<bool>('bool', true);
+    final DiagnosticsProperty<bool> boolProperty = DiagnosticsProperty<bool>('bool', true);
     json = simulateJsonSerialization(boolProperty);
     expect(json['name'], 'bool');
     expect(json['value'], true);
 
-    DiagnosticsProperty<String> stringProperty =
-        DiagnosticsProperty<String>('string1', 'hello');
+    DiagnosticsProperty<String> stringProperty = DiagnosticsProperty<String>('string1', 'hello');
     json = simulateJsonSerialization(stringProperty);
     expect(json['name'], 'string1');
     expect(json['value'], 'hello');

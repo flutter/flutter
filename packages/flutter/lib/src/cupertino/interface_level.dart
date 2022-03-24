@@ -44,15 +44,14 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
     Key? key,
     required CupertinoUserInterfaceLevelData data,
     required Widget child,
-  })  : assert(data != null),
-        _data = data,
-        super(key: key, child: child);
+  }) : assert(data != null),
+      _data = data,
+      super(key: key, child: child);
 
   final CupertinoUserInterfaceLevelData _data;
 
   @override
-  bool updateShouldNotify(CupertinoUserInterfaceLevel oldWidget) =>
-      oldWidget._data != _data;
+  bool updateShouldNotify(CupertinoUserInterfaceLevel oldWidget) => oldWidget._data != _data;
 
   /// The data from the closest instance of this class that encloses the given
   /// context.
@@ -67,9 +66,9 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData of(BuildContext context) {
     assert(context != null);
-    final CupertinoUserInterfaceLevel? query = context
-        .dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
-    if (query != null) return query._data;
+    final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
+    if (query != null)
+      return query._data;
     throw FlutterError(
       'CupertinoUserInterfaceLevel.of() called with a context that does not contain a CupertinoUserInterfaceLevel.\n'
       'No CupertinoUserInterfaceLevel ancestor could be found starting from the context that was passed '
@@ -96,16 +95,15 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
     assert(context != null);
-    final CupertinoUserInterfaceLevel? query = context
-        .dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
-    if (query != null) return query._data;
+    final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
+    if (query != null)
+      return query._data;
     return null;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<CupertinoUserInterfaceLevelData>(
-        'user interface level', _data));
+    properties.add(EnumProperty<CupertinoUserInterfaceLevelData>('user interface level', _data));
   }
 }

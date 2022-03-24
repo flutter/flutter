@@ -33,14 +33,13 @@ class PageViewAppState extends State<PageViewApp> {
     ];
 
     cardModels = List<CardModel>.generate(cardSizes.length, (int i) {
-      final Color? color = Color.lerp(
-          Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
+      final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
       return CardModel(i, cardSizes[i], color!);
     });
   }
 
-  static const TextStyle cardLabelStyle = TextStyle(
-      color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+  static const TextStyle cardLabelStyle =
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels = <CardModel>[];
   Size pageSize = const Size(200.0, 200.0);
@@ -59,8 +58,8 @@ class PageViewAppState extends State<PageViewApp> {
     );
 
     final BoxConstraints constraints = (scrollDirection == Axis.vertical)
-        ? BoxConstraints.tightFor(height: pageSize.height)
-        : BoxConstraints.tightFor(width: pageSize.width);
+      ? BoxConstraints.tightFor(height: pageSize.height)
+      : BoxConstraints.tightFor(width: pageSize.width);
 
     return Container(
       key: cardModel.key,
@@ -71,8 +70,9 @@ class PageViewAppState extends State<PageViewApp> {
 
   void switchScrollDirection() {
     setState(() {
-      scrollDirection =
-          (scrollDirection == Axis.vertical) ? Axis.horizontal : Axis.vertical;
+      scrollDirection = (scrollDirection == Axis.vertical)
+        ? Axis.horizontal
+        : Axis.vertical;
     });
   }
 

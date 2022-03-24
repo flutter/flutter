@@ -16,9 +16,7 @@ import 'rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  test(
-      'RenderFittedBox handles applying paint transform and hit-testing with empty size',
-      () {
+  test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
     final RenderFittedBox fittedBox = RenderFittedBox(
       child: RenderCustomPaint(
         painter: TestCallbackPainter(onPaint: () {}),
@@ -31,8 +29,7 @@ void main() {
     expect(transform, Matrix4.zero());
 
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(fittedBox.hitTestChildren(hitTestResult, position: Offset.zero),
-        isFalse);
+    expect(fittedBox.hitTestChildren(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFittedBox does not paint with empty sizes', () {
@@ -60,16 +57,14 @@ void main() {
 
     // The RenderFittedBox should not paint if it is empty.
     painted = false;
-    layout(makeFittedBox(const Size(1, 1)),
-        constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+    layout(makeFittedBox(const Size(1, 1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
   });
 
   test('RenderPhysicalModel compositing on Fuchsia', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
 
-    final RenderPhysicalModel root =
-        RenderPhysicalModel(color: const Color(0xffff00ff));
+    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isTrue);
 
@@ -93,8 +88,7 @@ void main() {
       }
       debugDefaultTargetPlatformOverride = platform;
 
-      final RenderPhysicalModel root =
-          RenderPhysicalModel(color: const Color(0xffff00ff));
+      final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
       layout(root, phase: EnginePhase.composite);
       expect(root.needsCompositing, isTrue);
 
@@ -110,12 +104,10 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  test('RenderSemanticsGestureHandler adds/removes correct semantic actions',
-      () {
-    final RenderSemanticsGestureHandler renderObj =
-        RenderSemanticsGestureHandler(
-      onTap: () {},
-      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+  test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
+    final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
+      onTap: () { },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { },
     );
 
     SemanticsConfiguration config = SemanticsConfiguration();
@@ -125,10 +117,7 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
     config = SemanticsConfiguration();
-    renderObj.validActions = <SemanticsAction>{
-      SemanticsAction.tap,
-      SemanticsAction.scrollLeft
-    };
+    renderObj.validActions = <SemanticsAction>{SemanticsAction.tap, SemanticsAction.scrollLeft};
 
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
@@ -190,8 +179,7 @@ void main() {
 
   test('RenderRepaintBoundary can capture images of itself', () async {
     RenderRepaintBoundary boundary = RenderRepaintBoundary();
-    layout(boundary,
-        constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
+    layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
     pumpFrame(phase: EnginePhase.composite);
     ui.Image image = await boundary.toImage();
     expect(image.width, equals(100));
@@ -199,8 +187,7 @@ void main() {
 
     // Now with pixel ratio set to something other than 1.0.
     boundary = RenderRepaintBoundary();
-    layout(boundary,
-        constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
+    layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
     pumpFrame(phase: EnginePhase.composite);
     image = await boundary.toImage(pixelRatio: 2.0);
     expect(image.width, equals(200));
@@ -246,7 +233,7 @@ void main() {
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
 
@@ -255,11 +242,10 @@ void main() {
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     // non-zero offsets.
-    image = await layer
-        .toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
+    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
     expect(image.width, equals(30));
     expect(image.height, equals(30));
     data = (await image.toByteData())!;
@@ -269,9 +255,7 @@ void main() {
     expect(getPixel(image.width - 1, 10), equals(0xffffffff));
 
     // offset combined with a custom pixel ratio.
-    image = await layer.toImage(
-        const Offset(-10.0, -10.0) & const Size(30.0, 30.0),
-        pixelRatio: 2.0);
+    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
     expect(image.width, equals(60));
     expect(image.height, equals(60));
     data = (await image.toByteData())!;
@@ -302,13 +286,12 @@ void main() {
 
   test('RenderOpacity reuses its layer', () {
     _testLayerReuse<OpacityLayer>(RenderOpacity(
-      opacity: 0.5, // must not be 0 or 1.0. Otherwise, it won't create a layer
+      opacity: 0.5,  // must not be 0 or 1.0. Otherwise, it won't create a layer
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     ));
   });
 
-  test('RenderAnimatedOpacity does not composite if it is transparent',
-      () async {
+  test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 0.0;
@@ -339,7 +322,7 @@ void main() {
   test('RenderAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
-    )..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
+    )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
       opacity: opacityAnimation,
@@ -353,10 +336,7 @@ void main() {
         return ui.Gradient.radial(
           rect.center,
           rect.shortestSide / 2.0,
-          const <Color>[
-            Color.fromRGBO(0, 0, 0, 1.0),
-            Color.fromRGBO(255, 255, 255, 1.0)
-          ],
+          const <Color>[Color.fromRGBO(0, 0, 0, 1.0), Color.fromRGBO(255, 255, 255, 1.0)],
         );
       },
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
@@ -480,9 +460,7 @@ void main() {
     _testFittedBoxWithTransformLayer();
   });
 
-  test(
-      'RenderFittedBox switches between ClipRectLayer and TransformLayer, and reuses them',
-      () {
+  test('RenderFittedBox switches between ClipRectLayer and TransformLayer, and reuses them', () {
     _testFittedBoxWithClipRectLayer();
 
     // clip -> transform
@@ -492,27 +470,18 @@ void main() {
   });
 
   test('RenderFittedBox respects clipBehavior', () {
-    const BoxConstraints viewport =
-        BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
 
     // By default, clipBehavior should be Clip.none
-    final RenderFittedBox defaultBox =
-        RenderFittedBox(child: box200x200, fit: BoxFit.none);
-    layout(defaultBox,
-        constraints: viewport,
-        phase: EnginePhase.composite,
-        onErrors: expectOverflowedErrors);
+    final RenderFittedBox defaultBox = RenderFittedBox(child: box200x200, fit: BoxFit.none);
+    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
     defaultBox.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
-      final RenderFittedBox box = RenderFittedBox(
-          child: box200x200, fit: BoxFit.none, clipBehavior: clip);
-      layout(box,
-          constraints: viewport,
-          phase: EnginePhase.composite,
-          onErrors: expectOverflowedErrors);
+      final RenderFittedBox box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip);
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       box.paint(context, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
@@ -528,11 +497,8 @@ void main() {
     // Passes if no error is thrown
   });
 
-  test(
-      'RenderFractionalTranslation updates its semantics after its translation value is set',
-      () {
-    final _TestSemanticsUpdateRenderFractionalTranslation box =
-        _TestSemanticsUpdateRenderFractionalTranslation(
+  test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
+    final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
       translation: const Offset(0.5, 0.5),
     );
     layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
@@ -543,36 +509,28 @@ void main() {
     expect(box.markNeedsSemanticsUpdateCallCount, 3);
   });
 
-  test(
-      'RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is true',
-      () {
+  test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is true', () {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: LayerLink(),
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
-    layout(follower,
-        constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
-  test(
-      'RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is false',
-      () {
+  test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is false', () {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: LayerLink(),
       showWhenUnlinked: false,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
-    layout(follower,
-        constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isFalse);
   });
 
-  test(
-      'RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is true',
-      () {
+  test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is true', () {
     // Creates a layer link with a leader.
     final LayerLink link = LayerLink();
     final LeaderLayer leader = LeaderLayer(link: link);
@@ -582,15 +540,12 @@ void main() {
       link: link,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
-    layout(follower,
-        constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
-  test(
-      'RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is false',
-      () {
+  test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is false', () {
     // Creates a layer link with a leader.
     final LayerLink link = LayerLink();
     final LeaderLayer leader = LeaderLayer(link: link);
@@ -601,8 +556,7 @@ void main() {
       showWhenUnlinked: false,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
-    layout(follower,
-        constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     // The follower is still hit testable because there is a leader layer.
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
@@ -641,9 +595,7 @@ class _TestRRectClipper extends CustomClipper<RRect> {
 void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
-  layout(renderObject,
-      phase: EnginePhase.paint,
-      constraints: BoxConstraints.tight(const Size(10, 10)));
+  layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
   final Layer layer = renderObject.debugLayer!;
   expect(layer, isA<L>());
   expect(layer, isNotNull);
@@ -659,15 +611,14 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
 class _TestPathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    return Path()..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
-
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
 }
 
-class _TestSemanticsUpdateRenderFractionalTranslation
-    extends RenderFractionalTranslation {
+class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
   _TestSemanticsUpdateRenderFractionalTranslation({
     required Offset translation,
     RenderBox? child,

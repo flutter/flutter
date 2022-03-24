@@ -13,15 +13,12 @@ const String kDocRoot = 'dev/docs/doc';
 /// This script downloads an archive of Javadoc and objc doc for the engine from
 /// the artifact store and extracts them to the location used for Dartdoc.
 Future<void> main(List<String> args) async {
-  final String engineVersion =
-      File('bin/internal/engine.version').readAsStringSync().trim();
+  final String engineVersion = File('bin/internal/engine.version').readAsStringSync().trim();
 
-  final String javadocUrl =
-      'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
+  final String javadocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
   generateDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html');
 
-  final String objcdocUrl =
-      'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/ios-objcdoc.zip';
+  final String objcdocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/ios-objcdoc.zip';
   generateDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
@@ -36,12 +33,11 @@ Future<Archive?> fetchArchive(String url, int maxTries) async {
       responseBytes = response.bodyBytes;
       break;
     }
-    stderr.writeln('Failed attempt ${i + 1} to fetch $url.');
+    stderr.writeln('Failed attempt ${i+1} to fetch $url.');
 
     // On failure print a short snipped from the body in case it's helpful.
     final int bodyLength = min(1024, response.body.length);
-    stderr.writeln(
-        'Response status code ${response.statusCode}. Body: ${response.body.substring(0, bodyLength)}');
+    stderr.writeln('Response status code ${response.statusCode}. Body: ${response.body.substring(0, bodyLength)}');
     sleep(const Duration(seconds: 1));
   }
   return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
@@ -51,8 +47,7 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
   const int maxTries = 5;
   final Archive? archive = await fetchArchive(url, maxTries);
   if (archive == null) {
-    stderr.writeln(
-        'Failed to fetch zip archive from: $url after $maxTries attempts. Giving up.');
+    stderr.writeln('Failed to fetch zip archive from: $url after $maxTries attempts. Giving up.');
     exit(1);
   }
 

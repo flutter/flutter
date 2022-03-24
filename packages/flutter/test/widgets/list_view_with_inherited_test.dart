@@ -40,8 +40,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgets('ListView is a build function (smoketest)',
-      (WidgetTester tester) async {
+  testWidgets('ListView is a build function (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
     expect(find.text('one'), findsOneWidget);
     expect(find.text('two'), findsOneWidget);

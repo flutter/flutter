@@ -13,10 +13,10 @@ import 'package:path/path.dart' as path;
 /// Tests that iOS .xcframeworks can be built.
 Future<void> main() async {
   await task(() async {
+
     section('Create module project');
 
-    final Directory tempDir =
-        Directory.systemTemp.createTempSync('flutter_module_test.');
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     try {
       await inDirectory(tempDir, () async {
         section('Test module template');
@@ -59,8 +59,7 @@ Future<void> main() async {
   });
 }
 
-Future<void> _testBuildIosFramework(Directory projectDir,
-    {bool isModule = false}) async {
+Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = false}) async {
   section('Add plugins');
 
   final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
@@ -283,8 +282,7 @@ Future<void> _testBuildIosFramework(Directory projectDir,
       'Reachability',
     );
     if (await _linksOnFlutter(transitiveDependencyFrameworkPath)) {
-      throw TaskResult.failure(
-          'Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
+      throw TaskResult.failure('Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
     }
 
     checkFileExists(path.join(
@@ -393,8 +391,7 @@ Future<void> _testBuildIosFramework(Directory projectDir,
     );
   });
 
-  final String cocoapodsOutputPath =
-      path.join(projectDir.path, cocoapodsOutputDirectoryName);
+  final String cocoapodsOutputPath = path.join(projectDir.path, cocoapodsOutputDirectoryName);
   for (final String mode in <String>['Debug', 'Profile', 'Release']) {
     checkFileExists(path.join(
       cocoapodsOutputPath,

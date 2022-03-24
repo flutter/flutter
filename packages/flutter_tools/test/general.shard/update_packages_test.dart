@@ -138,12 +138,10 @@ void main() {
     expect(result.childFile('version').readAsStringSync(), '1.2.3');
 
     // The sky_engine package exists
-    expect(fileSystem.directory('${result.path}/bin/cache/pkg/sky_engine'),
-        exists);
+    expect(fileSystem.directory('${result.path}/bin/cache/pkg/sky_engine'), exists);
 
     // The flutter pubspec exists
-    final File pubspecFile =
-        fileSystem.file('${result.path}/packages/flutter/pubspec.yaml');
+    final File pubspecFile = fileSystem.file('${result.path}/packages/flutter/pubspec.yaml');
     expect(pubspecFile, exists);
 
     // The flutter pubspec contains `any` dependencies.
@@ -167,8 +165,7 @@ void main() {
     final PubspecYaml pubspecYaml = PubspecYaml(flutter);
     expect(
         pubspecYaml.allDependencies
-            .map<String>((PubspecDependency dependency) =>
-                '${dependency.name}: ${dependency.version}')
+            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',
@@ -183,8 +180,7 @@ void main() {
         }));
     expect(
         pubspecYaml.allExplicitDependencies
-            .map<String>((PubspecDependency dependency) =>
-                '${dependency.name}: ${dependency.version}')
+            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',
@@ -198,8 +194,7 @@ void main() {
         }));
     expect(
         pubspecYaml.dependencies
-            .map<String>((PubspecDependency dependency) =>
-                '${dependency.name}: ${dependency.version}')
+            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',

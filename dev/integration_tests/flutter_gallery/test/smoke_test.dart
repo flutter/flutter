@@ -26,16 +26,14 @@ int toStringErrors = 0;
 // If you change navigation behavior in the Gallery or in the framework, make
 // sure all 3 are covered.
 
-void reportToStringError(String name, String route, int lineNumber,
-    List<String> lines, String message) {
+void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
   // If you're on line 12, then it has index 11.
   // If you want 1 line before and 1 line after, then you want lines with index 10, 11, and 12.
   // That's (lineNumber-1)-margin .. (lineNumber-1)+margin, or lineNumber-(margin+1) .. lineNumber+(margin-1)
   const int margin = 5;
   final int firstLine = math.max(0, lineNumber - margin);
   final int lastLine = math.min(lines.length, lineNumber + margin);
-  print(
-      '$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
+  print('$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
   toStringErrors += 1;
 }
 
@@ -43,18 +41,15 @@ void verifyToStringOutput(String name, String route, String testString) {
   int lineNumber = 0;
   final List<String> lines = testString.split('\n');
   if (!testString.endsWith('\n'))
-    reportToStringError(
-        name, route, lines.length, lines, 'does not end with a line feed');
+    reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
   for (final String line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {
       reportToStringError(name, route, lineNumber, lines, 'found empty line');
     } else if (line.contains('Instance of ')) {
-      reportToStringError(name, route, lineNumber, lines,
-          'found a class that does not have its own toString');
+      reportToStringError(name, route, lineNumber, lines, 'found a class that does not have its own toString');
     } else if (line.endsWith(' ')) {
-      reportToStringError(name, route, lineNumber, lines,
-          'found a line with trailing whitespace');
+      reportToStringError(name, route, lineNumber, lines, 'found a line with trailing whitespace');
     }
   }
 }
@@ -66,18 +61,15 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   await tester.tap(find.text(demo.title));
   await tester.pump(); // Launch the demo.
-  await tester.pump(
-      const Duration(milliseconds: 400)); // Wait until the demo has opened.
+  await tester.pump(const Duration(milliseconds: 400)); // Wait until the demo has opened.
   expect(find.text(kGalleryTitle), findsNothing);
 
   // Leave the demo on the screen briefly for manual testing.
   await tester.pump(const Duration(milliseconds: 400));
 
   // Scroll the demo around a bit.
-  await tester.flingFrom(
-      const Offset(400.0, 300.0), const Offset(-100.0, 0.0), 500.0);
-  await tester.flingFrom(
-      const Offset(400.0, 300.0), const Offset(0.0, -100.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-100.0, 0.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, -100.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 200));
@@ -85,26 +77,20 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
-  verifyToStringOutput('debugDumpApp', routeName,
-      WidgetsBinding.instance.renderViewElement!.toStringDeep());
-  verifyToStringOutput('debugDumpRenderTree', routeName,
-      RendererBinding.instance.renderView.toStringDeep());
-  verifyToStringOutput('debugDumpLayerTree', routeName,
-      RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? '');
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement!.toStringDeep());
+  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance.renderView.toStringDeep());
+  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? '');
 
   // Scroll the demo around a bit more.
-  await tester.flingFrom(
-      const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.flingFrom(
-      const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 200));
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.flingFrom(
-      const Offset(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
@@ -113,8 +99,7 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   await tester.pumpAndSettle();
   await tester.pump(); // Start the pop "back" operation.
   await tester.pump(); // Complete the willPop() Future.
-  await tester
-      .pump(const Duration(milliseconds: 400)); // Wait until it has finished.
+  await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
 }
 
 Future<void> smokeOptionsPage(WidgetTester tester) async {
@@ -133,8 +118,7 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
   // Switch back to system theme setting: first menu button, choose 'System Default'
   await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('System Default').at(1),
-      warnIfMissed: false); // https://github.com/flutter/flutter/issues/82908
+  await tester.tap(find.text('System Default').at(1), warnIfMissed: false); // https://github.com/flutter/flutter/issues/82908
   await tester.pumpAndSettle();
 
   // Switch text direction: first switch
@@ -174,15 +158,13 @@ Future<void> smokeGallery(WidgetTester tester) async {
   expect(find.text(kGalleryTitle), findsOneWidget);
 
   for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
-    await Scrollable.ensureVisible(tester.element(find.text(category.name)),
-        alignment: 0.5);
+    await Scrollable.ensureVisible(tester.element(find.text(category.name)), alignment: 0.5);
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (final GalleryDemo demo in kGalleryCategoryToDemos[category]!) {
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)));
       await smokeDemo(tester, demo);
-      tester.binding.debugAssertNoTransientCallbacks(
-          'A transient callback was still active after running $demo');
+      tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
     }
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -197,12 +179,10 @@ void main() {
   testWidgets(
     'Flutter Gallery app smoke test',
     smokeGallery,
-    variant: const TargetPlatformVariant(
-        <TargetPlatform>{TargetPlatform.android, TargetPlatform.macOS}),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }),
   );
 
-  testWidgets('Flutter Gallery app smoke test with semantics',
-      (WidgetTester tester) async {
+  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance.setSemanticsEnabled(true);
     await smokeGallery(tester);
     RendererBinding.instance.setSemanticsEnabled(false);

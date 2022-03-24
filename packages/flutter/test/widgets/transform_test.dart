@@ -111,12 +111,10 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Transform AlignmentDirectional alignment',
-      (WidgetTester tester) async {
+  testWidgets('Transform AlignmentDirectional alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
 
-    Widget buildFrame(
-        TextDirection textDirection, AlignmentGeometry alignment) {
+    Widget buildFrame(TextDirection textDirection, AlignmentGeometry alignment) {
       return Directionality(
         textDirection: textDirection,
         child: Stack(
@@ -155,32 +153,28 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(
-        buildFrame(TextDirection.ltr, AlignmentDirectional.centerEnd));
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, AlignmentDirectional.centerEnd));
     didReceiveTap = false;
     await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
     await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
 
-    await tester.pumpWidget(
-        buildFrame(TextDirection.rtl, AlignmentDirectional.centerStart));
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, AlignmentDirectional.centerStart));
     didReceiveTap = false;
     await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
     await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
 
-    await tester.pumpWidget(
-        buildFrame(TextDirection.ltr, AlignmentDirectional.centerStart));
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, AlignmentDirectional.centerStart));
     didReceiveTap = false;
     await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isFalse);
     await tester.tapAt(const Offset(110.0, 150.0));
     expect(didReceiveTap, isTrue);
 
-    await tester.pumpWidget(
-        buildFrame(TextDirection.rtl, AlignmentDirectional.centerEnd));
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, AlignmentDirectional.centerEnd));
     didReceiveTap = false;
     await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isFalse);
@@ -282,27 +276,14 @@ void main() {
     final TransformLayer layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
-      moreOrLessEquals(0.0),
-      1.0,
-      0.0,
-      0.0,
-      -1.0,
-      moreOrLessEquals(0.0),
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      700.0,
-      -100.0,
-      0.0,
-      1.0,
+      moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
+      -1.0, moreOrLessEquals(0.0), 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      700.0, -100.0, 0.0, 1.0,
     ]);
   });
 
-  testWidgets('applyPaintTransform of Transform in Padding',
-      (WidgetTester tester) async {
+  testWidgets('applyPaintTransform of Transform in Padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       Padding(
         padding: const EdgeInsets.only(
@@ -317,8 +298,7 @@ void main() {
         ),
       ),
     );
-    expect(
-        tester.getTopLeft(find.byType(Placeholder)), const Offset(30.0, 20.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(30.0, 20.0));
   });
 
   testWidgets('Transform.translate', (WidgetTester tester) async {
@@ -333,8 +313,7 @@ void main() {
     final List<Layer> layers = tester.layers
       ..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 1); // only the render view
-    expect(
-        tester.getTopLeft(find.byType(Container)), const Offset(100.0, 50.0));
+    expect(tester.getTopLeft(find.byType(Container)), const Offset(100.0, 50.0));
   });
 
   testWidgets('Transform.scale', (WidgetTester tester) async {
@@ -360,8 +339,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Translated child into translated box - hit test',
-      (WidgetTester tester) async {
+  testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     bool pointerDown = false;
     await tester.pumpWidget(
@@ -395,41 +373,32 @@ void main() {
         perspective: 0.003,
       ),
       // A RepaintBoundary child forces the Transform to needsCompositing
-      child:
-          needsCompositing ? RepaintBoundary(child: customPaint) : customPaint,
+      child: needsCompositing ? RepaintBoundary(child: customPaint) : customPaint,
     );
   }
 
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
-      for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
-        await tester.pumpWidget(
-            RepaintBoundary(child: _generateTransform(true, angle)));
+      for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
+        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
-        final ui.Image imageWithCompositing =
-            await layer.toImage(renderBox.paintBounds);
+        final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
 
-        await tester.pumpWidget(
-            RepaintBoundary(child: _generateTransform(false, angle)));
-        await expectLater(find.byType(RepaintBoundary).first,
-            matchesReferenceImage(imageWithCompositing));
+        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(false, angle)));
+        await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
     skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
   );
 
   List<double> extractMatrix(ui.ImageFilter? filter) {
-    final List<String> numbers =
-        filter.toString().split('[').last.split(']').first.split(',');
-    return numbers
-        .map<double>((String str) => double.parse(str.trim()))
-        .toList();
+    final List<String> numbers = filter.toString().split('[').last.split(']').first.split(',');
+    return numbers.map<double>((String str) => double.parse(str.trim())).toList();
   }
 
-  testWidgets('Transform.translate with FilterQuality produces filter layer',
-      (WidgetTester tester) async {
+  testWidgets('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(25.0, 25.0),
@@ -438,30 +407,16 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    final ImageFilterLayer layer =
-        tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(extractMatrix(layer.imageFilter), <double>[
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      25.0,
-      25.0,
-      0.0,
-      1.0
-    ]);
+      1.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      25.0, 25.0, 0.0, 1.0]
+    );
   });
 
-  testWidgets('Transform.scale with FilterQuality produces filter layer',
-      (WidgetTester tester) async {
+  testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.scale(
         scale: 3.14159,
@@ -470,30 +425,16 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    final ImageFilterLayer layer =
-        tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(extractMatrix(layer.imageFilter), <double>[
-      3.14159,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      3.14159,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      -856.636,
-      -642.477,
-      0.0,
-      1.0
-    ]);
+      3.14159, 0.0, 0.0, 0.0,
+      0.0, 3.14159, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      -856.636, -642.477, 0.0, 1.0]
+    );
   });
 
-  testWidgets('Transform.rotate with FilterQuality produces filter layer',
-      (WidgetTester tester) async {
+  testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
@@ -502,35 +443,18 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    final ImageFilterLayer layer =
-        tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(extractMatrix(layer.imageFilter), <dynamic>[
-      moreOrLessEquals(0.7071067811865476),
-      moreOrLessEquals(0.7071067811865475),
-      0.0,
-      0.0,
-      moreOrLessEquals(-0.7071067811865475),
-      moreOrLessEquals(0.7071067811865476),
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      moreOrLessEquals(329.28932188134524),
-      moreOrLessEquals(-194.97474683058329),
-      0.0,
-      1.0
-    ]);
+      moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
+      moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
+    );
   });
 
-  testWidgets(
-      'Offset Transform.rotate with FilterQuality produces filter layer',
-      (WidgetTester tester) async {
+  testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
-      SizedBox(
-        width: 400,
-        height: 400,
+      SizedBox(width: 400, height: 400,
         child: Center(
           child: Transform.rotate(
             angle: math.pi / 4,
@@ -541,30 +465,16 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    final ImageFilterLayer layer =
-        tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(extractMatrix(layer.imageFilter), <dynamic>[
-      moreOrLessEquals(0.7071067811865476),
-      moreOrLessEquals(0.7071067811865475),
-      0.0,
-      0.0,
-      moreOrLessEquals(-0.7071067811865475),
-      moreOrLessEquals(0.7071067811865476),
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      moreOrLessEquals(329.28932188134524),
-      moreOrLessEquals(-194.97474683058329),
-      0.0,
-      1.0
-    ]);
+      moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
+      moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
+    );
   });
 
-  testWidgets('Transform layers update to match child and filterQuality',
-      (WidgetTester tester) async {
+  testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
@@ -600,8 +510,7 @@ void main() {
     expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
   });
 
-  testWidgets('Transform layers with filterQuality golden',
-      (WidgetTester tester) async {
+  testWidgets('Transform layers with filterQuality golden', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -610,42 +519,30 @@ void main() {
           children: <Widget>[
             Transform.rotate(
               angle: math.pi / 6,
-              child: Center(
-                  child: Container(
-                      width: 100, height: 20, color: const Color(0xffffff00))),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
             ),
             Transform.scale(
               scale: 1.5,
-              child: Center(
-                  child: Container(
-                      width: 100, height: 20, color: const Color(0xffffff00))),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
             ),
             Transform.translate(
               offset: const Offset(20.0, 60.0),
-              child: Center(
-                  child: Container(
-                      width: 100, height: 20, color: const Color(0xffffff00))),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
             ),
             Transform.rotate(
               angle: math.pi / 6,
               filterQuality: FilterQuality.low,
-              child: Center(
-                  child: Container(
-                      width: 100, height: 20, color: const Color(0xff00ff00))),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
             ),
             Transform.scale(
               scale: 1.5,
               filterQuality: FilterQuality.low,
-              child: Center(
-                  child: Container(
-                      width: 100, height: 20, color: const Color(0xff00ff00))),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
             ),
             Transform.translate(
               offset: const Offset(20.0, 60.0),
               filterQuality: FilterQuality.low,
-              child: Center(
-                  child: Container(
-                      width: 100, height: 20, color: const Color(0xff00ff00))),
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
             ),
           ],
         ),
@@ -657,9 +554,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      "Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null",
-      (WidgetTester tester) async {
+  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -677,9 +572,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets(
-      "Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError",
-      (WidgetTester tester) async {
+  testWidgets("Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -694,9 +587,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets(
-      "Transform.scale() scales widget uniformly with 'scale' parameter",
-      (WidgetTester tester) async {
+  testWidgets("Transform.scale() scales widget uniformly with 'scale' parameter", (WidgetTester tester) async {
     const double scale = 1.5;
     const double height = 100;
     const double width = 150;
@@ -719,13 +610,10 @@ void main() {
 
     const Size target = Size(width * scale, height * scale);
 
-    expect(tester.getBottomRight(find.byType(Container)),
-        target.bottomRight(tester.getTopLeft(find.byType(Container))));
+    expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 
-  testWidgets(
-      "Transform.scale() scales widget according to 'scaleX' and 'scaleY'",
-      (WidgetTester tester) async {
+  testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (WidgetTester tester) async {
     const double scaleX = 1.5;
     const double scaleY = 1.2;
     const double height = 100;
@@ -750,8 +638,7 @@ void main() {
 
     const Size target = Size(width * scaleX, height * scaleY);
 
-    expect(tester.getBottomRight(find.byType(Container)),
-        target.bottomRight(tester.getTopLeft(find.byType(Container))));
+    expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 }
 
@@ -763,7 +650,6 @@ class TestRectPainter extends CustomPainter {
       Paint()..color = const Color(0xFFFF0000),
     );
   }
-
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

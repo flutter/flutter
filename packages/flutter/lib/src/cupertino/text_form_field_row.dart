@@ -171,8 +171,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           !expands || (maxLines == null && minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
         assert(maxLength == null || maxLength > 0),
         assert(enableInteractiveSelection != null),
         super(
@@ -286,8 +285,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     if (_cupertinoTextFormFieldRow.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      _cupertinoTextFormFieldRow.controller!
-          .addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller!.addListener(_handleControllerChanged);
     }
   }
 
@@ -296,11 +294,9 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     super.didUpdateWidget(oldWidget);
     if (_cupertinoTextFormFieldRow.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      _cupertinoTextFormFieldRow.controller
-          ?.addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null &&
-          _cupertinoTextFormFieldRow.controller == null) {
+      if (oldWidget.controller != null && _cupertinoTextFormFieldRow.controller == null) {
         _controller =
             TextEditingController.fromValue(oldWidget.controller!.value);
       }
@@ -316,8 +312,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    _cupertinoTextFormFieldRow.controller
-        ?.removeListener(_handleControllerChanged);
+    _cupertinoTextFormFieldRow.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 

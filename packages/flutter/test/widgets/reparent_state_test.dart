@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({Key? key, this.child}) : super(key: key);
+  const StateMarker({ Key? key, this.child }) : super(key: key);
 
   final Widget? child;
 
@@ -19,14 +19,14 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) return widget.child!;
+    if (widget.child != null)
+      return widget.child!;
     return Container();
   }
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({required Key key, required this.log})
-      : super(key: key);
+  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
 
   final List<String> log;
 
@@ -78,8 +78,7 @@ void main() {
     final StateMarkerState rightState = right.currentState! as StateMarkerState;
     rightState.marker = 'right';
 
-    final StateMarkerState grandchildState =
-        tester.state(find.byWidget(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
@@ -108,8 +107,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals('right'));
 
-    final StateMarkerState newGrandchildState =
-        tester.state(find.byWidget(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals('grandchild'));
@@ -131,8 +129,7 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgets('can reparent state with multichild widgets',
-      (WidgetTester tester) async {
+  testWidgets('can reparent state with multichild widgets', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
@@ -155,8 +152,7 @@ void main() {
     final StateMarkerState rightState = right.currentState! as StateMarkerState;
     rightState.marker = 'right';
 
-    final StateMarkerState grandchildState =
-        tester.state(find.byWidget(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
@@ -179,8 +175,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals('right'));
 
-    final StateMarkerState newGrandchildState =
-        tester.state(find.byWidget(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals('grandchild'));
@@ -246,7 +241,7 @@ void main() {
       ],
     ));
 
-    final StateMarkerState keyState = key.currentState! as StateMarkerState;
+    final StateMarkerState keyState = key.currentState!as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(Stack(
@@ -272,8 +267,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgets('Reparent to child during update children',
-      (WidgetTester tester) async {
+  testWidgets('Reparent to child during update children', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(Stack(

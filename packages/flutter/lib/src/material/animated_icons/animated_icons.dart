@@ -42,9 +42,9 @@ class AnimatedIcon extends StatelessWidget {
     this.size,
     this.semanticLabel,
     this.textDirection,
-  })  : assert(progress != null),
-        assert(icon != null),
-        super(key: key);
+  }) : assert(progress != null),
+       assert(icon != null),
+       super(key: key);
 
   /// The animation progress for the animated icon.
   ///
@@ -108,8 +108,7 @@ class AnimatedIcon extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     assert(iconTheme.isConcrete);
     final double iconSize = size ?? iconTheme.size!;
-    final TextDirection textDirection =
-        this.textDirection ?? Directionality.of(context);
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
     final double iconOpacity = iconTheme.opacity!;
     Color iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0)
@@ -123,8 +122,7 @@ class AnimatedIcon extends StatelessWidget {
           progress: progress,
           color: iconColor,
           scale: iconSize / iconData.size.width,
-          shouldMirror:
-              textDirection == TextDirection.rtl && iconData.matchTextDirection,
+          shouldMirror: textDirection == TextDirection.rtl && iconData.matchTextDirection,
           uiPathFactory: _pathFactory,
         ),
       ),
@@ -150,7 +148,6 @@ class _AnimatedIconPainter extends CustomPainter {
   final Animation<double> progress;
   final Color color;
   final double scale;
-
   /// If this is true the image will be mirrored horizontally.
   final bool shouldMirror;
   final _UiPathFactory uiPathFactory;
@@ -170,16 +167,16 @@ class _AnimatedIconPainter extends CustomPainter {
       path.paint(canvas, color, uiPathFactory, clampedProgress);
   }
 
+
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
-    return oldDelegate.progress.value != progress.value ||
-        oldDelegate.color != color
+    return oldDelegate.progress.value != progress.value
+        || oldDelegate.color != color
         // We are comparing the paths list by reference, assuming the list is
         // treated as immutable to be more efficient.
-        ||
-        oldDelegate.paths != paths ||
-        oldDelegate.scale != scale ||
-        oldDelegate.uiPathFactory != uiPathFactory;
+        || oldDelegate.paths != paths
+        || oldDelegate.scale != scale
+        || oldDelegate.uiPathFactory != uiPathFactory;
   }
 
   @override
@@ -201,15 +198,14 @@ class _PathFrames {
   final List<_PathCommand> commands;
   final List<double> opacities;
 
-  void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory,
-      double progress) {
-    final double opacity =
-        _interpolate<double?>(opacities, progress, lerpDouble)!;
+  void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
+    final double opacity = _interpolate<double?>(opacities, progress, lerpDouble)!;
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (final _PathCommand command in commands) command.apply(path, progress);
+    for (final _PathCommand command in commands)
+      command.apply(path, progress);
     canvas.drawPath(path, paint);
   }
 }
@@ -241,8 +237,7 @@ class _PathMoveTo extends _PathCommand {
 }
 
 class _PathCubicTo extends _PathCommand {
-  const _PathCubicTo(
-      this.controlPoints1, this.controlPoints2, this.targetPoints);
+  const _PathCubicTo(this.controlPoints1, this.controlPoints2, this.targetPoints);
 
   final List<Offset> controlPoints2;
   final List<Offset> controlPoints1;
@@ -250,19 +245,13 @@ class _PathCubicTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset controlPoint1 =
-        _interpolate<Offset?>(controlPoints1, progress, Offset.lerp)!;
-    final Offset controlPoint2 =
-        _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
-    final Offset targetPoint =
-        _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
+    final Offset controlPoint1 = _interpolate<Offset?>(controlPoints1, progress, Offset.lerp)!;
+    final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
+    final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
     path.cubicTo(
-      controlPoint1.dx,
-      controlPoint1.dy,
-      controlPoint2.dx,
-      controlPoint2.dy,
-      targetPoint.dx,
-      targetPoint.dy,
+      controlPoint1.dx, controlPoint1.dy,
+      controlPoint2.dx, controlPoint2.dy,
+      targetPoint.dx, targetPoint.dy,
     );
   }
 }
@@ -300,12 +289,12 @@ class _PathClose extends _PathCommand {
 /// not be smooth enough we can try applying spline instead.
 ///
 /// [progress] is expected to be between 0.0 and 1.0.
-T _interpolate<T>(
-    List<T> values, double progress, _Interpolator<T> interpolator) {
+T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
-  if (values.length == 1) return values[0];
-  final double targetIdx = lerpDouble(0, values.length - 1, progress)!;
+  if (values.length == 1)
+    return values[0];
+  final double targetIdx = lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

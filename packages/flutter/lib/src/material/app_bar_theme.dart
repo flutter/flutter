@@ -32,7 +32,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use systemOverlayStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-        this.brightness,
+    this.brightness,
     Color? color,
     Color? backgroundColor,
     this.foregroundColor,
@@ -45,7 +45,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-        this.textTheme,
+    this.textTheme,
     this.centerTitle,
     this.titleSpacing,
     this.toolbarHeight,
@@ -56,12 +56,12 @@ class AppBarTheme with Diagnosticable {
       'This property is obsolete and is false by default. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-        this.backwardsCompatibility,
-  })  : assert(
-          color == null || backgroundColor == null,
-          'The color and backgroundColor parameters mean the same thing. Only specify one.',
-        ),
-        backgroundColor = backgroundColor ?? color;
+    this.backwardsCompatibility,
+  }) : assert(
+         color == null || backgroundColor == null,
+         'The color and backgroundColor parameters mean the same thing. Only specify one.',
+       ),
+       backgroundColor = backgroundColor ?? color;
 
   /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
@@ -232,7 +232,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use systemOverlayStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-        Brightness? brightness,
+    Brightness? brightness,
     Color? color,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -244,7 +244,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-        TextTheme? textTheme,
+    TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,
     double? toolbarHeight,
@@ -255,7 +255,7 @@ class AppBarTheme with Diagnosticable {
       'This property is obsolete and is false by default. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-        bool? backwardsCompatibility,
+    bool? backwardsCompatibility,
   }) {
     assert(
       color == null || backgroundColor == null,
@@ -277,8 +277,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
-      backwardsCompatibility:
-          backwardsCompatibility ?? this.backwardsCompatibility,
+      backwardsCompatibility: backwardsCompatibility ?? this.backwardsCompatibility,
     );
   }
 
@@ -302,101 +301,80 @@ class AppBarTheme with Diagnosticable {
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
-      actionsIconTheme:
-          IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
+      actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
       toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
-      toolbarTextStyle:
-          TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
+      toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
-      systemOverlayStyle:
-          t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
-      backwardsCompatibility:
-          t < 0.5 ? a?.backwardsCompatibility : b?.backwardsCompatibility,
+      systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
+      backwardsCompatibility: t < 0.5 ? a?.backwardsCompatibility : b?.backwardsCompatibility,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        brightness,
-        backgroundColor,
-        foregroundColor,
-        elevation,
-        shadowColor,
-        shape,
-        iconTheme,
-        actionsIconTheme,
-        textTheme,
-        centerTitle,
-        titleSpacing,
-        toolbarHeight,
-        toolbarTextStyle,
-        titleTextStyle,
-        systemOverlayStyle,
-        backwardsCompatibility,
-      );
+    brightness,
+    backgroundColor,
+    foregroundColor,
+    elevation,
+    shadowColor,
+    shape,
+    iconTheme,
+    actionsIconTheme,
+    textTheme,
+    centerTitle,
+    titleSpacing,
+    toolbarHeight,
+    toolbarTextStyle,
+    titleTextStyle,
+    systemOverlayStyle,
+    backwardsCompatibility,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is AppBarTheme &&
-        other.brightness == brightness &&
-        other.backgroundColor == backgroundColor &&
-        other.foregroundColor == foregroundColor &&
-        other.elevation == elevation &&
-        other.shadowColor == shadowColor &&
-        other.shape == shape &&
-        other.iconTheme == iconTheme &&
-        other.actionsIconTheme == actionsIconTheme &&
-        other.textTheme == textTheme &&
-        other.centerTitle == centerTitle &&
-        other.titleSpacing == titleSpacing &&
-        other.toolbarHeight == toolbarHeight &&
-        other.toolbarTextStyle == toolbarTextStyle &&
-        other.titleTextStyle == titleTextStyle &&
-        other.systemOverlayStyle == systemOverlayStyle &&
-        other.backwardsCompatibility == backwardsCompatibility;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is AppBarTheme
+        && other.brightness == brightness
+        && other.backgroundColor == backgroundColor
+        && other.foregroundColor == foregroundColor
+        && other.elevation == elevation
+        && other.shadowColor == shadowColor
+        && other.shape == shape
+        && other.iconTheme == iconTheme
+        && other.actionsIconTheme == actionsIconTheme
+        && other.textTheme == textTheme
+        && other.centerTitle == centerTitle
+        && other.titleSpacing == titleSpacing
+        && other.toolbarHeight == toolbarHeight
+        && other.toolbarTextStyle == toolbarTextStyle
+        && other.titleTextStyle == titleTextStyle
+        && other.systemOverlayStyle == systemOverlayStyle
+        && other.backwardsCompatibility == backwardsCompatibility;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness,
-        defaultValue: null));
-    properties.add(
-        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(
-        ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation,
-        defaultValue: null));
-    properties
-        .add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<IconThemeData>(
-        'actionsIconTheme', actionsIconTheme,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'toolbarTextStyle', toolbarTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'titleTextStyle', titleTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>(
-        'backwardsCompatibility', backwardsCompatibility,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('backwardsCompatibility', backwardsCompatibility, defaultValue: null));
   }
 }

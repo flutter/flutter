@@ -20,7 +20,7 @@ void main() {
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('attach_test.');
     await project.setUpIn(tempDir);
-    flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ');
+    flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
     flutterAttach = FlutterRunTestDriver(
       tempDir,
       logPrefix: 'ATTACH  ',
@@ -68,10 +68,7 @@ void main() {
     await flutterRun.run(
       startPaused: true,
       withDebugger: true,
-      additionalCommandArgs: <String>[
-        '--devtools-server-address',
-        'http://127.0.0.1:9105'
-      ],
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9105'],
     );
     await flutterRun.resume();
     await pollForServiceExtensionValue<String>(
@@ -87,17 +84,13 @@ void main() {
       matches: isNotEmpty,
     );
 
-    final Response response = await flutterRun
-        .callServiceExtension('ext.flutter.connectedVmServiceUri');
+    final Response response = await flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
     final String vmServiceUri = response.json['value'] as String;
 
     // Attach with a different DevTools server address.
     await flutterAttach.attach(
       flutterRun.vmServicePort,
-      additionalCommandArgs: <String>[
-        '--devtools-server-address',
-        'http://127.0.0.1:9110'
-      ],
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
     await pollForServiceExtensionValue<String>(
       testDriver: flutterAttach,

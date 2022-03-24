@@ -8,15 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
-    expect(const NavigationRailThemeData(),
-        const NavigationRailThemeData().copyWith());
-    expect(const NavigationRailThemeData().hashCode,
-        const NavigationRailThemeData().copyWith().hashCode);
+    expect(const NavigationRailThemeData(), const NavigationRailThemeData().copyWith());
+    expect(const NavigationRailThemeData().hashCode, const NavigationRailThemeData().copyWith().hashCode);
   });
 
-  testWidgets(
-      'Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
     // Material 3 defaults
     await tester.pumpWidget(
       MaterialApp(
@@ -34,12 +30,10 @@ void main() {
     expect(_railMaterial(tester).elevation, 0);
     expect(_destinationSize(tester).width, 80.0);
     expect(_selectedIconTheme(tester).size, 24.0);
-    expect(_selectedIconTheme(tester).color,
-        ThemeData().colorScheme.onSecondaryContainer);
+    expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.onSecondaryContainer);
     expect(_selectedIconTheme(tester).opacity, null);
     expect(_unselectedIconTheme(tester).size, 24.0);
-    expect(
-        _unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
+    expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
     expect(_unselectedIconTheme(tester).opacity, null);
     expect(_selectedLabelStyle(tester).fontSize, 14.0);
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
@@ -48,9 +42,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsWidgets);
   });
 
-  testWidgets(
-      'Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)',
-      (WidgetTester tester) async {
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
     // This test can be removed when `useMaterial3` is deprecated.
     await tester.pumpWidget(
       MaterialApp(
@@ -71,8 +63,7 @@ void main() {
     expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
     expect(_selectedIconTheme(tester).opacity, 1.0);
     expect(_unselectedIconTheme(tester).size, 24.0);
-    expect(
-        _unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
+    expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
     expect(_unselectedIconTheme(tester).opacity, 0.64);
     expect(_selectedLabelStyle(tester).fontSize, 14.0);
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
@@ -81,9 +72,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsNothing);
   });
 
-  testWidgets(
-      'NavigationRailThemeData values are used when no NavigationRail properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -116,10 +105,8 @@ void main() {
                 color: unselectedIconColor,
                 opacity: unselectedIconOpacity,
               ),
-              selectedLabelTextStyle:
-                  TextStyle(fontSize: selectedLabelFontSize),
-              unselectedLabelTextStyle:
-                  TextStyle(fontSize: unselectedLabelFontSize),
+              selectedLabelTextStyle: TextStyle(fontSize: selectedLabelFontSize),
+              unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
               useIndicator: useIndicator,
@@ -150,9 +137,7 @@ void main() {
     expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
-  testWidgets(
-      'NavigationRail values take priority over NavigationRailThemeData values when both properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -207,10 +192,8 @@ void main() {
                 color: unselectedIconColor,
                 opacity: unselectedIconOpacity,
               ),
-              selectedLabelTextStyle:
-                  const TextStyle(fontSize: selectedLabelFontSize),
-              unselectedLabelTextStyle:
-                  const TextStyle(fontSize: unselectedLabelFontSize),
+              selectedLabelTextStyle: const TextStyle(fontSize: selectedLabelFontSize),
+              unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
               useIndicator: useIndicator,
@@ -271,14 +254,11 @@ void main() {
 
     expect(description[0], 'backgroundColor: Color(0x00000099)');
     expect(description[1], 'elevation: 5.0');
-    expect(description[2],
-        'unselectedLabelTextStyle: TextStyle(inherit: true, size: 7.0)');
-    expect(description[3],
-        'selectedLabelTextStyle: TextStyle(inherit: true, size: 9.0)');
+    expect(description[2], 'unselectedLabelTextStyle: TextStyle(inherit: true, size: 7.0)');
+    expect(description[3], 'selectedLabelTextStyle: TextStyle(inherit: true, size: 9.0)');
 
     // Ignore instance address for IconThemeData.
-    expect(
-        description[4].contains('unselectedIconTheme: IconThemeData'), isTrue);
+    expect(description[4].contains('unselectedIconTheme: IconThemeData'), isTrue);
     expect(description[4].contains('(color: Color(0x00000097))'), isTrue);
     expect(description[5].contains('selectedIconTheme: IconThemeData'), isTrue);
     expect(description[5].contains('(color: Color(0x00000098))'), isTrue);
@@ -315,15 +295,14 @@ Material _railMaterial(WidgetTester tester) {
   );
 }
 
+
 ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
-  return tester
-      .firstWidget<Container>(
-        find.descendant(
-          of: find.byType(NavigationIndicator),
-          matching: find.byType(Container),
-        ),
-      )
-      .decoration as ShapeDecoration?;
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -336,47 +315,40 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
   // The first IconTheme is the one added by the navigation rail.
-  return tester
-      .firstWidget<IconTheme>(
-        find.ancestor(
-          of: find.byIcon(icon),
-          matching: find.byType(IconTheme),
-        ),
-      )
-      .data;
+  return tester.firstWidget<IconTheme>(
+    find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(IconTheme),
+    ),
+  ).data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {
-  return tester
-      .widget<RichText>(
-        find.descendant(
-          of: find.text('Abc'),
-          matching: find.byType(RichText),
-        ),
-      )
-      .text
-      .style!;
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text('Abc'),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
-  return tester
-      .widget<RichText>(
-        find.descendant(
-          of: find.text('Def'),
-          matching: find.byType(RichText),
-        ),
-      )
-      .text
-      .style!;
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text('Def'),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
 
 Size _destinationSize(WidgetTester tester) {
-  return tester.getSize(find
-      .ancestor(
-        of: find.byIcon(Icons.favorite),
-        matching: find.byType(Material),
-      )
-      .first);
+  return tester.getSize(
+    find.ancestor(
+      of: find.byIcon(Icons.favorite),
+      matching: find.byType(Material),
+    )
+    .first
+  );
 }
 
 Align _destinationsAlign(WidgetTester tester) {
@@ -391,11 +363,8 @@ Align _destinationsAlign(WidgetTester tester) {
 }
 
 NavigationRailLabelType _labelType(WidgetTester tester) {
-  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty &&
-      _opacityAboveLabel('Def').evaluate().isNotEmpty) {
-    return _labelOpacity(tester, 'Abc') == 1
-        ? NavigationRailLabelType.selected
-        : NavigationRailLabelType.none;
+  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
+    return _labelOpacity(tester, 'Abc') == 1 ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
   } else {
     return NavigationRailLabelType.all;
   }

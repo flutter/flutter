@@ -16,6 +16,7 @@ void main() {
   testWidgets(
     'RichText TextSpan styles with different locales',
     (WidgetTester tester) async {
+
       await tester.pumpWidget(
         MaterialApp(
           supportedLocales: const <Locale>[
@@ -37,14 +38,8 @@ void main() {
                     child: RichText(
                       text: TextSpan(
                         children: <TextSpan>[
-                          TextSpan(
-                              text: character,
-                              style:
-                                  style.copyWith(locale: const Locale('ja'))),
-                          TextSpan(
-                              text: character,
-                              style:
-                                  style.copyWith(locale: const Locale('zh'))),
+                          TextSpan(text: character, style: style.copyWith(locale: const Locale('ja'))),
+                          TextSpan(text: character, style: style.copyWith(locale: const Locale('zh'))),
                         ],
                       ),
                     ),
@@ -138,10 +133,8 @@ void main() {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        Text(character,
-                            style: style, locale: const Locale('ja')),
-                        Text(character,
-                            style: style, locale: const Locale('zh')),
+                        Text(character, style: style, locale: const Locale('ja')),
+                        Text(character, style: style, locale: const Locale('zh')),
                       ],
                     ),
                   ),
@@ -158,4 +151,5 @@ void main() {
       );
     },
   );
+
 }

@@ -32,32 +32,28 @@ const String kPluginDependencies = r'''
 ''';
 
 void main() {
+
   testWithoutContext('Win32 injects Win32 plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
-    final FlutterProject flutterProject =
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    await writeWindowsPluginFiles(
-        flutterProject,
-        <Plugin>[
-          Plugin(
+    await writeWindowsPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
-            path: 'foo',
-            defaultPackagePlatforms: const <String, String>{},
-            pluginDartClassPlatforms: const <String, String>{},
-            platforms: const <String, PluginPlatform>{
-              WindowsPlugin.kConfigKey: WindowsPlugin(
-                name: 'test',
-                pluginClass: 'Foo',
-                variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
-              )
-            },
-            dependencies: <String>[],
-            isDirectDependency: true,
-          ),
-        ],
-        renderer);
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
 
     final Directory managed = flutterProject.windows.managedDirectory;
     expect(flutterProject.windows.generatedPluginCmakeFile, exists);
@@ -71,29 +67,24 @@ void main() {
   testWithoutContext('UWP injects plugins marked as UWP-compatible', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
-    final FlutterProject flutterProject =
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    await writeWindowsUwpPluginFiles(
-        flutterProject,
-        <Plugin>[
-          Plugin(
+    await writeWindowsUwpPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
-            path: 'foo',
-            defaultPackagePlatforms: const <String, String>{},
-            pluginDartClassPlatforms: const <String, String>{},
-            platforms: const <String, PluginPlatform>{
-              WindowsPlugin.kConfigKey: WindowsPlugin(
-                name: 'test',
-                pluginClass: 'Foo',
-                variants: <PluginPlatformVariant>{PluginPlatformVariant.winuwp},
-              )
-            },
-            dependencies: <String>[],
-            isDirectDependency: true,
-          ),
-        ],
-        renderer);
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.winuwp},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
 
     final Directory managed = flutterProject.windowsUwp.managedDirectory;
     expect(flutterProject.windowsUwp.generatedPluginCmakeFile, exists);
@@ -107,29 +98,24 @@ void main() {
   testWithoutContext('UWP does not inject Win32-only plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
-    final FlutterProject flutterProject =
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    await writeWindowsUwpPluginFiles(
-        flutterProject,
-        <Plugin>[
-          Plugin(
+    await writeWindowsUwpPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
-            path: 'foo',
-            defaultPackagePlatforms: const <String, String>{},
-            pluginDartClassPlatforms: const <String, String>{},
-            platforms: const <String, PluginPlatform>{
-              WindowsPlugin.kConfigKey: WindowsPlugin(
-                name: 'test',
-                pluginClass: 'Foo',
-                variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
-              )
-            },
-            dependencies: <String>[],
-            isDirectDependency: true,
-          ),
-        ],
-        renderer);
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
 
     final Directory managed = flutterProject.windowsUwp.managedDirectory;
     expect(flutterProject.windowsUwp.generatedPluginCmakeFile, exists);
@@ -143,10 +129,8 @@ void main() {
   testWithoutContext('Symlink injection treats UWP as Win32', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
-    final FlutterProject flutterProject =
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    flutterProject.flutterPluginsDependenciesFile
-        .writeAsStringSync(kPluginDependencies);
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    flutterProject.flutterPluginsDependenciesFile.writeAsStringSync(kPluginDependencies);
 
     createPluginSymlinks(
       flutterProject,
@@ -155,9 +139,7 @@ void main() {
 
     expect(flutterProject.windowsUwp.pluginSymlinkDirectory, exists);
 
-    final Link link = flutterProject.windowsUwp.pluginSymlinkDirectory
-        .listSync()
-        .single as Link;
+    final Link link = flutterProject.windowsUwp.pluginSymlinkDirectory.listSync().single as Link;
 
     expect(link.path, '/winuwp/flutter/ephemeral/.plugin_symlinks/example');
     expect(link.targetSync(), r'C:\\example\\');
@@ -166,7 +148,8 @@ void main() {
 
 void setUpProject(FileSystem fileSystem) {
   fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.file('winuwp/CMakeLists.txt').createSync(recursive: true);
+  fileSystem.file('winuwp/CMakeLists.txt')
+    .createSync(recursive: true);
   fileSystem.file('winuwp/project_version')
     ..createSync(recursive: true)
     ..writeAsStringSync('0');

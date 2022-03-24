@@ -25,8 +25,7 @@ void main() {
   // Second, we wrap that green box in a render object that forces the green box
   // to have a specific size.
   final RenderBox square = RenderConstrainedBox(
-    additionalConstraints:
-        const BoxConstraints.tightFor(width: 200.0, height: 200.0),
+    additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
     child: green,
   );
   // Third, we wrap the sized green square in a render object that applies rotation

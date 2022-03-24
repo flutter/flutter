@@ -5,8 +5,7 @@
 import 'template.dart';
 
 class NavigationBarTemplate extends TokenTemplate {
-  const NavigationBarTemplate(String fileName, Map<String, dynamic> tokens)
-      : super(fileName, tokens);
+  const NavigationBarTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
 
   @override
   String generate() => '''

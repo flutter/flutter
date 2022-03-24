@@ -24,8 +24,7 @@ import 'test_server.dart';
 /// use from editors, but this complicates debugging the adapter. Set this env
 /// variables to run the server in-process for easier debugging (this can be
 /// simplified in VS Code by using a launch config with custom CodeLens links).
-final bool useInProcessDap =
-    Platform.environment['DAP_TEST_INTERNAL'] == 'true';
+final bool useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true';
 
 /// Whether to print all protocol traffic to stdout while running tests.
 ///
@@ -34,10 +33,8 @@ final bool useInProcessDap =
 /// Service traffic (wrapped in a custom 'dart.log' event).
 final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
-const String startOfErrorOutputMarker =
-    '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════';
-const String endOfErrorOutputMarker =
-    '════════════════════════════════════════════════════════════════════════════════════════════════════';
+const String startOfErrorOutputMarker = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════';
+const String endOfErrorOutputMarker = '════════════════════════════════════════════════════════════════════════════════════════════════════';
 
 /// Expects the lines in [actual] to match the relevant matcher in [expected],
 /// ignoring differences in line endings and trailing whitespace.
@@ -69,11 +66,10 @@ class SimpleFlutterRunner {
   }
 
   void _handleExitCode(int code) {
-    if (!_vmServiceUriCompleter.isCompleted) {
-      _vmServiceUriCompleter.completeError(
-          'Flutter process ended without producing a VM Service URI');
+      if (!_vmServiceUriCompleter.isCompleted) {
+        _vmServiceUriCompleter.completeError('Flutter process ended without producing a VM Service URI');
+      }
     }
-  }
 
   void _handleStderr(String err) {
     if (!_vmServiceUriCompleter.isCompleted) {
@@ -89,10 +85,8 @@ class SimpleFlutterRunner {
       if (json is List && json.length == 1) {
         final Object? message = json.single;
         // Parse the add.debugPort event which contains our VM Service URI.
-        if (message is Map<String, Object?> &&
-            message['event'] == 'app.debugPort') {
-          final String vmServiceUri =
-              (message['params']! as Map<String, Object?>)['wsUri']! as String;
+        if (message is Map<String, Object?> && message['event'] == 'app.debugPort') {
+          final String vmServiceUri = (message['params']! as Map<String, Object?>)['wsUri']! as String;
           if (!_vmServiceUriCompleter.isCompleted) {
             _vmServiceUriCompleter.complete(Uri.parse(vmServiceUri));
           }
@@ -106,11 +100,10 @@ class SimpleFlutterRunner {
 
   final Process process;
   final Completer<Uri> _vmServiceUriCompleter = Completer<Uri>();
-  Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
+   Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
 
   static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
-    final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!,
-        'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!, 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
 
     final List<String> args = <String>[
       'run',
@@ -142,8 +135,7 @@ class DapTestSession {
   }
 
   static Future<DapTestSession> setUp({List<String>? additionalArgs}) async {
-    final DapTestServer server =
-        await _startServer(additionalArgs: additionalArgs);
+    final DapTestServer server = await _startServer(additionalArgs: additionalArgs);
     final DapTestClient client = await DapTestClient.connect(
       server,
       captureVmServiceTraffic: verboseLogging,

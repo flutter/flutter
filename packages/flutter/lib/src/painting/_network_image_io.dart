@@ -16,15 +16,13 @@ import 'image_stream.dart';
 
 /// The dart:io implementation of [image_provider.NetworkImage].
 @immutable
-class NetworkImage
-    extends image_provider.ImageProvider<image_provider.NetworkImage>
-    implements image_provider.NetworkImage {
+class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, {this.scale = 1.0, this.headers})
-      : assert(url != null),
-        assert(scale != null);
+  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
+    : assert(url != null),
+      assert(scale != null);
 
   @override
   final String url;
@@ -36,19 +34,16 @@ class NetworkImage
   final Map<String, String>? headers;
 
   @override
-  Future<NetworkImage> obtainKey(
-      image_provider.ImageConfiguration configuration) {
+  Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
     return SynchronousFuture<NetworkImage>(this);
   }
 
   @override
-  ImageStreamCompleter load(
-      image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents =
-        StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key as NetworkImage, chunkEvents, decode),
@@ -56,8 +51,7 @@ class NetworkImage
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: () => <DiagnosticsNode>[
-        DiagnosticsProperty<image_provider.ImageProvider>(
-            'Image provider', this),
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
         DiagnosticsProperty<image_provider.NetworkImage>('Image key', key),
       ],
     );
@@ -67,8 +61,7 @@ class NetworkImage
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()
-    ..autoUncompress = false;
+  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
@@ -101,8 +94,7 @@ class NetworkImage
         // added on the server later. Avoid having future calls to resolve
         // fail to check the network again.
         await response.drain<List<int>>(<int>[]);
-        throw image_provider.NetworkImageLoadException(
-            statusCode: response.statusCode, uri: resolved);
+        throw image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
       }
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
@@ -133,14 +125,16 @@ class NetworkImage
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is NetworkImage && other.url == url && other.scale == scale;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is NetworkImage
+        && other.url == url
+        && other.scale == scale;
   }
 
   @override
   int get hashCode => Object.hash(url, scale);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
 }

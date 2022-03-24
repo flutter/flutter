@@ -122,8 +122,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   id: 4,
-                  label:
-                      'Signed in as\nMichael Goderbauer\ngoderbauer@google.com',
+                  label: 'Signed in as\nMichael Goderbauer\ngoderbauer@google.com',
                 ),
               ],
             ),

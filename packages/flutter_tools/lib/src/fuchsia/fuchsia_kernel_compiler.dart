@@ -29,13 +29,11 @@ class FuchsiaKernelCompiler {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackagesFile =
-        globals.fs.path.relative(packagesFile, from: fsRoot);
-    final String manifestPath =
-        globals.fs.path.join(outDir, '$appName.dilpmanifest');
+    final String relativePackagesFile = globals.fs.path.relative(packagesFile, from: fsRoot);
+    final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String? kernelCompiler = globals.artifacts?.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
-      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (kernelCompiler == null || !globals.fs.isFileSync(kernelCompiler)) {
@@ -72,8 +70,7 @@ class FuchsiaKernelCompiler {
       '$multiRootScheme:///$target',
     ];
 
-    final String? engineDartBinaryPath =
-        globals.artifacts?.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String? engineDartBinaryPath = globals.artifacts?.getHostArtifact(HostArtifact.engineDartBinary).path;
     if (engineDartBinaryPath == null) {
       throwToolExit('Engine dart binary not found at "$engineDartBinaryPath"');
     }
@@ -116,7 +113,10 @@ class FuchsiaKernelCompiler {
       ],
 
       // debug, profile, jit release, release:
-      if (buildInfo.isDebug) '--embed-sources' else '--no-embed-sources',
+      if (buildInfo.isDebug)
+        '--embed-sources'
+      else
+        '--no-embed-sources',
 
       if (buildInfo.isProfile) ...<String>[
         '-Ddart.vm.profile=true',
@@ -128,7 +128,8 @@ class FuchsiaKernelCompiler {
         '-Ddart.vm.product=true',
       ],
 
-      for (final String dartDefine in buildInfo.dartDefines) '-D$dartDefine',
+      for (final String dartDefine in buildInfo.dartDefines)
+        '-D$dartDefine',
     ];
   }
 }

@@ -83,8 +83,7 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(
-      (context ?? SecurityContext())
-        ..setTrustedCertificatesBytes(certificate.codeUnits),
+        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits),
     );
   }
 }
@@ -142,8 +141,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title, required this.port})
-      : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.port}) : super(key: key);
   final String title;
   final int port;
 
@@ -162,18 +160,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Widget createImage(final int index, final Completer<bool> completer) {
     return Image.network(
-      'https://localhost:${widget.port}/${_counter * IMAGES + index}',
-      frameBuilder: (
-        BuildContext context,
-        Widget child,
-        int? frame,
-        bool wasSynchronouslyLoaded,
-      ) {
-        if (frame == 0 && !completer.isCompleted) {
-          completer.complete(true);
-        }
-        return child;
-      },
+        'https://localhost:${widget.port}/${_counter * IMAGES + index}',
+        frameBuilder: (
+          BuildContext context,
+          Widget child,
+          int? frame,
+          bool wasSynchronouslyLoaded,
+        ) {
+          if (frame == 0 && !completer.isCompleted) {
+            completer.complete(true);
+          }
+          return child;
+        },
     );
   }
 
@@ -187,13 +185,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         )..repeat(),
     ];
     final List<Completer<bool>> completers = <Completer<bool>>[
-      for (int i = 0; i < IMAGES; i++) Completer<bool>(),
+      for (int i = 0; i < IMAGES; i++)
+        Completer<bool>(),
     ];
-    final List<Future<bool>> futures = completers
-        .map(
-          (Completer<bool> completer) => completer.future,
-        )
-        .toList();
+    final List<Future<bool>> futures = completers.map(
+      (Completer<bool> completer) => completer.future,
+    ).toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
       debugPrint(

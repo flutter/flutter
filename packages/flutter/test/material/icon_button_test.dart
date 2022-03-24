@@ -27,14 +27,13 @@ void main() {
     mockOnPressedFunction = MockOnPressedFunction();
   });
 
-  testWidgets('test default icon buttons are sized up to 48',
-      (WidgetTester tester) async {
+  testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
       ),
     );
 
@@ -45,15 +44,14 @@ void main() {
     expect(mockOnPressedFunction.called, 1);
   });
 
-  testWidgets('test small icons are sized up to 48dp',
-      (WidgetTester tester) async {
+  testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          iconSize: 10.0,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
+          child: IconButton(
+            iconSize: 10.0,
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
       ),
     );
 
@@ -61,16 +59,15 @@ void main() {
     expect(iconButton.size, const Size(48.0, 48.0));
   });
 
-  testWidgets('test icons can be small when total size is >48dp',
-      (WidgetTester tester) async {
+  testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          iconSize: 10.0,
-          padding: const EdgeInsets.all(30.0),
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
+          child: IconButton(
+            iconSize: 10.0,
+            padding: const EdgeInsets.all(30.0),
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
       ),
     );
 
@@ -78,74 +75,75 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
-  testWidgets(
-      'when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0',
-      (WidgetTester tester) async {
+  testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-        data: const IconThemeData(),
-        child: IconButton(
-          focusNode: focusNode,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
+            data: const IconThemeData(),
+            child: IconButton(
+              focusNode: focusNode,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
     );
 
     final RenderBox icon = tester.renderObject(find.byType(Icon));
     expect(icon.size, const Size(24.0, 24.0));
   });
 
-  testWidgets('when null, iconSize is overridden by closest IconTheme',
-      (WidgetTester tester) async {
+  testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
     RenderBox icon;
 
     await tester.pumpWidget(
       wrap(
-          child: IconTheme(
-        data: const IconThemeData(size: 10),
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
-    );
-
-    icon = tester.renderObject(find.byType(Icon));
-    expect(icon.size, const Size(10.0, 10.0));
-
-    await tester.pumpWidget(
-      wrap(
-          child: Theme(
-        data: ThemeData(
-          iconTheme: const IconThemeData(size: 10),
-        ),
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
-    );
-
-    icon = tester.renderObject(find.byType(Icon));
-    expect(icon.size, const Size(10.0, 10.0));
-
-    await tester.pumpWidget(
-      wrap(
-          child: Theme(
-        data: ThemeData(
-          iconTheme: const IconThemeData(size: 20),
-        ),
         child: IconTheme(
           data: const IconThemeData(size: 10),
           child: IconButton(
             onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
           ),
-        ),
-      )),
+        )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 10),
+            ),
+            child: IconButton(
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 20),
+            ),
+            child: IconTheme(
+              data: const IconThemeData(size: 10),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
     );
 
     icon = tester.renderObject(find.byType(Icon));
@@ -154,43 +152,43 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-        data: const IconThemeData(size: 20),
-        child: Theme(
-          data: ThemeData(
-            iconTheme: const IconThemeData(size: 10),
-          ),
-          child: IconButton(
-            onPressed: mockOnPressedFunction.handler,
-            icon: const Icon(Icons.link),
-          ),
-        ),
-      )),
+            data: const IconThemeData(size: 20),
+            child: Theme(
+              data: ThemeData(
+                iconTheme: const IconThemeData(size: 10),
+              ),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
     );
 
     icon = tester.renderObject(find.byType(Icon));
     expect(icon.size, const Size(10.0, 10.0));
   });
 
-  testWidgets('when non-null, iconSize precedes IconTheme.of(context).size',
-      (WidgetTester tester) async {
+  testWidgets('when non-null, iconSize precedes IconTheme.of(context).size', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-        data: const IconThemeData(size: 30.0),
-        child: IconButton(
-          iconSize: 10.0,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
+            data: const IconThemeData(size: 30.0),
+            child: IconButton(
+              iconSize: 10.0,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
     );
 
     final RenderBox icon = tester.renderObject(find.byType(Icon));
     expect(icon.size, const Size(10.0, 10.0));
   });
 
-  testWidgets('Small icons with non-null constraints can be <48dp',
-      (WidgetTester tester) async {
+  testWidgets('Small icons with non-null constraints can be <48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: IconButton(
@@ -209,9 +207,7 @@ void main() {
     expect(iconButton.size, const Size(26.0, 26.0));
   });
 
-  testWidgets(
-      'Small icons with non-null constraints and custom padding can be <48dp',
-      (WidgetTester tester) async {
+  testWidgets('Small icons with non-null constraints and custom padding can be <48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: IconButton(
@@ -231,13 +227,11 @@ void main() {
     expect(iconButton.size, const Size(16.0, 16.0));
   });
 
-  testWidgets('Small icons comply with VisualDensity requirements',
-      (WidgetTester tester) async {
+  testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: Theme(
-          data: ThemeData(
-              visualDensity: const VisualDensity(horizontal: 1, vertical: -1)),
+          data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1)),
           child: IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction.handler,
@@ -257,16 +251,15 @@ void main() {
     expect(iconButton.size, const Size(36.0, 28.0));
   });
 
-  testWidgets('test default icon buttons are constrained',
-      (WidgetTester tester) async {
+  testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.ac_unit),
-          iconSize: 80.0,
-        ),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.ac_unit),
+            iconSize: 80.0,
+          ),
       ),
     );
 
@@ -274,15 +267,14 @@ void main() {
     expect(box.size, const Size(80.0, 80.0));
   });
 
-  testWidgets('test default icon buttons can be stretched if specified',
-      (WidgetTester tester) async {
+  testWidgets('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
+            children: <Widget> [
               IconButton(
                 onPressed: mockOnPressedFunction.handler,
                 icon: const Icon(Icons.ac_unit),
@@ -300,11 +292,11 @@ void main() {
   testWidgets('test default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.ac_unit),
-          iconSize: 80.0,
-        ),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.ac_unit),
+            iconSize: 80.0,
+          ),
       ),
     );
 
@@ -376,18 +368,17 @@ void main() {
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in buttons_test.dart. If you change this one, you may want to also change that one.
-  testWidgets('IconButton with explicit splashColor and highlightColor',
-      (WidgetTester tester) async {
+  testWidgets('IconButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
     const Color directSplashColor = Color(0xFF00000F);
     const Color directHighlightColor = Color(0xFF0000F0);
 
     Widget buttonWidget = wrap(
-      child: IconButton(
-        icon: const Icon(Icons.android),
-        splashColor: directSplashColor,
-        highlightColor: directHighlightColor,
-        onPressed: () {/* enable the button */},
-      ),
+        child: IconButton(
+          icon: const Icon(Icons.android),
+          splashColor: directSplashColor,
+          highlightColor: directHighlightColor,
+          onPressed: () { /* enable the button */ },
+        ),
     );
 
     await tester.pumpWidget(
@@ -400,8 +391,7 @@ void main() {
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
-    await tester.pump(const Duration(
-        milliseconds: 200)); // wait for splash to be well under way
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     expect(
       Material.of(tester.element(find.byType(IconButton))),
@@ -414,10 +404,10 @@ void main() {
     const Color themeHighlightColor1 = Color(0xFF00FF00);
 
     buttonWidget = wrap(
-      child: IconButton(
-        icon: const Icon(Icons.android),
-        onPressed: () {/* enable the button */},
-      ),
+        child: IconButton(
+          icon: const Icon(Icons.android),
+          onPressed: () { /* enable the button */ },
+        ),
     );
 
     await tester.pumpWidget(
@@ -446,8 +436,7 @@ void main() {
           highlightColor: themeHighlightColor2,
           splashColor: themeSplashColor2,
         ),
-        child:
-            buttonWidget, // same widget, so does not get updated because of us
+        child: buttonWidget, // same widget, so does not get updated because of us
       ),
     );
 
@@ -461,8 +450,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton with explicit splash radius',
-      (WidgetTester tester) async {
+  testWidgets('IconButton with explicit splash radius', (WidgetTester tester) async {
     const double splashRadius = 30.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -471,7 +459,7 @@ void main() {
             child: IconButton(
               icon: const Icon(Icons.android),
               splashRadius: splashRadius,
-              onPressed: () {/* enable the button */},
+              onPressed: () { /* enable the button */ },
             ),
           ),
         ),
@@ -481,12 +469,12 @@ void main() {
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // Start gesture.
-    await tester.pump(const Duration(
-        milliseconds: 1000)); // Wait for splash to be well under way.
+    await tester.pump(const Duration(milliseconds: 1000)); // Wait for splash to be well under way.
 
     expect(
       Material.of(tester.element(find.byType(IconButton))),
-      paints..circle(radius: splashRadius),
+      paints
+        ..circle(radius: splashRadius),
     );
 
     await gesture.up();
@@ -504,28 +492,23 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-            TestSemantics.root(
-              children: <TestSemantics>[
-                TestSemantics.rootChild(
-                  rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-                  actions: <SemanticsAction>[
-                    SemanticsAction.tap,
-                  ],
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocusable,
-                  ],
-                  label: 'link',
-                ),
-              ],
-            ),
-            ignoreId: true,
-            ignoreTransform: true));
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isButton,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+          ],
+          label: 'link',
+        ),
+      ],
+    ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -542,29 +525,23 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-            TestSemantics.root(
-              children: <TestSemantics>[
-                TestSemantics.rootChild(
-                  rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                  ],
-                  label: 'link',
-                ),
-              ],
-            ),
-            ignoreId: true,
-            ignoreTransform: true));
+    expect(semantics, hasSemantics(TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
+            ],
+            label: 'link',
+          ),
+        ],
+    ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
   });
 
-  testWidgets('IconButton loses focus when disabled.',
-      (WidgetTester tester) async {
+  testWidgets('IconButton loses focus when disabled.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
     await tester.pumpWidget(
       wrap(
@@ -594,9 +571,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets(
-      'IconButton keeps focus when disabled in directional navigation mode.',
-      (WidgetTester tester) async {
+  testWidgets('IconButton keeps focus when disabled in directional navigation mode.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
     await tester.pumpWidget(
       wrap(
@@ -636,8 +611,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets("Disabled IconButton can't be traversed to when disabled.",
-      (WidgetTester tester) async {
+  testWidgets("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
 
@@ -683,8 +657,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('IconButton with disabled feedback',
-        (WidgetTester tester) async {
+    testWidgets('IconButton with disabled feedback', (WidgetTester tester) async {
       await tester.pumpWidget(Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -703,8 +676,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('IconButton with enabled feedback',
-        (WidgetTester tester) async {
+    testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
       await tester.pumpWidget(Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -722,8 +694,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('IconButton with enabled feedback by default',
-        (WidgetTester tester) async {
+    testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
       await tester.pumpWidget(Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -742,8 +713,7 @@ void main() {
     });
   });
 
-  testWidgets('IconButton responds to density changes.',
-      (WidgetTester tester) async {
+  testWidgets('IconButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -780,8 +750,7 @@ void main() {
     expect(box.size, equals(const Size(60, 40)));
   });
 
-  testWidgets('IconButton.mouseCursor changes cursor on hover',
-      (WidgetTester tester) async {
+  testWidgets('IconButton.mouseCursor changes cursor on hover', (WidgetTester tester) async {
     // Test argument works
     await tester.pumpWidget(
       Material(
@@ -798,16 +767,13 @@ void main() {
       ),
     );
 
-    final TestGesture gesture =
-        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(
-        location: tester.getCenter(find.byType(IconButton)));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
     addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
 
     // Test default is click
     await tester.pumpWidget(
@@ -824,12 +790,10 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgets('disabled IconButton has basic mouse cursor',
-      (WidgetTester tester) async {
+  testWidgets('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
         child: Directionality(
@@ -844,21 +808,16 @@ void main() {
       ),
     );
 
-    final TestGesture gesture =
-        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(
-        location: tester.getCenter(find.byType(IconButton)));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
     addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets(
-      'IconButton.mouseCursor overrides implicit setting of mouse cursor',
-      (WidgetTester tester) async {
+  testWidgets('IconButton.mouseCursor overrides implicit setting of mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
         child: Directionality(
@@ -874,16 +833,13 @@ void main() {
       ),
     );
 
-    final TestGesture gesture =
-        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(
-        location: tester.getCenter(find.byType(IconButton)));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
     addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.none);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
 
     await tester.pumpWidget(
       Material(
@@ -900,12 +856,11 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.none);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 }
 
-Widget wrap({required Widget child}) {
+Widget wrap({ required Widget child }) {
   return FocusTraversalGroup(
     policy: ReadingOrderTraversalPolicy(),
     child: Directionality(

@@ -49,8 +49,7 @@ class TestsProject extends Project {
     return super.setUpIn(dir);
   }
 
-  String get testFilePath =>
-      fileSystem.path.join(dir.path, 'test', 'test.dart');
+  String get testFilePath => fileSystem.path.join(dir.path, 'test', 'test.dart');
 
   Uri get breakpointUri => Uri.file(testFilePath);
   Uri get breakpointAppUri => Uri.parse('org-dartlang-app:///test.dart');

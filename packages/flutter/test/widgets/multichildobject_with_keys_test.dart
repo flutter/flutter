@@ -7,9 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-      'Render and element tree stay in sync when keyed children move around',
-      (WidgetTester tester) async {
+  testWidgets('Render and element tree stay in sync when keyed children move around', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48855.
 
     await tester.pumpWidget(
@@ -61,9 +59,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Building a new MultiChildRenderObjectElement with children having duplicated keys throws',
-      (WidgetTester tester) async {
+  testWidgets('Building a new MultiChildRenderObjectElement with children having duplicated keys throws', (WidgetTester tester) async {
     const ValueKey<int> duplicatedKey = ValueKey<int>(1);
 
     await tester.pumpWidget(Column(
@@ -83,9 +79,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Updating a MultiChildRenderObjectElement to have children with duplicated keys throws',
-      (WidgetTester tester) async {
+  testWidgets('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/81541
 
     const ValueKey<int> key1 = ValueKey<int>(1);

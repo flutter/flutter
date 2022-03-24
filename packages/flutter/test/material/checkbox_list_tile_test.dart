@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
-Widget wrap({required Widget child}) {
+Widget wrap({ required Widget child }) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: Directionality(
@@ -25,9 +25,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: CheckboxListTile(
         value: true,
-        onChanged: (bool? value) {
-          log.add(value);
-        },
+        onChanged: (bool? value) { log.add(value); },
         title: const Text('Hello'),
       ),
     ));
@@ -57,21 +55,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(null));
     await tester.pumpAndSettle();
-    expect(
-        getCheckboxListTileRenderer(),
-        paints
-          ..path(color: checkBoxBorderColor)
-          ..path(color: checkBoxCheckColor));
+    expect(getCheckboxListTileRenderer(), paints..path(color: checkBoxBorderColor)..path(color: checkBoxCheckColor));
 
     checkBoxCheckColor = const Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(checkBoxCheckColor));
     await tester.pumpAndSettle();
-    expect(
-        getCheckboxListTileRenderer(),
-        paints
-          ..path(color: checkBoxBorderColor)
-          ..path(color: checkBoxCheckColor));
+    expect(getCheckboxListTileRenderer(), paints..path(color: checkBoxBorderColor)..path(color: checkBoxCheckColor));
   });
 
   testWidgets('CheckboxListTile activeColor test', (WidgetTester tester) async {
@@ -87,25 +77,20 @@ void main() {
         ),
       );
     }
-
     RenderBox getCheckboxListTileRenderer() {
       return tester.renderObject<RenderBox>(find.byType(CheckboxListTile));
     }
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(),
-        paints..path(color: const Color(0xFF000000)));
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000)));
 
-    await tester.pumpWidget(
-        buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
+    await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(),
-        paints..path(color: const Color(0xFFFFFFFF)));
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
   });
 
-  testWidgets('CheckboxListTile can autofocus unless disabled.',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -137,8 +122,7 @@ void main() {
     expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('CheckboxListTile contentPadding test',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: const Center(
@@ -156,8 +140,7 @@ void main() {
     final Rect checkboxRect = tester.getRect(find.byType(Checkbox));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
-    final Rect tallerWidget =
-        checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
+    final Rect tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
 
     // Check the offsets of CheckBox and title after padding is applied.
     expect(paddingRect.right, checkboxRect.right + 4);
@@ -261,12 +244,10 @@ void main() {
       ),
     ));
 
-    expect(
-        tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
-  testWidgets('CheckboxListTile respects tileColor',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects tileColor', (WidgetTester tester) async {
     final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
@@ -285,8 +266,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: tileColor));
   });
 
-  testWidgets('CheckboxListTile respects selectedTileColor',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
     final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
@@ -306,13 +286,12 @@ void main() {
     expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
-  testWidgets('CheckboxListTile selected item text Color',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76908
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({Color? activeColor, Color? toggleableActiveColor}) {
+    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
           toggleableActiveColor: toggleableActiveColor,
@@ -324,7 +303,7 @@ void main() {
               selected: true,
               title: const Text('title'),
               value: true,
-              onChanged: (bool? value) {},
+              onChanged: (bool? value) { },
             ),
           ),
         ),
@@ -332,11 +311,7 @@ void main() {
     }
 
     Color? textColor(String text) {
-      return tester
-          .renderObject<RenderParagraph>(find.text(text))
-          .text
-          .style
-          ?.color;
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
     await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
@@ -346,14 +321,12 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
-  testWidgets('CheckboxListTile respects checkbox shape and side',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects checkbox shape and side', (WidgetTester tester) async {
     Widget buildApp(BorderSide side, OutlinedBorder shape) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return CheckboxListTile(
                 value: false,
                 onChanged: (bool? newValue) {},
@@ -365,20 +338,13 @@ void main() {
         ),
       );
     }
-
-    const RoundedRectangleBorder border1 = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(5)));
+    const RoundedRectangleBorder border1 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
     const BorderSide side1 = BorderSide(
       color: Color(0xfff44336),
     );
     await tester.pumpWidget(buildApp(side1, border1));
-    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side,
-        side1);
-    expect(
-        tester
-            .widget<CheckboxListTile>(find.byType(CheckboxListTile))
-            .checkboxShape,
-        border1);
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side1);
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).checkboxShape, border1);
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side1);
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, border1);
     expect(
@@ -386,14 +352,11 @@ void main() {
       paints
         ..drrect(
           color: const Color(0xfff44336),
-          outer:
-              RRect.fromLTRBR(11.0, 11.0, 29.0, 29.0, const Radius.circular(5)),
-          inner:
-              RRect.fromLTRBR(12.0, 12.0, 28.0, 28.0, const Radius.circular(4)),
+          outer: RRect.fromLTRBR(11.0, 11.0, 29.0, 29.0, const Radius.circular(5)),
+          inner: RRect.fromLTRBR(12.0, 12.0, 28.0, 28.0, const Radius.circular(4)),
         ),
     );
-    const RoundedRectangleBorder border2 = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(5)));
+    const RoundedRectangleBorder border2 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
     const BorderSide side2 = BorderSide(
       width: 4.0,
       color: Color(0xff424242),
@@ -406,16 +369,13 @@ void main() {
       paints
         ..drrect(
           color: const Color(0xff424242),
-          outer:
-              RRect.fromLTRBR(11.0, 11.0, 29.0, 29.0, const Radius.circular(5)),
-          inner:
-              RRect.fromLTRBR(15.0, 15.0, 25.0, 25.0, const Radius.circular(1)),
+          outer: RRect.fromLTRBR(11.0, 11.0, 29.0, 29.0, const Radius.circular(5)),
+          inner: RRect.fromLTRBR(15.0, 15.0, 25.0, 25.0, const Radius.circular(1)),
         ),
     );
   });
 
-  testWidgets('CheckboxListTile respects visualDensity',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -439,8 +399,7 @@ void main() {
     expect(box.size, equals(const Size(800, 56)));
   });
 
-  testWidgets('CheckboxListTile respects focusNode',
-      (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects focusNode', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
       wrap(
@@ -473,8 +432,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('CheckboxListTile respects enableFeedback',
-        (WidgetTester tester) async {
+    testWidgets('CheckboxListTile respects enableFeedback', (WidgetTester tester) async {
       Future<void> buildTest(bool enableFeedback) async {
         return tester.pumpWidget(
           wrap(

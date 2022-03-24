@@ -46,16 +46,15 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
 // ignore: deprecated_member_use
-export 'package:test_api/test_api.dart'
-    hide
-        test,
-        group,
-        setUpAll,
-        tearDownAll,
-        setUp,
-        tearDown,
-        expect,
-        isInstanceOf;
+export 'package:test_api/test_api.dart' hide
+  test,
+  group,
+  setUpAll,
+  tearDownAll,
+  setUp,
+  tearDown,
+  expect,
+  isInstanceOf;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -70,7 +69,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
       foundMatching = true;
     }
   }
-  if (foundMatching) return result;
+  if (foundMatching)
+    return result;
   return null;
 }
 
@@ -128,18 +128,18 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool? skip,
   test_package.Timeout? timeout,
-  @Deprecated('This parameter has no effect. Use `timeout` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.')
-      Duration? initialTimeout,
+  @Deprecated(
+    'This parameter has no effect. Use `timeout` instead. '
+    'This feature was deprecated after v2.6.0-1.0.pre.'
+  )
+  Duration? initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
 }) {
   assert(variant != null);
-  assert(variant.values.isNotEmpty,
-      'There must be at least one value to test in the testing variant.');
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
+  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
@@ -162,8 +162,7 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
-            binding
-                .reset(); // TODO(ianh): the binding should just do this itself in _runTest
+            binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
             Object? memento;
             try {
@@ -259,26 +258,23 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
   /// considered desktop platforms.
-  TargetPlatformVariant.desktop()
-      : values = <TargetPlatform>{
-          TargetPlatform.linux,
-          TargetPlatform.macOS,
-          TargetPlatform.windows,
-        };
+  TargetPlatformVariant.desktop() : values = <TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+  };
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
   /// considered mobile platforms.
-  TargetPlatformVariant.mobile()
-      : values = <TargetPlatform>{
-          TargetPlatform.android,
-          TargetPlatform.iOS,
-          TargetPlatform.fuchsia,
-        };
+  TargetPlatformVariant.mobile() : values = <TargetPlatform>{
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+    TargetPlatform.fuchsia,
+  };
 
   /// Creates a [TargetPlatformVariant] that tests only the given value of
   /// [TargetPlatform].
-  TargetPlatformVariant.only(TargetPlatform platform)
-      : values = <TargetPlatform>{platform};
+  TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
 
   @override
   final Set<TargetPlatform> values;
@@ -288,8 +284,7 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 
   @override
   Future<TargetPlatform?> setUp(TargetPlatform value) async {
-    final TargetPlatform? previousTargetPlatform =
-        debugDefaultTargetPlatformOverride;
+    final TargetPlatform? previousTargetPlatform = debugDefaultTargetPlatformOverride;
     debugDefaultTargetPlatformOverride = value;
     return previousTargetPlatform;
   }
@@ -419,12 +414,12 @@ Future<void> benchmarkWidgets(
   bool semanticsEnabled = false,
 }) {
   assert(() {
-    if (mayRunWithAsserts) return true;
+    if (mayRunWithAsserts)
+      return true;
     debugPrint(kDebugWarning);
     return true;
   }());
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
@@ -494,17 +489,15 @@ Future<void> expectLater(
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
-  return test_package
-      .expectLater(actual, matcher, reason: reason, skip: skip)
-      .then<void>((dynamic value) => null);
+  return test_package.expectLater(actual, matcher, reason: reason, skip: skip)
+           .then<void>((dynamic value) => null);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
 ///
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
-class WidgetTester extends WidgetController
-    implements HitTestDispatcher, TickerProvider {
+class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
       binding.deviceEventDispatcher = this;
@@ -516,8 +509,7 @@ class WidgetTester extends WidgetController
 
   /// The binding instance used by the testing framework.
   @override
-  TestWidgetsFlutterBinding get binding =>
-      super.binding as TestWidgetsFlutterBinding;
+  TestWidgetsFlutterBinding get binding => super.binding as TestWidgetsFlutterBinding;
 
   /// Renders the UI from the given [widget].
   ///
@@ -558,8 +550,7 @@ class WidgetTester extends WidgetController
   }
 
   @override
-  Future<List<Duration>> handlePointerEventRecord(
-      Iterable<PointerEventRecord> records) {
+  Future<List<Duration>> handlePointerEventRecord(Iterable<PointerEventRecord> records) {
     assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
@@ -574,8 +565,7 @@ class WidgetTester extends WidgetController
           // Flush all past events
           handleTimeStampDiff.add(-timeDiff);
           for (final PointerEvent event in record.events) {
-            binding.handlePointerEventForSource(event,
-                source: TestBindingEventSource.test);
+            binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
           }
         } else {
           await binding.pump();
@@ -584,8 +574,7 @@ class WidgetTester extends WidgetController
             binding.clock.now().difference(startTime) - record.timeDelay,
           );
           for (final PointerEvent event in record.events) {
-            binding.handlePointerEventForSource(event,
-                source: TestBindingEventSource.test);
+            binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
           }
         }
       }
@@ -631,26 +620,19 @@ class WidgetTester extends WidgetController
     assert(() {
       final TestWidgetsFlutterBinding widgetsBinding = binding;
       return widgetsBinding is LiveTestWidgetsFlutterBinding &&
-          widgetsBinding.framePolicy ==
-              LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+             widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
     }());
 
     dynamic caughtException;
-    void handleError(dynamic error, StackTrace stackTrace) =>
-        caughtException ??= error;
+    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
 
-    await Future<void>.microtask(() {
-      binding.handleBeginFrame(duration);
-    }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
-    await Future<void>.microtask(() {
-      binding.handleDrawFrame();
-    }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
     await idle();
 
     if (caughtException != null) {
-      throw caughtException
-          as Object; // ignore: only_throw_errors, rethrowing caught exception.
+      throw caughtException as Object; // ignore: only_throw_errors, rethrowing caught exception.
     }
   }
 
@@ -667,8 +649,7 @@ class WidgetTester extends WidgetController
     assert(() {
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
-          binding.framePolicy ==
-              LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+          binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
         test_package.fail(
           'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
           'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
@@ -728,12 +709,8 @@ class WidgetTester extends WidgetController
       'therefore no restoration data has been collected to restore from. Did you forget to wrap '
       'your widget tree in a RootRestorationScope?',
     );
-    final Widget widget = ((binding.renderViewElement!
-                as RenderObjectToWidgetElement<RenderObject>)
-            .widget as RenderObjectToWidgetAdapter<RenderObject>)
-        .child!;
-    final TestRestorationData restorationData =
-        binding.restorationManager.restorationData;
+    final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+    final TestRestorationData restorationData = binding.restorationManager.restorationData;
     runApp(Container(key: UniqueKey()));
     await pump();
     binding.restorationManager.restoreFrom(restorationData);
@@ -800,8 +777,7 @@ class WidgetTester extends WidgetController
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
-  }) =>
-      binding.runAsync<T?>(callback, additionalTime: additionalTime);
+  }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
 
   /// Whether there are any transient callbacks scheduled.
   ///
@@ -829,8 +805,7 @@ class WidgetTester extends WidgetController
   @override
   Future<void> sendEventToBinding(PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
-      binding.handlePointerEventForSource(event,
-          source: TestBindingEventSource.test);
+      binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
     });
   }
 
@@ -839,9 +814,9 @@ class WidgetTester extends WidgetController
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
       final RenderObject innerTarget = result.path
-          .map((HitTestEntry candidate) => candidate.target)
-          .whereType<RenderObject>()
-          .first;
+        .map((HitTestEntry candidate) => candidate.target)
+        .whereType<RenderObject>()
+        .first;
       final Element? innerTargetElement = _lastWhereOrNull(
         collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
         (Element element) => element.renderObject == innerTarget,
@@ -860,18 +835,15 @@ class WidgetTester extends WidgetController
       int numberOfWithTexts = 0;
       int numberOfTypes = 0;
       int totalNumber = 0;
-      printToConsole(
-          'Some possible finders for the widgets at ${event.position}:');
+      printToConsole('Some possible finders for the widgets at ${event.position}:');
       for (final Element element in candidates) {
-        if (totalNumber >
-            13) // an arbitrary number of finders that feels useful without being overwhelming
+        if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
         final Widget widget = element.widget;
         if (widget is Tooltip) {
-          final String message =
-              widget.message ?? widget.richMessage!.toPlainText();
+          final String message = widget.message ?? widget.richMessage!.toPlainText();
           final Iterable<Element> matches = find.byTooltip(message).evaluate();
           if (matches.length == 1) {
             printToConsole("  find.byTooltip('$message')");
@@ -912,8 +884,7 @@ class WidgetTester extends WidgetController
 
         if (!_isPrivate(widget.runtimeType)) {
           if (numberOfTypes < 5) {
-            final Iterable<Element> matches =
-                find.byType(widget.runtimeType).evaluate();
+            final Iterable<Element> matches = find.byType(widget.runtimeType).evaluate();
             if (matches.length == 1) {
               printToConsole('  find.byType(${widget.runtimeType})');
               numberOfTypes += 1;
@@ -922,12 +893,9 @@ class WidgetTester extends WidgetController
           }
 
           if (descendantText != null && numberOfWithTexts < 5) {
-            final Iterable<Element> matches = find
-                .widgetWithText(widget.runtimeType, descendantText)
-                .evaluate();
+            final Iterable<Element> matches = find.widgetWithText(widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              printToConsole(
-                  "  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
+              printToConsole("  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
               numberOfWithTexts += 1;
               continue;
             }
@@ -935,16 +903,14 @@ class WidgetTester extends WidgetController
         }
 
         if (!_isPrivate(element.runtimeType)) {
-          final Iterable<Element> matches =
-              find.byElementType(element.runtimeType).evaluate();
+          final Iterable<Element> matches = find.byElementType(element.runtimeType).evaluate();
           if (matches.length == 1) {
             printToConsole('  find.byElementType(${element.runtimeType})');
             continue;
           }
         }
 
-        totalNumber -=
-            1; // if we got here, we didn't actually find something to say about it
+        totalNumber -= 1; // if we got here, we didn't actually find something to say about it
       }
       if (totalNumber == 0)
         printToConsole('  <could not come up with any unique finders>');
@@ -998,7 +964,7 @@ class WidgetTester extends WidgetController
   /// An argument can be specified to provide a string that will be used in the
   /// error message. It should be an adverbial phrase describing the current
   /// situation, such as "at the end of the test".
-  void verifyTickersWereDisposed([String when = 'when none should have been']) {
+  void verifyTickersWereDisposed([ String when = 'when none should have been' ]) {
     assert(when != null);
     if (_tickers != null) {
       for (final Ticker ticker in _tickers!) {
@@ -1006,9 +972,11 @@ class WidgetTester extends WidgetController
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('A Ticker was active $when.'),
             ErrorDescription('All Tickers must be disposed.'),
-            ErrorHint('Tickers used by AnimationControllers '
-                'should be disposed by calling dispose() on the AnimationController itself. '
-                'Otherwise, the ticker will leak.'),
+            ErrorHint(
+              'Tickers used by AnimationControllers '
+              'should be disposed by calling dispose() on the AnimationController itself. '
+              'Otherwise, the ticker will leak.'
+            ),
             ticker.describeForError('The offending ticker was')
           ]);
         }
@@ -1023,16 +991,18 @@ class WidgetTester extends WidgetController
 
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
-    if (binding.pipelineOwner.debugOutstandingSemanticsHandles >
-        _lastRecordedSemanticsHandles!) {
+    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles!) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A SemanticsHandle was active at the end of the test.'),
         ErrorDescription(
-            'All SemanticsHandle instances must be disposed by calling dispose() on '
-            'the SemanticsHandle.'),
-        ErrorHint('If your test uses SemanticsTester, it is '
-            'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-            'existing handle will leak into another test and alter its behavior.')
+          'All SemanticsHandle instances must be disposed by calling dispose() on '
+          'the SemanticsHandle.'
+        ),
+        ErrorHint(
+          'If your test uses SemanticsTester, it is '
+          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
+          'existing handle will leak into another test and alter its behavior.'
+        )
       ]);
     }
     _lastRecordedSemanticsHandles = null;
@@ -1041,8 +1011,7 @@ class WidgetTester extends WidgetController
   int? _lastRecordedSemanticsHandles;
 
   void _recordNumberOfSemanticsHandles() {
-    _lastRecordedSemanticsHandles =
-        binding.pipelineOwner.debugOutstandingSemanticsHandles;
+    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.
@@ -1073,8 +1042,7 @@ class WidgetTester extends WidgetController
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
-          matching:
-              find.byType(EditableText, skipOffstage: finder.skipOffstage),
+          matching: find.byType(EditableText, skipOffstage: finder.skipOffstage),
           matchRoot: true,
         ),
       );
@@ -1123,8 +1091,7 @@ class WidgetTester extends WidgetController
         backButton = find.byType(CupertinoNavigationBarBackButton);
       }
 
-      expectSync(backButton, findsOneWidget,
-          reason: 'One back button expected on screen');
+      expectSync(backButton, findsOneWidget, reason: 'One back button expected on screen');
 
       await tap(backButton);
     });

@@ -33,8 +33,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[red, green],
     );
-    final StackParentData greenParentData =
-        green.parentData! as StackParentData;
+    final StackParentData greenParentData = green.parentData! as StackParentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0
@@ -66,36 +65,27 @@ void main() {
   });
 
   test('Stack respects clipBehavior', () {
-    const BoxConstraints viewport =
-        BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
 
     // By default, clipBehavior should be Clip.none
-    final RenderStack defaultStack = RenderStack(
-        textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
-    layout(defaultStack,
-        constraints: viewport,
-        phase: EnginePhase.composite,
-        onErrors: expectOverflowedErrors);
+    final RenderStack defaultStack = RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
+    layout(defaultStack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
     defaultStack.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
       final RenderBox child = box200x200;
       final RenderStack stack = RenderStack(
-        textDirection: TextDirection.ltr,
-        children: <RenderBox>[child],
-        clipBehavior: clip,
+          textDirection: TextDirection.ltr,
+          children: <RenderBox>[child],
+          clipBehavior: clip,
       );
-      {
-        // Make sure that the child is positioned so the stack will consider it as overflowed.
+      { // Make sure that the child is positioned so the stack will consider it as overflowed.
         final StackParentData parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
-      layout(stack,
-          constraints: viewport,
-          phase: EnginePhase.composite,
-          onErrors: expectOverflowedErrors);
+      layout(stack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       context.paintChild(stack, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
@@ -145,8 +135,7 @@ void main() {
         children: <RenderBox>[child1, child2, child3],
       );
 
-      final List<DiagnosticsNode> diagnosticNodes =
-          stack.debugDescribeChildren();
+      final List<DiagnosticsNode> diagnosticNodes = stack.debugDescribeChildren();
 
       expect(diagnosticNodes[0].name, 'child 1');
       expect(diagnosticNodes[0].style, DiagnosticsTreeStyle.offstage);

@@ -44,9 +44,7 @@ void batch1() {
     );
   }
 
-  testWithoutContext(
-      'flutter run expression evaluation - can evaluate trivial expressions in top level function',
-      () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
@@ -54,9 +52,7 @@ void batch1() {
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter run expression evaluation - can evaluate trivial expressions in build method',
-      () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
@@ -64,9 +60,7 @@ void batch1() {
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter run expression evaluation - can evaluate complex expressions in top level function',
-      () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
@@ -74,9 +68,7 @@ void batch1() {
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter run expression evaluation - can evaluate complex expressions in build method',
-      () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
@@ -84,9 +76,7 @@ void batch1() {
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter run expression evaluation - can evaluate expressions returning complex objects in top level function',
-      () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
     await initProject();
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
@@ -94,9 +84,7 @@ void batch1() {
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter run expression evaluation - can evaluate expressions returning complex objects in build method',
-      () async {
+  testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in build method', () async {
     await initProject();
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
@@ -121,42 +109,33 @@ void batch2() {
     tryToDelete(tempDir);
   }
 
-  testWithoutContext(
-      'flutter test expression evaluation - can evaluate trivial expressions in a test',
-      () async {
+  testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
     await flutter.test(
       withDebugger: true,
-      beforeStart: () =>
-          flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
     );
     await flutter.waitForPause();
     await evaluateTrivialExpressions(flutter);
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter test expression evaluation - can evaluate complex expressions in a test',
-      () async {
+  testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
     await flutter.test(
       withDebugger: true,
-      beforeStart: () =>
-          flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
     );
     await flutter.waitForPause();
     await evaluateComplexExpressions(flutter);
     await cleanProject();
   });
 
-  testWithoutContext(
-      'flutter test expression evaluation - can evaluate expressions returning complex objects in a test',
-      () async {
+  testWithoutContext('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
     await initProject();
     await flutter.test(
       withDebugger: true,
-      beforeStart: () =>
-          flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
     );
     await flutter.waitForPause();
     await evaluateComplexReturningExpressions(flutter);
@@ -182,8 +161,7 @@ Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
   expectValueOfType(res, InstanceKind.kInt, DateTime.now().year.toString());
 }
 
-Future<void> evaluateComplexReturningExpressions(
-    FlutterTestDriver flutter) async {
+Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
   final DateTime now = DateTime.now();
   final ObjRef resp = await flutter.evaluateInFrame('new DateTime.now()');
   expectInstanceOfClass(resp, 'DateTime');
@@ -195,30 +173,22 @@ Future<void> evaluateComplexReturningExpressions(
 }
 
 void expectInstanceOfClass(ObjRef result, String name) {
-  expect(
-      result,
-      const TypeMatcher<InstanceRef>().having(
-          (InstanceRef instance) => instance.classRef.name,
-          'resp.classRef.name',
-          name));
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.classRef.name, 'resp.classRef.name', name));
 }
 
 void expectValueOfType(ObjRef result, String kind, String message) {
-  expect(
-      result,
-      const TypeMatcher<InstanceRef>()
-          .having((InstanceRef instance) => instance.kind, 'kind', kind)
-          .having((InstanceRef instance) => instance.valueAsString,
-              'valueAsString', message));
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.kind, 'kind', kind)
+      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
 }
 
 void expectValue(ObjRef result, String message) {
-  expect(
-      result,
-      const TypeMatcher<InstanceRef>().having(
-          (InstanceRef instance) => instance.valueAsString,
-          'valueAsString',
-          message));
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
 }
 
 void main() {

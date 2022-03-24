@@ -76,10 +76,7 @@ class XCResultGenerator {
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
   /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
-  factory XCResult(
-      {required Map<String, Object?> resultJson,
-      List<XCResultIssueDiscarder> issueDiscarders =
-          const <XCResultIssueDiscarder>[]}) {
+  factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
 
     final Object? issuesMap = resultJson['issues'];

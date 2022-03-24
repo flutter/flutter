@@ -18,9 +18,8 @@ import 'flutter_adapter_args.dart';
 import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter tests.
-class FlutterTestDebugAdapter extends DartDebugAdapter<
-    FlutterLaunchRequestArguments,
-    FlutterAttachRequestArguments> with PidTracker, TestAdapter {
+class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
+    with PidTracker, TestAdapter {
   FlutterTestDebugAdapter(
     ByteStreamServerChannel channel, {
     required this.fileSystem,
@@ -91,8 +90,7 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final FlutterLaunchRequestArguments args =
-        this.args as FlutterLaunchRequestArguments;
+    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
     final bool debug = !(args.noDebug ?? false);
     final String? program = args.program;
@@ -104,9 +102,7 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<
     ];
 
     // Handle customTool and deletion of any arguments for it.
-    final String executable = args.customTool ??
-        fileSystem.path.join(Cache.flutterRoot!, 'bin',
-            platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = args.customToolReplacesArgs;
     if (args.customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
@@ -128,8 +124,7 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<
   }
 
   @visibleForOverriding
-  Future<void> launchAsProcess(
-      String executable, List<String> processArgs) async {
+  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
     logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
       executable,

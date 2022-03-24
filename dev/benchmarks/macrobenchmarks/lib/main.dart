@@ -34,8 +34,7 @@ const String kMacrobenchmarks = 'Macrobenchmarks';
 void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
-  const MacrobenchmarksApp({Key? key, this.initialRoute = '/'})
-      : super(key: key);
+  const MacrobenchmarksApp({Key? key, this.initialRoute = '/'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,49 +43,29 @@ class MacrobenchmarksApp extends StatelessWidget {
       initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => const HomePage(),
-        kCullOpacityRouteName: (BuildContext context) =>
-            const CullOpacityPage(),
-        kCubicBezierRouteName: (BuildContext context) =>
-            const CubicBezierPage(),
-        kBackdropFilterRouteName: (BuildContext context) =>
-            const BackdropFilterPage(),
-        kPostBackdropFilterRouteName: (BuildContext context) =>
-            const PostBackdropFilterPage(),
-        kSimpleAnimationRouteName: (BuildContext context) =>
-            const SimpleAnimationPage(),
-        kPictureCacheRouteName: (BuildContext context) =>
-            const PictureCachePage(),
-        kPictureCacheComplexityScoringRouteName: (BuildContext context) =>
-            const PictureCacheComplexityScoringPage(),
-        kLargeImageChangerRouteName: (BuildContext context) =>
-            const LargeImageChangerPage(),
-        kLargeImagesRouteName: (BuildContext context) =>
-            const LargeImagesPage(),
+        kCullOpacityRouteName: (BuildContext context) => const CullOpacityPage(),
+        kCubicBezierRouteName: (BuildContext context) => const CubicBezierPage(),
+        kBackdropFilterRouteName: (BuildContext context) => const BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
+        kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
+        kPictureCacheComplexityScoringRouteName: (BuildContext context) => const PictureCacheComplexityScoringPage(),
+        kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
+        kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
-        kFullscreenTextRouteName: (BuildContext context) =>
-            const TextFieldPage(),
-        kAnimatedPlaceholderRouteName: (BuildContext context) =>
-            const AnimatedPlaceholderPage(),
-        kColorFilterAndFadeRouteName: (BuildContext context) =>
-            const ColorFilterAndFadePage(),
-        kColorFilterCacheRouteName: (BuildContext context) =>
-            const ColorFilterCachePage(),
-        kFadingChildAnimationRouteName: (BuildContext context) =>
-            const FilteredChildAnimationPage(FilterType.opacity),
-        kImageFilteredTransformAnimationRouteName: (BuildContext context) =>
-            const FilteredChildAnimationPage(FilterType.rotateFilter),
-        kMultiWidgetConstructionRouteName: (BuildContext context) =>
-            const MultiWidgetConstructTable(10, 20),
-        kHeavyGridViewRouteName: (BuildContext context) =>
-            const HeavyGridViewPage(),
+        kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
+        kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
+        kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
+        kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
+        kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
+        kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
+        kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
+        kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
-        kAnimationWithMicrotasksRouteName: (BuildContext context) =>
-            const AnimationWithMicrotasks(),
-        kAnimatedImageRouteName: (BuildContext context) =>
-            const AnimatedImagePage(),
-        kOpacityPeepholeRouteName: (BuildContext context) =>
-            const OpacityPeepholePage(),
+        kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
+        kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
+        kOpacityPeepholeRouteName: (BuildContext context) => const OpacityPeepholePage(),
         ...opacityPeepholeRoutes,
       },
     );
@@ -151,8 +130,7 @@ class HomePage extends StatelessWidget {
             key: const Key(kPictureCacheComplexityScoringRouteName),
             child: const Text('Picture Cache Complexity Scoring'),
             onPressed: () {
-              Navigator.pushNamed(
-                  context, kPictureCacheComplexityScoringRouteName);
+              Navigator.pushNamed(context, kPictureCacheComplexityScoringRouteName);
             },
           ),
           ElevatedButton(
@@ -208,8 +186,7 @@ class HomePage extends StatelessWidget {
             key: const Key(kImageFilteredTransformAnimationRouteName),
             child: const Text('ImageFiltered Transform Animation'),
             onPressed: () {
-              Navigator.pushNamed(
-                  context, kImageFilteredTransformAnimationRouteName);
+              Navigator.pushNamed(context, kImageFilteredTransformAnimationRouteName);
             },
           ),
           ElevatedButton(

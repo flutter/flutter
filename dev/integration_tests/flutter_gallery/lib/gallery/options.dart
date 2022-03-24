@@ -49,43 +49,39 @@ class GalleryOptions {
       textDirection: textDirection ?? this.textDirection,
       timeDilation: timeDilation ?? this.timeDilation,
       platform: platform ?? this.platform,
-      showPerformanceOverlay:
-          showPerformanceOverlay ?? this.showPerformanceOverlay,
-      showOffscreenLayersCheckerboard: showOffscreenLayersCheckerboard ??
-          this.showOffscreenLayersCheckerboard,
-      showRasterCacheImagesCheckerboard: showRasterCacheImagesCheckerboard ??
-          this.showRasterCacheImagesCheckerboard,
+      showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
+      showOffscreenLayersCheckerboard: showOffscreenLayersCheckerboard ?? this.showOffscreenLayersCheckerboard,
+      showRasterCacheImagesCheckerboard: showRasterCacheImagesCheckerboard ?? this.showRasterCacheImagesCheckerboard,
     );
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is GalleryOptions &&
-        other.themeMode == themeMode &&
-        other.textScaleFactor == textScaleFactor &&
-        other.visualDensity == visualDensity &&
-        other.textDirection == textDirection &&
-        other.platform == platform &&
-        other.showPerformanceOverlay == showPerformanceOverlay &&
-        other.showRasterCacheImagesCheckerboard ==
-            showRasterCacheImagesCheckerboard &&
-        other.showOffscreenLayersCheckerboard ==
-            showRasterCacheImagesCheckerboard;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is GalleryOptions
+        && other.themeMode == themeMode
+        && other.textScaleFactor == textScaleFactor
+        && other.visualDensity == visualDensity
+        && other.textDirection == textDirection
+        && other.platform == platform
+        && other.showPerformanceOverlay == showPerformanceOverlay
+        && other.showRasterCacheImagesCheckerboard == showRasterCacheImagesCheckerboard
+        && other.showOffscreenLayersCheckerboard == showRasterCacheImagesCheckerboard;
   }
 
   @override
   int get hashCode => Object.hash(
-        themeMode,
-        textScaleFactor,
-        visualDensity,
-        textDirection,
-        timeDilation,
-        platform,
-        showPerformanceOverlay,
-        showRasterCacheImagesCheckerboard,
-        showOffscreenLayersCheckerboard,
-      );
+    themeMode,
+    textScaleFactor,
+    visualDensity,
+    textDirection,
+    timeDilation,
+    platform,
+    showPerformanceOverlay,
+    showRasterCacheImagesCheckerboard,
+    showOffscreenLayersCheckerboard,
+  );
 
   @override
   String toString() {
@@ -94,11 +90,10 @@ class GalleryOptions {
 }
 
 const double _kItemHeight = 48.0;
-const EdgeInsetsDirectional _kItemPadding =
-    EdgeInsetsDirectional.only(start: 56.0);
+const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
 
 class _OptionsItem extends StatelessWidget {
-  const _OptionsItem({Key? key, this.child}) : super(key: key);
+  const _OptionsItem({ Key? key, this.child }) : super(key: key);
 
   final Widget? child;
 
@@ -126,7 +121,7 @@ class _OptionsItem extends StatelessWidget {
 }
 
 class _BooleanItem extends StatelessWidget {
-  const _BooleanItem(this.title, this.value, this.onChanged, {this.switchKey});
+  const _BooleanItem(this.title, this.value, this.onChanged, { this.switchKey });
 
   final String title;
   final bool value;
@@ -172,7 +167,7 @@ class _ActionItem extends StatelessWidget {
 }
 
 class _TextButton extends StatelessWidget {
-  const _TextButton({Key? key, this.onPressed, this.child}) : super(key: key);
+  const _TextButton({ Key? key, this.onPressed, this.child }) : super(key: key);
 
   final VoidCallback? onPressed;
   final Widget? child;
@@ -250,8 +245,7 @@ class _ThemeModeItem extends StatelessWidget {
             icon: const Icon(Icons.arrow_drop_down),
             initialValue: options!.themeMode,
             itemBuilder: (BuildContext context) {
-              return ThemeMode.values
-                  .map<PopupMenuItem<ThemeMode>>((ThemeMode mode) {
+              return ThemeMode.values.map<PopupMenuItem<ThemeMode>>((ThemeMode mode) {
                 return PopupMenuItem<ThemeMode>(
                   value: mode,
                   child: Text(modeLabels[mode]!),
@@ -297,9 +291,7 @@ class _TextScaleFactorItem extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
-              return kAllGalleryTextScaleValues
-                  .map<PopupMenuItem<GalleryTextScaleValue>>(
-                      (GalleryTextScaleValue scaleValue) {
+              return kAllGalleryTextScaleValues.map<PopupMenuItem<GalleryTextScaleValue>>((GalleryTextScaleValue scaleValue) {
                 return PopupMenuItem<GalleryTextScaleValue>(
                   value: scaleValue,
                   child: Text(scaleValue.label),
@@ -345,9 +337,7 @@ class _VisualDensityItem extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
-              return kAllGalleryVisualDensityValues
-                  .map<PopupMenuItem<GalleryVisualDensityValue>>(
-                      (GalleryVisualDensityValue densityValue) {
+              return kAllGalleryVisualDensityValues.map<PopupMenuItem<GalleryVisualDensityValue>>((GalleryVisualDensityValue densityValue) {
                 return PopupMenuItem<GalleryVisualDensityValue>(
                   value: densityValue,
                   child: Text(densityValue.label),
@@ -445,10 +435,10 @@ class _PlatformItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text('Platform mechanics'),
-                Text(
-                  _platformLabel(options!.platform!),
-                  style: Theme.of(context).primaryTextTheme.bodyText2,
-                ),
+                 Text(
+                   _platformLabel(options!.platform!),
+                   style: Theme.of(context).primaryTextTheme.bodyText2,
+                 ),
               ],
             ),
           ),
@@ -490,7 +480,8 @@ class GalleryOptionsPage extends StatelessWidget {
   List<Widget> _enabledDiagnosticItems() {
     // Boolean showFoo options with a value of null: don't display
     // the showFoo option at all.
-    if (options == null) return const <Widget>[];
+    if (options == null)
+      return const <Widget>[];
 
     return <Widget>[
       const Divider(),
@@ -499,16 +490,14 @@ class GalleryOptionsPage extends StatelessWidget {
         'Highlight offscreen layers',
         options!.showOffscreenLayersCheckerboard,
         (bool value) {
-          onOptionsChanged!(
-              options!.copyWith(showOffscreenLayersCheckerboard: value));
+          onOptionsChanged!(options!.copyWith(showOffscreenLayersCheckerboard: value));
         },
       ),
       _BooleanItem(
         'Highlight raster cache images',
         options!.showRasterCacheImagesCheckerboard,
         (bool value) {
-          onOptionsChanged!(
-              options!.copyWith(showRasterCacheImagesCheckerboard: value));
+          onOptionsChanged!(options!.copyWith(showRasterCacheImagesCheckerboard: value));
         },
       ),
       _BooleanItem(

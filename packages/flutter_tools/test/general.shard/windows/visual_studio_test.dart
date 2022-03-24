@@ -14,12 +14,9 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 const String programFilesPath = r'C:\Program Files (x86)';
-const String visualStudioPath =
-    programFilesPath + r'\Microsoft Visual Studio\2017\Community';
-const String cmakePath = visualStudioPath +
-    r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
-const String vswherePath =
-    programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
+const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
+const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String vswherePath = programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -126,11 +123,11 @@ void setMockVswhereResponse(
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
-  final String finalResponse = responseOverride ??
-      (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
+  final String finalResponse = responseOverride
+    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
   final List<String> requirementArguments = requiredComponents == null
-      ? <String>[]
-      : <String>['-requires', ...requiredComponents];
+    ? <String>[]
+    : <String>['-requires', ...requiredComponents];
 
   processManager.addCommand(FakeCommand(
     command: <String>[
@@ -282,23 +279,21 @@ void setMockSdkRegResponse(
   bool registryPresent = true,
   bool filesPresent = true,
 }) {
-  const String registryPath =
-      r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
+  const String registryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
   const String registryKey = r'InstallationFolder';
   const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
   final String stdout = registryPresent
-      ? '''
+    ? '''
 $registryPath
     $registryKey    REG_SZ    $installationPath
 '''
-      : '''
+    : '''
 
 ERROR: The system was unable to find the specified registry key or value.
 ''';
 
   if (filesPresent) {
-    final Directory includeDirectory =
-        fileSystem.directory(installationPath).childDirectory('Include');
+    final Directory includeDirectory =  fileSystem.directory(installationPath).childDirectory('Include');
     includeDirectory.childDirectory('10.0.17763.0').createSync(recursive: true);
     includeDirectory.childDirectory('10.0.18362.0').createSync(recursive: true);
     // Not an actual version; added to ensure that version comparison is number, not string-based.
@@ -320,8 +315,7 @@ ERROR: The system was unable to find the specified registry key or value.
 // Create a visual studio instance with a FakeProcessManager.
 VisualStudioFixture setUpVisualStudio() {
   final FakeProcessManager processManager = FakeProcessManager.empty();
-  final FileSystem fileSystem =
-      MemoryFileSystem.test(style: FileSystemStyle.windows);
+  final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   final BufferLogger logger = BufferLogger.test();
   final VisualStudio visualStudio = VisualStudio(
     fileSystem: fileSystem,
@@ -360,8 +354,7 @@ void setNoViableToolchainInstallation(
 
 void main() {
   group('Visual Studio', () {
-    testWithoutContext('isInstalled throws when PROGRAMFILES(X86) env not set',
-        () {
+    testWithoutContext('isInstalled throws when PROGRAMFILES(X86) env not set', () {
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
         fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
@@ -369,29 +362,20 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(
-          () => visualStudio.isInstalled,
-          throwsToolExit(
-              message: '%PROGRAMFILES(X86)% environment variable not found'));
+      expect(() => visualStudio.isInstalled,
+          throwsToolExit(message: '%PROGRAMFILES(X86)% environment variable not found'));
     });
 
-    testWithoutContext(
-        'isInstalled and cmakePath correct when vswhere is missing', () {
-      final FileSystem fileSystem =
-          MemoryFileSystem.test(style: FileSystemStyle.windows);
+    testWithoutContext('isInstalled and cmakePath correct when vswhere is missing', () {
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       const Exception exception = ProcessException('vswhere', <String>[]);
       final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
-      setMockCompatibleVisualStudioInstallation(
-          null, fileSystem, fakeProcessManager, null, exception);
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-          null, fileSystem, fakeProcessManager, null, exception);
-      setMockPrereleaseVisualStudioInstallation(
-          null, fileSystem, fakeProcessManager, null, exception);
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-          null, fileSystem, fakeProcessManager, null, exception);
-      setMockAnyVisualStudioInstallation(
-          null, fileSystem, fakeProcessManager, null, exception);
+      setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockPrereleaseVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockPrereleaseVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
 
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
@@ -406,20 +390,14 @@ void main() {
 
     testWithoutContext(
         'isInstalled returns false when vswhere returns non-zero', () {
-      final FileSystem fileSystem =
-          MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
-      setMockCompatibleVisualStudioInstallation(
-          null, fileSystem, fakeProcessManager, 1);
-      setMockCompatibleVisualStudioBuildToolsInstallation(
-          null, fileSystem, fakeProcessManager, 1);
-      setMockPrereleaseVisualStudioInstallation(
-          null, fileSystem, fakeProcessManager, 1);
-      setMockPrereleaseVisualStudioBuildToolsInstallation(
-          null, fileSystem, fakeProcessManager, 1);
-      setMockAnyVisualStudioInstallation(
-          null, fileSystem, fakeProcessManager, 1);
+      setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockPrereleaseVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockPrereleaseVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
 
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
@@ -432,9 +410,7 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-        'VisualStudio getters return the right values if no installation is found',
-        () {
+    testWithoutContext('VisualStudio getters return the right values if no installation is found', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -458,9 +434,7 @@ void main() {
       expect(visualStudio.fullVersion, null);
     });
 
-    testWithoutContext(
-        'necessaryComponentDescriptions suggest the right VS tools on major version 16',
-        () {
+    testWithoutContext('necessaryComponentDescriptions suggest the right VS tools on major version 16', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -470,15 +444,12 @@ void main() {
         fixture.processManager,
       );
 
-      final String toolsString =
-          visualStudio.necessaryComponentDescriptions()[0];
+      final String toolsString = visualStudio.necessaryComponentDescriptions()[0];
 
       expect(toolsString.contains('v142'), true);
     });
 
-    testWithoutContext(
-        'necessaryComponentDescriptions suggest the right VS tools on an old version',
-        () {
+    testWithoutContext('necessaryComponentDescriptions suggest the right VS tools on an old version', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -490,14 +461,12 @@ void main() {
         fixture.processManager,
       );
 
-      final String toolsString =
-          visualStudio.necessaryComponentDescriptions()[0];
+      final String toolsString = visualStudio.necessaryComponentDescriptions()[0];
 
       expect(toolsString.contains('v142'), true);
     });
 
-    testWithoutContext(
-        'isInstalled returns true even with missing status information', () {
+    testWithoutContext('isInstalled returns true even with missing status information', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -512,9 +481,7 @@ void main() {
       expect(visualStudio.isInstalled, true);
     });
 
-    testWithoutContext(
-        'isInstalled returns true when VS is present but missing components',
-        () {
+    testWithoutContext('isInstalled returns true when VS is present but missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -529,8 +496,7 @@ void main() {
       expect(visualStudio.isInstalled, true);
     });
 
-    testWithoutContext(
-        'isInstalled returns true when VS is present but too old', () {
+    testWithoutContext('isInstalled returns true when VS is present but too old', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -545,14 +511,12 @@ void main() {
       expect(visualStudio.isInstalled, true);
     });
 
-    testWithoutContext(
-        'isInstalled returns true when a prerelease version of VS is present',
-        () {
+    testWithoutContext('isInstalled returns true when a prerelease version of VS is present', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultResponse)..['isPrerelease'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isPrerelease'] = true;
       setMockCompatibleVisualStudioInstallation(
         null,
         fixture.fileSystem,
@@ -573,15 +537,12 @@ void main() {
       expect(visualStudio.isPrerelease, true);
     });
 
-    testWithoutContext(
-        'isInstalled returns true when a prerelease version of Build Tools is present',
-        () {
+    testWithoutContext('isInstalled returns true when a prerelease version of Build Tools is present', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultBuildToolsResponse)
-            ..['isPrerelease'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultBuildToolsResponse)
+        ..['isPrerelease'] = true;
       setMockCompatibleVisualStudioInstallation(
         null,
         fixture.fileSystem,
@@ -607,9 +568,7 @@ void main() {
       expect(visualStudio.isPrerelease, true);
     });
 
-    testWithoutContext(
-        'isAtLeastMinimumVersion returns false when the version found is too old',
-        () {
+    testWithoutContext('isAtLeastMinimumVersion returns false when the version found is too old', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -625,16 +584,14 @@ void main() {
       expect(visualStudio.isAtLeastMinimumVersion, false);
     });
 
-    testWithoutContext(
-        'isComplete returns false when an incomplete installation is found',
-        () {
+    testWithoutContext('isComplete returns false when an incomplete installation is found', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultResponse)..['isComplete'] = false;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isComplete'] = false;
       setMockAnyVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -652,8 +609,8 @@ void main() {
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultResponse)..['isLaunchable'] = false;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isLaunchable'] = false;
       setMockAnyVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -664,16 +621,14 @@ void main() {
       expect(visualStudio.isLaunchable, false);
     });
 
-    testWithoutContext(
-        'isRebootRequired returns true if the installation needs a reboot', () {
+    testWithoutContext('isRebootRequired returns true if the installation needs a reboot', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultResponse)
-            ..['isRebootRequired'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isRebootRequired'] = true;
       setMockAnyVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -684,9 +639,7 @@ void main() {
       expect(visualStudio.isRebootRequired, true);
     });
 
-    testWithoutContext(
-        'hasNecessaryComponents returns false when VS is present but missing components',
-        () {
+    testWithoutContext('hasNecessaryComponents returns false when VS is present but missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -701,8 +654,7 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, false);
     });
 
-    testWithoutContext(
-        'cmakePath returns null when VS is present but missing components', () {
+    testWithoutContext('cmakePath returns null when VS is present but missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -717,15 +669,12 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-        'cmakePath returns null when VS is present but with require components but installation is faulty',
-        () {
+    testWithoutContext('cmakePath returns null when VS is present but with require components but installation is faulty', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultResponse)
-            ..['isRebootRequired'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isRebootRequired'] = true;
       setMockCompatibleVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -735,15 +684,12 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-        'hasNecessaryComponents returns false when VS is present with required components but installation is faulty',
-        () {
+    testWithoutContext('hasNecessaryComponents returns false when VS is present with required components but installation is faulty', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response =
-          Map<String, dynamic>.of(_defaultResponse)
-            ..['isRebootRequired'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isRebootRequired'] = true;
       setMockCompatibleVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -753,9 +699,7 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, false);
     });
 
-    testWithoutContext(
-        'VS metadata is available when VS is present, even if missing components',
-        () {
+    testWithoutContext('VS metadata is available when VS is present, even if missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -773,9 +717,7 @@ void main() {
       expect(visualStudio.fullVersion, equals('16.2.29306.81'));
     });
 
-    testWithoutContext(
-        'cmakePath returns null when VS is present but when vswhere returns invalid JSON',
-        () {
+    testWithoutContext('cmakePath returns null when VS is present but when vswhere returns invalid JSON', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -790,9 +732,7 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-        'Everything returns good values when VS is present with all components',
-        () {
+    testWithoutContext('Everything returns good values when VS is present with all components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -809,9 +749,7 @@ void main() {
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
     });
 
-    testWithoutContext(
-        'Everything returns good values when Build Tools is present with all components',
-        () {
+    testWithoutContext('Everything returns good values when Build Tools is present with all components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -832,8 +770,7 @@ void main() {
       expect(visualStudio.cmakePath, equals(cmakePath));
     });
 
-    testWithoutContext(
-        'properties return the right value for Visual Studio 2022', () {
+    testWithoutContext('properties return the right value for Visual Studio 2022', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -850,15 +787,12 @@ void main() {
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 17 2022'));
     });
 
-    testWithoutContext(
-        'Metadata is for compatible version when latest is missing components',
-        () {
+    testWithoutContext('Metadata is for compatible version when latest is missing components', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
       // Return a different version for queries without the required packages.
-      final Map<String, dynamic> olderButCompleteVersionResponse =
-          <String, dynamic>{
+      final Map<String, dynamic> olderButCompleteVersionResponse = <String, dynamic>{
         'installationPath': visualStudioPath,
         'displayName': 'Visual Studio Community 2017',
         'installationVersion': '15.9.28307.665',
@@ -891,8 +825,7 @@ void main() {
       expect(visualStudio.displayVersion, equals('15.9.12'));
     });
 
-    testWithoutContext('SDK version returns the latest version when present',
-        () {
+    testWithoutContext('SDK version returns the latest version when present', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -904,8 +837,7 @@ void main() {
       expect(visualStudio.getWindows10SDKVersion(), '10.0.18362.0');
     });
 
-    testWithoutContext(
-        'SDK version returns null when the registry key is not present', () {
+    testWithoutContext('SDK version returns null when the registry key is not present', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -918,8 +850,7 @@ void main() {
       expect(visualStudio.getWindows10SDKVersion(), null);
     });
 
-    testWithoutContext(
-        'SDK version returns null when there are no SDK files present', () {
+    testWithoutContext('SDK version returns null when there are no SDK files present', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 

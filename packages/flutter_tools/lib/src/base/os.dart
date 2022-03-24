@@ -57,14 +57,14 @@ abstract class OperatingSystemUtils {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-  })  : _fileSystem = fileSystem,
-        _logger = logger,
-        _platform = platform,
-        _processManager = processManager,
-        _processUtils = ProcessUtils(
-          logger: logger,
-          processManager: processManager,
-        );
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _processManager = processManager,
+       _processUtils = ProcessUtils(
+        logger: logger,
+        processManager: processManager,
+      );
 
   @visibleForTesting
   static final GZipCodec gzipLevel1 = GZipCodec(level: 1);
@@ -127,7 +127,7 @@ abstract class OperatingSystemUtils {
 
   HostPlatform get hostPlatform;
 
-  List<File> _which(String execName, {bool all = false});
+  List<File> _which(String execName, { bool all = false });
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -171,11 +171,11 @@ class _PosixUtils extends OperatingSystemUtils {
     required Platform platform,
     required ProcessManager processManager,
   }) : super._private(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
 
   @override
   void makeExecutable(File file) {
@@ -190,10 +190,12 @@ class _PosixUtils extends OperatingSystemUtils {
         <String>['chmod', mode, entity.path],
       );
       if (result.exitCode != 0) {
-        _logger.printTrace('Error trying to run "chmod $mode ${entity.path}":\n'
-            '  exit code: ${result.exitCode}\n'
-            '  stdout: ${result.stdout.toString().trimRight()}\n'
-            '  stderr: ${result.stderr.toString().trimRight()}');
+        _logger.printTrace(
+          'Error trying to run "chmod $mode ${entity.path}":\n'
+          '  exit code: ${result.exitCode}\n'
+          '  stdout: ${result.stdout.toString().trimRight()}\n'
+          '  stderr: ${result.stderr.toString().trimRight()}'
+        );
       }
     } on ProcessException catch (error) {
       _logger.printTrace(
@@ -203,7 +205,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     final List<String> command = <String>[
       'which',
       if (all) '-a',
@@ -214,13 +216,9 @@ class _PosixUtils extends OperatingSystemUtils {
       return const <File>[];
     }
     final String stdout = result.stdout as String;
-    return stdout
-        .trim()
-        .split('\n')
-        .map<File>(
-          (String path) => _fileSystem.file(path.trim()),
-        )
-        .toList();
+    return stdout.trim().split('\n').map<File>(
+      (String path) => _fileSystem.file(path.trim()),
+    ).toList();
   }
 
   // unzip -o -q zipfile -d dest
@@ -236,7 +234,8 @@ class _PosixUtils extends OperatingSystemUtils {
         message = 'Consider running "sudo apt-get install unzip".';
       }
       throwToolExit(
-          'Missing "unzip" tool. Unable to extract ${file.path}.\n$message');
+        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
+      );
     }
     _processUtils.runSync(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
@@ -271,8 +270,7 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck =
-          _processUtils.runSync(<String>['uname', '-m']);
+      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
       // On x64 stdout is "uname -m: x86_64"
       // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
       if (hostPlatformCheck.exitCode != 0) {
@@ -315,15 +313,13 @@ class _LinuxUtils extends _PosixUtils {
     if (_name == null) {
       const String prettyNameKey = 'PRETTY_NAME';
       // If "/etc/os-release" doesn't exist, fallback to "/usr/lib/os-release".
-      final String osReleasePath =
-          _fileSystem.file('/etc/os-release').existsSync()
-              ? '/etc/os-release'
-              : '/usr/lib/os-release';
+      final String osReleasePath = _fileSystem.file('/etc/os-release').existsSync()
+        ? '/etc/os-release'
+        : '/usr/lib/os-release';
       String prettyName;
       String kernelRelease;
       try {
-        final String osRelease =
-            _fileSystem.file(osReleasePath).readAsStringSync();
+        final String osRelease = _fileSystem.file(osReleasePath).readAsStringSync();
         prettyName = _getOsReleaseValueForKey(osRelease, prettyNameKey);
       } on Exception catch (e) {
         _logger.printTrace('Failed obtaining PRETTY_NAME for Linux: $e');
@@ -332,8 +328,7 @@ class _LinuxUtils extends _PosixUtils {
       try {
         // Split the operating system version which should be formatted as
         // "Linux kernelRelease build", by spaces.
-        final List<String> osVersionSplitted =
-            _platform.operatingSystemVersion.split(' ');
+        final List<String> osVersionSplitted = _platform.operatingSystemVersion.split(' ');
         if (osVersionSplitted.length < 3) {
           // The operating system version didn't have the expected format.
           // Initialize as an empty string.
@@ -355,8 +350,8 @@ class _LinuxUtils extends _PosixUtils {
     for (String entry in osReleaseSplitted) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
-      if (entryKeyValuePair[0] == key) {
-        final String value = entryKeyValuePair[1];
+      if(entryKeyValuePair[0] == key) {
+        final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
         if (quote == "'" || quote == '"') {
@@ -422,8 +417,7 @@ class _MacOSUtils extends _PosixUtils {
       }
 
       if (sysctlPath == null) {
-        throwToolExit(
-            'sysctl not found. Try adding it to your PATH environment variable.');
+        throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
       }
       final RunResult arm64Check =
           _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
@@ -444,12 +438,10 @@ class _MacOSUtils extends _PosixUtils {
     if (!_processManager.canRun('unzip')) {
       // unzip is not available. this error message is modeled after the download
       // error in bin/internal/update_dart_sdk.sh
-      throwToolExit(
-          'Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
+      throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
     }
     if (_processManager.canRun('rsync')) {
-      final Directory tempDirectory = _fileSystem.systemTempDirectory
-          .createTempSync('flutter_${file.basename}.');
+      final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
       try {
         // Unzip to a temporary directory.
         _processUtils.runSync(
@@ -457,19 +449,11 @@ class _MacOSUtils extends _PosixUtils {
           throwOnError: true,
           verboseExceptions: true,
         );
-        for (final FileSystemEntity unzippedFile
-            in tempDirectory.listSync(followLinks: false)) {
+        for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
           // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
           // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
           _processUtils.runSync(
-            <String>[
-              'rsync',
-              '-8',
-              '-av',
-              '--delete',
-              unzippedFile.path,
-              targetDirectory.path
-            ],
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
             throwOnError: true,
             verboseExceptions: true,
           );
@@ -479,8 +463,7 @@ class _MacOSUtils extends _PosixUtils {
       }
     } else {
       // Fall back to just unzipping.
-      _logger.printTrace(
-          'Unable to find rsync, falling back to direct unzipping.');
+      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
       _processUtils.runSync(
         <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
         throwOnError: true,
@@ -497,11 +480,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     required Platform platform,
     required ProcessManager processManager,
   }) : super._private(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
 
   @override
   HostPlatform hostPlatform = HostPlatform.windows_x64;
@@ -513,26 +496,24 @@ class _WindowsUtils extends OperatingSystemUtils {
   void chmod(FileSystemEntity entity, String mode) {}
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  List<File> _which(String execName, { bool all = false }) {
     if (!_processManager.canRun('where')) {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
-          'Cannot find the executable for `where`. This can happen if the System32 '
-          r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
-          'variable. Ensure that this is present and then try again after restarting '
-          'the terminal and/or IDE.');
+        'Cannot find the executable for `where`. This can happen if the System32 '
+        r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
+        'variable. Ensure that this is present and then try again after restarting '
+        'the terminal and/or IDE.'
+      );
     }
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result =
-        _processManager.runSync(<String>['where', execName]);
+    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0) {
       return const <File>[];
     }
     final List<String> lines = (result.stdout as String).trim().split('\n');
     if (all) {
-      return lines
-          .map<File>((String path) => _fileSystem.file(path.trim()))
-          .toList();
+      return lines.map<File>((String path) => _fileSystem.file(path.trim())).toList();
     }
     return <File>[_fileSystem.file(lines.first.trim())];
   }
@@ -577,8 +558,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
         targetDirectory.path,
       );
-      if (!destinationFileCanonicalPath
-          .startsWith(targetDirectoryCanonicalPath)) {
+      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
         throw StateError(
           'Tried to extract the file $destinationFileCanonicalPath outside of the '
           'target directory $targetDirectoryCanonicalPath',
@@ -602,8 +582,8 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      final ProcessResult result =
-          _processManager.runSync(<String>['ver'], runInShell: true);
+      final ProcessResult result = _processManager.runSync(
+          <String>['ver'], runInShell: true);
       if (result.exitCode == 0) {
         _name = (result.stdout as String).trim();
       } else {
@@ -621,12 +601,11 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
+String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
   while (true) {
-    if (fileSystem
-        .isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
+    if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
       return directory;
     }
     final String parent = fileSystem.path.dirname(directory);

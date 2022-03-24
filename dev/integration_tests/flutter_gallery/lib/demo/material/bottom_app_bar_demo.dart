@@ -20,8 +20,7 @@ class BottomAppBarDemo extends StatefulWidget {
 // for bottom application bar.
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
-  static final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
+  static final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   // FAB shape
 
@@ -65,41 +64,35 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   // FAB Position
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndDocked =
-      _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndDocked = _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Attached - End',
     label: 'floating action button is docked at the end of the bottom app bar',
     value: FloatingActionButtonLocation.endDocked,
   );
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterDocked =
-      _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterDocked = _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Attached - Center',
-    label:
-        'floating action button is docked at the center of the bottom app bar',
+    label: 'floating action button is docked at the center of the bottom app bar',
     value: FloatingActionButtonLocation.centerDocked,
   );
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndFloat =
-      _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabEndFloat= _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Free - End',
     label: 'floating action button floats above the end of the bottom app bar',
     value: FloatingActionButtonLocation.endFloat,
   );
 
-  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterFloat =
-      _ChoiceValue<FloatingActionButtonLocation>(
+  static const _ChoiceValue<FloatingActionButtonLocation> kFabCenterFloat = _ChoiceValue<FloatingActionButtonLocation>(
     title: 'Free - Center',
-    label:
-        'floating action button is floats above the center of the bottom app bar',
+    label: 'floating action button is floats above the center of the bottom app bar',
     value: FloatingActionButtonLocation.centerFloat,
   );
 
   static void _showSnackbar() {
     const String text =
-        "When the Scaffold's floating action button location changes, "
-        'the floating action button animates to its new position. '
-        'The BottomAppBar adapts its shape appropriately.';
+      "When the Scaffold's floating action button location changes, "
+      'the floating action button animates to its new position. '
+      'The BottomAppBar adapts its shape appropriately.';
     _scaffoldMessengerKey.currentState!.showSnackBar(
       const SnackBar(content: Text(text)),
     );
@@ -133,8 +126,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     });
   }
 
-  void _onFabLocationChanged(
-      _ChoiceValue<FloatingActionButtonLocation>? value) {
+  void _onFabLocationChanged(_ChoiceValue<FloatingActionButtonLocation>? value) {
     setState(() {
       _fabLocation = value!;
     });
@@ -158,12 +150,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
             actions: <Widget>[
               MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
               IconButton(
-                icon: const Icon(Icons.sentiment_very_satisfied,
-                    semanticLabel: 'Update shape'),
+                icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Update shape'),
                 onPressed: () {
                   setState(() {
-                    _fabShape =
-                        _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
+                    _fabShape = _fabShape == kCircularFab ? kDiamondFab : kCircularFab;
                   });
                 },
               ),
@@ -174,27 +164,28 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               padding: const EdgeInsets.only(bottom: 88.0),
               children: <Widget>[
                 const _Heading('FAB Shape'),
+
                 _RadioItem<Widget>(kCircularFab, _fabShape, _onFabShapeChanged),
                 _RadioItem<Widget>(kDiamondFab, _fabShape, _onFabShapeChanged),
                 _RadioItem<Widget>(kNoFab, _fabShape, _onFabShapeChanged),
+
                 const Divider(),
                 const _Heading('Notch'),
-                _RadioItem<bool>(
-                    kShowNotchTrue, _showNotch, _onShowNotchChanged),
-                _RadioItem<bool>(
-                    kShowNotchFalse, _showNotch, _onShowNotchChanged),
+
+                _RadioItem<bool>(kShowNotchTrue, _showNotch, _onShowNotchChanged),
+                _RadioItem<bool>(kShowNotchFalse, _showNotch, _onShowNotchChanged),
+
                 const Divider(),
                 const _Heading('FAB Position'),
-                _RadioItem<FloatingActionButtonLocation>(
-                    kFabEndDocked, _fabLocation, _onFabLocationChanged),
-                _RadioItem<FloatingActionButtonLocation>(
-                    kFabCenterDocked, _fabLocation, _onFabLocationChanged),
-                _RadioItem<FloatingActionButtonLocation>(
-                    kFabEndFloat, _fabLocation, _onFabLocationChanged),
-                _RadioItem<FloatingActionButtonLocation>(
-                    kFabCenterFloat, _fabLocation, _onFabLocationChanged),
+
+                _RadioItem<FloatingActionButtonLocation>(kFabEndDocked, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabCenterDocked, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabEndFloat, _fabLocation, _onFabLocationChanged),
+                _RadioItem<FloatingActionButtonLocation>(kFabCenterFloat, _fabLocation, _onFabLocationChanged),
+
                 const Divider(),
                 const _Heading('App bar color'),
+
                 _ColorsItem(kBabColors, _babColor, _onBabColorChanged),
               ],
             ),
@@ -212,15 +203,18 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   NotchedShape? _selectNotch() {
-    if (!_showNotch.value!) return null;
-    if (_fabShape == kCircularFab) return const CircularNotchedRectangle();
-    if (_fabShape == kDiamondFab) return const _DiamondNotchedRectangle();
+    if (!_showNotch.value!)
+      return null;
+    if (_fabShape == kCircularFab)
+      return const CircularNotchedRectangle();
+    if (_fabShape == kDiamondFab)
+      return const _DiamondNotchedRectangle();
     return null;
   }
 }
 
 class _ChoiceValue<T> {
-  const _ChoiceValue({this.value, this.title, this.label});
+  const _ChoiceValue({ this.value, this.title, this.label });
 
   final T? value;
   final String? title;
@@ -306,9 +300,7 @@ class _ColorsItem extends StatelessWidget {
           fillColor: namedColor.color,
           shape: CircleBorder(
             side: BorderSide(
-              color: namedColor.color == selectedColor
-                  ? Colors.black
-                  : const Color(0xFFD5D7DA),
+              color: namedColor.color == selectedColor ? Colors.black : const Color(0xFFD5D7DA),
               width: 2.0,
             ),
           ),
@@ -353,8 +345,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation? fabLocation;
   final NotchedShape? shape;
 
-  static final List<FloatingActionButtonLocation> kCenterLocations =
-      <FloatingActionButtonLocation>[
+  static final List<FloatingActionButtonLocation> kCenterLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.centerFloat,
   ];
@@ -374,13 +365,9 @@ class _DemoBottomAppBar extends StatelessWidget {
             );
           },
         ),
-        if (kCenterLocations.contains(fabLocation))
-          const Expanded(child: SizedBox()),
+        if (kCenterLocations.contains(fabLocation)) const Expanded(child: SizedBox()),
         IconButton(
-          icon: const Icon(
-            Icons.search,
-            semanticLabel: 'show search action',
-          ),
+          icon: const Icon(Icons.search, semanticLabel: 'show search action',),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('This is a dummy search action.')),
@@ -464,7 +451,8 @@ class _DiamondNotchedRectangle implements NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (!host.overlaps(guest!)) return Path()..addRect(host);
+    if (!host.overlaps(guest!))
+      return Path()..addRect(host);
     assert(guest.width > 0.0);
 
     final Rect intersection = guest.intersect(host);
@@ -481,7 +469,8 @@ class _DiamondNotchedRectangle implements NotchedShape {
     //  the host's top edge where the notch starts (marked with "*").
     //  We compute notchToCenter by similar triangles:
     final double notchToCenter =
-        intersection.height * (guest.height / 2.0) / (guest.width / 2.0);
+      intersection.height * (guest.height / 2.0)
+      / (guest.width / 2.0);
 
     return Path()
       ..moveTo(host.left, host.top)
@@ -504,22 +493,22 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..moveTo(rect.left + rect.width / 2.0, rect.top)
       ..lineTo(rect.right, rect.top + rect.height / 2.0)
-      ..lineTo(rect.left + rect.width / 2.0, rect.bottom)
+      ..lineTo(rect.left + rect.width  / 2.0, rect.bottom)
       ..lineTo(rect.left, rect.top + rect.height / 2.0)
       ..close();
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
 
   // This border doesn't support scaling.
   @override

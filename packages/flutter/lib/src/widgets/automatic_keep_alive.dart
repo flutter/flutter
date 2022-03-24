@@ -81,8 +81,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     handle.addListener(_handles![handle]!);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      final ParentDataElement<KeepAliveParentDataMixin>? childElement =
-          _getChildElement();
+      final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
       if (childElement != null) {
         // If the child already exists, update it synchronously.
         _updateParentDataOfChild(childElement);
@@ -94,8 +93,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           if (!mounted) {
             return;
           }
-          final ParentDataElement<KeepAliveParentDataMixin>? childElement =
-              _getChildElement();
+          final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement!);
         });
@@ -134,15 +132,12 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     element.visitChildren((Element child) {
       childElement = child;
     });
-    assert(childElement == null ||
-        childElement is ParentDataElement<KeepAliveParentDataMixin>);
+    assert(childElement == null || childElement is ParentDataElement<KeepAliveParentDataMixin>);
     return childElement as ParentDataElement<KeepAliveParentDataMixin>?;
   }
 
-  void _updateParentDataOfChild(
-      ParentDataElement<KeepAliveParentDataMixin> childElement) {
-    childElement.applyWidgetOutOfTurn(
-        build(context) as ParentDataWidget<KeepAliveParentDataMixin>);
+  void _updateParentDataOfChild(ParentDataElement<KeepAliveParentDataMixin> childElement) {
+    childElement.applyWidgetOutOfTurn(build(context) as ParentDataWidget<KeepAliveParentDataMixin>);
   }
 
   VoidCallback _createCallback(Listenable handle) {
@@ -160,13 +155,10 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       }());
       _handles!.remove(handle);
       if (_handles!.isEmpty) {
-        if (SchedulerBinding.instance.schedulerPhase.index <
-            SchedulerPhase.persistentCallbacks.index) {
+        if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for
           // the next frame.
-          setState(() {
-            _keepingAlive = false;
-          });
+          setState(() { _keepingAlive = false; });
         } else {
           // We were probably notified by a descendant when they were yanked out
           // of our subtree somehow. We're probably in the middle of build or
@@ -243,17 +235,17 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     );
   }
 
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(FlagProperty('_keepingAlive',
-        value: _keepingAlive, ifTrue: 'keeping subtree alive'));
+    description.add(FlagProperty('_keepingAlive', value: _keepingAlive, ifTrue: 'keeping subtree alive'));
     description.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(
       'handles',
       _handles,
-      description: _handles != null
-          ? '${_handles!.length} active client${_handles!.length == 1 ? "" : "s"}'
-          : null,
+      description: _handles != null ?
+        '${_handles!.length} active client${ _handles!.length == 1 ? "" : "s" }' :
+        null,
       ifNull: 'no notifications ever received',
     ));
   }
@@ -375,28 +367,33 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   @protected
   void updateKeepAlive() {
     if (wantKeepAlive) {
-      if (_keepAliveHandle == null) _ensureKeepAlive();
+      if (_keepAliveHandle == null)
+        _ensureKeepAlive();
     } else {
-      if (_keepAliveHandle != null) _releaseKeepAlive();
+      if (_keepAliveHandle != null)
+        _releaseKeepAlive();
     }
   }
 
   @override
   void initState() {
     super.initState();
-    if (wantKeepAlive) _ensureKeepAlive();
+    if (wantKeepAlive)
+      _ensureKeepAlive();
   }
 
   @override
   void deactivate() {
-    if (_keepAliveHandle != null) _releaseKeepAlive();
+    if (_keepAliveHandle != null)
+      _releaseKeepAlive();
     super.deactivate();
   }
 
   @mustCallSuper
   @override
   Widget build(BuildContext context) {
-    if (wantKeepAlive && _keepAliveHandle == null) _ensureKeepAlive();
+    if (wantKeepAlive && _keepAliveHandle == null)
+      _ensureKeepAlive();
     return const _NullWidget();
   }
 }

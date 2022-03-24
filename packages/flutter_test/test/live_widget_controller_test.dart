@@ -94,12 +94,9 @@ void main() {
     runApp(
       MaterialApp(
         home: Listener(
-          onPointerDown: (PointerDownEvent event) =>
-              logs.add('down ${event.buttons}'),
-          onPointerMove: (PointerMoveEvent event) =>
-              logs.add('move ${event.buttons}'),
-          onPointerUp: (PointerUpEvent event) =>
-              logs.add('up ${event.buttons}'),
+          onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+          onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+          onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
           child: const Text('test'),
         ),
       ),
@@ -124,8 +121,8 @@ void main() {
       ]),
       ...<PointerEventRecord>[
         for (Duration t = const Duration(milliseconds: 5);
-            t < const Duration(milliseconds: 80);
-            t += const Duration(milliseconds: 16))
+             t < const Duration(milliseconds: 80);
+             t += const Duration(milliseconds: 16))
           PointerEventRecord(t, <PointerEvent>[
             PointerMoveEvent(
               timeStamp: t - const Duration(milliseconds: 1),
@@ -150,8 +147,7 @@ void main() {
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
-      assert(diff.inMilliseconds > -1,
-          'timeDiffs were: $timeDiffs (offending time was ${diff.inMilliseconds}ms)');
+      assert(diff.inMilliseconds > -1, 'timeDiffs were: $timeDiffs (offending time was ${diff.inMilliseconds}ms)');
     }
 
     const String b = '$kSecondaryMouseButton';

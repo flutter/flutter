@@ -16,8 +16,7 @@ String _toUpperCammel(String lowerCammel) {
 /// Generates the common/testing/key_codes.h based on the information in the key
 /// data structure given to it.
 class KeyCodesCcGenerator extends BaseCodeGenerator {
-  KeyCodesCcGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-      : super(keyData, logicalData);
+  KeyCodesCcGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData) : super(keyData, logicalData);
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {

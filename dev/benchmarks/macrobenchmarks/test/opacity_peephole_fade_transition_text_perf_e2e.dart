@@ -11,8 +11,7 @@ void main() {
     'opacity_peephole_fade_transition_text_perf',
     <ScrollableButtonRoute>[
       ScrollableButtonRoute(kScrollableName, kOpacityPeepholeRouteName),
-      ScrollableButtonRoute(
-          kOpacityScrollableName, kOpacityPeepholeFadeTransitionTextRouteName)
+      ScrollableButtonRoute(kOpacityScrollableName, kOpacityPeepholeFadeTransitionTextRouteName)
     ],
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 10),

@@ -5,44 +5,45 @@
 import '../base/common.dart';
 import '../build_info.dart';
 
-const String kGooglePlayVersioning =
-    'https://developer.android.com/studio/publish/versioning.html';
-const String kSupportedAbis =
-    'https://flutter.dev/docs/deployment/android#what-are-the-supported-target-architectures';
+const String kGooglePlayVersioning = 'https://developer.android.com/studio/publish/versioning.html';
+const String kSupportedAbis = 'https://flutter.dev/docs/deployment/android#what-are-the-supported-target-architectures';
 
 /// Validates that the build mode and build number are valid for a given build.
 void validateBuild(AndroidBuildInfo androidBuildInfo) {
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-  if (buildInfo.codeSizeDirectory != null &&
-      androidBuildInfo.targetArchs.length > 1) {
+  if (buildInfo.codeSizeDirectory != null && androidBuildInfo.targetArchs.length > 1) {
     throwToolExit(
-        'Cannot perform code size analysis when building for multiple ABIs. '
-        'Specify one of android-arm, android-arm64, or android-x64 in the '
-        '--target-platform flag.');
+      'Cannot perform code size analysis when building for multiple ABIs. '
+      'Specify one of android-arm, android-arm64, or android-x64 in the '
+      '--target-platform flag.'
+    );
   }
-  if (buildInfo.mode.isPrecompiled &&
-      androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {
+  if (buildInfo.mode.isPrecompiled && androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {
     throwToolExit(
-        'Cannot build ${androidBuildInfo.buildInfo.mode.name} mode for x86 ABI.\n'
-        'For more information see $kSupportedAbis .');
+      'Cannot build ${androidBuildInfo.buildInfo.mode.name} mode for x86 ABI.\n'
+      'For more information see $kSupportedAbis .'
+    );
   }
   if (buildInfo.buildNumber != null) {
     final int? result = int.tryParse(buildInfo.buildNumber!);
     if (result == null) {
       throwToolExit(
-          'buildNumber: ${buildInfo.buildNumber} was not a valid integer value.\n'
-          'For more information see $kGooglePlayVersioning .');
+        'buildNumber: ${buildInfo.buildNumber} was not a valid integer value.\n'
+        'For more information see $kGooglePlayVersioning .'
+      );
     }
     if (result < 0) {
       throwToolExit(
-          'buildNumber: ${buildInfo.buildNumber} must be a positive integer value.\n'
-          'For more information see $kGooglePlayVersioning .');
+        'buildNumber: ${buildInfo.buildNumber} must be a positive integer value.\n'
+        'For more information see $kGooglePlayVersioning .'
+      );
     }
     if (result > 2100000000) {
       throwToolExit(
-          'buildNumber: ${buildInfo.buildNumber} is greater than the maximum '
-          'allowed value of 2100000000.\n'
-          'For more information see $kGooglePlayVersioning .');
+        'buildNumber: ${buildInfo.buildNumber} is greater than the maximum '
+        'allowed value of 2100000000.\n'
+        'For more information see $kGooglePlayVersioning .'
+      );
     }
   }
 }

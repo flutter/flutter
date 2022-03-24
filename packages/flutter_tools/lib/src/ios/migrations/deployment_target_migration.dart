@@ -24,15 +24,13 @@ class DeploymentTargetMigration extends ProjectMigrator {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {
-      logger.printTrace(
-          'Xcode project not found, skipping iOS deployment target version migration.');
+      logger.printTrace('Xcode project not found, skipping iOS deployment target version migration.');
     }
 
     if (_appFrameworkInfoPlist.existsSync()) {
       processFileLines(_appFrameworkInfoPlist);
     } else {
-      logger.printTrace(
-          'AppFrameworkInfo.plist not found, skipping minimum OS version migration.');
+      logger.printTrace('AppFrameworkInfo.plist not found, skipping minimum OS version migration.');
     }
 
     return true;
@@ -49,23 +47,19 @@ class DeploymentTargetMigration extends ProjectMigrator {
   <string>9.0</string>
 ''';
 
-    return fileContents.replaceAll(
-        minimumOSVersionOriginal, minimumOSVersionReplacement);
+    return fileContents.replaceAll(minimumOSVersionOriginal, minimumOSVersionReplacement);
   }
 
   @override
   String? migrateLine(String line) {
     const String deploymentTargetOriginal = 'IPHONEOS_DEPLOYMENT_TARGET = 8.0;';
-    const String deploymentTargetReplacement =
-        'IPHONEOS_DEPLOYMENT_TARGET = 9.0;';
+    const String deploymentTargetReplacement = 'IPHONEOS_DEPLOYMENT_TARGET = 9.0;';
     if (line.contains(deploymentTargetOriginal)) {
       if (!migrationRequired) {
         // Only print for the first discovered change found.
-        logger.printStatus(
-            'Updating minimum iOS deployment target from 8.0 to 9.0.');
+        logger.printStatus('Updating minimum iOS deployment target from 8.0 to 9.0.');
       }
-      return line.replaceAll(
-          deploymentTargetOriginal, deploymentTargetReplacement);
+      return line.replaceAll(deploymentTargetOriginal, deploymentTargetReplacement);
     }
 
     return line;

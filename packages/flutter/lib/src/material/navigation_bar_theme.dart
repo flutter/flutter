@@ -109,72 +109,62 @@ class NavigationBarThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationBarThemeData? lerp(
-      NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
+  static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return NavigationBarThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
-      labelTextStyle: _lerpProperties<TextStyle?>(
-          a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
-      iconTheme: _lerpProperties<IconThemeData?>(
-          a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
+      labelTextStyle: _lerpProperties<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
+      iconTheme: _lerpProperties<IconThemeData?>(a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
       labelBehavior: t < 0.5 ? a?.labelBehavior : b?.labelBehavior,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        height,
-        backgroundColor,
-        elevation,
-        indicatorColor,
-        indicatorShape,
-        labelTextStyle,
-        iconTheme,
-        labelBehavior,
-      );
+    height,
+    backgroundColor,
+    elevation,
+    indicatorColor,
+    indicatorShape,
+    labelTextStyle,
+    iconTheme,
+    labelBehavior,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is NavigationBarThemeData &&
-        other.height == height &&
-        other.backgroundColor == backgroundColor &&
-        other.elevation == elevation &&
-        other.indicatorColor == indicatorColor &&
-        other.indicatorShape == indicatorShape &&
-        other.labelTextStyle == labelTextStyle &&
-        other.iconTheme == iconTheme &&
-        other.labelBehavior == labelBehavior;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is NavigationBarThemeData
+        && other.height == height
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.indicatorColor == indicatorColor
+        && other.indicatorShape == indicatorShape
+        && other.labelTextStyle == labelTextStyle
+        && other.iconTheme == iconTheme
+        && other.labelBehavior == labelBehavior;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(
-        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(
-        ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>(
-        'indicatorShape', indicatorShape,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
-        'labelTextStyle', labelTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>(
-        'iconTheme', iconTheme,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>(
-        'labelBehavior', labelBehavior,
-        defaultValue: null));
+    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(
@@ -184,7 +174,8 @@ class NavigationBarThemeData with Diagnosticable {
     T Function(T?, T?, double) lerpFunction,
   ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 }
@@ -224,8 +215,7 @@ class NavigationBarTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// Specifies the background color, label text style, icon theme, and label
   /// type values for descendant [NavigationBar] widgets.
@@ -242,8 +232,7 @@ class NavigationBarTheme extends InheritedTheme {
   /// NavigationBarThemeData theme = NavigationBarTheme.of(context);
   /// ```
   static NavigationBarThemeData of(BuildContext context) {
-    final NavigationBarTheme? navigationBarTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
+    final NavigationBarTheme? navigationBarTheme = context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 
@@ -253,6 +242,5 @@ class NavigationBarTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(NavigationBarTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
 }

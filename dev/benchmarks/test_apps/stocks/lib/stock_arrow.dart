@@ -20,10 +20,8 @@ class StockArrowPainter extends CustomPainter {
     final Paint paint = Paint()..color = color;
     paint.strokeWidth = 1.0;
     const double padding = 2.0;
-    assert(padding >
-        paint.strokeWidth / 2.0); // make sure the circle remains inside the box
-    final double r =
-        (size.shortestSide - padding) / 2.0; // radius of the circle
+    assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
+    final double r = (size.shortestSide - padding) / 2.0; // radius of the circle
     final double centerX = padding + r;
     final double centerY = padding + r;
 
@@ -52,20 +50,19 @@ class StockArrowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(StockArrowPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.percentChange != percentChange;
+    return oldDelegate.color != color
+        || oldDelegate.percentChange != percentChange;
   }
 }
 
 class StockArrow extends StatelessWidget {
-  const StockArrow({Key? key, required this.percentChange}) : super(key: key);
+  const StockArrow({ Key? key, required this.percentChange }) : super(key: key);
 
   final double percentChange;
 
   int _colorIndexForPercentChange(double percentChange) {
     const double maxPercent = 10.0;
-    final double normalizedPercentChange =
-        math.min(percentChange.abs(), maxPercent) / maxPercent;
+    final double normalizedPercentChange = math.min(percentChange.abs(), maxPercent) / maxPercent;
     return 100 + (normalizedPercentChange * 8.0).floor() * 100;
   }
 

@@ -13,15 +13,11 @@ void main() {
   test('test smoke test -- this test should fail', () async {
     if (system.Process.killPid(system.pid, system.ProcessSignal.sigsegv)) {
       print('system.Process.killPid returned before the process ended!');
-      print(
-          'Sleeping for a few seconds just in case signal delivery is delayed or our signal handler is being slow...');
-      system.sleep(const Duration(
-          seconds: 10)); // don't sleep too much, we must not time out
+      print('Sleeping for a few seconds just in case signal delivery is delayed or our signal handler is being slow...');
+      system.sleep(const Duration(seconds: 10)); // don't sleep too much, we must not time out
     } else {
-      print(
-          'system.Process.killPid reports that the SIGSEGV signal was not delivered!');
+      print('system.Process.killPid reports that the SIGSEGV signal was not delivered!');
     }
-    print(
-        'crash1_test.dart will now probably not crash, which will ruin the test.');
+    print('crash1_test.dart will now probably not crash, which will ruin the test.');
   });
 }

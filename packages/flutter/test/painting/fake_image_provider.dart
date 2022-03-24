@@ -11,7 +11,8 @@ import 'package:flutter/painting.dart';
 /// that it was given at construction time (typically the job of real image
 /// providers is to resolve some data and instantiate a [ui.Codec] from it).
 class FakeImageProvider extends ImageProvider<FakeImageProvider> {
-  const FakeImageProvider(this._codec, {this.scale = 1.0});
+
+  const FakeImageProvider(this._codec, { this.scale = 1.0 });
 
   final ui.Codec _codec;
 

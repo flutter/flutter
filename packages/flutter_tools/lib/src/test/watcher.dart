@@ -10,7 +10,7 @@ abstract class TestWatcher {
   ///
   /// If startPaused was true, the caller needs to resume in Observatory to
   /// start running the tests.
-  void handleStartedDevice(Uri? observatoryUri) {}
+  void handleStartedDevice(Uri? observatoryUri) { }
 
   /// Called after the tests finish but before the test device exits.
   ///

@@ -55,8 +55,7 @@ void main() {
       final FakeSocket fakeSocket = FakeSocket();
       fakeServerSocket.controller.add(fakeSocket);
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
 
       DaemonMessage message = await broadcastOutput.first;
 
@@ -74,9 +73,7 @@ void main() {
       expect(message.data['params'], <String, Object?>{'id': id});
       expect(message.binary, isNotNull);
       final List<List<int>> binary = await message.binary!.toList();
-      expect(binary, <List<int>>[
-        <int>[1, 2, 3]
-      ]);
+      expect(binary, <List<int>>[<int>[1, 2, 3]]);
 
       // Forwards data received as event to socket.
       expect(fakeSocket.addedData.isEmpty, true);
@@ -92,8 +89,7 @@ void main() {
       expect(fakeSocket.closeCalled, true);
     });
 
-    testWithoutContext('forwards the port from the remote end with device id',
-        () async {
+    testWithoutContext('forwards the port from the remote end with device id', () async {
       final FakeServerSocket fakeServerSocket = FakeServerSocket(400);
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
         clientDaemonConnection,
@@ -103,19 +99,16 @@ void main() {
             fakeServerSocket,
       );
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
 
       final Future<int> result = portForwarder.forward(300);
 
       DaemonMessage message = await broadcastOutput.first;
       expect(message.data['id'], isNotNull);
       expect(message.data['method'], 'device.forward');
-      expect(message.data['params'],
-          <String, Object?>{'deviceId': 'device_id', 'devicePort': 300});
+      expect(message.data['params'], <String, Object?>{'deviceId': 'device_id', 'devicePort': 300});
 
-      serverDaemonConnection.sendResponse(
-          message.data['id']!, <String, Object?>{'hostPort': 350});
+      serverDaemonConnection.sendResponse(message.data['id']!, <String, Object?>{'hostPort': 350});
 
       expect(await result, 400);
 
@@ -148,10 +141,8 @@ void main() {
 }
 
 class FakeDaemonStreams implements DaemonStreams {
-  final StreamController<DaemonMessage> inputs =
-      StreamController<DaemonMessage>();
-  final StreamController<DaemonMessage> outputs =
-      StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
 
   @override
   Stream<DaemonMessage> get inputStream {
@@ -160,8 +151,7 @@ class FakeDaemonStreams implements DaemonStreams {
 
   @override
   void send(Map<String, dynamic> message, [List<int>? binary]) {
-    outputs.add(DaemonMessage(
-        message, binary != null ? Stream<List<int>>.value(binary) : null));
+    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
   @override

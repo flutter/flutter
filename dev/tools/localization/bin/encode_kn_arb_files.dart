@@ -30,7 +30,8 @@ void _encodeBundleTranslations(Map<String, dynamic> bundle) {
   for (final String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo. Don't need
     // to encode them.
-    if (key.startsWith('@')) continue;
+    if (key.startsWith('@'))
+      continue;
     final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
@@ -41,36 +42,32 @@ void _encodeBundleTranslations(Map<String, dynamic> bundle) {
   }
 }
 
-void _checkEncodedTranslations(
-    Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
+void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
   bool errorFound = false;
   const JsonDecoder decoder = JsonDecoder();
   for (final String key in bundle.keys) {
     if (decoder.convert('"${encodedBundle[key]}"') != bundle[key]) {
-      stderr.writeln(
-          '  encodedTranslation for $key does not match original value "${bundle[key]}"');
+      stderr.writeln('  encodedTranslation for $key does not match original value "${bundle[key]}"');
       errorFound = true;
     }
   }
-  if (errorFound) exitWithError('JSON unicode translation encoding failed');
+  if (errorFound)
+    exitWithError('JSON unicode translation encoding failed');
 }
 
 void _rewriteBundle(File file, Map<String, dynamic> bundle) {
   final StringBuffer contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
-    contents.writeln(
-        '  "$key": "${bundle[key]}"${key == bundle.keys.last ? '' : ','}');
+    contents.writeln('  "$key": "${bundle[key]}"${key == bundle.keys.last ? '' : ','}');
   }
   contents.writeln('}');
   file.writeAsStringSync(contents.toString());
 }
 
 void encodeKnArbFiles(Directory directory) {
-  final File materialArbFile =
-      File(path.join(directory.path, 'material_kn.arb'));
-  final File cupertinoArbFile =
-      File(path.join(directory.path, 'cupertino_kn.arb'));
+  final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
+  final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));
 
   final Map<String, dynamic> materialBundle = _loadBundle(materialArbFile);
   final Map<String, dynamic> cupertinoBundle = _loadBundle(cupertinoArbFile);

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 /// This script removes published archives from the cloud storage and the
 /// corresponding JSON metadata file that the website uses to determine what
 /// releases are available.
@@ -113,9 +114,9 @@ class ProcessRunner {
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
-  })  : assert(subprocessOutput != null),
-        assert(processManager != null),
-        assert(platform != null) {
+  }) : assert(subprocessOutput != null),
+       assert(processManager != null),
+       assert(platform != null) {
     environment = Map<String, String>.from(platform.environment);
   }
 
@@ -150,8 +151,7 @@ class ProcessRunner {
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
-      stderr.write(
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
+      stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
     final List<int> output = <int>[];
     final Completer<void> stdoutComplete = Completer<void>();
@@ -189,21 +189,18 @@ class ProcessRunner {
         stderrComplete.complete();
       }
     } on ProcessException catch (e) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw UnpublishException(message);
     } on ArgumentError catch (e) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw UnpublishException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw UnpublishException(
         message,
         ProcessResult(0, exitCode, null, 'returned $exitCode'),
@@ -213,8 +210,7 @@ class ProcessRunner {
   }
 }
 
-typedef HttpReader = Future<Uint8List> Function(Uri url,
-    {Map<String, String> headers});
+typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> headers});
 
 class ArchiveUnpublisher {
   ArchiveUnpublisher(
@@ -239,23 +235,17 @@ class ArchiveUnpublisher {
   final bool confirmed;
   final Directory tempDir;
   final ProcessRunner _processRunner;
-  static String getMetadataFilename(PublishedPlatform platform) =>
-      'releases_${getPublishedPlatform(platform)}.json';
+  static String getMetadataFilename(PublishedPlatform platform) => 'releases_${getPublishedPlatform(platform)}.json';
 
   /// Remove the archive from Google Storage.
   Future<void> unpublishArchive() async {
     final Map<String, dynamic> jsonData = await _loadMetadata();
-    final List<Map<String, String>> releases =
-        (jsonData['releases'] as List<dynamic>)
-            .map<Map<String, String>>((dynamic entry) {
+    final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>).map<Map<String, String>>((dynamic entry) {
       final Map<String, dynamic> mapEntry = entry as Map<String, dynamic>;
       return mapEntry.cast<String, String>();
     }).toList();
-    final Map<Channel, Map<String, String>> paths =
-        await _getArchivePaths(releases);
-    releases.removeWhere((Map<String, String> value) =>
-        revisionsBeingRemoved.contains(value['hash']) &&
-        channels.contains(fromChannelName(value['channel'])));
+    final Map<Channel, Map<String, String>> paths = await _getArchivePaths(releases);
+    releases.removeWhere((Map<String, String> value) => revisionsBeingRemoved.contains(value['hash']) && channels.contains(fromChannelName(value['channel'])));
     releases.sort((Map<String, String> a, Map<String, String> b) {
       final DateTime aDate = DateTime.parse(a['release_date']!);
       final DateTime bDate = DateTime.parse(b['release_date']!);
@@ -263,34 +253,27 @@ class ArchiveUnpublisher {
     });
     jsonData['releases'] = releases;
     for (final Channel channel in channels) {
-      if (!revisionsBeingRemoved.contains((jsonData['current_release']
-          as Map<String, dynamic>)[getChannelName(channel)])) {
+      if (!revisionsBeingRemoved.contains((jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)])) {
         // Don't replace the current release if it's not one of the revisions we're removing.
         continue;
       }
-      final Map<String, String> replacementRelease = releases.firstWhere(
-          (Map<String, String> value) =>
-              value['channel'] == getChannelName(channel));
+      final Map<String, String> replacementRelease = releases.firstWhere((Map<String, String> value) => value['channel'] == getChannelName(channel));
       if (replacementRelease == null) {
-        throw UnpublishException(
-            'Unable to find previous release for channel ${getChannelName(channel)}.');
+        throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
       }
-      (jsonData['current_release']
-              as Map<String, dynamic>)[getChannelName(channel)] =
-          replacementRelease['hash'];
+      (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
       print(
-          '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
-          '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).');
+        '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
+        '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).'
+      );
     }
     await _cloudRemoveArchive(paths);
     await _updateMetadata(jsonData);
   }
 
-  Future<Map<Channel, Map<String, String>>> _getArchivePaths(
-      List<Map<String, String>> releases) async {
+  Future<Map<Channel, Map<String, String>>> _getArchivePaths(List<Map<String, String>> releases) async {
     final Set<String> hashes = <String>{};
-    final Map<Channel, Map<String, String>> paths =
-        <Channel, Map<String, String>>{};
+    final Map<Channel, Map<String, String>> paths = <Channel, Map<String, String>>{};
     for (final Map<String, String> revision in releases) {
       final String hash = revision['hash']!;
       final Channel channel = fromChannelName(revision['channel']);
@@ -300,12 +283,10 @@ class ArchiveUnpublisher {
         paths[channel]![hash] = revision['archive']!;
       }
     }
-    final Set<String> missingRevisions = revisionsBeingRemoved
-        .difference(hashes.intersection(revisionsBeingRemoved));
+    final Set<String> missingRevisions = revisionsBeingRemoved.difference(hashes.intersection(revisionsBeingRemoved));
     if (missingRevisions.isNotEmpty) {
       final bool plural = missingRevisions.length > 1;
-      throw UnpublishException(
-          'Revision${plural ? 's' : ''} $missingRevisions ${plural ? 'are' : 'is'} not present in the server metadata.');
+      throw UnpublishException('Revision${plural ? 's' : ''} $missingRevisions ${plural ? 'are' : 'is'} not present in the server metadata.');
     }
     return paths;
   }
@@ -315,8 +296,7 @@ class ArchiveUnpublisher {
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     // Always run this, even in dry runs.
-    await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path],
-        confirm: true);
+    await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path], confirm: true);
     final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
       throw UnpublishException('Empty metadata received from server');
@@ -326,8 +306,7 @@ class ArchiveUnpublisher {
     try {
       jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
     } on FormatException catch (e) {
-      throw UnpublishException(
-          'Unable to parse JSON metadata received from cloud: $e');
+      throw UnpublishException('Unable to parse JSON metadata received from cloud: $e');
     }
 
     return jsonData;
@@ -343,8 +322,7 @@ class ArchiveUnpublisher {
     );
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
-    print(
-        '${confirmed ? 'Overwriting' : 'Would overwrite'} $metadataGsPath with contents of ${metadataFile.absolute.path}');
+    print('${confirmed ? 'Overwriting' : 'Would overwrite'} $metadataGsPath with contents of ${metadataFile.absolute.path}');
     await _cloudReplaceDest(metadataFile.absolute.path, metadataGsPath);
   }
 
@@ -367,11 +345,9 @@ class ArchiveUnpublisher {
     }
   }
 
-  Future<void> _cloudRemoveArchive(
-      Map<Channel, Map<String, String>> paths) async {
+  Future<void> _cloudRemoveArchive(Map<Channel, Map<String, String>> paths) async {
     final List<String> files = <String>[];
-    print(
-        '${confirmed ? 'Removing' : 'Would remove'} the following release archives:');
+    print('${confirmed ? 'Removing' : 'Would remove'} the following release archives:');
     for (final Channel channel in paths.keys) {
       final Map<String, String> hashes = paths[channel]!;
       for (final String hash in hashes.keys) {
@@ -380,15 +356,12 @@ class ArchiveUnpublisher {
         print('  $file');
       }
     }
-    await _runGsUtil(<String>['rm', ...files],
-        failOk: true, confirm: confirmed);
+    await _runGsUtil(<String>['rm', ...files], failOk: true, confirm: confirmed);
   }
 
   Future<String> _cloudReplaceDest(String src, String dest) async {
-    assert(dest.startsWith('gs:'),
-        '_cloudReplaceDest must have a destination in cloud storage.');
-    assert(!src.startsWith('gs:'),
-        '_cloudReplaceDest must have a local source file.');
+    assert(dest.startsWith('gs:'), '_cloudReplaceDest must have a destination in cloud storage.');
+    assert(!src.startsWith('gs:'), '_cloudReplaceDest must have a local source file.');
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do first.
     await _runGsUtil(<String>['rm', dest], failOk: true, confirm: confirmed);
@@ -423,13 +396,8 @@ void _printBanner(String message) {
 
 /// Prepares a flutter git repo to be removed from the published cloud storage.
 Future<void> main(List<String> rawArguments) async {
-  final List<String> allowedChannelValues = Channel.values
-      .map<String>((Channel channel) => getChannelName(channel))
-      .toList();
-  final List<String> allowedPlatformNames = PublishedPlatform.values
-      .map<String>(
-          (PublishedPlatform platform) => getPublishedPlatform(platform))
-      .toList();
+  final List<String> allowedChannelValues = Channel.values.map<String>((Channel channel) => getChannelName(channel)).toList();
+  final List<String> allowedPlatformNames = PublishedPlatform.values.map<String>((PublishedPlatform platform) => getPublishedPlatform(platform)).toList();
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
@@ -493,12 +461,10 @@ Future<void> main(List<String> rawArguments) async {
   }
   for (final String revision in revisions) {
     if (revision.length != 40) {
-      errorExit(
-          'Invalid argument: --revision "$revision" must be the entire hash, not just a prefix.');
+      errorExit('Invalid argument: --revision "$revision" must be the entire hash, not just a prefix.');
     }
     if (revision.contains(RegExp(r'[^a-fA-F0-9]'))) {
-      errorExit(
-          'Invalid argument: --revision "$revision" contains non-hex characters.');
+      errorExit('Invalid argument: --revision "$revision" contains non-hex characters.');
     }
   }
 
@@ -516,22 +482,15 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   if (!(parsedArguments['confirm'] as bool)) {
-    _printBanner(
-        'This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
+    _printBanner('This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
   }
 
   final List<String> channelArg = parsedArguments['channel'] as List<String>;
-  final List<String> channelOptions =
-      channelArg.isNotEmpty ? channelArg : allowedChannelValues;
-  final Set<Channel> channels = channelOptions
-      .map<Channel>((String value) => fromChannelName(value))
-      .toSet();
+  final List<String> channelOptions = channelArg.isNotEmpty ? channelArg : allowedChannelValues;
+  final Set<Channel> channels = channelOptions.map<Channel>((String value) => fromChannelName(value)).toSet();
   final List<String> platformArg = parsedArguments['platform'] as List<String>;
-  final List<String> platformOptions =
-      platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
-  final List<PublishedPlatform> platforms = platformOptions
-      .map<PublishedPlatform>((String value) => fromPublishedPlatform(value))
-      .toList();
+  final List<String> platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
+  final List<PublishedPlatform> platforms = platformOptions.map<PublishedPlatform>((String value) => fromPublishedPlatform(value)).toList();
   int exitCode = 0;
   late String message;
   late String stack;
@@ -562,8 +521,7 @@ Future<void> main(List<String> rawArguments) async {
       errorExit('$message\n$stack', exitCode: exitCode);
     }
     if (!(parsedArguments['confirm'] as bool)) {
-      _printBanner(
-          'This was just a dry run.  To actually perform the above changes, re-run with --confirm argument.');
+      _printBanner('This was just a dry run.  To actually perform the above changes, re-run with --confirm argument.');
     }
     exit(0);
   }

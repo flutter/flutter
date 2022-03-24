@@ -26,12 +26,9 @@ void main() {
       Cache.disableLocking();
     });
 
-    testUsingContext(
-        'returns 0 when Android is connected and ready for an install',
-        () async {
+    testUsingContext('returns 0 when Android is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
-      command.applicationPackages =
-          FakeApplicationPackageFactory(FakeAndroidApk());
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
       testDeviceManager.addDevice(device);
@@ -41,27 +38,20 @@ void main() {
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
 
-    testUsingContext(
-        'returns 1 when targeted device is not Android with --device-user',
-        () async {
+    testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
       final InstallCommand command = InstallCommand();
-      command.applicationPackages =
-          FakeApplicationPackageFactory(FakeAndroidApk());
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.addDevice(device);
 
-      expect(
-          () async => createTestCommandRunner(command)
-              .run(<String>['install', '--device-user', '10']),
-          throwsToolExit(
-              message: '--device-user is only supported for Android'));
+      expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
+        throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
 
-    testUsingContext('returns 0 when iOS is connected and ready for an install',
-        () async {
+    testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
@@ -75,22 +65,18 @@ void main() {
   });
 }
 
-class FakeApplicationPackageFactory extends Fake
-    implements ApplicationPackageFactory {
+class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
   FakeApplicationPackageFactory(this.app);
 
   final ApplicationPackage app;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform,
-      {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
     return app;
   }
 }
-
-class FakeIOSApp extends Fake implements IOSApp {}
-
-class FakeAndroidApk extends Fake implements AndroidApk {}
+class FakeIOSApp extends Fake implements IOSApp { }
+class FakeAndroidApk extends Fake implements AndroidApk { }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
@@ -103,15 +89,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<bool> isAppInstalled(
     IOSApp app, {
     String userIdentifier,
-  }) async =>
-      false;
+  }) async => false;
 
   @override
   Future<bool> installApp(
     IOSApp app, {
     String userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -125,13 +109,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<bool> isAppInstalled(
     AndroidApk app, {
     String userIdentifier,
-  }) async =>
-      false;
+  }) async => false;
 
   @override
   Future<bool> installApp(
     AndroidApk app, {
     String userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 }

@@ -16,16 +16,13 @@ class SelectionControlsPage extends StatefulWidget {
 }
 
 class _SelectionControlsPageState extends State<SelectionControlsPage> {
-  static const ValueKey<String> checkbox1Key =
-      ValueKey<String>(checkboxKeyValue);
-  static const ValueKey<String> checkbox2Key =
-      ValueKey<String>(disabledCheckboxKeyValue);
+  static const ValueKey<String> checkbox1Key = ValueKey<String>(checkboxKeyValue);
+  static const ValueKey<String> checkbox2Key = ValueKey<String>(disabledCheckboxKeyValue);
   static const ValueKey<String> radio1Key = ValueKey<String>(radio1KeyValue);
   static const ValueKey<String> radio2Key = ValueKey<String>(radio2KeyValue);
   static const ValueKey<String> radio3Key = ValueKey<String>(radio3KeyValue);
   static const ValueKey<String> switchKey = ValueKey<String>(switchKeyValue);
-  static const ValueKey<String> labeledSwitchKey =
-      ValueKey<String>(labeledSwitchKeyValue);
+  static const ValueKey<String> labeledSwitchKey = ValueKey<String>(labeledSwitchKeyValue);
   bool _isChecked = false;
   bool _isOn = false;
   bool _isLabeledOn = false;
@@ -77,21 +74,9 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
           ),
           const Spacer(),
           Row(children: <Widget>[
-            Radio<int>(
-                key: radio1Key,
-                value: 0,
-                groupValue: _radio,
-                onChanged: _updateRadio),
-            Radio<int>(
-                key: radio2Key,
-                value: 1,
-                groupValue: _radio,
-                onChanged: _updateRadio),
-            Radio<int>(
-                key: radio3Key,
-                value: 2,
-                groupValue: _radio,
-                onChanged: _updateRadio),
+            Radio<int>(key: radio1Key, value: 0, groupValue: _radio, onChanged: _updateRadio),
+            Radio<int>(key: radio2Key, value: 1, groupValue: _radio, onChanged: _updateRadio),
+            Radio<int>(key: radio3Key, value: 2, groupValue: _radio, onChanged: _updateRadio),
           ]),
           const Spacer(),
           Switch(

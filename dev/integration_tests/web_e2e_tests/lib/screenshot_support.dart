@@ -21,8 +21,7 @@ Future<void> runTestWithScreenshots({
   final WebFlutterDriver driver =
       await FlutterDriver.connect() as WebFlutterDriver;
 
-  (await driver.webDriver.window)
-      .setSize(Rectangle<int>(0, 0, browserWidth, browserHeight));
+  (await driver.webDriver.window).setSize(Rectangle<int>(0, 0, browserWidth, browserHeight));
 
   test.integrationDriver(
     driver: driver,

@@ -12,8 +12,7 @@ import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
   LogsCommand() {
-    argParser.addFlag(
-      'clear',
+    argParser.addFlag('clear',
       negatable: false,
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
@@ -31,8 +30,7 @@ class LogsCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
 

@@ -23,8 +23,7 @@ void main() {
         key: columnKey,
         children: const <Widget>[
           SizedBox(key: child0Key, width: 100.0, height: 100.0),
-          Expanded(
-              child: SizedBox(key: child1Key, width: 100.0, height: 100.0)),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0)),
           SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
@@ -56,8 +55,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0));
   });
 
-  testWidgets('Column with default main axis parameters',
-      (WidgetTester tester) async {
+  testWidgets('Column with default main axis parameters', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -103,8 +101,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(200.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.center',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.center', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -188,8 +185,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.spaceBetween',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -235,8 +231,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.spaceAround',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -290,8 +285,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(475.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.spaceEvenly',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -370,8 +364,7 @@ void main() {
     expect(renderBox.size.height, equals(250.0));
   });
 
-  testWidgets('Column MainAxisSize.min layout at zero size',
-      (WidgetTester tester) async {
+  testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
@@ -396,6 +389,7 @@ void main() {
     expect(renderBox.size.height, equals(100.0));
   });
 
+
   // UP
 
   testWidgets('Column with one flexible child', (WidgetTester tester) async {
@@ -413,8 +407,7 @@ void main() {
         verticalDirection: VerticalDirection.up,
         children: const <Widget>[
           SizedBox(key: child0Key, width: 100.0, height: 100.0),
-          Expanded(
-              child: SizedBox(key: child1Key, width: 100.0, height: 100.0)),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0)),
           SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
@@ -446,8 +439,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(0.0));
   });
 
-  testWidgets('Column with default main axis parameters',
-      (WidgetTester tester) async {
+  testWidgets('Column with default main axis parameters', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -494,8 +486,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(300.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.center',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.center', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -581,8 +572,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(0.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.spaceBetween',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -629,8 +619,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(0.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.spaceAround',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -685,8 +674,7 @@ void main() {
     expect(boxParentData.offset.dy, equals(500.0 - 475.0));
   });
 
-  testWidgets('Column with MainAxisAlignment.spaceEvenly',
-      (WidgetTester tester) async {
+  testWidgets('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
     const Key columnKey = Key('column');
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
@@ -768,8 +756,7 @@ void main() {
     expect(renderBox.size.height, equals(250.0));
   });
 
-  testWidgets('Column MainAxisSize.min layout at zero size',
-      (WidgetTester tester) async {
+  testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(

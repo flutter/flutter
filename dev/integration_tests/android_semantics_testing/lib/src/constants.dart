@@ -60,88 +60,67 @@ class AndroidSemanticsAction {
   static const int _kSetText = 1 << 21;
 
   /// Matches `AccessibilityAction.ACTION_FOCUS`.
-  static const AndroidSemanticsAction focus =
-      AndroidSemanticsAction._(_kFocusIndex);
+  static const AndroidSemanticsAction focus = AndroidSemanticsAction._(_kFocusIndex);
 
   /// Matches `AccessibilityAction.ACTION_CLEAR_FOCUS`.
-  static const AndroidSemanticsAction clearFocus =
-      AndroidSemanticsAction._(_kClearFocusIndex);
+  static const AndroidSemanticsAction clearFocus = AndroidSemanticsAction._(_kClearFocusIndex);
 
   /// Matches `AccessibilityAction.ACTION_SELECT`.
-  static const AndroidSemanticsAction select =
-      AndroidSemanticsAction._(_kSelectIndex);
+  static const AndroidSemanticsAction select = AndroidSemanticsAction._(_kSelectIndex);
 
   /// Matches `AccessibilityAction.ACTION_CLEAR_SELECTION`.
-  static const AndroidSemanticsAction clearSelection =
-      AndroidSemanticsAction._(_kClearSelectionIndex);
+  static const AndroidSemanticsAction clearSelection = AndroidSemanticsAction._(_kClearSelectionIndex);
 
   /// Matches `AccessibilityAction.ACTION_CLICK`.
-  static const AndroidSemanticsAction click =
-      AndroidSemanticsAction._(_kClickIndex);
+  static const AndroidSemanticsAction click = AndroidSemanticsAction._(_kClickIndex);
 
   /// Matches `AccessibilityAction.ACTION_LONG_CLICK`.
-  static const AndroidSemanticsAction longClick =
-      AndroidSemanticsAction._(_kLongClickIndex);
+  static const AndroidSemanticsAction longClick = AndroidSemanticsAction._(_kLongClickIndex);
 
   /// Matches `AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS`.
-  static const AndroidSemanticsAction accessibilityFocus =
-      AndroidSemanticsAction._(_kAccessibilityFocusIndex);
+  static const AndroidSemanticsAction accessibilityFocus = AndroidSemanticsAction._(_kAccessibilityFocusIndex);
 
   /// Matches `AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS`.
-  static const AndroidSemanticsAction clearAccessibilityFocus =
-      AndroidSemanticsAction._(_kClearAccessibilityFocusIndex);
+  static const AndroidSemanticsAction clearAccessibilityFocus = AndroidSemanticsAction._(_kClearAccessibilityFocusIndex);
 
   /// Matches `AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY`.
-  static const AndroidSemanticsAction nextAtMovementGranularity =
-      AndroidSemanticsAction._(_kNextAtMovementGranularityIndex);
+  static const AndroidSemanticsAction nextAtMovementGranularity = AndroidSemanticsAction._(_kNextAtMovementGranularityIndex);
 
   /// Matches `AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY`.
-  static const AndroidSemanticsAction previousAtMovementGranularity =
-      AndroidSemanticsAction._(_kPreviousAtMovementGranularityIndex);
+  static const AndroidSemanticsAction previousAtMovementGranularity = AndroidSemanticsAction._(_kPreviousAtMovementGranularityIndex);
 
   /// Matches `AccessibilityAction.ACTION_NEXT_HTML_ELEMENT`.
-  static const AndroidSemanticsAction nextHtmlElement =
-      AndroidSemanticsAction._(_kNextHtmlElementIndex);
+  static const AndroidSemanticsAction nextHtmlElement = AndroidSemanticsAction._(_kNextHtmlElementIndex);
 
   /// Matches `AccessibilityAction.ACTION_PREVIOUS_HTML_ELEMENT`.
-  static const AndroidSemanticsAction previousHtmlElement =
-      AndroidSemanticsAction._(_kPreviousHtmlElementIndex);
+  static const AndroidSemanticsAction previousHtmlElement = AndroidSemanticsAction._(_kPreviousHtmlElementIndex);
 
   /// Matches `AccessibilityAction.ACTION_SCROLL_FORWARD`.
-  static const AndroidSemanticsAction scrollForward =
-      AndroidSemanticsAction._(_kScrollForwardIndex);
+  static const AndroidSemanticsAction scrollForward = AndroidSemanticsAction._(_kScrollForwardIndex);
 
   /// Matches `AccessibilityAction.ACTION_SCROLL_BACKWARD`.
-  static const AndroidSemanticsAction scrollBackward =
-      AndroidSemanticsAction._(_kScrollBackwardIndex);
+  static const AndroidSemanticsAction scrollBackward = AndroidSemanticsAction._(_kScrollBackwardIndex);
 
   /// Matches `AccessibilityAction.ACTION_CUT`.
-  static const AndroidSemanticsAction cut =
-      AndroidSemanticsAction._(_kCutIndex);
+  static const AndroidSemanticsAction cut = AndroidSemanticsAction._(_kCutIndex);
 
   /// Matches `AccessibilityAction.ACTION_COPY`.
-  static const AndroidSemanticsAction copy =
-      AndroidSemanticsAction._(_kCopyIndex);
+  static const AndroidSemanticsAction copy = AndroidSemanticsAction._(_kCopyIndex);
 
   /// Matches `AccessibilityAction.ACTION_PASTE`.
-  static const AndroidSemanticsAction paste =
-      AndroidSemanticsAction._(_kPasteIndex);
+  static const AndroidSemanticsAction paste = AndroidSemanticsAction._(_kPasteIndex);
 
   /// Matches `AccessibilityAction.ACTION_SET_SELECTION`.
-  static const AndroidSemanticsAction setSelection =
-      AndroidSemanticsAction._(_kSetSelectionIndex);
+  static const AndroidSemanticsAction setSelection = AndroidSemanticsAction._(_kSetSelectionIndex);
 
   /// Matches `AccessibilityAction.ACTION_EXPAND`.
-  static const AndroidSemanticsAction expand =
-      AndroidSemanticsAction._(_kExpandIndex);
+  static const AndroidSemanticsAction expand = AndroidSemanticsAction._(_kExpandIndex);
 
   /// Matches `AccessibilityAction.ACTION_COLLAPSE`.
-  static const AndroidSemanticsAction collapse =
-      AndroidSemanticsAction._(_kCollapseIndex);
+  static const AndroidSemanticsAction collapse = AndroidSemanticsAction._(_kCollapseIndex);
 
   /// Matches `AccessibilityAction.SET_TEXT`.
-  static const AndroidSemanticsAction setText =
-      AndroidSemanticsAction._(_kSetText);
+  static const AndroidSemanticsAction setText = AndroidSemanticsAction._(_kSetText);
 
   @override
   String toString() {
@@ -193,8 +172,7 @@ class AndroidSemanticsAction {
     }
   }
 
-  static const Map<int, AndroidSemanticsAction> _kActionById =
-      <int, AndroidSemanticsAction>{
+  static const Map<int, AndroidSemanticsAction> _kActionById = <int, AndroidSemanticsAction>{
     _kFocusIndex: focus,
     _kClearFocusIndex: clearFocus,
     _kSelectIndex: select,
@@ -223,8 +201,10 @@ class AndroidSemanticsAction {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is AndroidSemanticsAction && other.id == id;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is AndroidSemanticsAction
+        && other.id == id;
   }
 
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.

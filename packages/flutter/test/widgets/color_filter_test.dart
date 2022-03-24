@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+
 @TestOn('!chrome')
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -28,10 +29,10 @@ void main() {
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
     const ColorFilter sepia = ColorFilter.matrix(<double>[
-      0.39, 0.769, 0.189, 0, 0, //
+      0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
       0.272, 0.534, 0.131, 0, 0, //
-      0, 0, 0, 1, 0, //
+      0,     0,     0,     1, 0, //
     ]);
     await tester.pumpWidget(
       RepaintBoundary(
@@ -45,10 +46,10 @@ void main() {
                 title: const Text('Sepia ColorFilter Test'),
               ),
               body: const Center(
-                child: Text('Hooray!'),
+                child:Text('Hooray!'),
               ),
               floatingActionButton: FloatingActionButton(
-                onPressed: () {},
+                onPressed: () { },
                 tooltip: 'Increment',
                 child: const Icon(Icons.add),
               ),
@@ -76,10 +77,8 @@ void main() {
     }
 
     await pumpWithColor(Colors.red);
-    final RenderObject renderObject =
-        tester.firstRenderObject(find.byType(ColorFiltered));
-    final ColorFilterLayer originalLayer =
-        renderObject.debugLayer! as ColorFilterLayer;
+    final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
+    final ColorFilterLayer originalLayer = renderObject.debugLayer! as ColorFilterLayer;
     expect(originalLayer, isNotNull);
 
     // Change color to force a repaint.

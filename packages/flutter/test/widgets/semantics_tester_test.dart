@@ -9,8 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics tester visits last child',
-      (WidgetTester tester) async {
+  testWidgets('Semantics tester visits last child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
     await tester.pumpWidget(
@@ -18,9 +17,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello'),
-            TextSpan(
-                text: 'world',
-                recognizer: TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
           ],
           style: textStyle,
         ),
@@ -41,10 +38,7 @@ void main() {
         ),
       ],
     );
-    expect(
-        semantics,
-        isNot(hasSemantics(expectedSemantics,
-            ignoreTransform: true, ignoreId: true, ignoreRect: true)));
+    expect(semantics, isNot(hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true)));
     semantics.dispose();
   });
 }

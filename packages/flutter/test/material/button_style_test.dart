@@ -11,8 +11,7 @@ void main() {
   test('ButtonStyle copyWith, merge, ==, hashCode basics', () {
     expect(const ButtonStyle(), const ButtonStyle().copyWith());
     expect(const ButtonStyle().merge(const ButtonStyle()), const ButtonStyle());
-    expect(
-        const ButtonStyle().hashCode, const ButtonStyle().copyWith().hashCode);
+    expect(const ButtonStyle().hashCode, const ButtonStyle().copyWith().hashCode);
   });
 
   test('ButtonStyle defaults', () {
@@ -35,15 +34,14 @@ void main() {
     expect(style.enableFeedback, null);
   });
 
-  testWidgets('Default ButtonStyle debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
@@ -51,31 +49,26 @@ void main() {
   testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ButtonStyle(
-      textStyle:
-          MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10.0)),
-      backgroundColor:
-          MaterialStateProperty.all<Color>(const Color(0xfffffff1)),
-      foregroundColor:
-          MaterialStateProperty.all<Color>(const Color(0xfffffff2)),
+      textStyle: MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10.0)),
+      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff1)),
+      foregroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff2)),
       overlayColor: MaterialStateProperty.all<Color>(const Color(0xfffffff3)),
       elevation: MaterialStateProperty.all<double>(1.5),
       padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1.0)),
       minimumSize: MaterialStateProperty.all<Size>(const Size(1.0, 2.0)),
-      side: MaterialStateProperty.all<BorderSide>(
-          const BorderSide(width: 4.0, color: Color(0xfffffff4))),
+      side: MaterialStateProperty.all<BorderSide>(const BorderSide(width: 4.0, color: Color(0xfffffff4))),
       maximumSize: MaterialStateProperty.all<Size>(const Size(100.0, 200.0)),
       shape: MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder()),
-      mouseCursor:
-          MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden),
+      mouseCursor: MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       animationDuration: const Duration(seconds: 1),
       enableFeedback: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[
       'textStyle: MaterialStateProperty.all(TextStyle(inherit: true, size: 10.0))',
@@ -96,33 +89,20 @@ void main() {
   });
 
   testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
-    final MaterialStateProperty<TextStyle> textStyle =
-        MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10));
-    final MaterialStateProperty<Color> backgroundColor =
-        MaterialStateProperty.all<Color>(const Color(0xfffffff1));
-    final MaterialStateProperty<Color> foregroundColor =
-        MaterialStateProperty.all<Color>(const Color(0xfffffff2));
-    final MaterialStateProperty<Color> overlayColor =
-        MaterialStateProperty.all<Color>(const Color(0xfffffff3));
-    final MaterialStateProperty<double> elevation =
-        MaterialStateProperty.all<double>(1);
-    final MaterialStateProperty<EdgeInsets> padding =
-        MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1));
-    final MaterialStateProperty<Size> minimumSize =
-        MaterialStateProperty.all<Size>(const Size(1, 2));
-    final MaterialStateProperty<Size> fixedSize =
-        MaterialStateProperty.all<Size>(const Size(3, 4));
-    final MaterialStateProperty<Size> maximumSize =
-        MaterialStateProperty.all<Size>(const Size(5, 6));
-    final MaterialStateProperty<BorderSide> side =
-        MaterialStateProperty.all<BorderSide>(const BorderSide());
-    final MaterialStateProperty<OutlinedBorder> shape =
-        MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder());
-    final MaterialStateProperty<MouseCursor> mouseCursor =
-        MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden);
+    final MaterialStateProperty<TextStyle> textStyle = MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10));
+    final MaterialStateProperty<Color> backgroundColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    final MaterialStateProperty<Color> foregroundColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    final MaterialStateProperty<Color> overlayColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff3));
+    final MaterialStateProperty<double> elevation =  MaterialStateProperty.all<double>(1);
+    final MaterialStateProperty<EdgeInsets> padding = MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1));
+    final MaterialStateProperty<Size> minimumSize = MaterialStateProperty.all<Size>(const Size(1, 2));
+    final MaterialStateProperty<Size> fixedSize = MaterialStateProperty.all<Size>(const Size(3, 4));
+    final MaterialStateProperty<Size> maximumSize = MaterialStateProperty.all<Size>(const Size(5, 6));
+    final MaterialStateProperty<BorderSide> side = MaterialStateProperty.all<BorderSide>(const BorderSide());
+    final MaterialStateProperty<OutlinedBorder> shape  = MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder());
+    final MaterialStateProperty<MouseCursor> mouseCursor = MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden);
     const VisualDensity visualDensity = VisualDensity.compact;
-    const MaterialTapTargetSize tapTargetSize =
-        MaterialTapTargetSize.shrinkWrap;
+    const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(seconds: 1);
     const bool enableFeedback = true;
 
@@ -186,44 +166,29 @@ void main() {
 
     const BorderSide blackSide = BorderSide();
     const BorderSide whiteSide = BorderSide(color: Color(0xFFFFFFFF));
-    const BorderSide emptyBlackSide =
-        BorderSide(width: 0, color: Color(0x00000000));
+    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
-    final ButtonStyle blackStyle =
-        ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));
-    final ButtonStyle whiteStyle =
-        ButtonStyle(side: MaterialStateProperty.all<BorderSide>(whiteSide));
+    final ButtonStyle blackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));
+    final ButtonStyle whiteStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(whiteSide));
 
     // MaterialState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.
-    const Set<MaterialState> states = <MaterialState>{};
+    const Set<MaterialState> states = <MaterialState>{ };
 
-    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states),
-        blackSide);
-    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states),
-        blackSide);
-    expect(ButtonStyle.lerp(blackStyle, blackStyle, 1)?.side?.resolve(states),
-        blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, blackStyle, 1)?.side?.resolve(states), blackSide);
 
-    expect(ButtonStyle.lerp(blackStyle, null, 0)?.side?.resolve(states),
-        blackSide);
-    expect(ButtonStyle.lerp(blackStyle, null, 0.5)?.side?.resolve(states),
-        BorderSide.lerp(blackSide, emptyBlackSide, 0.5));
-    expect(ButtonStyle.lerp(blackStyle, null, 1)?.side?.resolve(states),
-        emptyBlackSide);
+    expect(ButtonStyle.lerp(blackStyle, null, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, null, 0.5)?.side?.resolve(states), BorderSide.lerp(blackSide, emptyBlackSide, 0.5));
+    expect(ButtonStyle.lerp(blackStyle, null, 1)?.side?.resolve(states), emptyBlackSide);
 
-    expect(ButtonStyle.lerp(null, blackStyle, 0)?.side?.resolve(states),
-        emptyBlackSide);
-    expect(ButtonStyle.lerp(null, blackStyle, 0.5)?.side?.resolve(states),
-        BorderSide.lerp(emptyBlackSide, blackSide, 0.5));
-    expect(ButtonStyle.lerp(null, blackStyle, 1)?.side?.resolve(states),
-        blackSide);
+    expect(ButtonStyle.lerp(null, blackStyle, 0)?.side?.resolve(states), emptyBlackSide);
+    expect(ButtonStyle.lerp(null, blackStyle, 0.5)?.side?.resolve(states), BorderSide.lerp(emptyBlackSide, blackSide, 0.5));
+    expect(ButtonStyle.lerp(null, blackStyle, 1)?.side?.resolve(states), blackSide);
 
-    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0)?.side?.resolve(states),
-        blackSide);
-    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0.5)?.side?.resolve(states),
-        BorderSide.lerp(blackSide, whiteSide, 0.5));
-    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 1)?.side?.resolve(states),
-        whiteSide);
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0)?.side?.resolve(states), blackSide);
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 0.5)?.side?.resolve(states), BorderSide.lerp(blackSide, whiteSide, 0.5));
+    expect(ButtonStyle.lerp(blackStyle, whiteStyle, 1)?.side?.resolve(states), whiteSide);
   });
 }

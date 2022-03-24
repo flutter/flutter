@@ -6,6 +6,7 @@ library component1;
 
 import 'package:flutter/material.dart';
 
+
 class LogoScreen extends StatelessWidget {
   const LogoScreen({Key? key}) : super(key: key);
 
@@ -20,8 +21,7 @@ class LogoScreen extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const Text('DeferredWidget', key: Key('DeferredWidget')),
-          Image.asset('customassets/flutter_logo.png',
-              key: const Key('DeferredImage')),
+          Image.asset('customassets/flutter_logo.png', key: const Key('DeferredImage')),
         ],
       ),
     );

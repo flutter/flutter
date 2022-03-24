@@ -55,21 +55,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSoftKeyboardVisible =
-        MediaQuery.of(context).viewInsets.bottom > 100;
+    final bool isSoftKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 100;
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Text(
-            '$offset',
+          Text('$offset',
             key: const ValueKey<String>(keys.kOffsetText),
           ),
           Text(
             isSoftKeyboardVisible ? 'keyboard visible' : 'keyboard hidden',
             key: const ValueKey<String>(keys.kKeyboardVisibleView),
           ),
-          const ElevatedButton(
-              onPressed: debugDumpApp, child: Text('dump app')),
+          const ElevatedButton(onPressed: debugDumpApp, child: Text('dump app')),
           Expanded(
             child: ListView(
               key: const ValueKey<String>(keys.kListView),

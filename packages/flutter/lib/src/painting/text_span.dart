@@ -2,13 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui
-    show
-        ParagraphBuilder,
-        Locale,
-        StringAttribute,
-        LocaleStringAttribute,
-        SpellOutStringAttribute;
+import 'dart:ui' as ui show ParagraphBuilder, Locale, StringAttribute, LocaleStringAttribute, SpellOutStringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -66,8 +60,7 @@ import 'text_style.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan extends InlineSpan
-    implements HitTestTarget, MouseTrackerAnnotation {
+class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotation {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -83,10 +76,10 @@ class TextSpan extends InlineSpan
     this.semanticsLabel,
     this.locale,
     this.spellOut,
-  })  : mouseCursor = mouseCursor ??
-            (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
-        assert(!(text == null && semanticsLabel != null)),
-        super(style: style);
+  }) : mouseCursor = mouseCursor ??
+         (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
+       assert(!(text == null && semanticsLabel != null)),
+       super(style: style);
 
   /// The text contained in this span.
   ///
@@ -258,7 +251,8 @@ class TextSpan extends InlineSpan
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (event is PointerDownEvent) recognizer?.addPointer(event);
+    if (event is PointerDownEvent)
+      recognizer?.addPointer(event);
   }
 
   /// Apply the [style], [text], and [children] of this object to the
@@ -302,7 +296,8 @@ class TextSpan extends InlineSpan
         );
       }
     }
-    if (hasStyle) builder.pop();
+    if (hasStyle)
+      builder.pop();
   }
 
   /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
@@ -313,11 +308,13 @@ class TextSpan extends InlineSpan
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
-      if (!visitor(this)) return false;
+      if (!visitor(this))
+        return false;
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor)) return false;
+        if (!child.visitChildren(visitor))
+          return false;
       }
     }
     return true;
@@ -325,8 +322,7 @@ class TextSpan extends InlineSpan
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan? getSpanForPositionVisitor(
-      TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
     if (text == null) {
       return null;
     }
@@ -356,8 +352,7 @@ class TextSpan extends InlineSpan
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        child.computeToPlainText(
-          buffer,
+        child.computeToPlainText(buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
         );
@@ -381,12 +376,9 @@ class TextSpan extends InlineSpan
         text!,
         stringAttributes: <ui.StringAttribute>[
           if (effectiveSpellOut && textLength > 0)
-            ui.SpellOutStringAttribute(
-                range: TextRange(start: 0, end: textLength)),
+            ui.SpellOutStringAttribute(range: TextRange(start: 0, end: textLength)),
           if (effectiveLocale != null && textLength > 0)
-            ui.LocaleStringAttribute(
-                locale: effectiveLocale,
-                range: TextRange(start: 0, end: textLength)),
+            ui.LocaleStringAttribute(locale: effectiveLocale, range: TextRange(start: 0, end: textLength)),
         ],
         semanticsLabel: semanticsLabel,
         recognizer: recognizer,
@@ -428,11 +420,11 @@ class TextSpan extends InlineSpan
   ///
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets,
-      List<dynamic> semanticsElements) {
-    if (recognizer != null &&
-        (recognizer is TapGestureRecognizer ||
-            recognizer is LongPressGestureRecognizer)) {
+  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
+    if (
+      recognizer != null &&
+      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
+    ) {
       final int length = semanticsLabel?.length ?? text!.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -476,27 +468,32 @@ class TextSpan extends InlineSpan
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other)) return RenderComparison.identical;
-    if (other.runtimeType != runtimeType) return RenderComparison.layout;
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (other.runtimeType != runtimeType)
+      return RenderComparison.layout;
     final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null))
       return RenderComparison.layout;
-    RenderComparison result = recognizer == textSpan.recognizer
-        ? RenderComparison.identical
-        : RenderComparison.metadata;
+    RenderComparison result = recognizer == textSpan.recognizer ?
+      RenderComparison.identical :
+      RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
-      if (candidate.index > result.index) result = candidate;
-      if (result == RenderComparison.layout) return result;
+      if (candidate.index > result.index)
+        result = candidate;
+      if (result == RenderComparison.layout)
+        return result;
     }
     if (children != null) {
       for (int index = 0; index < children!.length; index += 1) {
-        final RenderComparison candidate =
-            children![index].compareTo(textSpan.children![index]);
-        if (candidate.index > result.index) result = candidate;
-        if (result == RenderComparison.layout) return result;
+        final RenderComparison candidate = children![index].compareTo(textSpan.children![index]);
+        if (candidate.index > result.index)
+          result = candidate;
+        if (result == RenderComparison.layout)
+          return result;
       }
     }
     return result;
@@ -504,30 +501,33 @@ class TextSpan extends InlineSpan
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    if (super != other) return false;
-    return other is TextSpan &&
-        other.text == text &&
-        other.recognizer == recognizer &&
-        other.semanticsLabel == semanticsLabel &&
-        onEnter == other.onEnter &&
-        onExit == other.onExit &&
-        mouseCursor == other.mouseCursor &&
-        listEquals<InlineSpan>(other.children, children);
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    if (super != other)
+      return false;
+    return other is TextSpan
+        && other.text == text
+        && other.recognizer == recognizer
+        && other.semanticsLabel == semanticsLabel
+        && onEnter == other.onEnter
+        && onExit == other.onExit
+        && mouseCursor == other.mouseCursor
+        && listEquals<InlineSpan>(other.children, children);
   }
 
   @override
   int get hashCode => Object.hash(
-        super.hashCode,
-        text,
-        recognizer,
-        semanticsLabel,
-        onEnter,
-        onExit,
-        mouseCursor,
-        children == null ? null : Object.hashAll(children!),
-      );
+    super.hashCode,
+    text,
+    recognizer,
+    semanticsLabel,
+    onEnter,
+    onExit,
+    mouseCursor,
+    children == null ? null : Object.hashAll(children!),
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextSpan');
@@ -548,21 +548,19 @@ class TextSpan extends InlineSpan
       properties.add(DiagnosticsNode.message('(empty)'));
 
     properties.add(DiagnosticsProperty<GestureRecognizer>(
-      'recognizer',
-      recognizer,
+      'recognizer', recognizer,
       description: recognizer?.runtimeType.toString(),
       defaultValue: null,
     ));
 
     properties.add(FlagsSummary<Function?>(
       'callbacks',
-      <String, Function?>{
+      <String, Function?> {
         'enter': onEnter,
         'exit': onExit,
       },
     ));
-    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor,
-        defaultValue: MouseCursor.defer));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor, defaultValue: MouseCursor.defer));
 
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
@@ -571,7 +569,8 @@ class TextSpan extends InlineSpan
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null) return const <DiagnosticsNode>[];
+    if (children == null)
+      return const <DiagnosticsNode>[];
     return children!.map<DiagnosticsNode>((InlineSpan child) {
       // `child` has a non-nullable return type, but might be null when running
       // with weak checking, so we need to null check it anyway (and ignore the

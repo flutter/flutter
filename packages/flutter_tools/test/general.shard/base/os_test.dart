@@ -107,8 +107,7 @@ void main() {
         ),
       );
 
-      final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.which(kExecutable), isNull);
     });
 
@@ -122,8 +121,7 @@ void main() {
           stdout: '$kPath1\n$kPath2',
         ),
       );
-      final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.which(kExecutable)!.path, kPath1);
     });
 
@@ -137,8 +135,7 @@ void main() {
           stdout: '$kPath1\n$kPath2',
         ),
       );
-      final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
       expect(result[0].path, kPath1);
@@ -159,13 +156,13 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
+      createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
     testWithoutContext('Windows', () async {
       final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);
     });
 
@@ -180,7 +177,8 @@ void main() {
         ),
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
@@ -195,7 +193,8 @@ void main() {
         ),
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
@@ -219,7 +218,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_arm);
     });
 
@@ -243,7 +242,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
@@ -261,7 +260,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(() => utils.hostPlatform, throwsToolExit(message: 'sysctl'));
     });
 
@@ -285,7 +284,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
@@ -412,17 +411,14 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystemVersion:
-              'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Pretty Name 1.2.3-abcd');
     });
 
-    testWithoutContext(
-        'Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing',
-        () async {
+    testWithoutContext('Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing', () async {
       const String fakeOsRelease = '''
       NAME="Name"
       ID=id
@@ -446,40 +442,34 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystemVersion:
-              'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Pretty Name 1.2.3-abcd');
     });
 
-    testWithoutContext('Linux name when reading "/etc/os-release" fails',
-        () async {
+    testWithoutContext('Linux name when reading "/etc/os-release" fails', () async {
       final FileExceptionHandler handler = FileExceptionHandler();
-      final FileSystem fileSystem =
-          MemoryFileSystem.test(opHandle: handler.opHandle);
+      final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
       fileSystem.directory('/etc').createSync();
       final File osRelease = fileSystem.file('/etc/os-release');
 
-      handler.addError(
-          osRelease, FileSystemOp.read, const FileSystemException());
+      handler.addError(osRelease, FileSystemOp.read, const FileSystemException());
 
       final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystemVersion:
-              'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Linux 1.2.3-abcd');
     });
 
-    testWithoutContext('Linux name omits kernel release if undefined',
-        () async {
+    testWithoutContext('Linux name omits kernel release if undefined', () async {
       const String fakeOsRelease = '''
       NAME="Name"
       ID=id
@@ -512,19 +502,15 @@ void main() {
     testWithoutContext('Windows validates paths when unzipping', () {
       // on POSIX systems we use the `unzip` binary, which will fail to extract
       // files with paths outside the target directory
-      final OperatingSystemUtils utils =
-          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final File fakeZipFile = fs.file('archive.zip');
-      final Directory targetDirectory = fs.directory('output')
-        ..createSync(recursive: true);
+      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
       const String content = 'hello, world!';
-      final Archive archive = Archive()
-        ..addFile(
-          // This file would be extracted outside of the target extraction dir
-          ArchiveFile(
-              r'..\..\..\Target File.txt', content.length, content.codeUnits),
-        );
+      final Archive archive = Archive()..addFile(
+        // This file would be extracted outside of the target extraction dir
+        ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
+      );
       final List<int> zipData = ZipEncoder().encode(archive)!;
       fakeZipFile.writeAsBytesSync(zipData);
       expect(
@@ -543,8 +529,7 @@ void main() {
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
     final FileExceptionHandler handler = FileExceptionHandler();
-    final FileSystem fileSystem =
-        MemoryFileSystem.test(opHandle: handler.opHandle);
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     fakeProcessManager.addCommand(
       const FakeCommand(command: <String>[
@@ -557,10 +542,11 @@ void main() {
       ], exitCode: 1, stderr: exceptionMessage),
     );
 
-    final Directory foo = fileSystem.directory('foo')..createSync();
-    final File bar = fileSystem.file('bar.zip')..createSync();
-    handler.addError(
-        bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
+    final Directory foo = fileSystem.directory('foo')
+      ..createSync();
+    final File bar = fileSystem.file('bar.zip')
+      ..createSync();
+    handler.addError(bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
 
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
@@ -590,14 +576,7 @@ void main() {
 
       final Directory targetDirectory = fileSystem.currentDirectory;
       fakeProcessManager.addCommand(FakeCommand(
-        command: <String>[
-          'unzip',
-          '-o',
-          '-q',
-          'foo.zip',
-          '-d',
-          targetDirectory.path
-        ],
+        command: <String>['unzip', '-o', '-q', 'foo.zip', '-d', targetDirectory.path],
       ));
 
       macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory);
@@ -616,8 +595,7 @@ void main() {
       );
 
       final Directory targetDirectory = fileSystem.currentDirectory;
-      final Directory tempDirectory = fileSystem.systemTempDirectory
-          .childDirectory('flutter_foo.zip.rand0');
+      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
       fakeProcessManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -630,14 +608,8 @@ void main() {
           ],
           onRun: () {
             expect(tempDirectory, exists);
-            tempDirectory
-                .childDirectory('dirA')
-                .childFile('fileA')
-                .createSync(recursive: true);
-            tempDirectory
-                .childDirectory('dirB')
-                .childFile('fileB')
-                .createSync(recursive: true);
+            tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
+            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
           },
         ),
         FakeCommand(command: <String>[
@@ -677,11 +649,10 @@ void main() {
       );
 
       expect(
-        () => linuxOsUtils.unzip(
-            fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        () => linuxOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
         throwsToolExit(
-            message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-                'Consider running "sudo apt-get install unzip".'),
+          message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+          'Consider running "sudo apt-get install unzip".'),
       );
     });
 
@@ -697,11 +668,10 @@ void main() {
       );
 
       expect(
-        () => macOSUtils.unzip(
-            fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit(
-            message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-                'Consider running "brew install unzip".'),
+        () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        throwsToolExit
+          (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+            'Consider running "brew install unzip".'),
       );
     });
 
@@ -717,11 +687,10 @@ void main() {
       );
 
       expect(
-        () => unknownOsUtils.unzip(
-            fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit(
-            message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-                'Please install unzip.'),
+            () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        throwsToolExit
+          (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+            'Please install unzip.'),
       );
     });
   });

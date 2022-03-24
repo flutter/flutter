@@ -13,8 +13,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
   // Disabling tester emulation because this test relies on real message channel communication.
-  ui.debugEmulateFlutterTesterEnvironment =
-      false; // ignore: undefined_prefixed_name
+  ui.debugEmulateFlutterTesterEnvironment = false; // ignore: undefined_prefixed_name
 
   group('Plugin Event Channel', () {
     setUp(() {

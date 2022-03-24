@@ -19,8 +19,7 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 
 // Eyeballed value.
-const EdgeInsets _kToolbarButtonPadding =
-    EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
 
 /// A button in the style of the iOS text selection toolbar buttons.
 class CupertinoTextSelectionToolbarButton extends StatelessWidget {
@@ -37,16 +36,14 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     Key? key,
     this.onPressed,
     required String text,
-  })  : child = Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle.copyWith(
-            color: onPressed != null
-                ? CupertinoColors.white
-                : CupertinoColors.inactiveGray,
-          ),
-        ),
-        super(key: key);
+  }) : child = Text(
+         text,
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle.copyWith(
+           color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
+         ),
+       ),
+       super(key: key);
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
   /// The child of this button.

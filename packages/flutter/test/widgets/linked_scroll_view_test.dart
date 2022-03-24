@@ -16,7 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class LinkedScrollController extends ScrollController {
-  LinkedScrollController({this.before, this.after});
+  LinkedScrollController({ this.before, this.after });
 
   LinkedScrollController? before;
   LinkedScrollController? after;
@@ -35,12 +35,9 @@ class LinkedScrollController extends ScrollController {
 
   @override
   void attach(ScrollPosition position) {
-    assert(position is LinkedScrollPosition,
-        'A LinkedScrollController must only be used with LinkedScrollPositions.');
-    final LinkedScrollPosition linkedPosition =
-        position as LinkedScrollPosition;
-    assert(linkedPosition.owner == this,
-        'A LinkedScrollPosition cannot change controllers once created.');
+    assert(position is LinkedScrollPosition, 'A LinkedScrollController must only be used with LinkedScrollPositions.');
+    final LinkedScrollPosition linkedPosition = position as LinkedScrollPosition;
+    assert(linkedPosition.owner == this, 'A LinkedScrollPosition cannot change controllers once created.');
     super.attach(position);
     _parent?.attach(position);
   }
@@ -60,8 +57,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  LinkedScrollPosition createScrollPosition(ScrollPhysics physics,
-      ScrollContext context, ScrollPosition? oldPosition) {
+  LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
     return LinkedScrollPosition(
       this,
       physics: physics,
@@ -87,8 +83,8 @@ class LinkedScrollController extends ScrollController {
 
   Iterable<LinkedScrollActivity> link(LinkedScrollPosition driver) sync* {
     assert(hasClients);
-    for (final LinkedScrollPosition position
-        in positions.cast<LinkedScrollPosition>()) yield position.link(driver);
+    for (final LinkedScrollPosition position in positions.cast<LinkedScrollPosition>())
+      yield position.link(driver);
   }
 
   @override
@@ -104,6 +100,7 @@ class LinkedScrollController extends ScrollController {
       description.add('links: none');
     }
   }
+
 }
 
 class LinkedScrollPosition extends ScrollPositionWithSingleContext {
@@ -113,13 +110,13 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     required ScrollContext context,
     required double initialPixels,
     ScrollPosition? oldPosition,
-  })  : assert(owner != null),
-        super(
-          physics: physics,
-          context: context,
-          initialPixels: initialPixels,
-          oldPosition: oldPosition,
-        );
+  }) : assert(owner != null),
+       super(
+         physics: physics,
+         context: context,
+         initialPixels: initialPixels,
+         oldPosition: oldPosition,
+       );
 
   final LinkedScrollController owner;
 
@@ -128,7 +125,8 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void beginActivity(ScrollActivity? newActivity) {
-    if (newActivity == null) return;
+    if (newActivity == null)
+      return;
     if (_beforeActivities != null) {
       for (final LinkedScrollActivity activity in _beforeActivities!)
         activity.unlink(this);
@@ -144,11 +142,11 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void applyUserOffset(double delta) {
-    updateUserScrollDirection(
-        delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     final double value = pixels - physics.applyPhysicsToUserOffset(this, delta);
 
-    if (value == pixels) return;
+    if (value == pixels)
+      return;
 
     double beforeOverscroll = 0.0;
     if (owner.canLinkWithBefore && (value < minScrollExtent)) {
@@ -177,8 +175,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
       owner.canLinkWithAfter ? maxScrollExtent : double.infinity,
     ));
 
-    assert(localOverscroll == 0.0 ||
-        (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
+    assert(localOverscroll == 0.0 || (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
   }
 
   void _userMoved(ScrollDirection direction) {
@@ -188,15 +185,16 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   LinkedScrollActivity link(LinkedScrollPosition driver) {
     if (this.activity is! LinkedScrollActivity)
       beginActivity(LinkedScrollActivity(this));
-    final LinkedScrollActivity? activity =
-        this.activity as LinkedScrollActivity?;
+    final LinkedScrollActivity? activity = this.activity as LinkedScrollActivity?;
     activity!.link(driver);
     return activity;
   }
 
   void unlink(LinkedScrollActivity activity) {
-    if (_beforeActivities != null) _beforeActivities!.remove(activity);
-    if (_afterActivities != null) _afterActivities!.remove(activity);
+    if (_beforeActivities != null)
+      _beforeActivities!.remove(activity);
+    if (_afterActivities != null)
+      _afterActivities!.remove(activity);
   }
 
   @override
@@ -222,7 +220,8 @@ class LinkedScrollActivity extends ScrollActivity {
 
   void unlink(LinkedScrollPosition driver) {
     drivers.remove(driver);
-    if (drivers.isEmpty) delegate.goIdle();
+    if (drivers.isEmpty)
+      delegate.goIdle();
   }
 
   @override
@@ -253,13 +252,14 @@ class LinkedScrollActivity extends ScrollActivity {
 
   @override
   void dispose() {
-    for (final LinkedScrollPosition driver in drivers) driver.unlink(this);
+    for (final LinkedScrollPosition driver in drivers)
+      driver.unlink(this);
     super.dispose();
   }
 }
 
 class Test extends StatefulWidget {
-  const Test({Key? key}) : super(key: key);
+  const Test({ Key? key }) : super(key: key);
   @override
   State<Test> createState() => _TestState();
 }
@@ -462,10 +462,8 @@ void main() {
     expect(find.text('Hello 2'), findsOneWidget);
     expect(find.text('Hello 3'), findsNothing);
     expect(find.text('Hello 4'), findsNothing);
-    final TestGesture gestureTop =
-        await tester.startGesture(const Offset(200.0, 150.0));
-    final TestGesture gestureBottom =
-        await tester.startGesture(const Offset(600.0, 450.0));
+    final TestGesture gestureTop = await tester.startGesture(const Offset(200.0, 150.0));
+    final TestGesture gestureBottom = await tester.startGesture(const Offset(600.0, 450.0));
     await tester.pump(const Duration(seconds: 1));
     await gestureTop.moveBy(const Offset(0.0, -270.0));
     await tester.pump(const Duration(seconds: 1));

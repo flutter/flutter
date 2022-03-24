@@ -19,22 +19,19 @@ import '../base/terminal.dart';
 /// The results of each check are handled internally as they are not meant to
 /// be run isolated.
 abstract class DeferredComponentsValidator {
-  DeferredComponentsValidator(
-    this.projectDir,
-    this.logger,
-    this.platform, {
+  DeferredComponentsValidator(this.projectDir, this.logger, this.platform, {
     this.exitOnFail = true,
     String? title,
-  })  : outputDir = projectDir
-            .childDirectory('build')
-            .childDirectory(kDeferredComponentsTempDirectory),
-        inputs = <File>[],
-        outputs = <File>[],
-        title = title ?? 'Deferred components setup verification',
-        generatedFiles = <String>[],
-        modifiedFiles = <String>[],
-        invalidFiles = <String, String>{},
-        diffLines = <String>[];
+  }) : outputDir = projectDir
+        .childDirectory('build')
+        .childDirectory(kDeferredComponentsTempDirectory),
+      inputs = <File>[],
+      outputs = <File>[],
+      title = title ?? 'Deferred components setup verification',
+      generatedFiles = <String>[],
+      modifiedFiles = <String>[],
+      invalidFiles = <String, String>{},
+      diffLines = <String>[];
 
   /// Logger to use for [displayResults] output.
   final Logger logger;
@@ -47,12 +44,9 @@ abstract class DeferredComponentsValidator {
 
   /// The name of the golden file that tracks the latest loading units
   /// generated.
-  static const String kLoadingUnitsCacheFileName =
-      'deferred_components_loading_units.yaml';
-
+  static const String kLoadingUnitsCacheFileName = 'deferred_components_loading_units.yaml';
   /// The directory in the build folder to generate missing/modified files into.
-  static const String kDeferredComponentsTempDirectory =
-      'android_deferred_components_setup_files';
+  static const String kDeferredComponentsTempDirectory = 'android_deferred_components_setup_files';
 
   /// The title printed at the top of the results of [displayResults]
   final String title;
@@ -84,7 +78,6 @@ abstract class DeferredComponentsValidator {
 
   /// All files read by the validator.
   final List<File> inputs;
-
   /// All files output by the validator.
   final List<File> outputs;
 
@@ -95,12 +88,10 @@ abstract class DeferredComponentsValidator {
   ///
   /// If no checks are run, then this will default to false and will remain so
   /// until a failing check finishes running.
-  bool get changesNeeded =>
-      generatedFiles.isNotEmpty ||
-      modifiedFiles.isNotEmpty ||
-      invalidFiles.isNotEmpty ||
-      (loadingUnitComparisonResults != null &&
-          !(loadingUnitComparisonResults!['match'] as bool));
+  bool get changesNeeded => generatedFiles.isNotEmpty
+    || modifiedFiles.isNotEmpty
+    || invalidFiles.isNotEmpty
+    || (loadingUnitComparisonResults != null && !(loadingUnitComparisonResults!['match'] as bool));
 
   /// Handles the results of all executed checks by calling [displayResults] and
   /// [attemptToolExit].
@@ -111,10 +102,8 @@ abstract class DeferredComponentsValidator {
     attemptToolExit();
   }
 
-  static const String _thickDivider =
-      '=================================================================================';
-  static const String _thinDivider =
-      '---------------------------------------------------------------------------------';
+  static const String _thickDivider = '=================================================================================';
+  static const String _thinDivider = '---------------------------------------------------------------------------------';
 
   /// Displays the results of this validator's executed checks and tasks in a
   /// human readable format.
@@ -123,21 +112,18 @@ abstract class DeferredComponentsValidator {
   void displayResults() {
     if (changesNeeded) {
       logger.printStatus(_thickDivider);
-      logger.printStatus(title,
-          indent: (_thickDivider.length - title.length) ~/ 2, emphasis: true);
+      logger.printStatus(title, indent: (_thickDivider.length - title.length) ~/ 2, emphasis: true);
       logger.printStatus(_thickDivider);
       // Log any file reading/existence errors.
       if (invalidFiles.isNotEmpty) {
-        logger.printStatus('Errors checking the following files:\n',
-            emphasis: true);
+        logger.printStatus('Errors checking the following files:\n', emphasis: true);
         for (final String key in invalidFiles.keys) {
           logger.printStatus('  - $key: ${invalidFiles[key]}\n');
         }
       }
       // Log diff file contents, with color highlighting
       if (diffLines != null && diffLines.isNotEmpty) {
-        logger.printStatus('Diff between `android` and expected files:',
-            emphasis: true);
+        logger.printStatus('Diff between `android` and expected files:', emphasis: true);
         logger.printStatus('');
         for (final String line in diffLines) {
           // We only care about diffs in files that have
@@ -159,8 +145,7 @@ abstract class DeferredComponentsValidator {
       if (generatedFiles.isNotEmpty) {
         logger.printStatus('Newly generated android files:', emphasis: true);
         for (final String filePath in generatedFiles) {
-          final String shortenedPath =
-              filePath.substring(projectDir.parent.path.length + 1);
+          final String shortenedPath = filePath.substring(projectDir.parent.path.length + 1);
           logger.printStatus('  - $shortenedPath', color: TerminalColor.grey);
         }
         logger.printStatus('');
@@ -168,8 +153,7 @@ abstract class DeferredComponentsValidator {
       if (modifiedFiles.isNotEmpty) {
         logger.printStatus('Modified android files:', emphasis: true);
         for (final String filePath in modifiedFiles) {
-          final String shortenedPath =
-              filePath.substring(projectDir.parent.path.length + 1);
+          final String shortenedPath = filePath.substring(projectDir.parent.path.length + 1);
           logger.printStatus('  - $shortenedPath', color: TerminalColor.grey);
         }
         logger.printStatus('');
@@ -191,25 +175,17 @@ The recommended changes can be quickly applied by running:
       }
       // Log loading unit golden changes, if any.
       if (loadingUnitComparisonResults != null) {
-        if ((loadingUnitComparisonResults!['new'] as List<LoadingUnit>)
-            .isNotEmpty) {
+        if ((loadingUnitComparisonResults!['new'] as List<LoadingUnit>).isNotEmpty) {
           logger.printStatus('New loading units were found:', emphasis: true);
-          for (final LoadingUnit unit
-              in loadingUnitComparisonResults!['new'] as List<LoadingUnit>) {
-            logger.printStatus(unit.toString(),
-                color: TerminalColor.grey, indent: 2);
+          for (final LoadingUnit unit in loadingUnitComparisonResults!['new'] as List<LoadingUnit>) {
+            logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
           logger.printStatus('');
         }
-        if ((loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>)
-            .isNotEmpty) {
-          logger.printStatus(
-              'Previously existing loading units no longer exist:',
-              emphasis: true);
-          for (final LoadingUnit unit
-              in loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>) {
-            logger.printStatus(unit.toString(),
-                color: TerminalColor.grey, indent: 2);
+        if ((loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>).isNotEmpty) {
+          logger.printStatus('Previously existing loading units no longer exist:', emphasis: true);
+          for (final LoadingUnit unit in loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>) {
+            logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
           logger.printStatus('');
         }
@@ -241,9 +217,7 @@ $_thickDivider''');
 
   void attemptToolExit() {
     if (exitOnFail && changesNeeded) {
-      throwToolExit(
-          'Setup for deferred components incomplete. See recommended actions.',
-          exitCode: 1);
+      throwToolExit('Setup for deferred components incomplete. See recommended actions.', exitCode: 1);
     }
   }
 }

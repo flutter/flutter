@@ -27,9 +27,9 @@ Depfile unpackDesktopArtifacts({
     final String entityPath = fileSystem.path.join(engineSourcePath, artifact);
     final FileSystemEntityType entityType = fileSystem.typeSync(entityPath);
 
-    if (entityType == FileSystemEntityType.notFound ||
-        entityType == FileSystemEntityType.directory ||
-        entityType == FileSystemEntityType.link) {
+    if (entityType == FileSystemEntityType.notFound
+     || entityType == FileSystemEntityType.directory
+     || entityType == FileSystemEntityType.link) {
       throw Exception('Unsupported file type "$entityType" for $entityPath');
     }
     assert(entityType == FileSystemEntityType.file);
@@ -48,8 +48,7 @@ Depfile unpackDesktopArtifacts({
   }
   if (icuDataPath != null) {
     final File inputFile = fileSystem.file(icuDataPath);
-    final File outputFile = fileSystem
-        .file(fileSystem.path.join(outputDirectory.path, inputFile.basename));
+    final File outputFile = fileSystem.file(fileSystem.path.join(outputDirectory.path, inputFile.basename));
     inputFile.copySync(outputFile.path);
     inputs.add(inputFile);
     outputs.add(outputFile);
@@ -58,17 +57,16 @@ Depfile unpackDesktopArtifacts({
     return Depfile(inputs, outputs);
   }
   for (final String clientSourcePath in clientSourcePaths) {
-    final Directory clientSourceDirectory =
-        fileSystem.directory(clientSourcePath);
+    final Directory clientSourceDirectory = fileSystem.directory(clientSourcePath);
     if (!clientSourceDirectory.existsSync()) {
       throw Exception('Missing clientSourceDirectory: $clientSourcePath');
     }
-    for (final File input
-        in clientSourceDirectory.listSync(recursive: true).whereType<File>()) {
+    for (final File input in clientSourceDirectory
+      .listSync(recursive: true)
+      .whereType<File>()) {
       final String outputPath = fileSystem.path.join(
         outputDirectory.path,
-        fileSystem.path
-            .relative(input.path, from: clientSourceDirectory.parent.path),
+        fileSystem.path.relative(input.path, from: clientSourceDirectory.parent.path),
       );
       final File destinationFile = fileSystem.file(outputPath);
       if (!destinationFile.parent.existsSync()) {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'arena.dart';
 import 'binding.dart';
 
@@ -35,7 +36,8 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     _close();
     _winner ??= _owner.captain ?? _members[0];
     for (final GestureArenaMember member in _members) {
-      if (member != _winner) member.rejectGesture(pointer);
+      if (member != _winner)
+        member.rejectGesture(pointer);
     }
     _winner!.acceptGesture(pointer);
   }
@@ -51,8 +53,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   void _close() {
     assert(!_resolved);
     _resolved = true;
-    final _CombiningGestureArenaMember? combiner =
-        _owner._combiners.remove(_pointer);
+    final _CombiningGestureArenaMember? combiner = _owner._combiners.remove(_pointer);
     assert(combiner == this);
   }
 
@@ -65,11 +66,13 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   }
 
   void _resolve(GestureArenaMember member, GestureDisposition disposition) {
-    if (_resolved) return;
+    if (_resolved)
+      return;
     if (disposition == GestureDisposition.rejected) {
       _members.remove(member);
       member.rejectGesture(_pointer);
-      if (_members.isEmpty) _entry!.resolve(disposition);
+      if (_members.isEmpty)
+        _entry!.resolve(disposition);
     } else {
       assert(disposition == GestureDisposition.accepted);
       _winner ??= _owner.captain ?? member;
@@ -122,8 +125,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// To assign a gesture recognizer to a team, set
 /// [OneSequenceGestureRecognizer.team] to an instance of [GestureArenaTeam].
 class GestureArenaTeam {
-  final Map<int, _CombiningGestureArenaMember> _combiners =
-      <int, _CombiningGestureArenaMember>{};
+  final Map<int, _CombiningGestureArenaMember> _combiners = <int, _CombiningGestureArenaMember>{};
 
   /// A member that wins on behalf of the entire team.
   ///

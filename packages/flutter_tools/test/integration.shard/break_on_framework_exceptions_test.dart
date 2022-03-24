@@ -26,70 +26,66 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('breaks when AnimationController listener throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when AnimationController listener throws', () async {
+    final TestProject project = TestProject(
+      r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addListener(() {
           throw 'AnimationController listener';
         })
         ..forward();
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'AnimationController listener';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'AnimationController listener';"));
   });
 
-  testWithoutContext('breaks when AnimationController status listener throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when AnimationController status listener throws', () async {
+    final TestProject project = TestProject(
+      r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addStatusListener((AnimationStatus _) {
           throw 'AnimationController status listener';
         })
         ..forward();
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'AnimationController status listener';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'AnimationController status listener';"));
   });
 
   testWithoutContext('breaks when ChangeNotifier listener throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+       r'''
        ValueNotifier<int>(0)
          ..addListener(() {
            throw 'ValueNotifier listener';
          })
          ..value = 1;
-       ''');
+       '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'ValueNotifier listener';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'ValueNotifier listener';"));
   });
 
   testWithoutContext('breaks when handling a gesture throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -103,41 +99,38 @@ void main() {
         )
       );
       await tester.tap(find.byType(ElevatedButton));
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'while handling a gesture';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'while handling a gesture';"));
   });
 
   testWithoutContext('breaks when platform message callback throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       BasicMessageChannel<String>('foo', const StringCodec()).setMessageHandler((_) {
         throw 'platform message callback';
       });
       tester.binding.defaultBinaryMessenger.handlePlatformMessage('foo', const StringCodec().encodeMessage('Hello'), (_) {});
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'platform message callback';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'platform message callback';"));
   });
 
-  testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(MaterialApp(
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) {
@@ -145,19 +138,20 @@ void main() {
           },
         ),
       ));
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'cannot build child';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'cannot build child';"));
   });
 
   testWithoutContext('breaks when EditableText.onChanged throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: TextField(
@@ -168,20 +162,20 @@ void main() {
         ),
       ));
       await tester.enterText(find.byType(TextField), 'foo');
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine, project.lineContaining(project.test, "throw 'onChanged';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'onChanged';"));
   });
 
-  testWithoutContext('breaks when EditableText.onEditingComplete throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when EditableText.onEditingComplete throws', () async {
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: TextField(
@@ -194,20 +188,20 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.pump();
       await tester.testTextInput.receiveAction(TextInputAction.done);
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'onEditingComplete';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'onEditingComplete';"));
   });
 
-  testWithoutContext('breaks when EditableText.onSelectionChanged throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when EditableText.onSelectionChanged throws', () async {
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(MaterialApp(
         home: SelectableText('hello',
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
@@ -216,100 +210,98 @@ void main() {
         ),
       ));
       await tester.tap(find.byType(SelectableText));
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'onSelectionChanged';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'onSelectionChanged';"));
   });
 
   testWithoutContext('breaks when Action listener throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       CallbackAction<Intent>(onInvoke: (Intent _) { })
         ..addActionListener((_) {
           throw 'action listener';
         })
         ..notifyActionListeners();
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'action listener';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'action listener';"));
   });
 
   testWithoutContext('breaks when pointer route throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       PointerRouter()
         ..addRoute(2, (PointerEvent event) {
           throw 'pointer route';
         })
         ..route(TestPointer(2).down(Offset.zero));
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'pointer route';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'pointer route';"));
   });
 
-  testWithoutContext('breaks when PointerSignalResolver callback throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
+    final TestProject project = TestProject(
+      r'''
       const PointerScrollEvent originalEvent = PointerScrollEvent();
       PointerSignalResolver()
         ..register(originalEvent, (PointerSignalEvent event) {
           throw 'PointerSignalResolver callback';
         })
         ..resolve(originalEvent);
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'PointerSignalResolver callback';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'PointerSignalResolver callback';"));
   });
 
-  testWithoutContext('breaks when PointerSignalResolver callback throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
+    final TestProject project = TestProject(
+      r'''
       FocusManager.instance
         ..addHighlightModeListener((_) {
           throw 'highlight mode listener';
         })
         ..highlightStrategy = FocusHighlightStrategy.alwaysTouch
         ..highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'highlight mode listener';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'highlight mode listener';"));
   });
 
-  testWithoutContext('breaks when GestureBinding.dispatchEvent throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when GestureBinding.dispatchEvent throws', () async {
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(
         MouseRegion(
           onHover: (_) {
@@ -323,7 +315,8 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(MouseRegion)));
       await tester.pump();
       gesture.removePointer();
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
@@ -333,34 +326,35 @@ void main() {
     expect(breakLine, project.lineContaining(project.test, "throw 'onHover';"));
   });
 
-  testWithoutContext('breaks when ImageStreamListener.onImage throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when ImageStreamListener.onImage throws', () async {
+    final TestProject project = TestProject(
+      r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
         ..addListener(ImageStreamListener((ImageInfo _, bool __) {
           throw 'setImage';
         }));
       completer.complete(ImageInfo(image: image));
-      ''', setup: r'''
+      ''',
+      setup: r'''
         late ui.Image image;
         setUp(() async {
           image = await createTestImage();
         });
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine, project.lineContaining(project.test, "throw 'setImage';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'setImage';"));
   });
 
-  testWithoutContext('breaks when ImageStreamListener.onError throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when ImageStreamListener.onError throws', () async {
+    final TestProject project = TestProject(
+      r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
         ..addListener(ImageStreamListener(
@@ -370,7 +364,8 @@ void main() {
           },
         ));
       completer.completeError('ERROR');
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
@@ -381,63 +376,64 @@ void main() {
   });
 
   testWithoutContext('breaks when LayoutBuilder.builder throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       await tester.pumpWidget(LayoutBuilder(
         builder: (_, __) {
           throw 'LayoutBuilder.builder';
         },
       ));
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'LayoutBuilder.builder';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'LayoutBuilder.builder';"));
   });
 
-  testWithoutContext('breaks when _CallbackHookProvider callback throws',
-      () async {
-    final TestProject project = TestProject(r'''
+  testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
+    final TestProject project = TestProject(
+      r'''
       RootBackButtonDispatcher()
         ..addCallback(() {
           throw '_CallbackHookProvider.callback';
         })
         ..invokeCallback(Future.value(false));
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw '_CallbackHookProvider.callback';"));
+    expect(breakLine, project.lineContaining(project.test, "throw '_CallbackHookProvider.callback';"));
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         throw 'TimingsCallback';
       });
       ui.window.onReportTimings!(<FrameTiming>[]);
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'TimingsCallback';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'TimingsCallback';"));
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       SchedulerBinding.instance!.scheduleTask(
         () {
           throw 'scheduled task';
@@ -445,32 +441,33 @@ void main() {
         Priority.touch,
       );
       await tester.pumpAndSettle();
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'scheduled task';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'scheduled task';"));
   });
 
   testWithoutContext('breaks when FrameCallback throws', () async {
-    final TestProject project = TestProject(r'''
+    final TestProject project = TestProject(
+      r'''
       SchedulerBinding.instance!.addPostFrameCallback((_) {
         throw 'FrameCallback';
       });
       await tester.pump();
-      ''');
+      '''
+    );
     await project.setUpIn(tempDir);
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'FrameCallback';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'FrameCallback';"));
   });
 
   testWithoutContext('breaks when attaching to render tree throws', () async {
@@ -496,8 +493,7 @@ void main() {
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'create element';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'create element';"));
   });
 
   testWithoutContext('breaks when RenderObject.performLayout throws', () async {
@@ -520,8 +516,7 @@ void main() {
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'performLayout';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'performLayout';"));
   });
 
   testWithoutContext('breaks when RenderObject.performResize throws', () async {
@@ -547,13 +542,10 @@ void main() {
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'performResize';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'performResize';"));
   });
 
-  testWithoutContext(
-      'breaks when RenderObject.performLayout (without resize) throws',
-      () async {
+  testWithoutContext('breaks when RenderObject.performLayout (without resize) throws', () async {
     final TestProject project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
@@ -593,10 +585,7 @@ void main() {
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(
-        breakLine,
-        project.lineContaining(
-            project.test, "throw 'performLayout without resize';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'performLayout without resize';"));
   });
 
   testWithoutContext('breaks when StatelessWidget.build throws', () async {
@@ -619,8 +608,7 @@ void main() {
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'StatelessWidget.build';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'StatelessWidget.build';"));
   });
 
   testWithoutContext('breaks when StatefulWidget.build throws', () async {
@@ -648,8 +636,7 @@ void main() {
     await flutter.waitForPause();
 
     final int? breakLine = (await flutter.getSourceLocation())?.line;
-    expect(breakLine,
-        project.lineContaining(project.test, "throw 'StatefulWidget.build';"));
+    expect(breakLine, project.lineContaining(project.test, "throw 'StatefulWidget.build';"));
   });
 
   testWithoutContext('breaks when finalizing the tree throws', () async {
@@ -734,7 +721,7 @@ void main() {
 }
 
 class TestProject extends Project {
-  TestProject(this.testBody, {this.setup, this.classes});
+  TestProject(this.testBody, { this.setup, this.classes });
 
   final String testBody;
   final String? setup;
@@ -758,10 +745,7 @@ class TestProject extends Project {
   final String main = '';
 
   @override
-  String get test => _test
-      .replaceFirst('// SETUP', setup ?? '')
-      .replaceFirst('// TEST_BODY', testBody)
-      .replaceFirst('// CLASSES', classes ?? '');
+  String get test => _test.replaceFirst('// SETUP', setup ?? '').replaceFirst('// TEST_BODY', testBody).replaceFirst('// CLASSES', classes ?? '');
 
   final String _test = r'''
     import 'dart:async';

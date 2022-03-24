@@ -46,21 +46,16 @@ void main() {
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
-      fileSystem: fileSystem,
-      uwptool: uwptool,
+        fileSystem: fileSystem,
+        uwptool: uwptool,
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     final String packagePath = fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     );
-    fileSystem.file(packagePath).createSync(recursive: true);
+    fileSystem.file(packagePath).createSync(recursive:true);
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
     expect(windowsDevice.name, 'Windows (UWP)');
     expect(await windowsDevice.installApp(package), true);
@@ -75,88 +70,74 @@ void main() {
     expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext(
-      'WindowsDevices does not list devices if the workflow is unsupported',
-      () async {
-    expect(
-        await WindowsDevices(
-          windowsWorkflow: WindowsWorkflow(
-            featureFlags: TestFeatureFlags(),
-            platform: FakePlatform(operatingSystem: 'windows'),
-          ),
-          featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
-          uwptool: FakeUwpTool(),
-        ).devices,
-        <Device>[]);
+  testWithoutContext('WindowsDevices does not list devices if the workflow is unsupported', () async {
+    expect(await WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: TestFeatureFlags(),
+        platform: FakePlatform(operatingSystem: 'windows'),
+      ),
+      featureFlags: TestFeatureFlags(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      uwptool: FakeUwpTool(),
+    ).devices, <Device>[]);
   });
 
-  testWithoutContext(
-      'WindowsDevices lists a devices if the workflow is supported', () async {
-    expect(
-        await WindowsDevices(
-          windowsWorkflow: WindowsWorkflow(
-              featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-              platform: FakePlatform(operatingSystem: 'windows')),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
-          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-          uwptool: FakeUwpTool(),
-        ).devices,
-        hasLength(1));
+  testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
+    expect(await WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      uwptool: FakeUwpTool(),
+    ).devices, hasLength(1));
   });
 
-  testWithoutContext(
-      'WindowsDevices lists a UWP Windows device if feature is enabled',
-      () async {
-    final FeatureFlags featureFlags =
-        TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
-    expect(
-        await WindowsDevices(
-          windowsWorkflow: WindowsWorkflow(
-              featureFlags: featureFlags,
-              platform: FakePlatform(operatingSystem: 'windows')),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
-          featureFlags: featureFlags,
-          uwptool: FakeUwpTool(),
-        ).devices,
-        hasLength(2));
+  testWithoutContext('WindowsDevices lists a UWP Windows device if feature is enabled', () async {
+    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
+    expect(await WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      featureFlags: featureFlags,
+      uwptool: FakeUwpTool(),
+    ).devices, hasLength(2));
   });
 
-  testWithoutContext('WindowsDevices has windows and winuwp well known devices',
-      () async {
-    final FeatureFlags featureFlags =
-        TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
-    expect(
-        WindowsDevices(
-          windowsWorkflow: WindowsWorkflow(
-              featureFlags: featureFlags,
-              platform: FakePlatform(operatingSystem: 'windows')),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
-          featureFlags: featureFlags,
-          uwptool: FakeUwpTool(),
-        ).wellKnownIds,
-        <String>['windows', 'winuwp']);
+  testWithoutContext('WindowsDevices has windows and winuwp well known devices', () async {
+    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
+    expect(WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      featureFlags: featureFlags,
+      uwptool: FakeUwpTool(),
+    ).wellKnownIds, <String>['windows', 'winuwp']);
   });
 
-  testWithoutContext(
-      'WindowsDevices ignores the timeout provided to discoverDevices',
-      () async {
+  testWithoutContext('WindowsDevices ignores the timeout provided to discoverDevices', () async {
     final WindowsDevices windowsDevices = WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
-          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-          platform: FakePlatform(operatingSystem: 'windows')),
+        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
       operatingSystemUtils: FakeOperatingSystemUtils(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -165,66 +146,50 @@ void main() {
       uwptool: FakeUwpTool(),
     );
     // Timeout ignored.
-    final List<Device> devices = await windowsDevices.discoverDevices(
-        timeout: const Duration(seconds: 10));
+    final List<Device> devices = await windowsDevices.discoverDevices(timeout: const Duration(seconds: 10));
     expect(devices, hasLength(1));
   });
 
-  testWithoutContext('isSupportedForProject is true with editable host app',
-      () async {
+  testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final WindowsDevice windowsDevice =
-        setUpWindowsDevice(fileSystem: fileSystem);
+    final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('windows').createSync();
-    fileSystem
-        .file(fileSystem.path.join('windows', 'CMakeLists.txt'))
-        .createSync();
-    final FlutterProject flutterProject =
-        setUpFlutterProject(fileSystem.currentDirectory);
+    fileSystem.file(fileSystem.path.join('windows', 'CMakeLists.txt')).createSync();
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), true);
   });
 
-  testWithoutContext('isSupportedForProject is false with no host app',
-      () async {
+  testWithoutContext('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final WindowsDevice windowsDevice =
-        setUpWindowsDevice(fileSystem: fileSystem);
+    final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject =
-        setUpFlutterProject(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
   });
 
-  testWithoutContext('isSupportedForProject is false with no build file',
-      () async {
+  testWithoutContext('isSupportedForProject is false with no build file', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final WindowsDevice windowsDevice =
-        setUpWindowsDevice(fileSystem: fileSystem);
+    final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('windows').createSync();
-    final FlutterProject flutterProject =
-        setUpFlutterProject(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
   });
 
-  testWithoutContext(
-      'executablePathForDevice uses the correct package executable', () async {
+  testWithoutContext('executablePathForDevice uses the correct package executable', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
     final FakeWindowsApp fakeApp = FakeWindowsApp();
 
-    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.debug),
-        'debug/executable');
-    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.profile),
-        'profile/executable');
-    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release),
-        'release/executable');
+    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.debug), 'debug/executable');
+    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.profile), 'profile/executable');
+    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release), 'release/executable');
   });
 
   testWithoutContext('WinUWPDevice installs cert if not installed', () async {
@@ -239,15 +204,10 @@ void main() {
 
     uwptool.hasValidSignature = false;
     final String packagePath = fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     );
-    fileSystem.file(packagePath).createSync(recursive: true);
+    fileSystem.file(packagePath).createSync(recursive:true);
     final bool result = await windowsDevice.installApp(package);
 
     expect(result, isTrue);
@@ -255,8 +215,7 @@ void main() {
     expect(uwptool.installAppRequests, hasLength(1));
   });
 
-  testWithoutContext('WinUWPDevice does not install cert if not installed',
-      () async {
+  testWithoutContext('WinUWPDevice does not install cert if not installed', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -268,15 +227,10 @@ void main() {
 
     uwptool.hasValidSignature = true;
     final String packagePath = fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     );
-    fileSystem.file(packagePath).createSync(recursive: true);
+    fileSystem.file(packagePath).createSync(recursive:true);
     final bool result = await windowsDevice.installApp(package);
 
     expect(result, isTrue);
@@ -284,8 +238,7 @@ void main() {
     expect(uwptool.installAppRequests, hasLength(1));
   });
 
-  testWithoutContext('WinUWPDevice prefers installing multi-arch binaries',
-      () async {
+  testWithoutContext('WinUWPDevice prefers installing multi-arch binaries', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -296,34 +249,22 @@ void main() {
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     final String singleArchPath = fileSystem.path.absolute(fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     ));
-    fileSystem.file(singleArchPath).createSync(recursive: true);
+    fileSystem.file(singleArchPath).createSync(recursive:true);
     final String multiArchPath = fileSystem.path.absolute(fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_Debug_Test',
-      'testapp_1.2.3.4_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_Debug_Test', 'testapp_1.2.3.4_Debug.msix',
     ));
-    fileSystem.file(multiArchPath).createSync(recursive: true);
+    fileSystem.file(multiArchPath).createSync(recursive:true);
     final bool result = await windowsDevice.installApp(package);
 
     expect(result, isTrue);
-    expect(uwptool.installAppRequests.single.packageUri,
-        Uri.file(multiArchPath).toString());
+    expect(uwptool.installAppRequests.single.packageUri, Uri.file(multiArchPath).toString());
   });
 
-  testWithoutContext(
-      'WinUWPDevice falls back to installing single-arch binaries', () async {
+  testWithoutContext('WinUWPDevice falls back to installing single-arch binaries', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -334,24 +275,17 @@ void main() {
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     final String singleArchPath = fileSystem.path.absolute(fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     ));
-    fileSystem.file(singleArchPath).createSync(recursive: true);
+    fileSystem.file(singleArchPath).createSync(recursive:true);
     final bool result = await windowsDevice.installApp(package);
 
     expect(result, isTrue);
-    expect(uwptool.installAppRequests.single.packageUri,
-        Uri.file(singleArchPath).toString());
+    expect(uwptool.installAppRequests.single.packageUri, Uri.file(singleArchPath).toString());
   });
 
-  testWithoutContext('WinUWPDevice can launch application if cert is installed',
-      () async {
+  testWithoutContext('WinUWPDevice can launch application if cert is installed', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -363,15 +297,10 @@ void main() {
 
     uwptool.hasValidSignature = true;
     final String packagePath = fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     );
-    fileSystem.file(packagePath).createSync(recursive: true);
+    fileSystem.file(packagePath).createSync(recursive:true);
     final LaunchResult result = await windowsDevice.startApp(
       package,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -381,8 +310,7 @@ void main() {
 
     expect(result.started, true);
     expect(uwptool.installCertRequests, isEmpty);
-    expect(
-        uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
+    expect(uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
     expect(uwptool.launchAppRequests.single.args, <String>[
       '--observatory-port=12345',
       '--disable-service-auth-codes',
@@ -392,9 +320,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext(
-      'WinUWPDevice installs cert and can launch application if cert not installed',
-      () async {
+  testWithoutContext('WinUWPDevice installs cert and can launch application if cert not installed', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -406,15 +332,10 @@ void main() {
 
     uwptool.hasValidSignature = false;
     final String packagePath = fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Debug_Test',
-      'testapp_1.2.3.4_x64_Debug.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
     );
-    fileSystem.file(packagePath).createSync(recursive: true);
+    fileSystem.file(packagePath).createSync(recursive:true);
     final LaunchResult result = await windowsDevice.startApp(
       package,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -424,8 +345,7 @@ void main() {
 
     expect(result.started, true);
     expect(uwptool.installCertRequests, isNotEmpty);
-    expect(
-        uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
+    expect(uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
     expect(uwptool.launchAppRequests.single.args, <String>[
       '--observatory-port=12345',
       '--disable-service-auth-codes',
@@ -435,8 +355,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('WinUWPDevice can launch application in release mode',
-      () async {
+  testWithoutContext('WinUWPDevice can launch application in release mode', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -447,15 +366,10 @@ void main() {
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     final String packagePath = fileSystem.path.join(
-      'build',
-      'winuwp',
-      'runner_uwp',
-      'AppPackages',
-      'testapp',
-      'testapp_1.2.3.4_x64_Release_Test',
-      'testapp_1.2.3.4_x64_Release.msix',
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Release_Test', 'testapp_1.2.3.4_x64_Release.msix',
     );
-    fileSystem.file(packagePath).createSync(recursive: true);
+    fileSystem.file(packagePath).createSync(recursive:true);
     final LaunchResult result = await windowsDevice.startApp(
       package,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
@@ -464,8 +378,7 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(
-        uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
+    expect(uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
     expect(uwptool.launchAppRequests.single.args, <String>[]);
   });
 }
@@ -526,29 +439,25 @@ class FakeBuildableUwpApp extends Fake implements BuildableUwpApp {
 class FakeUwpTool implements UwpTool {
   bool isInstalled = false;
   bool hasValidSignature = false;
-  final List<_GetPackageFamilyRequest> getPackageFamilyRequests =
-      <_GetPackageFamilyRequest>[];
+  final List<_GetPackageFamilyRequest> getPackageFamilyRequests = <_GetPackageFamilyRequest>[];
   final List<_LaunchAppRequest> launchAppRequests = <_LaunchAppRequest>[];
   final List<_InstallCertRequest> installCertRequests = <_InstallCertRequest>[];
   final List<_InstallAppRequest> installAppRequests = <_InstallAppRequest>[];
-  final List<_UninstallAppRequest> uninstallAppRequests =
-      <_UninstallAppRequest>[];
+  final List<_UninstallAppRequest> uninstallAppRequests = <_UninstallAppRequest>[];
 
   @override
   Future<List<String>> listApps() async {
-    return isInstalled
-        ? <String>[FakeBuildableUwpApp.packageFamily]
-        : <String>[];
+    return isInstalled ? <String>[FakeBuildableUwpApp.packageFamily] : <String>[];
   }
 
   @override
-  Future<String /*?*/ > getPackageFamilyName(String packageName) async {
+  Future<String/*?*/> getPackageFamilyName(String packageName) async {
     getPackageFamilyRequests.add(_GetPackageFamilyRequest(packageName));
     return isInstalled ? FakeBuildableUwpApp.packageFamily : null;
   }
 
   @override
-  Future<int /*?*/ > launchApp(String packageFamily, List<String> args) async {
+  Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
     launchAppRequests.add(_LaunchAppRequest(packageFamily, args));
     return 42;
   }
@@ -565,8 +474,7 @@ class FakeUwpTool implements UwpTool {
   }
 
   @override
-  Future<bool> installApp(
-      String packageUri, List<String> dependencyUris) async {
+  Future<bool> installApp(String packageUri, List<String> dependencyUris) async {
     installAppRequests.add(_InstallAppRequest(packageUri, dependencyUris));
     isInstalled = true;
     return true;
@@ -598,6 +506,7 @@ class _InstallCertRequest {
 
   final String certificatePath;
 }
+
 
 class _InstallAppRequest {
   const _InstallAppRequest(this.packageUri, this.dependencyUris);

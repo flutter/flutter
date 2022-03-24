@@ -62,7 +62,7 @@ class _SearchDemoState extends State<SearchDemo> {
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ],
       ),
@@ -88,13 +88,12 @@ class _SearchDemoState extends State<SearchDemo> {
                       Text(' icon in the AppBar'),
                     ],
                   ),
-                  const Text(
-                      'and search for an integer between 0 and 100,000.'),
+                  const Text('and search for an integer between 0 and 100,000.'),
                 ],
               ),
             ),
             const SizedBox(height: 64.0),
-            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE'}.'),
+            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.'),
           ],
         ),
       ),
@@ -137,8 +136,7 @@ class _SearchDemoState extends State<SearchDemo> {
 }
 
 class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
-  final List<int> _data =
-      List<int>.generate(100001, (int i) => i).reversed.toList();
+  final List<int> _data = List<int>.generate(100001, (int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
 
   @override
@@ -157,6 +155,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+
     final Iterable<int> suggestions = query.isEmpty
         ? _history
         : _data.where((int i) => '$i'.startsWith(query));
@@ -229,9 +228,9 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) => const PreferredSize(
-        preferredSize: Size.fromHeight(56.0),
-        child: Text('Numbers'),
-      );
+    preferredSize: Size.fromHeight(56.0),
+    child: Text('Numbers'),
+  );
 }
 
 class _ResultCard extends StatelessWidget {
@@ -281,13 +280,11 @@ class _SuggestionList extends StatelessWidget {
       itemBuilder: (BuildContext context, int i) {
         final String suggestion = suggestions![i];
         return ListTile(
-          leading:
-              query!.isEmpty ? const Icon(Icons.history) : const Icon(null),
+          leading: query!.isEmpty ? const Icon(Icons.history) : const Icon(null),
           title: RichText(
             text: TextSpan(
               text: suggestion.substring(0, query!.length),
-              style: theme.textTheme.subtitle1!
-                  .copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
                 TextSpan(
                   text: suggestion.substring(query!.length),

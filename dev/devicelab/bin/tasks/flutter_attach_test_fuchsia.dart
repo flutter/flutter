@@ -61,7 +61,7 @@ void main() {
 }
 ''';
   File(path.join(appDir.path, 'lib', 'fuchsia_main.dart'))
-      .writeAsStringSync(mainCode, flush: true);
+    .writeAsStringSync(mainCode, flush: true);
 }
 
 void main() {
@@ -75,32 +75,28 @@ void main() {
       throw Exception('No FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR set');
     }
 
-    final String flutterBinary =
-        path.join(flutterDirectory.path, 'bin', 'flutter');
+    final String flutterBinary = path.join(flutterDirectory.path, 'bin', 'flutter');
 
     section('Downloading Fuchsia SDK and flutter runner');
 
     // Download the Fuchsia SDK.
-    final int precacheResult = await exec(flutterBinary, <String>[
-      'precache',
-      '--fuchsia',
-      '--flutter_runner',
-    ]);
+    final int precacheResult = await exec(
+      flutterBinary,
+      <String>[
+        'precache',
+        '--fuchsia',
+        '--flutter_runner',
+      ]
+    );
 
     if (precacheResult != 0) {
       throw Exception('flutter precache failed with exit code $precacheResult');
     }
 
-    final Directory fuchsiaToolDirectory = Directory(path.join(
-        flutterDirectory.path,
-        'bin',
-        'cache',
-        'artifacts',
-        'fuchsia',
-        'tools'));
+    final Directory fuchsiaToolDirectory =
+      Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'fuchsia', 'tools'));
     if (!fuchsiaToolDirectory.existsSync()) {
-      throw Exception(
-          'Expected Fuchsia tool directory at ${fuchsiaToolDirectory.path}');
+      throw Exception('Expected Fuchsia tool directory at ${fuchsiaToolDirectory.path}');
     }
 
     final Device device = await devices.workingDevice;
@@ -113,10 +109,9 @@ void main() {
 
     await inDirectory(appDir, () async {
       final Random random = Random();
-      final Map<String, Completer<void>> sentinelMessage =
-          <String, Completer<void>>{
-        'sentinel-${random.nextInt(1 << 32)}': Completer<void>(),
-        'sentinel-${random.nextInt(1 << 32)}': Completer<void>(),
+      final Map<String, Completer<void>> sentinelMessage = <String, Completer<void>>{
+        'sentinel-${random.nextInt(1<<32)}': Completer<void>(),
+        'sentinel-${random.nextInt(1<<32)}': Completer<void>(),
       };
 
       late Process runProcess;
@@ -134,20 +129,16 @@ void main() {
           <String>[
             'run',
             '--suppress-analytics',
-            '-d',
-            device.deviceId,
-            '-t',
-            'lib/fuchsia_main.dart',
+            '-d', device.deviceId,
+            '-t', 'lib/fuchsia_main.dart',
           ],
-          isBot:
-              false, // We just want to test the output, not have any debugging info.
+          isBot: false, // We just want to test the output, not have any debugging info.
         );
 
         logsProcess = await startProcess(
           flutterBinary,
           <String>['logs', '--suppress-analytics', '-d', device.deviceId],
-          isBot:
-              false, // We just want to test the output, not have any debugging info.
+          isBot: false, // We just want to test the output, not have any debugging info.
         );
 
         Future<dynamic> eventOrExit(Future<void> event) {
@@ -159,46 +150,46 @@ void main() {
         }
 
         logsProcess.stdout
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String log) {
-          print('logs:stdout: $log');
-          for (final String sentinel in sentinelMessage.keys) {
-            if (log.contains(sentinel)) {
-              if (sentinelMessage[sentinel]!.isCompleted) {
-                throw Exception(
-                    'Expected a single `$sentinel` message in the device log, but found more than one');
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String log) {
+            print('logs:stdout: $log');
+            for (final String sentinel in sentinelMessage.keys) {
+              if (log.contains(sentinel)) {
+                if (sentinelMessage[sentinel]!.isCompleted) {
+                  throw Exception(
+                    'Expected a single `$sentinel` message in the device log, but found more than one'
+                  );
+                }
+                sentinelMessage[sentinel]!.complete();
+                break;
               }
-              sentinelMessage[sentinel]!.complete();
-              break;
             }
-          }
-        });
+          });
 
         final Completer<void> hotReloadCompleter = Completer<void>();
         final Completer<void> reloadedCompleter = Completer<void>();
-        final RegExp observatoryRegexp = RegExp(
-            'An Observatory debugger and profiler on .+ is available at');
+        final RegExp observatoryRegexp = RegExp('An Observatory debugger and profiler on .+ is available at');
         runProcess.stdout
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String line) {
-          print('run:stdout: $line');
-          if (observatoryRegexp.hasMatch(line)) {
-            hotReloadCompleter.complete();
-          } else if (line.contains('Reloaded')) {
-            reloadedCompleter.complete();
-          }
-        });
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            print('run:stdout: $line');
+            if (observatoryRegexp.hasMatch(line)) {
+              hotReloadCompleter.complete();
+            } else if (line.contains('Reloaded')) {
+              reloadedCompleter.complete();
+            }
+          });
 
         final List<String> runStderr = <String>[];
         runProcess.stderr
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String line) {
-          runStderr.add(line);
-          print('run:stderr: $line');
-        });
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            runStderr.add(line);
+            print('run:stderr: $line');
+          });
 
         section('Waiting for hot reload availability');
         await eventOrExit(hotReloadCompleter.future);
@@ -227,7 +218,8 @@ void main() {
         final int runExitCode = await runProcess.exitCode;
         if (runExitCode != 0 || runStderr.isNotEmpty) {
           throw Exception(
-              'flutter run exited with code $runExitCode and errors: ${runStderr.join('\n')}.');
+            'flutter run exited with code $runExitCode and errors: ${runStderr.join('\n')}.'
+          );
         }
       } finally {
         runProcess.kill();

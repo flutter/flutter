@@ -35,8 +35,10 @@ class FloatToken extends NumberToken {
 
   static double _parse(String stringRep) {
     String toParse = stringRep;
-    if (toParse.startsWith('.')) toParse = '0$toParse';
-    if (toParse.endsWith('.')) toParse = '${toParse}0';
+    if (toParse.startsWith('.'))
+      toParse = '0$toParse';
+    if (toParse.endsWith('.'))
+      toParse = '${toParse}0';
     return double.parse(toParse);
   }
 }
@@ -49,7 +51,8 @@ class ResultToken extends NumberToken {
   /// floating point number is guaranteed to have at least this many
   /// decimal digits of precision.
   static num round(num number) {
-    if (number is int) return number;
+    if (number is int)
+      return number;
     return double.parse(number.toStringAsPrecision(14));
   }
 }
@@ -63,7 +66,8 @@ enum Operation { Addition, Subtraction, Multiplication, Division }
 
 /// A token that represents an arithmetic operation symbol.
 class OperationToken extends ExpressionToken {
-  OperationToken(this.operation) : super(opString(operation));
+  OperationToken(this.operation)
+   : super(opString(operation));
 
   Operation operation;
 
@@ -114,17 +118,17 @@ enum ExpressionState {
 class CalcExpression {
   CalcExpression(this._list, this.state);
 
-  CalcExpression.empty() : this(<ExpressionToken>[], ExpressionState.Start);
+  CalcExpression.empty()
+    : this(<ExpressionToken>[], ExpressionState.Start);
 
   CalcExpression.result(FloatToken result)
-      : _list = <ExpressionToken?>[],
-        state = ExpressionState.Result {
+    : _list = <ExpressionToken?>[],
+      state = ExpressionState.Result {
     _list.add(result);
   }
 
   /// The tokens comprising the expression.
   final List<ExpressionToken?> _list;
-
   /// The state of the expression.
   final ExpressionState state;
 

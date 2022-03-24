@@ -51,8 +51,7 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('Attaches to log reader when running in release mode',
-      () async {
+  testWithoutContext('Attaches to log reader when running in release mode', () async {
     final Completer<void> completer = Completer<void>();
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
@@ -79,30 +78,25 @@ void main() {
 
     final DeviceLogReader logReader = device.getLogReader(app: package);
 
-    expect(logReader.logLines,
-        emitsInAnyOrder(<String>['Hello World', 'Goodnight, Moon']));
+    expect(logReader.logLines, emitsInAnyOrder(<String>['Hello World', 'Goodnight, Moon']));
     completer.complete();
   });
 
   testWithoutContext('No devices listed if platform is unsupported', () async {
-    expect(
-        await MacOSDevices(
-          fileSystem: MemoryFileSystem.test(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          platform: linux,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          macOSWorkflow: MacOSWorkflow(
-            featureFlags: TestFeatureFlags(isMacOSEnabled: true),
-            platform: linux,
-          ),
-        ).devices,
-        isEmpty);
+    expect(await MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      platform: linux,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      macOSWorkflow: MacOSWorkflow(
+        featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+        platform: linux,
+      ),
+    ).devices, isEmpty);
   });
 
-  testWithoutContext(
-      'No devices listed if platform is supported and feature is disabled',
-      () async {
+  testWithoutContext('No devices listed if platform is supported and feature is disabled', () async {
     final MacOSDevices macOSDevices = MacOSDevices(
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
@@ -118,9 +112,7 @@ void main() {
     expect(await macOSDevices.devices, isEmpty);
   });
 
-  testWithoutContext(
-      'devices listed if platform is supported and feature is enabled',
-      () async {
+  testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
     final MacOSDevices macOSDevices = MacOSDevices(
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
@@ -166,14 +158,12 @@ void main() {
     );
 
     // Timeout ignored.
-    final List<Device> devices = await macOSDevices.discoverDevices(
-        timeout: const Duration(seconds: 10));
+    final List<Device> devices = await macOSDevices.discoverDevices(timeout: const Duration(seconds: 10));
 
     expect(devices, hasLength(1));
   });
 
-  testWithoutContext('isSupportedForProject is true with editable host app',
-      () async {
+  testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
@@ -185,8 +175,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('macos').createSync();
-    final FlutterProject flutterProject =
-        setUpFlutterProject(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), true);
   });
@@ -219,8 +208,7 @@ void main() {
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
   });
 
-  testWithoutContext('isSupportedForProject is false with no host app',
-      () async {
+  testWithoutContext('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final MacOSDevice device = MacOSDevice(
       fileSystem: fileSystem,
@@ -230,14 +218,12 @@ void main() {
     );
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject =
-        setUpFlutterProject(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), false);
   });
 
-  testWithoutContext(
-      'executablePathForDevice uses the correct package executable', () async {
+  testWithoutContext('executablePathForDevice uses the correct package executable', () async {
     final FakeMacOSApp package = FakeMacOSApp();
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
@@ -250,10 +236,8 @@ void main() {
     const String releasePath = 'release/executable';
 
     expect(device.executablePathForDevice(package, BuildMode.debug), debugPath);
-    expect(device.executablePathForDevice(package, BuildMode.profile),
-        profilePath);
-    expect(device.executablePathForDevice(package, BuildMode.release),
-        releasePath);
+    expect(device.executablePathForDevice(package, BuildMode.profile), profilePath);
+    expect(device.executablePathForDevice(package, BuildMode.release), releasePath);
   });
 }
 

@@ -27,16 +27,12 @@ void main() {
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(14, 7);
-    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes),
-        width: resizeDims.width.round(),
-        height: resizeDims.height.round(),
-        allowUpscaling: true);
-    const ImageConfiguration resizeConfig =
-        ImageConfiguration(size: resizeDims);
-    final Size resizedImageSize =
-        await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
+    const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
+
 
   test('ResizeImage resizes to the correct dimensions (down)', () async {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
@@ -45,31 +41,22 @@ void main() {
     expect(rawImageSize, const Size(50, 50));
 
     const Size resizeDims = Size(25, 25);
-    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes),
-        width: resizeDims.width.round(),
-        height: resizeDims.height.round(),
-        allowUpscaling: true);
-    const ImageConfiguration resizeConfig =
-        ImageConfiguration(size: resizeDims);
-    final Size resizedImageSize =
-        await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
+    const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
 
-  test('ResizeImage resizes to the correct dimensions - no upscaling',
-      () async {
+  test('ResizeImage resizes to the correct dimensions - no upscaling', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(1, 1);
-    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes),
-        width: resizeDims.width.round(), height: resizeDims.height.round());
-    const ImageConfiguration resizeConfig =
-        ImageConfiguration(size: resizeDims);
-    final Size resizedImageSize =
-        await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
+    const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
 
@@ -90,15 +77,11 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage memoryImage = MemoryImage(bytes);
     memoryImage.resolve(ImageConfiguration.empty);
-    final ResizeImage resizeImage =
-        ResizeImage(memoryImage, width: 10, height: 20);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10, height: 20);
     expect(resizeImage.width, 10);
     expect(resizeImage.height, 20);
     expect(resizeImage.imageProvider, memoryImage);
-    expect(
-        memoryImage.resolve(ImageConfiguration.empty) !=
-            resizeImage.resolve(ImageConfiguration.empty),
-        true);
+    expect(memoryImage.resolve(ImageConfiguration.empty) != resizeImage.resolve(ImageConfiguration.empty), true);
   });
 
   test('ResizeImage takes one dim', () async {
@@ -108,38 +91,28 @@ void main() {
     expect(resizeImage.width, 10);
     expect(resizeImage.height, null);
     expect(resizeImage.imageProvider, memoryImage);
-    expect(
-        memoryImage.resolve(ImageConfiguration.empty) !=
-            resizeImage.resolve(ImageConfiguration.empty),
-        true);
+    expect(memoryImage.resolve(ImageConfiguration.empty) != resizeImage.resolve(ImageConfiguration.empty), true);
   });
 
   test('ResizeImage forms closure', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage memoryImage = MemoryImage(bytes);
-    final ResizeImage resizeImage =
-        ResizeImage(memoryImage, width: 123, height: 321);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
-    Future<ui.Codec> decode(Uint8List bytes,
-        {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+    Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
       expect(cacheWidth, 123);
       expect(cacheHeight, 321);
       expect(allowUpscaling, false);
-      return PaintingBinding.instance.instantiateImageCodec(bytes,
-          cacheWidth: cacheWidth,
-          cacheHeight: cacheHeight,
-          allowUpscaling: allowUpscaling);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
     }
 
-    resizeImage.load(
-        await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+    resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
   });
 
   test('ResizeImage handles sync obtainKey', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage memoryImage = MemoryImage(bytes);
-    final ResizeImage resizeImage =
-        ResizeImage(memoryImage, width: 123, height: 321);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
     bool isAsync = false;
     resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
@@ -152,8 +125,7 @@ void main() {
   test('ResizeImage handles async obtainKey', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final _AsyncKeyMemoryImage memoryImage = _AsyncKeyMemoryImage(bytes);
-    final ResizeImage resizeImage =
-        ResizeImage(memoryImage, width: 123, height: 321);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
     bool isAsync = false;
     resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
@@ -171,11 +143,12 @@ Future<Size> _resolveAndGetSize(
   final ImageStream stream = imageProvider.resolve(configuration);
   final Completer<Size> completer = Completer<Size>();
   final ImageStreamListener listener =
-      ImageStreamListener((ImageInfo image, bool synchronousCall) {
-    final int height = image.image.height;
-    final int width = image.image.width;
-    completer.complete(Size(width.toDouble(), height.toDouble()));
-  });
+    ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      final int height = image.image.height;
+      final int width = image.image.width;
+      completer.complete(Size(width.toDouble(), height.toDouble()));
+    }
+  );
   stream.addListener(listener);
   return completer.future;
 }

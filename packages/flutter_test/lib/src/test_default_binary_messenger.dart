@@ -41,15 +41,14 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// Creates a [TestDefaultBinaryMessenger] instance.
   ///
   /// The [delegate] instance must not be null.
-  TestDefaultBinaryMessenger(this.delegate) : assert(delegate != null);
+  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
 
   /// The delegate [BinaryMessenger].
   final BinaryMessenger delegate;
 
   // The handlers for messages from the engine (including fake
   // messages sent by handlePlatformMessage).
-  final Map<String, MessageHandler> _inboundHandlers =
-      <String, MessageHandler>{};
+  final Map<String, MessageHandler> _inboundHandlers = <String, MessageHandler>{};
 
   /// Send a mock message to the framework as if it came from the platform.
   ///
@@ -89,10 +88,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       result = _inboundHandlers[channel]!(data);
     result ??= Future<ByteData?>.value();
     if (callback != null)
-      result = result.then((ByteData? result) {
-        callback(result);
-        return result;
-      });
+      result = result.then((ByteData? result) { callback(result); return result; });
     return result;
   }
 
@@ -102,10 +98,8 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       _inboundHandlers.remove(channel);
       delegate.setMessageHandler(channel, null);
     } else {
-      _inboundHandlers[channel] =
-          handler; // used to handle fake messages sent via handlePlatformMessage
-      delegate.setMessageHandler(
-          channel, handler); // used to handle real messages from the engine
+      _inboundHandlers[channel] = handler; // used to handle fake messages sent via handlePlatformMessage
+      delegate.setMessageHandler(channel, handler); // used to handle real messages from the engine
     }
   }
 
@@ -116,8 +110,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
 
   // Handlers that intercept and respond to outgoing messages,
   // pretending to be the platform.
-  final Map<String, MessageHandler> _outboundHandlers =
-      <String, MessageHandler>{};
+  final Map<String, MessageHandler> _outboundHandlers = <String, MessageHandler>{};
 
   // The outbound callbacks that were actually registered, so that we
   // can implement the [checkMockMessageHandler] method.
@@ -134,9 +127,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
     if (resultFuture != null) {
       _pendingMessages.add(resultFuture);
-      resultFuture.catchError((Object error) {
-        /* errors are the responsibility of the caller */
-      }).whenComplete(() => _pendingMessages.remove(resultFuture));
+      resultFuture
+        .catchError((Object error) { /* errors are the responsibility of the caller */ })
+        .whenComplete(() => _pendingMessages.remove(resultFuture));
     }
     return resultFuture;
   }
@@ -188,8 +181,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which wraps this method but decodes
   ///    the messages using a [MethodCodec].
-  void setMockMessageHandler(String channel, MessageHandler? handler,
-      [Object? identity]) {
+  void setMockMessageHandler(String channel, MessageHandler? handler, [ Object? identity ]) {
     if (handler == null) {
       _outboundHandlers.remove(channel);
       _outboundHandlerIdentities.remove(channel);
@@ -229,15 +221,13 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which is similar but decodes
   ///    the messages using a [MethodCodec].
-  void setMockDecodedMessageHandler<T>(
-      BasicMessageChannel<T> channel, Future<T> Function(T? message)? handler) {
+  void setMockDecodedMessageHandler<T>(BasicMessageChannel<T> channel, Future<T> Function(T? message)? handler) {
     if (handler == null) {
       setMockMessageHandler(channel.name, null);
       return;
     }
     setMockMessageHandler(channel.name, (ByteData? message) async {
-      return channel.codec
-          .encodeMessage(await handler(channel.codec.decodeMessage(message)));
+      return channel.codec.encodeMessage(await handler(channel.codec.decodeMessage(message)));
     }, handler);
   }
 
@@ -273,8 +263,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockDecodedMessageHandler], which is similar but decodes
   ///    the messages using a [MessageCodec].
-  void setMockMethodCallHandler(MethodChannel channel,
-      Future<Object?>? Function(MethodCall message)? handler) {
+  void setMockMethodCallHandler(MethodChannel channel, Future<Object?>? Function(MethodCall message)? handler) {
     if (handler == null) {
       setMockMessageHandler(channel.name, null);
       return;
@@ -292,8 +281,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       } on MissingPluginException {
         return null;
       } catch (error) {
-        return channel.codec
-            .encodeErrorEnvelope(code: 'error', message: '$error');
+        return channel.codec.encodeErrorEnvelope(code: 'error', message: '$error');
       }
     }, handler);
   }
@@ -314,6 +302,5 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// `channel` is not set.
   ///
   /// Registered callbacks are cleared after each test.
-  bool checkMockMessageHandler(String channel, Object? handler) =>
-      _outboundHandlerIdentities[channel] == handler;
+  bool checkMockMessageHandler(String channel, Object? handler) => _outboundHandlerIdentities[channel] == handler;
 }

@@ -205,29 +205,18 @@ void main() {
   });
 
   test('Wrap respects clipBehavior', () {
-    const BoxConstraints viewport =
-        BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
 
     // By default, clipBehavior should be Clip.none
-    final RenderWrap defaultWrap = RenderWrap(
-        textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
-    layout(defaultWrap,
-        constraints: viewport,
-        phase: EnginePhase.composite,
-        onErrors: expectOverflowedErrors);
+    final RenderWrap defaultWrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
+    layout(defaultWrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
     context.paintChild(defaultWrap, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
-      final RenderWrap wrap = RenderWrap(
-          textDirection: TextDirection.ltr,
-          children: <RenderBox>[box200x200],
-          clipBehavior: clip);
-      layout(wrap,
-          constraints: viewport,
-          phase: EnginePhase.composite,
-          onErrors: expectOverflowedErrors);
+      final RenderWrap wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip);
+      layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       context.paintChild(wrap, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }

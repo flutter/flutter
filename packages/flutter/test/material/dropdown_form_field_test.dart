@@ -10,9 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-void onChanged<T>(T _) {}
+void onChanged<T>(T _) { }
 final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) {},
+  onChanged: (_) { },
   items: const <DropdownMenuItem<String>>[],
 ).runtimeType;
 
@@ -90,8 +90,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
-            .copyWith(size: widget.mediaSize),
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -128,15 +127,12 @@ class TestApp extends StatefulWidget {
 void verifyPaintedShadow(Finder customPaint, int elevation) {
   const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
 
-  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(
-      3, (int index) => kElevationToShadow[elevation]![index]);
+  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);
   final List<RRect> rrects = List<RRect>.generate(3, (int index) {
     return RRect.fromRectAndRadius(
-      originalRectangle
-          .shift(
-            boxShadows[index].offset,
-          )
-          .inflate(boxShadows[index].spreadRadius),
+      originalRectangle.shift(
+        boxShadows[index].offset,
+      ).inflate(boxShadows[index].spreadRadius),
       const Radius.circular(2.0),
     );
   });
@@ -147,8 +143,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
       ..save()
       ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
       ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
-      ..rrect(
-          rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
+      ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
   );
 }
 
@@ -205,8 +200,7 @@ void main() {
     expect(hintEmptyLabel, oneValueLabel);
   });
 
-  testWidgets('label position test - show disabledHint: disable',
-      (WidgetTester tester) async {
+  testWidgets('label position test - show disabledHint: disable', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -218,8 +212,7 @@ void main() {
               labelText: 'labelText',
             ),
             value: value,
-            onChanged:
-                null, // this disables the menu and shows the disabledHint.
+            onChanged: null, // this disables the menu and shows the disabledHint.
             disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
@@ -245,8 +238,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show disabledHint: enable + null item',
-      (WidgetTester tester) async {
+  testWidgets('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -271,8 +263,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show disabledHint: enable + empty item',
-      (WidgetTester tester) async {
+  testWidgets('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -297,8 +288,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show hint: enable + empty item',
-      (WidgetTester tester) async {
+  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -323,9 +313,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets(
-      'label position test - no hint shown: enable + no selected + disabledHint',
-      (WidgetTester tester) async {
+  testWidgets('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -363,9 +351,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 24.0));
   });
 
-  testWidgets(
-      'label position test - show selected item: disabled + hint + disabledHint',
-      (WidgetTester tester) async {
+  testWidgets('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
     const int value = 1;
 
     await tester.pumpWidget(
@@ -457,8 +443,7 @@ void main() {
     expect(nonEmptyLabel, nullValueLabel);
   });
 
-  testWidgets('DropdownButtonFormField with autovalidation test',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int validateCalled = 0;
 
@@ -507,9 +492,7 @@ void main() {
     expect(value, equals('three'));
   });
 
-  testWidgets(
-      'DropdownButtonFormField arrow icon aligns with the edge of button when expanded',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     // There shouldn't be overflow when expanded although list contains longer items.
@@ -544,9 +527,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'DropdownButtonFormField with isDense:true aligns selected menu item',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -567,32 +548,26 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same vertical center as the button.
-    final List<RenderBox> itemBoxes = tester
-        .renderObjectList<RenderBox>(
-          find.byKey(const ValueKey<String>('two')),
-        )
-        .toList();
+    final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(
+      find.byKey(const ValueKey<String>('two')),
+    ).toList();
     expect(itemBoxes.length, equals(2));
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    final List<double> itemBoxesHeight =
-        itemBoxes.map<double>((RenderBox box) => box.size.height).toList();
+    final List<double> itemBoxesHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).toList();
     final double menuItemHeight = itemBoxesHeight.reduce(math.max);
     expect(menuItemHeight, greaterThanOrEqualTo(buttonBox.size.height));
 
     for (final RenderBox itemBox in itemBoxes) {
       expect(itemBox.attached, isTrue);
-      final Offset buttonBoxCenter =
-          buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
-      final Offset itemBoxCenter =
-          itemBox.size.center(itemBox.localToGlobal(Offset.zero));
+      final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
+      final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));
       expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
     }
   });
 
-  testWidgets('DropdownButtonFormField.isDense is true by default',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/46844
     final Key buttonKey = UniqueKey();
     const String value = 'two';
@@ -619,13 +594,11 @@ void main() {
       ),
     );
 
-    final RenderBox box =
-        tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
     expect(box.size.height, 48.0);
   });
 
-  testWidgets('DropdownButtonFormField - custom text style',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
 
@@ -642,7 +615,7 @@ void main() {
                 child: const Text(value),
               ),
             ],
-            onChanged: (_) {},
+            onChanged: (_) { },
             style: const TextStyle(
               color: Colors.amber,
               fontSize: 20.0,
@@ -663,12 +636,10 @@ void main() {
     expect(richText.text.style!.fontSize, 20.0);
   });
 
-  testWidgets(
-      'DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String>? items}) {
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -677,7 +648,6 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-
     // [disabledHint] should display when [items] is null
     await tester.pumpWidget(build());
     expect(find.text('enabled'), findsNothing);
@@ -695,7 +665,7 @@ void main() {
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build({List<String>? items}) {
+      Widget build({ List<String>? items }) {
         return buildFormFrame(
           items: items,
           buttonKey: buttonKey,
@@ -703,7 +673,6 @@ void main() {
           hint: const Text('hint used when disabled'),
         );
       }
-
       // [hint] should display when [items] is null and [disabledHint] is not defined
       await tester.pumpWidget(build());
       expect(find.text('hint used when disabled'), findsOneWidget);
@@ -714,11 +683,10 @@ void main() {
     },
   );
 
-  testWidgets('DropdownButtonFormField - disabledHint is null by default',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String>? items}) {
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -726,7 +694,6 @@ void main() {
         hint: const Text('hint used when disabled'),
       );
     }
-
     // [hint] should display when [items] is null and [disabledHint] is not defined
     await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
@@ -736,11 +703,10 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownButtonFormField - disabledHint is null by default',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String>? items}) {
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -748,7 +714,6 @@ void main() {
         hint: const Text('hint used when disabled'),
       );
     }
-
     // [hint] should display when [items] is null and [disabledHint] is not defined
     await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
@@ -758,12 +723,10 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets(
-      'DropdownButtonFormField - disabledHint displays when onChanged is null',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String>? items, ValueChanged<String?>? onChanged}) {
+    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -773,18 +736,15 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-
     await tester.pumpWidget(build(items: menuItems));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgets(
-      'DropdownButtonFormField - disabled hint should be of same size as enabled hint',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String>? items}) {
+    Widget build({ List<String>? items}) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -793,7 +753,6 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-
     await tester.pumpWidget(build());
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
@@ -803,13 +762,11 @@ void main() {
     final RenderBox enabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
     );
-    expect(enabledHintBox.localToGlobal(Offset.zero),
-        equals(disabledHintBox.localToGlobal(Offset.zero)));
+    expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 
-  testWidgets('DropdownButtonFormField - Custom icon size and colors',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - Custom icon size and colors', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
@@ -826,8 +783,7 @@ void main() {
     expect(icon.size, const Size(30.0, 30.0));
 
     // test for enabled color
-    final RichText enabledRichText =
-        tester.widget<RichText>(_iconRichText(iconKey));
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(enabledRichText.text.style!.color, Colors.pink);
 
     // test for disabled color
@@ -839,13 +795,11 @@ void main() {
       items: null,
     ));
 
-    final RichText disabledRichText =
-        tester.widget<RichText>(_iconRichText(iconKey));
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(disabledRichText.text.style!.color, Colors.orange);
   });
 
-  testWidgets('DropdownButtonFormField - default elevation',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - default elevation', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(buildFormFrame(
@@ -855,20 +809,17 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
-    final Finder customPaint = find
-        .ancestor(
-          of: find.text('one').last,
-          matching: find.byType(CustomPaint),
-        )
-        .last;
+    final Finder customPaint = find.ancestor(
+      of: find.text('one').last,
+      matching: find.byType(CustomPaint),
+    ).last;
 
     // Verifying whether or not default elevation(i.e. 8) paints desired shadow
     verifyPaintedShadow(customPaint, 8);
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownButtonFormField - custom elevation',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     final Key buttonKeyOne = UniqueKey();
     final Key buttonKeyTwo = UniqueKey();
@@ -881,12 +832,10 @@ void main() {
     await tester.tap(find.byKey(buttonKeyOne));
     await tester.pumpAndSettle();
 
-    final Finder customPaintOne = find
-        .ancestor(
-          of: find.text('one').last,
-          matching: find.byType(CustomPaint),
-        )
-        .last;
+    final Finder customPaintOne = find.ancestor(
+      of: find.text('one').last,
+      matching: find.byType(CustomPaint),
+    ).last;
 
     verifyPaintedShadow(customPaintOne, 16);
     await tester.tap(find.text('one').last);
@@ -898,30 +847,23 @@ void main() {
     await tester.tap(find.byKey(buttonKeyTwo));
     await tester.pumpAndSettle();
 
-    final Finder customPaintTwo = find
-        .ancestor(
-          of: find.text('one').last,
-          matching: find.byType(CustomPaint),
-        )
-        .last;
+    final Finder customPaintTwo = find.ancestor(
+      of: find.text('one').last,
+      matching: find.byType(CustomPaint),
+    ).last;
 
     verifyPaintedShadow(customPaintTwo, 24);
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownButtonFormField does not allow duplicate item values',
-      (WidgetTester tester) async {
-    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>[
-      'a',
-      'b',
-      'c',
-      'c'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
+  testWidgets('DropdownButtonFormField does not allow duplicate item values', (WidgetTester tester) async {
+    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'c']
+      .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList();
 
     await expectLater(
       () => tester.pumpWidget(
@@ -938,26 +880,19 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
-        contains(
-            "There should be exactly one item with [DropdownButton]'s value"),
+        contains("There should be exactly one item with [DropdownButton]'s value"),
       )),
     );
   });
 
-  testWidgets(
-      'DropdownButtonFormField value should only appear in one menu item',
-      (WidgetTester tester) async {
-    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>[
-      'a',
-      'b',
-      'c',
-      'd'
-    ].map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList();
+  testWidgets('DropdownButtonFormField value should only appear in one menu item', (WidgetTester tester) async {
+    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
+      .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList();
 
     await expectLater(
       () => tester.pumpWidget(
@@ -974,15 +909,12 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
-        contains(
-            "There should be exactly one item with [DropdownButton]'s value"),
+        contains("There should be exactly one item with [DropdownButton]'s value"),
       )),
     );
   });
 
-  testWidgets(
-      'DropdownButtonFormField - selectedItemBuilder builds custom buttons',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
     const List<String> items = <String>[
       'One',
       'Two',
@@ -997,8 +929,7 @@ void main() {
             home: Scaffold(
               body: DropdownButtonFormField<String>(
                 value: selectedItem,
-                onChanged: (String? string) =>
-                    setState(() => selectedItem = string),
+                onChanged: (String? string) => setState(() => selectedItem = string),
                 selectedItemBuilder: (BuildContext context) {
                   int index = 0;
                   return items.map((String string) {
@@ -1027,23 +958,19 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton onTap callback is called when defined',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String? value = 'one';
     void onChanged(String? newValue) {
       value = newValue;
     }
-
-    void onTap() {
-      dropdownButtonTapCounter += 1;
-    }
+    void onTap() { dropdownButtonTapCounter += 1; }
 
     Widget build() => buildFormFrame(
-          value: value,
-          onChanged: onChanged,
-          onTap: onTap,
-        );
+      value: value,
+      onChanged: onChanged,
+      onTap: onTap,
+    );
     await tester.pumpWidget(build());
 
     expect(dropdownButtonTapCounter, 0);
@@ -1077,8 +1004,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgets('DropdownButtonFormField should re-render if value param changes',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
     String currentValue = 'two';
 
     await tester.pumpWidget(
@@ -1124,8 +1050,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
   });
 
-  testWidgets('autovalidateMode is passed to super',
-      (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -1154,24 +1079,20 @@ void main() {
     expect(validateCalled, 1);
   });
 
-  testWidgets('DropdownButtonFormField - Custom button alignment',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {
     await tester.pumpWidget(buildFormFrame(
       buttonAlignment: AlignmentDirectional.center,
       items: <String>['one'],
       value: 'one',
     ));
 
-    final RenderBox buttonBox =
-        tester.renderObject<RenderBox>(find.byType(IndexedStack));
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byType(IndexedStack));
     final RenderBox selectedItemBox = tester.renderObject(find.text('one'));
 
     // Should be center-center aligned.
     expect(
-      buttonBox.localToGlobal(
-          Offset(buttonBox.size.width / 2.0, buttonBox.size.height / 2.0)),
-      selectedItemBox.localToGlobal(Offset(
-          selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
+      buttonBox.localToGlobal(Offset(buttonBox.size.width / 2.0, buttonBox.size.height / 2.0)),
+      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
     );
   });
 }

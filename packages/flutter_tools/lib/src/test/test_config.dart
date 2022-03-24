@@ -20,8 +20,7 @@ File? findTestConfigFile(File testFile, Logger logger) {
   while (directory.path != directory.parent.path) {
     final File configFile = directory.childFile(_kTestConfigFileName);
     if (configFile.existsSync()) {
-      logger
-          .printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
+      logger.printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
       testConfigFile = configFile;
       break;
     }

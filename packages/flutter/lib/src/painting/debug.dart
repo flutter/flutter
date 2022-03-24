@@ -53,8 +53,7 @@ class ImageSizeInfo {
   /// This class is used by the framework when it paints an image to a canvas
   /// to report to `dart:developer`'s [postEvent], as well as to the
   /// [debugOnPaintImage] callback if it is set.
-  const ImageSizeInfo(
-      {this.source, required this.displaySize, required this.imageSize});
+  const ImageSizeInfo({this.source, required this.displaySize, required this.imageSize});
 
   /// A unique identifier for this image, for example its asset path or network
   /// URL.
@@ -75,7 +74,7 @@ class ImageSizeInfo {
   int _sizeToBytes(Size size) {
     // Assume 4 bytes per pixel and that mipmapping will be used, which adds
     // 4/3.
-    return (size.width * size.height * 4 * (4 / 3)).toInt();
+    return (size.width * size.height * 4 * (4/3)).toInt();
   }
 
   /// Returns a JSON encodable representation of this object.
@@ -100,18 +99,17 @@ class ImageSizeInfo {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageSizeInfo &&
-        other.source == source &&
-        other.imageSize == imageSize &&
-        other.displaySize == displaySize;
+    return other is ImageSizeInfo
+        && other.source == source
+        && other.imageSize == imageSize
+        && other.displaySize == displaySize;
   }
 
   @override
   int get hashCode => Object.hash(source, displaySize, imageSize);
 
   @override
-  String toString() =>
-      'ImageSizeInfo($source, imageSize: $imageSize, displaySize: $displaySize)';
+  String toString() => 'ImageSizeInfo($source, imageSize: $imageSize, displaySize: $displaySize)';
 }
 
 /// If not null, called when the framework is about to paint an [Image] to a
@@ -182,8 +180,7 @@ int debugImageOverheadAllowance = _imageOverheadAllowanceDefault;
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason,
-    {bool debugDisableShadowsOverride = false}) {
+bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
@@ -214,8 +211,7 @@ typedef ShaderWarmUpImageCallback = bool Function(Image);
 /// Called by [ShaderWarmUp.execute] immediately after it creates a [Picture].
 ///
 /// Tests may use this to capture the picture and run assertions on it.
-ShaderWarmUpPictureCallback debugCaptureShaderWarmUpPicture =
-    _defaultPictureCapture;
+ShaderWarmUpPictureCallback debugCaptureShaderWarmUpPicture = _defaultPictureCapture;
 bool _defaultPictureCapture(Picture picture) => true;
 
 /// Called by [ShaderWarmUp.execute] immediately after it creates an [Image].

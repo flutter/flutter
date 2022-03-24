@@ -65,8 +65,7 @@ class WebCallbackManager implements CallbackManager {
             'driver side');
       }
     } catch (exception) {
-      throw Exception(
-          'Web Driver Command failed: ${command.type} with exception $exception');
+      throw Exception('Web Driver Command failed: ${command.type} with exception $exception');
     } finally {
       // Reset the completer.
       _driverCommandComplete = Completer<bool>();
@@ -111,8 +110,7 @@ class WebCallbackManager implements CallbackManager {
       final WebDriverCommand command = await _webDriverCommandPipe.future;
       switch (command.type) {
         case WebDriverCommandType.screenshot:
-          final Map<String, dynamic> data =
-              Map<String, dynamic>.from(command.values);
+          final Map<String, dynamic> data = Map<String, dynamic>.from(command.values);
           data.addAll(
               WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
           response = <String, String>{
@@ -144,8 +142,7 @@ class WebCallbackManager implements CallbackManager {
     };
   }
 
-  Future<Map<String, dynamic>> _requestData(
-      IntegrationTestResults testRunner) async {
+  Future<Map<String, dynamic>> _requestData(IntegrationTestResults testRunner) async {
     final bool allTestsPassed = await testRunner.allTestsPassed.future;
     final Map<String, String> response = <String, String>{
       'message': allTestsPassed

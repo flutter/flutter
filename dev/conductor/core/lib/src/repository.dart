@@ -219,8 +219,7 @@ abstract class Repository {
       <String>['merge-base', firstRef, secondRef],
       'determine the merge base between $firstRef and $secondRef',
       workingDirectory: (await checkoutDirectory).path,
-    ))
-        .trim();
+    )).trim();
   }
 
   /// Fetch all branches and associated commits and tags from [remoteName].
@@ -297,8 +296,7 @@ abstract class Repository {
   }
 
   /// Determines if one ref is an ancestor for another.
-  Future<bool> isAncestor(
-      String possibleAncestor, String possibleDescendant) async {
+  Future<bool> isAncestor(String possibleAncestor, String possibleDescendant) async {
     final int exitcode = await git.run(
       <String>[
         'merge-base',
@@ -416,9 +414,7 @@ abstract class Repository {
       <String>['status', '--porcelain'],
       'check for uncommitted changes',
       workingDirectory: (await checkoutDirectory).path,
-    ))
-        .trim()
-        .isNotEmpty;
+    )).trim().isNotEmpty;
     if (!hasChanges) {
       throw ConductorException(
           'Tried to commit with message $message but no changes were present');
@@ -748,15 +744,13 @@ class EngineRepository extends Repository {
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
           previousCheckoutLocation: previousCheckoutLocation,
-          requiredLocalBranches:
-              additionalRequiredLocalBranches ?? const <String>[],
+          requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 
   final Checkouts checkouts;
 
   Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml =
-        CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
+    final CiYaml ciYaml = CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
     return ciYaml;
   }
 
@@ -832,8 +826,7 @@ class Checkouts {
 class CiYaml {
   CiYaml(this.file) {
     if (!file.existsSync()) {
-      throw ConductorException(
-          'Could not find the .ci.yaml file at ${file.path}');
+      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
     }
   }
 

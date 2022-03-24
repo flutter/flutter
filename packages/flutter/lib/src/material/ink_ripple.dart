@@ -18,23 +18,20 @@ const Duration _kCancelDuration = Duration(milliseconds: 75);
 // The fade out begins 225ms after the _fadeOutController starts. See confirm().
 const double _kFadeOutIntervalStart = 225.0 / 375.0;
 
-RectCallback? _getClipCallback(
-    RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
   }
-  if (containedInkWell) return () => Offset.zero & referenceBox.size;
+  if (containedInkWell)
+    return () => Offset.zero & referenceBox.size;
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell,
-    RectCallback? rectCallback, Offset position) {
-  final Size size =
-      rectCallback != null ? rectCallback().size : referenceBox.size;
+double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
+  final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;
-  final double d2 =
-      (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
+  final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
   return math.max(d1, d2) / 2.0;
 }
 
@@ -121,42 +118,33 @@ class InkRipple extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     VoidCallback? onRemoved,
-  })  : assert(color != null),
-        assert(position != null),
-        assert(textDirection != null),
-        _position = position,
-        _borderRadius = borderRadius ?? BorderRadius.zero,
-        _customBorder = customBorder,
-        _textDirection = textDirection,
-        _targetRadius = radius ??
-            _getTargetRadius(
-                referenceBox, containedInkWell, rectCallback, position),
-        _clipCallback =
-            _getClipCallback(referenceBox, containedInkWell, rectCallback),
-        super(
-            controller: controller,
-            referenceBox: referenceBox,
-            color: color,
-            onRemoved: onRemoved) {
+  }) : assert(color != null),
+       assert(position != null),
+       assert(textDirection != null),
+       _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
+       _textDirection = textDirection,
+       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
+       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
 
     // Immediately begin fading-in the initial splash.
-    _fadeInController =
-        AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
-          ..addListener(controller.markNeedsPaint)
-          ..forward();
+    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..forward();
     _fadeIn = _fadeInController.drive(IntTween(
       begin: 0,
       end: color.alpha,
     ));
 
     // Controls the splash radius and its center. Starts upon confirm.
-    _radiusController = AnimationController(
-        duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    // Initial splash diameter is 60% of the target diameter, final
-    // diameter is 10dps larger than the target diameter.
+     // Initial splash diameter is 60% of the target diameter, final
+     // diameter is 10dps larger than the target diameter.
     _radius = _radiusController.drive(
       Tween<double>(
         begin: _targetRadius * 0.30,
@@ -166,8 +154,7 @@ class InkRipple extends InteractiveInkFeature {
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController = AnimationController(
-        duration: _kFadeOutDuration, vsync: controller.vsync)
+    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
     _fadeOut = _fadeOutController.drive(
@@ -200,10 +187,8 @@ class InkRipple extends InteractiveInkFeature {
   /// material [Theme], or [ButtonStyle].
   static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
-  static final Animatable<double> _easeCurveTween =
-      CurveTween(curve: Curves.ease);
-  static final Animatable<double> _fadeOutIntervalTween =
-      CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
+  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
+  static final Animatable<double> _fadeOutIntervalTween = CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
 
   @override
   void confirm() {
@@ -228,7 +213,8 @@ class InkRipple extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) dispose();
+    if (status == AnimationStatus.completed)
+      dispose();
   }
 
   @override
@@ -241,8 +227,7 @@ class InkRipple extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final int alpha =
-        _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
+    final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
     final Paint paint = Paint()..color = color.withAlpha(alpha);
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(

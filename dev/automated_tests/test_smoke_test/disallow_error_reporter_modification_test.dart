@@ -6,10 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tests must restore the value of reportTestException',
-      (WidgetTester tester) async {
+  testWidgets('tests must restore the value of reportTestException', (WidgetTester tester) async {
     // This test is expected to fail.
-    reportTestException =
-        (FlutterErrorDetails details, String testDescription) {};
+    reportTestException = (FlutterErrorDetails details, String testDescription) {};
   });
 }

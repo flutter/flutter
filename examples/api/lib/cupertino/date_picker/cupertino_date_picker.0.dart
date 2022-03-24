@@ -37,22 +37,23 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoDatePicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
-        context: context,
-        builder: (BuildContext context) => Container(
-              height: 216,
-              padding: const EdgeInsets.only(top: 6.0),
-              // The Bottom margin is provided to align the popup above the system navigation bar.
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              // Provide a background color for the popup.
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              // Use a SafeArea widget to avoid system overlaps.
-              child: SafeArea(
-                top: false,
-                child: child,
-              ),
-            ));
+      context: context,
+      builder: (BuildContext context) => Container(
+        height: 216,
+        padding: const EdgeInsets.only(top: 6.0),
+        // The Bottom margin is provided to align the popup above the system navigation bar.
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        // Provide a background color for the popup.
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        // Use a SafeArea widget to avoid system overlaps.
+        child: SafeArea(
+          top: false,
+          child: child,
+        ),
+      )
+    );
   }
 
   @override
@@ -85,8 +86,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                     ),
                     // In this example, the date value is formatted manually. You can use intl package
                     // to format the value based on user's locale settings.
-                    child: Text(
-                      '${date.month}-${date.day}-${date.year}',
+                    child: Text('${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
@@ -112,8 +112,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                     ),
                     // In this example, the time value is formatted manually. You can use intl package to
                     // format the value based on the user's locale settings.
-                    child: Text(
-                      '${time.hour}:${time.minute}',
+                    child: Text('${time.hour}:${time.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
@@ -138,8 +137,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                     ),
                     // In this example, time value is formatted manually. You can use intl package to
                     // format the value based on the user's locale settings.
-                    child: Text(
-                      '${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
+                    child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),

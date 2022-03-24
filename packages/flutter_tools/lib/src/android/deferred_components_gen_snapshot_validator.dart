@@ -17,8 +17,7 @@ import 'deferred_components_validator.dart';
 /// Once constructed, checks and tasks can be executed by calling the respective
 /// methods. The results of the checks are stored internally and can be
 /// displayed to the user by calling [displayResults].
-class DeferredComponentsGenSnapshotValidator
-    extends DeferredComponentsValidator {
+class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator {
   /// Constructs a validator instance.
   ///
   /// The [env] property is used to locate the project files that are checked.
@@ -29,12 +28,10 @@ class DeferredComponentsGenSnapshotValidator
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
-  DeferredComponentsGenSnapshotValidator(
-    this.env, {
+  DeferredComponentsGenSnapshotValidator(this.env, {
     bool exitOnFail = true,
     String? title,
-  }) : super(env.projectDir, env.logger, env.platform,
-            exitOnFail: exitOnFail, title: title);
+  }) : super(env.projectDir, env.logger, env.platform, exitOnFail: exitOnFail, title: title);
 
   /// The build environment that should be used to find the input files to run
   /// checks against.
@@ -45,8 +42,7 @@ class DeferredComponentsGenSnapshotValidator
 
   // The key used to identify the metadata element as the loading unit id to
   // deferred component mapping.
-  static const String _mappingKey =
-      'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
+  static const String _mappingKey = 'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
 
   /// Checks if the base module `app`'s `AndroidManifest.xml` contains the
   /// required meta-data that maps loading units to deferred components.
@@ -66,9 +62,7 @@ class DeferredComponentsGenSnapshotValidator
   ///
   /// Where loading unit 2 is included in componentA, loading unit 3 is included
   /// in componentB, and loading unit 4 is included in componentC.
-  bool checkAppAndroidManifestComponentLoadingUnitMapping(
-      List<DeferredComponent> components,
-      List<LoadingUnit> generatedLoadingUnits) {
+  bool checkAppAndroidManifestComponentLoadingUnitMapping(List<DeferredComponent> components, List<LoadingUnit> generatedLoadingUnits) {
     final Directory androidDir = projectDir.childDirectory('android');
     inputs.add(projectDir.childFile('pubspec.yaml'));
 
@@ -76,15 +70,15 @@ class DeferredComponentsGenSnapshotValidator
     // erase any user applied formatting and comments. The changes can be
     // applied with dart io and custom parsing.
     final File appManifestFile = androidDir
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     inputs.add(appManifestFile);
     if (!appManifestFile.existsSync()) {
       invalidFiles[appManifestFile.path] = 'Error: $appManifestFile does not '
-          'exist or could not be found. Please ensure an AndroidManifest.xml '
-          "exists for the app's base module.";
+        'exist or could not be found. Please ensure an AndroidManifest.xml '
+        "exists for the app's base module.";
       return false;
     }
     XmlDocument document;
@@ -92,13 +86,13 @@ class DeferredComponentsGenSnapshotValidator
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
     } on XmlParserException {
       invalidFiles[appManifestFile.path] = 'Error parsing $appManifestFile '
-          'Please ensure that the android manifest is a valid XML document and '
-          'try again.';
+        'Please ensure that the android manifest is a valid XML document and '
+        'try again.';
       return false;
     } on FileSystemException {
       invalidFiles[appManifestFile.path] = 'Error reading $appManifestFile '
-          'even though it exists. Please ensure that you have read permission for '
-          'this file and try again.';
+        'even though it exists. Please ensure that you have read permission for '
+        'this file and try again.';
       return false;
     }
     // Create loading unit mapping.
@@ -135,14 +129,12 @@ class DeferredComponentsGenSnapshotValidator
     // Check for existing metadata entry and see if needs changes.
     bool exists = false;
     bool modified = false;
-    for (final XmlElement application
-        in document.findAllElements('application')) {
+    for (final XmlElement application in document.findAllElements('application')) {
       for (final XmlElement metaData in application.findElements('meta-data')) {
         final String? name = metaData.getAttribute('android:name');
         if (name == _mappingKey) {
           exists = true;
-          final String? storedMappingString =
-              metaData.getAttribute('android:value');
+          final String? storedMappingString = metaData.getAttribute('android:value');
           if (storedMappingString != encodedMapping) {
             metaData.setAttribute('android:value', encodedMapping);
             modified = true;
@@ -152,29 +144,26 @@ class DeferredComponentsGenSnapshotValidator
     }
     if (!exists) {
       // Create an meta-data XmlElement that contains the mapping.
-      final XmlElement mappingMetadataElement = XmlElement(
-        XmlName.fromString('meta-data'),
+      final XmlElement mappingMetadataElement = XmlElement(XmlName.fromString('meta-data'),
         <XmlAttribute>[
           XmlAttribute(XmlName.fromString('android:name'), _mappingKey),
           XmlAttribute(XmlName.fromString('android:value'), encodedMapping),
         ],
       );
-      for (final XmlElement application
-          in document.findAllElements('application')) {
+      for (final XmlElement application in document.findAllElements('application')) {
         application.children.add(mappingMetadataElement);
         break;
       }
     }
     if (!exists || modified) {
       final File manifestOutput = outputDir
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childFile('AndroidManifest.xml');
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml');
       ErrorHandlingFileSystem.deleteIfExists(manifestOutput);
       manifestOutput.createSync(recursive: true);
-      manifestOutput.writeAsStringSync(document.toXmlString(pretty: true),
-          flush: true);
+      manifestOutput.writeAsStringSync(document.toXmlString(pretty: true), flush: true);
       modifiedFiles.add(manifestOutput.path);
       return false;
     }
@@ -192,10 +181,9 @@ class DeferredComponentsGenSnapshotValidator
   /// between newly added loading units and no longer existing loading units. If
   /// the cache file does not exist, then all generatedLoadingUnits will be
   /// considered new.
-  bool checkAgainstLoadingUnitsCache(List<LoadingUnit> generatedLoadingUnits) {
-    final List<LoadingUnit> cachedLoadingUnits = _parseLoadingUnitsCache(
-        projectDir
-            .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
+  bool checkAgainstLoadingUnitsCache(
+      List<LoadingUnit> generatedLoadingUnits) {
+    final List<LoadingUnit> cachedLoadingUnits = _parseLoadingUnitsCache(projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
     loadingUnitComparisonResults = <String, Object>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
@@ -223,8 +211,7 @@ class DeferredComponentsGenSnapshotValidator
     }
     loadingUnitComparisonResults!['new'] = newLoadingUnits;
     loadingUnitComparisonResults!['missing'] = unmatchedLoadingUnits;
-    loadingUnitComparisonResults!['match'] =
-        newLoadingUnits.isEmpty && unmatchedLoadingUnits.isEmpty;
+    loadingUnitComparisonResults!['match'] = newLoadingUnits.isEmpty && unmatchedLoadingUnits.isEmpty;
     return loadingUnitComparisonResults!['match']! as bool;
   }
 
@@ -237,45 +224,38 @@ class DeferredComponentsGenSnapshotValidator
     final YamlMap data = loadYaml(cacheFile.readAsStringSync()) as YamlMap;
     // validate yaml format.
     if (!data.containsKey('loading-units')) {
-      invalidFiles[cacheFile.path] =
-          "Invalid loading units yaml file, 'loading-units' "
-          'entry did not exist.';
+      invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
+                                       'entry did not exist.';
       return loadingUnits;
     } else {
       if (data['loading-units'] is! YamlList && data['loading-units'] != null) {
-        invalidFiles[cacheFile.path] =
-            "Invalid loading units yaml file, 'loading-units' "
-            'is not a list.';
+        invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
+                                         'is not a list.';
         return loadingUnits;
       }
       if (data['loading-units'] != null) {
         for (final Object? loadingUnitData in data['loading-units']) {
           if (loadingUnitData is! YamlMap) {
-            invalidFiles[cacheFile.path] =
-                "Invalid loading units yaml file, 'loading-units' "
-                'is not a list of maps.';
+            invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
+                                             'is not a list of maps.';
             return loadingUnits;
           }
           final YamlMap loadingUnitDataMap = loadingUnitData;
           if (loadingUnitDataMap['id'] == null) {
-            invalidFiles[cacheFile.path] =
-                'Invalid loading units yaml file, all '
-                "loading units must have an 'id'";
+            invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, all '
+                                             "loading units must have an 'id'";
             return loadingUnits;
           }
           if (loadingUnitDataMap['libraries'] != null) {
             if (loadingUnitDataMap['libraries'] is! YamlList) {
-              invalidFiles[cacheFile.path] =
-                  "Invalid loading units yaml file, 'libraries' "
-                  'is not a list.';
+              invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'libraries' "
+                                               'is not a list.';
               return loadingUnits;
             }
-            for (final Object? node
-                in loadingUnitDataMap['libraries'] as YamlList) {
+            for (final Object? node in loadingUnitDataMap['libraries'] as YamlList) {
               if (node is! String) {
-                invalidFiles[cacheFile.path] =
-                    "Invalid loading units yaml file, 'libraries' "
-                    'is not a list of strings.';
+                invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'libraries' "
+                                                 'is not a list of strings.';
                 return loadingUnits;
               }
             }
@@ -296,10 +276,11 @@ class DeferredComponentsGenSnapshotValidator
               libraries.add(node as String);
             }
           }
-          loadingUnits.add(LoadingUnit(
-            id: loadingUnitDataMap!['id'] as int,
-            libraries: libraries,
-          ));
+          loadingUnits.add(
+              LoadingUnit(
+                id: loadingUnitDataMap!['id'] as int,
+                libraries: libraries,
+              ));
         }
       }
     }
@@ -315,8 +296,7 @@ class DeferredComponentsGenSnapshotValidator
   /// deferred components.
   void writeLoadingUnitsCache(List<LoadingUnit>? generatedLoadingUnits) {
     generatedLoadingUnits ??= <LoadingUnit>[];
-    final File cacheFile = projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     outputs.add(cacheFile);
     ErrorHandlingFileSystem.deleteIfExists(cacheFile);
     cacheFile.createSync(recursive: true);

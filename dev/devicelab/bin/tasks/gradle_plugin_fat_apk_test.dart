@@ -14,8 +14,7 @@ Future<void> main() async {
   await task(() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section(
-            'APK content for task assembleDebug without explicit target platform');
+        section('APK content for task assembleDebug without explicit target platform');
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
@@ -26,8 +25,7 @@ Future<void> main() async {
           );
         });
 
-        Iterable<String> apkFiles =
-            await getFilesInApk(pluginProject.debugApkPath);
+        Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -47,8 +45,7 @@ Future<void> main() async {
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
-        section(
-            'APK content for task assembleRelease without explicit target platform');
+        section('APK content for task assembleRelease without explicit target platform');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
@@ -75,8 +72,7 @@ Future<void> main() async {
 
         checkCollectionDoesNotContain<String>(debugAssets, apkFiles);
 
-        section(
-            'APK content for task assembleRelease with target platform = android-arm, android-arm64');
+        section('APK content for task assembleRelease with target platform = android-arm, android-arm64');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
@@ -103,7 +99,7 @@ Future<void> main() async {
         checkCollectionDoesNotContain<String>(debugAssets, apkFiles);
 
         section('APK content for task assembleRelease with '
-            'target platform = android-arm, android-arm64 and split per ABI');
+                'target platform = android-arm, android-arm64 and split per ABI');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
@@ -117,8 +113,7 @@ Future<void> main() async {
           );
         });
 
-        final Iterable<String> armApkFiles =
-            await getFilesInApk(pluginProject.releaseArmApkPath);
+        final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -129,8 +124,7 @@ Future<void> main() async {
 
         checkCollectionDoesNotContain<String>(debugAssets, armApkFiles);
 
-        final Iterable<String> arm64ApkFiles =
-            await getFilesInApk(pluginProject.releaseArm64ApkPath);
+        final Iterable<String> arm64ApkFiles = await getFilesInApk(pluginProject.releaseArm64ApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -172,8 +166,7 @@ Future<void> main() async {
             targetPlatform,
           );
 
-          final String sharedLibrary =
-              path.join(androidArmSnapshotPath, 'app.so');
+          final String sharedLibrary = path.join(androidArmSnapshotPath, 'app.so');
           if (!File(sharedLibrary).existsSync()) {
             throw TaskResult.failure("Shared library doesn't exist");
           }

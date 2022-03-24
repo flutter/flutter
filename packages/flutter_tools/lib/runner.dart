@@ -28,38 +28,33 @@ import 'src/runner/flutter_command_runner.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> Function() commands, {
-  bool muteCommandLogging = false,
-  bool verbose = false,
-  bool verboseHelp = false,
-  bool reportCrashes,
-  String flutterVersion,
-  Map<Type, Generator> overrides,
-}) async {
+    bool muteCommandLogging = false,
+    bool verbose = false,
+    bool verboseHelp = false,
+    bool reportCrashes,
+    String flutterVersion,
+    Map<Type, Generator> overrides,
+  }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) =>
-        option == '-vv' || option == '-v' || option == '--verbose');
+    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {
     reportCrashes ??= !await globals.isRunningOnBot;
-    final FlutterCommandRunner runner =
-        FlutterCommandRunner(verboseHelp: verboseHelp);
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
     commands().forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
-      systemLocale,
-      intl.NumberFormat.localeExists,
+      systemLocale, intl.NumberFormat.localeExists,
       onFailure: (String _) => 'en_US',
     );
 
-    String getVersion() =>
-        flutterVersion ??
-        globals.flutterVersion.getVersionString(redactUnknownBranches: true);
+    String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object firstError;
     StackTrace firstStackTrace;
     return runZoned<Future<int>>(() async {
@@ -75,23 +70,19 @@ Future<int> run(
         // We already hit some error, so don't return success.  The error path
         // (which should be in progress) is responsible for calling _exit().
         return 1;
-      } catch (error, stackTrace) {
-        // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
         // This catches all exceptions to send to crash logging, etc.
         firstError = error;
         firstStackTrace = stackTrace;
-        return _handleToolError(
-            error, stackTrace, verbose, args, reportCrashes, getVersion);
+        return _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
-    }, onError: (Object error, StackTrace stackTrace) async {
-      // ignore: deprecated_member_use
+    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
       firstError ??= error;
       firstStackTrace ??= stackTrace;
-      await _handleToolError(firstError, firstStackTrace, verbose, args,
-          reportCrashes, getVersion);
+      await _handleToolError(firstError, firstStackTrace, verbose, args, reportCrashes, getVersion);
     });
   }, overrides: overrides);
 }
@@ -106,8 +97,7 @@ Future<int> _handleToolError(
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
-    globals.printError(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
+    globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
@@ -176,9 +166,8 @@ Future<int> _handleToolError(
       await globals.crashReporter.informUser(details, file);
 
       return _exit(1);
-      // This catch catches all exceptions to ensure the message below is printed.
-    } catch (error) {
-      // ignore: avoid_catches_without_on_clauses
+    // This catch catches all exceptions to ensure the message below is printed.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
         '${globals.userMessages.flutterToolBugInstructions}\n',
@@ -248,8 +237,7 @@ Future<int> _exit(int code) async {
   if (globals.flutterUsage.enabled) {
     final Stopwatch stopwatch = Stopwatch()..start();
     await globals.flutterUsage.ensureAnalyticsSent();
-    globals
-        .printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+    globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
   // Run shutdown hooks before flushing logs
@@ -263,10 +251,9 @@ Future<int> _exit(int code) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-      // This catches all exceptions because the error is propagated on the
-      // completer.
-    } catch (error, stackTrace) {
-      // ignore: avoid_catches_without_on_clauses
+    // This catches all exceptions because the error is propagated on the
+    // completer.
+    } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);
     }
   });

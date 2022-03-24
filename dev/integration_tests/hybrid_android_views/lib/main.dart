@@ -27,9 +27,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView(
-        children: _allPages
-            .map((PageWidget p) => _buildPageListTile(context, p))
-            .toList(),
+         children: _allPages.map((PageWidget p) => _buildPageListTile(context, p)).toList(),
       ),
     );
   }
@@ -38,9 +36,7 @@ class Home extends StatelessWidget {
     return ListTile(
       title: Text(page.title),
       key: page.tileKey,
-      onTap: () {
-        _pushPage(context, page);
-      },
+      onTap: () { _pushPage(context, page); },
     );
   }
 

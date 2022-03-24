@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // A custom text selection menu that just displays a single custom button.
-class _CustomMaterialTextSelectionControls
-    extends MaterialTextSelectionControls {
+class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
   static const double _kToolbarContentDistanceBelow = 20.0;
   static const double _kToolbarContentDistance = 8.0;
 
@@ -27,20 +26,16 @@ class _CustomMaterialTextSelectionControls
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
-        endpoints.length > 1 ? endpoints[1] : endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
+      ? endpoints[1]
+      : endpoints[0];
     final Offset anchorAbove = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top +
-          startTextSelectionPoint.point.dy -
-          textLineHeight -
-          _kToolbarContentDistance,
+      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance,
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top +
-          endTextSelectionPoint.point.dy +
-          _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
     return TextSelectionToolbar(
@@ -58,8 +53,7 @@ class _CustomMaterialTextSelectionControls
 }
 
 class TestBox extends SizedBox {
-  const TestBox({Key? key})
-      : super(key: key, width: itemWidth, height: itemHeight);
+  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;
@@ -72,8 +66,7 @@ void main() {
   Finder _findPrivate(String type) {
     return find.descendant(
       of: find.byType(MaterialApp),
-      matching:
-          find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
+      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
     );
   }
 
@@ -82,14 +75,11 @@ void main() {
   // visible part of the toolbar for use in measurements.
   Finder _findToolbar() => _findPrivate('_TextSelectionToolbarOverflowable');
 
-  Finder _findOverflowButton() =>
-      _findPrivate('_TextSelectionToolbarOverflowButton');
+  Finder _findOverflowButton() => _findPrivate('_TextSelectionToolbarOverflowButton');
 
-  testWidgets('puts children in an overflow menu if they overflow',
-      (WidgetTester tester) async {
+  testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children =
-        List<Widget>.generate(7, (int i) => const TestBox());
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -135,8 +125,7 @@ void main() {
     expect(_findOverflowButton(), findsOneWidget);
   });
 
-  testWidgets('positions itself at anchorAbove if it fits',
-      (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 44.0;
     const double anchorBelowY = 500.0;
@@ -185,8 +174,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height));
   });
 
-  testWidgets('can create and use a custom toolbar',
-      (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -205,8 +193,7 @@ void main() {
 
     // Long press on "custom" to select it.
     final Offset customPos = textOffsetToPosition(tester, 11);
-    final TestGesture gesture =
-        await tester.startGesture(customPos, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(customPos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();

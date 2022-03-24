@@ -76,10 +76,9 @@ abstract class CreateBase extends FlutterCommand {
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help:
-          '(deprecated) Historically, this added a flutter_driver dependency and generated a '
-          'sample "flutter drive" test. Now it does nothing. Consider using the '
-          '"integration_test" package: https://pub.dev/packages/integration_test',
+      help: '(deprecated) Historically, this added a flutter_driver dependency and generated a '
+            'sample "flutter drive" test. Now it does nothing. Consider using the '
+            '"integration_test" package: https://pub.dev/packages/integration_test',
       hide: !verboseHelp,
     );
     argParser.addFlag(
@@ -107,19 +106,19 @@ abstract class CreateBase extends FlutterCommand {
       help:
           'The project name for this new Flutter project. This must be a valid dart package name.',
     );
-    argParser.addOption('ios-language',
-        abbr: 'i',
-        defaultsTo: 'swift',
-        allowed: <String>['objc', 'swift'],
-        help:
-            'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).');
+    argParser.addOption(
+      'ios-language',
+      abbr: 'i',
+      defaultsTo: 'swift',
+      allowed: <String>['objc', 'swift'],
+      help: 'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).'
+    );
     argParser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help:
-          'The language to use for Android-specific code, either Java (legacy) or Kotlin (recommended).',
+      help: 'The language to use for Android-specific code, either Java (legacy) or Kotlin (recommended).',
     );
     argParser.addFlag(
       'skip-name-checks',
@@ -138,9 +137,8 @@ abstract class CreateBase extends FlutterCommand {
     argParser.addOption(
       'initial-create-revision',
       defaultsTo: null,
-      help:
-          'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
-          'internally and should generally not be used manually.',
+      help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
+            'internally and should generally not be used manually.',
       hide: !verboseHelp,
     );
   }
@@ -162,17 +160,18 @@ abstract class CreateBase extends FlutterCommand {
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
   void addPlatformsOptions({String customHelp}) {
-    argParser.addMultiOption(
-      'platforms',
+    argParser.addMultiOption('platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
-      aliases: <String>['platform'],
+      aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled) 'winuwp',
+        if (featureFlags.isWindowsUwpEnabled)
+          'winuwp',
       ],
       allowed: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled) 'winuwp',
+        if (featureFlags.isWindowsUwpEnabled)
+          'winuwp',
       ],
     );
   }
@@ -270,14 +269,13 @@ abstract class CreateBase extends FlutterCommand {
   void validateProjectDir({bool overwrite = false}) {
     if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
       // Make exception for dev and examples to facilitate example project development.
-      final String examplesDirectory =
-          globals.fs.path.join(flutterRoot, 'examples');
+      final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
       final String devDirectory = globals.fs.path.join(flutterRoot, 'dev');
       if (!globals.fs.path.isWithin(examplesDirectory, projectDirPath) &&
           !globals.fs.path.isWithin(devDirectory, projectDirPath)) {
         throwToolExit(
             'Cannot create a project within the Flutter SDK. '
-            "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
+                "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
             exitCode: 2);
       }
     }
@@ -300,8 +298,7 @@ abstract class CreateBase extends FlutterCommand {
 
     final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
 
-    switch (type) {
-      // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
+    switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
       case FileSystemEntityType.file:
         // Do not overwrite files.
         throwToolExit("Invalid project name: '$projectDirPath' - file exists.",
@@ -309,8 +306,7 @@ abstract class CreateBase extends FlutterCommand {
         break;
       case FileSystemEntityType.link:
         // Do not overwrite links.
-        throwToolExit(
-            "Invalid project name: '$projectDirPath' - refers to a link.",
+        throwToolExit("Invalid project name: '$projectDirPath' - refers to a link.",
             exitCode: 2);
         break;
       case FileSystemEntityType.directory:
@@ -383,11 +379,9 @@ abstract class CreateBase extends FlutterCommand {
 
     // TODO(dacoharkes): Replace with hardcoded version in template when Flutter 2.11 is released.
     final Version ffiPluginStableRelease = Version(2, 11, 0);
-    final String minFrameworkVersionFfiPlugin =
-        Version.parse(globals.flutterVersion.frameworkVersion) <
-                ffiPluginStableRelease
-            ? globals.flutterVersion.frameworkVersion
-            : ffiPluginStableRelease.toString();
+    final String minFrameworkVersionFfiPlugin = Version.parse(globals.flutterVersion.frameworkVersion) < ffiPluginStableRelease
+        ? globals.flutterVersion.frameworkVersion
+        : ffiPluginStableRelease.toString();
 
     return <String, Object>{
       'organization': organization,
@@ -413,8 +407,7 @@ abstract class CreateBase extends FlutterCommand {
       'withPluginHook': withFfiPluginHook || withPlatformChannelPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
-      'hasIosDevelopmentTeam':
-          iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
+      'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
@@ -567,8 +560,7 @@ abstract class CreateBase extends FlutterCommand {
         winUwpPlatform: winUwpPlatform,
       );
     }
-    final List<SupportedPlatform> platformsForMigrateConfig =
-        <SupportedPlatform>[SupportedPlatform.root];
+    final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
       platformsForMigrateConfig.add(SupportedPlatform.android);
@@ -598,19 +590,18 @@ abstract class CreateBase extends FlutterCommand {
       final File metadataFile = globals.fs
           .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
       final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
-          file: metadataFile,
-          versionRevision: globals.flutterVersion.frameworkRevision,
-          versionChannel: globals.flutterVersion.channel,
-          projectType: projectType,
-          migrateConfig: MigrateConfig(),
-          logger: globals.logger);
+        file: metadataFile,
+        versionRevision: globals.flutterVersion.frameworkRevision,
+        versionChannel: globals.flutterVersion.channel,
+        projectType: projectType,
+        migrateConfig: MigrateConfig(),
+        logger: globals.logger);
       metadata.populate(
         platforms: platformsForMigrateConfig,
         projectDirectory: directory,
         create: true,
         update: false,
-        currentRevision: stringArg('initial-create-revision') ??
-            globals.flutterVersion.frameworkRevision,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
         createRevision: globals.flutterVersion.frameworkRevision,
         logger: globals.logger,
       );
@@ -811,7 +802,9 @@ const Set<String> _packageDependencies = <String>{
 @visibleForTesting
 bool isValidPackageName(String name) {
   final Match match = _identifierRegExp.matchAsPrefix(name);
-  return match != null && match.end == name.length && !_keywords.contains(name);
+  return match != null &&
+      match.end == name.length &&
+      !_keywords.contains(name);
 }
 
 // Return null if the project name is legal. Return a validation message if

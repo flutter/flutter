@@ -41,7 +41,7 @@ class TestTextInput {
   ///
   /// The [onCleared] argument may be set to be notified of when the keyboard
   /// is dismissed.
-  TestTextInput({this.onCleared});
+  TestTextInput({ this.onCleared });
 
   /// Called when the keyboard goes away.
   ///
@@ -60,8 +60,7 @@ class TestTextInput {
   ///
   /// Called by the binding at the top of a test when
   /// [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  void register() =>
-      SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
+  void register() => SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
 
   /// Removes this object as a mock handler for [SystemChannels.textInput].
   ///
@@ -76,8 +75,7 @@ class TestTextInput {
   ///
   /// The binding uses the [register] and [unregister] methods to control this
   /// value when [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  bool get isRegistered =>
-      SystemChannels.textInput.checkMockMethodCallHandler(_handleTextInputCall);
+  bool get isRegistered => SystemChannels.textInput.checkMockMethodCallHandler(_handleTextInputCall);
 
   int? _client;
 
@@ -108,7 +106,6 @@ class TestTextInput {
     assert(isRegistered);
     return _isVisible;
   }
-
   bool _isVisible = false;
 
   /// Resets any internal state of this object.
@@ -201,8 +198,7 @@ class TestTextInput {
   ///  * [enterText], which is similar but takes only a String and resets the
   ///    selection.
   void updateEditingValue(TextEditingValue value) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -210,7 +206,7 @@ class TestTextInput {
           <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) {/* ignored */},
+      (ByteData? data) { /* ignored */ },
     );
   }
 
@@ -226,8 +222,7 @@ class TestTextInput {
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       final Completer<void> completer = Completer<void>();
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-          .handlePlatformMessage(
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(
@@ -267,46 +262,45 @@ class TestTextInput {
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
   void closeConnection() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
           'TextInputClient.onConnectionClosed',
-          <dynamic>[_client ?? -1],
+           <dynamic>[_client ?? -1],
         ),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
   /// Simulates a scribble interaction starting.
   Future<void> startScribbleInteraction() async {
     assert(isRegistered);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall('TextInputClient.scribbleInteractionBegan', <dynamic>[
-          _client ?? -1,
-        ]),
+        MethodCall(
+          'TextInputClient.scribbleInteractionBegan',
+           <dynamic>[_client ?? -1,]
+        ),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
   /// Simulates a Scribble focus.
-  Future<void> scribbleFocusElement(
-      String elementIdentifier, Offset offset) async {
+  Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall('TextInputClient.focusElement',
-            <dynamic>[elementIdentifier, offset.dx, offset.dy]),
+        MethodCall(
+          'TextInputClient.focusElement',
+           <dynamic>[elementIdentifier, offset.dx, offset.dy]
+        ),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -314,18 +308,16 @@ class TestTextInput {
   Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
     assert(isRegistered);
     List<List<dynamic>> response = <List<dynamic>>[];
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall('TextInputClient.requestElementsInRect',
-            <dynamic>[rect.left, rect.top, rect.width, rect.height]),
+        MethodCall(
+          'TextInputClient.requestElementsInRect',
+           <dynamic>[rect.left, rect.top, rect.width, rect.height]
+        ),
       ),
       (ByteData? data) {
-        response = (SystemChannels.textInput.codec.decodeEnvelope(data!)
-                as List<dynamic>)
-            .map((dynamic element) => element as List<dynamic>)
-            .toList();
+        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>).map((dynamic element) => element as List<dynamic>).toList();
       },
     );
 
@@ -335,28 +327,30 @@ class TestTextInput {
   /// Simulates iOS inserting a UITextPlaceholder during a long press with the pencil.
   Future<void> scribbleInsertPlaceholder() async {
     assert(isRegistered);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall('TextInputClient.insertTextPlaceholder',
-            <dynamic>[_client ?? -1, 0.0, 0.0]),
+        MethodCall(
+          'TextInputClient.insertTextPlaceholder',
+           <dynamic>[_client ?? -1, 0.0, 0.0]
+        ),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
   /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released.
   Future<void> scribbleRemovePlaceholder() async {
     assert(isRegistered);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .handlePlatformMessage(
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
-            'TextInputClient.removeTextPlaceholder', <dynamic>[_client ?? -1]),
+          'TextInputClient.removeTextPlaceholder',
+           <dynamic>[_client ?? -1]
+        ),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 }

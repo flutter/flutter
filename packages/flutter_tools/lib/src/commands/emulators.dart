@@ -16,15 +16,13 @@ class EmulatorsCommand extends FlutterCommand {
     argParser.addOption('launch',
         help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag('cold',
-        help:
-            'Used with the "--launch" flag to cold boot the emulator instance (Android only).',
+        help: 'Used with the "--launch" flag to cold boot the emulator instance (Android only).',
         negatable: false);
     argParser.addFlag('create',
         help: 'Creates a new Android emulator based on a Pixel device.',
         negatable: false);
     argParser.addOption('name',
-        help:
-            'Used with the "--create" flag. Specifies a name for the emulator being created.');
+        help: 'Used with the "--create" flag. Specifies a name for the emulator being created.');
   }
 
   @override
@@ -64,7 +62,7 @@ class EmulatorsCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  Future<void> _launchEmulator(String id, {required bool coldBoot}) async {
+  Future<void> _launchEmulator(String id, { required bool coldBoot }) async {
     final List<Emulator> emulators =
         await emulatorManager!.getEmulatorsMatching(id);
 
@@ -80,16 +78,14 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _createEmulator({String? name}) async {
+  Future<void> _createEmulator({ String? name }) async {
     final CreateEmulatorResult createResult =
         await emulatorManager!.createEmulator(name: name);
 
     if (createResult.success) {
-      globals.printStatus(
-          "Emulator '${createResult.emulatorName}' created successfully.");
+      globals.printStatus("Emulator '${createResult.emulatorName}' created successfully.");
     } else {
-      globals.printStatus(
-          "Failed to create emulator '${createResult.emulatorName}'.\n");
+      globals.printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
       final String? error = createResult.error;
       if (error != null) {
         globals.printStatus(error.trim());
@@ -139,8 +135,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
     // TODO(dantup): Update this link to flutter.dev if/when we have a better page.
     // That page can then link out to these places if required.
-    globals.printStatus(
-        'You can find more information on managing emulators at the links below:\n'
+    globals.printStatus('You can find more information on managing emulators at the links below:\n'
         '  https://developer.android.com/studio/run/managing-avds\n'
         '  https://developer.android.com/studio/command-line/avdmanager');
   }

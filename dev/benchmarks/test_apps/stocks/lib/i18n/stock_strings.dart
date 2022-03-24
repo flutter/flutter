@@ -66,8 +66,7 @@ import 'stock_strings_es.dart';
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 abstract class StockStrings {
-  StockStrings(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale);
+  StockStrings(String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
 
   final String localeName;
 
@@ -75,8 +74,7 @@ abstract class StockStrings {
     return Localizations.of<StockStrings>(context, StockStrings)!;
   }
 
-  static const LocalizationsDelegate<StockStrings> delegate =
-      _StockStringsDelegate();
+  static const LocalizationsDelegate<StockStrings> delegate = _StockStringsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -88,8 +86,7 @@ abstract class StockStrings {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -131,37 +128,34 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StockStringsDelegate old) => false;
 }
 
 StockStrings _lookupStockStrings(Locale locale) {
+
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'en':
-      {
-        switch (locale.countryCode) {
-          case 'US':
-            return StockStringsEnUs();
-        }
-        break;
+    case 'en': {
+      switch (locale.countryCode) {
+        case 'US': return StockStringsEnUs();
       }
+      break;
+    }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return StockStringsEn();
-    case 'es':
-      return StockStringsEs();
+    case 'en': return StockStringsEn();
+    case 'es': return StockStringsEs();
   }
 
   throw FlutterError(
-      'StockStrings.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'StockStrings.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

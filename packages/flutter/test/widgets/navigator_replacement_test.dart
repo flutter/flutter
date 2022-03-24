@@ -59,13 +59,12 @@ void main() {
       final List<String> log = <String>[];
       observer
         ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
-          log.add(
-              '${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}');
+          log.add('${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}');
         }
         ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
-          log.add(
-              '${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}');
+          log.add('${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}');
         };
+
 
       navigator.pushNamed('/a');
       await tester.pumpAndSettle();
@@ -81,14 +80,12 @@ void main() {
       expect(find.text('home', skipOffstage: false), findsNothing);
       expect(find.text('a', skipOffstage: false), findsNothing);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
-      expect(
-          log,
-          equals(<String>[
-            '/a pushed, previous route: /',
-            '/b pushed, previous route: /a',
-            '/a removed, previous route: null',
-            '/ removed, previous route: null',
-          ]));
+      expect(log, equals(<String>[
+        '/a pushed, previous route: /',
+        '/b pushed, previous route: /a',
+        '/a removed, previous route: null',
+        '/ removed, previous route: null',
+      ]));
 
       log.clear();
 
@@ -106,17 +103,14 @@ void main() {
       expect(find.text('home', skipOffstage: false), findsNothing);
       expect(find.text('a', skipOffstage: false), findsOneWidget);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
-      expect(
-          log,
-          equals(<String>[
-            '/ pushed, previous route: /b',
-            '/a pushed, previous route: /',
-            '/ removed, previous route: /b',
-          ]));
+      expect(log, equals(<String>[
+        '/ pushed, previous route: /b',
+        '/a pushed, previous route: /',
+        '/ removed, previous route: /b',
+      ]));
     });
 
-    testWidgets('triggers page transition animation for pushed route',
-        (WidgetTester tester) async {
+    testWidgets('triggers page transition animation for pushed route', (WidgetTester tester) async {
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
@@ -145,27 +139,23 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets(
-        'Hero transition triggers when preceding route contains hero, and predicate route does not',
-        (WidgetTester tester) async {
+    testWidgets('Hero transition triggers when preceding route contains hero, and predicate route does not', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) => const Material(child: Text('home')),
-          '/a': (BuildContext context) => const Material(
-                  child: Hero(
-                tag: kHeroTag,
-                child: Text('a'),
-              )),
-          '/b': (BuildContext context) => const Material(
-                  child: Padding(
-                padding: EdgeInsets.all(100.0),
-                child: Hero(
-                  tag: kHeroTag,
-                  child: Text('b'),
-                ),
-              )),
+          '/a': (BuildContext context) => const Material(child: Hero(
+            tag: kHeroTag,
+            child: Text('a'),
+          )),
+          '/b': (BuildContext context) => const Material(child: Padding(
+            padding: EdgeInsets.all(100.0),
+            child: Hero(
+              tag: kHeroTag,
+              child: Text('b'),
+            ),
+          )),
         },
       );
 
@@ -194,9 +184,7 @@ void main() {
       expect(find.text('b'), isOnstage);
     });
 
-    testWidgets(
-        'Hero transition does not trigger when preceding route does not contain hero, but predicate route does',
-        (WidgetTester tester) async {
+    testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         theme: ThemeData(
@@ -208,20 +196,18 @@ void main() {
         ),
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => const Material(
-                  child: Hero(
-                tag: kHeroTag,
-                child: Text('home'),
-              )),
+          '/': (BuildContext context) => const Material(child: Hero(
+            tag:kHeroTag,
+            child: Text('home'),
+          )),
           '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(
-                  child: Padding(
-                padding: EdgeInsets.all(100.0),
-                child: Hero(
-                  tag: kHeroTag,
-                  child: Text('b'),
-                ),
-              )),
+          '/b': (BuildContext context) => const Material(child: Padding(
+            padding: EdgeInsets.all(100.0),
+            child: Hero(
+              tag: kHeroTag,
+              child: Text('b'),
+            ),
+          )),
         },
       );
 

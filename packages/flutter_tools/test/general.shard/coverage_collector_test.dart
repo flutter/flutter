@@ -11,8 +11,7 @@ import '../src/common.dart';
 import '../src/fake_vm_services.dart';
 
 void main() {
-  testWithoutContext('Coverage collector Can handle coverage SentinelException',
-      () async {
+  testWithoutContext('Coverage collector Can handle coverage SentinelException', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
@@ -22,16 +21,22 @@ void main() {
         FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})
-                ..isolates = <IsolateRef>[
-                  IsolateRef.parse(<String, Object>{'id': '1'}),
-                ])
-              .toJson(),
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1'
+              }),
+            ]
+          ).toJson(),
         ),
-        const FakeVmServiceRequest(method: 'getScripts', args: <String, Object>{
-          'isolateId': '1',
-        }, jsonResponse: <String, Object>{
-          'type': 'Sentinel'
-        })
+        const FakeVmServiceRequest(
+          method: 'getScripts',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'type': 'Sentinel'
+          }
+        )
       ],
     );
 
@@ -43,13 +48,11 @@ void main() {
       },
     );
 
-    expect(result,
-        <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
+    expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('Coverage collector processes coverage and script data',
-      () async {
+  testWithoutContext('Coverage collector processes coverage and script data', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
@@ -59,10 +62,12 @@ void main() {
         FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})
-                ..isolates = <IsolateRef>[
-                  IsolateRef.parse(<String, Object>{'id': '1'}),
-                ])
-              .toJson(),
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1'
+              }),
+            ]
+          ).toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getScripts',
@@ -126,28 +131,23 @@ void main() {
       },
     );
 
-    expect(result, <String, Object>{
-      'type': 'CodeCoverage',
-      'coverage': <Object>[
-        <String, Object>{
-          'source': 'foo.dart',
-          'script': <String, Object>{
-            'type': '@Script',
-            'fixedId': true,
-            'id': 'libraries/1/scripts/foo.dart',
-            'uri': 'foo.dart',
-            '_kind': 'library',
-          },
-          'hits': <Object>[],
+    expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[
+      <String, Object>{
+        'source': 'foo.dart',
+        'script': <String, Object>{
+          'type': '@Script',
+          'fixedId': true,
+          'id': 'libraries/1/scripts/foo.dart',
+          'uri': 'foo.dart',
+          '_kind': 'library',
         },
-      ]
-    });
+        'hits': <Object>[],
+      },
+    ]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
-  testWithoutContext(
-      'Coverage collector skips loading Script objects when reportLines is available',
-      () async {
+  testWithoutContext('Coverage collector skips loading Script objects when reportLines is available', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
@@ -157,10 +157,12 @@ void main() {
         FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})
-                ..isolates = <IsolateRef>[
-                  IsolateRef.parse(<String, Object>{'id': '1'}),
-                ])
-              .toJson(),
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1'
+              }),
+            ]
+          ).toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getScripts',
@@ -212,22 +214,19 @@ void main() {
       },
     );
 
-    expect(result, <String, Object>{
-      'type': 'CodeCoverage',
-      'coverage': <Object>[
-        <String, Object>{
-          'source': 'foo.dart',
-          'script': <String, Object>{
-            'type': '@Script',
-            'fixedId': true,
-            'id': 'libraries/1/scripts/foo.dart',
-            'uri': 'foo.dart',
-            '_kind': 'library',
-          },
-          'hits': <Object>[1, 1, 3, 1, 2, 0],
+    expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[
+      <String, Object>{
+        'source': 'foo.dart',
+        'script': <String, Object>{
+          'type': '@Script',
+          'fixedId': true,
+          'id': 'libraries/1/scripts/foo.dart',
+          'uri': 'foo.dart',
+          '_kind': 'library',
         },
-      ]
-    });
+        'hits': <Object>[1, 1, 3, 1, 2, 0],
+      },
+    ]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 }

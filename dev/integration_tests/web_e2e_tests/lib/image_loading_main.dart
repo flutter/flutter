@@ -41,8 +41,7 @@ class MyAppState extends State<MyApp> {
         title: 'Integration Test App',
         home: Column(children: <Widget>[
           const Text('Asset image:'),
-          RepaintBoundary(
-              child: Image.asset(
+          RepaintBoundary(child: Image.asset(
             'assets/icons/material/material.png',
             package: 'flutter_gallery_assets',
             frameBuilder: (
@@ -58,8 +57,7 @@ class MyAppState extends State<MyApp> {
             },
           )),
           const Text('Network image:'),
-          RepaintBoundary(
-              child: Image.network(
+          RepaintBoundary(child: Image.network(
             'assets/packages/flutter_gallery_assets/assets/icons/material/material.png',
             frameBuilder: (
               BuildContext context,
@@ -73,6 +71,7 @@ class MyAppState extends State<MyApp> {
               return child;
             },
           )),
-        ]));
+      ])
+    );
   }
 }

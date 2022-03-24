@@ -7,49 +7,44 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-      'reassemble with a className only marks subtrees from the first matching element as dirty',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const Foo(Bar(Fizz(SizedBox()))));
+  testWidgets('reassemble with a className only marks subtrees from the first matching element as dirty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Foo(Bar(Fizz(SizedBox())))
+    );
 
     expect(Foo.count, 0);
     expect(Bar.count, 0);
     expect(Fizz.count, 0);
 
     DebugReassembleConfig config = DebugReassembleConfig(widgetName: 'Bar');
-    WidgetsBinding.instance.buildOwner!
-        .reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
 
     expect(Foo.count, 0);
     expect(Bar.count, 1);
     expect(Fizz.count, 1);
 
     config = DebugReassembleConfig(widgetName: 'Fizz');
-    WidgetsBinding.instance.buildOwner!
-        .reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
 
     expect(Foo.count, 0);
     expect(Bar.count, 1);
     expect(Fizz.count, 2);
 
     config = DebugReassembleConfig(widgetName: 'NoMatch');
-    WidgetsBinding.instance.buildOwner!
-        .reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
 
     expect(Foo.count, 0);
     expect(Bar.count, 1);
     expect(Fizz.count, 2);
 
     config = DebugReassembleConfig();
-    WidgetsBinding.instance.buildOwner!
-        .reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
 
     expect(Foo.count, 1);
     expect(Bar.count, 2);
     expect(Fizz.count, 3);
 
-    WidgetsBinding.instance.buildOwner!
-        .reassemble(WidgetsBinding.instance.renderViewElement!, null);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, null);
 
     expect(Foo.count, 2);
     expect(Bar.count, 3);
@@ -79,6 +74,7 @@ class _FooState extends State<Foo> {
     return widget.child;
   }
 }
+
 
 class Bar extends StatefulWidget {
   const Bar(this.child, {Key? key}) : super(key: key);

@@ -25,18 +25,14 @@ class OutputPreferences {
     int? wrapColumn,
     bool? showColor,
     io.Stdio? stdio,
-  })  : _stdio = stdio,
-        wrapText = wrapText ?? stdio?.hasTerminal ?? false,
-        _overrideWrapColumn = wrapColumn,
-        showColor = showColor ?? false;
+  }) : _stdio = stdio,
+       wrapText = wrapText ?? stdio?.hasTerminal ?? false,
+       _overrideWrapColumn = wrapColumn,
+       showColor = showColor ?? false;
 
   /// A version of this class for use in tests.
-  OutputPreferences.test(
-      {this.wrapText = false,
-      int wrapColumn = kDefaultTerminalColumns,
-      this.showColor = false})
-      : _overrideWrapColumn = wrapColumn,
-        _stdio = null;
+  OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
+    : _overrideWrapColumn = wrapColumn, _stdio = null;
 
   final io.Stdio? _stdio;
 
@@ -58,9 +54,7 @@ class OutputPreferences {
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
   final int? _overrideWrapColumn;
   int get wrapColumn {
-    return _overrideWrapColumn ??
-        _stdio?.terminalColumns ??
-        kDefaultTerminalColumns;
+    return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -79,8 +73,7 @@ abstract class Terminal {
   /// Create a new test [Terminal].
   ///
   /// If not specified, [supportsColor] defaults to `false`.
-  factory Terminal.test({bool supportsColor, bool supportsEmoji}) =
-      _TestTerminal;
+  factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
   bool get supportsColor;
@@ -158,11 +151,11 @@ class AnsiTerminal implements Terminal {
   AnsiTerminal({
     required io.Stdio stdio,
     required Platform platform,
-    DateTime?
-        now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
-  })  : _stdio = stdio,
-        _platform = platform,
-        _now = now ?? DateTime(1);
+    DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
+  })
+    : _stdio = stdio,
+      _platform = platform,
+      _now = now ?? DateTime(1);
 
   final io.Stdio _stdio;
   final Platform _platform;
@@ -202,8 +195,8 @@ class AnsiTerminal implements Terminal {
   // which sets the WT_SESSION environment variable. See:
   // https://github.com/microsoft/terminal/blob/master/doc/user-docs/index.md#tips-and-tricks
   @override
-  bool get supportsEmoji =>
-      !_platform.isWindows || _platform.environment.containsKey('WT_SESSION');
+  bool get supportsEmoji => !_platform.isWindows
+    || _platform.environment.containsKey('WT_SESSION');
 
   @override
   int get preferredStyle {
@@ -285,7 +278,6 @@ class AnsiTerminal implements Terminal {
     final io.Stdin stdin = _stdio.stdin as io.Stdin;
     return stdin.lineMode && stdin.echoMode;
   }
-
   @override
   set singleCharMode(bool value) {
     if (!_stdio.stdinHasTerminal) {
@@ -309,9 +301,7 @@ class AnsiTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes {
-    return _broadcastStdInString ??= _stdio.stdin
-        .transform<String>(const AsciiDecoder(allowInvalid: true))
-        .asBroadcastStream();
+    return _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
   }
 
   @override
@@ -329,23 +319,18 @@ class AnsiTerminal implements Terminal {
     }
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
-      assert(defaultChoiceIndex >= 0 &&
-          defaultChoiceIndex < acceptedCharacters.length);
+      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.of(charactersToDisplay);
-      charactersToDisplay[defaultChoiceIndex] =
-          bolden(charactersToDisplay[defaultChoiceIndex]);
+      charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('');
     }
     String? choice;
     singleCharMode = true;
-    while (choice == null ||
-        choice.length > 1 ||
-        !acceptedCharacters.contains(choice)) {
+    while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
         logger.printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters) {
-          logger.printStatus(' [${charactersToDisplay.join("|")}]',
-              newline: false);
+          logger.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
         // prompt ends with ': '
         logger.printStatus(': ', emphasis: true, newline: false);
@@ -380,21 +365,19 @@ class _TestTerminal implements Terminal {
   Stream<String> get keystrokes => const Stream<String>.empty();
 
   @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {
     required Logger logger,
     String? prompt,
     int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) {
-    throw UnsupportedError(
-        'promptForCharInput not supported in the test terminal.');
+    throw UnsupportedError('promptForCharInput not supported in the test terminal.');
   }
 
   @override
   bool get singleCharMode => false;
   @override
-  set singleCharMode(bool value) {}
+  set singleCharMode(bool value) { }
 
   @override
   final bool supportsColor;

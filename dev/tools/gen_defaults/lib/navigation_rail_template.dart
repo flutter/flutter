@@ -5,8 +5,7 @@
 import 'template.dart';
 
 class NavigationRailTemplate extends TokenTemplate {
-  const NavigationRailTemplate(String fileName, Map<String, dynamic> tokens)
-      : super(fileName, tokens);
+  const NavigationRailTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
 
   @override
   String generate() => '''

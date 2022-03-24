@@ -60,8 +60,7 @@ abstract class InheritedTheme extends InheritedWidget {
   /// change in the original subtree, those changes will not be visible to
   /// the wrapped `child` - unless this method is called again to re-wrap the
   /// child.
-  static Widget captureAll(BuildContext context, Widget child,
-      {BuildContext? to}) {
+  static Widget captureAll(BuildContext context, Widget child, {BuildContext? to}) {
     assert(child != null);
     assert(context != null);
 
@@ -85,8 +84,7 @@ abstract class InheritedTheme extends InheritedWidget {
   ///
   /// This method can be expensive if there are many widgets between `from` and
   /// `to` (it walks the element tree between those nodes).
-  static CapturedThemes capture(
-      {required BuildContext from, required BuildContext? to}) {
+  static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
     assert(from != null);
 
     if (from == to) {
@@ -123,8 +121,7 @@ abstract class InheritedTheme extends InheritedWidget {
       return true;
     });
 
-    assert(debugDidFindAncestor,
-        'The provided `to` context must be an ancestor of the `from` context.');
+    assert(debugDidFindAncestor, 'The provided `to` context must be an ancestor of the `from` context.');
     return CapturedThemes._(themes);
   }
 }
@@ -149,9 +146,7 @@ class _CaptureAll extends StatelessWidget {
     Key? key,
     required this.themes,
     required this.child,
-  })  : assert(themes != null),
-        assert(child != null),
-        super(key: key);
+  }) : assert(themes != null), assert(child != null), super(key: key);
 
   final List<InheritedTheme> themes;
   final Widget child;

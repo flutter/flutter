@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugCheckHasMaterial control test',
-      (WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
     await tester.pumpWidget(const ListTile());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -46,8 +45,7 @@ void main() {
     );
   });
 
-  testWidgets('debugCheckHasMaterialLocalizations control test',
-      (WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
     await tester.pumpWidget(const BackButton());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -83,8 +81,7 @@ void main() {
     );
   });
 
-  testWidgets('debugCheckHasScaffold control test',
-      (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffold control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -119,114 +116,112 @@ void main() {
         'or WidgetsApp widget at the top of your application widget tree.\n',
       ),
     );
-    expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes('FlutterError\n'
-            '   No Scaffold widget found.\n'
-            '   Builder widgets require a Scaffold widget ancestor.\n'
-            '   The specific widget that could not find a Scaffold ancestor was:\n'
-            '     Builder\n'
-            '   The ancestors of this widget were:\n'
-            '     Semantics\n'
-            '     Builder\n'
-            '     RepaintBoundary-[GlobalKey#00000]\n'
-            '     IgnorePointer\n'
-            '     AnimatedBuilder\n'
-            '     FadeTransition\n'
-            '     FractionalTranslation\n'
-            '     SlideTransition\n'
-            '     _FadeUpwardsPageTransition\n'
-            '     AnimatedBuilder\n'
-            '     RepaintBoundary\n'
-            '     FocusTrap\n'
-            '     _FocusMarker\n'
-            '     Semantics\n'
-            '     FocusScope\n'
-            '     PrimaryScrollController\n'
-            '     _ActionsMarker\n'
-            '     Actions\n'
-            '     Builder\n'
-            '     PageStorage\n'
-            '     Offstage\n'
-            '     _ModalScopeStatus\n'
-            '     UnmanagedRestorationScope\n'
-            '     RestorationScope\n'
-            '     AnimatedBuilder\n'
-            '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
-            '     Semantics\n'
-            '     _EffectiveTickerMode\n'
-            '     TickerMode\n'
-            '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
-            '     _Theatre\n'
-            '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
-            '     UnmanagedRestorationScope\n'
-            '     _FocusMarker\n'
-            '     Semantics\n'
-            '     FocusScope\n'
-            '     AbsorbPointer\n'
-            '     Listener\n'
-            '     HeroControllerScope\n'
-            '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
-            '     IconTheme\n'
-            '     IconTheme\n'
-            '     _InheritedCupertinoTheme\n'
-            '     CupertinoTheme\n'
-            '     _InheritedTheme\n'
-            '     Theme\n'
-            '     AnimatedTheme\n'
-            '     _ScaffoldMessengerScope\n'
-            '     ScaffoldMessenger\n'
-            '     Builder\n'
-            '     DefaultTextStyle\n'
-            '     CustomPaint\n'
-            '     Banner\n'
-            '     CheckedModeBanner\n'
-            '     Title\n'
-            '     Directionality\n'
-            '     _LocalizationsScope-[GlobalKey#00000]\n'
-            '     Semantics\n'
-            '     Localizations\n'
-            '     MediaQuery\n'
-            '     _MediaQueryFromWindow\n'
-            '     _FocusMarker\n'
-            '     Focus\n'
-            '     _FocusTraversalGroupMarker\n'
-            '     FocusTraversalGroup\n'
-            '     _ActionsMarker\n'
-            '     Actions\n'
-            '     _ShortcutsMarker\n'
-            '     Semantics\n'
-            '     _FocusMarker\n'
-            '     Focus\n'
-            '     DefaultTextEditingShortcuts\n'
-            '     _ShortcutsMarker\n'
-            '     Semantics\n'
-            '     _FocusMarker\n'
-            '     Focus\n'
-            '     Shortcuts\n'
-            '     _SharedAppModel\n'
-            '     SharedAppData\n'
-            '     UnmanagedRestorationScope\n'
-            '     RestorationScope\n'
-            '     UnmanagedRestorationScope\n'
-            '     RootRestorationScope\n'
-            '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
-            '     Semantics\n'
-            '     _FocusMarker\n'
-            '     Focus\n'
-            '     HeroControllerScope\n'
-            '     ScrollConfiguration\n'
-            '     MaterialApp\n'
-            '     [root]\n'
-            '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
-            '   or WidgetsApp widget at the top of your application widget tree.\n'));
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   No Scaffold widget found.\n'
+      '   Builder widgets require a Scaffold widget ancestor.\n'
+      '   The specific widget that could not find a Scaffold ancestor was:\n'
+      '     Builder\n'
+      '   The ancestors of this widget were:\n'
+      '     Semantics\n'
+      '     Builder\n'
+      '     RepaintBoundary-[GlobalKey#00000]\n'
+      '     IgnorePointer\n'
+      '     AnimatedBuilder\n'
+      '     FadeTransition\n'
+      '     FractionalTranslation\n'
+      '     SlideTransition\n'
+      '     _FadeUpwardsPageTransition\n'
+      '     AnimatedBuilder\n'
+      '     RepaintBoundary\n'
+      '     FocusTrap\n'
+      '     _FocusMarker\n'
+      '     Semantics\n'
+      '     FocusScope\n'
+      '     PrimaryScrollController\n'
+      '     _ActionsMarker\n'
+      '     Actions\n'
+      '     Builder\n'
+      '     PageStorage\n'
+      '     Offstage\n'
+      '     _ModalScopeStatus\n'
+      '     UnmanagedRestorationScope\n'
+      '     RestorationScope\n'
+      '     AnimatedBuilder\n'
+      '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
+      '     Semantics\n'
+      '     _EffectiveTickerMode\n'
+      '     TickerMode\n'
+      '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
+      '     _Theatre\n'
+      '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
+      '     UnmanagedRestorationScope\n'
+      '     _FocusMarker\n'
+      '     Semantics\n'
+      '     FocusScope\n'
+      '     AbsorbPointer\n'
+      '     Listener\n'
+      '     HeroControllerScope\n'
+      '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
+      '     IconTheme\n'
+      '     IconTheme\n'
+      '     _InheritedCupertinoTheme\n'
+      '     CupertinoTheme\n'
+      '     _InheritedTheme\n'
+      '     Theme\n'
+      '     AnimatedTheme\n'
+      '     _ScaffoldMessengerScope\n'
+      '     ScaffoldMessenger\n'
+      '     Builder\n'
+      '     DefaultTextStyle\n'
+      '     CustomPaint\n'
+      '     Banner\n'
+      '     CheckedModeBanner\n'
+      '     Title\n'
+      '     Directionality\n'
+      '     _LocalizationsScope-[GlobalKey#00000]\n'
+      '     Semantics\n'
+      '     Localizations\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromWindow\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
+      '     _FocusTraversalGroupMarker\n'
+      '     FocusTraversalGroup\n'
+      '     _ActionsMarker\n'
+      '     Actions\n'
+      '     _ShortcutsMarker\n'
+      '     Semantics\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
+      '     DefaultTextEditingShortcuts\n'
+      '     _ShortcutsMarker\n'
+      '     Semantics\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
+      '     Shortcuts\n'
+      '     _SharedAppModel\n'
+      '     SharedAppData\n'
+      '     UnmanagedRestorationScope\n'
+      '     RestorationScope\n'
+      '     UnmanagedRestorationScope\n'
+      '     RootRestorationScope\n'
+      '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
+      '     Semantics\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
+      '     HeroControllerScope\n'
+      '     ScrollConfiguration\n'
+      '     MaterialApp\n'
+      '     [root]\n'
+      '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
+      '   or WidgetsApp widget at the top of your application widget tree.\n'
+    ));
   });
 
-  testWidgets('debugCheckHasScaffoldMessenger control test',
-      (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-        GlobalKey<ScaffoldMessengerState>();
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
       content: const Text('Snack'),
       action: SnackBarAction(label: 'Test', onPressed: () {}),
@@ -288,21 +283,19 @@ void main() {
         'MaterialApp at the top of your application widget tree.\n',
       ),
     );
-    expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   No ScaffoldMessenger widget found.\n'
-          '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
-          '   The specific widget that could not find a ScaffoldMessenger\n'
-          '   ancestor was:\n'
-          '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00829]\n'
-          '   The ancestors of this widget were:\n'
-          '     MediaQuery\n'
-          '     Directionality\n'
-          '     [root]\n'
-          '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-          '   MaterialApp at the top of your application widget tree.\n',
-        ));
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   No ScaffoldMessenger widget found.\n'
+      '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
+      '   The specific widget that could not find a ScaffoldMessenger\n'
+      '   ancestor was:\n'
+      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00829]\n'
+      '   The ancestors of this widget were:\n'
+      '     MediaQuery\n'
+      '     Directionality\n'
+      '     [root]\n'
+      '   Typically, the ScaffoldMessenger widget is introduced by the\n'
+      '   MaterialApp at the top of your application widget tree.\n',
+    ));
   });
 }

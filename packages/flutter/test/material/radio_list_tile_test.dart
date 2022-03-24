@@ -24,8 +24,7 @@ Widget wrap({Widget? child}) {
 }
 
 void main() {
-  testWidgets('RadioListTile should initialize according to groupValue',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
@@ -51,8 +50,7 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    RadioListTile<int>(
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
                   onChanged: (int? value) {
                     setState(() {
                       selectedValue = value;
@@ -177,8 +175,7 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    RadioListTile<int>(
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
                   onChanged: (int? value) {
                     log.add(value);
                     setState(() {
@@ -226,8 +223,7 @@ void main() {
     expect(log, equals(<dynamic>[1, '-', 2]));
   });
 
-  testWidgets('Selected RadioListTile should not trigger onChanged',
-      (WidgetTester tester) async {
+  testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30311
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
@@ -247,8 +243,7 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    RadioListTile<int>(
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
                   onChanged: (int? value) {
                     log.add(value);
                     setState(() {
@@ -280,8 +275,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgets('Selected RadioListTile should trigger onChanged when toggleable',
-      (WidgetTester tester) async {
+  testWidgets('Selected RadioListTile should trigger onChanged when toggleable', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -335,8 +329,7 @@ void main() {
     expect(log, equals(<int?>[0, null, 0]));
   });
 
-  testWidgets('RadioListTile can be toggled when toggleable is set',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -545,8 +538,7 @@ void main() {
     final Key key = UniqueKey();
     dynamic semanticEvent;
     int? radioValue = 2;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
-        SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
 
@@ -574,19 +566,13 @@ void main() {
       'nodeId': object.debugSemantics!.id,
       'data': <String, dynamic>{},
     });
-    expect(
-        object.debugSemantics!
-            .getSemanticsData()
-            .hasAction(SemanticsAction.tap),
-        true);
+    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semantics.dispose();
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
-        SystemChannels.accessibility, null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('RadioListTile can autofocus unless disabled.',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -634,7 +620,7 @@ void main() {
             groupValue: true,
             value: true,
             title: const Text('Title'),
-            onChanged: (_) {},
+            onChanged: (_){},
             contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
           ),
         ),
@@ -646,17 +632,14 @@ void main() {
     final Rect titleRect = tester.getRect(find.text('Title'));
 
     // Get the taller Rect of the Radio and Text widgets
-    final Rect tallerRect =
-        radioRect.height > titleRect.height ? radioRect : titleRect;
+    final Rect tallerRect = radioRect.height > titleRect.height ? radioRect : titleRect;
 
     // Get the extra height between the tallerRect and ListTile height
     final double extraHeight = 56 - tallerRect.height;
 
     // Check for correct top and bottom padding
-    expect(
-        paddingRect.top, tallerRect.top - extraHeight / 2 - 10); //top padding
-    expect(paddingRect.bottom,
-        tallerRect.bottom + extraHeight / 2 + 20); //bottom padding
+    expect(paddingRect.top, tallerRect.top - extraHeight / 2 - 10); //top padding
+    expect(paddingRect.bottom, tallerRect.bottom + extraHeight / 2 + 20); //bottom padding
 
     // Check for correct left and right padding
     expect(paddingRect.left, radioRect.left - 8); //left padding
@@ -680,8 +663,7 @@ void main() {
       ),
     ));
 
-    expect(
-        tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
   testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
@@ -704,8 +686,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: tileColor));
   });
 
-  testWidgets('RadioListTile respects selectedTileColor',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
     final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
@@ -726,13 +707,12 @@ void main() {
     expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
-  testWidgets('RadioListTile selected item text Color',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76906
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({Color? activeColor, Color? toggleableActiveColor}) {
+    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
           toggleableActiveColor: toggleableActiveColor,
@@ -745,7 +725,7 @@ void main() {
               title: const Text('title'),
               value: false,
               groupValue: true,
-              onChanged: (bool? newValue) {},
+              onChanged: (bool? newValue) { },
             ),
           ),
         ),
@@ -753,11 +733,7 @@ void main() {
     }
 
     Color? textColor(String text) {
-      return tester
-          .renderObject<RenderParagraph>(find.text(text))
-          .text
-          .style
-          ?.color;
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
     await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
@@ -767,8 +743,7 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
-  testWidgets('RadioListTile respects visualDensity',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -827,8 +802,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('RadioListTile respects enableFeedback',
-        (WidgetTester tester) async {
+    testWidgets('RadioListTile respects enableFeedback', (WidgetTester tester) async {
       const Key key = Key('test');
       Future<void> buildTest(bool enableFeedback) async {
         return tester.pumpWidget(

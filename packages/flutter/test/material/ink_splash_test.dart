@@ -16,7 +16,7 @@ void main() {
         body: Center(
           child: ElevatedButton(
             child: const Text('Test'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -27,16 +27,15 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('InkWell with NoSplash splashFactory paints nothing',
-      (WidgetTester tester) async {
-    Widget buildFrame({InteractiveInkFeatureFactory? splashFactory}) {
+  testWidgets('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
             child: Material(
               child: InkWell(
                 splashFactory: splashFactory,
-                onTap: () {},
+                onTap: () { },
                 child: const Text('test'),
               ),
             ),
@@ -48,10 +47,8 @@ void main() {
     // NoSplash.splashFactory, no splash circles drawn
     await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
     {
-      final TestGesture gesture =
-          await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material =
-          Material.of(tester.element(find.text('test')))!;
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 0));
       await gesture.up();
@@ -61,10 +58,8 @@ void main() {
     // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
     await tester.pumpWidget(buildFrame());
     {
-      final TestGesture gesture =
-          await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material =
-          Material.of(tester.element(find.text('test')))!;
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();

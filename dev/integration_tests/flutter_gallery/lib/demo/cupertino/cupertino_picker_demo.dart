@@ -41,7 +41,7 @@ class _BottomPicker extends StatelessWidget {
         ),
         child: GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () {},
+          onTap: () { },
           child: SafeArea(
             top: false,
             child: child,
@@ -114,13 +114,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               child: CupertinoPicker(
                 scrollController: scrollController,
                 itemExtent: _kPickerItemHeight,
-                backgroundColor:
-                    CupertinoColors.systemBackground.resolveFrom(context),
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 onSelectedItemChanged: (int index) {
                   setState(() => _selectedColorIndex = index);
                 },
-                children:
-                    List<Widget>.generate(coolColorNames.length, (int index) {
+                children: List<Widget>.generate(coolColorNames.length, (int index) {
                   return Center(
                     child: Text(coolColorNames[index]),
                   );
@@ -135,9 +133,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Favorite Color'),
           Text(
             coolColorNames[_selectedColorIndex],
-            style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.inactiveGray, context)),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -153,8 +149,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoTimerPicker(
-                backgroundColor:
-                    CupertinoColors.systemBackground.resolveFrom(context),
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() => timer = newTimer);
@@ -169,11 +164,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Countdown Timer'),
           Text(
             '${timer.inHours}:'
-            '${(timer.inMinutes % 60).toString().padLeft(2, '0')}:'
-            '${(timer.inSeconds % 60).toString().padLeft(2, '0')}',
-            style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.inactiveGray, context)),
+                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
+                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -189,8 +182,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
-                backgroundColor:
-                    CupertinoColors.systemBackground.resolveFrom(context),
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -201,15 +193,15 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _Menu(children: <Widget>[
-        const Text('Date'),
-        Text(
-          DateFormat.yMMMMd().format(date),
-          style: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.inactiveGray, context)),
-        ),
-      ]),
+      child: _Menu(
+        children: <Widget>[
+          const Text('Date'),
+          Text(
+            DateFormat.yMMMMd().format(date),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
+          ),
+        ]
+      ),
     );
   }
 
@@ -222,8 +214,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
-                backgroundColor:
-                    CupertinoColors.systemBackground.resolveFrom(context),
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -239,9 +230,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Time'),
           Text(
             DateFormat.jm().format(time),
-            style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.inactiveGray, context)),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -257,8 +246,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
-                backgroundColor:
-                    CupertinoColors.systemBackground.resolveFrom(context),
+                backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => dateTime = newDateTime);
@@ -273,9 +261,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Date and Time'),
           Text(
             DateFormat.yMMMd().add_jm().format(dateTime),
-            style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.inactiveGray, context)),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
       ),
@@ -291,8 +277,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         // Material page. CupertinoPageRoutes could auto-populate these back
         // labels.
         previousPageTitle: 'Cupertino',
-        trailing:
-            CupertinoDemoDocumentationButton(CupertinoPickerDemo.routeName),
+        trailing: CupertinoDemoDocumentationButton(CupertinoPickerDemo.routeName),
       ),
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,

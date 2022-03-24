@@ -7,8 +7,7 @@ import 'package:flutter_gallery/demo/calculator_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
@@ -27,8 +26,7 @@ void main() {
     await tester.pump();
     await tester.tap(twoButton);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // Wait until it has finished.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
 
     final Finder display = find.widgetWithText(Expanded, '12');
     expect(display, findsOneWidget);

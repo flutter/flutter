@@ -10,16 +10,15 @@ import '../base/file_system.dart';
 // well as verifying the project is properly set up.
 
 File _getMultiDexApplicationFile(Directory projectDir) {
-  return projectDir
-      .childDirectory('android')
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('java')
-      .childDirectory('io')
-      .childDirectory('flutter')
-      .childDirectory('app')
-      .childFile('FlutterMultiDexApplication.java');
+  return projectDir.childDirectory('android')
+    .childDirectory('app')
+    .childDirectory('src')
+    .childDirectory('main')
+    .childDirectory('java')
+    .childDirectory('io')
+    .childDirectory('flutter')
+    .childDirectory('app')
+    .childFile('FlutterMultiDexApplication.java');
 }
 
 /// Creates the FlutterMultiDexApplication.java if it does not exist.
@@ -67,12 +66,11 @@ bool multiDexApplicationExists(final Directory projectDir) {
 }
 
 File _getManifestFile(Directory projectDir) {
-  return projectDir
-      .childDirectory('android')
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childFile('AndroidManifest.xml');
+  return projectDir.childDirectory('android')
+    .childDirectory('app')
+    .childDirectory('src')
+    .childDirectory('main')
+    .childFile('AndroidManifest.xml');
 }
 
 /// Returns true if the `app` module AndroidManifest.xml includes the
@@ -91,8 +89,7 @@ bool androidManifestHasNameVariable(final Directory projectDir) {
     return false;
   }
   // Check for the ${androidName} application attribute.
-  for (final XmlElement application
-      in document.findAllElements('application')) {
+  for (final XmlElement application in document.findAllElements('application')) {
     final String? applicationName = application.getAttribute('android:name');
     if (applicationName == r'${applicationName}') {
       return true;

@@ -210,8 +210,7 @@ class Focus extends StatefulWidget {
   /// keyboards in general. For text input, consider [TextField],
   /// [EditableText], or [CupertinoTextField] instead, which do support these
   /// things.
-  FocusOnKeyEventCallback? get onKeyEvent =>
-      _onKeyEvent ?? focusNode?.onKeyEvent;
+  FocusOnKeyEventCallback? get onKeyEvent => _onKeyEvent ?? focusNode?.onKeyEvent;
   final FocusOnKeyEventCallback? _onKeyEvent;
 
   /// A handler for keys that are pressed when this object or one of its
@@ -254,8 +253,7 @@ class Focus extends StatefulWidget {
   /// * [FocusTraversalPolicy], a class that can be extended to describe a
   ///   traversal policy.
   /// {@endtemplate}
-  bool get canRequestFocus =>
-      _canRequestFocus ?? focusNode?.canRequestFocus ?? true;
+  bool get canRequestFocus => _canRequestFocus ?? focusNode?.canRequestFocus ?? true;
   final bool? _canRequestFocus;
 
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
@@ -299,8 +297,7 @@ class Focus extends StatefulWidget {
   ///   `descendantsAreFocusable` parameter to conditionally block focus for a
   ///   subtree.
   /// {@endtemplate}
-  bool get descendantsAreFocusable =>
-      _descendantsAreFocusable ?? focusNode?.descendantsAreFocusable ?? true;
+  bool get descendantsAreFocusable => _descendantsAreFocusable ?? focusNode?.descendantsAreFocusable ?? true;
   final bool? _descendantsAreFocusable;
 
   /// {@template flutter.widgets.Focus.descendantsAreTraversable}
@@ -324,10 +321,7 @@ class Focus extends StatefulWidget {
   ///   `descendantsAreFocusable` parameter to conditionally block focus for a
   ///   subtree.
   /// {@endtemplate}
-  bool get descendantsAreTraversable =>
-      _descendantsAreTraversable ??
-      focusNode?.descendantsAreTraversable ??
-      true;
+  bool get descendantsAreTraversable => _descendantsAreTraversable ?? focusNode?.descendantsAreTraversable ?? true;
   final bool? _descendantsAreTraversable;
 
   /// {@template flutter.widgets.Focus.includeSemantics}
@@ -372,11 +366,10 @@ class Focus extends StatefulWidget {
   ///
   ///  * [maybeOf], which is similar to this function, but will return null
   ///    instead of throwing if it doesn't find a [Focus] node.
-  static FocusNode of(BuildContext context, {bool scopeOk = false}) {
+  static FocusNode of(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
-    final _FocusMarker? marker =
-        context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode? node = marker?.notifier;
     assert(() {
       if (node == null) {
@@ -425,11 +418,10 @@ class Focus extends StatefulWidget {
   ///
   ///  * [of], which is similar to this function, but will throw an exception if
   ///    it doesn't find a [Focus] node instead of returning null.
-  static FocusNode? maybeOf(BuildContext context, {bool scopeOk = false}) {
+  static FocusNode? maybeOf(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
-    final _FocusMarker? marker =
-        context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode? node = marker?.notifier;
     if (node == null) {
       return null;
@@ -452,28 +444,17 @@ class Focus extends StatefulWidget {
   ///
   /// Calling this function creates a dependency that will rebuild the given
   /// context when the focus changes.
-  static bool isAt(BuildContext context) =>
-      Focus.maybeOf(context)?.hasFocus ?? false;
+  static bool isAt(BuildContext context) => Focus.maybeOf(context)?.hasFocus ?? false;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(StringProperty('debugLabel', debugLabel, defaultValue: null));
-    properties.add(FlagProperty('autofocus',
-        value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
-    properties.add(FlagProperty('canRequestFocus',
-        value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: false));
-    properties.add(FlagProperty('descendantsAreFocusable',
-        value: descendantsAreFocusable,
-        ifFalse: 'DESCENDANTS UNFOCUSABLE',
-        defaultValue: true));
-    properties.add(FlagProperty('descendantsAreTraversable',
-        value: descendantsAreTraversable,
-        ifFalse: 'DESCENDANTS UNTRAVERSABLE',
-        defaultValue: true));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-        defaultValue: null));
+    properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
+    properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
+    properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: false));
+    properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
+    properties.add(FlagProperty('descendantsAreTraversable', value: descendantsAreTraversable, ifFalse: 'DESCENDANTS UNTRAVERSABLE', defaultValue: true));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
   @override
@@ -491,13 +472,13 @@ class _FocusWithExternalFocusNode extends Focus {
     ValueChanged<bool>? onFocusChange,
     bool includeSemantics = true,
   }) : super(
-          key: key,
-          child: child,
-          focusNode: focusNode,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-          includeSemantics: includeSemantics,
-        );
+    key: key,
+    child: child,
+    focusNode: focusNode,
+    autofocus: autofocus,
+    onFocusChange: onFocusChange,
+    includeSemantics: includeSemantics,
+  );
 
   @override
   bool get _usingExternalFocus => true;
@@ -552,8 +533,7 @@ class _FocusState extends State<Focus> {
     _descendantsWereFocusable = focusNode.descendantsAreFocusable;
     _descendantsWereTraversable = focusNode.descendantsAreTraversable;
     _hadPrimaryFocus = focusNode.hasPrimaryFocus;
-    _focusAttachment = focusNode.attach(context,
-        onKeyEvent: widget.onKeyEvent, onKey: widget.onKey);
+    _focusAttachment = focusNode.attach(context, onKeyEvent: widget.onKeyEvent, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
@@ -801,7 +781,7 @@ class FocusScope extends Focus {
     required FocusScopeNode focusScopeNode,
     bool autofocus,
     ValueChanged<bool>? onFocusChange,
-  }) = _FocusScopeWithExternalFocusNode;
+  })  = _FocusScopeWithExternalFocusNode;
 
   /// Returns the [FocusScopeNode] of the [FocusScope] that most tightly
   /// encloses the given [context].
@@ -812,10 +792,8 @@ class FocusScope extends Focus {
   /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
     assert(context != null);
-    final _FocusMarker? marker =
-        context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
-    return marker?.notifier?.nearestScope ??
-        context.owner!.focusManager.rootScope;
+    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    return marker?.notifier?.nearestScope ?? context.owner!.focusManager.rootScope;
   }
 
   @override
@@ -832,12 +810,13 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
     bool autofocus = false,
     ValueChanged<bool>? onFocusChange,
   }) : super(
-          key: key,
-          child: child,
-          node: focusScopeNode,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-        );
+    key: key,
+    child: child,
+    node: focusScopeNode,
+    autofocus: autofocus,
+    onFocusChange: onFocusChange,
+  );
+
 
   @override
   bool get _usingExternalFocus => true;

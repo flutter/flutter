@@ -44,8 +44,9 @@ class Section {
   final List<SectionDetail>? details;
 
   @override
-  bool operator ==(Object other) {
-    return other is Section && other.title == title;
+  bool operator==(Object other) {
+    return other is Section
+        && other.title == title;
   }
 
   @override

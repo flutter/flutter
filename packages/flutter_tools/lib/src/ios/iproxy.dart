@@ -23,9 +23,8 @@ class IProxy {
     required Logger logger,
     required ProcessManager processManager,
     required MapEntry<String, String> dyLdLibEntry,
-  })  : _dyLdLibEntry = dyLdLibEntry,
-        _processUtils =
-            ProcessUtils(processManager: processManager, logger: logger),
+  }) : _dyLdLibEntry = dyLdLibEntry,
+        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
         _logger = logger,
         _iproxyPath = iproxyPath;
 
@@ -42,8 +41,7 @@ class IProxy {
       logger: logger,
       processManager: processManager,
       dyLdLibEntry: const MapEntry<String, String>(
-        'DYLD_LIBRARY_PATH',
-        '/path/to/libs',
+        'DYLD_LIBRARY_PATH', '/path/to/libs',
       ),
     );
   }
@@ -61,7 +59,8 @@ class IProxy {
         '$hostPort:$devicePort',
         '--udid',
         deviceId,
-        if (_logger.isVerbose) '--debug',
+        if (_logger.isVerbose)
+          '--debug',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[_dyLdLibEntry],

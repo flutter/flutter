@@ -21,11 +21,9 @@ void main() {
         ..paragraph(offset: const Offset(64.0, 96.0)),
     );
 
-    final Widget error =
-        Builder(builder: (BuildContext context) => throw 'pillow');
+    final Widget error = Builder(builder: (BuildContext context) => throw 'pillow');
 
-    await tester
-        .pumpWidget(Center(child: SizedBox(width: 100.0, child: error)));
+    await tester.pumpWidget(Center(child: SizedBox(width: 100.0, child: error)));
     expect(tester.takeException(), 'pillow');
     expect(
       find.byType(ErrorWidget),
@@ -34,12 +32,10 @@ void main() {
         ..paragraph(offset: const Offset(0.0, 96.0)),
     );
 
-    await tester
-        .pumpWidget(Center(child: SizedBox(height: 100.0, child: error)));
+    await tester.pumpWidget(Center(child: SizedBox(height: 100.0, child: error)));
     expect(tester.takeException(), null);
 
-    await tester.pumpWidget(
-        Center(child: SizedBox(key: UniqueKey(), height: 100.0, child: error)));
+    await tester.pumpWidget(Center(child: SizedBox(key: UniqueKey(), height: 100.0, child: error)));
     expect(tester.takeException(), 'pillow');
     expect(
       find.byType(ErrorWidget),

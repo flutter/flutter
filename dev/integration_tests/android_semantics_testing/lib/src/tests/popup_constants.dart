@@ -23,10 +23,4 @@ const String alertButtonKeyValue = 'PopupControls#AlertButton1';
 /// The string supplied to the [ValueKey] for the alert dialog.
 const String alertKeyValue = 'PopupControls#Alert1';
 
-const List<String> popupItems = <String>[
-  'Item 1',
-  'Item 2',
-  'Item 3',
-  'Item 4',
-  'Item 5'
-];
+const List<String> popupItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'];

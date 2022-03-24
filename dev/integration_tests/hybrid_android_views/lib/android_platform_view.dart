@@ -45,11 +45,12 @@ class AndroidPlatformView extends StatelessWidget {
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
         final AndroidViewController controller =
-            PlatformViewsService.initSurfaceAndroidView(
-          id: params.id,
-          viewType: params.viewType,
-          layoutDirection: TextDirection.ltr,
-        )..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
+          PlatformViewsService.initSurfaceAndroidView(
+            id: params.id,
+            viewType: params.viewType,
+            layoutDirection: TextDirection.ltr,
+          )
+          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
         if (onPlatformViewCreated != null) {
           controller.addOnPlatformViewCreatedListener(onPlatformViewCreated!);
         }

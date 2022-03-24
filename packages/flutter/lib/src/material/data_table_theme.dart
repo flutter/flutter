@@ -109,8 +109,7 @@ class DataTableThemeData with Diagnosticable {
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
-      checkboxHorizontalMargin:
-          checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
+      checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
     );
   }
 
@@ -119,100 +118,78 @@ class DataTableThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DataTableThemeData lerp(
-      DataTableThemeData a, DataTableThemeData b, double t) {
+  static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
     assert(t != null);
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
-      dataRowColor: _lerpProperties<Color?>(
-          a.dataRowColor, b.dataRowColor, t, Color.lerp),
+      dataRowColor: _lerpProperties<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
       dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
-      headingRowColor: _lerpProperties<Color?>(
-          a.headingRowColor, b.headingRowColor, t, Color.lerp),
+      headingRowColor: _lerpProperties<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
-      headingTextStyle:
-          TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
+      headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
-      checkboxHorizontalMargin:
-          lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
+      checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        decoration,
-        dataRowColor,
-        dataRowHeight,
-        dataTextStyle,
-        headingRowColor,
-        headingRowHeight,
-        headingTextStyle,
-        horizontalMargin,
-        columnSpacing,
-        dividerThickness,
-        checkboxHorizontalMargin,
-      );
+    decoration,
+    dataRowColor,
+    dataRowHeight,
+    dataTextStyle,
+    headingRowColor,
+    headingRowHeight,
+    headingTextStyle,
+    horizontalMargin,
+    columnSpacing,
+    dividerThickness,
+    checkboxHorizontalMargin,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is DataTableThemeData &&
-        other.decoration == decoration &&
-        other.dataRowColor == dataRowColor &&
-        other.dataRowHeight == dataRowHeight &&
-        other.dataTextStyle == dataTextStyle &&
-        other.headingRowColor == headingRowColor &&
-        other.headingRowHeight == headingRowHeight &&
-        other.headingTextStyle == headingTextStyle &&
-        other.horizontalMargin == horizontalMargin &&
-        other.columnSpacing == columnSpacing &&
-        other.dividerThickness == dividerThickness &&
-        other.checkboxHorizontalMargin == checkboxHorizontalMargin;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DataTableThemeData
+      && other.decoration == decoration
+      && other.dataRowColor == dataRowColor
+      && other.dataRowHeight == dataRowHeight
+      && other.dataTextStyle == dataTextStyle
+      && other.headingRowColor == headingRowColor
+      && other.headingRowHeight == headingRowHeight
+      && other.headingTextStyle == headingTextStyle
+      && other.horizontalMargin == horizontalMargin
+      && other.columnSpacing == columnSpacing
+      && other.dividerThickness == dividerThickness
+      && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>(
-        'dataRowColor', dataRowColor,
-        defaultValue: null));
-    properties.add(
-        DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'dataTextStyle', dataTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>(
-        'headingRowColor', headingRowColor,
-        defaultValue: null));
-    properties.add(DoubleProperty('headingRowHeight', headingRowHeight,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'headingTextStyle', headingTextStyle,
-        defaultValue: null));
-    properties.add(DoubleProperty('horizontalMargin', horizontalMargin,
-        defaultValue: null));
-    properties.add(
-        DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
-    properties.add(DoubleProperty('dividerThickness', dividerThickness,
-        defaultValue: null));
-    properties.add(DoubleProperty(
-        'checkboxHorizontalMargin', checkboxHorizontalMargin,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
+    properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
+    properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
+    properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
+    properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
+    properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
+    properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
   }
 
-  static MaterialStateProperty<T>? _lerpProperties<T>(
-      MaterialStateProperty<T>? a,
-      MaterialStateProperty<T>? b,
-      double t,
-      T Function(T?, T?, double) lerpFunction) {
+  static MaterialStateProperty<T>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T Function(T?, T?, double) lerpFunction ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 }
@@ -255,8 +232,7 @@ class DataTableTheme extends InheritedWidget {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The properties used for all descendant [DataTable] widgets.
   final DataTableThemeData data;
@@ -272,8 +248,7 @@ class DataTableTheme extends InheritedWidget {
   /// DataTableThemeData theme = DataTableTheme.of(context);
   /// ```
   static DataTableThemeData of(BuildContext context) {
-    final DataTableTheme? dataTableTheme =
-        context.dependOnInheritedWidgetOfExactType<DataTableTheme>();
+    final DataTableTheme? dataTableTheme = context.dependOnInheritedWidgetOfExactType<DataTableTheme>();
     return dataTableTheme?.data ?? Theme.of(context).dataTableTheme;
   }
 

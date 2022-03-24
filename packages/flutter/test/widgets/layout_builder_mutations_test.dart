@@ -14,8 +14,8 @@ class Wrapper extends StatelessWidget {
   const Wrapper({
     Key? key,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   final Widget child;
 
@@ -24,23 +24,20 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Moving a global key from another LayoutBuilder at layout time',
-      (WidgetTester tester) async {
+  testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey = GlobalKey();
 
     await tester.pumpWidget(Row(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Wrapper(
-          child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return const SizedBox();
           }),
         ),
         Wrapper(
           child: Wrapper(
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return Wrapper(
                 child: SizedBox(key: victimKey),
               );
@@ -54,8 +51,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Wrapper(
-          child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return Wrapper(
               child: SizedBox(key: victimKey),
             );
@@ -63,8 +59,7 @@ void main() {
         ),
         Wrapper(
           child: Wrapper(
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return const SizedBox();
             }),
           ),
@@ -75,9 +70,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets(
-      'Moving a global key from another SliverLayoutBuilder at layout time',
-      (WidgetTester tester) async {
+  testWidgets('Moving a global key from another SliverLayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey1 = GlobalKey();
     final GlobalKey victimKey2 = GlobalKey();
 
@@ -88,22 +81,17 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
-                return SliverPadding(
-                    key: victimKey1,
-                    padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+                return SliverPadding(key: victimKey1, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
-                return SliverPadding(
-                    key: victimKey2,
-                    padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
+                return SliverPadding(key: victimKey2, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
-                return const SliverPadding(
-                    padding: EdgeInsets.fromLTRB(5, 7, 11, 13));
+                return const SliverPadding(padding: EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
           ],
@@ -118,22 +106,17 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
-                return SliverPadding(
-                    key: victimKey2,
-                    padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+                return SliverPadding(key: victimKey2, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
-                return const SliverPadding(
-                    padding: EdgeInsets.fromLTRB(5, 7, 11, 13));
+                return const SliverPadding(padding: EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
-                return SliverPadding(
-                    key: victimKey1,
-                    padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
+                return SliverPadding(key: victimKey1, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
           ],

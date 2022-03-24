@@ -15,8 +15,7 @@ void main() {
     expect(box, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedAlign alignment visual-to-directional animation',
-      (WidgetTester tester) async {
+  testWidgets('AnimatedAlign alignment visual-to-directional animation', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -79,8 +78,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box =
-        tester.renderObject<RenderBox>(find.byType(AnimatedAlign));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(AnimatedAlign));
     expect(box.size.width, equals(50.0));
   });
 
@@ -104,9 +102,8 @@ void main() {
         ),
       ),
     );
-    final RenderBox box =
-        tester.renderObject<RenderBox>(find.byType(AnimatedAlign));
-    expect(box.size.height, equals(50.0));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(AnimatedAlign));
+    expect(box.size.height, equals( 50.0));
   });
 
   testWidgets('AnimatedAlign null height factor', (WidgetTester tester) async {
@@ -142,7 +139,7 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: const <Widget>[
-              AnimatedAlign(
+               AnimatedAlign(
                 alignment: Alignment.center,
                 curve: Curves.ease,
                 duration: Duration(milliseconds: 200),
@@ -156,8 +153,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box =
-        tester.renderObject<RenderBox>(find.byType(SizedBox).last);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(SizedBox).last);
     expect(box.size, equals(const Size(100.0, 100)));
   });
 }

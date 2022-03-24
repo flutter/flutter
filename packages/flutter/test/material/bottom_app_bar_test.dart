@@ -11,8 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('no overlap with floating action button',
-      (WidgetTester tester) async {
+  testWidgets('no overlap with floating action button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -28,10 +27,10 @@ void main() {
       ),
     );
 
-    final ShapeListenerState shapeListenerState =
-        tester.state(find.byType(ShapeListener));
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
+    final Path expectedPath = Path()
+      ..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
     expect(
@@ -55,15 +54,13 @@ void main() {
             child: MaterialApp(
               home: Scaffold(
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 floatingActionButtonLocation: location,
                 bottomNavigationBar: const BottomAppBar(
                   shape: AutomaticNotchedShape(
-                    BeveledRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(50.0))),
-                    ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(30.0))),
+                    BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(50.0))),
+                    ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30.0))),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
@@ -75,7 +72,6 @@ void main() {
         ),
       );
     }
-
     await pump(FloatingActionButtonLocation.endDocked);
     await expectLater(
       find.byKey(key),
@@ -89,15 +85,13 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
-  testWidgets('color defaults to Theme.bottomAppBarColor',
-      (WidgetTester tester) async {
+  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)
-                  .copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -111,7 +105,7 @@ void main() {
     );
 
     final PhysicalShape physicalShape =
-        tester.widget(find.byType(PhysicalShape).at(0));
+      tester.widget(find.byType(PhysicalShape).at(0));
 
     expect(physicalShape.color, const Color(0xffffff00));
   });
@@ -122,8 +116,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)
-                  .copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -139,13 +132,12 @@ void main() {
     );
 
     final PhysicalShape physicalShape =
-        tester.widget(find.byType(PhysicalShape).at(0));
+      tester.widget(find.byType(PhysicalShape).at(0));
 
     expect(physicalShape.color, const Color(0xff0000ff));
   });
 
-  testWidgets('dark theme applies an elevation overlay color',
-      (WidgetTester tester) async {
+  testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
@@ -157,8 +149,7 @@ void main() {
       ),
     );
 
-    final PhysicalShape physicalShape =
-        tester.widget(find.byType(PhysicalShape).at(0));
+    final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     // For the default dark theme the overlay color for elevation 8 is 0xFF2D2D2D
     expect(physicalShape.color, const Color(0xFF2D2D2D));
@@ -206,16 +197,15 @@ void main() {
             onPressed: null,
             child: Icon(Icons.add),
           ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
       ),
     );
 
-    final ShapeListenerState shapeListenerState =
-        tester.state(find.byType(ShapeListener));
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
+    final Path expectedPath = Path()
+      ..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -243,18 +233,15 @@ void main() {
             onPressed: null,
             child: Icon(Icons.add),
           ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
       ),
     );
 
-    final ShapeListenerState shapeListenerState =
-        tester.state(find.byType(ShapeListener));
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox babBox = tester.renderObject(find.byType(BottomAppBar));
     final Size babSize = babBox.size;
-    final RenderBox fabBox =
-        tester.renderObject(find.byType(FloatingActionButton));
+    final RenderBox fabBox = tester.renderObject(find.byType(FloatingActionButton));
     final Size fabSize = fabBox.size;
 
     final double fabLeft = (babSize.width / 2.0) - (fabSize.width / 2.0);
@@ -298,18 +285,15 @@ void main() {
             onPressed: null,
             child: Icon(Icons.add),
           ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
       ),
     );
 
-    final ShapeListenerState shapeListenerState =
-        tester.state(find.byType(ShapeListener));
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox babBox = tester.renderObject(find.byType(BottomAppBar));
     final Size babSize = babBox.size;
-    final RenderBox fabBox =
-        tester.renderObject(find.byType(FloatingActionButton));
+    final RenderBox fabBox = tester.renderObject(find.byType(FloatingActionButton));
     final Size fabSize = fabBox.size;
 
     final double fabLeft = (babSize.width / 2.0) - (fabSize.width / 2.0) - 6.0;
@@ -381,7 +365,8 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: BottomAppBar(
+          bottomNavigationBar:
+          BottomAppBar(
             shape: RectangularNotch(),
             notchMargin: 0.0,
             clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -395,15 +380,12 @@ void main() {
     expect(physicalShape.clipBehavior, Clip.antiAliasWithSaveLayer);
   });
 
-  testWidgets(
-      'BottomAppBar with shape when Scaffold.bottomNavigationBar == null',
-      (WidgetTester tester) async {
+  testWidgets('BottomAppBar with shape when Scaffold.bottomNavigationBar == null', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: FloatingActionButton(
             backgroundColor: Colors.green,
             child: const Icon(Icons.home),
@@ -428,13 +410,11 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(FloatingActionButton)),
-        const Rect.fromLTRB(372, 528, 428, 584));
+    expect(tester.getRect(find.byType(FloatingActionButton)), const Rect.fromLTRB(372, 528, 428, 584));
     expect(tester.getSize(find.byType(BottomAppBar)), const Size(800, 50));
   });
 
-  testWidgets('notch with margin and top padding, home safe area',
-      (WidgetTester tester) async {
+  testWidgets('notch with margin and top padding, home safe area', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/90024
     await tester.pumpWidget(
       const MediaQuery(
@@ -456,20 +436,17 @@ void main() {
                 onPressed: null,
                 child: Icon(Icons.add),
               ),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
             ),
           ),
         ),
       ),
     );
 
-    final ShapeListenerState shapeListenerState =
-        tester.state(find.byType(ShapeListener));
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox babBox = tester.renderObject(find.byType(BottomAppBar));
     final Size babSize = babBox.size;
-    final RenderBox fabBox =
-        tester.renderObject(find.byType(FloatingActionButton));
+    final RenderBox fabBox = tester.renderObject(find.byType(FloatingActionButton));
     final Size fabSize = fabBox.size;
 
     final double fabLeft = (babSize.width / 2.0) - (fabSize.width / 2.0) - 6.0;
@@ -536,12 +513,13 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child, {Key? key}) : super(key: key);
+  const ShapeListener(this.child, { Key? key }) : super(key: key);
 
   final Widget child;
 
   @override
   State createState() => ShapeListenerState();
+
 }
 
 class ShapeListenerState extends State<ShapeListener> {
@@ -560,6 +538,7 @@ class ShapeListenerState extends State<ShapeListener> {
     super.didChangeDependencies();
     cache = ClipCachePainter(context);
   }
+
 }
 
 class RectangularNotch extends NotchedShape {
@@ -567,7 +546,8 @@ class RectangularNotch extends NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (guest == null) return Path()..addRect(host);
+    if (guest == null)
+      return Path()..addRect(host);
     return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)

@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import '_isolates_io.dart' if (dart.library.html) '_isolates_web.dart'
-    as isolates;
+import '_isolates_io.dart'
+  if (dart.library.html) '_isolates_web.dart' as isolates;
 
 /// Signature for the callback passed to [compute].
 ///
@@ -31,9 +31,7 @@ typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 ///
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
-typedef ComputeImpl = Future<R> Function<Q, R>(
-    ComputeCallback<Q, R> callback, Q message,
-    {String? debugLabel});
+typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
 
 /// A function that spawns an isolate and runs the provided `callback` on that
 /// isolate, passes it the provided `message`, and (eventually) returns the

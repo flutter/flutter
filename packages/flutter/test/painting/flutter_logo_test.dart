@@ -24,40 +24,34 @@ void main() {
   );
 
   test('FlutterLogoDecoration lerp from null to null is null', () {
-    final FlutterLogoDecoration? logo =
-        FlutterLogoDecoration.lerp(null, null, 0.5);
+    final FlutterLogoDecoration? logo = FlutterLogoDecoration.lerp(null, null, 0.5);
     expect(logo, isNull);
   });
 
   test('FlutterLogoDecoration lerp from non-null to null lerps margin', () {
-    final FlutterLogoDecoration logo =
-        FlutterLogoDecoration.lerp(start, null, 0.4)!;
+    final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(start, null, 0.4)!;
     expect(logo.textColor, start.textColor);
     expect(logo.style, start.style);
     expect(logo.margin, start.margin * 0.4);
   });
 
   test('FlutterLogoDecoration lerp from null to non-null lerps margin', () {
-    final FlutterLogoDecoration logo =
-        FlutterLogoDecoration.lerp(null, end, 0.6)!;
+    final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(null, end, 0.6)!;
     expect(logo.textColor, end.textColor);
     expect(logo.style, end.style);
     expect(logo.margin, end.margin * 0.6);
   });
 
   test('FlutterLogoDecoration lerps colors and margins', () {
-    final FlutterLogoDecoration logo =
-        FlutterLogoDecoration.lerp(start, end, 0.5)!;
+    final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(start, end, 0.5)!;
     expect(logo.textColor, Color.lerp(start.textColor, end.textColor, 0.5));
     expect(logo.margin, EdgeInsets.lerp(start.margin, end.margin, 0.5));
   });
 
   test('FlutterLogoDecoration.lerpFrom and FlutterLogoDecoration.lerpTo', () {
     expect(Decoration.lerp(start, const BoxDecoration(), 0.0), start);
-    expect(Decoration.lerp(start, const BoxDecoration(), 1.0),
-        const BoxDecoration());
-    expect(Decoration.lerp(const BoxDecoration(), end, 0.0),
-        const BoxDecoration());
+    expect(Decoration.lerp(start, const BoxDecoration(), 1.0), const BoxDecoration());
+    expect(Decoration.lerp(const BoxDecoration(), end, 0.0), const BoxDecoration());
     expect(Decoration.lerp(const BoxDecoration(), end, 1.0), end);
   });
 

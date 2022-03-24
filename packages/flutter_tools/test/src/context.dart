@@ -45,14 +45,12 @@ import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
-export 'fake_process_manager.dart'
-    show ProcessManager, FakeProcessManager, FakeCommand;
+export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
 
-FakeDeviceManager get testDeviceManager =>
-    context.get<DeviceManager>() as FakeDeviceManager;
+FakeDeviceManager get testDeviceManager => context.get<DeviceManager>() as FakeDeviceManager;
 FakeDoctor get testDoctor => context.get<Doctor>() as FakeDoctor;
 
 typedef ContextInitializer = void Function(AppContext testContext);
@@ -64,18 +62,17 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
-  bool
-      skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     throw StateError(
-        'If you override the FileSystem context you must also provide a ProcessManager, '
-        'otherwise the processes you launch will not be dealing with the same file system '
-        'that you are dealing with in your test.');
+      'If you override the FileSystem context you must also provide a ProcessManager, '
+      'otherwise the processes you launch will not be dealing with the same file system '
+      'that you are dealing with in your test.'
+    );
   }
   if (overrides.containsKey(ProcessUtils)) {
-    throw StateError(
-        'Do not inject ProcessUtils for testing, use ProcessManager instead.');
+    throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
   }
 
   // Ensure we don't rely on the default [Config] constructor which will
@@ -88,18 +85,15 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory
-        .createTempSync('flutter_config_dir_test.');
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return Config.test(
       name: Config.kFlutterSettings,
       directory: configDir,
       logger: globals.logger,
     );
   }
-
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory
-        .createTempSync('flutter_config_dir_test.');
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return PersistentToolState.test(
       directory: configDir,
       logger: globals.logger,
@@ -111,8 +105,7 @@ void testUsingContext(
       return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
-          AnsiTerminal: () =>
-              AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
+          AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(globals.logger),
@@ -150,9 +143,8 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-              // This catch rethrows, so doesn't need to catch only Exception.
-            } catch (error) {
-              // ignore: avoid_catches_without_on_clauses
+            // This catch rethrows, so doesn't need to catch only Exception.
+            } catch (error) { // ignore: avoid_catches_without_on_clauses
               _printBufferedErrors(context);
               rethrow;
             }
@@ -223,8 +215,7 @@ class FakeDeviceManager implements DeviceManager {
   Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) async =>
-      devices;
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async => devices;
 
   @override
   Future<List<Device>> getDevicesById(String deviceId) async {
@@ -250,14 +241,12 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  bool isDeviceSupportedForProject(
-      Device device, FlutterProject flutterProject) {
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject,
-      {Duration timeout}) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
     return devices;
   }
 }
@@ -279,7 +268,6 @@ class FakeDoctor extends Doctor {
   bool get canLaunchAnything => true;
 
   @override
-
   /// Replaces the android workflow with a version that overrides licensesAccepted,
   /// to prevent individual tests from having to mock out the process for
   /// the Doctor.
@@ -322,19 +310,17 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<String> pluginsBuildSettingsOutput(
-    Directory podXcodeProject, {
-    Duration timeout = const Duration(minutes: 1),
-  }) async {
+      Directory podXcodeProject, {
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
     return null;
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme,
-      {bool verbose = false}) async {}
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath,
-      {String projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -352,22 +338,20 @@ class NoopCrashReporter implements CrashReporter {
   const NoopCrashReporter();
 
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) async {}
+  Future<void> informUser(CrashDetails details, File crashFile) async { }
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  LocalFileSystemBlockingSetCurrentDirectory()
-      : super.test(
-          signals: LocalSignals.instance,
-        );
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
+    signals: LocalSignals.instance,
+  );
 
   @override
   set currentDirectory(dynamic value) {
-    throw Exception(
-        'globals.fs.currentDirectory should not be set on the local file system during '
-        'tests as this can cause race conditions with concurrent tests. '
-        'Consider using a MemoryFileSystem for testing if possible or refactor '
-        'code to not require setting globals.fs.currentDirectory.');
+    throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
+          'tests as this can cause race conditions with concurrent tests. '
+          'Consider using a MemoryFileSystem for testing if possible or refactor '
+          'code to not require setting globals.fs.currentDirectory.');
   }
 }
 

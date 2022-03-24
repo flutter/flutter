@@ -15,20 +15,17 @@ class MigrateProject extends Project {
   MigrateProject(this.version, {this.vanilla = true});
 
   @override
-  Future<void> setUpIn(
-    Directory dir, {
+  Future<void> setUpIn(Directory dir, {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) async {
     this.dir = dir;
     _appPath = dir.path;
     if (androidLocalProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'),
-          androidLocalProperties);
+      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
     final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
-    final Directory depotToolsDir =
-        createResolvedTempDirectorySync('depot_tools.');
+    final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 
     await processManager.run(<String>[
       'git',
@@ -37,8 +34,7 @@ class MigrateProject extends Project {
       depotToolsDir.path,
     ], workingDirectory: dir.path);
 
-    final File cipdFile =
-        depotToolsDir.childFile(Platform.isWindows ? 'cipd.bat' : 'cipd');
+    final File cipdFile = depotToolsDir.childFile(Platform.isWindows ? 'cipd.bat' : 'cipd');
     await processManager.run(<String>[
       cipdFile.path,
       'init',
@@ -119,9 +115,7 @@ class MigrateProject extends Project {
 
   // Maintain the same pubspec as the configured app.
   @override
-  String get pubspec => fileSystem
-      .file(fileSystem.path.join(_appPath, 'pubspec.yaml'))
-      .readAsStringSync();
+  String get pubspec => fileSystem.file(fileSystem.path.join(_appPath, 'pubspec.yaml')).readAsStringSync();
 
   String get androidLocalProperties => '''
   flutter.sdk=${getFlutterRoot()}

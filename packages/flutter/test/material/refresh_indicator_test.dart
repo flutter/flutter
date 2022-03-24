@@ -29,8 +29,7 @@ void main() {
           onRefresh: refresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                .map<Widget>((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -44,18 +43,13 @@ void main() {
     await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
 
-    expect(
-        tester.getSemantics(find.byType(RefreshProgressIndicator)),
-        matchesSemantics(
-          label: 'Refresh',
-        ));
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
 
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
     handle.dispose();
   });
@@ -65,8 +59,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
-          notificationPredicate: (ScrollNotification notification) =>
-              notification.depth == 1,
+          notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
           onRefresh: refresh,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -74,8 +67,7 @@ void main() {
               width: 600.0,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                    .map<Widget>((String item) {
+                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
                   return SizedBox(
                     height: 200.0,
                     child: Text(item),
@@ -88,26 +80,18 @@ void main() {
       ),
     );
 
-    await tester.fling(
-        find.text('A'), const Offset(300.0, 0.0), 1000.0); // horizontal fling
+    await tester.fling(find.text('A'), const Offset(300.0, 0.0), 1000.0); // horizontal fling
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, false);
 
-    await tester.fling(
-        find.text('A'), const Offset(0.0, 300.0), 1000.0); // vertical fling
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0); // vertical fling
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
 
@@ -133,12 +117,9 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
 
@@ -165,12 +146,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy,
-        lessThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
-  testWidgets('RefreshIndicator - reverse - position',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator - reverse - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -194,8 +173,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy,
-        lessThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
@@ -300,12 +278,9 @@ void main() {
     );
 
     bool completed = false;
-    tester
-        .state<RefreshIndicatorState>(find.byType(RefreshIndicator))
-        .show()
-        .then<void>((void value) {
-      completed = true;
-    });
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
+      .show()
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -315,12 +290,9 @@ void main() {
     expect(completed, false);
     completed = false;
     refreshCalled = false;
-    tester
-        .state<RefreshIndicatorState>(find.byType(RefreshIndicator))
-        .show()
-        .then<void>((void value) {
-      completed = true;
-    });
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
+      .show()
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -349,12 +321,9 @@ void main() {
     );
 
     bool completed = false;
-    tester
-        .state<RefreshIndicatorState>(find.byType(RefreshIndicator))
-        .show()
-        .then<void>((void value) {
-      completed = true;
-    });
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
+      .show()
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -364,12 +333,9 @@ void main() {
     expect(completed, true);
     completed = false;
     refreshCalled = false;
-    tester
-        .state<RefreshIndicatorState>(find.byType(RefreshIndicator))
-        .show()
-        .then<void>((void value) {
-      completed = true;
-    });
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
+      .show()
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -379,8 +345,7 @@ void main() {
     expect(completed, true);
   });
 
-  testWidgets('RefreshIndicator - show - fast - twice',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator - show - fast - twice', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -400,19 +365,13 @@ void main() {
     );
 
     bool completed1 = false;
-    tester
-        .state<RefreshIndicatorState>(find.byType(RefreshIndicator))
-        .show()
-        .then<void>((void value) {
-      completed1 = true;
-    });
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
+      .show()
+      .then<void>((void value) { completed1 = true; });
     bool completed2 = false;
-    tester
-        .state<RefreshIndicatorState>(find.byType(RefreshIndicator))
-        .show()
-        .then<void>((void value) {
-      completed2 = true;
-    });
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
+      .show()
+      .then<void>((void value) { completed2 = true; });
     await tester.pump();
     expect(completed1, false);
     expect(completed2, false);
@@ -424,9 +383,7 @@ void main() {
     expect(completed2, true);
   });
 
-  testWidgets(
-      'Refresh starts while scroll view moves back to 0.0 after overscroll',
-      (WidgetTester tester) async {
+  testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     refreshCalled = false;
     double lastScrollOffset;
     final ScrollController controller = ScrollController();
@@ -438,8 +395,7 @@ void main() {
           child: ListView(
             controller: controller,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                .map<Widget>((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -459,20 +415,16 @@ void main() {
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
-  },
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('RefreshIndicator does not force child to relayout',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator does not force child to relayout', (WidgetTester tester) async {
     int layoutCount = 0;
 
     Widget layoutCallback(BuildContext context, BoxConstraints constraints) {
       layoutCount++;
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children:
-            <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+        children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
           return SizedBox(
             height: 200.0,
             child: Text(item),
@@ -490,30 +442,24 @@ void main() {
       ),
     );
 
-    await tester.fling(
-        find.text('A'), const Offset(0.0, 300.0), 1000.0); // trigger refresh
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0); // trigger refresh
     await tester.pump();
 
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
 
     expect(layoutCount, 1);
   });
 
-  testWidgets('RefreshIndicator responds to strokeWidth',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator responds to strokeWidth', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
           onRefresh: () async {},
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                .map<Widget>((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -526,9 +472,7 @@ void main() {
 
     // Check for the default value
     expect(
-      tester
-          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
-          .strokeWidth,
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
       RefreshProgressIndicator.defaultStrokeWidth,
     );
 
@@ -539,8 +483,7 @@ void main() {
           strokeWidth: 4.0,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                .map<Widget>((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -552,23 +495,19 @@ void main() {
     );
 
     expect(
-      tester
-          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
-          .strokeWidth,
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
       4.0,
     );
   });
 
-  testWidgets('RefreshIndicator responds to edgeOffset',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator responds to edgeOffset', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
           onRefresh: () async {},
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                .map<Widget>((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -592,8 +531,7 @@ void main() {
           edgeOffset: kToolbarHeight,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                .map<Widget>((String item) {
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
               return SizedBox(
                 height: 200.0,
                 child: Text(item),
@@ -610,19 +548,17 @@ void main() {
     );
   });
 
-  testWidgets('RefreshIndicator appears at edgeOffset',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator appears at edgeOffset', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: RefreshIndicator(
         edgeOffset: kToolbarHeight,
         displacement: kToolbarHeight,
         onRefresh: () async {
-          await Future<void>.delayed(const Duration(seconds: 1), () {});
+          await Future<void>.delayed(const Duration(seconds: 1), () { });
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          children:
-              <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+          children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
             return SizedBox(
               height: 200.0,
               child: Text(item),
@@ -632,8 +568,7 @@ void main() {
       ),
     ));
 
-    await tester.fling(
-        find.byType(ListView), const Offset(0.0, 2.0 * kToolbarHeight), 1000.0);
+    await tester.fling(find.byType(ListView), const Offset(0.0, 2.0 * kToolbarHeight), 1000.0);
     await tester.pump(const Duration(seconds: 2));
 
     expect(
@@ -642,9 +577,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Top RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position',
-      (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -674,17 +607,12 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy,
-        lessThan(300.0));
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
-  testWidgets(
-      'Reverse RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position',
-      (WidgetTester tester) async {
+  testWidgets('Reverse RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -715,18 +643,13 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy,
-        lessThan(300.0));
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71936
-  testWidgets(
-      'RefreshIndicator(anywhere mode) should not be shown when overscroll occurs due to inertia',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator(anywhere mode) should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -757,16 +680,12 @@ void main() {
     // Release finger before reach the edge.
     await tester.fling(find.text('X'), const Offset(0.0, 99.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 
-  testWidgets(
-      'Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position',
-      (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -795,16 +714,12 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 
-  testWidgets(
-      'Reverse RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position',
-      (WidgetTester tester) async {
+  testWidgets('Reverse RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -834,19 +749,14 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 
-  testWidgets(
-      'ScrollController.jumpTo should not trigger the refresh indicator',
-      (WidgetTester tester) async {
+  testWidgets('ScrollController.jumpTo should not trigger the refresh indicator', (WidgetTester tester) async {
     refreshCalled = false;
-    final ScrollController scrollController =
-        ScrollController(initialScrollOffset: 500.0);
+    final ScrollController scrollController = ScrollController(initialScrollOffset: 500.0);
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
@@ -870,19 +780,15 @@ void main() {
     );
 
     scrollController.jumpTo(0.0);
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
 
     expect(refreshCalled, false);
   });
 
-  testWidgets('RefreshIndicator color defaults to ColorScheme.primary',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator color defaults to ColorScheme.primary', (WidgetTester tester) async {
     const Color primaryColor = Color(0xff4caf50);
-    final ThemeData theme = ThemeData.from(
-        colorScheme: const ColorScheme.light().copyWith(primary: primaryColor));
+    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light().copyWith(primary: primaryColor));
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -913,17 +819,10 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
-    expect(
-        tester
-            .widget<RefreshProgressIndicator>(
-                find.byType(RefreshProgressIndicator))
-            .valueColor!
-            .value,
-        primaryColor);
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, primaryColor);
   });
 
-  testWidgets('RefreshIndicator.color can be updated at runtime',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator.color can be updated at runtime', (WidgetTester tester) async {
     refreshCalled = false;
     Color refreshIndicatorColor = Colors.green;
     const Color red = Colors.red;
@@ -960,46 +859,34 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
-    expect(
-        tester
-            .widget<RefreshProgressIndicator>(
-                find.byType(RefreshProgressIndicator))
-            .valueColor!
-            .value,
-        refreshIndicatorColor.withOpacity(1.0));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, refreshIndicatorColor.withOpacity(1.0));
 
     setState(() {
       refreshIndicatorColor = red;
     });
 
     await tester.pump();
-    expect(
-        tester
-            .widget<RefreshProgressIndicator>(
-                find.byType(RefreshProgressIndicator))
-            .valueColor!
-            .value,
-        red.withOpacity(1.0));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, red.withOpacity(1.0));
   });
 
-  testWidgets('RefreshIndicator - reverse - BouncingScrollPhysics',
-      (WidgetTester tester) async {
+  testWidgets('RefreshIndicator - reverse - BouncingScrollPhysics', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
-            onRefresh: refresh,
-            child: ListView(
-              reverse: true,
-              physics: const BouncingScrollPhysics(),
-              children: <Widget>[
-                for (int i = 0; i < 4; i++)
-                  SizedBox(
-                    height: 200.0,
-                    child: Text('X - $i'),
-                  ),
-              ],
-            )),
+          onRefresh: refresh,
+          child: ListView(
+            reverse: true,
+            physics: const BouncingScrollPhysics(),
+            children: <Widget>[
+              for (int i = 0; i < 4; i++)
+                SizedBox(
+                  height: 200.0,
+                  child: Text('X - $i'),
+                ),
+            ],
+          )
+        ),
       ),
     );
 
@@ -1010,12 +897,9 @@ void main() {
     // Fling down to show refresh indicator
     await tester.fling(find.text('X - 3'), const Offset(0.0, 250.0), 1000.0);
     await tester.pump();
-    await tester
-        .pump(const Duration(seconds: 1)); // finish the scroll animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator settle animation
-    await tester.pump(
-        const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
 }

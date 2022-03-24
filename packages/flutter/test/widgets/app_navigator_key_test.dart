@@ -6,12 +6,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Route<void> generateRoute(RouteSettings settings) => PageRouteBuilder<void>(
-      settings: settings,
-      pageBuilder: (BuildContext context, Animation<double> animation1,
-          Animation<double> animation2) {
-        return const Placeholder();
-      },
-    );
+  settings: settings,
+  pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+    return const Placeholder();
+  },
+);
 
 void main() {
   testWidgets('WidgetsApp.navigatorKey', (WidgetTester tester) async {

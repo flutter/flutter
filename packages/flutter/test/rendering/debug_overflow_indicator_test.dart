@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('overflow indicator is not shown when not overflowing',
-      (WidgetTester tester) async {
+  testWidgets('overflow indicator is not shown when not overflowing', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: UnconstrainedBox(
@@ -21,8 +20,7 @@ void main() {
     expect(find.byType(UnconstrainedBox), isNot(paints..rect()));
   });
 
-  testWidgets('overflow indicator is shown when overflowing',
-      (WidgetTester tester) async {
+  testWidgets('overflow indicator is shown when overflowing', (WidgetTester tester) async {
     const UnconstrainedBox box = UnconstrainedBox(
       child: SizedBox(width: 200.0, height: 200.0),
     );
@@ -40,8 +38,7 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     // ignore: avoid_dynamic_calls
-    expect(exception.diagnostics.first.toString(),
-        startsWith('A RenderConstraintsTransformBox overflowed by '));
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
     expect(find.byType(UnconstrainedBox), paints..rect());
 
     await tester.pumpWidget(
@@ -59,8 +56,7 @@ void main() {
     expect(find.byType(UnconstrainedBox), paints..rect());
   });
 
-  testWidgets('overflow indicator is not shown when constraint size is zero.',
-      (WidgetTester tester) async {
+  testWidgets('overflow indicator is not shown when constraint size is zero.', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: SizedBox(

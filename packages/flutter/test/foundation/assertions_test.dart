@@ -51,12 +51,12 @@ void main() {
           yield ErrorDescription('INFO');
         },
       ).toString(),
-      '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
-      'The following message was thrown CONTEXTING:\n'
-      'MESSAGE\n'
-      '\n'
-      'INFO\n'
-      '═════════════════════════════════════════════════════════════════\n',
+        '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
+        'The following message was thrown CONTEXTING:\n'
+        'MESSAGE\n'
+        '\n'
+        'INFO\n'
+        '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
@@ -81,12 +81,12 @@ void main() {
           yield ErrorDescription('INFO');
         },
       ).toString(),
-      '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
-      'The following message was thrown CONTEXTING:\n'
-      'MESSAGE\n'
-      '\n'
-      'INFO\n'
-      '═════════════════════════════════════════════════════════════════\n',
+        '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
+        'The following message was thrown CONTEXTING:\n'
+        'MESSAGE\n'
+        '\n'
+        'INFO\n'
+        '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
@@ -122,15 +122,15 @@ void main() {
 
   test('FlutterErrorDetails.toStringShort', () {
     expect(
-      FlutterErrorDetails(
-        exception: 'MESSAGE',
-        library: 'library',
-        context: ErrorDescription('CONTEXTING'),
-        informationCollector: () sync* {
-          yield ErrorDescription('INFO');
-        },
-      ).toStringShort(),
-      'Exception caught by library',
+        FlutterErrorDetails(
+          exception: 'MESSAGE',
+          library: 'library',
+          context: ErrorDescription('CONTEXTING'),
+          informationCollector: () sync* {
+            yield ErrorDescription('INFO');
+          },
+        ).toStringShort(),
+        'Exception caught by library',
     );
   });
 
@@ -336,8 +336,7 @@ void main() {
       } catch (e) {
         node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
       }
-      final ErrorSummary summary =
-          node.getProperties().whereType<ErrorSummary>().single;
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
       expect(summary.value, equals(<String>['User thrown string']));
     }
 
@@ -348,12 +347,8 @@ void main() {
       } catch (e) {
         node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
       }
-      final ErrorSummary summary =
-          node.getProperties().whereType<ErrorSummary>().single;
-      expect(
-          summary.value,
-          equals(
-              <String>['Invalid argument(s) (myArgument): Must not be null']));
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['Invalid argument(s) (myArgument): Must not be null']));
     }
   });
 
@@ -383,12 +378,10 @@ void main() {
     details.debugFillProperties(builder);
 
     expect(builder.properties.length, 4);
-    expect(builder.properties[0].toString(),
-        'The following assertion was thrown:');
+    expect(builder.properties[0].toString(), 'The following assertion was thrown:');
     expect(builder.properties[1].toString(), contains('Assertion failed'));
     expect(builder.properties[2] is ErrorSpacer, true);
-    final DiagnosticsStackTrace trace =
-        builder.properties[3] as DiagnosticsStackTrace;
+    final DiagnosticsStackTrace trace = builder.properties[3] as DiagnosticsStackTrace;
     expect(trace, isNotNull);
     expect(trace.value, stack);
   });
@@ -420,8 +413,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);
     expect(builder.properties.length, 6);
-    expect(builder.properties[0].toString(),
-        'The following assertion was thrown:');
+    expect(builder.properties[0].toString(), 'The following assertion was thrown:');
     expect(builder.properties[1].toString(), contains('Assertion failed'));
     expect(builder.properties[2] is ErrorSpacer, true);
     expect(
@@ -433,8 +425,7 @@ void main() {
       '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
     );
     expect(builder.properties[4] is ErrorSpacer, true);
-    final DiagnosticsStackTrace trace =
-        builder.properties[5] as DiagnosticsStackTrace;
+    final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;
     expect(trace, isNotNull);
     expect(trace.value, stack);
   });
@@ -442,44 +433,17 @@ void main() {
   test('RepetitiveStackFrameFilter does not go out of range', () {
     const RepetitiveStackFrameFilter filter = RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
-        PartialStackFrame(
-            className: 'TestClass',
-            method: 'test1',
-            package: 'package:test/blah.dart'),
-        PartialStackFrame(
-            className: 'TestClass',
-            method: 'test2',
-            package: 'package:test/blah.dart'),
-        PartialStackFrame(
-            className: 'TestClass',
-            method: 'test3',
-            package: 'package:test/blah.dart'),
+        PartialStackFrame(className: 'TestClass', method: 'test1', package: 'package:test/blah.dart'),
+        PartialStackFrame(className: 'TestClass', method: 'test2', package: 'package:test/blah.dart'),
+        PartialStackFrame(className: 'TestClass', method: 'test3', package: 'package:test/blah.dart'),
       ],
       replacement: 'test',
     );
     final List<String?> reasons = List<String?>.filled(2, null);
     filter.filter(
       const <StackFrame>[
-        StackFrame(
-            className: 'TestClass',
-            method: 'test1',
-            packageScheme: 'package',
-            package: 'test',
-            packagePath: 'blah.dart',
-            line: 1,
-            column: 1,
-            number: 0,
-            source: ''),
-        StackFrame(
-            className: 'TestClass',
-            method: 'test2',
-            packageScheme: 'package',
-            package: 'test',
-            packagePath: 'blah.dart',
-            line: 1,
-            column: 1,
-            number: 0,
-            source: ''),
+        StackFrame(className: 'TestClass', method: 'test1', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
+        StackFrame(className: 'TestClass', method: 'test2', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
       ],
       reasons,
     );

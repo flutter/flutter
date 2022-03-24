@@ -31,18 +31,16 @@ void macroPerfTestE2E(
 }
 
 void macroPerfTestMultiPageE2E(
-  String testName,
-  List<ScrollableButtonRoute> routes, {
-  Duration? pageDelay,
-  Duration duration = const Duration(seconds: 3),
-  ControlCallback? body,
-  ControlCallback? setup,
-}) {
-  final WidgetsBinding widgetsBinding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+    String testName,
+    List<ScrollableButtonRoute> routes, {
+      Duration? pageDelay,
+      Duration duration = const Duration(seconds: 3),
+      ControlCallback? body,
+      ControlCallback? setup,
+    }) {
+  final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding =
-      widgetsBinding as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
   testWidgets(testName, (WidgetTester tester) async {
@@ -65,13 +63,11 @@ void macroPerfTestMultiPageE2E(
 
       final Finder listView = find.byKey(ValueKey<String>(route.listViewKey));
       // ListView is not a Scrollable, but it contains one
-      final Finder scrollable =
-          find.descendant(of: listView, matching: find.byType(Scrollable));
+      final Finder scrollable = find.descendant(of: listView, matching: find.byType(Scrollable));
       // scrollable should find one widget as soon as the page is loaded
       expect(scrollable, findsOneWidget);
 
-      final Finder button =
-          find.byKey(ValueKey<String>(route.buttonKey), skipOffstage: false);
+      final Finder button = find.byKey(ValueKey<String>(route.buttonKey), skipOffstage: false);
       // button may or may not find a widget right away until we scroll to it
       await tester.scrollUntilVisible(button, 50, scrollable: scrollable);
       // After scrolling, button should find one Widget

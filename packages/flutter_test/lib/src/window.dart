@@ -57,9 +57,8 @@ class TestWindow implements ui.SingletonFlutterWindow {
   /// [dart:ui.SingletonFlutterWindow] unless explicitly overridden for test purposes.
   TestWindow({
     required ui.SingletonFlutterWindow window,
-  })  : _window = window,
-        platformDispatcher = TestPlatformDispatcher(
-            platformDispatcher: window.platformDispatcher);
+  }) : _window = window,
+       platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
 
   /// The [dart:ui.SingletonFlutterWindow] that is wrapped by this [TestWindow].
   final ui.SingletonFlutterWindow _window;
@@ -70,15 +69,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   double get devicePixelRatio => _devicePixelRatio ?? _window.devicePixelRatio;
   double? _devicePixelRatio;
-
   /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
   /// instead.
-  set devicePixelRatioTestValue(double devicePixelRatio) {
-    // ignore: avoid_setters_without_getters
+  set devicePixelRatioTestValue(double devicePixelRatio) { // ignore: avoid_setters_without_getters
     _devicePixelRatio = devicePixelRatio;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test device pixel ratio and returns to using the real
   /// device pixel ratio.
   void clearDevicePixelRatioTestValue() {
@@ -89,15 +85,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   ui.Size get physicalSize => _physicalSizeTestValue ?? _window.physicalSize;
   ui.Size? _physicalSizeTestValue;
-
   /// Hides the real physical size and reports the given [physicalSizeTestValue]
   /// instead.
-  set physicalSizeTestValue(ui.Size physicalSizeTestValue) {
-    // ignore: avoid_setters_without_getters
+  set physicalSizeTestValue (ui.Size physicalSizeTestValue) { // ignore: avoid_setters_without_getters
     _physicalSizeTestValue = physicalSizeTestValue;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test physical size and returns to using the real
   /// physical size.
   void clearPhysicalSizeTestValue() {
@@ -106,17 +99,14 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.WindowPadding get viewInsets => _viewInsetsTestValue ?? _window.viewInsets;
+  ui.WindowPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
   ui.WindowPadding? _viewInsetsTestValue;
-
   /// Hides the real view insets and reports the given [viewInsetsTestValue]
   /// instead.
-  set viewInsetsTestValue(ui.WindowPadding viewInsetsTestValue) {
-    // ignore: avoid_setters_without_getters
+  set viewInsetsTestValue(ui.WindowPadding viewInsetsTestValue) { // ignore: avoid_setters_without_getters
     _viewInsetsTestValue = viewInsetsTestValue;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test view insets and returns to using the real view
   /// insets.
   void clearViewInsetsTestValue() {
@@ -127,15 +117,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   ui.WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
   ui.WindowPadding? _viewPaddingTestValue;
-
   /// Hides the real view padding and reports the given [paddingTestValue]
   /// instead.
-  set viewPaddingTestValue(ui.WindowPadding viewPaddingTestValue) {
-    // ignore: avoid_setters_without_getters
+  set viewPaddingTestValue(ui.WindowPadding viewPaddingTestValue) { // ignore: avoid_setters_without_getters
     _viewPaddingTestValue = viewPaddingTestValue;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test view padding and returns to using the real
   /// viewPadding.
   void clearViewPaddingTestValue() {
@@ -146,14 +133,11 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   ui.WindowPadding get padding => _paddingTestValue ?? _window.padding;
   ui.WindowPadding? _paddingTestValue;
-
   /// Hides the real padding and reports the given [paddingTestValue] instead.
-  set paddingTestValue(ui.WindowPadding paddingTestValue) {
-    // ignore: avoid_setters_without_getters
+  set paddingTestValue(ui.WindowPadding paddingTestValue) { // ignore: avoid_setters_without_getters
     _paddingTestValue = paddingTestValue;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test padding and returns to using the real padding.
   void clearPaddingTestValue() {
     _paddingTestValue = null;
@@ -161,18 +145,13 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  List<ui.DisplayFeature> get displayFeatures =>
-      _displayFeaturesTestValue ?? _window.displayFeatures;
+  List<ui.DisplayFeature> get displayFeatures => _displayFeaturesTestValue ?? _window.displayFeatures;
   List<ui.DisplayFeature>? _displayFeaturesTestValue;
-
   /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
-  set displayFeaturesTestValue(
-      List<ui.DisplayFeature> displayFeaturesTestValue) {
-    // ignore: avoid_setters_without_getters
+  set displayFeaturesTestValue(List<ui.DisplayFeature> displayFeaturesTestValue) { // ignore: avoid_setters_without_getters
     _displayFeaturesTestValue = displayFeaturesTestValue;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test padding and returns to using the real padding.
   void clearDisplayFeaturesTestValue() {
     _displayFeaturesTestValue = null;
@@ -180,18 +159,13 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.WindowPadding get systemGestureInsets =>
-      _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
+  ui.WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
   ui.WindowPadding? _systemGestureInsetsTestValue;
-
   /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
-  set systemGestureInsetsTestValue(
-      ui.WindowPadding systemGestureInsetsTestValue) {
-    // ignore: avoid_setters_without_getters
+  set systemGestureInsetsTestValue(ui.WindowPadding systemGestureInsetsTestValue) { // ignore: avoid_setters_without_getters
     _systemGestureInsetsTestValue = systemGestureInsetsTestValue;
     onMetricsChanged?.call();
   }
-
   /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
   void clearSystemGestureInsetsTestValue() {
     _systemGestureInsetsTestValue = null;
@@ -207,18 +181,18 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   ui.Locale get locale => platformDispatcher.locale;
-
   /// Hides the real locale and reports the given [localeTestValue] instead.
-  @Deprecated('Use platformDispatcher.localeTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set localeTestValue(ui.Locale localeTestValue) {
-    // ignore: avoid_setters_without_getters
+  @Deprecated(
+    'Use platformDispatcher.localeTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set localeTestValue(ui.Locale localeTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.localeTestValue = localeTestValue;
   }
-
-  @Deprecated('Use platformDispatcher.clearLocaleTestValue() instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-
+  @Deprecated(
+    'Use platformDispatcher.clearLocaleTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
     platformDispatcher.clearLocaleTestValue();
@@ -226,18 +200,19 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   List<ui.Locale> get locales => platformDispatcher.locales;
-
   /// Hides the real locales and reports the given [localesTestValue] instead.
-  @Deprecated('Use platformDispatcher.localesTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set localesTestValue(List<ui.Locale> localesTestValue) {
-    // ignore: avoid_setters_without_getters
+  @Deprecated(
+    'Use platformDispatcher.localesTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set localesTestValue(List<ui.Locale> localesTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.localesTestValue = localesTestValue;
   }
-
   /// Deletes any existing test locales and returns to using the real locales.
-  @Deprecated('Use platformDispatcher.clearLocalesTestValue() instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+  @Deprecated(
+    'Use platformDispatcher.clearLocalesTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearLocalesTestValue() {
     platformDispatcher.clearLocalesTestValue();
   }
@@ -251,31 +226,32 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   String get initialLifecycleState => platformDispatcher.initialLifecycleState;
-
   /// Sets a faked initialLifecycleState for testing.
-  @Deprecated('Use platformDispatcher.initialLifecycleStateTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set initialLifecycleStateTestValue(String state) {
-    // ignore: avoid_setters_without_getters
+  @Deprecated(
+    'Use platformDispatcher.initialLifecycleStateTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
     platformDispatcher.initialLifecycleStateTestValue = state;
   }
 
   @override
   double get textScaleFactor => platformDispatcher.textScaleFactor;
-
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
-  @Deprecated('Use platformDispatcher.textScaleFactorTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set textScaleFactorTestValue(double textScaleFactorTestValue) {
-    // ignore: avoid_setters_without_getters
+  @Deprecated(
+    'Use platformDispatcher.textScaleFactorTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
   }
-
   /// Deletes any existing test text scale factor and returns to using the real
   /// text scale factor.
-  @Deprecated('Use platformDispatcher.clearTextScaleFactorTestValue() instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+  @Deprecated(
+    'Use platformDispatcher.clearTextScaleFactorTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearTextScaleFactorTestValue() {
     platformDispatcher.clearTextScaleFactorTestValue();
   }
@@ -283,56 +259,53 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   ui.Brightness get platformBrightness => platformDispatcher.platformBrightness;
   @override
-  ui.VoidCallback? get onPlatformBrightnessChanged =>
-      platformDispatcher.onPlatformBrightnessChanged;
+  ui.VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
     platformDispatcher.onPlatformBrightnessChanged = callback;
   }
-
   /// Hides the real text scale factor and reports the given
   /// [platformBrightnessTestValue] instead.
-  @Deprecated('Use platformDispatcher.platformBrightnessTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) {
-    // ignore: avoid_setters_without_getters
-    platformDispatcher.platformBrightnessTestValue =
-        platformBrightnessTestValue;
+  @Deprecated(
+    'Use platformDispatcher.platformBrightnessTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
   }
-
   /// Deletes any existing test platform brightness and returns to using the
   /// real platform brightness.
   @Deprecated(
-      'Use platformDispatcher.clearPlatformBrightnessTestValue() instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+    'Use platformDispatcher.clearPlatformBrightnessTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearPlatformBrightnessTestValue() {
     platformDispatcher.clearPlatformBrightnessTestValue();
   }
 
   @override
   bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
-
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
-  @Deprecated('Use platformDispatcher.alwaysUse24HourFormatTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
-    // ignore: avoid_setters_without_getters
-    platformDispatcher.alwaysUse24HourFormatTestValue =
-        alwaysUse24HourFormatTestValue;
+  @Deprecated(
+    'Use platformDispatcher.alwaysUse24HourFormatTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
-
   /// Deletes any existing test clock format and returns to using the real clock
   /// format.
-  @Deprecated('Use platformDispatcher.clearAlwaysUse24HourTestValue() instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+  @Deprecated(
+    'Use platformDispatcher.clearAlwaysUse24HourTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearAlwaysUse24HourTestValue() {
     platformDispatcher.clearAlwaysUse24HourTestValue();
   }
 
   @override
-  ui.VoidCallback? get onTextScaleFactorChanged =>
-      platformDispatcher.onTextScaleFactorChanged;
+  ui.VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     platformDispatcher.onTextScaleFactorChanged = callback;
@@ -340,15 +313,14 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
-
   /// Hides the real [brieflyShowPassword] and reports the given
   /// `brieflyShowPasswordTestValue` instead.
-  @Deprecated('Use platformDispatcher.brieflyShowPasswordTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) {
-    // ignore: avoid_setters_without_getters
-    platformDispatcher.brieflyShowPasswordTestValue =
-        brieflyShowPasswordTestValue;
+  @Deprecated(
+    'Use platformDispatcher.brieflyShowPasswordTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
   }
 
   @override
@@ -373,8 +345,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.PointerDataPacketCallback? get onPointerDataPacket =>
-      platformDispatcher.onPointerDataPacket;
+  ui.PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
   @override
   set onPointerDataPacket(ui.PointerDataPacketCallback? callback) {
     platformDispatcher.onPointerDataPacket = callback;
@@ -382,20 +353,21 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   String get defaultRouteName => platformDispatcher.defaultRouteName;
-
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
-  @Deprecated('Use platformDispatcher.defaultRouteNameTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
-    // ignore: avoid_setters_without_getters
+  @Deprecated(
+    'Use platformDispatcher.defaultRouteNameTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
-
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
-  @Deprecated('Use platformDispatcher.clearDefaultRouteNameTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+  @Deprecated(
+    'Use platformDispatcher.clearDefaultRouteNameTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearDefaultRouteNameTestValue() {
     platformDispatcher.clearDefaultRouteNameTestValue();
   }
@@ -412,82 +384,75 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
-
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
-  @Deprecated('Use platformDispatcher.semanticsEnabledTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
-    // ignore: avoid_setters_without_getters
+  @Deprecated(
+    'Use platformDispatcher.semanticsEnabledTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
     platformDispatcher.semanticsEnabledTestValue = semanticsEnabledTestValue;
   }
-
   /// Deletes any existing test semantics enabled and returns to using the real
   /// semantics enabled.
-  @Deprecated('Use platformDispatcher.clearSemanticsEnabledTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+  @Deprecated(
+    'Use platformDispatcher.clearSemanticsEnabledTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearSemanticsEnabledTestValue() {
     platformDispatcher.clearSemanticsEnabledTestValue();
   }
 
   @override
-  ui.VoidCallback? get onSemanticsEnabledChanged =>
-      platformDispatcher.onSemanticsEnabledChanged;
+  ui.VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
   @override
   set onSemanticsEnabledChanged(ui.VoidCallback? callback) {
     platformDispatcher.onSemanticsEnabledChanged = callback;
   }
 
   @override
-  ui.SemanticsActionCallback? get onSemanticsAction =>
-      platformDispatcher.onSemanticsAction;
+  ui.SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
   @override
   set onSemanticsAction(ui.SemanticsActionCallback? callback) {
     platformDispatcher.onSemanticsAction = callback;
   }
 
   @override
-  ui.AccessibilityFeatures get accessibilityFeatures =>
-      platformDispatcher.accessibilityFeatures;
-
+  ui.AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
   ///
   /// Consider using [FakeAccessibilityFeatures] to provide specific
   /// values for the various accessibility features under test.
-  @Deprecated('Use platformDispatcher.accessibilityFeaturesTestValue instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
-  set accessibilityFeaturesTestValue(
-      ui.AccessibilityFeatures accessibilityFeaturesTestValue) {
-    // ignore: avoid_setters_without_getters
-    platformDispatcher.accessibilityFeaturesTestValue =
-        accessibilityFeaturesTestValue;
+  @Deprecated(
+    'Use platformDispatcher.accessibilityFeaturesTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
   }
-
   /// Deletes any existing test accessibility features and returns to using the
   /// real accessibility features.
   @Deprecated(
-      'Use platformDispatcher.clearAccessibilityFeaturesTestValue() instead. '
-      'This feature was deprecated after v2.11.0-0.0.pre.')
+    'Use platformDispatcher.clearAccessibilityFeaturesTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
   void clearAccessibilityFeaturesTestValue() {
     platformDispatcher.clearAccessibilityFeaturesTestValue();
   }
 
   @override
-  ui.ViewConfiguration get viewConfiguration =>
-      _viewConfiguration ?? _window.viewConfiguration;
+  ui.ViewConfiguration get viewConfiguration => _viewConfiguration ?? _window.viewConfiguration;
   ui.ViewConfiguration? _viewConfiguration;
 
   /// Hide the real view configuration and report the provided [value] instead.
-  set viewConfigurationTestValue(ui.ViewConfiguration? value) {
-    // ignore: avoid_setters_without_getters
+  set viewConfigurationTestValue(ui.ViewConfiguration? value) { // ignore: avoid_setters_without_getters
     _viewConfiguration = value;
     onMetricsChanged?.call();
   }
 
   @override
-  ui.VoidCallback? get onAccessibilityFeaturesChanged =>
-      platformDispatcher.onAccessibilityFeaturesChanged;
+  ui.VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
     platformDispatcher.onAccessibilityFeaturesChanged = callback;
@@ -513,14 +478,15 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @Deprecated(
-      'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-      'This feature was deprecated after v2.1.0-10.0.pre.')
+    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
-  ui.PlatformMessageCallback? get onPlatformMessage =>
-      platformDispatcher.onPlatformMessage;
+  ui.PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
   @Deprecated(
-      'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-      'This feature was deprecated after v2.1.0-10.0.pre.')
+    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
   set onPlatformMessage(ui.PlatformMessageCallback? callback) {
     platformDispatcher.onPlatformMessage = callback;
@@ -603,19 +569,19 @@ class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is FakeAccessibilityFeatures &&
-        other.accessibleNavigation == accessibleNavigation &&
-        other.invertColors == invertColors &&
-        other.disableAnimations == disableAnimations &&
-        other.boldText == boldText &&
-        other.reduceMotion == reduceMotion &&
-        other.highContrast == highContrast;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeAccessibilityFeatures
+        && other.accessibleNavigation == accessibleNavigation
+        && other.invertColors == invertColors
+        && other.disableAnimations == disableAnimations
+        && other.boldText == boldText
+        && other.reduceMotion == reduceMotion
+        && other.highContrast == highContrast;
   }
 
   @override
-  int get hashCode => Object.hash(accessibleNavigation, invertColors,
-      disableAnimations, boldText, reduceMotion, highContrast);
+  int get hashCode => Object.hash(accessibleNavigation, invertColors, disableAnimations, boldText, reduceMotion, highContrast);
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [AccessibilityFeatures], and makes things easier when we do rolls to
@@ -656,14 +622,11 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   ui.Locale get locale => _localeTestValue ?? _platformDispatcher.locale;
   ui.Locale? _localeTestValue;
-
   /// Hides the real locale and reports the given [localeTestValue] instead.
-  set localeTestValue(ui.Locale localeTestValue) {
-    // ignore: avoid_setters_without_getters
+  set localeTestValue(ui.Locale localeTestValue) { // ignore: avoid_setters_without_getters
     _localeTestValue = localeTestValue;
     onLocaleChanged?.call();
   }
-
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
     _localeTestValue = null;
@@ -671,17 +634,13 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  List<ui.Locale> get locales =>
-      _localesTestValue ?? _platformDispatcher.locales;
+  List<ui.Locale> get locales => _localesTestValue ?? _platformDispatcher.locales;
   List<ui.Locale>? _localesTestValue;
-
   /// Hides the real locales and reports the given [localesTestValue] instead.
-  set localesTestValue(List<ui.Locale> localesTestValue) {
-    // ignore: avoid_setters_without_getters
+  set localesTestValue(List<ui.Locale> localesTestValue) { // ignore: avoid_setters_without_getters
     _localesTestValue = localesTestValue;
     onLocaleChanged?.call();
   }
-
   /// Deletes any existing test locales and returns to using the real locales.
   void clearLocalesTestValue() {
     _localesTestValue = null;
@@ -698,26 +657,20 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue = '';
-
   /// Sets a faked initialLifecycleState for testing.
-  set initialLifecycleStateTestValue(String state) {
-    // ignore: avoid_setters_without_getters
+  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
     _initialLifecycleStateTestValue = state;
   }
 
   @override
-  double get textScaleFactor =>
-      _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
+  double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
   double? _textScaleFactorTestValue;
-
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
-  set textScaleFactorTestValue(double textScaleFactorTestValue) {
-    // ignore: avoid_setters_without_getters
+  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
     _textScaleFactorTestValue = textScaleFactorTestValue;
     onTextScaleFactorChanged?.call();
   }
-
   /// Deletes any existing test text scale factor and returns to using the real
   /// text scale factor.
   void clearTextScaleFactorTestValue() {
@@ -726,25 +679,20 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.Brightness get platformBrightness =>
-      _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
+  ui.Brightness get platformBrightness => _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
   ui.Brightness? _platformBrightnessTestValue;
   @override
-  ui.VoidCallback? get onPlatformBrightnessChanged =>
-      _platformDispatcher.onPlatformBrightnessChanged;
+  ui.VoidCallback? get onPlatformBrightnessChanged => _platformDispatcher.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onPlatformBrightnessChanged = callback;
   }
-
   /// Hides the real text scale factor and reports the given
   /// [platformBrightnessTestValue] instead.
-  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) {
-    // ignore: avoid_setters_without_getters
+  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
     _platformBrightnessTestValue = platformBrightnessTestValue;
     onPlatformBrightnessChanged?.call();
   }
-
   /// Deletes any existing test platform brightness and returns to using the
   /// real platform brightness.
   void clearPlatformBrightnessTestValue() {
@@ -753,18 +701,13 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  bool get alwaysUse24HourFormat =>
-      _alwaysUse24HourFormatTestValue ??
-      _platformDispatcher.alwaysUse24HourFormat;
+  bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
   bool? _alwaysUse24HourFormatTestValue;
-
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
-    // ignore: avoid_setters_without_getters
+  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
-
   /// Deletes any existing test clock format and returns to using the real clock
   /// format.
   void clearAlwaysUse24HourTestValue() {
@@ -772,22 +715,18 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.VoidCallback? get onTextScaleFactorChanged =>
-      _platformDispatcher.onTextScaleFactorChanged;
+  ui.VoidCallback? get onTextScaleFactorChanged => _platformDispatcher.onTextScaleFactorChanged;
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onTextScaleFactorChanged = callback;
   }
 
   @override
-  bool get brieflyShowPassword =>
-      _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
+  bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
   bool? _brieflyShowPasswordTestValue;
-
   /// Hides the real [brieflyShowPassword] and reports the given
   /// `brieflyShowPasswordTestValue` instead.
-  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) {
-    // ignore: avoid_setters_without_getters
+  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
     _brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
   }
 
@@ -806,33 +745,27 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.TimingsCallback? get onReportTimings =>
-      _platformDispatcher.onReportTimings;
+  ui.TimingsCallback? get onReportTimings => _platformDispatcher.onReportTimings;
   @override
   set onReportTimings(ui.TimingsCallback? callback) {
     _platformDispatcher.onReportTimings = callback;
   }
 
   @override
-  ui.PointerDataPacketCallback? get onPointerDataPacket =>
-      _platformDispatcher.onPointerDataPacket;
+  ui.PointerDataPacketCallback? get onPointerDataPacket => _platformDispatcher.onPointerDataPacket;
   @override
   set onPointerDataPacket(ui.PointerDataPacketCallback? callback) {
     _platformDispatcher.onPointerDataPacket = callback;
   }
 
   @override
-  String get defaultRouteName =>
-      _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
+  String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
   String? _defaultRouteNameTestValue;
-
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
-    // ignore: avoid_setters_without_getters
+  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
     _defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
-
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
   void clearDefaultRouteNameTestValue() {
@@ -845,18 +778,14 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  bool get semanticsEnabled =>
-      _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
+  bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
-
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
-    // ignore: avoid_setters_without_getters
+  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
     onSemanticsEnabledChanged?.call();
   }
-
   /// Deletes any existing test semantics enabled and returns to using the real
   /// semantics enabled.
   void clearSemanticsEnabledTestValue() {
@@ -865,39 +794,31 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.VoidCallback? get onSemanticsEnabledChanged =>
-      _platformDispatcher.onSemanticsEnabledChanged;
+  ui.VoidCallback? get onSemanticsEnabledChanged => _platformDispatcher.onSemanticsEnabledChanged;
   @override
   set onSemanticsEnabledChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onSemanticsEnabledChanged = callback;
   }
 
   @override
-  ui.SemanticsActionCallback? get onSemanticsAction =>
-      _platformDispatcher.onSemanticsAction;
+  ui.SemanticsActionCallback? get onSemanticsAction => _platformDispatcher.onSemanticsAction;
   @override
   set onSemanticsAction(ui.SemanticsActionCallback? callback) {
     _platformDispatcher.onSemanticsAction = callback;
   }
 
   @override
-  ui.AccessibilityFeatures get accessibilityFeatures =>
-      _accessibilityFeaturesTestValue ??
-      _platformDispatcher.accessibilityFeatures;
+  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
   ui.AccessibilityFeatures? _accessibilityFeaturesTestValue;
-
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
   ///
   /// Consider using [FakeAccessibilityFeatures] to provide specific
   /// values for the various accessibility features under test.
-  set accessibilityFeaturesTestValue(
-      ui.AccessibilityFeatures accessibilityFeaturesTestValue) {
-    // ignore: avoid_setters_without_getters
+  set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
   }
-
   /// Deletes any existing test accessibility features and returns to using the
   /// real accessibility features.
   void clearAccessibilityFeaturesTestValue() {
@@ -906,8 +827,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.VoidCallback? get onAccessibilityFeaturesChanged =>
-      _platformDispatcher.onAccessibilityFeaturesChanged;
+  ui.VoidCallback? get onAccessibilityFeaturesChanged => _platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onAccessibilityFeaturesChanged = callback;
@@ -925,22 +845,23 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   void sendPlatformMessage(
-    String name,
-    ByteData? data,
-    ui.PlatformMessageResponseCallback? callback,
-  ) {
+      String name,
+      ByteData? data,
+      ui.PlatformMessageResponseCallback? callback,
+      ) {
     _platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
   @Deprecated(
-      'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-      'This feature was deprecated after v2.1.0-10.0.pre.')
+    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
-  ui.PlatformMessageCallback? get onPlatformMessage =>
-      _platformDispatcher.onPlatformMessage;
+  ui.PlatformMessageCallback? get onPlatformMessage => _platformDispatcher.onPlatformMessage;
   @Deprecated(
-      'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-      'This feature was deprecated after v2.1.0-10.0.pre.')
+    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
   set onPlatformMessage(ui.PlatformMessageCallback? callback) {
     _platformDispatcher.onPlatformMessage = callback;
@@ -964,8 +885,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.VoidCallback? get onFrameDataChanged =>
-      _platformDispatcher.onFrameDataChanged;
+  ui.VoidCallback? get onFrameDataChanged => _platformDispatcher.onFrameDataChanged;
   @override
   set onFrameDataChanged(ui.VoidCallback? value) {
     _platformDispatcher.onFrameDataChanged = value;
@@ -980,30 +900,24 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
-  ui.VoidCallback? get onPlatformConfigurationChanged =>
-      _platformDispatcher.onPlatformConfigurationChanged;
+  ui.VoidCallback? get onPlatformConfigurationChanged => _platformDispatcher.onPlatformConfigurationChanged;
 
   @override
-  set onPlatformConfigurationChanged(
-      ui.VoidCallback? onPlatformConfigurationChanged) {
-    _platformDispatcher.onPlatformConfigurationChanged =
-        onPlatformConfigurationChanged;
+  set onPlatformConfigurationChanged(ui.VoidCallback? onPlatformConfigurationChanged) {
+    _platformDispatcher.onPlatformConfigurationChanged = onPlatformConfigurationChanged;
   }
 
   @override
-  ui.Locale? computePlatformResolvedLocale(List<ui.Locale> supportedLocales) =>
-      _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
+  ui.Locale? computePlatformResolvedLocale(List<ui.Locale> supportedLocales) => _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
 
   @override
-  ui.PlatformConfiguration get configuration =>
-      _platformDispatcher.configuration;
+  ui.PlatformConfiguration get configuration => _platformDispatcher.configuration;
 
   @override
   ui.FrameData get frameData => _platformDispatcher.frameData;
 
   @override
-  ByteData? getPersistentIsolateData() =>
-      _platformDispatcher.getPersistentIsolateData();
+  ByteData? getPersistentIsolateData() => _platformDispatcher.getPersistentIsolateData();
 
   @override
   Iterable<ui.FlutterView> get views => _platformDispatcher.views;

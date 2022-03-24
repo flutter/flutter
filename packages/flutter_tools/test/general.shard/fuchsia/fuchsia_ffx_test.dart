@@ -109,15 +109,7 @@ void main() {
       final ProcessManager processManager =
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[
-            ffx.path,
-            '-T',
-            '2',
-            'target',
-            'list',
-            '--format',
-            's'
-          ],
+          command: <String>[ffx.path, '-T', '2', 'target', 'list', '--format', 's'],
           stdout: 'device1',
         ),
       ]);
@@ -151,14 +143,7 @@ void main() {
       final ProcessManager processManager =
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[
-            ffx.path,
-            'target',
-            'list',
-            '--format',
-            'a',
-            'unknown-device'
-          ],
+          command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'unknown-device'],
           exitCode: 2,
           stderr: 'No devices found.',
         ),
@@ -180,14 +165,7 @@ void main() {
       final ProcessManager processManager =
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[
-            ffx.path,
-            'target',
-            'list',
-            '--format',
-            'a',
-            'error-device'
-          ],
+          command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'error-device'],
           exitCode: 1,
           stderr: 'unexpected error',
         ),
@@ -209,14 +187,7 @@ void main() {
       final ProcessManager processManager =
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[
-            ffx.path,
-            'target',
-            'list',
-            '--format',
-            'a',
-            'known-device'
-          ],
+          command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'known-device'],
           stdout: '1234-1234-1234-1234',
         ),
       ]);

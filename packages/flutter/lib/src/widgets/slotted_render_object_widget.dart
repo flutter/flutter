@@ -65,12 +65,10 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
   SlottedContainerRenderObjectMixin<S> createRenderObject(BuildContext context);
 
   @override
-  void updateRenderObject(
-      BuildContext context, SlottedContainerRenderObjectMixin<S> renderObject);
+  void updateRenderObject(BuildContext context, SlottedContainerRenderObjectMixin<S> renderObject);
 
   @override
-  SlottedRenderObjectElement<S> createElement() =>
-      SlottedRenderObjectElement<S>(this);
+  SlottedRenderObjectElement<S> createElement() => SlottedRenderObjectElement<S>(this);
 }
 
 /// Mixin for a [RenderBox] configured by a [SlottedMultiChildRenderObjectWidgetMixin].
@@ -167,8 +165,7 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
     return value;
   }
 
-  void _addDiagnostics(
-      RenderBox child, List<DiagnosticsNode> value, String name) {
+  void _addDiagnostics(RenderBox child, List<DiagnosticsNode> value, String name) {
     value.add(child.toDiagnosticsNode(name: name));
   }
 
@@ -190,14 +187,12 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
 /// Element used by the [SlottedMultiChildRenderObjectWidgetMixin].
 class SlottedRenderObjectElement<S> extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> widget)
-      : super(widget);
+  SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> widget) : super(widget);
 
   final Map<S, Element> _slotToChild = <S, Element>{};
 
   @override
-  SlottedContainerRenderObjectMixin<S> get renderObject =>
-      super.renderObject as SlottedContainerRenderObjectMixin<S>;
+  SlottedContainerRenderObjectMixin<S> get renderObject => super.renderObject as SlottedContainerRenderObjectMixin<S>;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -229,31 +224,21 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   List<S>? _debugPreviousSlots;
 
   void _updateChildren() {
-    final SlottedMultiChildRenderObjectWidgetMixin<S>
-        slottedMultiChildRenderObjectWidgetMixin =
-        widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
+    final SlottedMultiChildRenderObjectWidgetMixin<S> slottedMultiChildRenderObjectWidgetMixin = widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
     assert(() {
-      _debugPreviousSlots ??=
-          slottedMultiChildRenderObjectWidgetMixin.slots.toList();
-      return listEquals(_debugPreviousSlots,
-          slottedMultiChildRenderObjectWidgetMixin.slots.toList());
+      _debugPreviousSlots ??= slottedMultiChildRenderObjectWidgetMixin.slots.toList();
+      return listEquals(_debugPreviousSlots, slottedMultiChildRenderObjectWidgetMixin.slots.toList());
     }(), '${widget.runtimeType}.slots must not change.');
-    assert(
-        slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length ==
-            slottedMultiChildRenderObjectWidgetMixin.slots.length,
-        'slots must be unique');
+    assert(slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length == slottedMultiChildRenderObjectWidgetMixin.slots.length, 'slots must be unique');
 
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
-      _updateChild(
-          slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot), slot);
+      _updateChild(slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot), slot);
     }
   }
 
   void _updateChild(Widget? widget, S slot) {
     final Element? oldChild = _slotToChild[slot];
-    assert(oldChild == null ||
-        oldChild.slot ==
-            slot); // Reason why [moveRenderObjectChild] is not reachable.
+    assert(oldChild == null || oldChild.slot == slot); // Reason why [moveRenderObjectChild] is not reachable.
     final Element? newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       _slotToChild.remove(slot);
@@ -277,8 +262,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(
-      RenderBox child, Object? oldSlot, Object? newSlot) {
+  void moveRenderObjectChild(RenderBox child, Object? oldSlot, Object? newSlot) {
     // Existing elements are never moved to a new slot, see assert in [_updateChild].
     assert(false, 'not reachable');
   }

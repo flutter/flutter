@@ -105,43 +105,47 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated('Use primary or primaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? primaryVariant,
-    @Deprecated('Use secondary or secondaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? secondaryVariant,
-  })  : assert(brightness != null),
-        assert(primary != null),
-        assert(onPrimary != null),
-        assert(secondary != null),
-        assert(onSecondary != null),
-        assert(error != null),
-        assert(onError != null),
-        assert(background != null),
-        assert(onBackground != null),
-        assert(surface != null),
-        assert(onSurface != null),
-        _primaryContainer = primaryContainer,
-        _onPrimaryContainer = onPrimaryContainer,
-        _secondaryContainer = secondaryContainer,
-        _onSecondaryContainer = onSecondaryContainer,
-        _tertiary = tertiary,
-        _onTertiary = onTertiary,
-        _tertiaryContainer = tertiaryContainer,
-        _onTertiaryContainer = onTertiaryContainer,
-        _errorContainer = errorContainer,
-        _onErrorContainer = onErrorContainer,
-        _surfaceVariant = surfaceVariant,
-        _onSurfaceVariant = onSurfaceVariant,
-        _outline = outline,
-        _shadow = shadow,
-        _inverseSurface = inverseSurface,
-        _onInverseSurface = onInverseSurface,
-        _inversePrimary = inversePrimary,
-        _primaryVariant = primaryVariant,
-        _secondaryVariant = secondaryVariant,
-        _surfaceTint = surfaceTint;
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant,
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant,
+  }) : assert(brightness != null),
+       assert(primary != null),
+       assert(onPrimary != null),
+       assert(secondary != null),
+       assert(onSecondary != null),
+       assert(error != null),
+       assert(onError != null),
+       assert(background != null),
+       assert(onBackground != null),
+       assert(surface != null),
+       assert(onSurface != null),
+       _primaryContainer = primaryContainer,
+       _onPrimaryContainer = onPrimaryContainer,
+       _secondaryContainer = secondaryContainer,
+       _onSecondaryContainer = onSecondaryContainer,
+       _tertiary = tertiary,
+       _onTertiary = onTertiary,
+       _tertiaryContainer = tertiaryContainer,
+       _onTertiaryContainer = onTertiaryContainer,
+       _errorContainer = errorContainer,
+       _onErrorContainer = onErrorContainer,
+       _surfaceVariant = surfaceVariant,
+       _onSurfaceVariant = onSurfaceVariant,
+       _outline = outline,
+       _shadow = shadow,
+       _inverseSurface = inverseSurface,
+       _onInverseSurface = onInverseSurface,
+       _inversePrimary = inversePrimary,
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
@@ -210,19 +214,15 @@ class ColorScheme with Diagnosticable {
       primary: primary ?? Color(scheme.primary),
       onPrimary: onPrimary ?? Color(scheme.onPrimary),
       primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
-      onPrimaryContainer:
-          onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
       secondary: secondary ?? Color(scheme.secondary),
       onSecondary: onSecondary ?? Color(scheme.onSecondary),
-      secondaryContainer:
-          secondaryContainer ?? Color(scheme.secondaryContainer),
-      onSecondaryContainer:
-          onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
       tertiary: tertiary ?? Color(scheme.tertiary),
       onTertiary: onTertiary ?? Color(scheme.onTertiary),
       tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
-      onTertiaryContainer:
-          onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
       error: error ?? Color(scheme.error),
       onError: onError ?? Color(scheme.onError),
       errorContainer: errorContainer ?? Color(scheme.errorContainer),
@@ -275,43 +275,47 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated('Use primary or primaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? primaryVariant = const Color(0xff3700b3),
-    @Deprecated('Use secondary or secondaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? secondaryVariant = const Color(0xff018786),
-  })  : assert(brightness != null),
-        assert(primary != null),
-        assert(onPrimary != null),
-        assert(secondary != null),
-        assert(onSecondary != null),
-        assert(error != null),
-        assert(onError != null),
-        assert(background != null),
-        assert(onBackground != null),
-        assert(surface != null),
-        assert(onSurface != null),
-        _primaryContainer = primaryContainer,
-        _onPrimaryContainer = onPrimaryContainer,
-        _secondaryContainer = secondaryContainer,
-        _onSecondaryContainer = onSecondaryContainer,
-        _tertiary = tertiary,
-        _onTertiary = onTertiary,
-        _tertiaryContainer = tertiaryContainer,
-        _onTertiaryContainer = onTertiaryContainer,
-        _errorContainer = errorContainer,
-        _onErrorContainer = onErrorContainer,
-        _surfaceVariant = surfaceVariant,
-        _onSurfaceVariant = onSurfaceVariant,
-        _outline = outline,
-        _shadow = shadow,
-        _inverseSurface = inverseSurface,
-        _onInverseSurface = onInverseSurface,
-        _inversePrimary = inversePrimary,
-        _primaryVariant = primaryVariant,
-        _secondaryVariant = secondaryVariant,
-        _surfaceTint = surfaceTint;
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xff3700b3),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff018786),
+  }) : assert(brightness != null),
+       assert(primary != null),
+       assert(onPrimary != null),
+       assert(secondary != null),
+       assert(onSecondary != null),
+       assert(error != null),
+       assert(onError != null),
+       assert(background != null),
+       assert(onBackground != null),
+       assert(surface != null),
+       assert(onSurface != null),
+       _primaryContainer = primaryContainer,
+       _onPrimaryContainer = onPrimaryContainer,
+       _secondaryContainer = secondaryContainer,
+       _onSecondaryContainer = onSecondaryContainer,
+       _tertiary = tertiary,
+       _onTertiary = onTertiary,
+       _tertiaryContainer = tertiaryContainer,
+       _onTertiaryContainer = onTertiaryContainer,
+       _errorContainer = errorContainer,
+       _onErrorContainer = onErrorContainer,
+       _surfaceVariant = surfaceVariant,
+       _onSurfaceVariant = onSurfaceVariant,
+       _outline = outline,
+       _shadow = shadow,
+       _inverseSurface = inverseSurface,
+       _onInverseSurface = onInverseSurface,
+       _inversePrimary = inversePrimary,
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create the recommended dark color scheme that matches the
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
@@ -345,43 +349,47 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated('Use primary or primaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? primaryVariant = const Color(0xff3700B3),
-    @Deprecated('Use secondary or secondaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? secondaryVariant = const Color(0xff03dac6),
-  })  : assert(brightness != null),
-        assert(primary != null),
-        assert(onPrimary != null),
-        assert(secondary != null),
-        assert(onSecondary != null),
-        assert(error != null),
-        assert(onError != null),
-        assert(background != null),
-        assert(onBackground != null),
-        assert(surface != null),
-        assert(onSurface != null),
-        _primaryContainer = primaryContainer,
-        _onPrimaryContainer = onPrimaryContainer,
-        _secondaryContainer = secondaryContainer,
-        _onSecondaryContainer = onSecondaryContainer,
-        _tertiary = tertiary,
-        _onTertiary = onTertiary,
-        _tertiaryContainer = tertiaryContainer,
-        _onTertiaryContainer = onTertiaryContainer,
-        _errorContainer = errorContainer,
-        _onErrorContainer = onErrorContainer,
-        _surfaceVariant = surfaceVariant,
-        _onSurfaceVariant = onSurfaceVariant,
-        _outline = outline,
-        _shadow = shadow,
-        _inverseSurface = inverseSurface,
-        _onInverseSurface = onInverseSurface,
-        _inversePrimary = inversePrimary,
-        _primaryVariant = primaryVariant,
-        _secondaryVariant = secondaryVariant,
-        _surfaceTint = surfaceTint;
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xff3700B3),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff03dac6),
+  }) : assert(brightness != null),
+       assert(primary != null),
+       assert(onPrimary != null),
+       assert(secondary != null),
+       assert(onSecondary != null),
+       assert(error != null),
+       assert(onError != null),
+       assert(background != null),
+       assert(onBackground != null),
+       assert(surface != null),
+       assert(onSurface != null),
+       _primaryContainer = primaryContainer,
+       _onPrimaryContainer = onPrimaryContainer,
+       _secondaryContainer = secondaryContainer,
+       _onSecondaryContainer = onSecondaryContainer,
+       _tertiary = tertiary,
+       _onTertiary = onTertiary,
+       _tertiaryContainer = tertiaryContainer,
+       _onTertiaryContainer = onTertiaryContainer,
+       _errorContainer = errorContainer,
+       _onErrorContainer = onErrorContainer,
+       _surfaceVariant = surfaceVariant,
+       _onSurfaceVariant = onSurfaceVariant,
+       _outline = outline,
+       _shadow = shadow,
+       _inverseSurface = inverseSurface,
+       _onInverseSurface = onInverseSurface,
+       _inversePrimary = inversePrimary,
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on a purple primary color that
   /// matches the [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
@@ -415,43 +423,47 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated('Use primary or primaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? primaryVariant = const Color(0xff000088),
-    @Deprecated('Use secondary or secondaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? secondaryVariant = const Color(0xff018786),
-  })  : assert(brightness != null),
-        assert(primary != null),
-        assert(onPrimary != null),
-        assert(secondary != null),
-        assert(onSecondary != null),
-        assert(error != null),
-        assert(onError != null),
-        assert(background != null),
-        assert(onBackground != null),
-        assert(surface != null),
-        assert(onSurface != null),
-        _primaryContainer = primaryContainer,
-        _onPrimaryContainer = onPrimaryContainer,
-        _secondaryContainer = secondaryContainer,
-        _onSecondaryContainer = onSecondaryContainer,
-        _tertiary = tertiary,
-        _onTertiary = onTertiary,
-        _tertiaryContainer = tertiaryContainer,
-        _onTertiaryContainer = onTertiaryContainer,
-        _errorContainer = errorContainer,
-        _onErrorContainer = onErrorContainer,
-        _surfaceVariant = surfaceVariant,
-        _onSurfaceVariant = onSurfaceVariant,
-        _outline = outline,
-        _shadow = shadow,
-        _inverseSurface = inverseSurface,
-        _onInverseSurface = onInverseSurface,
-        _inversePrimary = inversePrimary,
-        _primaryVariant = primaryVariant,
-        _secondaryVariant = secondaryVariant,
-        _surfaceTint = surfaceTint;
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xff000088),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff018786),
+  }) : assert(brightness != null),
+       assert(primary != null),
+       assert(onPrimary != null),
+       assert(secondary != null),
+       assert(onSecondary != null),
+       assert(error != null),
+       assert(onError != null),
+       assert(background != null),
+       assert(onBackground != null),
+       assert(surface != null),
+       assert(onSurface != null),
+       _primaryContainer = primaryContainer,
+       _onPrimaryContainer = onPrimaryContainer,
+       _secondaryContainer = secondaryContainer,
+       _onSecondaryContainer = onSecondaryContainer,
+       _tertiary = tertiary,
+       _onTertiary = onTertiary,
+       _tertiaryContainer = tertiaryContainer,
+       _onTertiaryContainer = onTertiaryContainer,
+       _errorContainer = errorContainer,
+       _onErrorContainer = onErrorContainer,
+       _surfaceVariant = surfaceVariant,
+       _onSurfaceVariant = onSurfaceVariant,
+       _outline = outline,
+       _shadow = shadow,
+       _inverseSurface = inverseSurface,
+       _onInverseSurface = onInverseSurface,
+       _inversePrimary = inversePrimary,
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on the dark
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
@@ -485,43 +497,47 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated('Use primary or primaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? primaryVariant = const Color(0xffbe9eff),
-    @Deprecated('Use secondary or secondaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? secondaryVariant = const Color(0xff66fff9),
-  })  : assert(brightness != null),
-        assert(primary != null),
-        assert(onPrimary != null),
-        assert(secondary != null),
-        assert(onSecondary != null),
-        assert(error != null),
-        assert(onError != null),
-        assert(background != null),
-        assert(onBackground != null),
-        assert(surface != null),
-        assert(onSurface != null),
-        _primaryContainer = primaryContainer,
-        _onPrimaryContainer = onPrimaryContainer,
-        _secondaryContainer = secondaryContainer,
-        _onSecondaryContainer = onSecondaryContainer,
-        _tertiary = tertiary,
-        _onTertiary = onTertiary,
-        _tertiaryContainer = tertiaryContainer,
-        _onTertiaryContainer = onTertiaryContainer,
-        _errorContainer = errorContainer,
-        _onErrorContainer = onErrorContainer,
-        _surfaceVariant = surfaceVariant,
-        _onSurfaceVariant = onSurfaceVariant,
-        _outline = outline,
-        _shadow = shadow,
-        _inverseSurface = inverseSurface,
-        _onInverseSurface = onInverseSurface,
-        _inversePrimary = inversePrimary,
-        _primaryVariant = primaryVariant,
-        _secondaryVariant = secondaryVariant,
-        _surfaceTint = surfaceTint;
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xffbe9eff),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff66fff9),
+  }) : assert(brightness != null),
+       assert(primary != null),
+       assert(onPrimary != null),
+       assert(secondary != null),
+       assert(onSecondary != null),
+       assert(error != null),
+       assert(onError != null),
+       assert(background != null),
+       assert(onBackground != null),
+       assert(surface != null),
+       assert(onSurface != null),
+       _primaryContainer = primaryContainer,
+       _onPrimaryContainer = onPrimaryContainer,
+       _secondaryContainer = secondaryContainer,
+       _onSecondaryContainer = onSecondaryContainer,
+       _tertiary = tertiary,
+       _onTertiary = onTertiary,
+       _tertiaryContainer = tertiaryContainer,
+       _onTertiaryContainer = onTertiaryContainer,
+       _errorContainer = errorContainer,
+       _onErrorContainer = onErrorContainer,
+       _surfaceVariant = surfaceVariant,
+       _onSurfaceVariant = onSurfaceVariant,
+       _outline = outline,
+       _shadow = shadow,
+       _inverseSurface = inverseSurface,
+       _onInverseSurface = onInverseSurface,
+       _inversePrimary = inversePrimary,
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create a color scheme from a [MaterialColor] swatch.
   ///
@@ -541,19 +557,16 @@ class ColorScheme with Diagnosticable {
 
     final bool isDark = brightness == Brightness.dark;
     final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
-    final Color secondary =
-        accentColor ?? (isDark ? Colors.tealAccent[200]! : primarySwatch);
+    final Color secondary = accentColor ?? (isDark ? Colors.tealAccent[200]! : primarySwatch);
     final bool secondaryIsDark = _brightnessFor(secondary) == Brightness.dark;
 
     return ColorScheme(
       primary: primarySwatch,
-      primaryVariant:
-          primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]!),
+      primaryVariant: primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]!),
       secondary: secondary,
       secondaryVariant: isDark ? Colors.tealAccent[700]! : primarySwatch[700]!,
       surface: cardColor ?? (isDark ? Colors.grey[800]! : Colors.white),
-      background:
-          backgroundColor ?? (isDark ? Colors.grey[700]! : primarySwatch[200]!),
+      background: backgroundColor ?? (isDark ? Colors.grey[700]! : primarySwatch[200]!),
       error: errorColor ?? Colors.red[700]!,
       onPrimary: primaryIsDark ? Colors.white : Colors.black,
       onSecondary: secondaryIsDark ? Colors.white : Colors.black,
@@ -564,8 +577,7 @@ class ColorScheme with Diagnosticable {
     );
   }
 
-  static Brightness _brightnessFor(Color color) =>
-      ThemeData.estimateBrightnessForColor(color);
+  static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
 
   /// The overall brightness of this color scheme.
   final Brightness brightness;
@@ -581,12 +593,10 @@ class ColorScheme with Diagnosticable {
   final Color onPrimary;
 
   final Color? _primaryContainer;
-
   /// A color used for elements needing less emphasis than [primary].
   Color get primaryContainer => _primaryContainer ?? primary;
 
   final Color? _onPrimaryContainer;
-
   /// A color that's clearly legible when drawn on [primaryContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -607,12 +617,10 @@ class ColorScheme with Diagnosticable {
   final Color onSecondary;
 
   final Color? _secondaryContainer;
-
   /// A color used for elements needing less emphasis than [secondary].
   Color get secondaryContainer => _secondaryContainer ?? secondary;
 
   final Color? _onSecondaryContainer;
-
   /// A color that's clearly legible when drawn on [secondaryContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -622,14 +630,12 @@ class ColorScheme with Diagnosticable {
   Color get onSecondaryContainer => _onSecondaryContainer ?? onSecondary;
 
   final Color? _tertiary;
-
   /// A color used as a contrasting accent that can balance [primary]
   /// and [secondary] colors or bring heightened attention to an element,
   /// such as an input field.
   Color get tertiary => _tertiary ?? secondary;
 
   final Color? _onTertiary;
-
   /// A color that's clearly legible when drawn on [tertiary].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -638,12 +644,10 @@ class ColorScheme with Diagnosticable {
   Color get onTertiary => _onTertiary ?? onSecondary;
 
   final Color? _tertiaryContainer;
-
   /// A color used for elements needing less emphasis than [tertiary].
   Color get tertiaryContainer => _tertiaryContainer ?? tertiary;
 
   final Color? _onTertiaryContainer;
-
   /// A color that's clearly legible when drawn on [tertiaryContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -664,12 +668,10 @@ class ColorScheme with Diagnosticable {
   final Color onError;
 
   final Color? _errorContainer;
-
   /// A color used for error elements needing less emphasis than [error].
   Color get errorContainer => _errorContainer ?? error;
 
   final Color? _onErrorContainer;
-
   /// A color that's clearly legible when drawn on [errorContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -699,13 +701,11 @@ class ColorScheme with Diagnosticable {
   final Color onSurface;
 
   final Color? _surfaceVariant;
-
   /// A color variant of [surface] that can be used for differentiation against
   /// a component using [surface].
   Color get surfaceVariant => _surfaceVariant ?? surface;
 
   final Color? _onSurfaceVariant;
-
   /// A color that's clearly legible when drawn on [surfaceVariant].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -715,24 +715,20 @@ class ColorScheme with Diagnosticable {
   Color get onSurfaceVariant => _onSurfaceVariant ?? onSurface;
 
   final Color? _outline;
-
   /// A utility color that creates boundaries and emphasis to improve usability.
   Color get outline => _outline ?? onBackground;
 
   final Color? _shadow;
-
   /// A color use to paint the drop shadows of elevated components.
   Color get shadow => _shadow ?? const Color(0xff000000);
 
   final Color? _inverseSurface;
-
   /// A surface color used for displaying the reverse of what’s seen in the
   /// surrounding UI, for example in a SnackBar to bring attention to
   /// an alert.
   Color get inverseSurface => _inverseSurface ?? onSurface;
 
   final Color? _onInverseSurface;
-
   /// A color that's clearly legible when drawn on [inverseSurface].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
@@ -742,29 +738,29 @@ class ColorScheme with Diagnosticable {
   Color get onInverseSurface => _onInverseSurface ?? surface;
 
   final Color? _inversePrimary;
-
   /// An accent color used for displaying a highlight color on [inverseSurface]
   /// backgrounds, like button text in a SnackBar.
   Color get inversePrimary => _inversePrimary ?? onPrimary;
 
   final Color? _surfaceTint;
-
   /// A color used as an overlay on a surface color to indicate a component's
   /// elevation.
   Color get surfaceTint => _surfaceTint ?? primary;
 
   final Color? _primaryVariant;
-
   /// A darker version of the primary color.
-  @Deprecated('Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.')
+  @Deprecated(
+    'Use primary or primaryContainer instead. '
+    'This feature was deprecated after v2.6.0-0.0.pre.'
+  )
   Color get primaryVariant => _primaryVariant ?? primary;
 
   final Color? _secondaryVariant;
-
   /// A darker version of the secondary color.
-  @Deprecated('Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.')
+  @Deprecated(
+    'Use secondary or secondaryContainer instead. '
+    'This feature was deprecated after v2.6.0-0.0.pre.'
+  )
   Color get secondaryVariant => _secondaryVariant ?? secondary;
 
   /// Creates a copy of this color scheme with the given fields
@@ -799,42 +795,46 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated('Use primary or primaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? primaryVariant,
-    @Deprecated('Use secondary or secondaryContainer instead. '
-        'This feature was deprecated after v2.6.0-0.0.pre.')
-        Color? secondaryVariant,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant,
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant,
   }) {
     return ColorScheme(
       brightness: brightness ?? this.brightness,
-      primary: primary ?? this.primary,
-      onPrimary: onPrimary ?? this.onPrimary,
-      primaryContainer: primaryContainer ?? this.primaryContainer,
-      onPrimaryContainer: onPrimaryContainer ?? this.onPrimaryContainer,
-      secondary: secondary ?? this.secondary,
-      onSecondary: onSecondary ?? this.onSecondary,
-      secondaryContainer: secondaryContainer ?? this.secondaryContainer,
-      onSecondaryContainer: onSecondaryContainer ?? this.onSecondaryContainer,
-      tertiary: tertiary ?? this.tertiary,
-      onTertiary: onTertiary ?? this.onTertiary,
-      tertiaryContainer: tertiaryContainer ?? this.tertiaryContainer,
-      onTertiaryContainer: onTertiaryContainer ?? this.onTertiaryContainer,
-      error: error ?? this.error,
-      onError: onError ?? this.onError,
-      errorContainer: errorContainer ?? this.errorContainer,
-      onErrorContainer: onErrorContainer ?? this.onErrorContainer,
-      background: background ?? this.background,
-      onBackground: onBackground ?? this.onBackground,
-      surface: surface ?? this.surface,
-      onSurface: onSurface ?? this.onSurface,
-      surfaceVariant: surfaceVariant ?? this.surfaceVariant,
-      onSurfaceVariant: onSurfaceVariant ?? this.onSurfaceVariant,
-      outline: outline ?? this.outline,
-      shadow: shadow ?? this.shadow,
-      inverseSurface: inverseSurface ?? this.inverseSurface,
-      onInverseSurface: onInverseSurface ?? this.onInverseSurface,
-      inversePrimary: inversePrimary ?? this.inversePrimary,
+      primary : primary ?? this.primary,
+      onPrimary : onPrimary ?? this.onPrimary,
+      primaryContainer : primaryContainer ?? this.primaryContainer,
+      onPrimaryContainer : onPrimaryContainer ?? this.onPrimaryContainer,
+      secondary : secondary ?? this.secondary,
+      onSecondary : onSecondary ?? this.onSecondary,
+      secondaryContainer : secondaryContainer ?? this.secondaryContainer,
+      onSecondaryContainer : onSecondaryContainer ?? this.onSecondaryContainer,
+      tertiary : tertiary ?? this.tertiary,
+      onTertiary : onTertiary ?? this.onTertiary,
+      tertiaryContainer : tertiaryContainer ?? this.tertiaryContainer,
+      onTertiaryContainer : onTertiaryContainer ?? this.onTertiaryContainer,
+      error : error ?? this.error,
+      onError : onError ?? this.onError,
+      errorContainer : errorContainer ?? this.errorContainer,
+      onErrorContainer : onErrorContainer ?? this.onErrorContainer,
+      background : background ?? this.background,
+      onBackground : onBackground ?? this.onBackground,
+      surface : surface ?? this.surface,
+      onSurface : onSurface ?? this.onSurface,
+      surfaceVariant : surfaceVariant ?? this.surfaceVariant,
+      onSurfaceVariant : onSurfaceVariant ?? this.onSurfaceVariant,
+      outline : outline ?? this.outline,
+      shadow : shadow ?? this.shadow,
+      inverseSurface : inverseSurface ?? this.inverseSurface,
+      onInverseSurface : onInverseSurface ?? this.onInverseSurface,
+      inversePrimary : inversePrimary ?? this.inversePrimary,
       primaryVariant: primaryVariant ?? this.primaryVariant,
       secondaryVariant: secondaryVariant ?? this.secondaryVariant,
       surfaceTint: _surfaceTint ?? this.surfaceTint,
@@ -850,20 +850,15 @@ class ColorScheme with Diagnosticable {
       primary: Color.lerp(a.primary, b.primary, t)!,
       onPrimary: Color.lerp(a.onPrimary, b.onPrimary, t)!,
       primaryContainer: Color.lerp(a.primaryContainer, b.primaryContainer, t),
-      onPrimaryContainer:
-          Color.lerp(a.onPrimaryContainer, b.onPrimaryContainer, t),
+      onPrimaryContainer: Color.lerp(a.onPrimaryContainer, b.onPrimaryContainer, t),
       secondary: Color.lerp(a.secondary, b.secondary, t)!,
       onSecondary: Color.lerp(a.onSecondary, b.onSecondary, t)!,
-      secondaryContainer:
-          Color.lerp(a.secondaryContainer, b.secondaryContainer, t),
-      onSecondaryContainer:
-          Color.lerp(a.onSecondaryContainer, b.onSecondaryContainer, t),
+      secondaryContainer: Color.lerp(a.secondaryContainer, b.secondaryContainer, t),
+      onSecondaryContainer: Color.lerp(a.onSecondaryContainer, b.onSecondaryContainer, t),
       tertiary: Color.lerp(a.tertiary, b.tertiary, t),
       onTertiary: Color.lerp(a.onTertiary, b.onTertiary, t),
-      tertiaryContainer:
-          Color.lerp(a.tertiaryContainer, b.tertiaryContainer, t),
-      onTertiaryContainer:
-          Color.lerp(a.onTertiaryContainer, b.onTertiaryContainer, t),
+      tertiaryContainer: Color.lerp(a.tertiaryContainer, b.tertiaryContainer, t),
+      onTertiaryContainer: Color.lerp(a.onTertiaryContainer, b.onTertiaryContainer, t),
       error: Color.lerp(a.error, b.error, t)!,
       onError: Color.lerp(a.onError, b.onError, t)!,
       errorContainer: Color.lerp(a.errorContainer, b.errorContainer, t),
@@ -887,144 +882,115 @@ class ColorScheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is ColorScheme &&
-        other.brightness == brightness &&
-        other.primary == primary &&
-        other.onPrimary == onPrimary &&
-        other.primaryContainer == primaryContainer &&
-        other.onPrimaryContainer == onPrimaryContainer &&
-        other.secondary == secondary &&
-        other.onSecondary == onSecondary &&
-        other.secondaryContainer == secondaryContainer &&
-        other.onSecondaryContainer == onSecondaryContainer &&
-        other.tertiary == tertiary &&
-        other.onTertiary == onTertiary &&
-        other.tertiaryContainer == tertiaryContainer &&
-        other.onTertiaryContainer == onTertiaryContainer &&
-        other.error == error &&
-        other.onError == onError &&
-        other.errorContainer == errorContainer &&
-        other.onErrorContainer == onErrorContainer &&
-        other.background == background &&
-        other.onBackground == onBackground &&
-        other.surface == surface &&
-        other.onSurface == onSurface &&
-        other.surfaceVariant == surfaceVariant &&
-        other.onSurfaceVariant == onSurfaceVariant &&
-        other.outline == outline &&
-        other.shadow == shadow &&
-        other.inverseSurface == inverseSurface &&
-        other.onInverseSurface == onInverseSurface &&
-        other.inversePrimary == inversePrimary &&
-        other.primaryVariant == primaryVariant &&
-        other.secondaryVariant == secondaryVariant &&
-        other.surfaceTint == surfaceTint;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ColorScheme
+      && other.brightness == brightness
+      && other.primary == primary
+      && other.onPrimary == onPrimary
+      && other.primaryContainer == primaryContainer
+      && other.onPrimaryContainer == onPrimaryContainer
+      && other.secondary == secondary
+      && other.onSecondary == onSecondary
+      && other.secondaryContainer == secondaryContainer
+      && other.onSecondaryContainer == onSecondaryContainer
+      && other.tertiary == tertiary
+      && other.onTertiary == onTertiary
+      && other.tertiaryContainer == tertiaryContainer
+      && other.onTertiaryContainer == onTertiaryContainer
+      && other.error == error
+      && other.onError == onError
+      && other.errorContainer == errorContainer
+      && other.onErrorContainer == onErrorContainer
+      && other.background == background
+      && other.onBackground == onBackground
+      && other.surface == surface
+      && other.onSurface == onSurface
+      && other.surfaceVariant == surfaceVariant
+      && other.onSurfaceVariant == onSurfaceVariant
+      && other.outline == outline
+      && other.shadow == shadow
+      && other.inverseSurface == inverseSurface
+      && other.onInverseSurface == onInverseSurface
+      && other.inversePrimary == inversePrimary
+      && other.primaryVariant == primaryVariant
+      && other.secondaryVariant == secondaryVariant
+      && other.surfaceTint == surfaceTint;
   }
 
   @override
   int get hashCode => Object.hash(
-        brightness,
-        primary,
-        onPrimary,
-        primaryContainer,
-        onPrimaryContainer,
-        secondary,
-        onSecondary,
-        secondaryContainer,
-        onSecondaryContainer,
-        tertiary,
-        onTertiary,
-        tertiaryContainer,
-        onTertiaryContainer,
-        error,
-        onError,
-        errorContainer,
-        onErrorContainer,
-        background,
-        onBackground,
-        Object.hash(
-          surface,
-          onSurface,
-          surfaceVariant,
-          onSurfaceVariant,
-          outline,
-          shadow,
-          inverseSurface,
-          onInverseSurface,
-          inversePrimary,
-          primaryVariant,
-          secondaryVariant,
-          surfaceTint,
-        ),
-      );
+    brightness,
+    primary,
+    onPrimary,
+    primaryContainer,
+    onPrimaryContainer,
+    secondary,
+    onSecondary,
+    secondaryContainer,
+    onSecondaryContainer,
+    tertiary,
+    onTertiary,
+    tertiaryContainer,
+    onTertiaryContainer,
+    error,
+    onError,
+    errorContainer,
+    onErrorContainer,
+    background,
+    onBackground,
+    Object.hash(
+      surface,
+      onSurface,
+      surfaceVariant,
+      onSurfaceVariant,
+      outline,
+      shadow,
+      inverseSurface,
+      onInverseSurface,
+      inversePrimary,
+      primaryVariant,
+      secondaryVariant,
+      surfaceTint,
+    ),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const ColorScheme defaultScheme = ColorScheme.light();
-    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness,
-        defaultValue: defaultScheme.brightness));
-    properties.add(
-        ColorProperty('primary', primary, defaultValue: defaultScheme.primary));
-    properties.add(ColorProperty('onPrimary', onPrimary,
-        defaultValue: defaultScheme.onPrimary));
-    properties.add(ColorProperty('primaryContainer', primaryContainer,
-        defaultValue: defaultScheme.primaryContainer));
-    properties.add(ColorProperty('onPrimaryContainer', onPrimaryContainer,
-        defaultValue: defaultScheme.onPrimaryContainer));
-    properties.add(ColorProperty('secondary', secondary,
-        defaultValue: defaultScheme.secondary));
-    properties.add(ColorProperty('onSecondary', onSecondary,
-        defaultValue: defaultScheme.onSecondary));
-    properties.add(ColorProperty('secondaryContainer', secondaryContainer,
-        defaultValue: defaultScheme.secondaryContainer));
-    properties.add(ColorProperty('onSecondaryContainer', onSecondaryContainer,
-        defaultValue: defaultScheme.onSecondaryContainer));
-    properties.add(ColorProperty('tertiary', tertiary,
-        defaultValue: defaultScheme.tertiary));
-    properties.add(ColorProperty('onTertiary', onTertiary,
-        defaultValue: defaultScheme.onTertiary));
-    properties.add(ColorProperty('tertiaryContainer', tertiaryContainer,
-        defaultValue: defaultScheme.tertiaryContainer));
-    properties.add(ColorProperty('onTertiaryContainer', onTertiaryContainer,
-        defaultValue: defaultScheme.onTertiaryContainer));
-    properties
-        .add(ColorProperty('error', error, defaultValue: defaultScheme.error));
-    properties.add(
-        ColorProperty('onError', onError, defaultValue: defaultScheme.onError));
-    properties.add(ColorProperty('errorContainer', errorContainer,
-        defaultValue: defaultScheme.errorContainer));
-    properties.add(ColorProperty('onErrorContainer', onErrorContainer,
-        defaultValue: defaultScheme.onErrorContainer));
-    properties.add(ColorProperty('background', background,
-        defaultValue: defaultScheme.background));
-    properties.add(ColorProperty('onBackground', onBackground,
-        defaultValue: defaultScheme.onBackground));
-    properties.add(
-        ColorProperty('surface', surface, defaultValue: defaultScheme.surface));
-    properties.add(ColorProperty('onSurface', onSurface,
-        defaultValue: defaultScheme.onSurface));
-    properties.add(ColorProperty('surfaceVariant', surfaceVariant,
-        defaultValue: defaultScheme.surfaceVariant));
-    properties.add(ColorProperty('onSurfaceVariant', onSurfaceVariant,
-        defaultValue: defaultScheme.onSurfaceVariant));
-    properties.add(
-        ColorProperty('outline', outline, defaultValue: defaultScheme.outline));
-    properties.add(
-        ColorProperty('shadow', shadow, defaultValue: defaultScheme.shadow));
-    properties.add(ColorProperty('inverseSurface', inverseSurface,
-        defaultValue: defaultScheme.inverseSurface));
-    properties.add(ColorProperty('onInverseSurface', onInverseSurface,
-        defaultValue: defaultScheme.onInverseSurface));
-    properties.add(ColorProperty('inversePrimary', inversePrimary,
-        defaultValue: defaultScheme.inversePrimary));
-    properties.add(ColorProperty('primaryVariant', primaryVariant,
-        defaultValue: defaultScheme.primaryVariant));
-    properties.add(ColorProperty('secondaryVariant', secondaryVariant,
-        defaultValue: defaultScheme.secondaryVariant));
-    properties.add(ColorProperty('surfaceTint', surfaceTint,
-        defaultValue: defaultScheme.surfaceTint));
+    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: defaultScheme.brightness));
+    properties.add(ColorProperty('primary', primary, defaultValue: defaultScheme.primary));
+    properties.add(ColorProperty('onPrimary', onPrimary, defaultValue: defaultScheme.onPrimary));
+    properties.add(ColorProperty('primaryContainer', primaryContainer, defaultValue: defaultScheme.primaryContainer));
+    properties.add(ColorProperty('onPrimaryContainer', onPrimaryContainer, defaultValue: defaultScheme.onPrimaryContainer));
+    properties.add(ColorProperty('secondary', secondary, defaultValue: defaultScheme.secondary));
+    properties.add(ColorProperty('onSecondary', onSecondary, defaultValue: defaultScheme.onSecondary));
+    properties.add(ColorProperty('secondaryContainer', secondaryContainer, defaultValue: defaultScheme.secondaryContainer));
+    properties.add(ColorProperty('onSecondaryContainer', onSecondaryContainer, defaultValue: defaultScheme.onSecondaryContainer));
+    properties.add(ColorProperty('tertiary', tertiary, defaultValue: defaultScheme.tertiary));
+    properties.add(ColorProperty('onTertiary', onTertiary, defaultValue: defaultScheme.onTertiary));
+    properties.add(ColorProperty('tertiaryContainer', tertiaryContainer, defaultValue: defaultScheme.tertiaryContainer));
+    properties.add(ColorProperty('onTertiaryContainer', onTertiaryContainer, defaultValue: defaultScheme.onTertiaryContainer));
+    properties.add(ColorProperty('error', error, defaultValue: defaultScheme.error));
+    properties.add(ColorProperty('onError', onError, defaultValue: defaultScheme.onError));
+    properties.add(ColorProperty('errorContainer', errorContainer, defaultValue: defaultScheme.errorContainer));
+    properties.add(ColorProperty('onErrorContainer', onErrorContainer, defaultValue: defaultScheme.onErrorContainer));
+    properties.add(ColorProperty('background', background, defaultValue: defaultScheme.background));
+    properties.add(ColorProperty('onBackground', onBackground, defaultValue: defaultScheme.onBackground));
+    properties.add(ColorProperty('surface', surface, defaultValue: defaultScheme.surface));
+    properties.add(ColorProperty('onSurface', onSurface, defaultValue: defaultScheme.onSurface));
+    properties.add(ColorProperty('surfaceVariant', surfaceVariant, defaultValue: defaultScheme.surfaceVariant));
+    properties.add(ColorProperty('onSurfaceVariant', onSurfaceVariant, defaultValue: defaultScheme.onSurfaceVariant));
+    properties.add(ColorProperty('outline', outline, defaultValue: defaultScheme.outline));
+    properties.add(ColorProperty('shadow', shadow, defaultValue: defaultScheme.shadow));
+    properties.add(ColorProperty('inverseSurface', inverseSurface, defaultValue: defaultScheme.inverseSurface));
+    properties.add(ColorProperty('onInverseSurface', onInverseSurface, defaultValue: defaultScheme.onInverseSurface));
+    properties.add(ColorProperty('inversePrimary', inversePrimary, defaultValue: defaultScheme.inversePrimary));
+    properties.add(ColorProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
+    properties.add(ColorProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
+    properties.add(ColorProperty('surfaceTint', surfaceTint, defaultValue: defaultScheme.surfaceTint));
   }
 }

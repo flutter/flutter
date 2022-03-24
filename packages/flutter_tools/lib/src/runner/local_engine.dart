@@ -33,10 +33,10 @@ class LocalEngineLocator {
     required FileSystem fileSystem,
     required String flutterRoot,
     required UserMessages userMessages,
-  })  : _platform = platform,
-        _logger = logger,
-        _fileSystem = fileSystem,
-        _flutterRoot = flutterRoot,
+  }) : _platform = platform,
+       _logger = logger,
+       _fileSystem = fileSystem,
+       _flutterRoot = flutterRoot,
         _userMessages = userMessages;
 
   final Platform _platform;
@@ -46,24 +46,20 @@ class LocalEngineLocator {
   final UserMessages _userMessages;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
-  Future<EngineBuildPaths?> findEnginePath(String? engineSourcePath,
-      String? localEngine, String? packagePath) async {
-    engineSourcePath ??=
-        _platform.environment[kFlutterEngineEnvironmentVariableName];
+  Future<EngineBuildPaths?> findEnginePath(String? engineSourcePath, String? localEngine, String? packagePath) async {
+    engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && localEngine != null) {
       try {
         engineSourcePath = _findEngineSourceByLocalEngine(localEngine);
-        engineSourcePath ??=
-            await _findEngineSourceByPackageConfig(packagePath);
+        engineSourcePath ??= await _findEngineSourceByPackageConfig(packagePath);
       } on FileSystemException catch (e) {
         _logger.printTrace('Local engine auto-detection file exception: $e');
         engineSourcePath = null;
       }
       // If engineSourcePath is still not set, try to determine it by flutter root.
       engineSourcePath ??= _tryEnginePath(
-        _fileSystem.path.join(
-            _fileSystem.directory(_flutterRoot).parent.path, 'engine', 'src'),
+        _fileSystem.path.join(_fileSystem.directory(_flutterRoot).parent.path, 'engine', 'src'),
       );
     }
 
@@ -98,11 +94,8 @@ class LocalEngineLocator {
       final Directory localEngineDirectory = _fileSystem.directory(localEngine);
       final Directory outDirectory = localEngineDirectory.parent;
       final Directory srcDirectory = outDirectory.parent;
-      if (localEngineDirectory.existsSync() &&
-          outDirectory.basename == 'out' &&
-          srcDirectory.basename == 'src') {
-        _logger.printTrace(
-            'Parsed engine source from local engine as ${srcDirectory.path}.');
+      if (localEngineDirectory.existsSync() && outDirectory.basename == 'out' && srcDirectory.basename == 'src') {
+        _logger.printTrace('Parsed engine source from local engine as ${srcDirectory.path}.');
         return srcDirectory.path;
       }
     }
@@ -120,12 +113,9 @@ class LocalEngineLocator {
     );
     // Skip if sky_engine is the version in bin/cache.
     Uri? engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
-    final String cachedPath = _fileSystem.path.join(
-        _flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
-    if (engineUri != null &&
-        _fileSystem.identicalSync(cachedPath, engineUri.path)) {
-      _logger.printTrace(
-          'Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
+    final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
+    if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
+      _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
       engineUri = null;
     }
     // If sky_engine is specified and the engineSourcePath not set, try to
@@ -135,18 +125,15 @@ class LocalEngineLocator {
     String? engineSourcePath;
     final String? engineUriPath = engineUri?.path;
     if (engineUriPath != null) {
-      engineSourcePath = _fileSystem
-          .directory(engineUriPath)
-          .parent
-          .parent
-          .parent
-          .parent
-          .parent
-          .parent
-          .path;
-      if (engineSourcePath != null &&
-          (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) ||
-              engineSourcePath.isEmpty)) {
+      engineSourcePath = _fileSystem.directory(engineUriPath)
+        .parent
+        .parent
+        .parent
+        .parent
+        .parent
+        .parent
+        .path;
+      if (engineSourcePath != null && (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
         engineSourcePath = null;
         throwToolExit(
           _userMessages.runnerNoEngineSrcDir(
@@ -177,32 +164,26 @@ class LocalEngineLocator {
     return 'host_$tmpBasename';
   }
 
-  EngineBuildPaths _findEngineBuildPath(
-      String? localEngine, String enginePath) {
+  EngineBuildPaths _findEngineBuildPath(String? localEngine, String enginePath) {
     if (localEngine == null) {
       throwToolExit(_userMessages.runnerLocalEngineRequired, exitCode: 2);
     }
 
-    final String engineBuildPath = _fileSystem.path
-        .normalize(_fileSystem.path.join(enginePath, 'out', localEngine));
+    final String engineBuildPath = _fileSystem.path.normalize(_fileSystem.path.join(enginePath, 'out', localEngine));
     if (!_fileSystem.isDirectorySync(engineBuildPath)) {
-      throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath),
-          exitCode: 2);
+      throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
     }
 
     final String basename = _fileSystem.path.basename(engineBuildPath);
     final String hostBasename = _getHostEngineBasename(basename);
     final String engineHostBuildPath = _fileSystem.path.normalize(
-      _fileSystem.path
-          .join(_fileSystem.path.dirname(engineBuildPath), hostBasename),
+      _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), hostBasename),
     );
     if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
-      throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath),
-          exitCode: 2);
+      throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
     }
 
-    return EngineBuildPaths(
-        targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
+    return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
   String? _tryEnginePath(String enginePath) {

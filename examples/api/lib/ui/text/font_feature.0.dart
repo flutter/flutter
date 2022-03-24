@@ -46,33 +46,24 @@ class ExampleWidget extends StatelessWidget {
                   fontSize: 24,
                 )),
             const Spacer(),
-            Text('but old-style figures blend well with lower case:',
-                style: titleStyle),
+            Text('but old-style figures blend well with lower case:', style: titleStyle),
             const Text('The 1972 cup final was a 1-1 draw.',
                 style: TextStyle(
-                    fontFamily: 'Cardo',
-                    fontSize: 24,
-                    fontFeatures: <FontFeature>[
-                      FontFeature.oldstyleFigures()
-                    ])),
+                    fontFamily: 'Cardo', fontSize: 24, fontFeatures: <FontFeature>[FontFeature.oldstyleFigures()])),
             const Spacer(),
             const Divider(),
             const Spacer(),
-            Text('fractions look better with a custom ligature:',
-                style: titleStyle),
+            Text('fractions look better with a custom ligature:', style: titleStyle),
             const Text('Add 1/2 tsp of flour and stir.',
                 style: TextStyle(
                     fontFamily: 'Milonga',
                     fontSize: 24,
-                    fontFeatures: <FontFeature>[
-                      FontFeature.alternativeFractions()
-                    ])),
+                    fontFeatures: <FontFeature>[FontFeature.alternativeFractions()])),
             const Spacer(),
             const Divider(),
             const Spacer(),
             Text('multiple stylistic sets in one font:', style: titleStyle),
-            const Text('Raleway Dots',
-                style: TextStyle(fontFamily: 'Raleway Dots', fontSize: 48)),
+            const Text('Raleway Dots', style: TextStyle(fontFamily: 'Raleway Dots', fontSize: 48)),
             Text('Raleway Dots',
                 style: TextStyle(
                   fontFeatures: <FontFeature>[FontFeature.stylisticSet(1)],

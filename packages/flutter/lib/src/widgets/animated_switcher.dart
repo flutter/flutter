@@ -19,9 +19,9 @@ class _ChildEntry {
     required this.animation,
     required this.transition,
     required this.widgetChild,
-  })  : assert(animation != null),
-        assert(transition != null),
-        assert(controller != null);
+  }) : assert(animation != null),
+       assert(transition != null),
+       assert(controller != null);
 
   // The animation controller for the child's transition.
   final AnimationController controller;
@@ -48,8 +48,7 @@ class _ChildEntry {
 ///
 /// The function should return a widget which wraps the given `child`. It may
 /// also use the `animation` to inform its transition. It must not return null.
-typedef AnimatedSwitcherTransitionBuilder = Widget Function(
-    Widget child, Animation<double> animation);
+typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animation<double> animation);
 
 /// Signature for builders used to generate custom layouts for
 /// [AnimatedSwitcher].
@@ -61,8 +60,7 @@ typedef AnimatedSwitcherTransitionBuilder = Widget Function(
 /// The `previousChildren` list is an unmodifiable list, sorted with the oldest
 /// at the beginning and the newest at the end. It does not include the
 /// `currentChild`.
-typedef AnimatedSwitcherLayoutBuilder = Widget Function(
-    Widget? currentChild, List<Widget> previousChildren);
+typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, List<Widget> previousChildren);
 
 /// A widget that by default does a cross-fade between a new widget and the
 /// widget previously set on the [AnimatedSwitcher] as a child.
@@ -119,12 +117,12 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  })  : assert(duration != null),
-        assert(switchInCurve != null),
-        assert(switchOutCurve != null),
-        assert(transitionBuilder != null),
-        assert(layoutBuilder != null),
-        super(key: key);
+  }) : assert(duration != null),
+       assert(switchInCurve != null),
+       assert(switchOutCurve != null),
+       assert(transitionBuilder != null),
+       assert(layoutBuilder != null),
+       super(key: key);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -223,8 +221,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// reversed.
   ///
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
-  static Widget defaultTransitionBuilder(
-      Widget child, Animation<double> animation) {
+  static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return FadeTransition(
       opacity: animation,
       child: child,
@@ -238,8 +235,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// each other.
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
-  static Widget defaultLayoutBuilder(
-      Widget? currentChild, List<Widget> previousChildren) {
+  static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
@@ -252,16 +248,12 @@ class AnimatedSwitcher extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty(
-        'reverseDuration', reverseDuration?.inMilliseconds,
-        unit: 'ms', defaultValue: null));
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }
 
-class _AnimatedSwitcherState extends State<AnimatedSwitcher>
-    with TickerProviderStateMixin {
+class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
   _ChildEntry? _currentEntry;
   final Set<_ChildEntry> _outgoingEntries = <_ChildEntry>{};
   List<Widget>? _outgoingWidgets = const <Widget>[];
@@ -281,15 +273,15 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
     // transitions.
     if (widget.transitionBuilder != oldWidget.transitionBuilder) {
       _outgoingEntries.forEach(_updateTransitionForEntry);
-      if (_currentEntry != null) _updateTransitionForEntry(_currentEntry!);
+      if (_currentEntry != null)
+        _updateTransitionForEntry(_currentEntry!);
       _markChildWidgetCacheAsDirty();
     }
 
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
     if (hasNewChild != hasOldChild ||
-        hasNewChild &&
-            !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
+        hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
       _childNumber += 1;
       _addEntryForNewChild(animate: true);
@@ -306,7 +298,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
     }
   }
 
-  void _addEntryForNewChild({required bool animate}) {
+  void _addEntryForNewChild({ required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
@@ -316,7 +308,8 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
-    if (widget.child == null) return;
+    if (widget.child == null)
+      return;
     final AnimationController controller = AnimationController(
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
@@ -383,13 +376,13 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
       _outgoingEntries.map<Widget>((_ChildEntry entry) => entry.transition),
     );
     assert(_outgoingEntries.length == _outgoingWidgets!.length);
-    assert(_outgoingEntries.isEmpty ||
-        _outgoingEntries.last.transition == _outgoingWidgets!.last);
+    assert(_outgoingEntries.isEmpty || _outgoingEntries.last.transition == _outgoingWidgets!.last);
   }
 
   @override
   void dispose() {
-    if (_currentEntry != null) _currentEntry!.controller.dispose();
+    if (_currentEntry != null)
+      _currentEntry!.controller.dispose();
     for (final _ChildEntry entry in _outgoingEntries)
       entry.controller.dispose();
     super.dispose();

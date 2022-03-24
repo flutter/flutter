@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui'
-    show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
+import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
 
-import 'package:flutter/widgets.dart'
-    show WidgetsBinding, WidgetsBindingObserver;
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,8 +15,7 @@ void main() {
     expect(testWindow.someNewProperty, null);
   });
 
-  testWidgets('TestWindow can fake device pixel ratio',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can fake device pixel ratio', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<double>(
       tester: tester,
       realValue: ui.window.devicePixelRatio,
@@ -54,8 +51,7 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.window.viewInsets;
       },
-      propertyFaker:
-          (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
+      propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
         binding.window.viewInsetsTestValue = fakeValue;
       },
     );
@@ -69,8 +65,7 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.window.padding;
       },
-      propertyFaker:
-          (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
+      propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
         binding.window.paddingTestValue = fakeValue;
       },
     );
@@ -98,15 +93,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.window.locales;
       },
-      propertyFaker:
-          (TestWidgetsFlutterBinding binding, List<Locale> fakeValue) {
+      propertyFaker: (TestWidgetsFlutterBinding binding, List<Locale> fakeValue) {
         binding.window.localesTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestWindow can fake text scale factor',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can fake text scale factor', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<double>(
       tester: tester,
       realValue: ui.window.textScaleFactor,
@@ -134,22 +127,19 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake brieflyShowPassword',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can fake brieflyShowPassword', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<bool>(
       tester: tester,
       realValue: ui.window.brieflyShowPassword,
       fakeValue: !ui.window.brieflyShowPassword,
-      propertyRetriever: () =>
-          WidgetsBinding.instance.window.brieflyShowPassword,
+      propertyRetriever: () => WidgetsBinding.instance.window.brieflyShowPassword,
       propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
         binding.window.brieflyShowPasswordTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestWindow can fake default route name',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can fake default route name', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<String>(
       tester: tester,
       realValue: ui.window.defaultRouteName,
@@ -163,8 +153,7 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake accessibility features',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can fake accessibility features', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<AccessibilityFeatures>(
       tester: tester,
       realValue: ui.window.accessibilityFeatures,
@@ -172,15 +161,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.window.accessibilityFeatures;
       },
-      propertyFaker:
-          (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
+      propertyFaker: (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
         binding.window.accessibilityFeaturesTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestWindow can fake platform brightness',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can fake platform brightness', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<Brightness>(
       tester: tester,
       realValue: Brightness.light,
@@ -194,8 +181,7 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can clear out fake properties all at once',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) async {
     final double originalDevicePixelRatio = ui.window.devicePixelRatio;
     final double originalTextScaleFactor = ui.window.textScaleFactor;
     final TestWindow testWindow = retrieveTestBinding(tester).window;
@@ -208,21 +194,15 @@ void main() {
     testWindow.clearAllTestValues();
 
     // Verify that the window once again reports real property values.
-    expect(WidgetsBinding.instance.window.devicePixelRatio,
-        originalDevicePixelRatio);
-    expect(WidgetsBinding.instance.window.textScaleFactor,
-        originalTextScaleFactor);
+    expect(WidgetsBinding.instance.window.devicePixelRatio, originalDevicePixelRatio);
+    expect(WidgetsBinding.instance.window.textScaleFactor, originalTextScaleFactor);
   });
 
-  testWidgets(
-      'TestWindow sends fake locales when WidgetsBindingObserver notifiers are called',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
     final List<Locale> defaultLocales = WidgetsBinding.instance.window.locales;
     final TestObserver observer = TestObserver();
     retrieveTestBinding(tester).addObserver(observer);
-    final List<Locale> expectedValue = <Locale>[
-      const Locale('fake_language_code')
-    ];
+    final List<Locale> expectedValue = <Locale>[const Locale('fake_language_code')];
     retrieveTestBinding(tester).window.localesTestValue = expectedValue;
     expect(observer.locales, equals(expectedValue));
     retrieveTestBinding(tester).window.localesTestValue = defaultLocales;
@@ -234,8 +214,7 @@ void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
   required WindowPropertyType? realValue,
   required WindowPropertyType fakeValue,
   required WindowPropertyType? Function() propertyRetriever,
-  required Function(TestWidgetsFlutterBinding, WindowPropertyType fakeValue)
-      propertyFaker,
+  required Function(TestWidgetsFlutterBinding, WindowPropertyType fakeValue) propertyFaker,
 }) {
   WindowPropertyType? propertyBeforeFaking;
   WindowPropertyType? propertyAfterFaking;
@@ -253,8 +232,7 @@ void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
 TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   final WidgetsBinding binding = tester.binding;
   assert(binding is TestWidgetsFlutterBinding);
-  final TestWidgetsFlutterBinding testBinding =
-      binding as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
   return testBinding;
 }
 

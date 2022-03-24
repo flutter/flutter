@@ -16,9 +16,7 @@ class _VersionInfo {
   /// This should contain a version number. For example:
   ///     "clang version 9.0.1-6+build1"
   _VersionInfo(this.description) {
-    final String? versionString = RegExp(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?')
-        .firstMatch(description)
-        ?.group(0);
+    final String? versionString = RegExp(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?').firstMatch(description)?.group(0);
     number = Version.parse(versionString);
   }
 
@@ -34,9 +32,9 @@ class LinuxDoctorValidator extends DoctorValidator {
   LinuxDoctorValidator({
     required ProcessManager processManager,
     required UserMessages userMessages,
-  })  : _processManager = processManager,
-        _userMessages = userMessages,
-        super('Linux toolchain - develop for Linux desktop');
+  }) : _processManager = processManager,
+       _userMessages = userMessages,
+       super('Linux toolchain - develop for Linux desktop');
 
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -64,20 +62,17 @@ class LinuxDoctorValidator extends DoctorValidator {
     ValidationType validationType = ValidationType.installed;
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    final Map<String, _VersionInfo?> installedVersions =
-        <String, _VersionInfo?>{
+    final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{
       // Sort the check to make the call order predictable for unit tests.
       for (String binary in _requiredBinaryVersions.keys.toList()..sort())
-        binary: await _getBinaryVersion(binary)
+          binary: await _getBinaryVersion(binary)
     };
 
     // Determine overall validation level.
-    if (installedVersions.values
-        .any((_VersionInfo? versionInfo) => versionInfo?.number == null)) {
+    if (installedVersions.values.any((_VersionInfo? versionInfo) => versionInfo?.number == null)) {
       validationType = ValidationType.missing;
     } else if (installedVersions.keys.any((String binary) =>
-        installedVersions[binary]!.number! <
-        _requiredBinaryVersions[binary]!)) {
+          installedVersions[binary]!.number! < _requiredBinaryVersions[binary]!)) {
       validationType = ValidationType.partial;
     }
 
@@ -91,8 +86,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         messages.add(ValidationMessage(version.description));
         final Version requiredVersion = _requiredBinaryVersions[kClangBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(ValidationMessage.error(
-              _userMessages.clangTooOld(requiredVersion.toString())));
+          messages.add(ValidationMessage.error(_userMessages.clangTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -107,8 +101,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         messages.add(ValidationMessage(version.description));
         final Version requiredVersion = _requiredBinaryVersions[kCmakeBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(ValidationMessage.error(
-              _userMessages.cmakeTooOld(requiredVersion.toString())));
+          messages.add(ValidationMessage.error(_userMessages.cmakeTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -121,12 +114,10 @@ class LinuxDoctorValidator extends DoctorValidator {
       } else {
         assert(_requiredBinaryVersions.containsKey(kNinjaBinary));
         // The full version description is just the number, so add context.
-        messages.add(
-            ValidationMessage(_userMessages.ninjaVersion(version.description)));
+        messages.add(ValidationMessage(_userMessages.ninjaVersion(version.description)));
         final Version requiredVersion = _requiredBinaryVersions[kNinjaBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(ValidationMessage.error(
-              _userMessages.ninjaTooOld(requiredVersion.toString())));
+          messages.add(ValidationMessage.error(_userMessages.ninjaTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -139,13 +130,10 @@ class LinuxDoctorValidator extends DoctorValidator {
       } else {
         assert(_requiredBinaryVersions.containsKey(kPkgConfigBinary));
         // The full version description is just the number, so add context.
-        messages.add(ValidationMessage(
-            _userMessages.pkgConfigVersion(version.description)));
-        final Version requiredVersion =
-            _requiredBinaryVersions[kPkgConfigBinary]!;
+        messages.add(ValidationMessage(_userMessages.pkgConfigVersion(version.description)));
+        final Version requiredVersion = _requiredBinaryVersions[kPkgConfigBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(ValidationMessage.error(
-              _userMessages.pkgConfigTooOld(requiredVersion.toString())));
+          messages.add(ValidationMessage.error(_userMessages.pkgConfigTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -161,8 +149,7 @@ class LinuxDoctorValidator extends DoctorValidator {
       }
       if (libraryMissing) {
         validationType = ValidationType.missing;
-        messages
-            .add(ValidationMessage.error(_userMessages.gtkLibrariesMissing));
+        messages.add(ValidationMessage.error(_userMessages.gtkLibrariesMissing));
       }
     }
 

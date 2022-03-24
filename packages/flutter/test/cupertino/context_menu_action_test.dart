@@ -9,13 +9,11 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
-  const CupertinoDynamicColor kBackgroundColor =
-      CupertinoDynamicColor.withBrightness(
+  const CupertinoDynamicColor kBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFEEEEEE),
     darkColor: Color(0xFF212122),
   );
-  const CupertinoDynamicColor kBackgroundColorPressed =
-      CupertinoDynamicColor.withBrightness(
+  const CupertinoDynamicColor kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
@@ -83,56 +81,45 @@ void main() {
 
   testWidgets('turns grey when pressed and held', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp());
-    expect(find.byType(CupertinoContextMenuAction),
-        paints..rect(color: kBackgroundColor.color));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.color));
 
-    final Offset actionCenterLight =
-        tester.getCenter(find.byType(CupertinoContextMenuAction));
-    final TestGesture gestureLight =
-        await tester.startGesture(actionCenterLight);
+    final Offset actionCenterLight = tester.getCenter(find.byType(CupertinoContextMenuAction));
+    final TestGesture gestureLight = await tester.startGesture(actionCenterLight);
     await tester.pump();
-    expect(find.byType(CupertinoContextMenuAction),
-        paints..rect(color: kBackgroundColorPressed.color));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColorPressed.color));
 
     await gestureLight.up();
     await tester.pump();
-    expect(find.byType(CupertinoContextMenuAction),
-        paints..rect(color: kBackgroundColor.color));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.color));
 
     await tester.pumpWidget(_getApp(brightness: Brightness.dark));
-    expect(find.byType(CupertinoContextMenuAction),
-        paints..rect(color: kBackgroundColor.darkColor));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.darkColor));
 
-    final Offset actionCenterDark =
-        tester.getCenter(find.byType(CupertinoContextMenuAction));
+    final Offset actionCenterDark = tester.getCenter(find.byType(CupertinoContextMenuAction));
     final TestGesture gestureDark = await tester.startGesture(actionCenterDark);
     await tester.pump();
-    expect(find.byType(CupertinoContextMenuAction),
-        paints..rect(color: kBackgroundColorPressed.darkColor));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColorPressed.darkColor));
 
     await gestureDark.up();
     await tester.pump();
-    expect(find.byType(CupertinoContextMenuAction),
-        paints..rect(color: kBackgroundColor.darkColor));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.darkColor));
   });
 
-  testWidgets('icon and textStyle colors are correct out of the box',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp());
     expect(_getTextStyle(tester).color, CupertinoColors.label);
-    expect(_getIcon(tester).color, CupertinoColors.label);
+    expect(_getIcon(tester).color,  CupertinoColors.label);
   });
 
-  testWidgets('icon and textStyle colors are correct for destructive actions',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp(isDestructiveAction: true));
     expect(_getTextStyle(tester).color, kDestructiveActionColor);
     expect(_getIcon(tester).color, kDestructiveActionColor);
   });
 
-  testWidgets('textStyle is correct for defaultAction',
-      (WidgetTester tester) async {
+  testWidgets('textStyle is correct for defaultAction', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp(isDefaultAction: true));
     expect(_getTextStyle(tester).fontWeight, kDefaultActionWeight);
   });
+
 }

@@ -89,10 +89,10 @@ class PopupMenuThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static PopupMenuThemeData? lerp(
-      PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
+  static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return PopupMenuThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -105,41 +105,38 @@ class PopupMenuThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        color,
-        shape,
-        elevation,
-        textStyle,
-        enableFeedback,
-        mouseCursor,
-      );
+    color,
+    shape,
+    elevation,
+    textStyle,
+    enableFeedback,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is PopupMenuThemeData &&
-        other.elevation == elevation &&
-        other.color == color &&
-        other.shape == shape &&
-        other.textStyle == textStyle &&
-        other.enableFeedback == enableFeedback &&
-        other.mouseCursor == mouseCursor;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is PopupMenuThemeData
+        && other.elevation == elevation
+        && other.color == color
+        && other.shape == shape
+        && other.textStyle == textStyle
+        && other.enableFeedback == enableFeedback
+        && other.mouseCursor == mouseCursor;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
-        'mouseCursor', mouseCursor,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 
@@ -157,8 +154,7 @@ class PopupMenuTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant popup menu widgets.
   final PopupMenuThemeData data;
@@ -173,8 +169,7 @@ class PopupMenuTheme extends InheritedTheme {
   /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
   /// ```
   static PopupMenuThemeData of(BuildContext context) {
-    final PopupMenuTheme? popupMenuTheme =
-        context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
+    final PopupMenuTheme? popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 

@@ -93,8 +93,7 @@ class MyNavigationRailFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation =
-        NavigationRail.extendedAnimation(context);
+    final Animation<double> animation = NavigationRail.extendedAnimation(context);
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {

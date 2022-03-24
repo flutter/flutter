@@ -13,12 +13,7 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton(
-      {Key? key,
-      required this.name,
-      this.canRequestFocus = true,
-      this.autofocus = false})
-      : super(key: key);
+  const DemoButton({Key? key, required this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
   final String name;
   final bool canRequestFocus;
@@ -30,8 +25,8 @@ class DemoButton extends StatefulWidget {
 
 class _DemoButtonState extends State<DemoButton> {
   late final FocusNode focusNode = FocusNode(
-    debugLabel: widget.name,
-    canRequestFocus: widget.canRequestFocus,
+      debugLabel: widget.name,
+      canRequestFocus: widget.canRequestFocus,
   );
 
   @override
@@ -58,8 +53,7 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: focusNode,
       autofocus: widget.autofocus,
       style: ButtonStyle(
-        overlayColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
+        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.focused))
             return Colors.red.withOpacity(0.25);
           if (states.contains(MaterialState.hovered))
@@ -183,14 +177,11 @@ class _FocusDemoState extends State<FocusDemo> {
                         DemoButton(name: 'Six'),
                       ],
                     ),
-                    OutlinedButton(
-                        onPressed: () => print('pressed'),
-                        child: const Text('PRESS ME')),
+                    OutlinedButton(onPressed: () => print('pressed'), child: const Text('PRESS ME')),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: TextField(
-                        decoration: InputDecoration(
-                            labelText: 'Enter Text', filled: true),
+                        decoration: InputDecoration(labelText: 'Enter Text', filled: true),
                       ),
                     ),
                     const Padding(

@@ -49,8 +49,7 @@ class CupertinoNavBarSample extends StatelessWidget {
                 const Text('Drag me up', textAlign: TextAlign.center),
                 CupertinoButton.filled(
                   onPressed: () {
-                    Navigator.push(context, CupertinoPageRoute<Widget>(
-                        builder: (BuildContext context) {
+                    Navigator.push(context, CupertinoPageRoute<Widget>(builder: (BuildContext context) {
                       return const NextPage();
                     }));
                   },
@@ -66,12 +65,12 @@ class CupertinoNavBarSample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  const NextPage({Key? key}) : super(key: key);
+  const NextPage({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Brightness brightness = CupertinoTheme.brightnessOf(context);
-    return CupertinoPageScaffold(
+    return  CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
@@ -79,8 +78,8 @@ class NextPage extends StatelessWidget {
             border: Border(
               bottom: BorderSide(
                 color: brightness == Brightness.light
-                    ? CupertinoColors.black
-                    : CupertinoColors.white,
+                  ? CupertinoColors.black
+                  : CupertinoColors.white,
               ),
             ),
             // The middle widget is visible in both collapsed and expanded states.
@@ -96,8 +95,7 @@ class NextPage extends StatelessWidget {
                 Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.
-                Text('Tap on the leading button to navigate back',
-                    textAlign: TextAlign.center),
+                Text('Tap on the leading button to navigate back', textAlign: TextAlign.center),
               ],
             ),
           ),

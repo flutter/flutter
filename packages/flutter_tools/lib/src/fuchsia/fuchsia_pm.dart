@@ -230,14 +230,12 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ??
-        false;
+    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ?? false;
   }
 
   @override
   String toString() {
-    final String p =
-        (_process == null) ? 'stopped' : 'running ${_process?.pid}';
+    final String p = (_process == null) ? 'stopped' : 'running ${_process?.pid}';
     return 'FuchsiaPackageServer at $_host:$_port ($p)';
   }
 }

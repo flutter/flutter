@@ -100,22 +100,32 @@ class _AndroidSemanticsMatcher extends Matcher {
   @override
   Description describe(Description description) {
     description.add('AndroidSemanticsNode');
-    if (text != null) description.add(' with text: $text');
+    if (text != null)
+      description.add(' with text: $text');
     if (contentDescription != null)
-      description.add('with contentDescription $contentDescription');
-    if (className != null) description.add(' with className: $className');
-    if (id != null) description.add(' with id: $id');
-    if (actions != null) description.add(' with actions: $actions');
-    if (rect != null) description.add(' with rect: $rect');
-    if (size != null) description.add(' with size: $size');
-    if (isChecked != null) description.add(' with flag isChecked: $isChecked');
+      description.add( 'with contentDescription $contentDescription');
+    if (className != null)
+      description.add(' with className: $className');
+    if (id != null)
+      description.add(' with id: $id');
+    if (actions != null)
+      description.add(' with actions: $actions');
+    if (rect != null)
+      description.add(' with rect: $rect');
+    if (size != null)
+      description.add(' with size: $size');
+    if (isChecked != null)
+      description.add(' with flag isChecked: $isChecked');
     if (isEditable != null)
       description.add(' with flag isEditable: $isEditable');
-    if (isEnabled != null) description.add(' with flag isEnabled: $isEnabled');
+    if (isEnabled != null)
+      description.add(' with flag isEnabled: $isEnabled');
     if (isFocusable != null)
       description.add(' with flag isFocusable: $isFocusable');
-    if (isFocused != null) description.add(' with flag isFocused: $isFocused');
-    if (isHeading != null) description.add(' with flag isHeading: $isHeading');
+    if (isFocused != null)
+      description.add(' with flag isFocused: $isFocused');
+    if (isHeading != null)
+      description.add(' with flag isHeading: $isHeading');
     if (isPassword != null)
       description.add(' with flag isPassword: $isPassword');
     if (isLongClickable != null)
@@ -124,14 +134,11 @@ class _AndroidSemanticsMatcher extends Matcher {
   }
 
   @override
-  bool matches(
-      covariant AndroidSemanticsNode item, Map<Object, Object> matchState) {
+  bool matches(covariant AndroidSemanticsNode item, Map<Object, Object> matchState) {
     if (text != null && text != item.text)
       return _failWithMessage('Expected text: $text', matchState);
-    if (contentDescription != null &&
-        contentDescription != item.contentDescription)
-      return _failWithMessage(
-          'Expected contentDescription: $contentDescription', matchState);
+    if (contentDescription != null && contentDescription != item.contentDescription)
+      return _failWithMessage('Expected contentDescription: $contentDescription', matchState);
     if (className != null && className != item.className)
       return _failWithMessage('Expected className: $className', matchState);
     if (id != null && id != item.id)
@@ -143,28 +150,15 @@ class _AndroidSemanticsMatcher extends Matcher {
     if (actions != null) {
       final List<AndroidSemanticsAction> itemActions = item.getActions();
       if (!unorderedEquals(actions).matches(itemActions, matchState)) {
-        final List<String> actionsString = actions
-            .map<String>((AndroidSemanticsAction action) => action.toString())
-            .toList()
-          ..sort();
-        final List<String> itemActionsString = itemActions
-            .map<String>((AndroidSemanticsAction action) => action.toString())
-            .toList()
-          ..sort();
-        final Set<AndroidSemanticsAction> unexpected =
-            itemActions.toSet().difference(actions.toSet());
-        final Set<String> unexpectedInString =
-            itemActionsString.toSet().difference(actionsString.toSet());
-        final Set<String> missingInString =
-            actionsString.toSet().difference(itemActionsString.toSet());
-        if (missingInString.isEmpty &&
-            ignoredActions != null &&
-            unexpected.every(ignoredActions.contains)) {
+        final List<String> actionsString = actions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
+        final List<String> itemActionsString = itemActions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
+        final Set<AndroidSemanticsAction> unexpected = itemActions.toSet().difference(actions.toSet());
+        final Set<String> unexpectedInString = itemActionsString.toSet().difference(actionsString.toSet());
+        final Set<String> missingInString = actionsString.toSet().difference(itemActionsString.toSet());
+        if (missingInString.isEmpty && ignoredActions != null && unexpected.every(ignoredActions.contains)) {
           return true;
         }
-        return _failWithMessage(
-            'Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpectedInString\nMissing: $missingInString',
-            matchState);
+        return _failWithMessage('Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpectedInString\nMissing: $missingInString', matchState);
       }
     }
     if (isChecked != null && isChecked != item.isChecked)
@@ -180,15 +174,12 @@ class _AndroidSemanticsMatcher extends Matcher {
     if (isFocused != null && isFocused != item.isFocused)
       return _failWithMessage('Expected isFocused: $isFocused', matchState);
     // Heading is not available in all Android versions, so match anything if it is not set by the platform
-    if (isHeading != null &&
-        isHeading != item.isHeading &&
-        item.isHeading != null)
+    if (isHeading != null && isHeading != item.isHeading && item.isHeading != null)
       return _failWithMessage('Expected isHeading: $isHeading', matchState);
     if (isPassword != null && isPassword != item.isPassword)
       return _failWithMessage('Expected isPassword: $isPassword', matchState);
     if (isLongClickable != null && isLongClickable != item.isLongClickable)
-      return _failWithMessage(
-          'Expected longClickable: $isLongClickable', matchState);
+      return _failWithMessage('Expected longClickable: $isLongClickable', matchState);
     return true;
   }
 

@@ -12,26 +12,25 @@ class TestBorder extends ShapeBorder {
   final Logger onLog;
 
   @override
-  EdgeInsetsGeometry get dimensions =>
-      const EdgeInsetsDirectional.only(start: 1.0);
+  EdgeInsetsGeometry get dimensions => const EdgeInsetsDirectional.only(start: 1.0);
 
   @override
   ShapeBorder scale(double t) => TestBorder(onLog);
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     onLog('getInnerPath $rect $textDirection');
     return Path();
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     onLog('getOuterPath $rect $textDirection');
     return Path();
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     onLog('paint $rect $textDirection');
   }
 }

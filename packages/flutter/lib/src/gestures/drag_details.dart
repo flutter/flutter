@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
@@ -23,8 +24,8 @@ class DragDownDetails {
   DragDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  })  : assert(globalPosition != null),
-        localPosition = localPosition ?? globalPosition;
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -43,8 +44,7 @@ class DragDownDetails {
   final Offset localPosition;
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'DragDownDetails')}($globalPosition)';
+  String toString() => '${objectRuntimeType(this, 'DragDownDetails')}($globalPosition)';
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to
@@ -72,8 +72,8 @@ class DragStartDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  })  : assert(globalPosition != null),
-        localPosition = localPosition ?? globalPosition;
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -105,8 +105,7 @@ class DragStartDetails {
   // instead).
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'DragStartDetails')}($globalPosition)';
+  String toString() => '${objectRuntimeType(this, 'DragStartDetails')}($globalPosition)';
 }
 
 /// Signature for when a pointer has contacted the screen and has begun to move.
@@ -140,13 +139,13 @@ class DragUpdateDetails {
     this.primaryDelta,
     required this.globalPosition,
     Offset? localPosition,
-  })  : assert(delta != null),
-        assert(
-          primaryDelta == null ||
-              (primaryDelta == delta.dx && delta.dy == 0.0) ||
-              (primaryDelta == delta.dy && delta.dx == 0.0),
-        ),
-        localPosition = localPosition ?? globalPosition;
+  }) : assert(delta != null),
+       assert(
+         primaryDelta == null
+           || (primaryDelta == delta.dx && delta.dy == 0.0)
+           || (primaryDelta == delta.dy && delta.dx == 0.0),
+       ),
+       localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -192,8 +191,7 @@ class DragUpdateDetails {
   final Offset localPosition;
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';
+  String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';
 }
 
 /// Signature for when a pointer that is in contact with the screen and moving
@@ -220,12 +218,12 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-  })  : assert(velocity != null),
-        assert(
-          primaryVelocity == null ||
-              primaryVelocity == velocity.pixelsPerSecond.dx ||
-              primaryVelocity == velocity.pixelsPerSecond.dy,
-        );
+  }) : assert(velocity != null),
+       assert(
+         primaryVelocity == null
+           || primaryVelocity == velocity.pixelsPerSecond.dx
+           || primaryVelocity == velocity.pixelsPerSecond.dy,
+       );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -245,6 +243,5 @@ class DragEndDetails {
   final double? primaryVelocity;
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';
+  String toString() => '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';
 }

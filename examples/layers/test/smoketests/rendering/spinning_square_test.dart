@@ -11,9 +11,7 @@ import '../../../rendering/spinning_square.dart' as demo;
 
 void main() {
   test('layers smoketest for rendering/spinning_square.dart', () {
-    FlutterError.onError = (FlutterErrorDetails details) {
-      throw details.exception;
-    };
+    FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
     demo.main();
     expect(SchedulerBinding.instance.hasScheduledFrame, true);
   });

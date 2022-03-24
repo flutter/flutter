@@ -15,21 +15,19 @@ const Duration _kSplashFadeDuration = Duration(milliseconds: 200);
 const double _kSplashInitialSize = 0.0; // logical pixels
 const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 
-RectCallback? _getClipCallback(
-    RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
   }
-  if (containedInkWell) return () => Offset.zero & referenceBox.size;
+  if (containedInkWell)
+    return () => Offset.zero & referenceBox.size;
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell,
-    RectCallback? rectCallback, Offset position) {
+double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
   if (containedInkWell) {
-    final Size size =
-        rectCallback != null ? rectCallback().size : referenceBox.size;
+    final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
     return _getSplashRadiusForPositionInSize(size, position);
   }
   return Material.defaultSplashRadius;
@@ -126,33 +124,24 @@ class InkSplash extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     VoidCallback? onRemoved,
-  })  : assert(textDirection != null),
-        _position = position,
-        _borderRadius = borderRadius ?? BorderRadius.zero,
-        _customBorder = customBorder,
-        _targetRadius = radius ??
-            _getTargetRadius(
-                referenceBox, containedInkWell, rectCallback, position!),
-        _clipCallback =
-            _getClipCallback(referenceBox, containedInkWell, rectCallback),
-        _repositionToReferenceBox = !containedInkWell,
-        _textDirection = textDirection,
-        super(
-            controller: controller,
-            referenceBox: referenceBox,
-            color: color,
-            onRemoved: onRemoved) {
+  }) : assert(textDirection != null),
+       _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
+       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
+       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+       _repositionToReferenceBox = !containedInkWell,
+       _textDirection = textDirection,
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
-    _radiusController = AnimationController(
-        duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
     _radius = _radiusController.drive(Tween<double>(
       begin: _kSplashInitialSize,
       end: _targetRadius,
     ));
-    _alphaController = AnimationController(
-        duration: _kSplashFadeDuration, vsync: controller.vsync)
+    _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
     _alpha = _alphaController!.drive(IntTween(
@@ -196,7 +185,8 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) dispose();
+    if (status == AnimationStatus.completed)
+      dispose();
   }
 
   @override
@@ -212,8 +202,7 @@ class InkSplash extends InteractiveInkFeature {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset? center = _position;
     if (_repositionToReferenceBox)
-      center = Offset.lerp(center, referenceBox.size.center(Offset.zero),
-          _radiusController.value);
+      center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
     paintInkCircle(
       canvas: canvas,
       transform: transform,

@@ -18,13 +18,13 @@ RenderBox getRenderSegmentedControl(WidgetTester tester) {
   ) as RenderBox;
 }
 
-Rect currentUnscaledThumbRect(WidgetTester tester,
-    {bool useGlobalCoordinate = false}) {
+Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
   final Rect local = renderSegmentedControl.currentThumbRect as Rect;
-  if (!useGlobalCoordinate) return local;
+  if (!useGlobalCoordinate)
+    return local;
 
   final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
   return local.shift(segmentedControl.localToGlobal(Offset.zero));
@@ -33,8 +33,7 @@ Rect currentUnscaledThumbRect(WidgetTester tester,
 int? getHighlightedIndex(WidgetTester tester) {
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).highlightedIndex
-      as int?;
+  return (getRenderSegmentedControl(tester) as dynamic).highlightedIndex as int?;
 }
 
 Color getThumbColor(WidgetTester tester) {
@@ -69,17 +68,14 @@ Widget setupSimpleSegmentedControl() {
 StateSetter? setState;
 int? groupValue = 0;
 void defaultCallback(int? newValue) {
-  setState!(() {
-    groupValue = newValue;
-  });
+  setState!(() { groupValue = newValue; });
 }
 
-Widget boilerplate({required WidgetBuilder builder}) {
+Widget boilerplate({ required WidgetBuilder builder }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
-      child:
-          StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+      child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
         setState = setter;
         return builder(context);
       }),
@@ -88,6 +84,7 @@ Widget boilerplate({required WidgetBuilder builder}) {
 }
 
 void main() {
+
   setUp(() {
     setState = null;
     groupValue = 0;
@@ -141,8 +138,7 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
-        contains(
-            'groupValue must be either null or one of the keys in the children map'),
+        contains('groupValue must be either null or one of the keys in the children map'),
       )),
     );
   });
@@ -155,30 +151,25 @@ void main() {
       1: Text('Child 2'),
     };
 
-    Future<void> verifyPadding({EdgeInsets? padding}) async {
-      final EdgeInsets effectivePadding =
-          padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
+    Future<void> verifyPadding({ EdgeInsets? padding }) async {
+      final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
 
       expect(
-        tester.getTopLeft(find.ancestor(
-            of: find.byWidget(children[0]!), matching: find.byType(MetaData))),
+        tester.getTopLeft(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData))),
         segmentedControlRect.topLeft + effectivePadding.topLeft,
       );
       expect(
-        tester.getBottomLeft(find.ancestor(
-            of: find.byWidget(children[0]!), matching: find.byType(MetaData))),
+        tester.getBottomLeft(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData))),
         segmentedControlRect.bottomLeft + effectivePadding.bottomLeft,
       );
 
       expect(
-        tester.getTopRight(find.ancestor(
-            of: find.byWidget(children[1]!), matching: find.byType(MetaData))),
+        tester.getTopRight(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData))),
         segmentedControlRect.topRight + effectivePadding.topRight,
       );
       expect(
-        tester.getBottomRight(find.ancestor(
-            of: find.byWidget(children[1]!), matching: find.byType(MetaData))),
+        tester.getBottomRight(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData))),
         segmentedControlRect.bottomRight + effectivePadding.bottomRight,
       );
     }
@@ -284,8 +275,7 @@ void main() {
         ),
       );
 
-      DefaultTextStyle textStyle =
-          tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
+      DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
       expect(textStyle.style.fontWeight, FontWeight.w500);
 
@@ -293,8 +283,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      textStyle =
-          tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
+      textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
       expect(groupValue, 1);
       expect(textStyle.style.fontWeight, FontWeight.normal);
@@ -332,38 +321,30 @@ void main() {
       ),
     );
 
-    final BoxDecoration decoration = tester
-        .widget<Container>(find.descendant(
-          of: find.byType(UnconstrainedBox),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    final BoxDecoration decoration = tester.widget<Container>(find.descendant(
+      of: find.byType(UnconstrainedBox),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
-    expect(
-        getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
+    expect(getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
 
-    setState(() {
-      brightness = Brightness.dark;
-    });
+    setState(() { brightness = Brightness.dark; });
     await tester.pump();
 
-    final BoxDecoration decorationDark = tester
-        .widget<Container>(find.descendant(
-          of: find.byType(UnconstrainedBox),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
+      of: find.byType(UnconstrainedBox),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
-    expect(getThumbColor(tester).value,
-        CupertinoColors.systemGreen.darkColor.value);
-    expect(
-        decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
+
+    expect(getThumbColor(tester).value, CupertinoColors.systemGreen.darkColor.value);
+    expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
-    'a Container or Placeholder widget)',
+        'a Container or Placeholder widget)',
     (WidgetTester tester) async {
       const Map<int, Widget> children = <int, Widget>{
         0: Text('Child 1'),
@@ -385,15 +366,13 @@ void main() {
     },
   );
 
-  testWidgets('Passed in value is child initially selected',
-      (WidgetTester tester) async {
+  testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     expect(getHighlightedIndex(tester), 0);
   });
 
-  testWidgets('Null input for value results in no child initially selected',
-      (WidgetTester tester) async {
+  testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -419,8 +398,7 @@ void main() {
     expect(getHighlightedIndex(tester), null);
   });
 
-  testWidgets('Long press not-selected child interactions',
-      (WidgetTester tester) async {
+  testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -445,14 +423,9 @@ void main() {
     );
 
     double getChildOpacityByName(String childName) {
-      return tester
-          .renderObject<RenderAnimatedOpacity>(
-            find.ancestor(
-                matching: find.byType(AnimatedOpacity),
-                of: find.text(childName)),
-          )
-          .opacity
-          .value;
+      return tester.renderObject<RenderAnimatedOpacity>(
+        find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
+      ).opacity.value;
     }
 
     // Opacity 1 with no interaction.
@@ -489,18 +462,11 @@ void main() {
     expect(getChildOpacityByName('Child 2'), 0.2);
   });
 
-  testWidgets(
-      'Long press does not change the opacity of currently-selected child',
-      (WidgetTester tester) async {
+  testWidgets('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
-      return tester
-          .renderObject<RenderAnimatedOpacity>(
-            find.ancestor(
-                matching: find.byType(AnimatedOpacity),
-                of: find.text(childName)),
-          )
-          .opacity
-          .value;
+      return tester.renderObject<RenderAnimatedOpacity>(
+        find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
+      ).opacity.value;
     }
 
     await tester.pumpWidget(setupSimpleSegmentedControl());
@@ -513,8 +479,7 @@ void main() {
     expect(getChildOpacityByName('Child 1'), 1);
   });
 
-  testWidgets('Height of segmented control is determined by tallest widget',
-      (WidgetTester tester) async {
+  testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(height: 100.0)),
       1: Container(constraints: const BoxConstraints.tightFor(height: 400.0)),
@@ -544,9 +509,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Width of each segmented control segment is determined by widest widget',
-      (WidgetTester tester) async {
+  testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
@@ -577,8 +540,7 @@ void main() {
     expect(childWidth, 200.0 + 9.25 * 2);
   });
 
-  testWidgets('Width is finite in unbounded space',
-      (WidgetTester tester) async {
+  testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: SizedBox(width: 50),
       1: SizedBox(width: 70),
@@ -607,15 +569,11 @@ void main() {
 
     expect(
       segmentedControl.size.width,
-      70 * 2 +
-          9.25 * 4 +
-          3 * 2 +
-          1, // 2 children + 4 child padding + 2 outer padding + 1 separator
+      70 * 2 + 9.25 * 4 + 3 * 2 + 1, // 2 children + 4 child padding + 2 outer padding + 1 separator
     );
   });
 
-  testWidgets('Directionality test - RTL should reverse order of widgets',
-      (WidgetTester tester) async {
+  testWidgets('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -639,14 +597,10 @@ void main() {
       ),
     );
 
-    expect(
-        tester.getTopRight(find.text('Child 1')).dx >
-            tester.getTopRight(find.text('Child 2')).dx,
-        isTrue);
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
-  testWidgets('Correct initial selection and toggling behavior - RTL',
-      (WidgetTester tester) async {
+  testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -776,8 +730,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Non-centered taps work on smaller widgets',
-      (WidgetTester tester) async {
+  testWidgets('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const SizedBox();
@@ -805,15 +758,12 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Hit-tests report accurate local position in segments',
-      (WidgetTester tester) async {
+  testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (TapDownDetails details) {
-        tapDownDetails = details;
-      },
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
       child: const SizedBox(width: 200, height: 200),
     );
     children[1] = const Text('Child 2');
@@ -833,30 +783,24 @@ void main() {
 
     expect(groupValue, 0);
 
-    final Offset segment0GlobalOffset =
-        tester.getTopLeft(find.byWidget(children[0]!));
+    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]!));
     await tester.tapAt(segment0GlobalOffset + const Offset(7, 11));
 
     expect(tapDownDetails.localPosition, const Offset(7, 11));
-    expect(tapDownDetails.globalPosition,
-        segment0GlobalOffset + const Offset(7, 11));
+    expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
   });
 
-  testWidgets('Thumb animation is correct when the selected segment changes',
-      (WidgetTester tester) async {
+  testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    final Rect initialRect =
-        currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+    final Rect initialRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
     expect(currentThumbScale(tester), 1);
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.text('Child 2')));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Child 2')));
     await tester.pump();
 
     // Does not move until tapUp.
     expect(currentThumbScale(tester), 1);
-    expect(currentUnscaledThumbRect(tester, useGlobalCoordinate: true),
-        initialRect);
+    expect(currentUnscaledThumbRect(tester, useGlobalCoordinate: true), initialRect);
 
     // Tap up and the sliding animation should play.
     await gesture.up();
@@ -877,8 +821,7 @@ void main() {
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
       // We're using a critically damped spring so expect the value of the
       // animation controller to not be 1.
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')),
-          epsilon: 0.01),
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
     );
 
     // Press the currently selected widget.
@@ -890,16 +833,14 @@ void main() {
     expect(currentThumbScale(tester), lessThan(1));
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')),
-          epsilon: 0.01),
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
     );
 
     await tester.pumpAndSettle();
     expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')),
-          epsilon: 0.01),
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
     );
 
     // Drag to Child 1.
@@ -918,8 +859,7 @@ void main() {
     expect(currentThumbScale(tester), moreOrLessEquals(0.95, epsilon: 0.01));
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1')),
-          epsilon: 0.01),
+      offsetMoreOrLessEquals(tester.getCenter(find.text('Child 1')), epsilon: 0.01),
     );
 
     await gesture.up();
@@ -950,13 +890,10 @@ void main() {
         },
       ));
 
-      final Rect initialThumbRect =
-          currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+      final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
 
       // Starts animating towards 1.
-      setState!(() {
-        groupValue = 1;
-      });
+      setState!(() { groupValue = 1; });
       await tester.pump(const Duration(milliseconds: 10));
 
       const Map<int, Widget> newChildren = <int, Widget>{
@@ -975,28 +912,23 @@ void main() {
         },
       ));
 
-      final RenderBox renderSegmentedControl =
-          getRenderSegmentedControl(tester);
-      final Offset segmentedControlOrigin =
-          renderSegmentedControl.localToGlobal(Offset.zero);
+      final RenderBox renderSegmentedControl = getRenderSegmentedControl(tester);
+      final Offset segmentedControlOrigin = renderSegmentedControl.localToGlobal(Offset.zero);
 
       // Expect the segmented control to be much narrower.
       expect(segmentedControlOrigin.dx, greaterThan(initialThumbRect.left));
 
-      final Rect thumbRect =
-          currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+      final Rect thumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
       expect(initialThumbRect.size.height, 400);
       expect(thumbRect.size.height, lessThan(100));
       // The new thumbRect should fit in the segmentedControl. The -1 and the +1
       // are to account for the thumb's vertical EdgeInsets.
       expect(segmentedControlOrigin.dx - 1, lessThanOrEqualTo(thumbRect.left));
-      expect(segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1,
-          greaterThanOrEqualTo(thumbRect.right));
+      expect(segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1, greaterThanOrEqualTo(thumbRect.right));
     },
   );
 
-  testWidgets('Transition is triggered while a transition is already occurring',
-      (WidgetTester tester) async {
+  testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -1022,25 +954,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
 
     // Between A and B.
-    final Rect initialThumbRect =
-        currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
-    expect(initialThumbRect.center.dx,
-        greaterThan(tester.getCenter(find.text('A')).dx));
-    expect(initialThumbRect.center.dx,
-        lessThan(tester.getCenter(find.text('B')).dx));
+    final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+    expect(initialThumbRect.center.dx, greaterThan(tester.getCenter(find.text('A')).dx));
+    expect(initialThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
     // While A to B transition is occurring, press on C.
     await tester.tap(find.text('C'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 40));
 
-    final Rect secondThumbRect =
-        currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+    final Rect secondThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
 
     // Between the initial Rect and B.
     expect(secondThumbRect.center.dx, greaterThan(initialThumbRect.center.dx));
-    expect(secondThumbRect.center.dx,
-        lessThan(tester.getCenter(find.text('B')).dx));
+    expect(secondThumbRect.center.dx, lessThan(tester.getCenter(find.text('B')).dx));
 
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -1051,10 +978,8 @@ void main() {
     );
   });
 
-  testWidgets('Insert segment while animation is running',
-      (WidgetTester tester) async {
-    final Map<int, Widget> children =
-        SplayTreeMap<int, Widget>((int a, int b) => a - b);
+  testWidgets('Insert segment while animation is running', (WidgetTester tester) async {
+    final Map<int, Widget> children = SplayTreeMap<int, Widget>((int a, int b) => a - b);
 
     children[0] = const Text('A');
     children[2] = const Text('C');
@@ -1099,8 +1024,7 @@ void main() {
     );
   });
 
-  testWidgets('change selection programmatically when dragging',
-      (WidgetTester tester) async {
+  testWidgets('change selection programmatically when dragging', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -1127,15 +1051,12 @@ void main() {
     );
 
     // Start dragging.
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.text('A')));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     // Change selection programmatically.
-    setState!(() {
-      groupValue = 1;
-    });
+    setState!(() { groupValue = 1; });
     await tester.pump();
     await tester.pumpAndSettle();
 
@@ -1162,8 +1083,7 @@ void main() {
     expect(callbackCalled, isFalse);
   });
 
-  testWidgets('Disallow new gesture when dragging',
-      (WidgetTester tester) async {
+  testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -1190,8 +1110,7 @@ void main() {
     );
 
     // Start dragging.
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.text('A')));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1241,8 +1160,7 @@ void main() {
     );
 
     // Start dragging.
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.text('A')));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1292,8 +1210,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Has consistent size, independent of groupValue',
-      (WidgetTester tester) async {
+  testWidgets('Has consistent size, independent of groupValue', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62063.
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
@@ -1319,9 +1236,7 @@ void main() {
     final Size size = renderBox.size;
 
     for (final int value in children.keys) {
-      setState!(() {
-        groupValue = value;
-      });
+      setState!(() { groupValue = value; });
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -1329,8 +1244,8 @@ void main() {
     }
   });
 
-  testWidgets('ScrollView + SlidingSegmentedControl interaction',
-      (WidgetTester tester) async {
+
+  testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -1366,8 +1281,7 @@ void main() {
     expect(groupValue, 1);
 
     // Vertical drag works for the scroll view.
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.text('Child 1')));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Child 1')));
     // The first moveBy doesn't actually move the scrollable. It's there to make
     // sure VerticalDragGestureRecognizer wins the arena. This is due to
     // startBehavior being set to DragStartBehavior.start.

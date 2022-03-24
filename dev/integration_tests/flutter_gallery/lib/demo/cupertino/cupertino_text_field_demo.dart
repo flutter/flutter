@@ -56,8 +56,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       ),
       autofocus: true,
       suffixMode: OverlayVisibilityMode.editing,
-      onSubmitted: (String text) =>
-          setState(() => _chatTextController!.clear()),
+      onSubmitted: (String text)=> setState(()=> _chatTextController!.clear()),
     );
   }
 
@@ -73,9 +72,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       textCapitalization: TextCapitalization.words,
       autocorrect: false,
       decoration: BoxDecoration(
-        border: Border(
-            bottom:
-                BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Name',
     );
@@ -93,9 +90,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
       decoration: BoxDecoration(
-        border: Border(
-            bottom:
-                BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Email',
     );
@@ -113,9 +108,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       clearButtonMode: OverlayVisibilityMode.editing,
       textCapitalization: TextCapitalization.words,
       decoration: const BoxDecoration(
-        border: Border(
-            bottom:
-                BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Location',
     );
@@ -134,9 +127,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       autocorrect: false,
       obscureText: true,
       decoration: BoxDecoration(
-        border: Border(
-            bottom:
-                BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Create a PIN',
     );
@@ -153,9 +144,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       enabled: false,
       padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
       decoration: const BoxDecoration(
-        border: Border(
-            bottom:
-                BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
+        border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
     );
   }
@@ -181,8 +170,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
           child: ListView(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 32.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
                 child: Column(
                   children: <Widget>[
                     _buildNameField(),
@@ -194,8 +182,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 32.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
                 child: _buildChatTextField(),
               ),
             ],

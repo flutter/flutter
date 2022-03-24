@@ -13,13 +13,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
-import 'package:test_api/test_api.dart' as test_package
-    show test; // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart'
-    hide test; // ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 
-export 'package:test_api/test_api.dart'
-    hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
@@ -48,8 +45,7 @@ String getFlutterRoot() {
     return platform.environment['FLUTTER_ROOT']!;
   }
 
-  Error invalidScript() => StateError(
-      'Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
+  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
   switch (platform.script.scheme) {
@@ -57,11 +53,8 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = RegExp(
-          r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)',
-          multiLine: true);
-      final Match? match =
-          flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
+      final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final Match? match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null) {
         throw invalidScript();
       }
@@ -71,8 +64,7 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts =
-      path.split(globals.localFileSystem.path.fromUri(scriptUri));
+  final List<String> parts = path.split(globals.localFileSystem.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
@@ -87,8 +79,7 @@ Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
   await runZoned<Future<void>>(() async {
     // Service the event loop.
     await body();
-  }, zoneSpecification: ZoneSpecification(
-      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+  }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
     buffer.writeln(line);
   }));
   return buffer;
@@ -98,14 +89,13 @@ Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
 final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit({int? exitCode, Pattern? message}) {
+Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
   Matcher matcher = _isToolExit;
   if (exitCode != null) {
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
   }
   if (message != null) {
-    matcher =
-        allOf(matcher, (ToolExit e) => e.message?.contains(message) ?? false);
+    matcher = allOf(matcher, (ToolExit e) => e.message?.contains(message) ?? false);
   }
   return throwsA(matcher);
 }
@@ -114,29 +104,25 @@ Matcher throwsToolExit({int? exitCode, Pattern? message}) {
 final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
 
 /// Matcher for functions that throw [ProcessException].
-Matcher throwsProcessException({Pattern? message}) {
+Matcher throwsProcessException({ Pattern? message }) {
   Matcher matcher = _isProcessException;
   if (message != null) {
-    matcher =
-        allOf(matcher, (ProcessException e) => e.message.contains(message));
+    matcher = allOf(matcher, (ProcessException e) => e.message.contains(message));
   }
   return throwsA(matcher);
 }
 
 /// Matcher for [ProcessException]s.
-final TypeMatcher<ProcessException> _isProcessException =
-    isA<ProcessException>();
+final TypeMatcher<ProcessException> _isProcessException = isA<ProcessException>();
 
-Future<void> expectToolExitLater(
-    Future<dynamic> future, Matcher messageMatcher) async {
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');
-  } on ToolExit catch (e) {
+  } on ToolExit catch(e) {
     expect(e.message, messageMatcher);
-    // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) {
-    // ignore: avoid_catches_without_on_clauses
+  // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
     fail('ToolExit expected, got $e\n$trace');
   }
 }
@@ -144,9 +130,8 @@ Future<void> expectToolExitLater(
 Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
   try {
     await future;
-    // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) {
-    // ignore: avoid_catches_without_on_clauses
+  // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
     fail('Expected to run with no exceptions, got $e\n$trace');
   }
 }
@@ -164,9 +149,7 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(
-  String description,
-  FutureOr<void> Function() body, {
+void test(String description, FutureOr<void> Function() body, {
   String? testOn,
   dynamic skip,
   List<String>? tags,
@@ -202,9 +185,7 @@ void test(
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(
-  String description,
-  FutureOr<void> Function() body, {
+void testWithoutContext(String description, FutureOr<void> Function() body, {
   String? testOn,
   dynamic skip,
   List<String>? tags,
@@ -212,8 +193,7 @@ void testWithoutContext(
   int? retry,
 }) {
   return test(
-    description,
-    () async {
+    description, () async {
       return runZoned(body, zoneValues: <Object, Object>{
         contextKey: const _NoContext(),
       });
@@ -239,9 +219,11 @@ class _NoContext implements AppContext {
 
   @override
   T get<T>() {
-    throw UnsupportedError('context.get<$T> is not supported in test methods. '
-        'Use Testbed or testUsingContext if accessing Zone injected '
-        'values.');
+    throw UnsupportedError(
+      'context.get<$T> is not supported in test methods. '
+      'Use Testbed or testUsingContext if accessing Zone injected '
+      'values.'
+    );
   }
 
   @override
@@ -276,16 +258,13 @@ class _NoContext implements AppContext {
 /// }
 /// ```
 class FileExceptionHandler {
-  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors =
-      <String, Map<FileSystemOp, FileSystemException>>{};
-  final Map<FileSystemOp, FileSystemException> _tempErrors =
-      <FileSystemOp, FileSystemException>{};
+  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+  final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
   static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 
   /// Add an exception that will be thrown whenever the file system attached to this
   /// handler performs the [operation] on the [entity].
-  void addError(FileSystemEntity entity, FileSystemOp operation,
-      FileSystemException exception) {
+  void addError(FileSystemEntity entity, FileSystemOp operation, FileSystemException exception) {
     final String path = entity.path;
     _contextErrors[path] ??= <FileSystemOp, FileSystemException>{};
     _contextErrors[path]![operation] = exception;
@@ -297,15 +276,13 @@ class FileExceptionHandler {
 
   /// Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
   void opHandle(String path, FileSystemOp operation) {
-    if (path.startsWith('.tmp_') ||
-        _tempDirectoryEnd.firstMatch(path) != null) {
+    if (path.startsWith('.tmp_') || _tempDirectoryEnd.firstMatch(path) != null) {
       final FileSystemException? exception = _tempErrors[operation];
       if (exception != null) {
         throw exception;
       }
     }
-    final Map<FileSystemOp, FileSystemException>? exceptions =
-        _contextErrors[path];
+    final Map<FileSystemOp, FileSystemException>? exceptions = _contextErrors[path];
     if (exceptions == null) {
       return;
     }

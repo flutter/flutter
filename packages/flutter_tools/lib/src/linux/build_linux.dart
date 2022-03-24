@@ -23,25 +23,23 @@ import '../migrations/cmake_custom_command_migration.dart';
 // - <file path>:<line>:<column>: warning: <warning...>
 // - clang: error: <link error...>
 // - Error: <tool error...>
-final RegExp errorMatcher = RegExp(
-    r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*',
-    caseSensitive: false);
+final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
-  String? target,
-  SizeAnalyzer? sizeAnalyzer,
-  bool needCrossBuild = false,
-  required TargetPlatform targetPlatform,
-  String targetSysroot = '/',
-}) async {
+    String? target,
+    SizeAnalyzer? sizeAnalyzer,
+    bool needCrossBuild = false,
+    required TargetPlatform targetPlatform,
+    String targetSysroot = '/',
+  }) async {
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-        'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
-        'to learn about adding Linux support to a project.');
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Linux support to a project.');
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
@@ -61,12 +59,10 @@ Future<void> buildLinux(
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    environmentConfig['FLUTTER_ENGINE'] =
-        globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
+    environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environmentConfig['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(
-      Cache.flutterRoot!, linuxProject, environmentConfig);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, environmentConfig);
 
   createPluginSymlinks(linuxProject.parent);
 
@@ -75,39 +71,33 @@ Future<void> buildLinux(
   );
   try {
     final String buildModeName = getNameForBuildMode(buildInfo.mode);
-    final Directory buildDirectory = globals.fs
-        .directory(getLinuxBuildDirectory(targetPlatform))
-        .childDirectory(buildModeName);
-    await _runCmake(buildModeName, linuxProject.cmakeFile.parent,
-        buildDirectory, needCrossBuild, targetPlatform, targetSysroot);
+    final Directory buildDirectory =
+        globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
+    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
+                    needCrossBuild, targetPlatform, targetSysroot);
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(targetPlatform);
-    final File codeSizeFile = globals.fs
-        .directory(buildInfo.codeSizeDirectory)
-        .childFile('snapshot.$arch.json');
-    final File precompilerTrace = globals.fs
-        .directory(buildInfo.codeSizeDirectory)
-        .childFile('trace.$arch.json');
+    final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('snapshot.$arch.json');
+    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+      .childFile('trace.$arch.json');
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path
-            .join(getLinuxBuildDirectory(targetPlatform), 'release', 'bundle'),
+        globals.fs.path.join(getLinuxBuildDirectory(targetPlatform), 'release', 'bundle'),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs
-          .directory(globals.fsUtils.homeDirPath)
-          .childDirectory('.flutter-devtools'),
-      'linux-code-size-analysis',
-      'json',
+        .directory(globals.fsUtils.homeDirPath)
+        .childDirectory('.flutter-devtools'), 'linux-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(
@@ -115,29 +105,24 @@ Future<void> buildLinux(
     );
 
     // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath =
-        outputFile.path.split('.flutter-devtools/').last.trim();
+    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     globals.printStatus(
-        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-        'flutter pub global activate devtools; flutter pub global run devtools '
-        '--appSizeBase=$relativeAppSizePath');
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=$relativeAppSizePath'
+    );
   }
 }
 
-Future<void> _runCmake(
-    String buildModeName,
-    Directory sourceDir,
-    Directory buildDir,
-    bool needCrossBuild,
-    TargetPlatform targetPlatform,
-    String targetSysroot) async {
+Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
+    bool needCrossBuild, TargetPlatform targetPlatform, String targetSysroot) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
 
   final String buildFlag = sentenceCase(buildModeName);
-  final bool needCrossBuildOptionsForArm64 =
-      needCrossBuild && targetPlatform == TargetPlatform.linux_arm64;
+  final bool needCrossBuildOptionsForArm64 = needCrossBuild
+      && targetPlatform == TargetPlatform.linux_arm64;
   int result;
   try {
     result = await globals.processUtils.stream(
@@ -149,7 +134,8 @@ Future<void> _runCmake(
         '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
         // Support cross-building for arm64 targets on x64 hosts.
         // (Cross-building for x64 on arm64 hosts isn't supported now.)
-        if (needCrossBuild) '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
+        if (needCrossBuild)
+          '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
         if (needCrossBuildOptionsForArm64)
           '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
         if (needCrossBuildOptionsForArm64)
@@ -157,18 +143,19 @@ Future<void> _runCmake(
         sourceDir.path,
       ],
       workingDirectory: buildDir.path,
-      environment: <String, String>{'CC': 'clang', 'CXX': 'clang++'},
+      environment: <String, String>{
+        'CC': 'clang',
+        'CXX': 'clang++'
+      },
       trace: true,
     );
   } on ArgumentError {
-    throwToolExit(
-        "cmake not found. Run 'flutter doctor' for more information.");
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
     throwToolExit('Unable to generate build files');
   }
-  globals.flutterUsage.sendTiming(
-      'build', 'cmake-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'cmake-linux', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 Future<void> _runBuild(Directory buildDir) async {
@@ -184,19 +171,19 @@ Future<void> _runBuild(Directory buildDir) async {
         'install',
       ],
       environment: <String, String>{
-        if (globals.logger.isVerbose) 'VERBOSE_SCRIPT_LOGGING': 'true',
-        if (!globals.logger.isVerbose) 'PREFIXED_ERROR_LOGGING': 'true',
+        if (globals.logger.isVerbose)
+          'VERBOSE_SCRIPT_LOGGING': 'true',
+        if (!globals.logger.isVerbose)
+          'PREFIXED_ERROR_LOGGING': 'true',
       },
       trace: true,
       stdoutErrorMatcher: errorMatcher,
     );
   } on ArgumentError {
-    throwToolExit(
-        "ninja not found. Run 'flutter doctor' for more information.");
+    throwToolExit("ninja not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  globals.flutterUsage.sendTiming(
-      'build', 'linux-ninja', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'linux-ninja', Duration(milliseconds: sw.elapsedMilliseconds));
 }

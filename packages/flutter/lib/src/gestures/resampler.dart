@@ -134,10 +134,8 @@ class PointerEventResampler {
 
     // Resample if `next` time stamp is past `sampleTime`.
     if (nextTimeStamp > sampleTime && nextTimeStamp > lastTimeStamp) {
-      final double interval =
-          (nextTimeStamp - lastTimeStamp).inMicroseconds.toDouble();
-      final double scalar =
-          (sampleTime - lastTimeStamp).inMicroseconds.toDouble() / interval;
+      final double interval = (nextTimeStamp - lastTimeStamp).inMicroseconds.toDouble();
+      final double scalar = (sampleTime - lastTimeStamp).inMicroseconds.toDouble() / interval;
       final double lastX = _last?.position.dx ?? 0.0;
       final double lastY = _last?.position.dy ?? 0.0;
       x = lastX + (x - lastX) * scalar;
@@ -302,8 +300,7 @@ class PointerEventResampler {
     _processPointerEvents(sampleTime);
 
     // Dequeue and sample pointer events until `sampleTime`.
-    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
-        sampleTime, nextSampleTime, callback);
+    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, nextSampleTime, callback);
 
     // Dispatch resampled pointer location event if tracked.
     if (_isTracked) {

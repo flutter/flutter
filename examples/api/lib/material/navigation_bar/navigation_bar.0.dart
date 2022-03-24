@@ -15,7 +15,7 @@ class Destination {
 }
 
 class RootPage extends StatelessWidget {
-  const RootPage({Key? key, required this.destination}) : super(key: key);
+  const RootPage({ Key? key, required this.destination }) : super(key: key);
 
   final Destination destination;
 
@@ -24,9 +24,7 @@ class RootPage extends StatelessWidget {
       title: Text('${destination.title} AlertDialog'),
       actions: <Widget>[
         TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () { Navigator.pop(context); },
           child: const Text('OK'),
         ),
       ],
@@ -119,7 +117,7 @@ class RootPage extends StatelessWidget {
 }
 
 class ListPage extends StatelessWidget {
-  const ListPage({Key? key, required this.destination}) : super(key: key);
+  const ListPage({ Key? key, required this.destination }) : super(key: key);
 
   final Destination destination;
 
@@ -145,10 +143,9 @@ class ListPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
-                  backgroundColor: MaterialStateProperty.all<Color>(Color.lerp(
-                      destination.color[100],
-                      Colors.white,
-                      index / itemCount)!),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    Color.lerp(destination.color[100], Colors.white, index / itemCount)!
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pushNamed(context, '/text');
@@ -164,7 +161,7 @@ class ListPage extends StatelessWidget {
 }
 
 class TextPage extends StatefulWidget {
-  const TextPage({Key? key, required this.destination}) : super(key: key);
+  const TextPage({ Key? key, required this.destination }) : super(key: key);
 
   final Destination destination;
 
@@ -241,7 +238,7 @@ class _DestinationViewState extends State<DestinationView> {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) {
-            switch (settings.name) {
+            switch(settings.name) {
               case '/':
                 return RootPage(destination: widget.destination);
               case '/list':
@@ -259,7 +256,7 @@ class _DestinationViewState extends State<DestinationView> {
 }
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({ Key? key }) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -280,11 +277,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   int selectedIndex = 0;
 
   AnimationController buildFaderController() {
-    final AnimationController controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+    final AnimationController controller =  AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     controller.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
-        setState(() {}); // Rebuild unselected destinations offstage.
+        setState(() { }); // Rebuild unselected destinations offstage.
       }
     });
     return controller;
@@ -293,22 +289,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   @override
   void initState() {
     super.initState();
-    navigatorKeys = List<GlobalKey<NavigatorState>>.generate(
-        allDestinations.length, (int index) => GlobalKey()).toList();
-    destinationFaders = List<AnimationController>.generate(
-        allDestinations.length, (int index) => buildFaderController()).toList();
+    navigatorKeys = List<GlobalKey<NavigatorState>>.generate(allDestinations.length, (int index) => GlobalKey()).toList();
+    destinationFaders = List<AnimationController>.generate(allDestinations.length, (int index) => buildFaderController()).toList();
     destinationFaders[selectedIndex].value = 1.0;
     destinationViews = allDestinations.map((Destination destination) {
       return FadeTransition(
-          opacity: destinationFaders[destination.index]
-              .drive(CurveTween(curve: Curves.fastOutSlowIn)),
-          child: KeyedSubtree(
-            key: GlobalKey(),
-            child: DestinationView(
-              destination: destination,
-              navigatorKey: navigatorKeys[destination.index],
-            ),
-          ));
+        opacity: destinationFaders[destination.index].drive(CurveTween(curve: Curves.fastOutSlowIn)),
+        child: KeyedSubtree(
+          key: GlobalKey(),
+          child: DestinationView(
+            destination: destination,
+            navigatorKey: navigatorKeys[destination.index],
+          ),
+        )
+      );
     }).toList();
   }
 
@@ -324,8 +318,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final NavigatorState navigator =
-            navigatorKeys[selectedIndex].currentState!;
+        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
         if (!navigator.canPop()) {
           return true;
         }

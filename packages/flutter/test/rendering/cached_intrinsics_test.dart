@@ -11,7 +11,6 @@ class RenderTestBox extends RenderBox {
     value += 1.0;
     return value;
   }
-
   @override
   double computeMinIntrinsicWidth(double height) => next();
   @override
@@ -67,5 +66,6 @@ void main() {
     expect(test.getMinIntrinsicWidth(200.0), equals(3.0));
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
+
   });
 }

@@ -9,8 +9,7 @@ void main() {
   test('BoxConstraints toString', () {
     expect(const BoxConstraints.expand().toString(), contains('biggest'));
     expect(const BoxConstraints().toString(), contains('unconstrained'));
-    expect(const BoxConstraints.tightFor(width: 50.0).toString(),
-        contains('w=50'));
+    expect(const BoxConstraints.tightFor(width: 50.0).toString(), contains('w=50'));
   });
 
   test('BoxConstraints copyWith', () {
@@ -79,15 +78,12 @@ void main() {
     expect(copy.maxWidth, moreOrLessEquals(3.5));
     expect(copy.minHeight, moreOrLessEquals(5.5));
     expect(copy.maxHeight, moreOrLessEquals(8.5));
-    copy = BoxConstraints.lerp(
-        const BoxConstraints(
-          minWidth: 13.0,
-          maxWidth: 17.0,
-          minHeight: 111.0,
-          maxHeight: 117.0,
-        ),
-        constraints,
-        0.2)!;
+    copy = BoxConstraints.lerp(const BoxConstraints(
+      minWidth: 13.0,
+      maxWidth: 17.0,
+      minHeight: 111.0,
+      maxHeight: 117.0,
+    ), constraints, 0.2)!;
     expect(copy.minWidth, moreOrLessEquals(11.0));
     expect(copy.maxWidth, moreOrLessEquals(15.0));
     expect(copy.minHeight, moreOrLessEquals(91.0));
@@ -147,12 +143,9 @@ void main() {
       minHeight: 20.0,
       maxHeight: 30.0,
     );
-    expect(() => BoxConstraints.lerp(constraints1, constraints2, 0.5),
-        throwsAssertionError);
-    expect(() => BoxConstraints.lerp(constraints1, constraints3, 0.5),
-        throwsAssertionError);
-    expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5),
-        throwsAssertionError);
+    expect(() => BoxConstraints.lerp(constraints1, constraints2, 0.5), throwsAssertionError);
+    expect(() => BoxConstraints.lerp(constraints1, constraints3, 0.5), throwsAssertionError);
+    expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5), throwsAssertionError);
   });
 
   test('BoxConstraints normalize', () {

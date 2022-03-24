@@ -51,8 +51,7 @@ class _GalleryAppState extends State<GalleryApp> {
     // using named routes, consider the example in the Navigator class documentation:
     // https://api.flutter.dev/flutter/widgets/Navigator-class.html
     return <String, WidgetBuilder>{
-      for (final GalleryDemo demo in kAllGalleryDemos)
-        demo.routeName: demo.buildRoute,
+      for (final GalleryDemo demo in kAllGalleryDemos) demo.routeName: demo.buildRoute,
     };
   }
 
@@ -122,11 +121,9 @@ class _GalleryAppState extends State<GalleryApp> {
       optionsPage: GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ??
-            () {
-              launch('https://github.com/flutter/flutter/issues/new/choose',
-                  forceSafariVC: false);
-            },
+        onSendFeedback: widget.onSendFeedback ?? () {
+          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
+        },
       ),
     );
 
@@ -144,21 +141,15 @@ class _GalleryAppState extends State<GalleryApp> {
         // demos where many scrollables are all attached to the same
         // PrimaryScrollController. The gallery needs to be migrated before
         // enabling this. https://github.com/flutter/gallery/issues/523
-        scrollBehavior:
-            const MaterialScrollBehavior().copyWith(scrollbars: false),
-        theme: kLightGalleryTheme.copyWith(
-            platform: _options!.platform,
-            visualDensity: _options!.visualDensity!.visualDensity),
-        darkTheme: kDarkGalleryTheme.copyWith(
-            platform: _options!.platform,
-            visualDensity: _options!.visualDensity!.visualDensity),
+        scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+        theme: kLightGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
         themeMode: _options!.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,
         showPerformanceOverlay: _options!.showPerformanceOverlay,
         checkerboardOffscreenLayers: _options!.showOffscreenLayersCheckerboard,
-        checkerboardRasterCacheImages:
-            _options!.showRasterCacheImagesCheckerboard,
+        checkerboardRasterCacheImages: _options!.showRasterCacheImagesCheckerboard,
         routes: _buildRoutes(),
         builder: (BuildContext context, Widget? child) {
           return Directionality(

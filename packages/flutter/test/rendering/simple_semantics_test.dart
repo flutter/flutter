@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -16,13 +17,11 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     final RenderConstrainedBox tree = RenderConstrainedBox(
-      additionalConstraints:
-          const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+      additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
       child: testRender,
     );
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle =
-        TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },

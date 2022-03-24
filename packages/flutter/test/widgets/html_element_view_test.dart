@@ -16,8 +16,7 @@ void main() {
   group('HtmlElementView', () {
     testWidgets('Create HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -38,11 +37,9 @@ void main() {
       );
     });
 
-    testWidgets('Create HTML view with PlatformViewCreatedCallback',
-        (WidgetTester tester) async {
+    testWidgets('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
 
       bool hasPlatformViewCreated = false;
@@ -76,8 +73,7 @@ void main() {
 
     testWidgets('Resize HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
@@ -114,8 +110,7 @@ void main() {
 
     testWidgets('Change HTML view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
@@ -147,8 +142,7 @@ void main() {
     });
 
     testWidgets('Dispose HTML view', (WidgetTester tester) async {
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
@@ -175,11 +169,9 @@ void main() {
       );
     });
 
-    testWidgets('HTML view survives widget tree change',
-        (WidgetTester tester) async {
+    testWidgets('HTML view survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -210,13 +202,11 @@ void main() {
       );
     });
 
-    testWidgets('HtmlElementView has correct semantics',
-        (WidgetTester tester) async {
+    testWidgets('HtmlElementView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeHtmlPlatformViewsController viewsController =
-          FakeHtmlPlatformViewsController();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -239,8 +229,7 @@ void main() {
       await tester.pump();
 
       // The platform view ID is set on the child of the HtmlElementView render object.
-      final SemanticsNode semantics =
-          tester.getSemantics(find.byType(PlatformViewSurface));
+      final SemanticsNode semantics = tester.getSemantics(find.byType(PlatformViewSurface));
 
       expect(semantics.platformViewId, currentViewId + 1);
       expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));

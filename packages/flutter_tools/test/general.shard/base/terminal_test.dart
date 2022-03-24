@@ -14,10 +14,8 @@ void main() {
   group('output preferences', () {
     testWithoutContext('can wrap output', () async {
       final BufferLogger bufferLogger = BufferLogger(
-        outputPreferences:
-            OutputPreferences.test(wrapText: true, wrapColumn: 40),
-        terminal:
-            TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
       bufferLogger.printStatus('0123456789' * 8);
 
@@ -27,8 +25,7 @@ void main() {
     testWithoutContext('can turn off wrapping', () async {
       final BufferLogger bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(),
-        terminal:
-            TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
+        terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
       final String testString = '0123456789' * 20;
       bufferLogger.printStatus(testString);
@@ -51,8 +48,7 @@ void main() {
       for (final TerminalColor color in TerminalColor.values) {
         expect(
           terminal.color('output', color),
-          equals(
-              '${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
+          equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
         );
       }
     });
@@ -67,44 +63,33 @@ void main() {
     testWithoutContext('nesting bold within color works', () {
       expect(
         terminal.color(terminal.bolden('output'), TerminalColor.blue),
-        equals(
-            '${AnsiTerminal.blue}${AnsiTerminal.bold}output${AnsiTerminal.resetBold}${AnsiTerminal.resetColor}'),
+        equals('${AnsiTerminal.blue}${AnsiTerminal.bold}output${AnsiTerminal.resetBold}${AnsiTerminal.resetColor}'),
       );
       expect(
-        terminal.color('non-bold ${terminal.bolden('output')} also non-bold',
-            TerminalColor.blue),
-        equals(
-            '${AnsiTerminal.blue}non-bold ${AnsiTerminal.bold}output${AnsiTerminal.resetBold} also non-bold${AnsiTerminal.resetColor}'),
+        terminal.color('non-bold ${terminal.bolden('output')} also non-bold', TerminalColor.blue),
+        equals('${AnsiTerminal.blue}non-bold ${AnsiTerminal.bold}output${AnsiTerminal.resetBold} also non-bold${AnsiTerminal.resetColor}'),
       );
     });
 
     testWithoutContext('nesting color within bold works', () {
       expect(
         terminal.bolden(terminal.color('output', TerminalColor.blue)),
-        equals(
-            '${AnsiTerminal.bold}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.resetBold}'),
+        equals('${AnsiTerminal.bold}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.resetBold}'),
       );
       expect(
-        terminal.bolden(
-            'non-color ${terminal.color('output', TerminalColor.blue)} also non-color'),
-        equals(
-            '${AnsiTerminal.bold}non-color ${AnsiTerminal.blue}output${AnsiTerminal.resetColor} also non-color${AnsiTerminal.resetBold}'),
+        terminal.bolden('non-color ${terminal.color('output', TerminalColor.blue)} also non-color'),
+        equals('${AnsiTerminal.bold}non-color ${AnsiTerminal.blue}output${AnsiTerminal.resetColor} also non-color${AnsiTerminal.resetBold}'),
       );
     });
 
     testWithoutContext('nesting color within color works', () {
       expect(
-        terminal.color(terminal.color('output', TerminalColor.blue),
-            TerminalColor.magenta),
-        equals(
-            '${AnsiTerminal.magenta}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta}${AnsiTerminal.resetColor}'),
+        terminal.color(terminal.color('output', TerminalColor.blue), TerminalColor.magenta),
+        equals('${AnsiTerminal.magenta}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta}${AnsiTerminal.resetColor}'),
       );
       expect(
-        terminal.color(
-            'magenta ${terminal.color('output', TerminalColor.blue)} also magenta',
-            TerminalColor.magenta),
-        equals(
-            '${AnsiTerminal.magenta}magenta ${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta} also magenta${AnsiTerminal.resetColor}'),
+        terminal.color('magenta ${terminal.color('output', TerminalColor.blue)} also magenta', TerminalColor.magenta),
+        equals('${AnsiTerminal.magenta}magenta ${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta} also magenta${AnsiTerminal.resetColor}'),
       );
     });
 
@@ -115,8 +100,7 @@ void main() {
       );
       expect(
         terminal.bolden('bold ${terminal.bolden('output')} still bold'),
-        equals(
-            '${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
+        equals('${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
       );
     });
   });
@@ -128,15 +112,12 @@ void main() {
       terminalUnderTest = TestTerminal(stdio: FakeStdio());
     });
 
-    testWithoutContext('character prompt throws if usesTerminalUi is false',
-        () async {
-      expect(
-          terminalUnderTest.promptForCharInput(
-            <String>['a', 'b', 'c'],
-            prompt: 'Please choose something',
-            logger: BufferLogger.test(),
-          ),
-          throwsStateError);
+    testWithoutContext('character prompt throws if usesTerminalUi is false', () async {
+      expect(terminalUnderTest.promptForCharInput(
+        <String>['a', 'b', 'c'],
+        prompt: 'Please choose something',
+        logger: BufferLogger.test(),
+      ), throwsStateError);
     });
 
     testWithoutContext('character prompt', () async {
@@ -163,8 +144,7 @@ void main() {
           'Please choose something [a|b|c]: b\n');
     });
 
-    testWithoutContext(
-        'default character choice without displayAcceptedCharacters', () async {
+    testWithoutContext('default character choice without displayAcceptedCharacters', () async {
       final BufferLogger bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
@@ -182,12 +162,15 @@ void main() {
       );
 
       expect(choice, 'b');
-      expect(bufferLogger.statusText, 'Please choose something: \n');
+      expect(
+        bufferLogger.statusText,
+        'Please choose something: \n'
+      );
     });
 
-    testWithoutContext(
-        'Does not set single char mode when a terminal is not attached', () {
-      final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
+    testWithoutContext('Does not set single char mode when a terminal is not attached', () {
+      final Stdio stdio = FakeStdio()
+        ..stdinHasTerminal = false;
       final AnsiTerminal ansiTerminal = AnsiTerminal(
         stdio: stdio,
         platform: const LocalPlatform(),
@@ -199,244 +182,43 @@ void main() {
 
   testWithoutContext('AnsiTerminal.preferredStyle', () {
     final Stdio stdio = FakeStdio();
-    expect(
-        AnsiTerminal(stdio: stdio, platform: const LocalPlatform())
-            .preferredStyle,
-        0); // Defaults to 0 for backwards compatibility.
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform()).preferredStyle, 0); // Defaults to 0 for backwards compatibility.
 
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018))
-            .preferredStyle,
-        0);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 2))
-            .preferredStyle,
-        1);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 3))
-            .preferredStyle,
-        2);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 4))
-            .preferredStyle,
-        3);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 5))
-            .preferredStyle,
-        4);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 6))
-            .preferredStyle,
-        5);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 7))
-            .preferredStyle,
-        5);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 8))
-            .preferredStyle,
-        0);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 9))
-            .preferredStyle,
-        1);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 10))
-            .preferredStyle,
-        2);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 11))
-            .preferredStyle,
-        3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4)).preferredStyle, 3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  5)).preferredStyle, 4);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  6)).preferredStyle, 5);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  7)).preferredStyle, 5);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  8)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  9)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 10)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 11)).preferredStyle, 3);
 
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 1, 1))
-            .preferredStyle,
-        0);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 2, 1))
-            .preferredStyle,
-        1);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 3, 1))
-            .preferredStyle,
-        2);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 4, 1))
-            .preferredStyle,
-        3);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 5, 1))
-            .preferredStyle,
-        4);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 6, 1))
-            .preferredStyle,
-        6);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 7, 1))
-            .preferredStyle,
-        6);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 8, 1))
-            .preferredStyle,
-        0);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 9, 1))
-            .preferredStyle,
-        1);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 10, 1))
-            .preferredStyle,
-        2);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 11, 1))
-            .preferredStyle,
-        3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1, 1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2, 1)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3, 1)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4, 1)).preferredStyle, 3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  5, 1)).preferredStyle, 4);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  6, 1)).preferredStyle, 6);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  7, 1)).preferredStyle, 6);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  8, 1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  9, 1)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 10, 1)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 11, 1)).preferredStyle, 3);
 
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 1, 23))
-            .preferredStyle,
-        0);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 2, 23))
-            .preferredStyle,
-        1);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 3, 23))
-            .preferredStyle,
-        2);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 4, 23))
-            .preferredStyle,
-        3);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 5, 23))
-            .preferredStyle,
-        4);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 6, 23))
-            .preferredStyle,
-        28);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 7, 23))
-            .preferredStyle,
-        28);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 8, 23))
-            .preferredStyle,
-        0);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 9, 23))
-            .preferredStyle,
-        1);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 10, 23))
-            .preferredStyle,
-        2);
-    expect(
-        AnsiTerminal(
-                stdio: stdio,
-                platform: const LocalPlatform(),
-                now: DateTime(2018, 1, 11, 23))
-            .preferredStyle,
-        3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1, 23)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2, 23)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3, 23)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4, 23)).preferredStyle, 3);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  5, 23)).preferredStyle, 4);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  6, 23)).preferredStyle, 28);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  7, 23)).preferredStyle, 28);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  8, 23)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  9, 23)).preferredStyle, 1);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 10, 23)).preferredStyle, 2);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1, 11, 23)).preferredStyle, 3);
   });
 }
 
@@ -447,10 +229,7 @@ class TestTerminal extends AnsiTerminal {
     Stdio? stdio,
     Platform platform = const LocalPlatform(),
     DateTime? now,
-  }) : super(
-            stdio: stdio ?? Stdio(),
-            platform: platform,
-            now: now ?? DateTime(2018));
+  }) : super(stdio: stdio ?? Stdio(), platform: platform, now: now ?? DateTime(2018));
 
   @override
   Stream<String> get keystrokes {

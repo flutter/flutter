@@ -76,24 +76,18 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         key: const ValueKey<String>(alertKeyValue),
-                        title: const Text('Title text',
-                            key: ValueKey<String>('$alertKeyValue.Title')),
+                        title: const Text('Title text', key: ValueKey<String>('$alertKeyValue.Title')),
                         content: SingleChildScrollView(
                           child: ListBody(
                             children: const <Widget>[
-                              Text('Body text line 1.',
-                                  key:
-                                      ValueKey<String>('$alertKeyValue.Body1')),
-                              Text('Body text line 2.',
-                                  key:
-                                      ValueKey<String>('$alertKeyValue.Body2')),
+                              Text('Body text line 1.', key: ValueKey<String>('$alertKeyValue.Body1')),
+                              Text('Body text line 2.', key: ValueKey<String>('$alertKeyValue.Body2')),
                             ],
                           ),
                         ),
                         actions: <Widget>[
                           TextButton(
-                            child: const Text('OK',
-                                key: ValueKey<String>('$alertKeyValue.OK')),
+                            child: const Text('OK', key: ValueKey<String>('$alertKeyValue.OK')),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },

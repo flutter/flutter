@@ -37,8 +37,7 @@ void main() {
     expect(values, <int>[10, 60, 110]);
   });
 
-  testWidgets('No initial animation when begin=null',
-      (WidgetTester tester) async {
+  testWidgets('No initial animation when begin=null', (WidgetTester tester) async {
     final List<int> values = <int>[];
     int endCount = 0;
     await tester.pumpWidget(
@@ -61,8 +60,8 @@ void main() {
     expect(values, <int>[100]);
   });
 
-  testWidgets('No initial animation when begin=end',
-      (WidgetTester tester) async {
+
+  testWidgets('No initial animation when begin=end', (WidgetTester tester) async {
     final List<int> values = <int>[];
     int endCount = 0;
     await tester.pumpWidget(
@@ -127,8 +126,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100), curve: Curves.easeInExpo));
+    await tester.pumpWidget(buildWidget(tween: IntTween(begin: 0, end: 100), curve: Curves.easeInExpo));
     expect(values, <int>[0]);
     await tester.pump(const Duration(milliseconds: 500));
     expect(values.last, lessThan(50));
@@ -138,8 +136,7 @@ void main() {
 
     values.clear();
     // Update curve (and tween to re-trigger animation).
-    await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 100, end: 200), curve: Curves.linear));
+    await tester.pumpWidget(buildWidget(tween: IntTween(begin: 100, end: 200), curve: Curves.linear));
     expect(values, <int>[100]);
     await tester.pump(const Duration(milliseconds: 500));
     expect(values, <int>[100, 150]);
@@ -158,9 +155,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-        duration: const Duration(seconds: 1)));
+    await tester.pumpWidget(buildWidget(tween: IntTween(begin: 0, end: 100), duration: const Duration(seconds: 1)));
     expect(values, <int>[0]);
     await tester.pump(const Duration(milliseconds: 500));
     expect(values, <int>[0, 50]);
@@ -169,9 +164,7 @@ void main() {
 
     values.clear();
     // Update duration (and tween to re-trigger animation).
-    await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 100, end: 200),
-        duration: const Duration(seconds: 2)));
+    await tester.pumpWidget(buildWidget(tween: IntTween(begin: 100, end: 200), duration: const Duration(seconds: 2)));
     expect(values, <int>[100]);
     await tester.pump(const Duration(milliseconds: 500));
     expect(values, <int>[100, 125]);
@@ -220,16 +213,10 @@ void main() {
       await tester.pumpWidget(buildWidget(
         tween: IntTween(begin: 200, end: 300),
       ));
-      expect(values,
-          <int>[0, 50, 50]); // gapless: animation continues where it left off.
+      expect(values, <int>[0, 50, 50]); // gapless: animation continues where it left off.
 
       await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[
-        0,
-        50,
-        50,
-        175
-      ]); // 175 = halfway between 50 and new target 300.
+      expect(values, <int>[0, 50, 50, 175]); // 175 = halfway between 50 and new target 300.
 
       // Run animation to end
       await tester.pump(const Duration(seconds: 2));
@@ -237,8 +224,7 @@ void main() {
       values.clear();
     });
 
-    testWidgets('running forward and then reverse with same tween instance',
-        (WidgetTester tester) async {
+    testWidgets('running forward and then reverse with same tween instance', (WidgetTester tester) async {
       final List<int> values = <int>[];
       Widget buildWidget({required IntTween tween}) {
         return TweenAnimationBuilder<int>(
@@ -268,8 +254,7 @@ void main() {
     });
   });
 
-  testWidgets('Changing tween while gapless tween change is in progress',
-      (WidgetTester tester) async {
+  testWidgets('Changing tween while gapless tween change is in progress', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -309,9 +294,7 @@ void main() {
     expect(values, <int>[175, 338, 501]);
   });
 
-  testWidgets(
-      'Changing curve while no animation is running does not trigger animation',
-      (WidgetTester tester) async {
+  testWidgets('Changing curve while no animation is running does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required Curve curve}) {
       return TweenAnimationBuilder<int>(
@@ -340,8 +323,7 @@ void main() {
     expect(values, <int>[100]);
   });
 
-  testWidgets('Setting same tween and direction does not trigger animation',
-      (WidgetTester tester) async {
+  testWidgets('Setting same tween and direction does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -370,9 +352,7 @@ void main() {
     expect(values, everyElement(100));
   });
 
-  testWidgets(
-      'Setting same tween and direction while gapless animation is in progress works',
-      (WidgetTester tester) async {
+  testWidgets('Setting same tween and direction while gapless animation is in progress works', (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -413,15 +393,15 @@ void main() {
     await tester.pumpWidget(
       TweenAnimationBuilder<Size?>(
         duration: const Duration(seconds: 1),
-        tween: SizeTween(end: const Size(10, 10)),
+        tween: SizeTween(end: const Size(10,10)),
         builder: (BuildContext context, Size? s, Widget? child) {
           values.add(s);
           return const Placeholder();
         },
       ),
     );
-    expect(values, <Size>[const Size(10, 10)]);
+    expect(values, <Size>[const Size(10,10)]);
     await tester.pump(const Duration(seconds: 2));
-    expect(values, <Size>[const Size(10, 10)]);
+    expect(values, <Size>[const Size(10,10)]);
   });
 }

@@ -27,22 +27,21 @@ class AnalyzeContinuously extends AnalyzeBase {
     required ProcessManager processManager,
     required Artifacts artifacts,
   }) : super(
-          argResults,
-          repoPackages: repoPackages,
-          repoRoots: repoRoots,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          terminal: terminal,
-          processManager: processManager,
-          artifacts: artifacts,
-        );
+        argResults,
+        repoPackages: repoPackages,
+        repoRoots: repoRoots,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        processManager: processManager,
+        artifacts: artifacts,
+      );
 
   String? analysisTarget;
   bool firstAnalysis = true;
   Set<String> analyzedPaths = <String>{};
-  Map<String, List<AnalysisError>> analysisErrors =
-      <String, List<AnalysisError>>{};
+  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
   final Stopwatch analysisTimer = Stopwatch();
   int lastErrorCount = 0;
   Status? analysisStatus;
@@ -77,8 +76,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
     );
-    server.onAnalyzing.listen(
-        (bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
+    server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
     await server.start();
@@ -121,8 +119,7 @@ class AnalyzeContinuously extends AnalyzeBase {
           pathsToRemove.add(path);
         }
       });
-      analysisErrors
-          .removeWhere((String path, _) => pathsToRemove.contains(path));
+      analysisErrors.removeWhere((String path, _) => pathsToRemove.contains(path));
 
       sortedErrors.sort();
 
@@ -133,14 +130,12 @@ class AnalyzeContinuously extends AnalyzeBase {
         }
       }
 
-      dumpErrors(sortedErrors
-          .map<String>((AnalysisError error) => error.toLegacyString()));
+      dumpErrors(sortedErrors.map<String>((AnalysisError error) => error.toLegacyString()));
 
       final int issueCount = sortedErrors.length;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
-      final String seconds =
-          (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
+      final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
       final String errorsMessage = AnalyzeBase.generateErrorsMessage(
         issueCount: issueCount,
         issueDiff: issueDiff,
@@ -152,9 +147,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
-        server.dispose().whenComplete(() {
-          exit(issueCount > 0 ? 1 : 0);
-        });
+        server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
       }
 
       firstAnalysis = false;
@@ -162,8 +155,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   }
 
   void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-    fileErrors.errors
-        .removeWhere((AnalysisError error) => error.type == 'TODO');
+    fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
 
     analyzedPaths.add(fileErrors.file);
     analysisErrors[fileErrors.file] = fileErrors.errors;

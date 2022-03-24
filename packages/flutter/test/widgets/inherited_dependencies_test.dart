@@ -7,8 +7,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InheritedWidget dependencies show up in diagnostic properties',
-      (WidgetTester tester) async {
+  testWidgets('InheritedWidget dependencies show up in diagnostic properties', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(Directionality(
       key: key,

@@ -10,7 +10,8 @@ const double kSectionIndicatorWidth = 32.0;
 
 // The card for a single section. Displays the section's gradient and background image.
 class SectionCard extends StatelessWidget {
-  const SectionCard({Key? key, required this.section}) : super(key: key);
+  const SectionCard({ Key? key, required this.section })
+    : super(key: key);
 
   final Section section;
 
@@ -48,8 +49,8 @@ class SectionTitle extends StatelessWidget {
     required this.section,
     required this.scale,
     required this.opacity,
-  })  : assert(opacity >= 0.0 && opacity <= 1.0),
-        super(key: key);
+  }) : assert(opacity >= 0.0 && opacity <= 1.0),
+       super(key: key);
 
   final Section section;
   final double scale;
@@ -93,7 +94,7 @@ class SectionTitle extends StatelessWidget {
 
 // Small horizontal bar that indicates the selected section.
 class SectionIndicator extends StatelessWidget {
-  const SectionIndicator({Key? key, this.opacity = 1.0}) : super(key: key);
+  const SectionIndicator({ Key? key, this.opacity = 1.0 }) : super(key: key);
 
   final double opacity;
 
@@ -111,10 +112,10 @@ class SectionIndicator extends StatelessWidget {
 
 // Display a single SectionDetail.
 class SectionDetailView extends StatelessWidget {
-  SectionDetailView({Key? key, required this.detail})
-      : assert(detail.imageAsset != null),
-        assert((detail.imageAsset ?? detail.title) != null),
-        super(key: key);
+  SectionDetailView({ Key? key, required this.detail })
+    : assert(detail.imageAsset != null),
+      assert((detail.imageAsset ?? detail.title) != null),
+      super(key: key);
 
   final SectionDetail detail;
 

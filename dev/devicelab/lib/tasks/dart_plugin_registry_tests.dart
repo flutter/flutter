@@ -152,22 +152,21 @@ class ApluginPlatformInterfaceMacOS {
 
       Completer<void> registryExecutedCompleter = Completer<void>();
       final StreamSubscription<void> stdoutSub = run.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        if (line.contains(
-            'ApluginPlatformInterfaceMacOS.registerWith() was called')) {
-          registryExecutedCompleter.complete();
-        }
-        print('stdout: $line');
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          if (line.contains('ApluginPlatformInterfaceMacOS.registerWith() was called')) {
+            registryExecutedCompleter.complete();
+          }
+          print('stdout: $line');
+        });
 
       final StreamSubscription<void> stderrSub = run.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        print('stderr: $line');
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('stderr: $line');
+        });
 
       final Future<void> stdoutDone = stdoutSub.asFuture<void>();
       final Future<void> stderrDone = stderrSub.asFuture<void>();

@@ -31,8 +31,7 @@ void main() {
                 AboutListTile(
                   applicationVersion: '0.1.2',
                   applicationIcon: logo,
-                  applicationLegalese:
-                      'I am the very model of a modern major general.',
+                  applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     Text('About box'),
                   ],
@@ -79,8 +78,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(
-            <String>['Pirate package '], 'Pirate license'),
+        const LicenseEntryWithLineBreaks(<String>['Pirate package '], 'Pirate license'),
       ]);
     });
 
@@ -99,8 +97,7 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgets('About box logic defaults to executable name for app name',
-      (WidgetTester tester) async {
+  testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         title: 'flutter_tester',
@@ -161,8 +158,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  testWidgets('LicensePage control test with all properties',
-      (WidgetTester tester) async {
+  testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     LicenseRegistry.addLicense(() {
@@ -188,8 +184,7 @@ void main() {
             applicationName: 'LicensePage test app',
             applicationVersion: '0.1.2',
             applicationIcon: logo,
-            applicationLegalese:
-                'I am the very model of a modern major general.',
+            applicationLegalese: 'I am the very model of a modern major general.',
           ),
         ),
       ),
@@ -239,8 +234,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  testWidgets('_PackageLicensePage title style without AppBarTheme',
-      (WidgetTester tester) async {
+  testWidgets('_PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -287,8 +281,7 @@ void main() {
     expect(subtitle.style, subtitleTextStyle);
   });
 
-  testWidgets('_PackageLicensePage title style with AppBarTheme',
-      (WidgetTester tester) async {
+  testWidgets('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -377,8 +370,7 @@ void main() {
     );
   });
 
-  testWidgets('LicensePage returns early if unmounted',
-      (WidgetTester tester) async {
+  testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -403,8 +395,7 @@ void main() {
     expect(licenseEntry.packagesCalled, false);
   });
 
-  testWidgets('LicensePage returns late if unmounted',
-      (WidgetTester tester) async {
+  testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -429,8 +420,7 @@ void main() {
     expect(licenseEntry.packagesCalled, true);
   });
 
-  testWidgets('LicensePage logic defaults to executable name for app name',
-      (WidgetTester tester) async {
+  testWidgets('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         title: 'flutter_tester',
@@ -440,8 +430,7 @@ void main() {
     expect(find.text('flutter_tester'), findsOneWidget);
   });
 
-  testWidgets('AboutListTile dense property is applied',
-      (WidgetTester tester) async {
+  testWidgets('AboutListTile dense property is applied', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(child: Center(child: AboutListTile())),
     ));
@@ -461,8 +450,7 @@ void main() {
     expect(tileRect.height, 48.0);
   });
 
-  testWidgets('showLicensePage uses nested navigator by default',
-      (WidgetTester tester) async {
+  testWidgets('showLicensePage uses nested navigator by default', (WidgetTester tester) async {
     final LicensePageObserver rootObserver = LicensePageObserver();
     final LicensePageObserver nestedObserver = LicensePageObserver();
 
@@ -500,8 +488,7 @@ void main() {
     expect(nestedObserver.licensePageCount, 1);
   });
 
-  testWidgets('showLicensePage uses root navigator if useRootNavigator is true',
-      (WidgetTester tester) async {
+  testWidgets('showLicensePage uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
     final LicensePageObserver rootObserver = LicensePageObserver();
     final LicensePageObserver nestedObserver = LicensePageObserver();
 
@@ -540,8 +527,7 @@ void main() {
     expect(nestedObserver.licensePageCount, 0);
   });
 
-  testWidgets('showAboutDialog uses root navigator by default',
-      (WidgetTester tester) async {
+  testWidgets('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
 
@@ -574,9 +560,7 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgets(
-      'showAboutDialog uses nested navigator if useRootNavigator is false',
-      (WidgetTester tester) async {
+  testWidgets('showAboutDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
 
@@ -649,8 +633,7 @@ void main() {
 
       // By default it should place the dialog on the left screen
       expect(tester.getTopLeft(find.byType(AboutDialog)), Offset.zero);
-      expect(tester.getBottomRight(find.byType(AboutDialog)),
-          const Offset(390.0, 600.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(390.0, 600.0));
     });
 
     testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
@@ -691,14 +674,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // The anchorPoint hits the right side of the display
-      expect(tester.getTopLeft(find.byType(AboutDialog)),
-          const Offset(410.0, 0.0));
-      expect(tester.getBottomRight(find.byType(AboutDialog)),
-          const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('positioning using Directionality',
-        (WidgetTester tester) async {
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -738,16 +718,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Since this is rtl, the first screen is the on the right
-      expect(tester.getTopLeft(find.byType(AboutDialog)),
-          const Offset(410.0, 0.0));
-      expect(tester.getBottomRight(find.byType(AboutDialog)),
-          const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
     });
   });
 
-  testWidgets(
-      "AboutListTile's child should not be offset when the icon is not specified.",
-      (WidgetTester tester) async {
+  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -767,8 +743,7 @@ void main() {
     );
   });
 
-  testWidgets("AboutDialog's contents are scrollable",
-      (WidgetTester tester) async {
+  testWidgets("AboutDialog's contents are scrollable", (WidgetTester tester) async {
     final Key contentKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
       home: Navigator(
@@ -806,20 +781,17 @@ void main() {
     Offset originalOffset = box.localToGlobal(Offset.zero);
     await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
 
-    expect(box.localToGlobal(Offset.zero),
-        equals(originalOffset.translate(0.0, -20.0)));
+    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
 
     // Try dragging by the additional children in contents.
     box = tester.renderObject(find.byKey(contentKey));
     originalOffset = box.localToGlobal(Offset.zero);
     await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
 
-    expect(box.localToGlobal(Offset.zero),
-        equals(originalOffset.translate(0.0, -20.0)));
+    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
   });
 
-  testWidgets("LicensePage's color must be same whether loading or done",
-      (WidgetTester tester) async {
+  testWidgets("LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
     const Color scaffoldColor = Color(0xFF123456);
     const Color cardColor = Color(0xFF654321);
 
@@ -851,8 +823,7 @@ void main() {
     await tester.pump();
 
     // Check color when loading.
-    final List<Material> materialLoadings =
-        tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialLoadings = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materialLoadings.length, equals(4));
     expect(materialLoadings[1].color, scaffoldColor);
     expect(materialLoadings[2].color, cardColor);
@@ -860,18 +831,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check color when done.
-    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)),
-        findsOneWidget);
-    final List<Material> materialDones =
-        tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
+    final List<Material> materialDones = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materialDones.length, equals(3));
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
   });
 
-  testWidgets(
-      'Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage',
-      (WidgetTester tester) async {
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -912,6 +879,7 @@ void main() {
     }
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
+
   }, variant: TargetPlatformVariant.all());
 }
 

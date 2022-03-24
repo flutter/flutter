@@ -14,15 +14,13 @@ import 'package:test/test.dart' hide isInstanceOf;
 // The accessibility focus actions are added when a semantics node receives or
 // lose accessibility focus. This test ignores these actions since it is hard to
 // predict which node has the accessibility focus after a screen changes.
-const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions =
-    <AndroidSemanticsAction>[
+const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
   AndroidSemanticsAction.accessibilityFocus,
   AndroidSemanticsAction.clearAccessibilityFocus,
 ];
 
 String adbPath() {
-  final String androidHome = io.Platform.environment['ANDROID_HOME'] ??
-      io.Platform.environment['ANDROID_SDK_ROOT'];
+  final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
     return 'adb';
   } else {
@@ -43,16 +41,14 @@ void main() {
     Version talkbackVersion;
 
     Future<Version> getTalkbackVersion() async {
-      final io.ProcessResult result =
-          await io.Process.run(adbPath(), const <String>[
+      final io.ProcessResult result = await io.Process.run(adbPath(), const <String>[
         'shell',
         'dumpsys',
         'package',
         'com.google.android.marvin.talkback',
       ]);
       if (result.exitCode != 0) {
-        throw Exception(
-            'Failed to get TalkBack version: ${result.stdout as String}\n${result.stderr as String}');
+        throw Exception('Failed to get TalkBack version: ${result.stdout as String}\n${result.stderr as String}');
       }
       final List<String> lines = (result.stdout as String).split('\n');
       String version;
@@ -67,8 +63,7 @@ void main() {
       }
 
       // Android doesn't quite use semver, so convert the version string to semver form.
-      final RegExp startVersion = RegExp(
-          r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
+      final RegExp startVersion = RegExp(r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
       final RegExpMatch match = startVersion.firstMatch(version);
       if (match == null) {
         return Version(0, 0, 0);
@@ -307,7 +302,6 @@ void main() {
         Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getCheckboxSemantics(checkboxKeyValue),
           hasAndroidSemantics(
@@ -354,7 +348,6 @@ void main() {
         Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getRadioSemantics(radio2KeyValue),
           hasAndroidSemantics(
@@ -391,7 +384,6 @@ void main() {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getSwitchSemantics(switchKeyValue),
           hasAndroidSemantics(
@@ -430,7 +422,6 @@ void main() {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getSwitchSemantics(labeledSwitchKeyValue),
           hasAndroidSemantics(
@@ -496,8 +487,7 @@ void main() {
                 ),
                 reason: "Popup $item doesn't have the right semantics");
           }
-          await driver
-              .tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
+          await driver.tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
 
           // Pop up the menu again, to verify that TalkBack gets the right answer
           // more than just the first time.
@@ -518,12 +508,10 @@ void main() {
                     AndroidSemanticsAction.click,
                   ],
                 ),
-                reason:
-                    "Popup $item doesn't have the right semantics the second time");
+                reason: "Popup $item doesn't have the right semantics the second time");
           }
         } finally {
-          await driver
-              .tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
+          await driver.tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
         }
       }, timeout: Timeout.none);
 
@@ -571,8 +559,7 @@ void main() {
           await driver.tap(
             find.descendant(
               of: find.byType('Scrollable'),
-              matching:
-                  find.byValueKey('$dropdownKeyValue.${popupItems.first}'),
+              matching: find.byValueKey('$dropdownKeyValue.${popupItems.first}'),
             ),
           );
 
@@ -600,15 +587,13 @@ void main() {
                     AndroidSemanticsAction.click,
                   ],
                 ),
-                reason:
-                    "Dropdown $item doesn't have the right semantics the second time.");
+                reason: "Dropdown $item doesn't have the right semantics the second time.");
           }
         } finally {
           await driver.tap(
             find.descendant(
               of: find.byType('Scrollable'),
-              matching:
-                  find.byValueKey('$dropdownKeyValue.${popupItems.first}'),
+              matching: find.byValueKey('$dropdownKeyValue.${popupItems.first}'),
             ),
           );
         }
@@ -734,5 +719,6 @@ void main() {
         await driver.tap(find.byValueKey('back'));
       });
     });
+
   });
 }

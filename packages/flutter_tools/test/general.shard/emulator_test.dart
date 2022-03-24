@@ -20,10 +20,8 @@ import '../src/context.dart';
 import '../src/fakes.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
-const FakeEmulator emulator2 =
-    FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
-const FakeEmulator emulator3 =
-    FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
+const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
+const FakeEmulator emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
 const List<Emulator> emulators = <Emulator>[
   emulator1,
   emulator2,
@@ -33,11 +31,11 @@ const List<Emulator> emulators = <Emulator>[
 // We have to send a command that fails in order to get the list of valid
 // system images paths. This is an example of the output to use in the fake.
 const String fakeCreateFailureOutput =
-    'Error: Package path (-k) not specified. Valid system image paths are:\n'
-    'system-images;android-27;google_apis;x86\n'
-    'system-images;android-P;google_apis;x86\n'
-    'system-images;android-27;google_apis_playstore;x86\n'
-    'null\n'; // Yep, these really end with null (on dantup's machine at least)
+  'Error: Package path (-k) not specified. Valid system image paths are:\n'
+  'system-images;android-27;google_apis;x86\n'
+  'system-images;android-P;google_apis;x86\n'
+  'system-images;android-27;google_apis_playstore;x86\n'
+  'null\n'; // Yep, these really end with null (on dantup's machine at least)
 
 const FakeCommand kListEmulatorsCommand = FakeCommand(
   command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
@@ -55,8 +53,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     sdk = FakeAndroidSdk();
-    xcode =
-        Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
+    xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
 
     sdk
       ..avdManagerPath = 'avdmanager'
@@ -86,7 +83,7 @@ void main() {
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
-          returnsNormally);
+        returnsNormally);
     });
 
     testUsingContext('getEmulators with no Android SDK', () async {
@@ -108,30 +105,21 @@ void main() {
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
-          returnsNormally);
+        returnsNormally);
     });
 
     testWithoutContext('getEmulatorsById', () async {
-      final TestEmulatorManager testEmulatorManager =
-          TestEmulatorManager(emulators);
+      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators);
 
-      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'),
-          <Emulator>[emulator1]);
-      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'),
-          <Emulator>[emulator2]);
-      expect(
-          await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_27_x86'),
-          <Emulator>[emulator2]);
-      expect(await testEmulatorManager.getEmulatorsMatching('Nexus'),
-          <Emulator>[emulator1, emulator2]);
-      expect(await testEmulatorManager.getEmulatorsMatching('iOS Simulator'),
-          <Emulator>[emulator3]);
-      expect(await testEmulatorManager.getEmulatorsMatching('ios'),
-          <Emulator>[emulator3]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'), <Emulator>[emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_27_x86'),  <Emulator>[emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus'), <Emulator>[emulator1, emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('iOS Simulator'), <Emulator>[emulator3]);
+      expect(await testEmulatorManager.getEmulatorsMatching('ios'),  <Emulator>[emulator3]);
     });
 
-    testUsingContext(
-        'create emulator with a missing avdmanager does not crash.', () async {
+    testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
@@ -149,17 +137,14 @@ void main() {
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
-      final CreateEmulatorResult result =
-          await emulatorManager.createEmulator();
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
       expect(result.success, false);
-      expect(
-          result.error, contains('avdmanager is missing from the Android SDK'));
+      expect(result.error, contains('avdmanager is missing from the Android SDK'));
     });
 
     // iOS discovery uses context.
-    testUsingContext('create emulator with an empty name does not fail',
-        () async {
+    testUsingContext('create emulator with an empty name does not fail', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -194,14 +179,12 @@ void main() {
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
-      final CreateEmulatorResult result =
-          await emulatorManager.createEmulator();
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
       expect(result.success, true);
     });
 
-    testWithoutContext('create emulator with a unique name does not throw',
-        () async {
+    testWithoutContext('create emulator with a unique name does not throw', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -233,14 +216,12 @@ void main() {
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
-      final CreateEmulatorResult result =
-          await emulatorManager.createEmulator(name: 'test');
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
 
       expect(result.success, true);
     });
 
-    testWithoutContext('create emulator with an existing name errors',
-        () async {
+    testWithoutContext('create emulator with an existing name errors', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -251,21 +232,21 @@ void main() {
           ),
           kListEmulatorsCommand,
           const FakeCommand(
-              command: <String>[
-                'avdmanager',
-                'create',
-                'avd',
-                '-n',
-                'existing-avd-1',
-                '-k',
-                'system-images;android-27;google_apis_playstore;x86',
-                '-d',
-                'pixel',
-              ],
-              exitCode: 1,
-              stderr:
-                  "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-                  'Use --force if you want to replace it.')
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              '-n',
+              'existing-avd-1',
+              '-k',
+              'system-images;android-27;google_apis_playstore;x86',
+              '-d',
+              'pixel',
+            ],
+            exitCode: 1,
+            stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
+              'Use --force if you want to replace it.'
+          )
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -274,16 +255,13 @@ void main() {
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
-      final CreateEmulatorResult result =
-          await emulatorManager.createEmulator(name: 'existing-avd-1');
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
 
       expect(result.success, false);
     });
 
     // iOS discovery uses context.
-    testUsingContext(
-        'create emulator without a name but when default exists adds a suffix',
-        () async {
+    testUsingContext('create emulator without a name but when default exists adds a suffix', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -319,8 +297,7 @@ void main() {
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
-      final CreateEmulatorResult result =
-          await emulatorManager.createEmulator();
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
       expect(result.success, true);
       expect(result.emulatorName, 'flutter_emulator_2');
@@ -329,10 +306,7 @@ void main() {
 
   group('ios_emulators', () {
     testUsingContext('runs correct launch commands', () async {
-      fileSystem
-          .directory(
-              '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app')
-          .createSync(recursive: true);
+      fileSystem.directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app').createSync(recursive: true);
       fakeProcessManager.addCommands(
         <FakeCommand>[
           const FakeCommand(
@@ -376,7 +350,8 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class FakeEmulator extends Emulator {
-  const FakeEmulator(String id, this.name, this.manufacturer) : super(id, true);
+  const FakeEmulator(String id, this.name, this.manufacturer)
+    : super(id, true);
 
   @override
   final String name;

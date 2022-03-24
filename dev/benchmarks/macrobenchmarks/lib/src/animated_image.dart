@@ -18,8 +18,7 @@ class AnimatedImagePage extends StatelessWidget {
       body: Image.asset(
         'animated_images/animated_flutter_lgtm.gif',
         package: 'flutter_gallery_assets',
-        frameBuilder:
-            (BuildContext context, Widget child, int? frame, bool syncCall) {
+        frameBuilder: (BuildContext context, Widget child, int? frame, bool syncCall) {
           if (onFrame != null && frame != null) {
             onFrame?.call(frame);
           }

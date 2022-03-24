@@ -46,37 +46,34 @@ void main() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            label: 'L1',
+            rect: TestSemantics.fullScreen,
+          ),
+          TestSemantics.rootChild(
+            id: 2,
+            label: 'L2',
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                label: 'L1',
+              TestSemantics(
+                id: 3,
+                flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
                 rect: TestSemantics.fullScreen,
               ),
-              TestSemantics.rootChild(
-                id: 2,
-                label: 'L2',
+              TestSemantics(
+                id: 4,
+                flags: SemanticsFlag.hasCheckedState.index,
                 rect: TestSemantics.fullScreen,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 3,
-                    flags: SemanticsFlag.hasCheckedState.index |
-                        SemanticsFlag.isChecked.index,
-                    rect: TestSemantics.fullScreen,
-                  ),
-                  TestSemantics(
-                    id: 4,
-                    flags: SemanticsFlag.hasCheckedState.index,
-                    rect: TestSemantics.fullScreen,
-                  ),
-                ],
               ),
             ],
           ),
-        ));
+        ],
+      ),
+    ));
 
     //    O        O=root
     //   / \       L=node with label
@@ -109,26 +106,23 @@ void main() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                label: 'L1',
-                rect: TestSemantics.fullScreen,
-              ),
-              TestSemantics.rootChild(
-                id: 2,
-                label: 'L2',
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                rect: TestSemantics.fullScreen,
-              ),
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            label: 'L1',
+            rect: TestSemantics.fullScreen,
           ),
-        ));
+          TestSemantics.rootChild(
+            id: 2,
+            label: 'L2',
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            rect: TestSemantics.fullScreen,
+          ),
+        ],
+      ),
+    ));
 
     //             O=root
     //    OLC      L=node with label
@@ -157,21 +151,18 @@ void main() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 2,
-                label: 'L2',
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                rect: TestSemantics.fullScreen,
-              ),
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 2,
+            label: 'L2',
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            rect: TestSemantics.fullScreen,
           ),
-        ));
+        ],
+      ),
+    ));
 
     semantics.dispose();
   });

@@ -13,8 +13,7 @@ void main() {
     kFullscreenTextRouteName,
     pageDelay: const Duration(milliseconds: 50),
     driverOps: (FlutterDriver driver) async {
-      final SerializableFinder textfield =
-          find.byValueKey('fullscreen-textfield');
+      final SerializableFinder textfield = find.byValueKey('fullscreen-textfield');
       driver.tap(textfield);
       await Future<void>.delayed(const Duration(milliseconds: 5000));
     },

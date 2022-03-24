@@ -23,19 +23,15 @@ const String _dryRunOption = 'dry-run';
 
 const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String _defaultNewCodepointsPath = 'codepoints';
-const String _defaultOldCodepointsPath =
-    'bin/cache/artifacts/material_fonts/codepoints';
+const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
 const String _defaultFontFamily = 'MaterialIcons';
 
 const String _beginGeneratedMark = '// BEGIN GENERATED ICONS';
 const String _endGeneratedMark = '// END GENERATED ICONS';
-const String _beginPlatformAdaptiveGeneratedMark =
-    '// BEGIN GENERATED PLATFORM ADAPTIVE ICONS';
-const String _endPlatformAdaptiveGeneratedMark =
-    '// END GENERATED PLATFORM ADAPTIVE ICONS';
+const String _beginPlatformAdaptiveGeneratedMark = '// BEGIN GENERATED PLATFORM ADAPTIVE ICONS';
+const String _endPlatformAdaptiveGeneratedMark = '// END GENERATED PLATFORM ADAPTIVE ICONS';
 
-const Map<String, List<String>> _platformAdaptiveIdentifiers =
-    <String, List<String>>{
+const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<String>>{
   // Mapping of Flutter IDs to an Android/agnostic ID and an iOS ID.
   // Flutter IDs can be anything, but should be chosen to be agnostic.
   'arrow_back': <String>['arrow_back', 'arrow_back_ios'],
@@ -173,41 +169,32 @@ void main(List<String> args) {
 
   final ArgResults argResults = _handleArguments(args);
 
-  final File iconsFile = File(
-      path.normalize(path.absolute(argResults[_iconsPathOption] as String)));
+  final File iconsFile = File(path.normalize(path.absolute(argResults[_iconsPathOption] as String)));
   if (!iconsFile.existsSync()) {
     stderr.writeln('Error: Icons file not found: ${iconsFile.path}');
     exit(1);
   }
-  final File iconsTemplateFile = File(path.normalize(
-      path.absolute(argResults[_iconsTemplatePathOption] as String)));
+  final File iconsTemplateFile = File(path.normalize(path.absolute(argResults[_iconsTemplatePathOption] as String)));
   if (!iconsTemplateFile.existsSync()) {
-    stderr.writeln(
-        'Error: Icons template file not found: ${iconsTemplateFile.path}');
+    stderr.writeln('Error: Icons template file not found: ${iconsTemplateFile.path}');
     exit(1);
   }
-  final File newCodepointsFile =
-      File(argResults[_newCodepointsPathOption] as String);
+  final File newCodepointsFile = File(argResults[_newCodepointsPathOption] as String);
   if (!newCodepointsFile.existsSync()) {
-    stderr.writeln(
-        'Error: New codepoints file not found: ${newCodepointsFile.path}');
+    stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
     exit(1);
   }
-  final File oldCodepointsFile =
-      File(argResults[_oldCodepointsPathOption] as String);
+  final File oldCodepointsFile = File(argResults[_oldCodepointsPathOption] as String);
   if (!oldCodepointsFile.existsSync()) {
-    stderr.writeln(
-        'Error: Old codepoints file not found: ${oldCodepointsFile.path}');
+    stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final Map<String, String> newTokenPairMap =
-      stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final Map<String, String> oldTokenPairMap =
-      stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = stringToTokenPairMap(oldCodepointsString);
 
   stderr.writeln('Performing safety checks');
   final bool isSuperset = testIsSuperset(newTokenPairMap, oldTokenPairMap);
@@ -217,8 +204,7 @@ void main(List<String> args) {
   }
   final String iconsTemplateContents = iconsTemplateFile.readAsStringSync();
 
-  stderr.writeln(
-      "Generating icons ${argResults[_dryRunOption] as bool ? '' : 'to ${iconsFile.path}'}");
+  stderr.writeln("Generating icons ${argResults[_dryRunOption] as bool ? '' : 'to ${iconsFile.path}'}");
   final String newIconsContents = _regenerateIconsFile(
     iconsTemplateContents,
     newTokenPairMap,
@@ -254,8 +240,7 @@ ArgResults _handleArguments(List<String> args) {
         help: 'The font family to use for the IconData constants')
     ..addFlag(_enforceSafetyChecks,
         defaultsTo: true,
-        help:
-            'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
+        help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
     ..addFlag(_dryRunOption);
   argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
     if (help) {
@@ -285,11 +270,11 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 }
 
 String _regenerateIconsFile(
-  String templateFileContents,
-  Map<String, String> tokenPairMap,
-  String fontFamily,
-  bool enforceSafetyChecks,
-) {
+    String templateFileContents,
+    Map<String, String> tokenPairMap,
+    String fontFamily,
+    bool enforceSafetyChecks,
+  ) {
   final List<Icon> newIcons = tokenPairMap.entries
       .map((MapEntry<String, String> entry) => Icon(entry, fontFamily))
       .toList();
@@ -307,15 +292,9 @@ String _regenerateIconsFile(
     if (line.contains(_beginPlatformAdaptiveGeneratedMark)) {
       generating = true;
       final List<String> platformAdaptiveDeclarations = <String>[];
-      _platformAdaptiveIdentifiers
-          .forEach((String flutterId, List<String> ids) {
+      _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates all icon declarations.
-        for (final String style in <String>[
-          '',
-          '_outlined',
-          '_rounded',
-          '_sharp'
-        ]) {
+        for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
             final Icon agnosticIcon = newIcons.firstWhere(
                 (Icon icon) => icon.id == '${ids[0]}$style',
@@ -323,9 +302,7 @@ String _regenerateIconsFile(
             final Icon iOSIcon = newIcons.firstWhere(
                 (Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
-            platformAdaptiveDeclarations.add(
-              Icon.platformAdaptiveDeclaration(
-                  '$flutterId$style', agnosticIcon, iOSIcon),
+            platformAdaptiveDeclarations.add(Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
             );
           } catch (e) {
             if (style == '') {
@@ -350,8 +327,7 @@ String _regenerateIconsFile(
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString =
-          newIcons.map((Icon icon) => icon.fullDeclaration).join();
+      final String iconDeclarationsString = newIcons.map((Icon icon) => icon.fullDeclaration).join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -362,15 +338,13 @@ String _regenerateIconsFile(
 }
 
 @visibleForTesting
-bool testIsSuperset(
-    Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
   final int diff = newCodepointsSet.length - oldCodepointsSet.length;
   if (diff > 0) {
-    stderr.writeln(
-        '🆕 $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
+    stderr.writeln('🆕 $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
   }
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
     stderr.writeln(
@@ -378,15 +352,13 @@ bool testIsSuperset(
         'existing codepoints. Missing: ${oldCodepointsSet.difference(newCodepointsSet)}');
     return false;
   } else {
-    stderr.writeln(
-        '✅ new codepoints file contains all ${oldCodepointsSet.length} existing codepoints');
+    stderr.writeln('✅ new codepoints file contains all ${oldCodepointsSet.length} existing codepoints');
   }
   return true;
 }
 
 @visibleForTesting
-bool testIsStable(
-    Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
   final List<String> unstable = <String>[];
 
@@ -399,8 +371,7 @@ bool testIsStable(
   });
 
   if (unstable.isNotEmpty) {
-    stderr.writeln(
-        '❌ out of $oldCodepointsCount existing codepoints, ${unstable.length} were unstable: $unstable');
+    stderr.writeln('❌ out of $oldCodepointsCount existing codepoints, ${unstable.length} were unstable: $unstable');
     return false;
   } else {
     stderr.writeln('✅ all existing $oldCodepointsCount codepoints are stable');
@@ -408,15 +379,12 @@ bool testIsStable(
   }
 }
 
-void _regenerateCodepointsFile(
-    File oldCodepointsFile, Map<String, String> newTokenPairMap) {
+void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}');
 
   final StringBuffer buf = StringBuffer();
-  final SplayTreeMap<String, String> sortedNewTokenPairMap =
-      SplayTreeMap<String, String>.of(newTokenPairMap);
-  sortedNewTokenPairMap
-      .forEach((String key, String value) => buf.writeln('$key $value'));
+  final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
+  sortedNewTokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
   oldCodepointsFile.writeAsStringSync(buf.toString());
 }
 
@@ -469,18 +437,15 @@ class Icon {
 
   late String id; // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   late String shortId; // e.g. 5g
-  late String
-      flutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  late String flutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
   late String family; // e.g. material
   late String hexCodepoint; // e.g. e547
-  late String htmlSuffix =
-      ''; // The suffix for the 'material-icons' HTML class.
+  late String htmlSuffix = ''; // The suffix for the 'material-icons' HTML class.
   String fontFamily; // The IconData font family.
 
   String get name => shortId.replaceAll('_', ' ').trim();
 
-  String get style =>
-      htmlSuffix == '' ? '' : ' (${htmlSuffix.replaceFirst('-', '')})';
+  String get style => htmlSuffix == '' ? '' : ' (${htmlSuffix.replaceFirst('-', '')})';
 
   String get dartDoc =>
       '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
@@ -498,9 +463,7 @@ class Icon {
   $declaration
 ''';
 
-  static String platformAdaptiveDeclaration(
-          String fullFlutterId, Icon agnosticIcon, Icon iOSIcon) =>
-      '''
+  static String platformAdaptiveDeclaration(String fullFlutterId, Icon agnosticIcon, Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
@@ -537,8 +500,7 @@ class Icon {
   static String generateFlutterId(String id) {
     String flutterId = id;
     // Exact identifier rewrites.
-    for (final MapEntry<String, String> rewritePair
-        in _identifierExactRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in _identifierExactRewrites.entries) {
       final String shortId = Icon._generateShortId(id);
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(
@@ -548,8 +510,7 @@ class Icon {
       }
     }
     // Prefix identifier rewrites.
-    for (final MapEntry<String, String> rewritePair
-        in _identifierPrefixRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in _identifierPrefixRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
         flutterId = id.replaceFirst(
           rewritePair.key,

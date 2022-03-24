@@ -26,26 +26,20 @@ void main() {
   test('FractionalOffset.lerp()', () {
     const FractionalOffset a = FractionalOffset.topLeft;
     const FractionalOffset b = FractionalOffset.topCenter;
-    expect(FractionalOffset.lerp(a, b, 0.25),
-        equals(const FractionalOffset(0.125, 0.0)));
+    expect(FractionalOffset.lerp(a, b, 0.25), equals(const FractionalOffset(0.125, 0.0)));
 
     expect(FractionalOffset.lerp(null, null, 0.25), isNull);
-    expect(FractionalOffset.lerp(null, b, 0.25),
-        equals(const FractionalOffset(0.5, 0.5 - 0.125)));
-    expect(FractionalOffset.lerp(a, null, 0.25),
-        equals(const FractionalOffset(0.125, 0.125)));
+    expect(FractionalOffset.lerp(null, b, 0.25), equals(const FractionalOffset(0.5, 0.5 - 0.125)));
+    expect(FractionalOffset.lerp(a, null, 0.25), equals(const FractionalOffset(0.125, 0.125)));
   });
 
   test('FractionalOffset.fromOffsetAndSize()', () {
-    final FractionalOffset a = FractionalOffset.fromOffsetAndSize(
-        const Offset(100.0, 100.0), const Size(200.0, 400.0));
+    final FractionalOffset a = FractionalOffset.fromOffsetAndSize(const Offset(100.0, 100.0), const Size(200.0, 400.0));
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 
   test('FractionalOffset.fromOffsetAndRect()', () {
-    final FractionalOffset a = FractionalOffset.fromOffsetAndRect(
-        const Offset(150.0, 120.0),
-        const Rect.fromLTWH(50.0, 20.0, 200.0, 400.0));
+    final FractionalOffset a = FractionalOffset.fromOffsetAndRect(const Offset(150.0, 120.0), const Rect.fromLTWH(50.0, 20.0, 200.0, 400.0));
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 }

@@ -14,9 +14,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext(
-      'generateLocalizations is skipped if l10n.yaml does not exist.',
-      () async {
+  testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -33,10 +31,10 @@ void main() {
     expect(const GenerateLocalizationsTarget().canSkip(environment), false);
   });
 
-  testWithoutContext(
-      'parseLocalizationsOptions handles valid yaml configuration', () async {
+  testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 arb-dir: arb
 template-arb-file: example.arb
 output-localization-file: bar
@@ -70,9 +68,7 @@ nullable-getter: false
     expect(options.usesNullableGetter, false);
   });
 
-  testWithoutContext(
-      'parseLocalizationsOptions handles preferredSupportedLocales as list',
-      () async {
+  testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 preferred-supported-locales: ['en_US', 'de']

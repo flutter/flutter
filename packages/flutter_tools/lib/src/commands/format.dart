@@ -30,25 +30,28 @@ class FormatCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  String get invocation =>
-      '${runner?.executableName} $name <one or more paths>';
+  String get invocation => '${runner?.executableName} $name <one or more paths>';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String dartBinary =
-        globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[
       dartBinary,
       'format',
     ];
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.isEmpty) {
-      globals.printError('No files specified to be formatted.');
+      globals.printError(
+        'No files specified to be formatted.'
+      );
       command.add('-h');
     } else {
       command.addAll(<String>[
         for (String arg in rest)
-          if (arg == '--dry-run' || arg == '-n') '--output=none' else arg
+          if (arg == '--dry-run' || arg == '-n')
+            '--output=none'
+          else
+            arg
       ]);
     }
 

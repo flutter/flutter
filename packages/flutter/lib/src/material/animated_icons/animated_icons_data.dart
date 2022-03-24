@@ -14,6 +14,7 @@ part of material_animated_icons;
 ///
 /// Use with [AnimatedIcon] class to show specific animated icons.
 abstract class AnimatedIcons {
+
   /// The material design add to event icon animation.
   static const AnimatedIconData add_event = _$add_event;
 
@@ -82,8 +83,7 @@ abstract class AnimatedIconData {
 }
 
 class _AnimatedIconData extends AnimatedIconData {
-  const _AnimatedIconData(this.size, this.paths,
-      {this.matchTextDirection = false});
+  const _AnimatedIconData(this.size, this.paths, {this.matchTextDirection = false});
 
   final Size size;
   final List<_PathFrames> paths;

@@ -40,7 +40,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   @override
   String? get restorationId => widget.restorationId;
 
-  final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021));
+  final RestorableDateTimeN _startDate =
+      RestorableDateTimeN(DateTime(2021));
   final RestorableDateTimeN _endDate =
       RestorableDateTimeN(DateTime(2021, 1, 5));
   late final RestorableRouteFuture<DateTimeRange?>

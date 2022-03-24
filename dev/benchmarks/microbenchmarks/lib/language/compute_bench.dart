@@ -12,18 +12,18 @@ const int _kNumWarmUp = 100;
 class Data {
   Data(this.value);
 
-  Map<String, dynamic> toJson() => <String, dynamic>{'value': value};
+  Map<String, dynamic> toJson() => <String, dynamic>{ 'value': value };
 
   final int value;
 }
 
 List<Data> test(int length) {
-  return List<Data>.generate(length, (int index) => Data(index * index));
+  return List<Data>.generate(length,
+      (int index) => Data(index * index));
 }
 
 Future<void> main() async {
-  assert(false,
-      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
 
   // Warm up lap
   for (int i = 0; i < _kNumWarmUp; i += 1) {

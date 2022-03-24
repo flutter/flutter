@@ -17,23 +17,19 @@ import '../project.dart';
 
 import 'fuchsia_pm.dart';
 
-Future<void> _timedBuildStep(
-    String name, Future<void> Function() action) async {
+Future<void> _timedBuildStep(String name, Future<void> Function() action) async {
   final Stopwatch sw = Stopwatch()..start();
   await action();
   globals.printTrace('$name: ${sw.elapsedMilliseconds} ms.');
-  globals.flutterUsage.sendTiming(
-      'build', name, Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 Future<void> _validateCmxFile(FuchsiaProject fuchsiaProject) async {
   final String appName = fuchsiaProject.project.manifest.appName;
-  final String cmxPath =
-      globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx');
+  final String cmxPath = globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx');
   final File cmxFile = globals.fs.file(cmxPath);
   if (!await cmxFile.exists()) {
-    throwToolExit(
-        'The Fuchsia build requires a .cmx file at $cmxPath for the app: $appName.');
+    throwToolExit('The Fuchsia build requires a .cmx file at $cmxPath for the app: $appName.');
   }
 }
 
@@ -57,26 +53,19 @@ Future<void> buildFuchsia({
     outDir.createSync(recursive: true);
   }
 
-  await _timedBuildStep(
-      'fuchsia-kernel-compile',
-      () => globals.fuchsiaSdk!.fuchsiaKernelCompiler.build(
-          fuchsiaProject: fuchsiaProject,
-          target: targetPath,
-          buildInfo: buildInfo));
+  await _timedBuildStep('fuchsia-kernel-compile',
+    () => globals.fuchsiaSdk!.fuchsiaKernelCompiler.build(
+      fuchsiaProject: fuchsiaProject, target: targetPath, buildInfo: buildInfo));
 
   if (buildInfo.usesAot) {
-    await _timedBuildStep(
-        'fuchsia-gen-snapshot',
-        () => _genSnapshot(
-            fuchsiaProject, targetPath, buildInfo, targetPlatform));
+    await _timedBuildStep('fuchsia-gen-snapshot',
+      () => _genSnapshot(fuchsiaProject, targetPath, buildInfo, targetPlatform));
   }
 
   await _timedBuildStep('fuchsia-build-assets',
-      () => _buildAssets(fuchsiaProject, targetPath, buildInfo));
-  await _timedBuildStep(
-      'fuchsia-build-package',
-      () => _buildPackage(
-          fuchsiaProject, targetPath, buildInfo, runnerPackageSource));
+    () => _buildAssets(fuchsiaProject, targetPath, buildInfo));
+  await _timedBuildStep('fuchsia-build-package',
+    () => _buildPackage(fuchsiaProject, targetPath, buildInfo, runnerPackageSource));
 }
 
 Future<void> _genSnapshot(
@@ -141,8 +130,7 @@ Future<void> _buildAssets(
 
   final String appName = fuchsiaProject.project.manifest.appName;
   final String outDir = getFuchsiaBuildDirectory();
-  final String assetManifest =
-      globals.fs.path.join(outDir, '${appName}_pkgassets');
+  final String assetManifest = globals.fs.path.join(outDir, '${appName}_pkgassets');
 
   final File destFile = globals.fs.file(assetManifest);
   await destFile.create(recursive: true);
@@ -155,11 +143,8 @@ Future<void> _buildAssets(
   await outFile.close();
 }
 
-void _rewriteCmx(
-    BuildMode mode, String runnerPackageSource, File src, File dst) {
-  final Map<String, Object?> cmx =
-      castStringKeyedMap(json.decode(src.readAsStringSync())) ??
-          <String, Object?>{};
+void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst) {
+  final Map<String, Object?> cmx = castStringKeyedMap(json.decode(src.readAsStringSync())) ?? <String, Object?>{};
   // If the app author has already specified the runner in the cmx file, then
   // do not override it with something else.
   if (cmx.containsKey('runner')) {
@@ -198,30 +183,27 @@ Future<void> _buildPackage(
   final String pkgDir = globals.fs.path.join(outDir, 'pkg');
   final String appName = fuchsiaProject.project.manifest.appName;
   final String pkgassets = globals.fs.path.join(outDir, '${appName}_pkgassets');
-  final String packageManifest =
-      globals.fs.path.join(pkgDir, 'package_manifest');
+  final String packageManifest = globals.fs.path.join(pkgDir, 'package_manifest');
 
   final Directory pkg = globals.fs.directory(pkgDir);
   if (!pkg.existsSync()) {
     pkg.createSync(recursive: true);
   }
 
-  final File srcCmx = globals.fs
-      .file(globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
-  final File dstCmx =
-      globals.fs.file(globals.fs.path.join(outDir, '$appName.cmx'));
+  final File srcCmx =
+      globals.fs.file(globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
+  final File dstCmx = globals.fs.file(globals.fs.path.join(outDir, '$appName.cmx'));
   _rewriteCmx(buildInfo.mode, runnerPackageSource, srcCmx, dstCmx);
 
   final File manifestFile = globals.fs.file(packageManifest);
 
   if (buildInfo.usesAot) {
     final String elf = globals.fs.path.join(outDir, 'elf.aotsnapshot');
-    manifestFile.writeAsStringSync('data/$appName/app_aot_snapshot.so=$elf\n');
+    manifestFile.writeAsStringSync(
+      'data/$appName/app_aot_snapshot.so=$elf\n');
   } else {
-    final String dilpmanifest =
-        globals.fs.path.join(outDir, '$appName.dilpmanifest');
-    manifestFile
-        .writeAsStringSync(globals.fs.file(dilpmanifest).readAsStringSync());
+    final String dilpmanifest = globals.fs.path.join(outDir, '$appName.dilpmanifest');
+    manifestFile.writeAsStringSync(globals.fs.file(dilpmanifest).readAsStringSync());
   }
 
   manifestFile.writeAsStringSync(globals.fs.file(pkgassets).readAsStringSync(),

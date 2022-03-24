@@ -33,22 +33,17 @@ Future<void> _withApkInstall(
 void _copyGradleFromModule(String source, String destination) {
   print('copying gradle from module $source to $destination');
   final String wrapperPath = path.join(source, '.android', 'gradlew');
-  final String windowsWrapperPath =
-      path.join(source, '.android', 'gradlew.bat');
+  final String windowsWrapperPath = path.join(source, '.android', 'gradlew.bat');
   final String wrapperDestinationPath = path.join(destination, 'gradlew');
-  final String windowsWrapperDestinationPath =
-      path.join(destination, 'gradlew.bat');
+  final String windowsWrapperDestinationPath = path.join(destination, 'gradlew.bat');
   File(wrapperPath).copySync(wrapperDestinationPath);
   File(windowsWrapperPath).copySync(windowsWrapperDestinationPath);
-  final Directory gradleDestinationDirectory =
-      Directory(path.join(destination, 'gradle', 'wrapper'));
+  final Directory gradleDestinationDirectory = Directory(path.join(destination, 'gradle', 'wrapper'));
   if (!gradleDestinationDirectory.existsSync()) {
     gradleDestinationDirectory.createSync(recursive: true);
   }
-  final String gradleDestinationPath =
-      path.join(gradleDestinationDirectory.path, 'gradle-wrapper.jar');
-  final String gradlePath =
-      path.join(source, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar');
+  final String gradleDestinationPath = path.join(gradleDestinationDirectory.path, 'gradle-wrapper.jar');
+  final String gradlePath = path.join(source, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar');
   File(gradlePath).copySync(gradleDestinationPath);
 }
 

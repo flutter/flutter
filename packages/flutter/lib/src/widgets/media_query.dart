@@ -109,23 +109,23 @@ class MediaQueryData {
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
-  })  : assert(size != null),
-        assert(devicePixelRatio != null),
-        assert(textScaleFactor != null),
-        assert(platformBrightness != null),
-        assert(padding != null),
-        assert(viewInsets != null),
-        assert(systemGestureInsets != null),
-        assert(viewPadding != null),
-        assert(alwaysUse24HourFormat != null),
-        assert(accessibleNavigation != null),
-        assert(invertColors != null),
-        assert(highContrast != null),
-        assert(disableAnimations != null),
-        assert(boldText != null),
-        assert(navigationMode != null),
-        assert(gestureSettings != null),
-        assert(displayFeatures != null);
+  }) : assert(size != null),
+       assert(devicePixelRatio != null),
+       assert(textScaleFactor != null),
+       assert(platformBrightness != null),
+       assert(padding != null),
+       assert(viewInsets != null),
+       assert(systemGestureInsets != null),
+       assert(viewPadding != null),
+       assert(alwaysUse24HourFormat != null),
+       assert(accessibleNavigation != null),
+       assert(invertColors != null),
+       assert(highContrast != null),
+       assert(disableAnimations != null),
+       assert(boldText != null),
+       assert(navigationMode != null),
+       assert(gestureSettings != null),
+       assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -135,31 +135,23 @@ class MediaQueryData {
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
   MediaQueryData.fromWindow(ui.FlutterView window)
-      : size = window.physicalSize / window.devicePixelRatio,
-        devicePixelRatio = window.devicePixelRatio,
-        textScaleFactor = window.platformDispatcher.textScaleFactor,
-        platformBrightness = window.platformDispatcher.platformBrightness,
-        padding = EdgeInsets.fromWindowPadding(
-            window.padding, window.devicePixelRatio),
-        viewPadding = EdgeInsets.fromWindowPadding(
-            window.viewPadding, window.devicePixelRatio),
-        viewInsets = EdgeInsets.fromWindowPadding(
-            window.viewInsets, window.devicePixelRatio),
-        systemGestureInsets = EdgeInsets.fromWindowPadding(
-            window.systemGestureInsets, window.devicePixelRatio),
-        accessibleNavigation = window
-            .platformDispatcher.accessibilityFeatures.accessibleNavigation,
-        invertColors =
-            window.platformDispatcher.accessibilityFeatures.invertColors,
-        disableAnimations =
-            window.platformDispatcher.accessibilityFeatures.disableAnimations,
-        boldText = window.platformDispatcher.accessibilityFeatures.boldText,
-        highContrast =
-            window.platformDispatcher.accessibilityFeatures.highContrast,
-        alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
-        navigationMode = NavigationMode.traditional,
-        gestureSettings = DeviceGestureSettings.fromWindow(window),
-        displayFeatures = window.displayFeatures;
+    : size = window.physicalSize / window.devicePixelRatio,
+      devicePixelRatio = window.devicePixelRatio,
+      textScaleFactor = window.platformDispatcher.textScaleFactor,
+      platformBrightness = window.platformDispatcher.platformBrightness,
+      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
+      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
+      accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = window.platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
+      navigationMode = NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
+      displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -378,9 +370,7 @@ class MediaQueryData {
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
-    return size.width > size.height
-        ? Orientation.landscape
-        : Orientation.portrait;
+    return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
   /// Creates a copy of this media query data but with the given fields replaced
@@ -413,8 +403,7 @@ class MediaQueryData {
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      alwaysUse24HourFormat:
-          alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
       disableAnimations: disableAnimations ?? this.disableAnimations,
@@ -447,7 +436,8 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom)) return this;
+    if (!(removeLeft || removeTop || removeRight || removeBottom))
+      return this;
     return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -460,15 +450,10 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       viewPadding: viewPadding.copyWith(
-        left:
-            removeLeft ? math.max(0.0, viewPadding.left - padding.left) : null,
+        left: removeLeft ? math.max(0.0, viewPadding.left - padding.left) : null,
         top: removeTop ? math.max(0.0, viewPadding.top - padding.top) : null,
-        right: removeRight
-            ? math.max(0.0, viewPadding.right - padding.right)
-            : null,
-        bottom: removeBottom
-            ? math.max(0.0, viewPadding.bottom - padding.bottom)
-            : null,
+        right: removeRight ? math.max(0.0, viewPadding.right - padding.right) : null,
+        bottom: removeBottom ? math.max(0.0, viewPadding.bottom - padding.bottom) : null,
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
@@ -501,7 +486,8 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom)) return this;
+    if (!(removeLeft || removeTop || removeRight || removeBottom))
+      return this;
     return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -509,16 +495,10 @@ class MediaQueryData {
       platformBrightness: platformBrightness,
       padding: padding,
       viewPadding: viewPadding.copyWith(
-        left: removeLeft
-            ? math.max(0.0, viewPadding.left - viewInsets.left)
-            : null,
+        left: removeLeft ? math.max(0.0, viewPadding.left - viewInsets.left) : null,
         top: removeTop ? math.max(0.0, viewPadding.top - viewInsets.top) : null,
-        right: removeRight
-            ? math.max(0.0, viewPadding.right - viewInsets.right)
-            : null,
-        bottom: removeBottom
-            ? math.max(0.0, viewPadding.bottom - viewInsets.bottom)
-            : null,
+        right: removeRight ? math.max(0.0, viewPadding.right - viewInsets.right) : null,
+        bottom: removeBottom ? math.max(0.0, viewPadding.bottom - viewInsets.bottom) : null,
       ),
       viewInsets: viewInsets.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -556,7 +536,8 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom)) return this;
+    if (!(removeLeft || removeTop || removeRight || removeBottom))
+      return this;
     return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -603,13 +584,11 @@ class MediaQueryData {
   ///    split the screen, from the [MediaQuery] and adds a [Padding] widget to
   ///    position the child to match the selected sub-screen.
   MediaQueryData removeDisplayFeatures(Rect subScreen) {
-    assert(
-        subScreen.left >= 0.0 &&
-            subScreen.top >= 0.0 &&
-            subScreen.right <= size.width &&
-            subScreen.bottom <= size.height,
+    assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
+        subScreen.right <= size.width && subScreen.bottom <= size.height,
         "'subScreen' argument cannot be outside the bounds of the screen");
-    if (subScreen.size == size && subScreen.topLeft == Offset.zero) return this;
+    if (subScreen.size == size && subScreen.topLeft == Offset.zero)
+      return this;
     final double rightInset = size.width - subScreen.right;
     final double bottomInset = size.height - subScreen.bottom;
     return copyWith(
@@ -631,54 +610,54 @@ class MediaQueryData {
         right: math.max(0.0, viewInsets.right - rightInset),
         bottom: math.max(0.0, viewInsets.bottom - bottomInset),
       ),
-      displayFeatures: displayFeatures
-          .where((ui.DisplayFeature displayFeature) =>
-              subScreen.overlaps(displayFeature.bounds))
-          .toList(),
+      displayFeatures: displayFeatures.where(
+        (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds)
+      ).toList(),
     );
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is MediaQueryData &&
-        other.size == size &&
-        other.devicePixelRatio == devicePixelRatio &&
-        other.textScaleFactor == textScaleFactor &&
-        other.platformBrightness == platformBrightness &&
-        other.padding == padding &&
-        other.viewPadding == viewPadding &&
-        other.viewInsets == viewInsets &&
-        other.alwaysUse24HourFormat == alwaysUse24HourFormat &&
-        other.highContrast == highContrast &&
-        other.disableAnimations == disableAnimations &&
-        other.invertColors == invertColors &&
-        other.accessibleNavigation == accessibleNavigation &&
-        other.boldText == boldText &&
-        other.navigationMode == navigationMode &&
-        other.gestureSettings == gestureSettings &&
-        listEquals(other.displayFeatures, displayFeatures);
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is MediaQueryData
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio
+        && other.textScaleFactor == textScaleFactor
+        && other.platformBrightness == platformBrightness
+        && other.padding == padding
+        && other.viewPadding == viewPadding
+        && other.viewInsets == viewInsets
+        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && other.highContrast == highContrast
+        && other.disableAnimations == disableAnimations
+        && other.invertColors == invertColors
+        && other.accessibleNavigation == accessibleNavigation
+        && other.boldText == boldText
+        && other.navigationMode == navigationMode
+        && other.gestureSettings == gestureSettings
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
   int get hashCode => Object.hash(
-        size,
-        devicePixelRatio,
-        textScaleFactor,
-        platformBrightness,
-        padding,
-        viewPadding,
-        viewInsets,
-        alwaysUse24HourFormat,
-        highContrast,
-        disableAnimations,
-        invertColors,
-        accessibleNavigation,
-        boldText,
-        navigationMode,
-        gestureSettings,
-        Object.hashAll(displayFeatures),
-      );
+    size,
+    devicePixelRatio,
+    textScaleFactor,
+    platformBrightness,
+    padding,
+    viewPadding,
+    viewInsets,
+    alwaysUse24HourFormat,
+    highContrast,
+    disableAnimations,
+    invertColors,
+    accessibleNavigation,
+    boldText,
+    navigationMode,
+    gestureSettings,
+    Object.hashAll(displayFeatures),
+  );
 
   @override
   String toString() {
@@ -734,9 +713,9 @@ class MediaQuery extends InheritedWidget {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
@@ -1000,8 +979,7 @@ class MediaQuery extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-        DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }
 
@@ -1065,8 +1043,7 @@ class _MediaQueryFromWindow extends StatefulWidget {
   State<_MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
 }
 
-class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow>
-    with WidgetsBindingObserver {
+class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -1114,8 +1091,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow>
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data =
-        MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     if (!kReleaseMode) {
       data = data.copyWith(platformBrightness: debugBrightnessOverride);
     }

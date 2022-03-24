@@ -34,8 +34,7 @@ import 'scroll_position.dart';
 ///  * [ScrollController], which can manipulate one or more [ScrollPosition]s,
 ///    and which uses [ScrollPositionWithSingleContext] as its default class for
 ///    scroll positions.
-class ScrollPositionWithSingleContext extends ScrollPosition
-    implements ScrollActivityDelegate {
+class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollActivityDelegate {
   /// Create a [ScrollPosition] object that manages its behavior using
   /// [ScrollActivity] objects.
   ///
@@ -55,16 +54,18 @@ class ScrollPositionWithSingleContext extends ScrollPosition
     ScrollPosition? oldPosition,
     String? debugLabel,
   }) : super(
-          physics: physics,
-          context: context,
-          keepScrollOffset: keepScrollOffset,
-          oldPosition: oldPosition,
-          debugLabel: debugLabel,
-        ) {
+         physics: physics,
+         context: context,
+         keepScrollOffset: keepScrollOffset,
+         oldPosition: oldPosition,
+         debugLabel: debugLabel,
+       ) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
-    if (!hasPixels && initialPixels != null) correctPixels(initialPixels);
-    if (activity == null) goIdle();
+    if (!hasPixels && initialPixels != null)
+      correctPixels(initialPixels);
+    if (activity == null)
+      goIdle();
     assert(activity != null);
   }
 
@@ -107,18 +108,19 @@ class ScrollPositionWithSingleContext extends ScrollPosition
   @override
   void beginActivity(ScrollActivity? newActivity) {
     _heldPreviousVelocity = 0.0;
-    if (newActivity == null) return;
+    if (newActivity == null)
+      return;
     assert(newActivity.delegate == this);
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
     _currentDrag = null;
-    if (!activity!.isScrolling) updateUserScrollDirection(ScrollDirection.idle);
+    if (!activity!.isScrolling)
+      updateUserScrollDirection(ScrollDirection.idle);
   }
 
   @override
   void applyUserOffset(double delta) {
-    updateUserScrollDirection(
-        delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
   }
 
@@ -139,8 +141,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition
   @override
   void goBallistic(double velocity) {
     assert(hasPixels);
-    final Simulation? simulation =
-        physics.createBallisticSimulation(this, velocity);
+    final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
     } else {
@@ -159,7 +160,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
-    if (userScrollDirection == value) return;
+    if (userScrollDirection == value)
+      return;
     _userScrollDirection = value;
     didUpdateScrollDirection(value);
   }
@@ -213,7 +215,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition
     if (targetPixels != pixels) {
       goIdle();
       updateUserScrollDirection(
-        -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       final double oldPixels = pixels;
       forcePixels(targetPixels);
@@ -225,8 +227,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition
     }
   }
 
-  @Deprecated(
-      'This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
+
+  @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override
   void jumpToWithoutSettling(double value) {
     goIdle();

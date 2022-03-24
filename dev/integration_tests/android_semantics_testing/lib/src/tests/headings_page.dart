@@ -11,10 +11,8 @@ export 'headings_constants.dart';
 class HeadingsPage extends StatelessWidget {
   const HeadingsPage({Key key}) : super(key: key);
 
-  static const ValueKey<String> _appBarTitleKey =
-      ValueKey<String>(appBarTitleKeyValue);
-  static const ValueKey<String> _bodyTextKey =
-      ValueKey<String>(bodyTextKeyValue);
+  static const ValueKey<String> _appBarTitleKey = ValueKey<String>(appBarTitleKeyValue);
+  static const ValueKey<String> _bodyTextKey = ValueKey<String>(bodyTextKeyValue);
 
   @override
   Widget build(BuildContext context) {

@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestParentData {
-  TestParentData({this.top, this.right, this.bottom, this.left});
+  TestParentData({ this.top, this.right, this.bottom, this.left });
 
   final double? top;
   final double? right;
@@ -20,8 +20,7 @@ class TestParentData {
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   final MultiChildRenderObjectElement element = tester.element(
-    find.byElementPredicate(
-        (Element element) => element is MultiChildRenderObjectElement),
+    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement),
   );
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -32,14 +31,12 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
       expect(child, isA<RenderDecoratedBox>());
       final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.parentData, isA<StackParentData>());
-      final StackParentData parentData =
-          decoratedBox.parentData! as StackParentData;
+      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData? decoratedBoxParentData =
-          decoratedBox.parentData as StackParentData?;
+      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
       child = decoratedBoxParentData?.nextSibling;
     }
     expect(child, isNull);
@@ -99,12 +96,9 @@ void main() {
       kNonPositioned,
     ]);
 
-    const DecoratedBox kDecoratedBoxA =
-        DecoratedBox(decoration: kBoxDecorationA);
-    const DecoratedBox kDecoratedBoxB =
-        DecoratedBox(decoration: kBoxDecorationB);
-    const DecoratedBox kDecoratedBoxC =
-        DecoratedBox(decoration: kBoxDecorationC);
+    const DecoratedBox kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
+    const DecoratedBox kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
+    const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       Stack(
@@ -337,8 +331,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget interacts with global keys',
-      (WidgetTester tester) async {
+  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -431,17 +424,13 @@ void main() {
     );
   });
 
-  testWidgets(
-      'ParentDataWidget can be used with different ancestor RenderObjectWidgets',
-      (WidgetTester tester) async {
+  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       OneAncestorWidget(
         child: Container(),
       ),
     );
-    DummyParentData parentData = tester
-        .renderObject(find.byType(Container))
-        .parentData! as DummyParentData;
+    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
@@ -452,8 +441,7 @@ void main() {
         ),
       ),
     );
-    parentData = tester.renderObject(find.byType(Container)).parentData!
-        as DummyParentData;
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
@@ -464,8 +452,7 @@ void main() {
         ),
       ),
     );
-    parentData = tester.renderObject(find.byType(Container)).parentData!
-        as DummyParentData;
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
   });
 }
@@ -482,8 +469,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is DummyParentData);
-    final DummyParentData parentData =
-        renderObject.parentData! as DummyParentData;
+    final DummyParentData parentData = renderObject.parentData! as DummyParentData;
     parentData.string = string;
   }
 
@@ -532,7 +518,7 @@ class RenderAnother extends RenderProxyBox {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({Key? key, required this.child}) : super(key: key);
+  const DummyWidget({ Key? key, required this.child }) : super(key: key);
 
   final Widget child;
 

@@ -41,7 +41,6 @@ void main() {
 
     final RenderBox boxB = tester.renderObject(find.byKey(keyB));
     expect(boxB.localToGlobal(Offset.zero), equals(const Offset(100.0, 200.0)));
-    expect(boxB.globalToLocal(const Offset(110.0, 205.0)),
-        equals(const Offset(10.0, 5.0)));
+    expect(boxB.globalToLocal(const Offset(110.0, 205.0)), equals(const Offset(10.0, 5.0)));
   });
 }

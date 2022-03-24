@@ -78,10 +78,8 @@ void main() {
   testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
     expect(
       kManuallyPinnedDependencies.values,
-      isNot(contains(
-          anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
-      reason:
-          'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
+      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
+      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
     );
   });
 
@@ -113,21 +111,19 @@ void main() {
     testUsingContext('updates packages', () async {
       final UpdatePackagesCommand command = UpdatePackagesCommand();
       await createTestCommandRunner(command).run(<String>['update-packages']);
-      expect(
-          pub.pubGetDirectories,
-          equals(<String>[
-            '/.tmp_rand0/flutter_update_packages.rand0',
-            '/flutter/examples',
-            '/flutter/packages/flutter',
-          ]));
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+        '/flutter/examples',
+        '/flutter/packages/flutter',
+      ]));
       expect(pub.pubBatchDirectories, isEmpty);
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Cache: () => Cache.test(
-            processManager: FakeProcessManager.any(),
-          ),
+        processManager: FakeProcessManager.any(),
+      ),
     });
 
     testUsingContext('force updates packages', () async {
@@ -136,25 +132,21 @@ void main() {
         'update-packages',
         '--force-upgrade',
       ]);
-      expect(
-          pub.pubGetDirectories,
-          equals(<String>[
-            '/.tmp_rand0/flutter_update_packages.rand0',
-            '/flutter/examples',
-            '/flutter/packages/flutter',
-          ]));
-      expect(
-          pub.pubBatchDirectories,
-          equals(<String>[
-            '/.tmp_rand0/flutter_update_packages.rand0',
-          ]));
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+        '/flutter/examples',
+        '/flutter/packages/flutter',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+      ]));
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Cache: () => Cache.test(
-            processManager: FakeProcessManager.any(),
-          ),
+        processManager: FakeProcessManager.any(),
+      ),
     });
 
     testUsingContext('force updates packages --jobs=1', () async {
@@ -164,25 +156,21 @@ void main() {
         '--force-upgrade',
         '--jobs=1',
       ]);
-      expect(
-          pub.pubGetDirectories,
-          equals(<String>[
-            '/.tmp_rand0/flutter_update_packages.rand0',
-            '/flutter/examples',
-            '/flutter/packages/flutter',
-          ]));
-      expect(
-          pub.pubBatchDirectories,
-          equals(<String>[
-            '/.tmp_rand0/flutter_update_packages.rand0',
-          ]));
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+        '/flutter/examples',
+        '/flutter/packages/flutter',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+      ]));
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Cache: () => Cache.test(
-            processManager: FakeProcessManager.any(),
-          ),
+        processManager: FakeProcessManager.any(),
+      ),
     });
   });
 }
@@ -233,17 +221,17 @@ sdks:
 
   @override
   Future<void> batch(
-    List<String> arguments, {
-    @required PubContext context,
-    String directory,
-    MessageFilter filter,
-    String failureMessage = 'pub failed',
-    @required bool retry,
-    bool showTraceForErrors,
-  }) async {
+      List<String> arguments, {
+        @required PubContext context,
+        String directory,
+        MessageFilter filter,
+        String failureMessage = 'pub failed',
+        @required bool retry,
+        bool showTraceForErrors,
+      }) async {
     pubBatchDirectories.add(directory);
 
-    '''
+'''
 Dart SDK 2.16.0-144.0.dev
 Flutter SDK 2.9.0-1.0.pre.263
 flutter_api_samples 1.0.0
@@ -260,8 +248,6 @@ dev dependencies:
 transitive dependencies:
 - platform 3.1.0
 - process 4.2.4 [file path platform]
-'''
-        .split('\n')
-        .forEach(filter);
+'''.split('\n').forEach(filter);
   }
 }

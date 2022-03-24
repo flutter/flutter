@@ -106,8 +106,7 @@ class DialogTheme with Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
-      contentTextStyle:
-          TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
     );
   }
 
@@ -116,15 +115,17 @@ class DialogTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is DialogTheme &&
-        other.backgroundColor == backgroundColor &&
-        other.elevation == elevation &&
-        other.shape == shape &&
-        other.alignment == alignment &&
-        other.titleTextStyle == titleTextStyle &&
-        other.contentTextStyle == contentTextStyle;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DialogTheme
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.alignment == alignment
+        && other.titleTextStyle == titleTextStyle
+        && other.contentTextStyle == contentTextStyle;
   }
 
   @override
@@ -132,16 +133,9 @@ class DialogTheme with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>(
-        'alignment', alignment,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'titleTextStyle', titleTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'contentTextStyle', contentTextStyle,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }
 }

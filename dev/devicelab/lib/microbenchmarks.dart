@@ -16,15 +16,14 @@ Future<Map<String, double>> readJsonResults(Process process) {
   const String jsonPrefix = ':::JSON:::';
   bool jsonStarted = false;
   final StringBuffer jsonBuf = StringBuffer();
-  final Completer<Map<String, double>> completer =
-      Completer<Map<String, double>>();
+  final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
 
   final StreamSubscription<String> stderrSub = process.stderr
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    stderr.writeln('[STDERR] $line');
-  });
+        stderr.writeln('[STDERR] $line');
+      });
 
   bool processWasKilledIntentionally = false;
   bool resultsHaveBeenParsed = false;
@@ -48,12 +47,12 @@ Future<Map<String, double>> readJsonResults(Process process) {
       // https://github.com/flutter/flutter/issues/19096#issuecomment-402756549
       if (resultsHaveBeenParsed) {
         throw 'Additional JSON was received after results has already been '
-            'processed. This suggests the `flutter run` process may have lived '
-            'past the end of our test and collected additional output from the '
-            'next test.\n\n'
-            'The JSON below contains all collected output, including both from '
-            'the original test and what followed.\n\n'
-            '$jsonOutput';
+              'processed. This suggests the `flutter run` process may have lived '
+              'past the end of our test and collected additional output from the '
+              'next test.\n\n'
+              'The JSON below contains all collected output, including both from '
+              'the original test and what followed.\n\n'
+              '$jsonOutput';
       }
 
       jsonStarted = false;
@@ -68,18 +67,15 @@ Future<Map<String, double>> readJsonResults(Process process) {
       // Also send a kill signal in case the `q` above didn't work.
       process.kill(ProcessSignal.sigint);
       try {
-        completer.complete(Map<String, double>.from(
-            json.decode(jsonOutput) as Map<String, dynamic>));
+        completer.complete(Map<String, double>.from(json.decode(jsonOutput) as Map<String, dynamic>));
       } catch (ex) {
-        completer.completeError(
-            'Decoding JSON failed ($ex). JSON string was: $jsonOutput');
+        completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }
       return;
     }
 
     if (jsonStarted && line.contains(jsonPrefix))
-      jsonBuf.writeln(
-          line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
+      jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
   process.exitCode.then<void>((int code) async {

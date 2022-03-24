@@ -27,14 +27,12 @@ void main() {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
-          body: Builder(
-            // Introduce a context so the app's Theme is visible.
+          body: Builder( // Introduce a context so the app's Theme is visible.
             builder: (BuildContext context) {
               navigatorContext = context;
               return Theme(
                 data: Theme.of(context).copyWith(primaryColor: primaryColor),
-                child: Builder(
-                  // Introduce a context so the shadow Theme is visible to captureAll().
+                child: Builder( // Introduce a context so the shadow Theme is visible to captureAll().
                   builder: (BuildContext context) {
                     return Center(
                       child: Column(
@@ -57,9 +55,7 @@ void main() {
                               Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
                                   // Capture the shadow Theme.
-                                  builder: (BuildContext _) =>
-                                      InheritedTheme.captureAll(
-                                          context, primaryBox),
+                                  builder: (BuildContext _) => InheritedTheme.captureAll(context, primaryBox),
                                 ),
                               );
                             },
@@ -108,8 +104,7 @@ void main() {
             data: const PopupMenuThemeData(
               // The menu route's elevation, shape, and color are defined by the
               // current context, so they're not affected by ThemeData.captureAll().
-              textStyle:
-                  TextStyle(fontSize: menuFontSize, color: menuTextColor),
+              textStyle: TextStyle(fontSize: menuFontSize, color: menuTextColor),
             ),
             child: Center(
               child: PopupMenuButton<int>(
@@ -117,7 +112,7 @@ void main() {
                 // PopupMenuTheme defined above. Popup menus use
                 // InheritedTheme.captureAll() by default.
                 child: const Text('show popupmenu'),
-                onSelected: (int result) {},
+                onSelected: (int result) { },
                 itemBuilder: (BuildContext context) {
                   return const <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(value: 1, child: Text('One')),
@@ -132,13 +127,9 @@ void main() {
     }
 
     TextStyle itemTextStyle(String text) {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-                of: find.text(text), matching: find.byType(RichText)),
-          )
-          .text
-          .style!;
+      return tester.widget<RichText>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      ).text.style!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -165,7 +156,7 @@ void main() {
       actions: <Widget>[
         TextButton(
           child: const Text('action'),
-          onPressed: () {},
+          onPressed: () { },
         ),
       ],
     );
@@ -178,11 +169,9 @@ void main() {
           body: MaterialBannerTheme(
             data: const MaterialBannerThemeData(
               backgroundColor: bannerBackgroundColor,
-              contentTextStyle:
-                  TextStyle(fontSize: bannerFontSize, color: bannerTextColor),
+              contentTextStyle: TextStyle(fontSize: bannerFontSize, color: bannerTextColor),
             ),
-            child: Builder(
-              // Introduce a context so the shadow BannerTheme is visible to captureAll().
+            child: Builder( // Introduce a context so the shadow BannerTheme is visible to captureAll().
               builder: (BuildContext context) {
                 navigatorContext = context;
                 return Center(
@@ -206,8 +195,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder: (BuildContext _) =>
-                                  InheritedTheme.captureAll(context, banner),
+                              builder: (BuildContext _) => InheritedTheme.captureAll(context, banner),
                             ),
                           );
                         },
@@ -223,27 +211,18 @@ void main() {
     }
 
     Color bannerColor() {
-      return tester
-          .widget<Material>(
-            find
-                .descendant(
-                    of: find.byType(MaterialBanner),
-                    matching: find.byType(Material))
-                .first,
-          )
-          .color!;
+      return tester.widget<Material>(
+        find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first,
+      ).color!;
     }
 
     TextStyle getTextStyle(String text) {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-              of: find.text(text),
-              matching: find.byType(RichText),
-            ),
-          )
-          .text
-          .style!;
+      return tester.widget<RichText>(
+        find.descendant(
+          of: find.text(text),
+          matching: find.byType(RichText),
+        ),
+      ).text.style!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -282,8 +261,7 @@ void main() {
               space: dividerSpace,
               thickness: dividerThickness,
             ),
-            child: Builder(
-              // Introduce a context so the shadow DividerTheme is visible to captureAll().
+            child: Builder( // Introduce a context so the shadow DividerTheme is visible to captureAll().
               builder: (BuildContext context) {
                 navigatorContext = context;
                 return Center(
@@ -307,8 +285,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder: (BuildContext _) =>
-                                  InheritedTheme.captureAll(context, divider),
+                              builder: (BuildContext _) => InheritedTheme.captureAll(context, divider),
                             ),
                           );
                         },
@@ -324,14 +301,9 @@ void main() {
     }
 
     BorderSide dividerBorder() {
-      final BoxDecoration decoration = tester
-          .widget<Container>(
-            find
-                .descendant(
-                    of: find.byType(Divider), matching: find.byType(Container))
-                .first,
-          )
-          .decoration! as BoxDecoration;
+      final BoxDecoration decoration = tester.widget<Container>(
+        find.descendant(of: find.byType(Divider), matching: find.byType(Container)).first,
+      ).decoration! as BoxDecoration;
       return decoration.border!.bottom;
     }
 
@@ -390,8 +362,7 @@ void main() {
             selectedColor: tileSelectedColor,
             textColor: tileTextColor,
             iconColor: tileIconColor,
-            child: Builder(
-              // Introduce a context so the shadow ListTileTheme is visible to captureAll().
+            child: Builder( // Introduce a context so the shadow ListTileTheme is visible to captureAll().
               builder: (BuildContext context) {
                 navigatorContext = context;
                 return Center(
@@ -415,8 +386,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder: (BuildContext _) =>
-                                  InheritedTheme.captureAll(context, listTiles),
+                              builder: (BuildContext _) => InheritedTheme.captureAll(context, listTiles),
                             ),
                           );
                         },
@@ -432,25 +402,18 @@ void main() {
     }
 
     TextStyle getTextStyle(String text) {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-                of: find.text(text), matching: find.byType(RichText)),
-          )
-          .text
-          .style!;
+      return tester.widget<RichText>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      ).text.style!;
     }
 
     TextStyle getIconStyle(Key key) {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-              of: find.byKey(key),
-              matching: find.byType(RichText),
-            ),
-          )
-          .text
-          .style!;
+      return tester.widget<RichText>(
+        find.descendant(
+          of: find.byKey(key),
+          matching: find.byType(RichText),
+        ),
+      ).text.style!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -483,7 +446,7 @@ void main() {
       body: Center(
         child: Slider(
           value: 0.5,
-          onChanged: (double value) {},
+          onChanged: (double value) { },
         ),
       ),
     );
@@ -499,8 +462,7 @@ void main() {
               inactiveTrackColor: inactiveTrackColor,
               thumbColor: thumbColor,
             ),
-            child: Builder(
-              // Introduce a context so the shadow SliderTheme is visible to captureAll().
+            child: Builder( // Introduce a context so the shadow SliderTheme is visible to captureAll().
               builder: (BuildContext context) {
                 navigatorContext = context;
                 return Center(
@@ -524,8 +486,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow SliderTheme.
-                              builder: (BuildContext _) =>
-                                  InheritedTheme.captureAll(context, slider),
+                              builder: (BuildContext _) => InheritedTheme.captureAll(context, slider),
                             ),
                           );
                         },
@@ -545,13 +506,8 @@ void main() {
     // Show a route which contains listTiles.
     await tester.tap(find.text('push wrapped'));
     await tester.pumpAndSettle(); // route animation
-    RenderBox sliderBox =
-        tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(
-        sliderBox,
-        paints
-          ..rrect(color: activeTrackColor)
-          ..rrect(color: inactiveTrackColor));
+    RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
     expect(sliderBox, paints..circle(color: thumbColor));
 
     Navigator.of(navigatorContext).pop();
@@ -560,11 +516,7 @@ void main() {
     await tester.tap(find.text('push unwrapped'));
     await tester.pumpAndSettle(); // route animation
     sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(
-        sliderBox,
-        isNot(paints
-          ..rrect(color: activeTrackColor)
-          ..rrect(color: inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
@@ -580,7 +532,7 @@ void main() {
             Text('selected'),
             Text('unselected'),
           ],
-          onPressed: (int index) {},
+          onPressed: (int index) { },
         ),
       ),
     );
@@ -595,8 +547,7 @@ void main() {
               color: buttonColor,
               selectedColor: selectedButtonColor,
             ),
-            child: Builder(
-              // Introduce a context so the shadow ToggleButtonsTheme is visible to captureAll().
+            child: Builder( // Introduce a context so the shadow ToggleButtonsTheme is visible to captureAll().
               builder: (BuildContext context) {
                 navigatorContext = context;
                 return Center(
@@ -620,9 +571,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow toggleButtons.
-                              builder: (BuildContext _) =>
-                                  InheritedTheme.captureAll(
-                                      context, toggleButtons),
+                              builder: (BuildContext _) => InheritedTheme.captureAll(context, toggleButtons),
                             ),
                           );
                         },
@@ -638,14 +587,9 @@ void main() {
     }
 
     Color getTextColor(String text) {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-                of: find.text(text), matching: find.byType(RichText)),
-          )
-          .text
-          .style!
-          .color!;
+      return tester.widget<RichText>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      ).text.style!.color!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -663,6 +607,7 @@ void main() {
     await tester.pumpAndSettle(); // route animation
     expect(getTextColor('selected'), isNot(selectedButtonColor));
     expect(getTextColor('unselected'), isNot(buttonColor));
+
   });
 
   testWidgets('ButtonTheme.wrap()', (WidgetTester tester) async {
@@ -675,7 +620,7 @@ void main() {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const RaisedButton(onPressed: null, child: Text('disabled')),
-            RaisedButton(child: const Text('enabled'), onPressed: () {}),
+            RaisedButton(child: const Text('enabled'), onPressed: () { }),
           ],
         ),
       ),
@@ -691,8 +636,7 @@ void main() {
               buttonColor: buttonColor,
               disabledColor: disabledButtonColor,
             ),
-            child: Builder(
-              // Introduce a context so the shadow ButtonTheme is visible to captureAll().
+            child: Builder( // Introduce a context so the shadow ButtonTheme is visible to captureAll().
               builder: (BuildContext context) {
                 navigatorContext = context;
                 return Center(
@@ -716,8 +660,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow toggleButtons.
-                              builder: (BuildContext _) =>
-                                  InheritedTheme.captureAll(context, buttons),
+                              builder: (BuildContext _) => InheritedTheme.captureAll(context, buttons),
                             ),
                           );
                         },
@@ -733,14 +676,12 @@ void main() {
     }
 
     Color getButtonColor(String text) {
-      return tester
-          .widget<Material>(
-            find.descendant(
-              of: find.widgetWithText(RawMaterialButton, text),
-              matching: find.byType(Material),
-            ),
-          )
-          .color!;
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.widgetWithText(RawMaterialButton, text),
+          matching: find.byType(Material),
+        ),
+      ).color!;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -758,5 +699,7 @@ void main() {
     await tester.pumpAndSettle(); // route animation
     expect(getButtonColor('disabled'), isNot(disabledButtonColor));
     expect(getButtonColor('enabled'), isNot(buttonColor));
+
   });
+
 }

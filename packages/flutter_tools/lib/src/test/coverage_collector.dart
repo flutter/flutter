@@ -19,10 +19,7 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector(
-      {this.libraryPredicate,
-      this.verbose = true,
-      @required this.packagesPath});
+  CoverageCollector({this.libraryPredicate, this.verbose = true, @required this.packagesPath});
 
   final bool verbose;
   final String packagesPath;
@@ -35,7 +32,7 @@ class CoverageCollector extends TestWatcher {
     await collectCoverage(testDevice);
   }
 
-  void _logMessage(String line, {bool error = false}) {
+  void _logMessage(String line, { bool error = false }) {
     if (!verbose) {
       return;
     }
@@ -63,8 +60,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
     _logMessage('collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data =
-        await collect(observatoryUri, libraryPredicate);
+    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -76,8 +72,7 @@ class CoverageCollector extends TestWatcher {
       packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
-    _logMessage(
-        '($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -98,21 +93,20 @@ class CoverageCollector extends TestWatcher {
       test: (Object error) => error is TestDeviceException,
     );
 
-    final Future<void> collectionComplete =
-        testDevice.observatoryUri.then((Uri observatoryUri) {
-      _logMessage(
-          'collecting coverage data from $testDevice at $observatoryUri...');
-      return collect(observatoryUri, libraryPredicate)
+    final Future<void> collectionComplete = testDevice.observatoryUri
+      .then((Uri observatoryUri) {
+        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
+        return collect(observatoryUri, libraryPredicate)
           .then<void>((Map<String, dynamic> result) {
-        if (result == null) {
-          throw Exception('Failed to collect coverage.');
-        }
-        _logMessage('Collected coverage data.');
-        data = result;
+            if (result == null) {
+              throw Exception('Failed to collect coverage.');
+            }
+            _logMessage('Collected coverage data.');
+            data = result;
+          });
       });
-    });
 
-    await Future.any<void>(<Future<void>>[processComplete, collectionComplete]);
+    await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
     _logMessage('Merging coverage data...');
@@ -150,8 +144,7 @@ class CoverageCollector extends TestWatcher {
     return result;
   }
 
-  bool collectCoverageData(String coveragePath,
-      {bool mergeCoverageData = false, Directory coverageDirectory}) {
+  bool collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) {
     final String coverageData = finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
@@ -163,15 +156,12 @@ class CoverageCollector extends TestWatcher {
     final File coverageFile = globals.fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
-    _logMessage(
-        'wrote coverage data to $coveragePath (size=${coverageData.length})');
+    _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!globals.fs.isFileSync(baseCoverageData)) {
-        _logMessage(
-            'Missing "$baseCoverageData". Unable to merge coverage data.',
-            error: true);
+        _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
@@ -182,25 +172,18 @@ class CoverageCollector extends TestWatcher {
         } else if (globals.platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
-        _logMessage(
-            'Missing "lcov" tool. Unable to merge coverage data.\n$installMessage',
-            error: true);
+        _logMessage('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage', error: true);
         return false;
       }
 
-      final Directory tempDir = globals.fs.systemTempDirectory
-          .createTempSync('flutter_tools_test_coverage.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
-        final File sourceFile = coverageFile
-            .copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
+        final File sourceFile = coverageFile.copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
         final RunResult result = globals.processUtils.runSync(<String>[
           'lcov',
-          '--add-tracefile',
-          baseCoverageData,
-          '--add-tracefile',
-          sourceFile.path,
-          '--output-file',
-          coverageFile.path,
+          '--add-tracefile', baseCoverageData,
+          '--add-tracefile', sourceFile.path,
+          '--output-file', coverageFile.path,
         ]);
         if (result.exitCode != 0) {
           return false;
@@ -213,31 +196,25 @@ class CoverageCollector extends TestWatcher {
   }
 
   @override
-  Future<void> handleTestCrashed(TestDevice testDevice) async {}
+  Future<void> handleTestCrashed(TestDevice testDevice) async { }
 
   @override
-  Future<void> handleTestTimedOut(TestDevice testDevice) async {}
+  Future<void> handleTestTimedOut(TestDevice testDevice) async { }
 }
 
 Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
-    serviceUri,
-    compression: CompressionOptions.compressionOff,
-    logger: globals.logger,
-  );
+      serviceUri, compression: CompressionOptions.compressionOff, logger: globals.logger,);
 }
 
-Future<Map<String, dynamic>> collect(
-  Uri serviceUri,
-  bool Function(String) libraryPredicate, {
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
   Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
   @visibleForTesting bool forceSequential = false,
 }) async {
   final FlutterVmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(
-      vmService.service, libraryPredicate, forceSequential);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate, forceSequential);
   await vmService.dispose();
   return result;
 }
@@ -248,8 +225,7 @@ Future<Map<String, dynamic>> _getAllCoverage(
   bool forceSequential,
 ) async {
   final vm_service.Version version = await service.getVersion();
-  final bool reportLines =
-      (version.major == 3 && version.minor >= 51) || version.major > 3;
+  final bool reportLines = (version.major == 3 && version.minor >= 51) || version.major > 3;
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
@@ -264,10 +240,8 @@ Future<Map<String, dynamic>> _getAllCoverage(
     }
 
     final List<Future<void>> futures = <Future<void>>[];
-    final Map<String, vm_service.Script> scripts =
-        <String, vm_service.Script>{};
-    final Map<String, vm_service.SourceReport> sourceReports =
-        <String, vm_service.SourceReport>{};
+    final Map<String, vm_service.Script> scripts = <String, vm_service.Script>{};
+    final Map<String, vm_service.SourceReport> sourceReports = <String, vm_service.SourceReport>{};
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
 
@@ -277,15 +251,14 @@ Future<Map<String, dynamic>> _getAllCoverage(
         continue;
       }
       final String scriptId = script.id;
-      final Future<void> getSourceReport = service
-          .getSourceReport(
+      final Future<void> getSourceReport = service.getSourceReport(
         isolateRef.id,
         <String>['Coverage'],
         scriptId: scriptId,
         forceCompile: true,
         reportLines: reportLines ? true : null,
       )
-          .then((vm_service.SourceReport report) {
+      .then((vm_service.SourceReport report) {
         sourceReports[scriptId] = report;
       });
       if (forceSequential) {
@@ -296,11 +269,11 @@ Future<Map<String, dynamic>> _getAllCoverage(
         continue;
       }
       final Future<void> getObject = service
-          .getObject(isolateRef.id, scriptId)
-          .then((vm_service.Obj response) {
-        final vm_service.Script script = response as vm_service.Script;
-        scripts[scriptId] = script;
-      });
+        .getObject(isolateRef.id, scriptId)
+        .then((vm_service.Obj response) {
+          final vm_service.Script script = response as vm_service.Script;
+          scripts[scriptId] = script;
+        });
       futures.add(getObject);
     }
     await Future.wait(futures);
@@ -325,8 +298,7 @@ void _buildCoverageMap(
       if (coverage == null) {
         continue;
       }
-      final vm_service.ScriptRef scriptRef =
-          sourceReport.scripts[range.scriptIndex];
+      final vm_service.ScriptRef scriptRef = sourceReport.scripts[range.scriptIndex];
       final String uri = scriptRef.uri;
 
       hitMaps[uri] ??= <int, int>{};
@@ -385,8 +357,7 @@ List<int> _lineAndColumn(int position, List<dynamic> tokenPositions) {
 }
 
 // Returns a JSON hit map backward-compatible with pre-1.16.0 SDKs.
-Map<String, dynamic> _toScriptCoverageJson(
-    String scriptUri, Map<int, int> hitMap) {
+Map<String, dynamic> _toScriptCoverageJson(String scriptUri, Map<int, int> hitMap) {
   final Map<String, dynamic> json = <String, dynamic>{};
   final List<int> hits = <int>[];
   hitMap.forEach((int line, int hitCount) {

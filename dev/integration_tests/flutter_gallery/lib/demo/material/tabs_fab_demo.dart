@@ -7,20 +7,19 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 const String _explanatoryText =
-    "When the Scaffold's floating action button changes, the new button fades and "
-    'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
-    'with a FloatingActionButton that the Scaffold distinguishes from the others '
-    'by its key.';
+  "When the Scaffold's floating action button changes, the new button fades and "
+  'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
+  'with a FloatingActionButton that the Scaffold distinguishes from the others '
+  'by its key.';
 
 class _Page {
-  _Page({this.label, this.colors, this.icon});
+  _Page({ this.label, this.colors, this.icon });
 
   final String? label;
   final MaterialColor? colors;
   final IconData? icon;
 
-  Color get labelColor =>
-      colors != null ? colors!.shade300 : Colors.grey.shade300;
+  Color get labelColor => colors != null ? colors!.shade300 : Colors.grey.shade300;
   bool get fabDefined => colors != null && icon != null;
   Color get fabColor => colors!.shade400;
   Icon get fabIcon => Icon(icon);
@@ -44,8 +43,7 @@ class TabsFabDemo extends StatefulWidget {
   State<TabsFabDemo> createState() => _TabsFabDemoState();
 }
 
-class _TabsFabDemoState extends State<TabsFabDemo>
-    with SingleTickerProviderStateMixin {
+class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TabController? _controller;
@@ -76,40 +74,41 @@ class _TabsFabDemoState extends State<TabsFabDemo>
     _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return Container(
         decoration: BoxDecoration(
-            border:
-                Border(top: BorderSide(color: Theme.of(context).dividerColor))),
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
+        ),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: Text(_explanatoryText,
-              style: Theme.of(context).textTheme.subtitle1),
+          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subtitle1),
         ),
       );
     });
   }
 
   Widget buildTabView(_Page page) {
-    return Builder(builder: (BuildContext context) {
-      return Container(
-        key: ValueKey<String?>(page.label),
-        padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
-        child: Card(
-          child: Center(
-            child: Text(
-              page.label!,
-              style: TextStyle(
-                color: page.labelColor,
-                fontSize: 32.0,
+    return Builder(
+      builder: (BuildContext context) {
+        return Container(
+          key: ValueKey<String?>(page.label),
+          padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
+          child: Card(
+            child: Center(
+              child: Text(page.label!,
+                style: TextStyle(
+                  color: page.labelColor,
+                  fontSize: 32.0,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
-        ),
-      );
-    });
+        );
+      }
+    );
   }
 
   Widget? buildFloatingActionButton(_Page page) {
-    if (!page.fabDefined) return null;
+    if (!page.fabDefined)
+      return null;
 
     if (_extendedButtons) {
       return FloatingActionButton.extended(
@@ -139,15 +138,12 @@ class _TabsFabDemoState extends State<TabsFabDemo>
         title: const Text('FAB per tab'),
         bottom: TabBar(
           controller: _controller,
-          tabs: _allPages
-              .map<Widget>((_Page page) => Tab(text: page.label!.toUpperCase()))
-              .toList(),
+          tabs: _allPages.map<Widget>((_Page page) => Tab(text: page.label!.toUpperCase())).toList(),
         ),
         actions: <Widget>[
           MaterialDemoDocumentationButton(TabsFabDemo.routeName),
           IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied,
-                semanticLabel: 'Toggle extended buttons'),
+            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Toggle extended buttons'),
             onPressed: () {
               setState(() {
                 _extendedButtons = !_extendedButtons;

@@ -16,26 +16,22 @@ void main() {
     test('no deadlock when delayed exceptions fire in closures', () async {
       final TaskQueue<void> sharedTracker = TaskQueue<void>(maxJobs: 2);
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-            const Duration(milliseconds: 10), () => throw TestException());
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-            const Duration(milliseconds: 10), () => throw TestException());
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-            const Duration(milliseconds: 10), () => throw TestException());
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-            const Duration(milliseconds: 10), () => throw TestException());
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
@@ -58,12 +54,8 @@ void main() {
       final Set<int> completed = <int>{};
       final TaskQueue<void> tracker = TaskQueue<void>(maxJobs: 1);
       await tracker.add(() async => completed.add(0));
-      await tracker
-          .add(() async => throw TestException())
-          .catchError((Object _) {});
-      await tracker
-          .add(() async => throw TestException())
-          .catchError((Object _) {});
+      await tracker.add(() async => throw TestException()).catchError((Object _) {});
+      await tracker.add(() async => throw TestException()).catchError((Object _) {});
       await tracker.add(() async => completed.add(3));
       await tracker.tasksComplete;
       expect(completed.length, equals(2));

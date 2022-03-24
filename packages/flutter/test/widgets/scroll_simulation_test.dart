@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('ClampingScrollSimulation has a stable initial conditions', () {
     void checkInitialConditions(double position, double velocity) {
-      final ClampingScrollSimulation simulation =
-          ClampingScrollSimulation(position: position, velocity: velocity);
+      final ClampingScrollSimulation simulation = ClampingScrollSimulation(position: position, velocity: velocity);
       expect(simulation.x(0.0), moreOrLessEquals(position));
       expect(simulation.dx(0.0), moreOrLessEquals(velocity));
     }

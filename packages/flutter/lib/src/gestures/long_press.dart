@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -20,8 +21,7 @@ import 'velocity_tracker.dart';
 ///  * [GestureLongPressStartCallback], the signature that gets called when the
 ///    pointer has been in contact with the screen long enough to be considered
 ///    a long-press.
-typedef GestureLongPressDownCallback = void Function(
-    LongPressDownDetails details);
+typedef GestureLongPressDownCallback = void Function(LongPressDownDetails details);
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressCancel].
 ///
@@ -66,8 +66,7 @@ typedef GestureLongPressUpCallback = void Function();
 ///  * [GestureDetector.onLongPressStart], which matches this signature.
 ///  * [GestureLongPressCallback], which is the same signature without the
 ///    details.
-typedef GestureLongPressStartCallback = void Function(
-    LongPressStartDetails details);
+typedef GestureLongPressStartCallback = void Function(LongPressStartDetails details);
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressMoveUpdate].
 ///
@@ -78,8 +77,7 @@ typedef GestureLongPressStartCallback = void Function(
 /// See also:
 ///
 ///  * [GestureDetector.onLongPressMoveUpdate], which matches this signature.
-typedef GestureLongPressMoveUpdateCallback = void Function(
-    LongPressMoveUpdateDetails details);
+typedef GestureLongPressMoveUpdateCallback = void Function(LongPressMoveUpdateDetails details);
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressEnd].
 ///
@@ -90,8 +88,7 @@ typedef GestureLongPressMoveUpdateCallback = void Function(
 /// See also:
 ///
 ///  * [GestureDetector.onLongPressEnd], which matches this signature.
-typedef GestureLongPressEndCallback = void Function(
-    LongPressEndDetails details);
+typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details);
 
 /// Details for callbacks that use [GestureLongPressDownCallback].
 ///
@@ -114,8 +111,8 @@ class LongPressDownDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  })  : assert(globalPosition != null),
-        localPosition = localPosition ?? globalPosition;
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -141,8 +138,8 @@ class LongPressStartDetails {
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  })  : assert(globalPosition != null),
-        localPosition = localPosition ?? globalPosition;
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer initially contacted the screen.
   final Offset globalPosition;
@@ -167,10 +164,10 @@ class LongPressMoveUpdateDetails {
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
-  })  : assert(globalPosition != null),
-        assert(offsetFromOrigin != null),
-        localPosition = localPosition ?? globalPosition,
-        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+  }) : assert(globalPosition != null),
+       assert(offsetFromOrigin != null),
+       localPosition = localPosition ?? globalPosition,
+       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
@@ -204,8 +201,8 @@ class LongPressEndDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
-  })  : assert(globalPosition != null),
-        localPosition = localPosition ?? globalPosition;
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
@@ -254,16 +251,16 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-        PointerDeviceKind? kind,
+    PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
     Object? debugOwner,
   }) : super(
-          deadline: duration ?? kLongPressTimeout,
-          postAcceptSlopTolerance: postAcceptSlopTolerance,
-          kind: kind,
-          supportedDevices: supportedDevices,
-          debugOwner: debugOwner,
-        );
+         deadline: duration ?? kLongPressTimeout,
+         postAcceptSlopTolerance: postAcceptSlopTolerance,
+         kind: kind,
+         supportedDevices: supportedDevices,
+         debugOwner: debugOwner,
+       );
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
@@ -580,7 +577,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onLongPress == null &&
             onLongPressMoveUpdate == null &&
             onLongPressEnd == null &&
-            onLongPressUp == null) return false;
+            onLongPressUp == null)
+          return false;
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown == null &&
@@ -589,7 +587,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onSecondaryLongPress == null &&
             onSecondaryLongPressMoveUpdate == null &&
             onSecondaryLongPressEnd == null &&
-            onSecondaryLongPressUp == null) return false;
+            onSecondaryLongPressUp == null)
+          return false;
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressDown == null &&
@@ -598,7 +597,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onTertiaryLongPress == null &&
             onTertiaryLongPressMoveUpdate == null &&
             onTertiaryLongPressEnd == null &&
-            onTertiaryLongPressUp == null) return false;
+            onTertiaryLongPressUp == null)
+          return false;
         break;
       default:
         return false;
@@ -664,18 +664,15 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressDown != null)
-          invokeCallback<void>(
-              'onLongPressDown', () => onLongPressDown!(details));
+          invokeCallback<void>('onLongPressDown', () => onLongPressDown!(details));
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown != null)
-          invokeCallback<void>('onSecondaryLongPressDown',
-              () => onSecondaryLongPressDown!(details));
+          invokeCallback<void>('onSecondaryLongPressDown', () => onSecondaryLongPressDown!(details));
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressDown != null)
-          invokeCallback<void>('onTertiaryLongPressDown',
-              () => onTertiaryLongPressDown!(details));
+          invokeCallback<void>('onTertiaryLongPressDown', () => onTertiaryLongPressDown!(details));
         break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
@@ -691,13 +688,11 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           break;
         case kSecondaryButton:
           if (onSecondaryLongPressCancel != null)
-            invokeCallback<void>(
-                'onSecondaryLongPressCancel', onSecondaryLongPressCancel!);
+            invokeCallback<void>('onSecondaryLongPressCancel', onSecondaryLongPressCancel!);
           break;
         case kTertiaryButton:
           if (onTertiaryLongPressCancel != null)
-            invokeCallback<void>(
-                'onTertiaryLongPressCancel', onTertiaryLongPressCancel!);
+            invokeCallback<void>('onTertiaryLongPressCancel', onTertiaryLongPressCancel!);
           break;
         default:
           assert(false, 'Unhandled button $_initialButtons');
@@ -713,8 +708,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>(
-              'onLongPressStart', () => onLongPressStart!(details));
+          invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
         }
         if (onLongPress != null) {
           invokeCallback<void>('onLongPress', onLongPress!);
@@ -726,8 +720,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>('onSecondaryLongPressStart',
-              () => onSecondaryLongPressStart!(details));
+          invokeCallback<void>('onSecondaryLongPressStart', () => onSecondaryLongPressStart!(details));
         }
         if (onSecondaryLongPress != null) {
           invokeCallback<void>('onSecondaryLongPress', onSecondaryLongPress!);
@@ -739,8 +732,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
           );
-          invokeCallback<void>('onTertiaryLongPressStart',
-              () => onTertiaryLongPressStart!(details));
+          invokeCallback<void>('onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
         }
         if (onTertiaryLongPress != null) {
           invokeCallback<void>('onTertiaryLongPress', onTertiaryLongPress!);
@@ -761,20 +753,17 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressMoveUpdate != null) {
-          invokeCallback<void>(
-              'onLongPressMoveUpdate', () => onLongPressMoveUpdate!(details));
+          invokeCallback<void>('onLongPressMoveUpdate', () => onLongPressMoveUpdate!(details));
         }
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressMoveUpdate != null) {
-          invokeCallback<void>('onSecondaryLongPressMoveUpdate',
-              () => onSecondaryLongPressMoveUpdate!(details));
+          invokeCallback<void>('onSecondaryLongPressMoveUpdate', () => onSecondaryLongPressMoveUpdate!(details));
         }
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressMoveUpdate != null) {
-          invokeCallback<void>('onTertiaryLongPressMoveUpdate',
-              () => onTertiaryLongPressMoveUpdate!(details));
+          invokeCallback<void>('onTertiaryLongPressMoveUpdate', () => onTertiaryLongPressMoveUpdate!(details));
         }
         break;
       default:
@@ -797,8 +786,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressEnd != null) {
-          invokeCallback<void>(
-              'onLongPressEnd', () => onLongPressEnd!(details));
+          invokeCallback<void>('onLongPressEnd', () => onLongPressEnd!(details));
         }
         if (onLongPressUp != null) {
           invokeCallback<void>('onLongPressUp', onLongPressUp!);
@@ -806,18 +794,15 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressEnd != null) {
-          invokeCallback<void>('onSecondaryLongPressEnd',
-              () => onSecondaryLongPressEnd!(details));
+          invokeCallback<void>('onSecondaryLongPressEnd', () => onSecondaryLongPressEnd!(details));
         }
         if (onSecondaryLongPressUp != null) {
-          invokeCallback<void>(
-              'onSecondaryLongPressUp', onSecondaryLongPressUp!);
+          invokeCallback<void>('onSecondaryLongPressUp', onSecondaryLongPressUp!);
         }
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressEnd != null) {
-          invokeCallback<void>(
-              'onTertiaryLongPressEnd', () => onTertiaryLongPressEnd!(details));
+          invokeCallback<void>('onTertiaryLongPressEnd', () => onTertiaryLongPressEnd!(details));
         }
         if (onTertiaryLongPressUp != null) {
           invokeCallback<void>('onTertiaryLongPressUp', onTertiaryLongPressUp!);

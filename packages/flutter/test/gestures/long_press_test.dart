@@ -104,10 +104,8 @@ void main() {
       expect(recognized, const <String>['down', 'start']);
     });
 
-    testGesture('Should recognize long press with altered duration',
-        (GestureTester tester) {
-      gesture = LongPressGestureRecognizer(
-          duration: const Duration(milliseconds: 100));
+    testGesture('Should recognize long press with altered duration', (GestureTester tester) {
+      gesture = LongPressGestureRecognizer(duration: const Duration(milliseconds: 100));
       setUpHandlers();
       gesture.addPointer(down);
       tester.closeArena(5);
@@ -173,8 +171,7 @@ void main() {
       expect(recognized, const <String>['down', 'start', 'move', 'end']);
     });
 
-    testGesture('Should recognize both tap down and long press',
-        (GestureTester tester) {
+    testGesture('Should recognize both tap down and long press', (GestureTester tester) {
       final TapGestureRecognizer tap = TapGestureRecognizer();
       tap.onTapDown = (_) {
         recognized.add('tap_down');
@@ -196,8 +193,7 @@ void main() {
     });
 
     testGesture('Drag start delayed by microtask', (GestureTester tester) {
-      final HorizontalDragGestureRecognizer drag =
-          HorizontalDragGestureRecognizer();
+      final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
       bool isDangerousStack = false;
       drag.onStart = (DragStartDetails details) {
         expect(isDangerousStack, isFalse);
@@ -237,8 +233,7 @@ void main() {
       expect(recognized, const <String>['down', 'start', 'end']);
     });
 
-    testGesture('Should not recognize long press with more than one buttons',
-        (GestureTester tester) {
+    testGesture('Should not recognize long press with more than one buttons', (GestureTester tester) {
       gesture.addPointer(const PointerDownEvent(
         pointer: 5,
         kind: PointerDeviceKind.mouse,
@@ -257,9 +252,7 @@ void main() {
       expect(recognized, const <String>[]);
     });
 
-    testGesture(
-        'Should cancel long press when buttons change before acceptance',
-        (GestureTester tester) {
+    testGesture('Should cancel long press when buttons change before acceptance', (GestureTester tester) {
       gesture.addPointer(down);
       tester.closeArena(5);
       expect(recognized, const <String>[]);
@@ -282,9 +275,7 @@ void main() {
       expect(recognized, const <String>['down', 'cancel']);
     });
 
-    testGesture(
-        'non-allowed pointer does not inadvertently reset the recognizer',
-        (GestureTester tester) {
+    testGesture('non-allowed pointer does not inadvertently reset the recognizer', (GestureTester tester) {
       gesture = LongPressGestureRecognizer(kind: PointerDeviceKind.touch);
       setUpHandlers();
 
@@ -443,9 +434,7 @@ void main() {
       recognized.clear();
     });
 
-    testGesture(
-        'Should cancel long press when buttons change before acceptance',
-        (GestureTester tester) {
+    testGesture('Should cancel long press when buttons change before acceptance', (GestureTester tester) {
       // First press
       gesture.addPointer(down);
       tester.closeArena(down.pointer);
@@ -458,9 +447,7 @@ void main() {
       expect(recognized, const <String>['down', 'cancel']);
     });
 
-    testGesture(
-        'Buttons change before acceptance should not prevent the next long press',
-        (GestureTester tester) {
+    testGesture('Buttons change before acceptance should not prevent the next long press', (GestureTester tester) {
       // First press
       gesture.addPointer(down);
       tester.closeArena(down.pointer);
@@ -486,8 +473,7 @@ void main() {
       expect(recognized, <String>['end']);
     });
 
-    testGesture('Should cancel long press when buttons change after acceptance',
-        (GestureTester tester) {
+    testGesture('Should cancel long press when buttons change after acceptance', (GestureTester tester) {
       // First press
       gesture.addPointer(down);
       tester.closeArena(down.pointer);
@@ -502,9 +488,7 @@ void main() {
       expect(recognized, <String>[]);
     });
 
-    testGesture(
-        'Buttons change after acceptance should not prevent the next long press',
-        (GestureTester tester) {
+    testGesture('Buttons change after acceptance should not prevent the next long press', (GestureTester tester) {
       // First press
       gesture.addPointer(down);
       tester.closeArena(down.pointer);
@@ -527,10 +511,8 @@ void main() {
     });
   });
 
-  testGesture('Can filter long press based on device kind',
-      (GestureTester tester) {
-    final LongPressGestureRecognizer mouseLongPress =
-        LongPressGestureRecognizer(kind: PointerDeviceKind.mouse);
+  testGesture('Can filter long press based on device kind', (GestureTester tester) {
+    final LongPressGestureRecognizer mouseLongPress = LongPressGestureRecognizer(kind: PointerDeviceKind.mouse);
 
     bool mouseLongPressDown = false;
     mouseLongPress.onLongPress = () {
@@ -568,8 +550,7 @@ void main() {
     mouseLongPress.dispose();
   });
 
-  group('Recognizers listening on different buttons do not form competition:',
-      () {
+  group('Recognizers listening on different buttons do not form competition:', () {
     // This test is assisted by tap recognizers. If a tap gesture has
     // no competing recognizers, a pointer down event triggers its onTapDown
     // immediately; if there are competitors, onTapDown is triggered after a
@@ -603,9 +584,7 @@ void main() {
       longPress.dispose();
     });
 
-    testGesture(
-        'A primary long press recognizer does not form competition with a secondary tap recognizer',
-        (GestureTester tester) {
+    testGesture('A primary long press recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       longPress.addPointer(down3);
       tapSecondary.addPointer(down3);
       tester.closeArena(down3.pointer);
@@ -614,9 +593,7 @@ void main() {
       expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture(
-        'A primary long press recognizer forms competition with a primary tap recognizer',
-        (GestureTester tester) {
+    testGesture('A primary long press recognizer forms competition with a primary tap recognizer', (GestureTester tester) {
       longPress.addPointer(down);
       tapPrimary.addPointer(down);
       tester.closeArena(down.pointer);
@@ -629,8 +606,7 @@ void main() {
     });
   });
 
-  testGesture('A secondary long press should not trigger primary',
-      (GestureTester tester) {
+  testGesture('A secondary long press should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
     final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
       ..onLongPressStart = (LongPressStartDetails details) {
@@ -677,8 +653,7 @@ void main() {
     recognized.clear();
   });
 
-  testGesture('A tertiary long press should not trigger primary or secondary',
-      (GestureTester tester) {
+  testGesture('A tertiary long press should not trigger primary or secondary', (GestureTester tester) {
     final List<String> recognized = <String>[];
     final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
       ..onLongPressStart = (LongPressStartDetails details) {
@@ -740,21 +715,17 @@ void main() {
     recognized.clear();
   });
 
-  testWidgets(
-      'LongPressGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('LongPressGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
         LongPressGestureRecognizer(
           kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
         );
       },
       throwsA(
-        isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
       ),
     );
   });

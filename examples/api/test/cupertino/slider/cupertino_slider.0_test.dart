@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/slider/cupertino_slider.0.dart'
-    as example;
+import 'package:flutter_api_samples/cupertino/slider/cupertino_slider.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,12 +11,10 @@ void main() {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
-    return tester.dragFrom(
-        topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
+    return tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
   }
 
-  testWidgets('Can change value using CupertinoSlider',
-      (WidgetTester tester) async {
+  testWidgets('Can change value using CupertinoSlider', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );

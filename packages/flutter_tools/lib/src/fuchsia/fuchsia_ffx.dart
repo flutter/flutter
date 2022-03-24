@@ -53,7 +53,8 @@ class FuchsiaFfx {
     }
     final List<String> command = <String>[
       ffx.path,
-      if (timeout != null) ...<String>['-T', '${timeout.inSeconds}'],
+      if (timeout != null)
+        ...<String>['-T', '${timeout.inSeconds}'],
       'target',
       'list',
       '--format',

@@ -25,12 +25,9 @@ void main() {
       await driver.waitFor(presentText);
     }, timeout: Timeout.none);
 
-    test(
-        'waitForAbsent should time out waiting for text "present" to disappear',
-        () async {
+    test('waitForAbsent should time out waiting for text "present" to disappear', () async {
       await expectLater(
-        () => driver.waitForAbsent(presentText,
-            timeout: const Duration(seconds: 1)),
+        () => driver.waitForAbsent(presentText, timeout: const Duration(seconds: 1)),
         throwsA(isA<DriverError>().having(
           (DriverError error) => error.message,
           'message',
@@ -39,14 +36,13 @@ void main() {
       );
     }, timeout: Timeout.none);
 
-    test('waitForAbsent should resolve when text "present" disappears',
-        () async {
+    test('waitForAbsent should resolve when text "present" disappears', () async {
       // Begin waiting for it to disappear
       final Completer<void> whenWaitForAbsentResolves = Completer<void>();
       driver.waitForAbsent(presentText).then(
-            whenWaitForAbsentResolves.complete,
-            onError: whenWaitForAbsentResolves.completeError,
-          );
+        whenWaitForAbsentResolves.complete,
+        onError: whenWaitForAbsentResolves.completeError,
+      );
 
       // Wait 1 second then make it disappear
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -71,9 +67,9 @@ void main() {
       // Begin waiting for it to reappear
       final Completer<void> whenWaitForResolves = Completer<void>();
       driver.waitFor(presentText).then(
-            whenWaitForResolves.complete,
-            onError: whenWaitForResolves.completeError,
-          );
+        whenWaitForResolves.complete,
+        onError: whenWaitForResolves.completeError,
+      );
 
       // Wait 1 second then make it appear
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -83,8 +79,7 @@ void main() {
       await whenWaitForResolves.future;
     }, timeout: Timeout.none);
 
-    test('waitForAbsent resolves immediately when the element does not exist',
-        () async {
+    test('waitForAbsent resolves immediately when the element does not exist', () async {
       await driver.waitForAbsent(find.text('that does not exist'));
     }, timeout: Timeout.none);
 

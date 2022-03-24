@@ -14,8 +14,7 @@ typedef DriverHandler = Future<String> Function();
 /// set by the app in which case the requestData call will only complete once the app is ready
 /// for it.
 class FutureDataHandler {
-  final Map<String, Completer<DriverHandler>> _handlers =
-      <String, Completer<DriverHandler>>{};
+  final Map<String, Completer<DriverHandler>> _handlers = <String, Completer<DriverHandler>>{};
 
   /// Registers a lazy handler that will be invoked on the next message from the driver.
   Completer<DriverHandler> registerHandler(String key) {
@@ -26,7 +25,7 @@ class FutureDataHandler {
   Future<String> handleMessage(String? message) async {
     if (_handlers[message] == null) {
       return 'Unsupported driver message: $message.\n'
-          'Supported messages are: ${_handlers.keys}.';
+             'Supported messages are: ${_handlers.keys}.';
     }
     final DriverHandler handler = await _handlers[message]!.future;
     return handler();

@@ -43,8 +43,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     final Color evenItemColor = colorScheme.secondary.withOpacity(0.15);
     final Color draggableItemColor = colorScheme.secondary;
 
-    Widget _proxyDecorator(
-        Widget child, int index, Animation<double> animation) {
+    Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
       return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {

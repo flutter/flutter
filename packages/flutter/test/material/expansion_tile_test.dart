@@ -101,27 +101,23 @@ void main() {
 
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
     Container getContainer(Key key) => tester.firstWidget(find.descendant(
-          of: find.byKey(key),
-          matching: find.byType(Container),
-        ));
+      of: find.byKey(key),
+      matching: find.byType(Container),
+    ));
 
-    expect(
-        getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
+    expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-    BoxDecoration expandedContainerDecoration =
-        getContainer(expandedKey).decoration! as BoxDecoration;
+    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.red);
     expect(expandedContainerDecoration.border!.top.color, dividerColor);
     expect(expandedContainerDecoration.border!.bottom.color, dividerColor);
 
-    BoxDecoration collapsedContainerDecoration =
-        getContainer(collapsedKey).decoration! as BoxDecoration;
+    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect(collapsedContainerDecoration.border!.top.color, Colors.transparent);
-    expect(
-        collapsedContainerDecoration.border!.bottom.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border!.bottom.color, Colors.transparent);
 
     await tester.tap(find.text('Expanded'));
     await tester.tap(find.text('Collapsed'));
@@ -131,40 +127,31 @@ void main() {
 
     // Pump to the middle of the animation for expansion.
     await tester.pump(const Duration(milliseconds: 100));
-    final BoxDecoration collapsingContainerDecoration =
-        getContainer(collapsedKey).decoration! as BoxDecoration;
+    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
     // Opacity should change but color component should remain the same.
-    expect(collapsingContainerDecoration.border!.top.color,
-        const Color(0x15333333));
-    expect(collapsingContainerDecoration.border!.bottom.color,
-        const Color(0x15333333));
+    expect(collapsingContainerDecoration.border!.top.color, const Color(0x15333333));
+    expect(collapsingContainerDecoration.border!.bottom.color, const Color(0x15333333));
 
     // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));
 
     expect(getHeight(topKey), getHeight(expandedKey) - 2.0);
-    expect(
-        getHeight(topKey), getHeight(collapsedKey) - getHeight(tileKey) - 2.0);
+    expect(getHeight(topKey), getHeight(collapsedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
 
     // Expanded should be collapsed now.
-    expandedContainerDecoration =
-        getContainer(expandedKey).decoration! as BoxDecoration;
+    expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.transparent);
     expect(expandedContainerDecoration.border!.top.color, Colors.transparent);
-    expect(
-        expandedContainerDecoration.border!.bottom.color, Colors.transparent);
+    expect(expandedContainerDecoration.border!.bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainerDecoration =
-        getContainer(collapsedKey).decoration! as BoxDecoration;
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect(collapsedContainerDecoration.border!.top.color, dividerColor);
     expect(collapsedContainerDecoration.border!.bottom.color, dividerColor);
-  },
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
@@ -175,8 +162,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme:
-              ColorScheme.fromSwatch().copyWith(primary: foregroundColor),
+          colorScheme: ColorScheme.fromSwatch().copyWith(primary: foregroundColor),
           unselectedWidgetColor: unselectedWidgetColor,
           textTheme: const TextTheme(subtitle1: TextStyle(color: headerColor)),
         ),
@@ -204,10 +190,8 @@ void main() {
       ),
     );
 
-    Color iconColor(Key key) =>
-        tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
-    Color textColor(Key key) =>
-        tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
     expect(textColor(expandedTitleKey), foregroundColor);
     expect(textColor(collapsedTitleKey), headerColor);
@@ -225,9 +209,7 @@ void main() {
     expect(textColor(collapsedTitleKey), foregroundColor);
     expect(iconColor(expandedIconKey), unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), foregroundColor);
-  },
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -276,12 +258,12 @@ void main() {
       ),
     );
 
-    // This text should be offstage while ExpansionTile collapsed
-    expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
-    expect(find.text('Maintaining State'), findsNothing);
-    // This text shouldn't be there while ExpansionTile collapsed
-    expect(find.text('Discarding State'), findsNothing);
-  });
+     // This text should be offstage while ExpansionTile collapsed
+     expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+     expect(find.text('Maintaining State'), findsNothing);
+     // This text shouldn't be there while ExpansionTile collapsed
+     expect(find.text('Discarding State'), findsNothing);
+   });
 
   testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
@@ -298,8 +280,7 @@ void main() {
     final Rect titleRect = tester.getRect(find.text('Hello'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
     final Rect listTileRect = tester.getRect(find.byType(ListTile));
-    final Rect tallerWidget =
-        titleRect.height > trailingRect.height ? titleRect : trailingRect;
+    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(listTileRect.left, titleRect.left - 8);
@@ -311,8 +292,7 @@ void main() {
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
   });
 
-  testWidgets('ExpansionTile expandedAlignment test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -341,8 +321,7 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
-  testWidgets('ExpansionTile expandedCrossAxisAlignment test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
@@ -386,8 +365,7 @@ void main() {
     expect(child1Rect.left, 700.0);
   });
 
-  testWidgets('CrossAxisAlignment.baseline is not allowed',
-      (WidgetTester tester) async {
+  testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
     expect(
       () {
         MaterialApp(
@@ -400,18 +378,14 @@ void main() {
           ),
         );
       },
-      throwsA(isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          '.toString()',
-          contains(
-            'CrossAxisAlignment.baseline is not supported since the expanded'
-            ' children are aligned in a column, not a row. Try to use another constant.',
-          ))),
+      throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
+        'CrossAxisAlignment.baseline is not supported since the expanded'
+        ' children are aligned in a column, not a row. Try to use another constant.',
+      ))),
     );
   });
 
-  testWidgets('expandedCrossAxisAlignment and expandedAlignment default values',
-      (WidgetTester tester) async {
+  testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(const MaterialApp(
@@ -428,6 +402,7 @@ void main() {
       ),
     ));
 
+
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
 
@@ -441,8 +416,8 @@ void main() {
 
     // By default the value of extendedCrossAxisAlignment is CrossAxisAlignment.center, hence
     // the offset of left and right edges from Column should be equal.
-    expect(
-        child1Rect.left - columnRect.left, columnRect.right - child1Rect.right);
+    expect(child1Rect.left - columnRect.left, columnRect.right - child1Rect.right);
+
   });
 
   testWidgets('childrenPadding default value', (WidgetTester tester) async {
@@ -475,8 +450,7 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom);
   });
 
-  testWidgets('ExpansionTile childrenPadding test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile childrenPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -507,8 +481,7 @@ void main() {
     expect(columnRect.bottom, paddingRect.bottom - 4);
   });
 
-  testWidgets('ExpansionTile.collapsedBackgroundColor',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile.collapsedBackgroundColor', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
     const Color backgroundColor = Colors.red;
     const Color collapsedBackgroundColor = Colors.brown;
@@ -527,30 +500,25 @@ void main() {
       ),
     ));
 
-    BoxDecoration boxDecoration = tester
-        .firstWidget<Container>(find.descendant(
-          of: find.byKey(expansionTileKey),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
     expect(boxDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    boxDecoration = tester
-        .firstWidget<Container>(find.descendant(
-          of: find.byKey(expansionTileKey),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgets('ExpansionTile iconColor, textColor',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78281
 
     const Color iconColor = Color(0xff00ff00);
@@ -574,10 +542,8 @@ void main() {
       ),
     ));
 
-    Color getIconColor() =>
-        tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
-    Color getTextColor() =>
-        tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
     expect(getIconColor(), collapsedIconColor);
     expect(getTextColor(), collapsedTextColor);
@@ -589,8 +555,7 @@ void main() {
     expect(getTextColor(), textColor);
   });
 
-  testWidgets('ExpansionTile platform controlAffinity test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -604,8 +569,7 @@ void main() {
     expect(listTile.trailing.runtimeType, RotationTransition);
   });
 
-  testWidgets('ExpansionTile trailing controlAffinity test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -620,8 +584,7 @@ void main() {
     expect(listTile.trailing.runtimeType, RotationTransition);
   });
 
-  testWidgets('ExpansionTile leading controlAffinity test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
@@ -636,8 +599,7 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
-  testWidgets('ExpansionTile override rotating icon test',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(

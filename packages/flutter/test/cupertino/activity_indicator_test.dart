@@ -13,8 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Activity indicator animate property works',
-      (WidgetTester tester) async {
+  testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
@@ -101,8 +100,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 30% in progress',
-      (WidgetTester tester) async {
+  testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -124,8 +122,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 100% in progress',
-      (WidgetTester tester) async {
+  testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -183,9 +180,8 @@ void main() {
     expect(
       find.byType(CupertinoActivityIndicator),
       paints
-        ..rrect(
-            rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
-            color: const Color(0x935d3fd3)),
+        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
+                color: const Color(0x935d3fd3)),
     );
   });
 }

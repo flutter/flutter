@@ -18,18 +18,9 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    void listener1() {
-      log.add('listener1');
-    }
-
-    void listener3() {
-      log.add('listener3');
-    }
-
-    void listener4() {
-      log.add('listener4');
-    }
-
+    void listener1() { log.add('listener1'); }
+    void listener3() { log.add('listener3'); }
+    void listener4() { log.add('listener4'); }
     void listener2() {
       log.add('listener2');
       controller.removeListener(listener1);
@@ -60,18 +51,9 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    void listener1(AnimationStatus status) {
-      log.add('listener1');
-    }
-
-    void listener3(AnimationStatus status) {
-      log.add('listener3');
-    }
-
-    void listener4(AnimationStatus status) {
-      log.add('listener4');
-    }
-
+    void listener1(AnimationStatus status) { log.add('listener1'); }
+    void listener3(AnimationStatus status) { log.add('listener3'); }
+    void listener4(AnimationStatus status) { log.add('listener4'); }
     void listener2(AnimationStatus status) {
       log.add('listener2');
       controller.removeStatusListener(listener1);
@@ -97,26 +79,19 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('AnimationController with throwing listener',
-      (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
     final List<String> log = <String>[];
 
-    void listener1() {
-      log.add('listener1');
-    }
-
+    void listener1() { log.add('listener1'); }
     void badListener() {
       log.add('badListener');
       throw ArgumentError();
     }
-
-    void listener2() {
-      log.add('listener2');
-    }
+    void listener2() { log.add('listener2'); }
 
     controller.addListener(listener1);
     controller.addListener(badListener);
@@ -127,26 +102,19 @@ void main() {
     log.clear();
   });
 
-  testWidgets('AnimationController with throwing status listener',
-      (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
     final List<String> log = <String>[];
 
-    void listener1(AnimationStatus status) {
-      log.add('listener1');
-    }
-
+    void listener1(AnimationStatus status) { log.add('listener1'); }
     void badListener(AnimationStatus status) {
       log.add('badListener');
       throw ArgumentError();
     }
-
-    void listener2(AnimationStatus status) {
-      log.add('listener2');
-    }
+    void listener2(AnimationStatus status) { log.add('listener2'); }
 
     controller.addStatusListener(listener1);
     controller.addStatusListener(badListener);

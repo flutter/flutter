@@ -19,8 +19,7 @@ TextAffinity? _toTextAffinity(String? affinity) {
 
 /// Replaces a range of text in the original string with the text given in the
 /// replacement string.
-String _replace(
-    String originalText, String replacementText, int start, int end) {
+String _replace(String originalText, String replacementText, int start, int end) {
   final String textStart = originalText.substring(0, start);
   final String textEnd = originalText.substring(end, originalText.length);
   final String newText = textStart + replacementText + textEnd;
@@ -50,9 +49,9 @@ abstract class TextEditingDelta {
     required this.oldText,
     required this.selection,
     required this.composing,
-  })  : assert(oldText != null),
-        assert(selection != null),
-        assert(composing != null);
+  }) : assert(oldText != null),
+       assert(selection != null),
+       assert(composing != null);
 
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
@@ -106,8 +105,7 @@ abstract class TextEditingDelta {
     final int replacementSourceEnd = replacementSource.length;
 
     // This delta is explicitly a non text update.
-    final bool isNonTextUpdate = replacementDestinationStart == -1 &&
-        replacementDestinationStart == replacementDestinationEnd;
+    final bool isNonTextUpdate = replacementDestinationStart == -1 && replacementDestinationStart == replacementDestinationEnd;
     final TextRange newComposing = TextRange(
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
@@ -128,57 +126,32 @@ abstract class TextEditingDelta {
       );
     }
 
-    final String newText = _replace(oldText, replacementSource,
-        replacementDestinationStart, replacementDestinationEnd);
+    final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
     final bool isEqual = oldText == newText;
 
-    final bool isDeletionGreaterThanOne =
-        (replacementDestinationEnd - replacementDestinationStart) -
-                (replacementSourceEnd - replacementSourceStart) >
-            1;
-    final bool isDeletingByReplacingWithEmpty = replacementSource.isEmpty &&
-        replacementSourceStart == 0 &&
-        replacementSourceStart == replacementSourceEnd;
+    final bool isDeletionGreaterThanOne = (replacementDestinationEnd - replacementDestinationStart) - (replacementSourceEnd - replacementSourceStart) > 1;
+    final bool isDeletingByReplacingWithEmpty = replacementSource.isEmpty && replacementSourceStart == 0 && replacementSourceStart == replacementSourceEnd;
 
-    final bool isReplacedByShorter = isDeletionGreaterThanOne &&
-        (replacementSourceEnd - replacementSourceStart <
-            replacementDestinationEnd - replacementDestinationStart);
-    final bool isReplacedByLonger =
-        replacementSourceEnd - replacementSourceStart >
-            replacementDestinationEnd - replacementDestinationStart;
-    final bool isReplacedBySame =
-        replacementSourceEnd - replacementSourceStart ==
-            replacementDestinationEnd - replacementDestinationStart;
+    final bool isReplacedByShorter = isDeletionGreaterThanOne && (replacementSourceEnd - replacementSourceStart < replacementDestinationEnd - replacementDestinationStart);
+    final bool isReplacedByLonger = replacementSourceEnd - replacementSourceStart > replacementDestinationEnd - replacementDestinationStart;
+    final bool isReplacedBySame = replacementSourceEnd - replacementSourceStart == replacementDestinationEnd - replacementDestinationStart;
 
-    final bool isInsertingInsideComposingRegion =
-        replacementDestinationStart + replacementSourceEnd >
-            replacementDestinationEnd;
-    final bool isDeletingInsideComposingRegion = !isReplacedByShorter &&
-        !isDeletingByReplacingWithEmpty &&
-        replacementDestinationStart + replacementSourceEnd <
-            replacementDestinationEnd;
+    final bool isInsertingInsideComposingRegion = replacementDestinationStart + replacementSourceEnd > replacementDestinationEnd;
+    final bool isDeletingInsideComposingRegion =
+        !isReplacedByShorter && !isDeletingByReplacingWithEmpty && replacementDestinationStart + replacementSourceEnd < replacementDestinationEnd;
 
     String newComposingText;
     String originalComposingText;
 
-    if (isDeletingByReplacingWithEmpty ||
-        isDeletingInsideComposingRegion ||
-        isReplacedByShorter) {
-      newComposingText = replacementSource.substring(
-          replacementSourceStart, replacementSourceEnd);
-      originalComposingText = oldText.substring(replacementDestinationStart,
-          replacementDestinationStart + replacementSourceEnd);
+    if (isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion || isReplacedByShorter) {
+      newComposingText = replacementSource.substring(replacementSourceStart, replacementSourceEnd);
+      originalComposingText = oldText.substring(replacementDestinationStart, replacementDestinationStart + replacementSourceEnd);
     } else {
-      newComposingText = replacementSource.substring(
-          replacementSourceStart,
-          replacementSourceStart +
-              (replacementDestinationEnd - replacementDestinationStart));
-      originalComposingText = oldText.substring(
-          replacementDestinationStart, replacementDestinationEnd);
+      newComposingText = replacementSource.substring(replacementSourceStart, replacementSourceStart + (replacementDestinationEnd - replacementDestinationStart));
+      originalComposingText = oldText.substring(replacementDestinationStart, replacementDestinationEnd);
     }
 
-    final bool isOriginalComposingRegionTextChanged =
-        !(originalComposingText == newComposingText);
+    final bool isOriginalComposingRegionTextChanged = !(originalComposingText == newComposingText);
     final bool isReplaced = isOriginalComposingRegionTextChanged ||
         (isReplacedByLonger || isReplacedByShorter || isReplacedBySame);
 
@@ -188,10 +161,8 @@ abstract class TextEditingDelta {
         selection: newSelection,
         composing: newComposing,
       );
-    } else if ((isDeletingByReplacingWithEmpty ||
-            isDeletingInsideComposingRegion) &&
-        !isOriginalComposingRegionTextChanged) {
-      // Deletion.
+    } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
+        !isOriginalComposingRegionTextChanged) {  // Deletion.
       int actualStart = replacementDestinationStart;
 
       if (!isDeletionGreaterThanOne) {
@@ -207,23 +178,16 @@ abstract class TextEditingDelta {
         selection: newSelection,
         composing: newComposing,
       );
-    } else if ((replacementDestinationStart == replacementDestinationEnd ||
-            isInsertingInsideComposingRegion) &&
-        !isOriginalComposingRegionTextChanged) {
-      // Insertion.
+    } else if ((replacementDestinationStart == replacementDestinationEnd || isInsertingInsideComposingRegion) &&
+        !isOriginalComposingRegionTextChanged) {  // Insertion.
       return TextEditingDeltaInsertion(
         oldText: oldText,
-        textInserted: replacementSource.substring(
-            replacementDestinationEnd - replacementDestinationStart,
-            (replacementDestinationEnd - replacementDestinationStart) +
-                (replacementSource.length -
-                    (replacementDestinationEnd - replacementDestinationStart))),
+        textInserted: replacementSource.substring(replacementDestinationEnd - replacementDestinationStart, (replacementDestinationEnd - replacementDestinationStart) + (replacementSource.length - (replacementDestinationEnd - replacementDestinationStart))),
         insertionOffset: replacementDestinationEnd,
         selection: newSelection,
         composing: newComposing,
       );
-    } else if (isReplaced) {
-      // Replacement.
+    } else if (isReplaced) {  // Replacement.
       return TextEditingDeltaReplacement(
         oldText: oldText,
         replacementText: replacementSource,
@@ -281,10 +245,10 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     required TextSelection selection,
     required TextRange composing,
   }) : super(
-          oldText: oldText,
-          selection: selection,
-          composing: composing,
-        );
+      oldText: oldText,
+      selection: selection,
+      composing: composing,
+  );
 
   /// The text that is being inserted into [oldText].
   final String textInserted;
@@ -299,8 +263,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     newText = _replace(newText, textInserted, insertionOffset, insertionOffset);
-    return value.copyWith(
-        text: newText, selection: selection, composing: composing);
+    return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
 
@@ -319,17 +282,16 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     required TextSelection selection,
     required TextRange composing,
   }) : super(
-          oldText: oldText,
-          selection: selection,
-          composing: composing,
-        );
+    oldText: oldText,
+    selection: selection,
+    composing: composing,
+  );
 
   /// The range in [oldText] that is being deleted.
   final TextRange deletedRange;
 
   /// The text from [oldText] that is being deleted.
-  String get textDeleted =>
-      oldText.substring(deletedRange.start, deletedRange.end);
+  String get textDeleted => oldText.substring(deletedRange.start, deletedRange.end);
 
   @override
   TextEditingValue apply(TextEditingValue value) {
@@ -338,8 +300,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     newText = _replace(newText, '', deletedRange.start, deletedRange.end);
-    return value.copyWith(
-        text: newText, selection: selection, composing: composing);
+    return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
 
@@ -365,10 +326,10 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     required TextSelection selection,
     required TextRange composing,
   }) : super(
-          oldText: oldText,
-          selection: selection,
-          composing: composing,
-        );
+    oldText: oldText,
+    selection: selection,
+    composing: composing,
+  );
 
   /// The new text that is replacing [replacedRange] in [oldText].
   final String replacementText;
@@ -377,8 +338,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   final TextRange replacedRange;
 
   /// The original text that is being replaced in [oldText].
-  String get textReplaced =>
-      oldText.substring(replacedRange.start, replacedRange.end);
+  String get textReplaced => oldText.substring(replacedRange.start, replacedRange.end);
 
   @override
   TextEditingValue apply(TextEditingValue value) {
@@ -386,10 +346,8 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(
-        newText, replacementText, replacedRange.start, replacedRange.end);
-    return value.copyWith(
-        text: newText, selection: selection, composing: composing);
+    newText = _replace(newText, replacementText, replacedRange.start, replacedRange.end);
+    return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
 
@@ -413,17 +371,16 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     required TextSelection selection,
     required TextRange composing,
   }) : super(
-          oldText: oldText,
-          selection: selection,
-          composing: composing,
-        );
+    oldText: oldText,
+    selection: selection,
+    composing: composing,
+  );
 
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
-    return TextEditingValue(
-        text: oldText, selection: selection, composing: composing);
+    return TextEditingValue(text: oldText, selection: selection, composing: composing);
   }
 }

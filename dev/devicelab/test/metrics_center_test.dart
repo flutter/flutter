@@ -11,8 +11,7 @@ class FakeFlutterDestination implements FlutterDestination {
   /// Overrides the skia perf `update` function, which uploads new data to gcs if there
   /// doesn't exist the commit, otherwise updates existing data by appending new ones.
   @override
-  Future<void> update(
-      List<MetricPoint> points, DateTime commitTime, String taskName) async {
+  Future<void> update(List<MetricPoint> points, DateTime commitTime, String taskName) async {
     lastUpdatedPoints = points;
     time = commitTime;
     name = taskName;
@@ -37,8 +36,7 @@ void main() {
           'average_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints =
-          parse(results, <String, String>{}, 'test');
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{}, 'test');
 
       expect(metricPoints.length, 1);
       expect(metricPoints[0].value, equals(0.4550425531914895));
@@ -59,8 +57,7 @@ void main() {
           '90th_percentile_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints =
-          parse(results, <String, String>{}, 'task abc');
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{}, 'task abc');
 
       expect(metricPoints[0].value, equals(0.4550425531914895));
       expect(metricPoints[1].value, equals(0.473));
@@ -103,8 +100,7 @@ void main() {
         'ResultData': null,
         'BenchmarkScoreKeys': null,
       };
-      final List<MetricPoint> metricPoints =
-          parse(results, <String, String>{}, 'tetask abcst');
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{}, 'tetask abcst');
 
       expect(metricPoints.length, 0);
     });
@@ -125,15 +121,12 @@ void main() {
           '90th_percentile_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints =
-          parse(results, <String, String>{}, 'task abc');
-      final FakeFlutterDestination flutterDestination =
-          FakeFlutterDestination();
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{}, 'task abc');
+      final FakeFlutterDestination flutterDestination = FakeFlutterDestination();
       const String taskName = 'default';
       const int commitTimeSinceEpoch = 1629220312;
 
-      await upload(
-          flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
+      await upload(flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
 
       expect(flutterDestination.name, 'default');
     });
@@ -152,15 +145,12 @@ void main() {
           '90th_percentile_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints =
-          parse(results, <String, String>{}, 'task abc');
-      final FakeFlutterDestination flutterDestination =
-          FakeFlutterDestination();
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{}, 'task abc');
+      final FakeFlutterDestination flutterDestination = FakeFlutterDestination();
       const String taskName = 'test';
       const int commitTimeSinceEpoch = 1629220312;
 
-      await upload(
-          flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
+      await upload(flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
 
       expect(flutterDestination.name, taskName);
     });

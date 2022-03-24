@@ -53,9 +53,7 @@ class PluginTest {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
           tempDir, options, buildTarget,
-          name: 'plugintest',
-          template: template,
-          environment: pluginCreateEnvironment);
+          name: 'plugintest', template: template, environment: pluginCreateEnvironment);
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
       }
@@ -64,19 +62,15 @@ class PluginTest {
         await plugin.test();
       }
       section('Create Flutter app');
-      final _FlutterProject app = await _FlutterProject.create(
-          tempDir, options, buildTarget,
-          name: 'plugintestapp',
-          template: 'app',
-          environment: appCreateEnvironment);
+      final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
+          name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
       try {
         section('Add plugins');
         await app.addPlugin('plugintest',
             pluginPath: path.join('..', 'plugintest'));
         await app.addPlugin('path_provider');
         section('Build app');
-        await app.build(buildTarget,
-            validateNativeBuildProject: !dartOnlyPlugin);
+        await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
         if (runFlutterTest) {
           section('Test app');
           await app.test();
@@ -164,13 +158,14 @@ class $dartPluginClass {
   }
 
   static Future<_FlutterProject> create(
-    Directory directory,
-    List<String> options,
-    String target, {
-    required String name,
-    required String template,
-    Map<String, String>? environment,
-  }) async {
+      Directory directory,
+      List<String> options,
+      String target,
+      {
+        required String name,
+        required String template,
+        Map<String, String>? environment,
+      }) async {
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -204,24 +199,24 @@ class $dartPluginClass {
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
-      throw TaskResult.failure(
-          'Update this test to match plugin minimum $target deployment version');
+      throw TaskResult.failure('Update this test to match plugin minimum $target deployment version');
     }
     podspecContent = podspecContent.replaceFirst(
-        versionString,
-        target == 'ios'
-            ? "s.platform = :ios, '7.0'"
-            : "s.platform = :osx, '10.8'");
+      versionString,
+      target == 'ios'
+          ? "s.platform = :ios, '7.0'"
+          : "s.platform = :osx, '10.8'"
+    );
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
-  Future<void> build(String target,
-      {bool validateNativeBuildProject = true}) async {
+  Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
     await inDirectory(Directory(rootPath), () async {
-      final String buildOutput = await evalFlutter('build', options: <String>[
+      final String buildOutput =  await evalFlutter('build', options: <String>[
         target,
         '-v',
-        if (target == 'ios') '--no-codesign',
+        if (target == 'ios')
+          '--no-codesign',
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -231,17 +226,14 @@ class $dartPluginClass {
         // but the range of supported deployment target versions is 9.0 to 14.0.99.
         //
         // (or "The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET'"...)
-        if (buildOutput
-            .contains('the range of supported deployment target versions')) {
+        if (buildOutput.contains('the range of supported deployment target versions')) {
           throw TaskResult.failure('Minimum plugin version warning present');
         }
 
         if (validateNativeBuildProject) {
-          final File podsProject = File(path.join(
-              rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
+          final File podsProject = File(path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
           if (!podsProject.existsSync()) {
-            throw TaskResult.failure(
-                'Xcode Pods project file missing at ${podsProject.path}');
+            throw TaskResult.failure('Xcode Pods project file missing at ${podsProject.path}');
           }
 
           final String podsProjectContent = podsProject.readAsStringSync();
@@ -250,22 +242,17 @@ class $dartPluginClass {
             // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
             // in _reduceDarwinPluginMinimumVersion to 7, which is below the target version of 9.
             if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 7')) {
-              throw TaskResult.failure(
-                  'Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
+              throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
             }
-            if (!podsProjectContent.contains(
-                r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
-              throw TaskResult.failure(
-                  r'EXCLUDED_ARCHS is not "$(inherited) i386"');
+            if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+              throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
             }
           }
 
           // Same for macOS deployment target, but 10.8.
           // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-          if (target == 'macos' &&
-              podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
-            throw TaskResult.failure(
-                'Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
+          if (target == 'macos' && podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
+            throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
           }
         }
       }

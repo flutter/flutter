@@ -8,8 +8,7 @@ import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
@@ -32,8 +31,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify theme settings
-    MaterialApp app =
-        find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
+    MaterialApp app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme!.brightness, equals(Brightness.light));
     expect(app.darkTheme!.brightness, equals(Brightness.dark));
 
@@ -57,9 +55,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) =>
-            widget.runtimeType.toString() == 'PopupMenuItem<ThemeMode>'),
-        matching: find.text('System Default')));
+        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<ThemeMode>'),
+        matching: find.text('System Default')
+    ));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.themeMode, ThemeMode.system);
@@ -78,10 +76,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) =>
-            widget.runtimeType.toString() ==
-            'PopupMenuItem<GalleryVisualDensityValue>'),
-        matching: find.text('System Default')));
+        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryVisualDensityValue>'),
+        matching: find.text('System Default')
+    ));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme!.visualDensity, equals(VisualDensity.standard));
@@ -113,10 +110,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(1));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) =>
-            widget.runtimeType.toString() ==
-            'PopupMenuItem<GalleryTextScaleValue>'),
-        matching: find.text('System Default')));
+        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryTextScaleValue>'),
+        matching: find.text('System Default')
+    ));
     await tester.pumpAndSettle();
     textSize = tester.getSize(find.text('Text size'));
     expect(textSize, origTextSize);

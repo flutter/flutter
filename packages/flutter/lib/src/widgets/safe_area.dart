@@ -47,11 +47,11 @@ class SafeArea extends StatelessWidget {
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
-  })  : assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
-        super(key: key);
+  }) : assert(left != null),
+       assert(top != null),
+       assert(right != null),
+       assert(bottom != null),
+       super(key: key);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -121,14 +121,10 @@ class SafeArea extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties
-        .add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
-    properties.add(
-        FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
-    properties.add(
-        FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+    properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }
 
@@ -164,11 +160,11 @@ class SliverSafeArea extends StatelessWidget {
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     required this.sliver,
-  })  : assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
-        super(key: key);
+  }) : assert(left != null),
+       assert(top != null),
+       assert(right != null),
+       assert(bottom != null),
+       super(key: key);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -219,13 +215,9 @@ class SliverSafeArea extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties
-        .add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
-    properties.add(
-        FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
-    properties.add(
-        FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+    properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }

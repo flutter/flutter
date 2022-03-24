@@ -19,18 +19,18 @@ class IdeConfigCommand extends FlutterCommand {
       'update-templates',
       negatable: false,
       help: 'Update the templates in the template directory from the current '
-          'configuration files. This is the opposite of what $name usually does. '
-          'Will search the flutter tree for *.iml files and copy any missing ones '
-          'into the template directory. If "--overwrite" is also specified, it will '
-          'update any out-of-date files, and remove any deleted files from the '
-          'template directory.',
+            'configuration files. This is the opposite of what $name usually does. '
+            'Will search the flutter tree for *.iml files and copy any missing ones '
+            'into the template directory. If "--overwrite" is also specified, it will '
+            'update any out-of-date files, and remove any deleted files from the '
+            'template directory.',
     );
     argParser.addFlag(
       'with-root-module',
       defaultsTo: true,
       help: 'Also create module that corresponds to the root of Flutter tree. '
-          'This makes the entire Flutter tree browsable and searchable in IDE. '
-          'Without this flag, only the child modules will be visible in IDE.',
+            'This makes the entire Flutter tree browsable and searchable in IDE. '
+            'Without this flag, only the child modules will be visible in IDE.',
     );
   }
 
@@ -38,12 +38,10 @@ class IdeConfigCommand extends FlutterCommand {
   final String name = 'ide-config';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
-  final String description =
-      'Configure the IDE for use in the Flutter tree.\n\n'
+  final String description = 'Configure the IDE for use in the Flutter tree.\n\n'
       'If run on a Flutter tree that is already configured for the IDE, this '
       'command will add any new configurations, recreate any files that are '
       'missing. If --overwrite is specified, will revert existing files to '
@@ -79,8 +77,7 @@ class IdeConfigCommand extends FlutterCommand {
     ));
   }
 
-  Directory get _flutterRoot =>
-      globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot!));
+  Directory get _flutterRoot => globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot!));
 
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
@@ -123,11 +120,9 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     final Set<String> manifest = <String>{};
-    final Iterable<File> flutterFiles =
-        _flutterRoot.listSync(recursive: true).whereType<File>();
+    final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
     for (final File srcFile in flutterFiles) {
-      final String relativePath = globals.fs.path
-          .relative(srcFile.path, from: _flutterRoot.absolute.path);
+      final String relativePath = globals.fs.path.relative(srcFile.path, from: _flutterRoot.absolute.path);
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
@@ -143,18 +138,15 @@ class IdeConfigCommand extends FlutterCommand {
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
           (trackedIdeaFileRegExp.hasMatch(relativePath) ||
               _hasDirectoryInPath(srcFile, 'runConfigurations'));
-      final bool isAnImlOutsideIdea =
-          !isATrackedIdeaFile && srcFile.path.endsWith('.iml');
+      final bool isAnImlOutsideIdea = !isATrackedIdeaFile && srcFile.path.endsWith('.iml');
       if (!isATrackedIdeaFile && !isAnImlOutsideIdea) {
         continue;
       }
 
-      final File finalDestinationFile = globals.fs.file(globals.fs.path
-          .absolute(_templateDirectory.absolute.path,
-              '$relativePath${Template.copyTemplateExtension}'));
-      final String relativeDestination = globals.fs.path.relative(
-          finalDestinationFile.path,
-          from: _flutterRoot.absolute.path);
+      final File finalDestinationFile = globals.fs.file(globals.fs.path.absolute(
+          _templateDirectory.absolute.path, '$relativePath${Template.copyTemplateExtension}'));
+      final String relativeDestination =
+          globals.fs.path.relative(finalDestinationFile.path, from: _flutterRoot.absolute.path);
       if (finalDestinationFile.existsSync()) {
         if (_fileIsIdentical(srcFile, finalDestinationFile)) {
           globals.printTrace('  $relativeDestination (identical)');
@@ -172,11 +164,9 @@ class IdeConfigCommand extends FlutterCommand {
       } else {
         globals.printStatus('  $relativeDestination (added)');
       }
-      final Directory finalDestinationDir =
-          globals.fs.directory(finalDestinationFile.dirname);
+      final Directory finalDestinationDir = globals.fs.directory(finalDestinationFile.dirname);
       if (!finalDestinationDir.existsSync()) {
-        globals.printTrace(
-            "  ${finalDestinationDir.path} doesn't exist, creating.");
+        globals.printTrace("  ${finalDestinationDir.path} doesn't exist, creating.");
         finalDestinationDir.createSync(recursive: true);
       }
       srcFile.copySync(finalDestinationFile.path);
@@ -190,8 +180,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     // Look for any files under the template dir that don't exist in the manifest and remove
     // them.
-    final Iterable<File> templateFiles =
-        _templateDirectory.listSync(recursive: true).whereType<File>();
+    final Iterable<File> templateFiles = _templateDirectory.listSync(recursive: true).whereType<File>();
     for (final File templateFile in templateFiles) {
       final String relativePath = globals.fs.path.relative(
         templateFile.absolute.path,
@@ -199,8 +188,8 @@ class IdeConfigCommand extends FlutterCommand {
       );
       if (!manifest.contains(relativePath)) {
         templateFile.deleteSync();
-        final String relativeDestination = globals.fs.path
-            .relative(templateFile.path, from: _flutterRoot.absolute.path);
+        final String relativeDestination =
+            globals.fs.path.relative(templateFile.path, from: _flutterRoot.absolute.path);
         globals.printStatus('  $relativeDestination (removed)');
       }
       // If the directory is now empty, then remove it, and do the same for its parent,
@@ -208,11 +197,9 @@ class IdeConfigCommand extends FlutterCommand {
       Directory parentDir = globals.fs.directory(templateFile.dirname);
       while (parentDir.listSync().isEmpty) {
         parentDir.deleteSync();
-        globals.printTrace(
-            '  ${globals.fs.path.relative(parentDir.absolute.path)} (empty directory - removed)');
+        globals.printTrace('  ${globals.fs.path.relative(parentDir.absolute.path)} (empty directory - removed)');
         parentDir = globals.fs.directory(parentDir.dirname);
-        if (globals.fs.path.isWithin(
-            _templateDirectory.absolute.path, parentDir.absolute.path)) {
+        if (globals.fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
           break;
         }
       }
@@ -223,8 +210,7 @@ class IdeConfigCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.isNotEmpty) {
-      throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage',
-          exitCode: 2);
+      throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
 
     if (boolArg('update-templates')) {
@@ -234,20 +220,15 @@ class IdeConfigCommand extends FlutterCommand {
 
     final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot!);
     final String dirPath = globals.fs.path.normalize(
-      globals.fs
-          .directory(globals.fs.path.absolute(Cache.flutterRoot!))
-          .absolute
-          .path,
+      globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot!)).absolute.path,
     );
 
-    final String? error =
-        _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
+    final String? error = _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
     if (error != null) {
       throwToolExit(error);
     }
 
-    globals.printStatus(
-        'Updating IDE configuration for Flutter tree at $dirPath...');
+    globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
@@ -256,15 +237,13 @@ class IdeConfigCommand extends FlutterCommand {
 
     globals.printStatus('Wrote $generatedCount files.');
     globals.printStatus('');
-    globals.printStatus(
-        'Your IntelliJ configuration is now up to date. It is prudent to '
+    globals.printStatus('Your IntelliJ configuration is now up to date. It is prudent to '
         'restart IntelliJ, if running.');
 
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(
-      String templateName, String dirPath, Map<String, Object> context) {
+  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
     final Template template = Template(
       _templateDirectory,
       null,
@@ -282,11 +261,10 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String? _validateFlutterDir(String dirPath, {String? flutterRoot}) {
+String? _validateFlutterDir(String dirPath, { String? flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  switch (type) {
-    // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
+  switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
     case FileSystemEntityType.link:
       // Do not overwrite links.
       return "Invalid project root dir: '$dirPath' - refers to a link.";

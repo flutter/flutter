@@ -260,8 +260,7 @@ class AssetImage extends AssetBundleImageProvider {
   /// The name used to generate the key to obtain the asset. For local assets
   /// this is [assetName], and for assets from packages the [assetName] is
   /// prefixed 'packages/<package_name>/'.
-  String get keyName =>
-      package == null ? assetName : 'packages/$package/$assetName';
+  String get keyName => package == null ? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.
   ///
@@ -288,15 +287,11 @@ class AssetImage extends AssetBundleImageProvider {
     // which all happens in one call frame; using native Futures would guarantee
     // that we resolve each future in a new call frame, and thus not in this
     // build/layout/paint sequence.)
-    final AssetBundle chosenBundle =
-        bundle ?? configuration.bundle ?? rootBundle;
+    final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle
-        .loadStructuredData<Map<String, List<String>>?>(
-            _kAssetManifestFileName, _manifestParser)
-        .then<void>(
+    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, _manifestParser).then<void>(
       (Map<String, List<String>>? manifest) {
         final String chosenName = _chooseVariant(
           keyName,
@@ -344,22 +339,18 @@ class AssetImage extends AssetBundleImageProvider {
     if (jsonData == null)
       return SynchronousFuture<Map<String, List<String>>?>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson =
-        json.decode(jsonData) as Map<String, dynamic>;
+    final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>>{
-      for (final String key in keys)
-        key: List<String>.from(parsedJson[key] as List<dynamic>),
+    final Map<String, List<String>> parsedManifest = <String, List<String>> {
+      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
     // TODO(ianh): convert that data structure to the right types.
     return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
 
-  String? _chooseVariant(
-      String main, ImageConfiguration config, List<String>? candidates) {
-    if (config.devicePixelRatio == null ||
-        candidates == null ||
-        candidates.isEmpty) return main;
+  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
+    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
+      return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
     for (final String candidate in candidates)
@@ -382,13 +373,15 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  String? _findBestVariant(
-      SplayTreeMap<double, String> candidates, double value) {
-    if (candidates.containsKey(value)) return candidates[value]!;
+  String? _findBestVariant(SplayTreeMap<double, String> candidates, double value) {
+    if (candidates.containsKey(value))
+      return candidates[value]!;
     final double? lower = candidates.lastKeyBefore(value);
     final double? upper = candidates.firstKeyAfter(value);
-    if (lower == null) return candidates[upper];
-    if (upper == null) return candidates[lower];
+    if (lower == null)
+      return candidates[upper];
+    if (upper == null)
+      return candidates[lower];
 
     // On screens with low device-pixel ratios the artifacts from upscaling
     // images are more visible than on screens with a higher device-pixel
@@ -421,16 +414,16 @@ class AssetImage extends AssetBundleImageProvider {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is AssetImage &&
-        other.keyName == keyName &&
-        other.bundle == bundle;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is AssetImage
+        && other.keyName == keyName
+        && other.bundle == bundle;
   }
 
   @override
   int get hashCode => Object.hash(keyName, bundle);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
+  String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
 }

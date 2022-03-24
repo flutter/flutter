@@ -54,16 +54,13 @@ class NoSplash extends InteractiveInkFeature {
     required RenderBox referenceBox,
     required Color color,
     VoidCallback? onRemoved,
-  }) : super(
-            controller: controller,
-            referenceBox: referenceBox,
-            color: color,
-            onRemoved: onRemoved);
+  }) : super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved);
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
   /// material [Theme], or [ButtonStyle].
   static const InteractiveInkFeatureFactory splashFactory = _NoSplashFactory();
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {}
+  void paintFeature(Canvas canvas, Matrix4 transform) {
+  }
 }

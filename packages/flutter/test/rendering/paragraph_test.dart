@@ -11,8 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-const String _kText =
-    "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
 // A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
 // for a given TextSelection.
@@ -85,28 +84,24 @@ void main() {
 
     const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
 
-    final Offset offset5 =
-        paragraph.getOffsetForCaret(const TextPosition(offset: 5), caret);
+    final Offset offset5 = paragraph.getOffsetForCaret(const TextPosition(offset: 5), caret);
     expect(offset5.dx, greaterThan(0.0));
 
-    final Offset offset25 =
-        paragraph.getOffsetForCaret(const TextPosition(offset: 25), caret);
+    final Offset offset25 = paragraph.getOffsetForCaret(const TextPosition(offset: 25), caret);
     expect(offset25.dx, greaterThan(offset5.dx));
 
-    final Offset offset50 =
-        paragraph.getOffsetForCaret(const TextPosition(offset: 50), caret);
+    final Offset offset50 = paragraph.getOffsetForCaret(const TextPosition(offset: 50), caret);
     expect(offset50.dy, greaterThan(offset5.dy));
   });
 
   test('getFullHeightForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
+      const TextSpan(text: _kText,style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
 
-    final double height5 =
-        paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
     expect(height5, equals(10.0));
   });
 
@@ -117,16 +112,13 @@ void main() {
     );
     layout(paragraph);
 
-    final TextPosition position20 =
-        paragraph.getPositionForOffset(const Offset(20.0, 5.0));
+    final TextPosition position20 = paragraph.getPositionForOffset(const Offset(20.0, 5.0));
     expect(position20.offset, greaterThan(0.0));
 
-    final TextPosition position40 =
-        paragraph.getPositionForOffset(const Offset(40.0, 5.0));
+    final TextPosition position40 = paragraph.getPositionForOffset(const Offset(40.0, 5.0));
     expect(position40.offset, greaterThan(position20.offset));
 
-    final TextPosition positionBelow =
-        paragraph.getPositionForOffset(const Offset(5.0, 20.0));
+    final TextPosition positionBelow = paragraph.getPositionForOffset(const Offset(5.0, 20.0));
     expect(positionBelow.offset, greaterThan(position40.offset));
   });
 
@@ -147,10 +139,8 @@ void main() {
       const TextSelection(baseOffset: 25, extentOffset: 50),
     );
 
-    expect(
-        boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
-    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10),
-        isTrue);
+    expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
+    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('getBoxesForSelection test with multiple TextSpans and lines', () {
@@ -189,24 +179,16 @@ void main() {
     // alignment becomes (10px * 0.8 - 5px * 0.8) = 4px.
 
     // 'First ':
-    expect(boxes[0],
-        const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
     // 'smallsecond ' in size 5:
-    expect(boxes[1],
-        const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
     // 'third fourth ':
-    expect(boxes[2],
-        const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
-    expect(boxes[3],
-        const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  },
-      skip:
-          !isLinux); // mac typography values can differ https://github.com/flutter/flutter/issues/12357
+    expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
+  }, skip: !isLinux); // mac typography values can differ https://github.com/flutter/flutter/issues/12357
 
-  test(
-      'getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max',
-      () {
+  test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
@@ -237,20 +219,15 @@ void main() {
     expect(boxes.length, equals(5));
 
     // 'First ':
-    expect(boxes[0],
-        const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
     // 'smallsecond ' in size 8, but on same line as previous box, so height remains 10:
-    expect(boxes[1],
-        const TextBox.fromLTRBD(60.0, 0.0, 156.0, 10.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 0.0, 156.0, 10.0, TextDirection.ltr));
     // 'third fourth ':
-    expect(boxes[2],
-        const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // extra box added to extend width, as per definition of ui.BoxWidthStyle.max:
-    expect(boxes[3],
-        const TextBox.fromLTRBD(130.0, 10.0, 156.0, 20.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(130.0, 10.0, 156.0, 20.0, TextDirection.ltr));
     // 'fifth':
-    expect(boxes[4],
-        const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('getWordBoundary control test', () {
@@ -260,25 +237,21 @@ void main() {
     );
     layout(paragraph);
 
-    final TextRange range5 =
-        paragraph.getWordBoundary(const TextPosition(offset: 5));
+    final TextRange range5 = paragraph.getWordBoundary(const TextPosition(offset: 5));
     expect(range5.textInside(_kText), equals('polished'));
 
-    final TextRange range50 =
-        paragraph.getWordBoundary(const TextPosition(offset: 50));
+    final TextRange range50 = paragraph.getWordBoundary(const TextPosition(offset: 50));
     expect(range50.textInside(_kText), equals(' '));
 
-    final TextRange range85 =
-        paragraph.getWordBoundary(const TextPosition(offset: 75));
+    final TextRange range85 = paragraph.getWordBoundary(const TextPosition(offset: 75));
     expect(range85.textInside(_kText), equals("Queen's"));
   });
 
   test('overflow test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        text:
-            'This\n' // 4 characters * 10px font size = 40px width on the first line
-            'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
+        text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
+              'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
         style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
@@ -298,9 +271,7 @@ void main() {
     }
 
     // Lay out in a narrow box to force wrapping.
-    layout(paragraph,
-        constraints: const BoxConstraints(
-            maxWidth: 50.0)); // enough to fit "This" but not "This is"
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0)); // enough to fit "This" but not "This is"
     final double lineHeight = paragraph.size.height;
 
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);
@@ -358,10 +329,9 @@ void main() {
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        text:
-            "How do you write like you're running out of time? Write day and night like you're running out of time?",
-        // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
-        // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
+            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+            // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
@@ -393,9 +363,7 @@ void main() {
       ),
       textDirection: TextDirection.ltr,
     );
-    layout(paragraph,
-        constraints: const BoxConstraints(maxWidth: 100.0),
-        phase: EnginePhase.paint);
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0), phase: EnginePhase.paint);
     expect(paragraph.debugNeedsLayout, isFalse);
     expect(paragraph.debugNeedsPaint, isFalse);
     paragraph.text = const TextSpan(
@@ -440,9 +408,9 @@ void main() {
       ],
     );
     final RenderParagraph paragraph = RenderParagraph(
-      testSpan,
-      textDirection: TextDirection.ltr,
-      textScaleFactor: 1.3,
+        testSpan,
+        textDirection: TextDirection.ltr,
+        textScaleFactor: 1.3,
     );
     paragraph.layout(const BoxConstraints());
     // anyOf is needed here because Linux and Mac have different text
@@ -531,12 +499,9 @@ void main() {
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
 
     final RenderParagraph paragraph = RenderParagraph(
@@ -551,16 +516,11 @@ void main() {
     );
 
     expect(boxes.length, equals(5));
-    expect(boxes[0],
-        const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
-    expect(boxes[1],
-        const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
-    expect(boxes[2],
-        const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3],
-        const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
-    expect(boxes[4],
-        const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('getBoxesForSelection with boxHeightStyle for inline widgets', () {
@@ -579,12 +539,9 @@ void main() {
     // of these get used in place of the widths and heights specified in the
     // SizedBoxes above: each comes out as (w,h) = (14,14).
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
 
     final RenderParagraph paragraph = RenderParagraph(
@@ -600,16 +557,11 @@ void main() {
     );
 
     expect(boxes.length, equals(5));
-    expect(boxes[0],
-        const TextBox.fromLTRBD(0.0, 0.0, 10.0, 14.0, TextDirection.ltr));
-    expect(boxes[1],
-        const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
-    expect(boxes[2],
-        const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3],
-        const TextBox.fromLTRBD(38.0, 0.0, 48.0, 14.0, TextDirection.ltr));
-    expect(boxes[4],
-        const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 0.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('can compute IntrinsicHeight for widget span', () {
@@ -617,12 +569,11 @@ void main() {
     const double screenWidth = 100.0;
     const String sentence = 'one two';
     List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan>[
+        children: <InlineSpan> [
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -630,18 +581,16 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double singleLineHeight =
-        paragraph.computeMaxIntrinsicHeight(screenWidth);
+    final double singleLineHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
     expect(singleLineHeight, 14.0);
 
     pumpFrame();
     renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan>[
+        children: <InlineSpan> [
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -651,10 +600,8 @@ void main() {
     );
 
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double maxIntrinsicHeight =
-        paragraph.computeMaxIntrinsicHeight(screenWidth);
-    final double minIntrinsicHeight =
-        paragraph.computeMinIntrinsicHeight(screenWidth);
+    final double maxIntrinsicHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
+    final double minIntrinsicHeight = paragraph.computeMinIntrinsicHeight(screenWidth);
     // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
     expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
     expect(maxIntrinsicHeight, minIntrinsicHeight);
@@ -666,12 +613,11 @@ void main() {
     const double fixedHeight = 1000.0;
     const String sentence = 'one two';
     List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan>[
+        children: <InlineSpan> [
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -679,18 +625,16 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double widthForOneLine =
-        paragraph.computeMaxIntrinsicWidth(fixedHeight);
+    final double widthForOneLine = paragraph.computeMaxIntrinsicWidth(fixedHeight);
     expect(widthForOneLine, 98.0);
 
     pumpFrame();
     renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan>[
+        children: <InlineSpan> [
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -700,8 +644,7 @@ void main() {
     );
 
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double maxIntrinsicWidth =
-        paragraph.computeMaxIntrinsicWidth(fixedHeight);
+    final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
     // maxIntrinsicWidth = widthForOneLine * textScaleFactor
     expect(maxIntrinsicWidth, widthForOneLine * 2.0);
   });
@@ -724,20 +667,13 @@ void main() {
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
 
     final RenderParagraph paragraph = RenderParagraph(
@@ -752,36 +688,26 @@ void main() {
     );
 
     expect(boxes.length, equals(9));
-    expect(boxes[0],
-        const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
-    expect(boxes[1],
-        const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
-    expect(boxes[2],
-        const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3],
-        const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     // Wraps
-    expect(boxes[4],
-        const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0, TextDirection.ltr));
-    expect(boxes[5],
-        const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
-    expect(boxes[6],
-        const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
+    expect(boxes[5], const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
+    expect(boxes[6], const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
     // Wraps
-    expect(boxes[7],
-        const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
-    expect(boxes[8],
-        const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0, TextDirection.ltr));
+    expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
+    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-  test('Does not include the semantics node of truncated rendering children',
-      () {
+  test('Does not include the semantics node of truncated rendering children', () {
     // Regression test for https://github.com/flutter/flutter/issues/88180
     const double screenWidth = 100;
     const String sentence = 'truncated';
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(
+          const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
@@ -797,11 +723,8 @@ void main() {
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
     final SemanticsNode result = SemanticsNode();
     final SemanticsNode truncatedChild = SemanticsNode();
-    truncatedChild.tags = <SemanticsTag>{
-      const PlaceholderSpanIndexSemanticsTag(0)
-    };
-    paragraph.assembleSemanticsNode(
-        result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
+    truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
+    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
     // It should only contain the semantics node of the TextSpan.
     expect(result.childrenCount, 1);
     result.visitChildren((SemanticsNode node) {
@@ -810,24 +733,18 @@ void main() {
     });
   });
 
-  test('Supports gesture recognizer semantics', () {
+    test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(
-            text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(
-            text: 'two',
-            recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
-        TextSpan(
-            text: 'three',
-            recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
+        TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+        TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
       ]),
       textDirection: TextDirection.rtl,
     );
     layout(paragraph);
 
-    paragraph.assembleSemanticsNode(
-        SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+    paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
   });
 
   test('Supports empty text span with spell out', () {
@@ -837,8 +754,7 @@ void main() {
     );
     layout(paragraph);
     final SemanticsNode node = SemanticsNode();
-    paragraph.assembleSemanticsNode(
-        node, SemanticsConfiguration(), <SemanticsNode>[]);
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.attributedLabel.string, '');
     expect(node.attributedLabel.attributes.length, 0);
   });
@@ -846,9 +762,7 @@ void main() {
   test('Asserts on unsupported gesture recognizer', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(
-            text: 'three',
-            recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
+        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
       ]),
       textDirection: TextDirection.rtl,
     );
@@ -856,8 +770,7 @@ void main() {
 
     bool failed = false;
     try {
-      paragraph.assembleSemanticsNode(
-          SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+      paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
     } on AssertionError catch (e) {
       failed = true;
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
@@ -865,9 +778,7 @@ void main() {
     expect(failed, true);
   });
 
-  test(
-      'assembleSemanticsNode handles text spans that do not yield selection boxes',
-      () {
+  test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
     final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
       TextSpan(text: '', children: <InlineSpan>[
         TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -880,25 +791,20 @@ void main() {
     layout(paragraph);
 
     final SemanticsNode node = SemanticsNode();
-    paragraph.assembleSemanticsNode(
-        node, SemanticsConfiguration(), <SemanticsNode>[]);
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
 
-  test(
-      'assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes',
-      () {
+  test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
       TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
       const WidgetSpan(child: SizedBox(width: 0, height: 0)),
       TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
     ]);
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: 'b'),
-          textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
-    final RenderParagraph paragraph =
-        RenderParagraphWithEmptyBoxListForWidgetSpan(
+    final RenderParagraph paragraph = RenderParagraphWithEmptyBoxListForWidgetSpan(
       text,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
@@ -906,8 +812,7 @@ void main() {
     layout(paragraph);
 
     final SemanticsNode node = SemanticsNode();
-    paragraph.assembleSemanticsNode(
-        node, SemanticsConfiguration(), <SemanticsNode>[]);
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 }

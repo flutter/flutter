@@ -139,10 +139,8 @@ class FittedSizes {
 ///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
 ///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
-  if (inputSize.height <= 0.0 ||
-      inputSize.width <= 0.0 ||
-      outputSize.height <= 0.0 ||
-      outputSize.width <= 0.0) return const FittedSizes(Size.zero, Size.zero);
+  if (inputSize.height <= 0.0 || inputSize.width <= 0.0 || outputSize.height <= 0.0 || outputSize.width <= 0.0)
+    return const FittedSizes(Size.zero, Size.zero);
 
   Size sourceSize, destinationSize;
   switch (fit) {
@@ -152,43 +150,29 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       break;
     case BoxFit.contain:
       sourceSize = inputSize;
-      if (outputSize.width / outputSize.height >
-          sourceSize.width / sourceSize.height)
-        destinationSize = Size(
-            sourceSize.width * outputSize.height / sourceSize.height,
-            outputSize.height);
+      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
+        destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       else
-        destinationSize = Size(outputSize.width,
-            sourceSize.height * outputSize.width / sourceSize.width);
+        destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
     case BoxFit.cover:
-      if (outputSize.width / outputSize.height >
-          inputSize.width / inputSize.height) {
-        sourceSize = Size(inputSize.width,
-            inputSize.width * outputSize.height / outputSize.width);
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
+        sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
       } else {
-        sourceSize = Size(
-            inputSize.height * outputSize.width / outputSize.height,
-            inputSize.height);
+        sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
       }
       destinationSize = outputSize;
       break;
     case BoxFit.fitWidth:
-      sourceSize = Size(inputSize.width,
-          inputSize.width * outputSize.height / outputSize.width);
-      destinationSize = Size(outputSize.width,
-          sourceSize.height * outputSize.width / sourceSize.width);
+      sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
+      destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
     case BoxFit.fitHeight:
-      sourceSize = Size(inputSize.height * outputSize.width / outputSize.height,
-          inputSize.height);
-      destinationSize = Size(
-          sourceSize.width * outputSize.height / sourceSize.height,
-          outputSize.height);
+      sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+      destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       break;
     case BoxFit.none:
-      sourceSize = Size(math.min(inputSize.width, outputSize.width),
-          math.min(inputSize.height, outputSize.height));
+      sourceSize = Size(math.min(inputSize.width, outputSize.width), math.min(inputSize.height, outputSize.height));
       destinationSize = sourceSize;
       break;
     case BoxFit.scaleDown:
@@ -196,11 +180,9 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       destinationSize = inputSize;
       final double aspectRatio = inputSize.width / inputSize.height;
       if (destinationSize.height > outputSize.height)
-        destinationSize =
-            Size(outputSize.height * aspectRatio, outputSize.height);
+        destinationSize = Size(outputSize.height * aspectRatio, outputSize.height);
       if (destinationSize.width > outputSize.width)
-        destinationSize =
-            Size(outputSize.width, outputSize.width / aspectRatio);
+        destinationSize = Size(outputSize.width, outputSize.width / aspectRatio);
       break;
   }
   return FittedSizes(sourceSize, destinationSize);

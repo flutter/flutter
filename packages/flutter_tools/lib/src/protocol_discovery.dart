@@ -22,8 +22,8 @@ class ProtocolDiscovery {
     this.devicePort,
     required this.ipv6,
     required Logger logger,
-  })  : _logger = logger,
-        assert(logReader != null) {
+  }) : _logger = logger,
+       assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(
       _handleLine,
       onDone: _stopScrapingLogs,
@@ -64,8 +64,7 @@ class ProtocolDiscovery {
   final Duration throttleDuration;
 
   StreamSubscription<String>? _deviceLogSubscription;
-  final _BufferedStreamController<Uri> _uriStreamController =
-      _BufferedStreamController<Uri>();
+  final _BufferedStreamController<Uri> _uriStreamController = _BufferedStreamController<Uri>();
 
   /// The discovered service URL.
   ///
@@ -90,10 +89,10 @@ class ProtocolDiscovery {
   /// Port forwarding is only attempted when this is invoked,
   /// for each observatory URL in the stream.
   Stream<Uri> get uris {
-    final Stream<Uri> uriStream =
-        _uriStreamController.stream.transform(_throttle<Uri>(
-      waitDuration: throttleDuration,
-    ));
+    final Stream<Uri> uriStream = _uriStreamController.stream
+      .transform(_throttle<Uri>(
+        waitDuration: throttleDuration,
+      ));
     return uriStream.asyncMap<Uri>(_forwardPort);
   }
 
@@ -128,8 +127,7 @@ class ProtocolDiscovery {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      _logger.printTrace(
-          'skipping potential observatory $uri due to device port mismatch');
+      _logger.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);
@@ -142,10 +140,8 @@ class ProtocolDiscovery {
     final DevicePortForwarder? forwarder = portForwarder;
     if (forwarder != null) {
       final int actualDevicePort = deviceUri.port;
-      final int actualHostPort =
-          await forwarder.forward(actualDevicePort, hostPort: hostPort);
-      _logger.printTrace(
-          'Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      final int actualHostPort = await forwarder.forward(actualDevicePort, hostPort: hostPort);
+      _logger.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
@@ -168,9 +164,8 @@ class _BufferedStreamController<T> {
   }
 
   late final StreamController<T> _streamController = () {
-    final StreamController<T> streamControllerInstance =
-        StreamController<T>.broadcast();
-    streamControllerInstance.onListen = () {
+    final StreamController<T> streamControllerInstance = StreamController<T>.broadcast();
+      streamControllerInstance.onListen = () {
       for (final dynamic event in _events) {
         assert(T is! List);
         if (event is T) {
@@ -229,32 +224,34 @@ StreamTransformer<S, S> _throttle<S>({
   Future<void>? throttleFuture;
   bool done = false;
 
-  return StreamTransformer<S, S>.fromHandlers(
+  return StreamTransformer<S, S>
+    .fromHandlers(
       handleData: (S value, EventSink<S> sink) {
-    latestLine = value;
+        latestLine = value;
 
-    final bool isFirstMessage = lastExecution == null;
-    final int currentTime = DateTime.now().millisecondsSinceEpoch;
-    lastExecution ??= currentTime;
-    final int remainingTime = currentTime - lastExecution!;
+        final bool isFirstMessage = lastExecution == null;
+        final int currentTime = DateTime.now().millisecondsSinceEpoch;
+        lastExecution ??= currentTime;
+        final int remainingTime = currentTime - lastExecution!;
 
-    // Always send the first event immediately.
-    final int nextExecutionTime =
-        isFirstMessage || remainingTime > waitDuration.inMilliseconds
-            ? 0
-            : waitDuration.inMilliseconds - remainingTime;
-    throttleFuture ??=
-        Future<void>.delayed(Duration(milliseconds: nextExecutionTime))
-            .whenComplete(() {
-      if (done) {
-        return;
+        // Always send the first event immediately.
+        final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
+          ? 0
+          : waitDuration.inMilliseconds - remainingTime;
+        throttleFuture ??= Future<void>
+          .delayed(Duration(milliseconds: nextExecutionTime))
+          .whenComplete(() {
+            if (done) {
+              return;
+            }
+            sink.add(latestLine);
+            throttleFuture = null;
+            lastExecution = DateTime.now().millisecondsSinceEpoch;
+          });
+      },
+      handleDone: (EventSink<S> sink) {
+        done = true;
+        sink.close();
       }
-      sink.add(latestLine);
-      throttleFuture = null;
-      lastExecution = DateTime.now().millisecondsSinceEpoch;
-    });
-  }, handleDone: (EventSink<S> sink) {
-    done = true;
-    sink.close();
-  });
+    );
 }

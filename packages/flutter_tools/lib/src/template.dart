@@ -38,9 +38,7 @@ const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  factory Template(
-    Directory templateSource,
-    Directory? imageSourceDir, {
+  factory Template(Directory templateSource, Directory? imageSourceDir, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
@@ -57,54 +55,45 @@ class Template {
   }
 
   Template._(
-    List<Directory> templateSources,
-    this.imageSourceDirectories, {
+    List<Directory> templateSources, this.imageSourceDirectories, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
     required Set<Uri>? templateManifest,
-  })  : _fileSystem = fileSystem,
-        _logger = logger,
-        _templateRenderer = templateRenderer,
-        _templateManifest = templateManifest ?? <Uri>{} {
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _templateRenderer = templateRenderer,
+       _templateManifest = templateManifest ?? <Uri>{} {
     for (final Directory sourceDirectory in templateSources) {
       if (!sourceDirectory.existsSync()) {
-        throwToolExit(
-            'Template source directory does not exist: ${sourceDirectory.absolute.path}');
+        throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
       }
     }
 
-    final Map<FileSystemEntity, Directory> templateFiles =
-        <FileSystemEntity, Directory>{
+    final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
       for (final Directory sourceDirectory in templateSources)
-        for (final FileSystemEntity entity
-            in sourceDirectory.listSync(recursive: true))
+        for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true))
           entity: sourceDirectory,
     };
-    for (final FileSystemEntity entity
-        in templateFiles.keys.whereType<File>()) {
-      if (_templateManifest.isNotEmpty &&
-          !_templateManifest.contains(Uri.file(entity.absolute.path))) {
-        _logger.printTrace(
-            'Skipping ${entity.absolute.path}, missing from the template manifest.');
+    for (final FileSystemEntity entity in templateFiles.keys.whereType<File>()) {
+      if (_templateManifest.isNotEmpty && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
+        _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
       }
 
-      final String relativePath = fileSystem.path
-          .relative(entity.path, from: templateFiles[entity]!.absolute.path);
+      final String relativePath = fileSystem.path.relative(entity.path,
+          from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] =
-            fileSystem.path.absolute(entity.path);
+        _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
     }
   }
 
-  static Future<Template> fromName(
-    String name, {
+  static Future<Template> fromName(String name, {
     required FileSystem fileSystem,
     required Set<Uri>? templateManifest,
     required Logger logger,
@@ -112,8 +101,7 @@ class Template {
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
-    final Directory imageDir =
-        await _templateImageDirectory(name, fileSystem, logger);
+    final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
     return Template._(
       <Directory>[templateDir],
       <Directory>[imageDir],
@@ -124,9 +112,7 @@ class Template {
     );
   }
 
-  static Future<Template> merged(
-    List<String> names,
-    Directory directory, {
+  static Future<Template> merged(List<String> names, Directory directory, {
     required FileSystem fileSystem,
     required Set<Uri> templateManifest,
     required Logger logger,
@@ -140,8 +126,7 @@ class Template {
       ],
       <Directory>[
         for (final String name in names)
-          if ((await _templateImageDirectory(name, fileSystem, logger))
-              .existsSync())
+          if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
             await _templateImageDirectory(name, fileSystem, logger)
       ],
       fileSystem: fileSystem,
@@ -163,8 +148,7 @@ class Template {
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
   final List<Directory> imageSourceDirectories;
 
-  final Map<String /* relative */, String /* absolute source */ >
-      _templateFilePaths = <String, String>{};
+  final Map<String /* relative */, String /* absolute source */> _templateFilePaths = <String, String>{};
 
   /// Render the template into [directory].
   ///
@@ -182,8 +166,7 @@ class Template {
       throwToolExit('Failed to flutter create at ${destination.path}.');
     }
     int fileCount = 0;
-    final bool implementationTests =
-        (context['implementationTests'] as bool?) ?? false;
+    final bool implementationTests = (context['implementationTests'] as bool?) ?? false;
 
     /// Returns the resolved destination path corresponding to the specified
     /// raw destination path, after performing language filtering and template
@@ -191,16 +174,14 @@ class Template {
     ///
     /// Returns null if the given raw destination path has been filtered.
     String? renderPath(String relativeDestinationPath) {
-      final Match? match =
-          _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
+      final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1)!;
         final String? language = context['${platform}Language'] as String?;
         if (language != match.group(2)) {
           return null;
         }
-        relativeDestinationPath = relativeDestinationPath.replaceAll(
-            '$platform-$language.tmpl', platform);
+        relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
 
       final bool android = (context['android'] as bool?) ?? false;
@@ -242,47 +223,40 @@ class Template {
       final String? projectName = context['projectName'] as String?;
       final String? androidIdentifier = context['androidIdentifier'] as String?;
       final String? pluginClass = context['pluginClass'] as String?;
-      final String? pluginClassSnakeCase =
-          context['pluginClassSnakeCase'] as String?;
+      final String? pluginClassSnakeCase = context['pluginClassSnakeCase'] as String?;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
-          .join(destinationDirPath, relativeDestinationPath)
-          .replaceAll(copyTemplateExtension, '')
-          .replaceAll(imageTemplateExtension, '')
-          .replaceAll(testTemplateExtension, '')
-          .replaceAll(templateExtension, '');
+        .join(destinationDirPath, relativeDestinationPath)
+        .replaceAll(copyTemplateExtension, '')
+        .replaceAll(imageTemplateExtension, '')
+        .replaceAll(testTemplateExtension, '')
+        .replaceAll(templateExtension, '');
 
       if (android != null && android && androidIdentifier != null) {
-        finalDestinationPath = finalDestinationPath.replaceAll(
-            'androidIdentifier',
-            androidIdentifier.replaceAll('.', pathSeparator));
+        finalDestinationPath = finalDestinationPath
+            .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
       if (projectName != null) {
-        finalDestinationPath =
-            finalDestinationPath.replaceAll('projectName', projectName);
+        finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       }
       // This must be before the pluginClass replacement step.
       if (pluginClassSnakeCase != null) {
-        finalDestinationPath = finalDestinationPath.replaceAll(
-            'pluginClassSnakeCase', pluginClassSnakeCase);
+        finalDestinationPath = finalDestinationPath.replaceAll('pluginClassSnakeCase', pluginClassSnakeCase);
       }
       if (pluginClass != null) {
-        finalDestinationPath =
-            finalDestinationPath.replaceAll('pluginClass', pluginClass);
+        finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
       }
       return finalDestinationPath;
     }
 
-    _templateFilePaths
-        .forEach((String relativeDestinationPath, String absoluteSourcePath) {
+    _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final bool withRootModule = context['withRootModule'] as bool? ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
       }
 
-      if (!implementationTests &&
-          absoluteSourcePath.contains(testTemplateExtension)) {
+      if (!implementationTests && absoluteSourcePath.contains(testTemplateExtension)) {
         return;
       }
 
@@ -291,8 +265,7 @@ class Template {
         return;
       }
       final File finalDestinationFile = _fileSystem.file(finalDestinationPath);
-      final String relativePathForLogging =
-          _fileSystem.path.relative(finalDestinationFile.path);
+      final String relativePathForLogging = _fileSystem.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
@@ -305,8 +278,7 @@ class Template {
         } else {
           // The file exists but we cannot overwrite it, move on.
           if (printStatusWhenWriting) {
-            _logger
-                .printTrace('  $relativePathForLogging (existing - skipped)');
+            _logger.printTrace('  $relativePathForLogging (existing - skipped)');
           }
           return;
         }
@@ -336,13 +308,12 @@ class Template {
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
         final List<File> potentials = <File>[
           for (final Directory imageSourceDir in imageSourceDirectories)
-            _fileSystem.file(_fileSystem.path.join(imageSourceDir.path,
-                relativeDestinationPath.replaceAll(imageTemplateExtension, '')))
+            _fileSystem.file(_fileSystem.path
+                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')))
         ];
 
         if (potentials.any((File file) => file.existsSync())) {
-          final File imageSourceFile =
-              potentials.firstWhere((File file) => file.existsSync());
+          final File imageSourceFile = potentials.firstWhere((File file) => file.existsSync());
 
           imageSourceFile.copySync(finalDestinationFile.path);
         } else {
@@ -357,16 +328,12 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String? androidIdentifier =
-            context['androidIdentifier'] as String?;
-        if (finalDestinationFile.path.endsWith('.kt') &&
-            androidIdentifier != null) {
-          context['androidIdentifier'] =
-              _escapeKotlinKeywords(androidIdentifier);
+        final String? androidIdentifier = context['androidIdentifier'] as String?;
+        if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
+          context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
         }
 
-        final String renderedContents =
-            _templateRenderer.renderString(templateContents, context);
+        final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
@@ -383,27 +350,23 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
-  final String templatesDir = fileSystem.path
-      .join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates');
+  final String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
+      'packages', 'flutter_tools', 'templates');
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }
 
 // Returns the directory containing the 'name' template directory in
 // flutter_template_images, to resolve image placeholder against.
-Future<Directory> _templateImageDirectory(
-    String name, FileSystem fileSystem, Logger logger) async {
-  final String toolPackagePath =
-      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-  final String packageFilePath = fileSystem.path
-      .join(toolPackagePath, '.dart_tool', 'package_config.json');
+Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
+  final String toolPackagePath = fileSystem.path.join(
+      Cache.flutterRoot!, 'packages', 'flutter_tools');
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,
   );
-  final Uri? imagePackageLibDir =
-      packageConfig['flutter_template_images']?.packageUriRoot;
-  return fileSystem
-      .directory(imagePackageLibDir)
+  final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  return fileSystem.directory(imagePackageLibDir)
       .parent
       .childDirectory('templates')
       .childDirectory(name);
@@ -411,9 +374,8 @@ Future<Directory> _templateImageDirectory(
 
 String _escapeKotlinKeywords(String androidIdentifier) {
   final List<String> segments = androidIdentifier.split('.');
-  final List<String> correctedSegments = segments
-      .map((String segment) =>
-          kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment)
-      .toList();
+  final List<String> correctedSegments = segments.map(
+    (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
+  ).toList();
   return correctedSegments.join('.');
 }

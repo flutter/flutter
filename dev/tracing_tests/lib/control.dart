@@ -12,6 +12,5 @@ void main() {
   // The dev/bots/test.dart test looks for the string from that exception.
   // The string below is matched verbatim in dev/bots/test.dart as a control
   // to make sure this file did get compiled.
-  DiagnosticsNode.message('TIMELINE ARGUMENTS TEST CONTROL FILE')
-      .toTimelineArguments();
+  DiagnosticsNode.message('TIMELINE ARGUMENTS TEST CONTROL FILE').toTimelineArguments();
 }

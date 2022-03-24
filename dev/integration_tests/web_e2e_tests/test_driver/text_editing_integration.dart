@@ -127,9 +127,7 @@ void main() {
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
-  testWidgets(
-      'Jump between TextFormFields with tab key after CapsLock is activated',
-      (WidgetTester tester) async {
+  testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -240,8 +238,7 @@ void main() {
 KeyboardEvent dispatchKeyboardEvent(
     EventTarget target, String type, Map<String, dynamic> args) {
   // ignore: implicit_dynamic_function
-  final Object jsKeyboardEvent =
-      js_util.getProperty(window, 'KeyboardEvent') as Object;
+  final Object jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Object;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     args,

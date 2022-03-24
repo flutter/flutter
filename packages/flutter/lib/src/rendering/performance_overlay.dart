@@ -67,14 +67,14 @@ class RenderPerformanceOverlay extends RenderBox {
     int rasterizerThreshold = 0,
     bool checkerboardRasterCacheImages = false,
     bool checkerboardOffscreenLayers = false,
-  })  : assert(optionsMask != null),
-        assert(rasterizerThreshold != null),
-        assert(checkerboardRasterCacheImages != null),
-        assert(checkerboardOffscreenLayers != null),
-        _optionsMask = optionsMask,
-        _rasterizerThreshold = rasterizerThreshold,
-        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
-        _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
+  }) : assert(optionsMask != null),
+       assert(rasterizerThreshold != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
+       _optionsMask = optionsMask,
+       _rasterizerThreshold = rasterizerThreshold,
+       _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
+       _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -82,7 +82,8 @@ class RenderPerformanceOverlay extends RenderBox {
   int _optionsMask;
   set optionsMask(int value) {
     assert(value != null);
-    if (value == _optionsMask) return;
+    if (value == _optionsMask)
+      return;
     _optionsMask = value;
     markNeedsPaint();
   }
@@ -94,7 +95,8 @@ class RenderPerformanceOverlay extends RenderBox {
   int _rasterizerThreshold;
   set rasterizerThreshold(int value) {
     assert(value != null);
-    if (value == _rasterizerThreshold) return;
+    if (value == _rasterizerThreshold)
+      return;
     _rasterizerThreshold = value;
     markNeedsPaint();
   }
@@ -104,7 +106,8 @@ class RenderPerformanceOverlay extends RenderBox {
   bool _checkerboardRasterCacheImages;
   set checkerboardRasterCacheImages(bool value) {
     assert(value != null);
-    if (value == _checkerboardRasterCacheImages) return;
+    if (value == _checkerboardRasterCacheImages)
+      return;
     _checkerboardRasterCacheImages = value;
     markNeedsPaint();
   }
@@ -114,7 +117,8 @@ class RenderPerformanceOverlay extends RenderBox {
   bool _checkerboardOffscreenLayers;
   set checkerboardOffscreenLayers(bool value) {
     assert(value != null);
-    if (value == _checkerboardOffscreenLayers) return;
+    if (value == _checkerboardOffscreenLayers)
+      return;
     _checkerboardOffscreenLayers = value;
     markNeedsPaint();
   }
@@ -138,23 +142,12 @@ class RenderPerformanceOverlay extends RenderBox {
   double get _intrinsicHeight {
     const double kDefaultGraphHeight = 80.0;
     double result = 0.0;
-    if ((optionsMask |
-                (1 <<
-                    PerformanceOverlayOption
-                        .displayRasterizerStatistics.index) >
-            0) ||
-        (optionsMask |
-                (1 <<
-                    PerformanceOverlayOption
-                        .visualizeRasterizerStatistics.index) >
-            0)) result += kDefaultGraphHeight;
-    if ((optionsMask |
-                (1 << PerformanceOverlayOption.displayEngineStatistics.index) >
-            0) ||
-        (optionsMask |
-                (1 <<
-                    PerformanceOverlayOption.visualizeEngineStatistics.index) >
-            0)) result += kDefaultGraphHeight;
+    if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0))
+      result += kDefaultGraphHeight;
+    if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0))
+      result += kDefaultGraphHeight;
     return result;
   }
 

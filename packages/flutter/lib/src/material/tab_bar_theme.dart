@@ -124,10 +124,8 @@ class TabBarTheme with Diagnosticable {
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a.labelPadding, b.labelPadding, t),
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
-      unselectedLabelColor:
-          Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
-      unselectedLabelStyle:
-          TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
+      unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
+      unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
       overlayColor: _LerpColors(a.overlayColor, b.overlayColor, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
@@ -136,35 +134,38 @@ class TabBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        indicator,
-        indicatorSize,
-        labelColor,
-        labelPadding,
-        labelStyle,
-        unselectedLabelColor,
-        unselectedLabelStyle,
-        overlayColor,
-        splashFactory,
-        mouseCursor,
-      );
+    indicator,
+    indicatorSize,
+    labelColor,
+    labelPadding,
+    labelStyle,
+    unselectedLabelColor,
+    unselectedLabelStyle,
+    overlayColor,
+    splashFactory,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is TabBarTheme &&
-        other.indicator == indicator &&
-        other.indicatorSize == indicatorSize &&
-        other.labelColor == labelColor &&
-        other.labelPadding == labelPadding &&
-        other.labelStyle == labelStyle &&
-        other.unselectedLabelColor == unselectedLabelColor &&
-        other.unselectedLabelStyle == unselectedLabelStyle &&
-        other.overlayColor == overlayColor &&
-        other.splashFactory == splashFactory &&
-        other.mouseCursor == mouseCursor;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is TabBarTheme
+        && other.indicator == indicator
+        && other.indicatorSize == indicatorSize
+        && other.labelColor == labelColor
+        && other.labelPadding == labelPadding
+        && other.labelStyle == labelStyle
+        && other.unselectedLabelColor == unselectedLabelColor
+        && other.unselectedLabelStyle == unselectedLabelStyle
+        && other.overlayColor == overlayColor
+        && other.splashFactory == splashFactory
+        && other.mouseCursor == mouseCursor;
   }
 }
+
 
 @immutable
 class _LerpColors implements MaterialStateProperty<Color?> {
@@ -188,8 +189,13 @@ class _LerpColors implements MaterialStateProperty<Color?> {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is _LerpColors && other.a == a && other.b == b && other.t == t;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _LerpColors
+      && other.a == a
+      && other.b == b
+      && other.t == t;
   }
 }

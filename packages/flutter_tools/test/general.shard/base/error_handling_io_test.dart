@@ -19,17 +19,22 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-final Platform windowsPlatform =
-    FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{}
+);
 
-final Platform linuxPlatform = FakePlatform(environment: <String, String>{});
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{}
+);
 
-final Platform macOSPlatform =
-    FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+final Platform macOSPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{}
+);
 
 void main() {
-  testWithoutContext('deleteIfExists does not delete if file does not exist',
-      () {
+  testWithoutContext('deleteIfExists does not delete if file does not exist', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('file');
 
@@ -40,19 +45,17 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('file')..createSync();
 
-    expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
+     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
-  testWithoutContext('deleteIfExists handles separate program deleting file',
-      () {
+  testWithoutContext('deleteIfExists handles separate program deleting file', () {
     final File file = FakeExistsFile()
       ..error = const FileSystemException('', '', OSError('', 2));
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
-  testWithoutContext(
-      'deleteIfExists throws tool exit if file exists on read-only volume', () {
+  testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -66,13 +69,11 @@ void main() {
       FileSystemException('', file.path, const OSError('', 2)),
     );
 
-    expect(
-        () => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
+    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
   });
 
-  testWithoutContext(
-      'deleteIfExists does not tool exit if file exists on read-only '
-      'volume and it is run under noExitOnFailure', () {
+  testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
+    'volume and it is run under noExitOnFailure', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -97,7 +98,7 @@ void main() {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
-    const int kFatalDeviceHardwareError = 483;
+    const int kFatalDeviceHardwareError =  483;
     const int kDeviceDoesNotExist = 433;
 
     late FileExceptionHandler exceptionHandler;
@@ -106,8 +107,7 @@ void main() {
       exceptionHandler = FileExceptionHandler();
     });
 
-    testWithoutContext(
-        'bypasses error handling when withAllowedFailure is used', () {
+    testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -117,19 +117,16 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.write,
-        FileSystemException(
-            '', file.path, const OSError('', kUserPermissionDenied)),
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
 
-      expect(
-          () => ErrorHandlingFileSystem.noExitOnFailure(
-              () => file.writeAsStringSync('')),
-          throwsException);
+      expect(() => ErrorHandlingFileSystem.noExitOnFailure(
+        () => file.writeAsStringSync('')), throwsException);
 
       // nesting does not unconditionally re-enable errors.
       expect(() {
         ErrorHandlingFileSystem.noExitOnFailure(() {
-          ErrorHandlingFileSystem.noExitOnFailure(() {});
+          ErrorHandlingFileSystem.noExitOnFailure(() { });
           file.writeAsStringSync('');
         });
       }, throwsException);
@@ -148,33 +145,32 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.write,
-        FileSystemException(
-            '', file.path, const OSError('', kUserPermissionDenied)),
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
       exceptionHandler.addError(
         file,
         FileSystemOp.open,
-        FileSystemException(
-            '', file.path, const OSError('', kUserPermissionDenied)),
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
       exceptionHandler.addError(
         file,
         FileSystemOp.create,
-        FileSystemException(
-            '', file.path, const OSError('', kUserPermissionDenied)),
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
 
       const String expectedMessage = 'The flutter tool cannot access the file';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
-      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
-      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -192,17 +188,16 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when the file is being used by another program',
-        () async {
+    testWithoutContext('when the file is being used by another program', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -212,20 +207,18 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.write,
-        FileSystemException(
-            '', file.path, const OSError('', kUserMappedSectionOpened)),
+        FileSystemException('', file.path, const OSError('', kUserMappedSectionOpened)),
       );
 
-      const String expectedMessage =
-          'The file is being used by another program';
+      const String expectedMessage = 'The file is being used by another program';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when the device driver has a fatal error', () async {
@@ -238,35 +231,33 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.write,
-        FileSystemException(
-            '', file.path, const OSError('', kFatalDeviceHardwareError)),
+        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
       exceptionHandler.addError(
         file,
         FileSystemOp.open,
-        FileSystemException(
-            '', file.path, const OSError('', kFatalDeviceHardwareError)),
+        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
       exceptionHandler.addError(
         file,
         FileSystemOp.create,
-        FileSystemException(
-            '', file.path, const OSError('', kFatalDeviceHardwareError)),
+        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
 
-      const String expectedMessage =
-          'There is a problem with the device driver '
-          'that this file or directory is stored on';
+      const String expectedMessage = 'There is a problem with the device driver '
+        'that this file or directory is stored on';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
-      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
-      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when the device does not exist', () async {
@@ -279,37 +270,35 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.write,
-        FileSystemException(
-            '', file.path, const OSError('', kDeviceDoesNotExist)),
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
       exceptionHandler.addError(
         file,
         FileSystemOp.open,
-        FileSystemException(
-            '', file.path, const OSError('', kDeviceDoesNotExist)),
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
       exceptionHandler.addError(
         file,
         FileSystemOp.create,
-        FileSystemException(
-            '', file.path, const OSError('', kDeviceDoesNotExist)),
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
 
       const String expectedMessage = 'The device was not found.';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
-      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
-      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a temporary dir on a full device',
-        () async {
+    testWithoutContext('when creating a temporary dir on a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -324,13 +313,12 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => directory.createTemp('prefix'),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a directory with permission issues',
-        () async {
+    testWithoutContext('when creating a directory with permission issues', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -340,18 +328,15 @@ void main() {
       exceptionHandler.addError(
         directory,
         FileSystemOp.create,
-        FileSystemException(
-            '', directory.path, const OSError('', kUserPermissionDenied)),
+        FileSystemException('', directory.path, const OSError('', kUserPermissionDenied)),
       );
 
       const String expectedMessage = 'Flutter failed to create a directory at';
       expect(() => directory.createSync(recursive: true),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext(
-        'when checking for directory existence with permission issues',
-        () async {
+    testWithoutContext('when checking for directory existence with permission issues', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -366,14 +351,13 @@ void main() {
         FileSystemException('', directory.path, const OSError('', kDeviceFull)),
       );
 
-      const String expectedMessage =
-          'Flutter failed to check for directory existence at';
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('When reading from a file without permission', () {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
       );
@@ -382,26 +366,22 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.read,
-        FileSystemException(
-            '', file.path, const OSError('', kUserPermissionDenied)),
+        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
       );
 
       const String expectedMessage = 'Flutter failed to read a file at';
       expect(() => file.readAsStringSync(),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext(
-        'When reading from a file or directory without permission', () {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+    testWithoutContext('When reading from a file or directory without permission', () {
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: ThrowsOnCurrentDirectoryFileSystem(kUserPermissionDenied),
         platform: windowsPlatform,
       );
 
-      expect(
-          () => fileSystem.currentDirectory,
-          throwsToolExit(
-              message: 'The flutter tool cannot access the file or directory'));
+      expect(() => fileSystem.currentDirectory,
+             throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
   });
 
@@ -449,14 +429,10 @@ void main() {
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /dir/file';
-      expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: writeMessage));
-      expect(() async => file.writeAsString(''),
-          throwsToolExit(message: writeMessage));
-      expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: writeMessage));
-      expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: writeMessage));
 
       const String createMessage =
           'Flutter failed to create file at "dir/file".\n'
@@ -465,18 +441,15 @@ void main() {
           r'  sudo chown -R $(whoami) /dir';
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
       // Recursive does not contain the "sudo chown" suggestion.
-      expect(
-          () async => file.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message',
-              isNot(contains('sudo chown')))));
+      expect(() async => file.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String readMessage =
           'Flutter failed to read a file at "dir/file".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /dir/file';
-      expect(
-          () => file.readAsStringSync(), throwsToolExit(message: readMessage));
+      expect(() => file.readAsStringSync(), throwsToolExit(message: readMessage));
     });
 
     testWithoutContext('when access is denied for directories', () async {
@@ -504,31 +477,27 @@ void main() {
           'Try running:\n'
           r'  sudo chown -R $(whoami) /parent';
       expect(() async => directory.create(),
-          throwsToolExit(message: createMessage));
-      expect(
-          () => directory.createSync(), throwsToolExit(message: createMessage));
+             throwsToolExit(message: createMessage));
+      expect(() => directory.createSync(),
+             throwsToolExit(message: createMessage));
 
       // Recursive does not contain the "sudo chown" suggestion.
-      expect(
-          () async => directory.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message',
-              isNot(contains('sudo chown')))));
+      expect(() async => directory.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String deleteMessage =
           'Flutter failed to delete a directory at "parent/childDir".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /parent';
-      expect(
-          () => directory.deleteSync(), throwsToolExit(message: deleteMessage));
+      expect(() => directory.deleteSync(),
+             throwsToolExit(message: deleteMessage));
       expect(() async => directory.delete(),
           throwsToolExit(message: deleteMessage));
 
       // Recursive does not contain the "sudo chown" suggestion.
-      expect(
-          () async => directory.deleteSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message',
-              isNot(contains('sudo chown')))));
+      expect(() async => directory.deleteSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -546,17 +515,16 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a temporary dir on a full device',
-        () async {
+    testWithoutContext('when creating a temporary dir on a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -572,14 +540,12 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => directory.createTemp('prefix'),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext(
-        'when checking for directory existence with permission issues',
-        () async {
+    testWithoutContext('when checking for directory existence with permission issues', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
@@ -594,25 +560,22 @@ void main() {
         FileSystemException('', directory.path, const OSError('', eacces)),
       );
 
-      const String expectedMessage =
-          'Flutter failed to check for directory existence at';
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When the current working directory disappears',
-        () async {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+    testWithoutContext('When the current working directory disappears', () async {
+     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: ThrowsOnCurrentDirectoryFileSystem(kSystemCannotFindFile),
         platform: linuxPlatform,
       );
 
-      expect(() => fileSystem.currentDirectory,
-          throwsToolExit(message: 'Unable to read current working directory'));
+      expect(() => fileSystem.currentDirectory, throwsToolExit(message: 'Unable to read current working directory'));
     });
 
     testWithoutContext('Rethrows os error $kSystemCannotFindFile', () {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,
       );
@@ -621,13 +584,11 @@ void main() {
       exceptionHandler.addError(
         file,
         FileSystemOp.read,
-        FileSystemException(
-            '', file.path, const OSError('', kSystemCannotFindFile)),
+        FileSystemException('', file.path, const OSError('', kSystemCannotFindFile)),
       );
 
       // Error is not caught by other operations.
-      expect(() => fileSystem.file('foo').readAsStringSync(),
-          throwsFileSystemException(kSystemCannotFindFile));
+      expect(() => fileSystem.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCannotFindFile));
     });
   });
 
@@ -674,14 +635,10 @@ void main() {
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /dir/file';
-      expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: writeMessage));
-      expect(() async => file.writeAsString(''),
-          throwsToolExit(message: writeMessage));
-      expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: writeMessage));
-      expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: writeMessage));
 
       const String createMessage =
           'Flutter failed to create file at "dir/file".\n'
@@ -691,18 +648,15 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
 
       // Recursive does not contain the "sudo chown" suggestion.
-      expect(
-          () async => file.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message',
-              isNot(contains('sudo chown')))));
+      expect(() async => file.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String readMessage =
           'Flutter failed to read a file at "dir/file".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /dir/file';
-      expect(
-          () => file.readAsStringSync(), throwsToolExit(message: readMessage));
+      expect(() => file.readAsStringSync(), throwsToolExit(message: readMessage));
     });
 
     testWithoutContext('when access is denied for directories', () async {
@@ -731,30 +685,25 @@ void main() {
           r'  sudo chown -R $(whoami) /parent';
       expect(() async => directory.create(),
           throwsToolExit(message: createMessage));
-      expect(
-          () => directory.createSync(), throwsToolExit(message: createMessage));
+      expect(() => directory.createSync(), throwsToolExit(message: createMessage));
 
       // Recursive does not contain the "sudo chown" suggestion.
-      expect(
-          () async => directory.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message',
-              isNot(contains('sudo chown')))));
+      expect(() async => directory.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String deleteMessage =
           'Flutter failed to delete a directory at "parent/childDir".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /parent';
-      expect(
-          () => directory.deleteSync(), throwsToolExit(message: deleteMessage));
+      expect(() => directory.deleteSync(),
+          throwsToolExit(message: deleteMessage));
       expect(() async => directory.delete(),
           throwsToolExit(message: deleteMessage));
 
       // Recursive does not contain the "sudo chown" suggestion.
-      expect(
-          () async => directory.deleteSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message',
-              isNot(contains('sudo chown')))));
+      expect(() async => directory.deleteSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -772,18 +721,17 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => file.writeAsBytes(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when creating a temporary dir on a full device',
-        () async {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+    testWithoutContext('when creating a temporary dir on a full device', () async {
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
       );
@@ -798,15 +746,13 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => directory.createTemp('prefix'),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext(
-        'when checking for directory existence with permission issues',
-        () async {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+    testWithoutContext('when checking for directory existence with permission issues', () async {
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
       );
@@ -819,14 +765,13 @@ void main() {
         FileSystemException('', directory.path, const OSError('', eacces)),
       );
 
-      const String expectedMessage =
-          'Flutter failed to check for directory existence at';
+      const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('When reading from a file without permission', () {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: macOSPlatform,
       );
@@ -840,20 +785,17 @@ void main() {
 
       const String expectedMessage = 'Flutter failed to read a file at';
       expect(() => file.readAsStringSync(),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from current directory without permission',
-        () {
-      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+    testWithoutContext('When reading from current directory without permission', () {
+     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: ThrowsOnCurrentDirectoryFileSystem(eacces),
         platform: linuxPlatform,
       );
 
-      expect(
-          () => fileSystem.currentDirectory,
-          throwsToolExit(
-              message: 'The flutter tool cannot access the file or directory'));
+      expect(() => fileSystem.currentDirectory,
+             throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
   });
 
@@ -915,8 +857,7 @@ void main() {
       expect(fs.directory('directory').toString(), directory.toString());
       delegate.currentDirectory = directory;
 
-      expect(
-          fs.currentDirectory.toString(), delegate.currentDirectory.toString());
+      expect(fs.currentDirectory.toString(), delegate.currentDirectory.toString());
       expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
     });
   });
@@ -926,19 +867,10 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
 
-    testWithoutContext(
-        'when PackageProcess throws an exception containing non-executable bits',
-        () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException('',
-                candidates: <String>['not-empty'])),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException('',
-                candidates: <String>['not-empty'])),
+    testWithoutContext('when PackageProcess throws an exception containing non-executable bits', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -946,26 +878,18 @@ void main() {
         platform: windowsPlatform,
       );
 
-      const String expectedMessage =
-          'The Flutter tool could not locate an executable with suitable permissions';
+      const String expectedMessage = 'The Flutter tool could not locate an executable with suitable permissions';
 
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext(
-        'when PackageProcess throws an exception without containing non-executable bits',
-        () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException('')),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessPackageExecutableNotFoundException('')),
+    testWithoutContext('when PackageProcess throws an exception without containing non-executable bits', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -975,24 +899,15 @@ void main() {
 
       // If there were no located executables treat this as a programming error and rethrow the original
       // exception.
-      expect(() async => processManager.start(<String>['foo']),
-          throwsProcessException());
-      expect(() async => processManager.runSync(<String>['foo']),
-          throwsProcessException());
+      expect(() async => processManager.start(<String>['foo']), throwsProcessException());
+      expect(() async => processManager.runSync(<String>['foo']), throwsProcessException());
     });
 
     testWithoutContext('when the device is full', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', kDeviceFull)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', kDeviceFull)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', kDeviceFull)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -1003,28 +918,18 @@ void main() {
       const String expectedMessage = 'The target device is full';
 
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when the file is being used by another program', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception:
-                ProcessException('', <String>[], '', kUserMappedSectionOpened)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception:
-                ProcessException('', <String>[], '', kUserMappedSectionOpened)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception:
-                ProcessException('', <String>[], '', kUserMappedSectionOpened)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -1032,31 +937,20 @@ void main() {
         platform: windowsPlatform,
       );
 
-      const String expectedMessage =
-          'The file is being used by another program';
+      const String expectedMessage = 'The file is being used by another program';
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when permissions are denied', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception:
-                ProcessException('', <String>[], '', kUserPermissionDenied)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception:
-                ProcessException('', <String>[], '', kUserPermissionDenied)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception:
-                ProcessException('', <String>[], '', kUserPermissionDenied)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -1066,27 +960,23 @@ void main() {
 
       const String expectedMessage = 'The flutter tool cannot access the file';
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when cannot run executable', () {
-      final ThrowingFakeProcessManager throwingFakeProcessManager =
-          ThrowingFakeProcessManager(const ProcessException(
-              '', <String>[], '', kUserPermissionDenied));
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', kUserPermissionDenied));
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: throwingFakeProcessManager,
         platform: windowsPlatform,
       );
 
-      const String expectedMessage =
-          r'Flutter failed to run "C:\path\to\dart". The flutter tool cannot access the file or directory.';
-      expect(() async => processManager.canRun(r'C:\path\to\dart'),
-          throwsToolExit(message: expectedMessage));
+      const String expectedMessage = r'Flutter failed to run "C:\path\to\dart". The flutter tool cannot access the file or directory.';
+      expect(() async => processManager.canRun(r'C:\path\to\dart'), throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -1095,17 +985,10 @@ void main() {
     const int eacces = 13;
 
     testWithoutContext('when writing to a full device', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', enospc)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', enospc)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', enospc)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -1115,25 +998,18 @@ void main() {
 
       const String expectedMessage = 'The target device is full';
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when permissions are denied', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', eacces)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', eacces)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', eacces)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
       ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
@@ -1143,17 +1019,15 @@ void main() {
       const String expectedMessage = 'The flutter tool cannot access the file';
 
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when cannot run executable', () {
-      final ThrowingFakeProcessManager throwingFakeProcessManager =
-          ThrowingFakeProcessManager(
-              const ProcessException('', <String>[], '', eacces));
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', eacces));
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: throwingFakeProcessManager,
@@ -1165,8 +1039,7 @@ void main() {
           'Try running:\n'
           r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
 
-      expect(() async => processManager.canRun('/path/to/dart'),
-          throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -1175,17 +1048,10 @@ void main() {
     const int eacces = 13;
 
     testWithoutContext('when writing to a full device', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', enospc)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', enospc)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', enospc)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
       ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
@@ -1195,25 +1061,18 @@ void main() {
       const String expectedMessage = 'The target device is full';
 
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when permissions are denied', () {
-      final FakeProcessManager fakeProcessManager =
-          FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', eacces)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', eacces)),
-        const FakeCommand(
-            command: <String>['foo'],
-            exception: ProcessException('', <String>[], '', eacces)),
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
       ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
@@ -1223,17 +1082,15 @@ void main() {
       const String expectedMessage = 'The flutter tool cannot access the file';
 
       expect(() async => processManager.start(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
-          throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when cannot run executable', () {
-      final ThrowingFakeProcessManager throwingFakeProcessManager =
-          ThrowingFakeProcessManager(
-              const ProcessException('', <String>[], '', eacces));
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', eacces));
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: throwingFakeProcessManager,
@@ -1241,19 +1098,16 @@ void main() {
       );
 
       const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
+      'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+      'Try running:\n'
+      r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
 
-      expect(() async => processManager.canRun('/path/to/dart'),
-          throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
   });
 
-  testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly',
-      () async {
-    final FakeSignalProcessManager fakeProcessManager =
-        FakeSignalProcessManager();
+  testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
+    final FakeSignalProcessManager fakeProcessManager = FakeSignalProcessManager();
     final ProcessManager processManager = ErrorHandlingProcessManager(
       delegate: fakeProcessManager,
       platform: linuxPlatform,
@@ -1267,7 +1121,7 @@ void main() {
     });
   });
 
-  group('CopySync', () {
+  group('CopySync' , () {
     const int eaccess = 13;
     late FileExceptionHandler exceptionHandler;
     late ErrorHandlingFileSystem fileSystem;
@@ -1280,8 +1134,7 @@ void main() {
       );
     });
 
-    testWithoutContext(
-        'copySync handles error if openSync on source file fails', () {
+    testWithoutContext('copySync handles error if openSync on source file fails', () {
       final File source = fileSystem.file('source');
 
       exceptionHandler.addError(
@@ -1295,12 +1148,10 @@ void main() {
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
           r'  sudo chown -R $(whoami) /source';
-      expect(() => fileSystem.file('source').copySync('dest'),
-          throwsToolExit(message: expectedMessage));
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext(
-        'copySync handles error if createSync on destination file fails', () {
+    testWithoutContext('copySync handles error if createSync on destination file fails', () {
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
@@ -1313,13 +1164,11 @@ void main() {
       const String expectedMessage =
           'Flutter failed to copy source to dest due to destination location error.\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
-      expect(() => fileSystem.file('source').copySync('dest'),
-          throwsToolExit(message: expectedMessage));
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
 
     // dart:io is able to clobber read-only files.
-    testWithoutContext(
-        'copySync will copySync even if the destination is not writable', () {
+    testWithoutContext('copySync will copySync even if the destination is not writable', () {
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
@@ -1343,11 +1192,8 @@ void main() {
       expect(dest, exists);
     });
 
-    testWithoutContext(
-        'copySync can directly copy bytes if both files can be opened but copySync fails',
-        () {
-      final List<int> expectedBytes =
-          List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
+    testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
+      final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
       fileSystem.file('source').writeAsBytesSync(expectedBytes);
       final File dest = fileSystem.file('dest');
 
@@ -1390,13 +1236,13 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
   final int errorCode;
 
   @override
-  Directory get currentDirectory =>
-      throw FileSystemException('', '', OSError('', errorCode));
+  Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
 }
 
 class FakeExistsFile extends Fake implements File {
   late Exception error;
   int existsCount = 0;
+
 
   @override
   bool existsSync() {
@@ -1421,7 +1267,6 @@ class FakeFileSystem extends Fake implements FileSystem {
   Directory get currentDirectory {
     throw UnimplementedError();
   }
-
   @override
-  set currentDirectory(dynamic path) {}
+  set currentDirectory(dynamic path) { }
 }

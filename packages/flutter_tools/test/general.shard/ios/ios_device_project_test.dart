@@ -29,8 +29,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext('IOSDevice.isSupportedForProject is true on module project',
-      () async {
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -40,7 +39,7 @@ flutter:
   ''');
     fileSystem.file('.packages').writeAsStringSync('\n');
     final FlutterProject flutterProject =
-        FlutterProject.fromDirectory(fileSystem.currentDirectory);
+      FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), true);
@@ -49,15 +48,13 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext(
-      'IOSDevice.isSupportedForProject is true with editable host app',
-      () async {
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').writeAsStringSync('\n');
     fileSystem.directory('ios').createSync();
     final FlutterProject flutterProject =
-        FlutterProject.fromDirectory(fileSystem.currentDirectory);
+      FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), true);
@@ -66,14 +63,13 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext(
-      'IOSDevice.isSupportedForProject is false with no host app and no module',
-      () async {
+
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').writeAsStringSync('\n');
     final FlutterProject flutterProject =
-        FlutterProject.fromDirectory(fileSystem.currentDirectory);
+      FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), false);

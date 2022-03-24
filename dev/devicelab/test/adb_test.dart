@@ -18,7 +18,8 @@ void main() {
       device = FakeDevice(deviceId: 'fakeDeviceId');
     });
 
-    tearDown(() {});
+    tearDown(() {
+    });
 
     group('cpu check', () {
       test('arm64', () async {
@@ -26,15 +27,7 @@ void main() {
         final AndroidDevice androidDevice = device as AndroidDevice;
         expect(await androidDevice.isArm64(), isTrue);
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'getprop', arguments: <String>['ro.product.cpu.abi']),
         ]);
       });
@@ -64,15 +57,7 @@ void main() {
       test('sends power event', () async {
         await device.togglePower();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'input', arguments: <String>['keyevent', '26']),
         ]);
       });
@@ -83,15 +68,7 @@ void main() {
         FakeDevice.pretendAwake();
         await device.wakeUp();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
         ]);
       });
@@ -100,15 +77,7 @@ void main() {
         FakeDevice.pretendAsleep();
         await device.wakeUp();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '26']),
         ]);
@@ -120,15 +89,7 @@ void main() {
         FakeDevice.pretendAsleep();
         await device.sendToSleep();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
         ]);
       });
@@ -137,15 +98,7 @@ void main() {
         FakeDevice.pretendAwake();
         await device.sendToSleep();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '26']),
         ]);
@@ -157,15 +110,7 @@ void main() {
         FakeDevice.pretendAwake();
         await device.unlock();
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '82']),
         ]);
@@ -176,15 +121,7 @@ void main() {
       test('tap', () async {
         await device.tap(100, 200);
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>[
-            'ro.bootimage.build.fingerprint',
-            ';',
-            'getprop',
-            'ro.build.version.release',
-            ';',
-            'getprop',
-            'ro.build.version.sdk'
-          ]),
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'input', arguments: <String>['tap', '100', '200']),
         ]);
       });
@@ -212,24 +149,23 @@ typedef ExitErrorFactory = dynamic Function();
 
 @immutable
 class CommandArgs {
-  const CommandArgs({required this.command, this.arguments, this.environment});
+  const CommandArgs({ required this.command, this.arguments, this.environment });
 
   final String command;
   final List<String>? arguments;
   final Map<String, String>? environment;
 
   @override
-  String toString() =>
-      'CommandArgs(command: $command, arguments: $arguments, environment: $environment)';
+  String toString() => 'CommandArgs(command: $command, arguments: $arguments, environment: $environment)';
 
   @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != CommandArgs) return false;
-    return other is CommandArgs &&
-        other.command == command &&
-        const ListEquality<String>().equals(other.arguments, arguments) &&
-        const MapEquality<String, String>()
-            .equals(other.environment, environment);
+  bool operator==(Object other) {
+    if (other.runtimeType != CommandArgs)
+      return false;
+    return other is CommandArgs
+        && other.command == command
+        && const ListEquality<String>().equals(other.arguments, arguments)
+        && const MapEquality<String, String>().equals(other.environment, environment);
   }
 
   @override
@@ -279,8 +215,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<String> shellEval(String command, List<String> arguments,
-      {Map<String, String>? environment, bool silent = false}) async {
+  Future<String> shellEval(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
@@ -290,8 +225,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<void> shellExec(String command, List<String> arguments,
-      {Map<String, String>? environment, bool silent = false}) async {
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,

@@ -13,8 +13,7 @@ void main() {
       appBar: AppBar(title: const Text('Flutter Code Sample')),
       body: const Center(
         child: MyStatelessWidget(
-          image: NetworkImage(
-              'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
+          image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
         ),
       ),
     ),

@@ -67,9 +67,7 @@ class _MyAppState extends State<MyApp> {
           body: Center(
             child: TextButton(
                 onPressed: () {
-                  setState(() {
-                    throwError = true;
-                  });
+                  setState(() { throwError = true; });
                 },
                 child: const Text('Error Prone')),
           ),

@@ -12,11 +12,12 @@ void main() {
     // The point is to mainly test the cupertino icons that we don't have a
     // dependency against in the flutter/cupertino package directly.
 
-    final Future<ByteData> font =
-        rootBundle.load('packages/cupertino_icons/assets/CupertinoIcons.ttf');
+    final Future<ByteData> font = rootBundle.load(
+      'packages/cupertino_icons/assets/CupertinoIcons.ttf'
+    );
 
     await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font))
-        .load();
+      .load();
 
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoNavigationDemo(randomSeed: 123456),
@@ -27,8 +28,7 @@ void main() {
       matchesGoldenFile('cupertino_navigation_demo.screen.1.png'),
     );
 
-    await tester
-        .pump(); // Need a new frame after loading fonts to refresh layout.
+    await tester.pump(); // Need a new frame after loading fonts to refresh layout.
     // Tap some row to go to the next page.
     await tester.tap(find.text('Buy this cool color').first);
     await tester.pump();

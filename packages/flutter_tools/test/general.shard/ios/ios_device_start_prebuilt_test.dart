@@ -28,21 +28,24 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 // The command used to actually launch the app with args in release/profile.
-const FakeCommand kLaunchReleaseCommand = FakeCommand(command: <String>[
-  'HostArtifact.iosDeploy',
-  '--id',
-  '123',
-  '--bundle',
-  '/',
-  '--no-wifi',
-  '--justlaunch',
-  // These args are the default on DebuggingOptions.
-  '--args',
-  '--enable-dart-profiling --disable-service-auth-codes',
-], environment: <String, String>{
-  'PATH': '/usr/bin:null',
-  'DYLD_LIBRARY_PATH': '/path/to/libraries',
-});
+const FakeCommand kLaunchReleaseCommand = FakeCommand(
+  command: <String>[
+    'HostArtifact.iosDeploy',
+    '--id',
+    '123',
+    '--bundle',
+    '/',
+    '--no-wifi',
+    '--justlaunch',
+    // These args are the default on DebuggingOptions.
+    '--args',
+    '--enable-dart-profiling --disable-service-auth-codes',
+  ],
+  environment: <String, String>{
+    'PATH': '/usr/bin:null',
+    'DYLD_LIBRARY_PATH': '/path/to/libraries',
+  }
+);
 
 // The command used to just launch the app with args in debug.
 const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
@@ -61,35 +64,31 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 });
 
 // The command used to actually launch the app and attach the debugger with args in debug.
-const FakeCommand kAttachDebuggerCommand = FakeCommand(
-  command: <String>[
-    'script',
-    '-t',
-    '0',
-    '/dev/null',
-    'HostArtifact.iosDeploy',
-    '--id',
-    '123',
-    '--bundle',
-    '/',
-    '--debug',
-    '--no-wifi',
-    '--args',
-    '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points'
-  ],
-  environment: <String, String>{
-    'PATH': '/usr/bin:null',
-    'DYLD_LIBRARY_PATH': '/path/to/libraries',
-  },
-  stdout: '(lldb)     run\nsuccess',
+const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
+  'script',
+  '-t',
+  '0',
+  '/dev/null',
+  'HostArtifact.iosDeploy',
+  '--id',
+  '123',
+  '--bundle',
+  '/',
+  '--debug',
+  '--no-wifi',
+  '--args',
+  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points'
+], environment: <String, String>{
+  'PATH': '/usr/bin:null',
+  'DYLD_LIBRARY_PATH': '/path/to/libraries',
+},
+stdout: '(lldb)     run\nsuccess',
 );
 
 void main() {
-  testWithoutContext(
-      'disposing device disposes the portForwarder and logReader', () async {
+  testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
-    final FakeDevicePortForwarder devicePortForwarder =
-        FakeDevicePortForwarder();
+    final FakeDevicePortForwarder devicePortForwarder = FakeDevicePortForwarder();
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -106,12 +105,9 @@ void main() {
     expect(devicePortForwarder.disposed, true);
   });
 
-  testWithoutContext(
-      'IOSDevice.startApp attaches in debug mode via log reading on iOS 13+',
-      () async {
+  testWithoutContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kAttachDebuggerCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -132,12 +128,10 @@ void main() {
     // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader
-          .addLine('The Dart VM service is listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
     });
 
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
+    final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
@@ -148,12 +142,9 @@ void main() {
     expect(await device.stopApp(iosApp), false);
   });
 
-  testWithoutContext(
-      'IOSDevice.startApp launches in debug mode via log reading on <iOS 13',
-      () async {
+  testWithoutContext('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kLaunchDebugCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -175,12 +166,10 @@ void main() {
     // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader
-          .addLine('The Dart VM service is listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
     });
 
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
+    final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
@@ -191,13 +180,10 @@ void main() {
     expect(await device.stopApp(iosApp), false);
   });
 
-  testWithoutContext(
-      'IOSDevice.startApp prints warning message if discovery takes longer than configured timeout',
-      () async {
+  testWithoutContext('IOSDevice.startApp prints warning message if discovery takes longer than configured timeout', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kAttachDebuggerCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -220,12 +206,10 @@ void main() {
     Timer.run(() async {
       await Future<void>.delayed(const Duration(milliseconds: 1));
       deviceLogReader.addLine('Foo');
-      deviceLogReader
-          .addLine('The Dart VM service is listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
     });
 
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
+    final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
@@ -235,16 +219,12 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
     expect(await device.stopApp(iosApp), false);
-    expect(
-        logger.errorText,
-        contains(
-            'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...'));
+    expect(logger.errorText, contains('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...'));
   });
 
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kLaunchReleaseCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -258,8 +238,7 @@ void main() {
       applicationPackage: fileSystem.currentDirectory,
     );
 
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
+    final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       platformArgs: <String, dynamic>{},
@@ -271,11 +250,9 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-      'IOSDevice.startApp forwards all supported debugging options', () async {
+  testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           'script',
@@ -309,11 +286,10 @@ void main() {
             '--cache-sksl',
             '--purge-persistent-cache',
           ].join(' '),
-        ],
-        environment: const <String, String>{
-          'PATH': '/usr/bin:null',
-          'DYLD_LIBRARY_PATH': '/path/to/libraries',
-        },
+        ], environment: const <String, String>{
+        'PATH': '/usr/bin:null',
+        'DYLD_LIBRARY_PATH': '/path/to/libraries',
+      },
         stdout: '(lldb)     run\nsuccess',
       )
     ]);
@@ -335,12 +311,10 @@ void main() {
 
     // Start writing messages to the log reader.
     Timer.run(() {
-      deviceLogReader
-          .addLine('The Dart VM service is listening on http://127.0.0.1:1234');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
     });
 
-    final LaunchResult launchResult = await device.startApp(
-      iosApp,
+    final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
@@ -389,15 +363,12 @@ IOSDevice setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
 
-  return IOSDevice(
-    '123',
+  return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
-    iProxy: IProxy.test(
-        logger: logger,
-        processManager: processManager ?? FakeProcessManager.any()),
+    iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger ?? BufferLogger.test(),
     iosDeploy: iosDeploy ??
         IOSDeploy(

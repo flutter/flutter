@@ -22,8 +22,8 @@ class UnderlineTabIndicator extends Decoration {
   const UnderlineTabIndicator({
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
-  })  : assert(borderSide != null),
-        assert(insets != null);
+  }) : assert(borderSide != null),
+       assert(insets != null);
 
   /// The color and weight of the horizontal line drawn below the selected tab.
   final BorderSide borderSide;
@@ -59,7 +59,7 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     return _UnderlinePainter(this, onChanged);
   }
 
@@ -83,8 +83,8 @@ class UnderlineTabIndicator extends Decoration {
 
 class _UnderlinePainter extends BoxPainter {
   _UnderlinePainter(this.decoration, VoidCallback? onChanged)
-      : assert(decoration != null),
-        super(onChanged);
+    : assert(decoration != null),
+      super(onChanged);
 
   final UnderlineTabIndicator decoration;
 
@@ -94,11 +94,8 @@ class _UnderlinePainter extends BoxPainter {
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection textDirection = configuration.textDirection!;
-    final Rect indicator = decoration
-        ._indicatorRectFor(rect, textDirection)
-        .deflate(decoration.borderSide.width / 2.0);
-    final Paint paint = decoration.borderSide.toPaint()
-      ..strokeCap = StrokeCap.square;
+    final Rect indicator = decoration._indicatorRectFor(rect, textDirection).deflate(decoration.borderSide.width / 2.0);
+    final Paint paint = decoration.borderSide.toPaint()..strokeCap = StrokeCap.square;
     canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
   }
 }

@@ -13,7 +13,7 @@ class FontConfigManager {
 
   /// Returns a Font configuration that limits font fallback to the artifact
   /// cache directory.
-  late final File fontConfigFile = () {
+  late final File fontConfigFile = (){
     final StringBuffer sb = StringBuffer();
     sb.writeln('<fontconfig>');
     sb.writeln('  <dir>${globals.cache.getCacheArtifacts().path}</dir>');
@@ -21,14 +21,11 @@ class FontConfigManager {
     sb.writeln('</fontconfig>');
 
     if (_fontsDirectory == null) {
-      _fontsDirectory =
-          globals.fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
-      globals.printTrace(
-          'Using this directory for fonts configuration: ${_fontsDirectory!.path}');
+      _fontsDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
+      globals.printTrace('Using this directory for fonts configuration: ${_fontsDirectory!.path}');
     }
 
-    final File cachedFontConfig =
-        globals.fs.file('${_fontsDirectory!.path}/fonts.conf');
+    final File cachedFontConfig = globals.fs.file('${_fontsDirectory!.path}/fonts.conf');
     cachedFontConfig.createSync();
     cachedFontConfig.writeAsStringSync(sb.toString());
     return cachedFontConfig;

@@ -20,15 +20,11 @@ void main() {
     final FakeBuildInfoCommand command = FakeBuildInfoCommand();
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-    expect(
-        () => commandRunner.run(<String>[
-              'fake',
-              '--obfuscate',
-            ]),
-        throwsToolExit(
-            message:
-                '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
-                'combination with "--${FlutterOptions.kSplitDebugInfoOption}"'));
+    expect(() => commandRunner.run(<String>[
+      'fake',
+      '--obfuscate',
+    ]), throwsToolExit(message: '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
+        'combination with "--${FlutterOptions.kSplitDebugInfoOption}"'));
   });
   group('Fatal Logs', () {
     FakeBuildCommand command;
@@ -41,9 +37,7 @@ void main() {
       Cache.disableLocking();
     });
 
-    testUsingContext(
-        "doesn't fail if --fatal-warnings specified and no warnings occur",
-        () async {
+    testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
       command = FakeBuildCommand();
       try {
         await createTestCommandRunner(command).run(<String>[
@@ -59,8 +53,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext("doesn't fail if --fatal-warnings not specified",
-        () async {
+    testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
       command = FakeBuildCommand();
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       try {
@@ -76,37 +69,27 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('fails if --fatal-warnings specified and warnings emitted',
-        () async {
+    testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand();
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
-      await expectLater(
-          createTestCommandRunner(command).run(<String>[
-            'build',
-            'test',
-            '--${FlutterOptions.kFatalWarnings}',
-          ]),
-          throwsToolExit(
-              message:
-                  'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'build',
+        'test',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('fails if --fatal-warnings specified and errors emitted',
-        () async {
+    testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand();
       testLogger.printError('Error: Danger Will Robinson!');
-      await expectLater(
-          createTestCommandRunner(command).run(<String>[
-            'build',
-            'test',
-            '--${FlutterOptions.kFatalWarnings}',
-          ]),
-          throwsToolExit(
-              message:
-                  'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'build',
+        'test',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -134,8 +117,7 @@ class FakeBuildInfoCommand extends FlutterCommand {
 }
 
 class FakeBuildCommand extends BuildCommand {
-  FakeBuildCommand({bool verboseHelp = false})
-      : super(verboseHelp: verboseHelp) {
+  FakeBuildCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
     addSubcommand(FakeBuildSubcommand(verboseHelp: verboseHelp));
   }
 
@@ -152,8 +134,7 @@ class FakeBuildCommand extends BuildCommand {
 }
 
 class FakeBuildSubcommand extends BuildSubCommand {
-  FakeBuildSubcommand({@required bool verboseHelp})
-      : super(verboseHelp: verboseHelp);
+  FakeBuildSubcommand({@required bool verboseHelp}) : super(verboseHelp: verboseHelp);
 
   @override
   String get description => '';

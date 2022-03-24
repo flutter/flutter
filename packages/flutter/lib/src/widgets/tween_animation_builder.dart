@@ -90,8 +90,7 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
-class TweenAnimationBuilder<T extends Object?>
-    extends ImplicitlyAnimatedWidget {
+class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
   /// The properties [tween], [duration], and [builder] are required. The values
@@ -109,10 +108,10 @@ class TweenAnimationBuilder<T extends Object?>
     required this.builder,
     VoidCallback? onEnd,
     this.child,
-  })  : assert(tween != null),
-        assert(curve != null),
-        assert(builder != null),
-        super(key: key, duration: duration, curve: curve, onEnd: onEnd);
+  }) : assert(tween != null),
+       assert(curve != null),
+       assert(builder != null),
+       super(key: key, duration: duration, curve: curve, onEnd: onEnd);
 
   /// Defines the target value for the animation.
   ///
@@ -172,8 +171,7 @@ class TweenAnimationBuilder<T extends Object?>
   }
 }
 
-class _TweenAnimationBuilderState<T extends Object?>
-    extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
   Tween<T>? _currentTween;
 
   @override
@@ -194,14 +192,12 @@ class _TweenAnimationBuilderState<T extends Object?>
     );
     _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
       assert(false);
-      throw StateError(
-          'Constructor will never be called because null is never provided as current tween.');
+      throw StateError('Constructor will never be called because null is never provided as current tween.');
     }) as Tween<T>?;
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(
-        context, _currentTween!.evaluate(animation), widget.child);
+    return widget.builder(context, _currentTween!.evaluate(animation), widget.child);
   }
 }

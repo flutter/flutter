@@ -18,17 +18,14 @@ class FileStorage {
   FileStorage(this.version, this.files);
 
   factory FileStorage.fromBuffer(Uint8List buffer) {
-    final Map<String, dynamic>? json =
-        castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    final Map<String, dynamic>? json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
     if (json == null) {
       throw Exception('File storage format invalid');
     }
     final int version = json['version'] as int;
-    final List<Map<String, dynamic>> rawCachedFiles =
-        (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
     final List<FileHash> cachedFiles = <FileHash>[
-      for (final Map<String, dynamic> rawFile in rawCachedFiles)
-        FileHash._fromJson(rawFile),
+      for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
@@ -97,9 +94,9 @@ class FileStore {
     required File cacheFile,
     required Logger logger,
     FileStoreStrategy strategy = FileStoreStrategy.hash,
-  })  : _logger = logger,
-        _strategy = strategy,
-        _cacheFile = cacheFile;
+  }) : _logger = logger,
+       _strategy = strategy,
+       _cacheFile = cacheFile;
 
   final File _cacheFile;
   final Logger _logger;

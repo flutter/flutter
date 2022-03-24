@@ -38,8 +38,7 @@ void main() {
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
   });
 
-  testWidgets('Has default cupertino localizations',
-      (WidgetTester tester) async {
+  testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -62,8 +61,7 @@ void main() {
   });
 
   testWidgets('Can use dynamic color', (WidgetTester tester) async {
-    const CupertinoDynamicColor dynamicColor =
-        CupertinoDynamicColor.withBrightness(
+    const CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
     );
@@ -131,8 +129,7 @@ void main() {
     expect(find.text('regular page two'), findsNothing);
   });
 
-  testWidgets('CupertinoApp.navigatorKey can be updated',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
     await tester.pumpWidget(CupertinoApp(
       navigatorKey: key1,
@@ -149,19 +146,16 @@ void main() {
   });
 
   testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
-    final PlatformRouteInformationProvider provider =
-        PlatformRouteInformationProvider(
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: const RouteInformation(
         location: 'initial',
       ),
     );
-    final SimpleNavigatorRouterDelegate delegate =
-        SimpleNavigatorRouterDelegate(
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location!);
       },
-      onPopPage: (Route<void> route, void result,
-          SimpleNavigatorRouterDelegate delegate) {
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
@@ -176,16 +170,13 @@ void main() {
     expect(find.text('initial'), findsOneWidget);
 
     // Simulate android back button intent.
-    final ByteData message =
-        const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/navigation', message, (_) {});
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgets('CupertinoApp has correct default ScrollBehavior',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
@@ -197,12 +188,10 @@ void main() {
         ),
       ),
     );
-    expect(ScrollConfiguration.of(capturedContext).runtimeType,
-        CupertinoScrollBehavior);
+    expect(ScrollConfiguration.of(capturedContext).runtimeType, CupertinoScrollBehavior);
   });
 
-  testWidgets('A ScrollBehavior can be set for CupertinoApp',
-      (WidgetTester tester) async {
+  testWidgets('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
@@ -215,16 +204,12 @@ void main() {
         ),
       ),
     );
-    final ScrollBehavior scrollBehavior =
-        ScrollConfiguration.of(capturedContext);
+    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, MockScrollBehavior);
-    expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType,
-        NeverScrollableScrollPhysics);
+    expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
-  testWidgets(
-      'When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available',
-      (WidgetTester tester) async {
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
@@ -241,9 +226,7 @@ void main() {
         ),
       ),
     );
-    expect(
-        capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key,
-        uniqueKey);
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 }
 
@@ -251,17 +234,13 @@ class MockScrollBehavior extends ScrollBehavior {
   const MockScrollBehavior();
 
   @override
-  ScrollPhysics getScrollPhysics(BuildContext context) =>
-      const NeverScrollableScrollPhysics();
+  ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(
-    BuildContext, RouteInformation);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(
-    Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
-class SimpleRouteInformationParser
-    extends RouteInformationParser<RouteInformation> {
+class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
 
   @override
@@ -275,8 +254,7 @@ class SimpleRouteInformationParser
   }
 }
 
-class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
-    with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
     required this.builder,
     this.onPopPage,
@@ -314,7 +292,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
         const CupertinoPage<void>(
-          child: Text('base'),
+          child:  Text('base'),
         ),
         CupertinoPage<void>(
           key: ValueKey<String?>(routeInformation.location),

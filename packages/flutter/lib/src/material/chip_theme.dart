@@ -47,9 +47,9 @@ class ChipTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -86,8 +86,7 @@ class ChipTheme extends InheritedTheme {
   ///  * [ChipThemeData], which describes the actual configuration of a chip
   ///    theme.
   static ChipThemeData of(BuildContext context) {
-    final ChipTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<ChipTheme>();
+    final ChipTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<ChipTheme>();
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
   }
 
@@ -223,10 +222,8 @@ class ChipThemeData with Diagnosticable {
     required Color secondaryColor,
     required TextStyle labelStyle,
   }) {
-    assert(primaryColor != null || brightness != null,
-        'One of primaryColor or brightness must be specified');
-    assert(primaryColor == null || brightness == null,
-        'Only one of primaryColor or brightness may be specified');
+    assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
+    assert(primaryColor == null || brightness == null, 'Only one of primaryColor or brightness may be specified');
     assert(secondaryColor != null);
     assert(labelStyle != null);
 
@@ -243,8 +240,7 @@ class ChipThemeData with Diagnosticable {
     const int textLabelAlpha = 0xde; // 87%
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
-    primaryColor = primaryColor ??
-        (brightness == Brightness.light ? Colors.black : Colors.white);
+    primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
     final Color backgroundColor = primaryColor.withAlpha(backgroundAlpha);
     final Color deleteIconColor = primaryColor.withAlpha(deleteIconAlpha);
     final Color disabledColor = primaryColor.withAlpha(disabledAlpha);
@@ -253,8 +249,7 @@ class ChipThemeData with Diagnosticable {
     final TextStyle secondaryLabelStyle = labelStyle.copyWith(
       color: secondaryColor.withAlpha(textLabelAlpha),
     );
-    labelStyle =
-        labelStyle.copyWith(color: primaryColor.withAlpha(textLabelAlpha));
+    labelStyle = labelStyle.copyWith(color: primaryColor.withAlpha(textLabelAlpha));
 
     return ChipThemeData(
       backgroundColor: backgroundColor,
@@ -442,8 +437,7 @@ class ChipThemeData with Diagnosticable {
       deleteIconColor: deleteIconColor ?? this.deleteIconColor,
       disabledColor: disabledColor ?? this.disabledColor,
       selectedColor: selectedColor ?? this.selectedColor,
-      secondarySelectedColor:
-          secondarySelectedColor ?? this.secondarySelectedColor,
+      secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
       shadowColor: shadowColor ?? this.shadowColor,
       selectedShadowColor: selectedShadowColor ?? this.selectedShadowColor,
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
@@ -466,29 +460,24 @@ class ChipThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
-      secondarySelectedColor:
-          Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
+      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
-      selectedShadowColor:
-          Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
+      selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
       checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
-      labelPadding:
-          EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
+      labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       side: _lerpSides(a?.side, b?.side, t),
       shape: _lerpShapes(a?.shape, b?.shape, t),
       labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
-      secondaryLabelStyle:
-          TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
-      brightness: t < 0.5
-          ? a?.brightness ?? Brightness.light
-          : b?.brightness ?? Brightness.light,
+      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
+      brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
     );
@@ -496,43 +485,42 @@ class ChipThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments.
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     if (a == null)
-      return BorderSide.lerp(
-          BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
+      return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
     if (b == null)
-      return BorderSide.lerp(
-          BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
+      return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
     return BorderSide.lerp(a, b, t);
   }
 
   // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static OutlinedBorder? _lerpShapes(
-      OutlinedBorder? a, OutlinedBorder? b, double t) {
-    if (a == null && b == null) return null;
+  static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    if (a == null && b == null)
+      return null;
     return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
   }
 
   @override
   int get hashCode => Object.hash(
-        backgroundColor,
-        deleteIconColor,
-        disabledColor,
-        selectedColor,
-        secondarySelectedColor,
-        shadowColor,
-        selectedShadowColor,
-        checkmarkColor,
-        labelPadding,
-        padding,
-        side,
-        shape,
-        labelStyle,
-        secondaryLabelStyle,
-        brightness,
-        elevation,
-        pressElevation,
-      );
+    backgroundColor,
+    deleteIconColor,
+    disabledColor,
+    selectedColor,
+    secondarySelectedColor,
+    shadowColor,
+    selectedShadowColor,
+    checkmarkColor,
+    labelPadding,
+    padding,
+    side,
+    shape,
+    labelStyle,
+    secondaryLabelStyle,
+    brightness,
+    elevation,
+    pressElevation,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -542,64 +530,45 @@ class ChipThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ChipThemeData &&
-        other.backgroundColor == backgroundColor &&
-        other.deleteIconColor == deleteIconColor &&
-        other.disabledColor == disabledColor &&
-        other.selectedColor == selectedColor &&
-        other.secondarySelectedColor == secondarySelectedColor &&
-        other.shadowColor == shadowColor &&
-        other.selectedShadowColor == selectedShadowColor &&
-        other.checkmarkColor == checkmarkColor &&
-        other.labelPadding == labelPadding &&
-        other.padding == padding &&
-        other.side == side &&
-        other.shape == shape &&
-        other.labelStyle == labelStyle &&
-        other.secondaryLabelStyle == secondaryLabelStyle &&
-        other.brightness == brightness &&
-        other.elevation == elevation &&
-        other.pressElevation == pressElevation;
+    return other is ChipThemeData
+        && other.backgroundColor == backgroundColor
+        && other.deleteIconColor == deleteIconColor
+        && other.disabledColor == disabledColor
+        && other.selectedColor == selectedColor
+        && other.secondarySelectedColor == secondarySelectedColor
+        && other.shadowColor == shadowColor
+        && other.selectedShadowColor == selectedShadowColor
+        && other.checkmarkColor == checkmarkColor
+        && other.labelPadding == labelPadding
+        && other.padding == padding
+        && other.side == side
+        && other.shape == shape
+        && other.labelStyle == labelStyle
+        && other.secondaryLabelStyle == secondaryLabelStyle
+        && other.brightness == brightness
+        && other.elevation == elevation
+        && other.pressElevation == pressElevation;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(
-        ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));
-    properties
-        .add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
-    properties
-        .add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
-    properties.add(ColorProperty(
-        'secondarySelectedColor', secondarySelectedColor,
-        defaultValue: null));
-    properties
-        .add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
-    properties.add(ColorProperty('selectedShadowColor', selectedShadowColor,
-        defaultValue: null));
-    properties.add(
-        ColorProperty('checkMarkColor', checkmarkColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>(
-        'labelPadding', labelPadding,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
-        defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'secondaryLabelStyle', secondaryLabelStyle,
-        defaultValue: null));
-    properties.add(
-        EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
+    properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: null));
+    properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: null));
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(
-        DoubleProperty('pressElevation', pressElevation, defaultValue: null));
+    properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: null));
   }
 }

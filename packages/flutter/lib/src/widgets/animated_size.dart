@@ -32,12 +32,14 @@ class AnimatedSize extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    @Deprecated('This field is now ignored. '
-        'This feature was deprecated after v2.2.0-10.1.pre.')
-        TickerProvider? vsync,
+    @Deprecated(
+      'This field is now ignored. '
+      'This feature was deprecated after v2.2.0-10.1.pre.'
+    )
+    TickerProvider? vsync,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(clipBehavior != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -88,8 +90,8 @@ class AnimatedSize extends StatefulWidget {
   State<AnimatedSize> createState() => _AnimatedSizeState();
 }
 
-class _AnimatedSizeState extends State<AnimatedSize>
-    with SingleTickerProviderStateMixin {
+class _AnimatedSizeState
+    extends State<AnimatedSize> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
@@ -114,8 +116,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(clipBehavior != null),
-        super(key: key, child: child);
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   final AlignmentGeometry alignment;
   final Curve curve;
@@ -141,8 +143,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, RenderAnimatedSize renderObject) {
+  void updateRenderObject(BuildContext context, RenderAnimatedSize renderObject) {
     renderObject
       ..alignment = alignment
       ..duration = duration
@@ -156,13 +157,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AlignmentGeometry>(
-        'alignment', alignment,
-        defaultValue: Alignment.topCenter));
-    properties
-        .add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty(
-        'reverseDuration', reverseDuration?.inMilliseconds,
-        unit: 'ms', defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }

@@ -11,8 +11,7 @@ import 'box.dart';
 /// [BoxConstraints].
 ///
 /// The methods of [ChildLayoutHelper] adhere to this signature.
-typedef ChildLayouter = Size Function(
-    RenderBox child, BoxConstraints constraints);
+typedef ChildLayouter = Size Function(RenderBox child, BoxConstraints constraints);
 
 /// A collection of static functions to layout a [RenderBox] child with the
 /// given set of [BoxConstraints].

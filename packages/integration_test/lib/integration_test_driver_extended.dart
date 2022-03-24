@@ -48,8 +48,7 @@ Future<void> integrationDriver(
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
   // error if it's used as a message for requestData.
-  String jsonResponse =
-      await driver.requestData(DriverTestMessage.pending().toString());
+  String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
 
   Response response = Response.fromJson(jsonResponse);
 
@@ -58,21 +57,16 @@ Future<void> integrationDriver(
   while (response.data != null &&
       response.data!['web_driver_command'] != null &&
       response.data!['web_driver_command'] != '${WebDriverCommandType.noop}') {
-    final String? webDriverCommand =
-        response.data!['web_driver_command'] as String?;
+    final String? webDriverCommand = response.data!['web_driver_command'] as String?;
     if (webDriverCommand == '${WebDriverCommandType.screenshot}') {
-      assert(onScreenshot != null,
-          'screenshot command requires an onScreenshot callback');
+      assert(onScreenshot != null, 'screenshot command requires an onScreenshot callback');
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
-      final String screenshotName =
-          response.data!['screenshot_name']! as String;
+      final String screenshotName = response.data!['screenshot_name']! as String;
 
-      final bool screenshotSuccess =
-          await onScreenshot!(screenshotName, screenshotImage);
+      final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage);
       if (screenshotSuccess) {
-        jsonResponse =
-            await driver.requestData(DriverTestMessage.complete().toString());
+        jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
       } else {
         jsonResponse =
             await driver.requestData(DriverTestMessage.error().toString());
@@ -100,11 +94,8 @@ Future<void> integrationDriver(
     print('result $jsonResponse');
   }
 
-  if (response.data != null &&
-      response.data!['screenshots'] != null &&
-      onScreenshot != null) {
-    final List<dynamic> screenshots =
-        response.data!['screenshots'] as List<dynamic>;
+  if (response.data != null && response.data!['screenshots'] != null && onScreenshot != null) {
+    final List<dynamic> screenshots = response.data!['screenshots'] as List<dynamic>;
     final List<String> failures = <String>[];
     for (final dynamic screenshot in screenshots) {
       final Map<String, dynamic> data = screenshot as Map<String, dynamic>;
@@ -125,8 +116,7 @@ Future<void> integrationDriver(
       }
     }
     if (failures.isNotEmpty) {
-      throw StateError(
-          'The following screenshot tests failed: ${failures.join(', ')}');
+     throw StateError('The following screenshot tests failed: ${failures.join(', ')}');
     }
   }
 

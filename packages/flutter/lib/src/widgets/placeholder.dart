@@ -32,7 +32,8 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PlaceholderPainter oldPainter) {
-    return oldPainter.color != color || oldPainter.strokeWidth != strokeWidth;
+    return oldPainter.color != color
+        || oldPainter.strokeWidth != strokeWidth;
   }
 
   @override
@@ -100,13 +101,9 @@ class Placeholder extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-        ColorProperty('color', color, defaultValue: const Color(0xFF455A64)));
-    properties
-        .add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: 2.0));
-    properties.add(
-        DoubleProperty('fallbackWidth', fallbackWidth, defaultValue: 400.0));
-    properties.add(
-        DoubleProperty('fallbackHeight', fallbackHeight, defaultValue: 400.0));
+    properties.add(ColorProperty('color', color, defaultValue: const Color(0xFF455A64)));
+    properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('fallbackWidth', fallbackWidth, defaultValue: 400.0));
+    properties.add(DoubleProperty('fallbackHeight', fallbackHeight, defaultValue: 400.0));
   }
 }

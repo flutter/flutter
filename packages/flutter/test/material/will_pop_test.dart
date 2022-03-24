@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
-  const SamplePage({Key? key}) : super(key: key);
+  const SamplePage({ Key? key }) : super(key: key);
   @override
   SamplePageState createState() => SamplePageState();
 }
@@ -43,7 +43,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  const SampleForm({Key? key, required this.callback}) : super(key: key);
+  const SampleForm({ Key? key, required this.callback }) : super(key: key);
 
   final WillPopCallback callback;
 
@@ -96,8 +96,7 @@ class _TestPage extends Page<dynamic> {
 }
 
 void main() {
-  testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button',
-      (WidgetTester tester) async {
+  testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -152,8 +151,7 @@ void main() {
     expect(find.text('Sample Page'), findsNothing);
   });
 
-  testWidgets('willPop will only pop if the callback returns true',
-      (WidgetTester tester) async {
+  testWidgets('willPop will only pop if the callback returns true', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
@@ -192,8 +190,7 @@ void main() {
     expect(find.text('Sample Form'), findsNothing);
   });
 
-  testWidgets('Form.willPop can inhibit back button',
-      (WidgetTester tester) async {
+  testWidgets('Form.willPop can inhibit back button', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
@@ -233,8 +230,7 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
     await tester.pump(); // Complete the willPop() Future.
-    await tester
-        .pump(const Duration(seconds: 1)); // Wait until it has finished.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsOneWidget);
     expect(willPopCount, 1);
 
@@ -243,31 +239,25 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
     await tester.pump(); // Complete the willPop() Future.
-    await tester
-        .pump(const Duration(seconds: 1)); // Wait until it has finished.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsNothing);
     expect(willPopCount, 1);
   });
 
-  testWidgets('Form.willPop callbacks do not accumulate',
-      (WidgetTester tester) async {
+  testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
     Future<bool> showYesNoAlert(BuildContext context) async {
       return (await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            actions: <Widget>[
+            actions: <Widget> [
               TextButton(
                 child: const Text('YES'),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
+                onPressed: () { Navigator.of(context).pop(true); },
               ),
               TextButton(
                 child: const Text('NO'),
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
+                onPressed: () { Navigator.of(context).pop(false); },
               ),
             ],
           );
@@ -318,8 +308,7 @@ void main() {
     await tester.tap(find.text('NO'));
     await tester.pump(); // Start the dismiss animation.
     await tester.pump(); // Resolve the willPop callback.
-    await tester
-        .pump(const Duration(seconds: 1)); // Wait until it has finished.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsOneWidget);
 
     // Do it again.
@@ -332,8 +321,7 @@ void main() {
     await tester.tap(find.text('NO'));
     await tester.pump(); // Start the dismiss animation.
     await tester.pump(); // Resolve the willPop callback.
-    await tester
-        .pump(const Duration(seconds: 1)); // Wait until it has finished.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsOneWidget);
 
     // This time really dismiss the SampleForm by pressing the Alert's
@@ -344,26 +332,20 @@ void main() {
     await tester.tap(find.text('YES'));
     await tester.pump(); // Start the dismiss animation.
     await tester.pump(); // Resolve the willPop callback.
-    await tester
-        .pump(const Duration(seconds: 1)); // Wait until it has finished.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsNothing);
   });
 
-  testWidgets('Route.scopedWillPop callbacks do not accumulate',
-      (WidgetTester tester) async {
-    late StateSetter
-        contentsSetState; // call this to rebuild the route's SampleForm contents
-    bool contentsEmpty =
-        false; // when true, don't include the SampleForm in the route
+  testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
+    late StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
+    bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
     final _TestPageRoute<void> route = _TestPageRoute<void>(
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             contentsSetState = setState;
-            return contentsEmpty
-                ? Container()
-                : SampleForm(key: UniqueKey(), callback: () async => false);
+            return contentsEmpty ? Container() : SampleForm(key: UniqueKey(), callback: () async => false);
           },
         );
       },
@@ -399,24 +381,22 @@ void main() {
     expect(route.hasCallback, isTrue);
 
     // Rebuild the route's SampleForm child an additional 3x for good measure.
-    contentsSetState(() {});
+    contentsSetState(() { });
     await tester.pump();
-    contentsSetState(() {});
+    contentsSetState(() { });
     await tester.pump();
-    contentsSetState(() {});
+    contentsSetState(() { });
     await tester.pump();
 
     // Now build the route's contents without the sample form.
     contentsEmpty = true;
-    contentsSetState(() {});
+    contentsSetState(() { });
     await tester.pump();
 
     expect(route.hasCallback, isFalse);
   });
 
-  testWidgets(
-      'should handle new route if page moved from one navigator to another',
-      (WidgetTester tester) async {
+  testWidgets('should handle new route if page moved from one navigator to another', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89133
     late StateSetter contentsSetState;
     bool moveToAnotherNavigator = false;
@@ -461,17 +441,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     await tester.pump();
-    final _TestPageRoute<dynamic> route1 =
-        ModalRoute.of(tester.element(find.text('anchor')))!
-            as _TestPageRoute<dynamic>;
+    final _TestPageRoute<dynamic> route1 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
     expect(route1.hasCallback, isTrue);
     moveToAnotherNavigator = true;
     contentsSetState(() {});
 
     await tester.pump();
-    final _TestPageRoute<dynamic> route2 =
-        ModalRoute.of(tester.element(find.text('anchor')))!
-            as _TestPageRoute<dynamic>;
+    final _TestPageRoute<dynamic> route2 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
 
     expect(route1.hasCallback, isFalse);
     expect(route2.hasCallback, isTrue);

@@ -38,24 +38,24 @@ class XCDevice {
     required Xcode xcode,
     required Platform platform,
     required IProxy iproxy,
-  })  : _processUtils =
-            ProcessUtils(logger: logger, processManager: processManager),
-        _logger = logger,
-        _iMobileDevice = IMobileDevice(
-          artifacts: artifacts,
-          cache: cache,
-          logger: logger,
-          processManager: processManager,
-        ),
-        _iosDeploy = IOSDeploy(
-          artifacts: artifacts,
-          cache: cache,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        ),
-        _iProxy = iproxy,
-        _xcode = xcode {
+  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _logger = logger,
+      _iMobileDevice = IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        processManager: processManager,
+      ),
+      _iosDeploy = IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      _iProxy = iproxy,
+      _xcode = xcode {
+
     _setupDeviceIdentifierByEventStream();
   }
 
@@ -77,8 +77,7 @@ class XCDevice {
   void _setupDeviceIdentifierByEventStream() {
     // _deviceIdentifierByEvent Should always be available for listeners
     // in case polling needs to be stopped and restarted.
-    _deviceIdentifierByEvent =
-        StreamController<Map<XCDeviceEvent, String>>.broadcast(
+    _deviceIdentifierByEvent = StreamController<Map<XCDeviceEvent, String>>.broadcast(
       onListen: _startObservingTetheredIOSDevices,
       onCancel: _stopObservingTetheredIOSDevices,
     );
@@ -86,11 +85,12 @@ class XCDevice {
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
-  Future<List<Object>?> _getAllDevices(
-      {bool useCache = false, required Duration timeout}) async {
+  Future<List<Object>?> _getAllDevices({
+    bool useCache = false,
+    required Duration timeout
+  }) async {
     if (!isInstalled) {
-      _logger.printTrace(
-          "Xcode not found. Run 'flutter doctor' for more information.");
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
     if (useCache && _cachedListResults != null) {
@@ -111,26 +111,20 @@ class XCDevice {
       if (result.exitCode == 0) {
         final String listOutput = result.stdout;
         try {
-          final List<Object> listResults =
-              (json.decode(result.stdout) as List<Object?>)
-                  .whereType<Object>()
-                  .toList();
+          final List<Object> listResults = (json.decode(result.stdout) as List<Object?>).whereType<Object>().toList();
           _cachedListResults = listResults;
           return listResults;
         } on FormatException {
           // xcdevice logs errors and crashes to stdout.
-          _logger
-              .printError('xcdevice returned non-JSON response: $listOutput');
+          _logger.printError('xcdevice returned non-JSON response: $listOutput');
           return null;
         }
       }
       _logger.printTrace('xcdevice returned an error:\n${result.stderr}');
     } on ProcessException catch (exception) {
-      _logger
-          .printTrace('Process exception running xcdevice list:\n$exception');
+      _logger.printTrace('Process exception running xcdevice list:\n$exception');
     } on ArgumentError catch (exception) {
-      _logger
-          .printTrace('Argument exception running xcdevice list:\n$exception');
+      _logger.printTrace('Argument exception running xcdevice list:\n$exception');
     }
 
     return null;
@@ -142,8 +136,7 @@ class XCDevice {
   /// and identifier.
   Stream<Map<XCDeviceEvent, String>>? observedDeviceEvents() {
     if (!isInstalled) {
-      _logger.printTrace(
-          "Xcode not found. Run 'flutter doctor' for more information.");
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
     return _deviceIdentifierByEvent?.stream;
@@ -175,11 +168,11 @@ class XCDevice {
         ],
       );
 
-      final StreamSubscription<String> stdoutSubscription =
-          _deviceObservationProcess!.stdout
-              .transform<String>(utf8.decoder)
-              .transform<String>(const LineSplitter())
-              .listen((String line) {
+      final StreamSubscription<String> stdoutSubscription = _deviceObservationProcess!.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+
         // xcdevice observe example output of UDIDs:
         //
         // Listening for all devices, on both interfaces.
@@ -187,25 +180,25 @@ class XCDevice {
         // Attach: 00008027-00192736010F802E
         // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
         // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-        final RegExpMatch? match =
-            _observationIdentifierPattern.firstMatch(line);
+        final RegExpMatch? match = _observationIdentifierPattern.firstMatch(line);
         if (match != null && match.groupCount == 2) {
           final String verb = match.group(1)!.toLowerCase();
           final String identifier = match.group(2)!;
           if (verb.startsWith('attach')) {
-            _deviceIdentifierByEvent?.add(
-                <XCDeviceEvent, String>{XCDeviceEvent.attach: identifier});
+            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
+              XCDeviceEvent.attach: identifier
+            });
           } else if (verb.startsWith('detach')) {
-            _deviceIdentifierByEvent?.add(
-                <XCDeviceEvent, String>{XCDeviceEvent.detach: identifier});
+            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
+              XCDeviceEvent.detach: identifier
+            });
           }
         }
       });
-      final StreamSubscription<String> stderrSubscription =
-          _deviceObservationProcess!.stderr
-              .transform<String>(utf8.decoder)
-              .transform<String>(const LineSplitter())
-              .listen((String line) {
+      final StreamSubscription<String> stderrSubscription = _deviceObservationProcess!.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
         _logger.printTrace('xcdevice observe error: $line');
       });
       unawaited(_deviceObservationProcess?.exitCode.then((int status) {
@@ -234,9 +227,8 @@ class XCDevice {
   }
 
   /// [timeout] defaults to 2 seconds.
-  Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
-    final List<Object>? allAvailableDevices =
-        await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
+  Future<List<IOSDevice>> getAvailableIOSDevices({ Duration? timeout }) async {
+    final List<Object>? allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -297,9 +289,7 @@ class XCDevice {
           final String? errorMessage = _parseErrorMessage(errorProperties);
           if (errorMessage != null) {
             if (errorMessage.contains('not paired')) {
-              UsageEvent('device', 'ios-trust-failure',
-                      flutterUsage: globals.flutterUsage)
-                  .send();
+              UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
             }
             _logger.printTrace(errorMessage);
           }
@@ -347,6 +337,7 @@ class XCDevice {
       }
     }
     return devices;
+
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
@@ -359,8 +350,7 @@ class XCDevice {
     return false;
   }
 
-  static Map<String, Object?>? _errorProperties(
-      Map<String, Object?> deviceProperties) {
+  static Map<String, Object?>? _errorProperties(Map<String, Object?> deviceProperties) {
     final Object? error = deviceProperties['error'];
     return error is Map<String, Object?> ? error : null;
   }
@@ -370,8 +360,7 @@ class XCDevice {
     return code is int ? code : null;
   }
 
-  static IOSDeviceConnectionInterface _interfaceType(
-      Map<String, Object?> deviceProperties) {
+  static IOSDeviceConnectionInterface _interfaceType(Map<String, Object?> deviceProperties) {
     // Interface can be "usb", "network", or "none" for simulators
     // and unknown future interfaces.
     final Object? interface = deviceProperties['interface'];
@@ -387,16 +376,13 @@ class XCDevice {
   }
 
   static String? _sdkVersion(Map<String, Object?> deviceProperties) {
-    final Object? operatingSystemVersion =
-        deviceProperties['operatingSystemVersion'];
+    final Object? operatingSystemVersion = deviceProperties['operatingSystemVersion'];
     if (operatingSystemVersion is String) {
       // Parse out the OS version, ignore the build number in parentheses.
       // "13.3 (17C54)"
       final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
       if (operatingSystemRegex.hasMatch(operatingSystemVersion.trim())) {
-        return operatingSystemRegex
-            .firstMatch(operatingSystemVersion.trim())
-            ?.group(1);
+        return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
       }
       return operatingSystemVersion;
     }
@@ -404,15 +390,11 @@ class XCDevice {
   }
 
   static String? _buildVersion(Map<String, Object?> deviceProperties) {
-    final Object? operatingSystemVersion =
-        deviceProperties['operatingSystemVersion'];
+    final Object? operatingSystemVersion = deviceProperties['operatingSystemVersion'];
     if (operatingSystemVersion is String) {
       // Parse out the build version, for example 17C54 from "13.3 (17C54)".
       final RegExp buildVersionRegex = RegExp(r'\(.*\)$');
-      return buildVersionRegex
-          .firstMatch(operatingSystemVersion)
-          ?.group(0)
-          ?.replaceAll(RegExp('[()]'), '');
+      return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(0)?.replaceAll(RegExp('[()]'), '');
     }
     return null;
   }
@@ -524,7 +506,9 @@ class XCDevice {
   /// List of all devices reporting errors.
   Future<List<String>> getDiagnostics() async {
     final List<Object>? allAvailableDevices = await _getAllDevices(
-        useCache: true, timeout: const Duration(seconds: 2));
+      useCache: true,
+      timeout: const Duration(seconds: 2)
+    );
 
     if (allAvailableDevices == null) {
       return const <String>[];
@@ -535,8 +519,7 @@ class XCDevice {
       if (deviceProperties is! Map<String, Object?>) {
         continue;
       }
-      final Map<String, Object?>? errorProperties =
-          _errorProperties(deviceProperties);
+      final Map<String, Object?>? errorProperties = _errorProperties(deviceProperties);
       final String? errorMessage = _parseErrorMessage(errorProperties);
       if (errorMessage != null) {
         diagnostics.add(errorMessage);

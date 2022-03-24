@@ -172,8 +172,7 @@ void main() {
     log.clear();
   });
 
-  test('During notifyListeners, a listener was added and removed immediately',
-      () {
+  test('During notifyListeners, a listener was added and removed immediately', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -225,9 +224,7 @@ void main() {
     },
   );
 
-  test(
-      'If the first listener removes itself, notifyListeners still notify all listeners',
-      () {
+  test('If the first listener removes itself, notifyListeners still notify all listeners', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 enum StockMode { optimistic, pessimistic }
-
 enum BackupMode { enabled, disabled }
 
 class StockConfiguration {
@@ -18,16 +17,16 @@ class StockConfiguration {
     required this.debugShowRainbow,
     required this.showPerformanceOverlay,
     required this.showSemanticsDebugger,
-  })  : assert(stockMode != null),
-        assert(backupMode != null),
-        assert(debugShowGrid != null),
-        assert(debugShowSizes != null),
-        assert(debugShowBaselines != null),
-        assert(debugShowLayers != null),
-        assert(debugShowPointers != null),
-        assert(debugShowRainbow != null),
-        assert(showPerformanceOverlay != null),
-        assert(showSemanticsDebugger != null);
+  }) : assert(stockMode != null),
+       assert(backupMode != null),
+       assert(debugShowGrid != null),
+       assert(debugShowSizes != null),
+       assert(debugShowBaselines != null),
+       assert(debugShowLayers != null),
+       assert(debugShowPointers != null),
+       assert(debugShowRainbow != null),
+       assert(showPerformanceOverlay != null),
+       assert(showSemanticsDebugger != null);
 
   final StockMode stockMode;
   final BackupMode backupMode;
@@ -61,10 +60,8 @@ class StockConfiguration {
       debugShowLayers: debugShowLayers ?? this.debugShowLayers,
       debugShowPointers: debugShowPointers ?? this.debugShowPointers,
       debugShowRainbow: debugShowRainbow ?? this.debugShowRainbow,
-      showPerformanceOverlay:
-          showPerformanceOverlay ?? this.showPerformanceOverlay,
-      showSemanticsDebugger:
-          showSemanticsDebugger ?? this.showSemanticsDebugger,
+      showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
+      showSemanticsDebugger: showSemanticsDebugger ?? this.showSemanticsDebugger,
     );
   }
 }

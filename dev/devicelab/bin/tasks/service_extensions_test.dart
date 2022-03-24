@@ -21,24 +21,14 @@ void main() {
 
     final Device device = await devices.workingDevice;
     await device.unlock();
-    final Directory appDir =
-        dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
+    final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
       final Completer<void> ready = Completer<void>();
       late bool ok;
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>[
-          'run',
-          '--verbose',
-          '--no-fast-start',
-          '--no-publish-port',
-          '--disable-service-auth-codes',
-          '-d',
-          device.deviceId,
-          'lib/main.dart'
-        ],
+        <String>['run', '--verbose', '--no-fast-start', '--no-publish-port', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
           .transform<String>(utf8.decoder)
@@ -48,8 +38,7 @@ void main() {
         if (vmServicePort == null) {
           vmServicePort = parseServicePort(line);
           if (vmServicePort != null) {
-            print(
-                'service protocol connection available at port $vmServicePort');
+            print('service protocol connection available at port $vmServicePort');
             print('run: ready!');
             ready.complete();
             ok = true;
@@ -62,21 +51,17 @@ void main() {
           .listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      unawaited(run.exitCode.then<void>((int exitCode) {
-        ok = false;
-      }));
-      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
-      if (!ok) throw 'Failed to run test app.';
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
+      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+      if (!ok)
+        throw 'Failed to run test app.';
 
-      final VmService client =
-          await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
+      final VmService client = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
       final IsolateRef isolate = vm.isolates!.first;
 
-      final StreamController<Event> frameEventsController =
-          StreamController<Event>();
-      final StreamController<Event> navigationEventsController =
-          StreamController<Event>();
+      final StreamController<Event> frameEventsController = StreamController<Event>();
+      final StreamController<Event> navigationEventsController = StreamController<Event>();
       try {
         await client.streamListen(EventKind.kExtension);
       } catch (err) {
@@ -95,8 +80,7 @@ void main() {
 
       print('reassembling app...');
       final Future<Event> frameFuture = frameEvents.first;
-      await client.callServiceExtension('ext.flutter.reassemble',
-          isolateId: isolate.id);
+      await client.callServiceExtension('ext.flutter.reassemble', isolateId: isolate.id);
 
       // ensure we get an event
       final Event event = await frameFuture;
@@ -122,14 +106,11 @@ void main() {
 
       final Event navigationEvent = await navigationFuture;
       // validate the fields
-      expect(navigationEvent.extensionData!.data['route']
-          is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route =
-          navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
+      expect(navigationEvent.extensionData!.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> settings =
-          route['settings'] as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;
       expect(settings.containsKey('name'));
 
       run.stdin.write('q');
@@ -142,5 +123,6 @@ void main() {
 }
 
 void expect(bool value) {
-  if (!value) throw 'failed assertion in service extensions test';
+  if (!value)
+    throw 'failed assertion in service extensions test';
 }

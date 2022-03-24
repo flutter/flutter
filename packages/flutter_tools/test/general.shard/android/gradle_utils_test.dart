@@ -14,31 +14,29 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  group('injectGradleWrapperIfNeeded', () {
+   group('injectGradleWrapperIfNeeded', () {
     late MemoryFileSystem fileSystem;
     late Directory gradleWrapperDirectory;
     late GradleUtils gradleUtils;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      gradleWrapperDirectory =
-          fileSystem.directory('cache/bin/cache/artifacts/gradle_wrapper');
+      gradleWrapperDirectory = fileSystem.directory('cache/bin/cache/artifacts/gradle_wrapper');
       gradleWrapperDirectory.createSync(recursive: true);
       gradleWrapperDirectory
-          .childFile('gradlew')
-          .writeAsStringSync('irrelevant');
+        .childFile('gradlew')
+        .writeAsStringSync('irrelevant');
       gradleWrapperDirectory
-          .childDirectory('gradle')
-          .childDirectory('wrapper')
-          .createSync(recursive: true);
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .createSync(recursive: true);
       gradleWrapperDirectory
-          .childDirectory('gradle')
-          .childDirectory('wrapper')
-          .childFile('gradle-wrapper.jar')
-          .writeAsStringSync('irrelevant');
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
       gradleUtils = GradleUtils(
-        cache: Cache.test(
-            processManager: FakeProcessManager.any(), fileSystem: fileSystem),
+        cache: Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem),
         fileSystem: fileSystem,
         platform: FakePlatform(environment: <String, String>{}),
         logger: BufferLogger.test(),
@@ -47,52 +45,43 @@ void main() {
     });
 
     testWithoutContext('injects the wrapper when all files are missing', () {
-      final Directory sampleAppAndroid =
-          fileSystem.directory('/sample-app/android');
+      final Directory sampleAppAndroid = fileSystem.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
 
       expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
 
-      expect(
-          sampleAppAndroid
-              .childDirectory('gradle')
-              .childDirectory('wrapper')
-              .childFile('gradle-wrapper.jar')
-              .existsSync(),
-          isTrue);
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .existsSync(), isTrue);
 
-      expect(
-          sampleAppAndroid
-              .childDirectory('gradle')
-              .childDirectory('wrapper')
-              .childFile('gradle-wrapper.properties')
-              .existsSync(),
-          isTrue);
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .existsSync(), isTrue);
 
-      expect(
-          sampleAppAndroid
-              .childDirectory('gradle')
-              .childDirectory('wrapper')
-              .childFile('gradle-wrapper.properties')
-              .readAsStringSync(),
-          'distributionBase=GRADLE_USER_HOME\n'
-          'distributionPath=wrapper/dists\n'
-          'zipStoreBase=GRADLE_USER_HOME\n'
-          'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .readAsStringSync(),
+            'distributionBase=GRADLE_USER_HOME\n'
+            'distributionPath=wrapper/dists\n'
+            'zipStoreBase=GRADLE_USER_HOME\n'
+            'zipStorePath=wrapper/dists\n'
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
     });
 
     testWithoutContext('injects the wrapper when some files are missing', () {
-      final Directory sampleAppAndroid =
-          fileSystem.directory('/sample-app/android');
+      final Directory sampleAppAndroid = fileSystem.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       // There's an existing gradlew
-      sampleAppAndroid
-          .childFile('gradlew')
-          .writeAsStringSync('existing gradlew');
+      sampleAppAndroid.childFile('gradlew').writeAsStringSync('existing gradlew');
 
       gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
 
@@ -100,28 +89,23 @@ void main() {
       expect(sampleAppAndroid.childFile('gradlew').readAsStringSync(),
           equals('existing gradlew'));
 
-      expect(
-          sampleAppAndroid
-              .childDirectory('gradle')
-              .childDirectory('wrapper')
-              .childFile('gradle-wrapper.jar')
-              .existsSync(),
-          isTrue);
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .existsSync(), isTrue);
 
-      expect(
-          sampleAppAndroid
-              .childDirectory('gradle')
-              .childDirectory('wrapper')
-              .childFile('gradle-wrapper.properties')
-              .existsSync(),
-          isTrue);
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .existsSync(), isTrue);
 
-      expect(
-          sampleAppAndroid
-              .childDirectory('gradle')
-              .childDirectory('wrapper')
-              .childFile('gradle-wrapper.properties')
-              .readAsStringSync(),
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .readAsStringSync(),
           'distributionBase=GRADLE_USER_HOME\n'
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
@@ -129,9 +113,7 @@ void main() {
           'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
     });
 
-    testWithoutContext(
-        'injects the wrapper and the Gradle version is derivated from the AGP version',
-        () {
+    testWithoutContext('injects the wrapper and the Gradle version is derivated from the AGP version', () {
       const Map<String, String> testCases = <String, String>{
         // AGP version : Gradle version
         '1.0.0': '2.3',
@@ -150,9 +132,10 @@ void main() {
       };
 
       for (final MapEntry<String, String> entry in testCases.entries) {
-        final Directory sampleAppAndroid =
-            fileSystem.systemTempDirectory.createTempSync('flutter_android.');
-        sampleAppAndroid.childFile('build.gradle').writeAsStringSync('''
+        final Directory sampleAppAndroid = fileSystem.systemTempDirectory.createTempSync('flutter_android.');
+        sampleAppAndroid
+          .childFile('build.gradle')
+          .writeAsStringSync('''
   buildscript {
       dependencies {
           classpath 'com.android.tools.build:gradle:${entry.key}'
@@ -163,39 +146,33 @@ void main() {
 
         expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
 
-        expect(
-            sampleAppAndroid
-                .childDirectory('gradle')
-                .childDirectory('wrapper')
-                .childFile('gradle-wrapper.jar')
-                .existsSync(),
-            isTrue);
+        expect(sampleAppAndroid
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.jar')
+          .existsSync(), isTrue);
 
-        expect(
-            sampleAppAndroid
-                .childDirectory('gradle')
-                .childDirectory('wrapper')
-                .childFile('gradle-wrapper.properties')
-                .existsSync(),
-            isTrue);
+        expect(sampleAppAndroid
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.properties')
+          .existsSync(), isTrue);
 
-        expect(
-            sampleAppAndroid
-                .childDirectory('gradle')
-                .childDirectory('wrapper')
-                .childFile('gradle-wrapper.properties')
-                .readAsStringSync(),
-            'distributionBase=GRADLE_USER_HOME\n'
-            'distributionPath=wrapper/dists\n'
-            'zipStoreBase=GRADLE_USER_HOME\n'
-            'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-${entry.value}-all.zip\n');
+        expect(sampleAppAndroid
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.properties')
+          .readAsStringSync(),
+              'distributionBase=GRADLE_USER_HOME\n'
+              'distributionPath=wrapper/dists\n'
+              'zipStoreBase=GRADLE_USER_HOME\n'
+              'zipStorePath=wrapper/dists\n'
+              'distributionUrl=https\\://services.gradle.org/distributions/gradle-${entry.value}-all.zip\n');
       }
     });
 
     testWithoutContext('returns the gradlew path', () {
-      final Directory androidDirectory = fileSystem.directory('/android')
-        ..createSync();
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('gradlew').createSync();
       androidDirectory.childFile('gradlew.bat').createSync();
       androidDirectory.childFile('gradle.properties').createSync();
@@ -205,8 +182,7 @@ void main() {
         fileSystem: fileSystem,
       ).fromDirectory(fileSystem.currentDirectory);
 
-      expect(
-        gradleUtils.getExecutable(flutterProject),
+      expect(gradleUtils.getExecutable(flutterProject),
         androidDirectory.childFile('gradlew').path,
       );
     });

@@ -61,8 +61,7 @@ class PointerSignalResolver {
   ///
   /// See the documentation for the [PointerSignalResolver] class on when and
   /// how this method should be used.
-  void register(
-      PointerSignalEvent event, PointerSignalResolvedCallback callback) {
+  void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
     assert(event != null);
     assert(callback != null);
     assert(_currentEvent == null || _isSameEvent(_currentEvent!, event));
@@ -91,9 +90,8 @@ class PointerSignalResolver {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
-              DiagnosticsProperty<PointerSignalEvent>('Event', event,
-                  style: DiagnosticsTreeStyle.errorProperty),
-            ];
+          DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+        ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(

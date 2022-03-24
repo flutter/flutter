@@ -17,17 +17,14 @@ class MySliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 150.0;
 
   @override
-  Widget build(
-          BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      const Placeholder(color: Colors.teal);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => const Placeholder(color: Colors.teal);
 
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      false;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({ Key? key }) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -55,8 +52,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       appBar: AppBar(
         bottom: TabBar(
           controller: tabController,
-          tabs: List<Widget>.generate(
-              tabCount, (int index) => Tab(text: 'Tab $index')).toList(),
+          tabs: List<Widget>.generate(tabCount, (int index) => Tab(text: 'Tab $index')).toList(),
         ),
       ),
       body: TabBarView(
@@ -78,8 +74,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 void main() {
-  testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3',
-      (WidgetTester tester) async {
+  testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: MyHomePage()));
 
     // should not crash.

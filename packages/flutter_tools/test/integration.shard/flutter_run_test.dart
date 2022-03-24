@@ -29,15 +29,12 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext(
-      'flutter run reports an error if an invalid device is supplied',
-      () async {
+  testWithoutContext('flutter run reports an error if an invalid device is supplied', () async {
     // This test forces flutter to check for all possible devices to catch issues
     // like https://github.com/flutter/flutter/issues/21418 which were skipped
     // over because other integration tests run using flutter-tester which short-cuts
     // some of the checks for devices.
-    final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     const ProcessManager processManager = LocalProcessManager();
     final ProcessResult proc = await processManager.run(
@@ -47,12 +44,9 @@ void main() {
 
     expect(proc.stdout, isNot(contains('flutter has exited unexpectedly')));
     expect(proc.stderr, isNot(contains('flutter has exited unexpectedly')));
-    if (!proc.stderr.toString().contains('Unable to locate a development') &&
-        !proc.stdout
-            .toString()
-            .contains('No supported devices found with name or id matching')) {
-      fail(
-          "'flutter run -d invalid-device-id' did not produce the expected error");
+    if (!proc.stderr.toString().contains('Unable to locate a development')
+        && !proc.stdout.toString().contains('No supported devices found with name or id matching')) {
+      fail("'flutter run -d invalid-device-id' did not produce the expected error");
     }
   });
 
@@ -60,10 +54,7 @@ void main() {
     await flutter.run(
       startPaused: true,
       withDebugger: true,
-      additionalCommandArgs: <String>[
-        '--devtools-server-address',
-        'http://127.0.0.1:9110'
-      ],
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
     await flutter.resume();
     await pollForServiceExtensionValue<String>(

@@ -17,12 +17,10 @@ class CupertinoSegmentedControlDemo extends StatefulWidget {
   static const String routeName = 'cupertino/segmented_control';
 
   @override
-  State<CupertinoSegmentedControlDemo> createState() =>
-      _CupertinoSegmentedControlDemoState();
+  State<CupertinoSegmentedControlDemo> createState() => _CupertinoSegmentedControlDemoState();
 }
 
-class _CupertinoSegmentedControlDemoState
-    extends State<CupertinoSegmentedControlDemo> {
+class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedControlDemo> {
   final Map<int, Widget> children = const <int, Widget>{
     0: Text('Small'),
     1: Text('Medium'),
@@ -64,14 +62,10 @@ class _CupertinoSegmentedControlDemoState
         // Material page. CupertinoPageRoutes could auto-populate these back
         // labels.
         previousPageTitle: 'Cupertino',
-        trailing: CupertinoDemoDocumentationButton(
-            CupertinoSegmentedControlDemo.routeName),
+        trailing: CupertinoDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName),
       ),
       child: DefaultTextStyle(
-        style: CupertinoTheme.of(context)
-            .textTheme
-            .textStyle
-            .copyWith(fontSize: 13),
+        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 13),
         child: SafeArea(
           child: Column(
             children: <Widget>[
@@ -111,8 +105,7 @@ class _CupertinoSegmentedControlDemoState
                             horizontal: 16.0,
                           ),
                           decoration: BoxDecoration(
-                            color: CupertinoTheme.of(context)
-                                .scaffoldBackgroundColor,
+                            color: CupertinoTheme.of(context).scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(3.0),
                             boxShadow: const <BoxShadow>[
                               BoxShadow(

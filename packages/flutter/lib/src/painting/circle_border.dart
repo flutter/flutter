@@ -27,9 +27,7 @@ class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({BorderSide side = BorderSide.none})
-      : assert(side != null),
-        super(side: side);
+  const CircleBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -54,7 +52,7 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addOval(Rect.fromCircle(
         center: rect.center,
@@ -63,7 +61,7 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addOval(Rect.fromCircle(
         center: rect.center,
@@ -72,25 +70,26 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  CircleBorder copyWith({BorderSide? side}) {
+  CircleBorder copyWith({ BorderSide? side }) {
     return CircleBorder(side: side ?? this.side);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        canvas.drawCircle(rect.center, (rect.shortestSide - side.width) / 2.0,
-            side.toPaint());
+        canvas.drawCircle(rect.center, (rect.shortestSide - side.width) / 2.0, side.toPaint());
     }
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is CircleBorder && other.side == side;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is CircleBorder
+        && other.side == side;
   }
 
   @override

@@ -106,10 +106,10 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// ```
   /// {@end-tool}
   @protected
-  ValueChanged<bool> updateMaterialState(MaterialState key,
-      {ValueChanged<bool>? onChanged}) {
+  ValueChanged<bool> updateMaterialState(MaterialState key, {ValueChanged<bool>? onChanged}) {
     return (bool value) {
-      if (materialStates.contains(key) == value) return;
+      if (materialStates.contains(key) == value)
+        return;
       setMaterialState(key, value);
       onChanged?.call(value);
     };
@@ -124,13 +124,15 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// Mutator to mark a [MaterialState] value as active.
   @protected
   void addMaterialState(MaterialState state) {
-    if (materialStates.add(state)) setState(() {});
+    if (materialStates.add(state))
+      setState((){});
   }
 
   /// Mutator to mark a [MaterialState] value as inactive.
   @protected
   void removeMaterialState(MaterialState state) {
-    if (materialStates.remove(state)) setState(() {});
+    if (materialStates.remove(state))
+      setState((){});
   }
 
   /// Getter for whether this class considers [MaterialState.disabled] to be active.
@@ -152,8 +154,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   bool get isPressed => materialStates.contains(MaterialState.pressed);
 
   /// Getter for whether this class considers [MaterialState.scrolledUnder] to be active.
-  bool get isScrolledUnder =>
-      materialStates.contains(MaterialState.scrolledUnder);
+  bool get isScrolledUnder => materialStates.contains(MaterialState.scrolledUnder);
 
   /// Getter for whether this class considers [MaterialState.selected] to be active.
   bool get isSelected => materialStates.contains(MaterialState.selected);
@@ -161,8 +162,6 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Set<MaterialState>>(
-        'materialStates', materialStates,
-        defaultValue: <MaterialState>{}));
+    properties.add(DiagnosticsProperty<Set<MaterialState>>('materialStates', materialStates, defaultValue: <MaterialState>{}));
   }
 }

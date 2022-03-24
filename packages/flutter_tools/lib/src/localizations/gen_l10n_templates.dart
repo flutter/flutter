@@ -259,11 +259,9 @@ class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
 
 @(lookupFunction)''';
 
-const String loadBodyTemplate =
-    '''return SynchronousFuture<@(class)>(@(lookupName)(locale));''';
+const String loadBodyTemplate = '''return SynchronousFuture<@(class)>(@(lookupName)(locale));''';
 
-const String loadBodyDeferredLoadingTemplate =
-    '''return @(lookupName)(locale);''';
+const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);''';
 
 // DELEGATE LOOKUP TEMPLATES
 
@@ -297,11 +295,9 @@ const String lookupBodyTemplate = '''
 @(lookupCountryCodeSpecified)
 @(lookupLanguageCodeSpecified)''';
 
-const String switchClauseTemplate =
-    '''case '@(case)': return @(localeClass)();''';
+const String switchClauseTemplate = '''case '@(case)': return @(localeClass)();''';
 
-const String switchClauseDeferredLoadingTemplate =
-    '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
+const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
 
 const String nestedSwitchTemplate = '''
 case '@(languageCode)': {

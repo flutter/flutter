@@ -17,8 +17,7 @@ import 'dart:convert';
 ///
 /// Since the function is executed on the host driving the test, you can access any environment
 /// variable from it.
-typedef ScreenshotCallback = Future<bool> Function(
-    String name, List<int> image);
+typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
 
 /// Classes shared between `integration_test.dart` and `flutter drive` based
 /// adoptor (ex: `integration_test_driver.dart`).
@@ -71,15 +70,12 @@ class Response {
 
   /// Deserializes the result from JSON.
   static Response fromJson(String source) {
-    final Map<String, dynamic> responseJson =
-        json.decode(source) as Map<String, dynamic>;
+    final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
     if ((responseJson['result'] as String?) == 'true') {
-      return Response.allTestsPassed(
-          data: responseJson['data'] as Map<String, dynamic>?);
+      return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>?);
     } else {
       return Response.someTestsFailed(
-        _failureDetailsFromJson(
-            responseJson['failureDetails'] as List<dynamic>),
+        _failureDetailsFromJson(responseJson['failureDetails'] as List<dynamic>),
         data: responseJson['data'] as Map<String, dynamic>?,
       );
     }
@@ -148,10 +144,8 @@ class Failure {
 
   /// Decode a JSON string to create a Failure object.
   static Failure fromJsonString(String jsonString) {
-    final Map<String, dynamic> failure =
-        json.decode(jsonString) as Map<String, dynamic>;
-    return Failure(
-        failure['methodName'] as String, failure['details'] as String?);
+    final Map<String, dynamic> failure = json.decode(jsonString) as Map<String, dynamic>;
+    return Failure(failure['methodName'] as String, failure['details'] as String?);
   }
 }
 
@@ -272,10 +266,9 @@ class WebDriverCommand {
   /// Util method for converting [WebDriverCommandType] to a map entry.
   ///
   /// Used for converting messages to json format.
-  static Map<String, dynamic> typeToMap(WebDriverCommandType type) =>
-      <String, dynamic>{
-        'web_driver_command': '$type',
-      };
+  static Map<String, dynamic> typeToMap(WebDriverCommandType type) => <String, dynamic>{
+    'web_driver_command': '$type',
+  };
 }
 
 /// Template methods each class that responses the driver side inputs must
@@ -293,7 +286,7 @@ abstract class CallbackManager {
 
   /// Takes a screenshot of the application.
   /// Returns the data that is sent back to the host.
-  Future<Map<String, dynamic>> takeScreenshot(String screenshot);
+   Future<Map<String, dynamic>> takeScreenshot(String screenshot);
 
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();

@@ -24,8 +24,7 @@ class PictureCacheComplexityScoringPage extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          key: const Key(
-              'tabbar_view_complexity'), // this key is used by the driver test
+          key: const Key('tabbar_view_complexity'), // this key is used by the driver test
           children: kTabNames.map((String name) {
             return _buildComplexityScoringWidgets(name);
           }).toList(),
@@ -40,27 +39,9 @@ class PictureCacheComplexityScoringPage extends StatelessWidget {
   // Eventually we can extend this to add new test cases based on the tab name.
   Widget _buildComplexityScoringWidgets(String name) {
     return Column(children: <Widget>[
-      Slider(
-        value: 50,
-        label: 'Slider 1',
-        onChanged: (double _) {},
-        max: 100,
-        divisions: 10,
-      ),
-      Slider(
-        value: 50,
-        label: 'Slider 2',
-        onChanged: (double _) {},
-        max: 100,
-        divisions: 10,
-      ),
-      Slider(
-        value: 50,
-        label: 'Slider 3',
-        onChanged: (double _) {},
-        max: 100,
-        divisions: 10,
-      ),
+      Slider(value: 50, label: 'Slider 1', onChanged: (double _) {}, max: 100, divisions: 10,),
+      Slider(value: 50, label: 'Slider 2', onChanged: (double _) {}, max: 100, divisions: 10,),
+      Slider(value: 50, label: 'Slider 3', onChanged: (double _) {}, max: 100, divisions: 10,),
     ]);
   }
 }

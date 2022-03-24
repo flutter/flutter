@@ -25,13 +25,14 @@ typedef ShutdownHook = FutureOr<dynamic> Function();
 abstract class ShutdownHooks {
   factory ShutdownHooks({
     required Logger logger,
-  }) =>
-      _DefaultShutdownHooks(
-        logger: logger,
-      );
+  }) => _DefaultShutdownHooks(
+    logger: logger,
+  );
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
-  void addShutdownHook(ShutdownHook shutdownHook);
+  void addShutdownHook(
+    ShutdownHook shutdownHook
+  );
 
   /// Runs all registered shutdown hooks and returns a future that completes when
   /// all such hooks have finished.
@@ -54,7 +55,9 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   bool _shutdownHooksRunning = false;
 
   @override
-  void addShutdownHook(ShutdownHook shutdownHook) {
+  void addShutdownHook(
+    ShutdownHook shutdownHook
+  ) {
     assert(!_shutdownHooksRunning);
     _shutdownHooks.add(shutdownHook);
   }
@@ -93,8 +96,8 @@ class ProcessExit implements Exception {
 
 class RunResult {
   RunResult(this.processResult, this._command)
-      : assert(_command != null),
-        assert(_command.isNotEmpty);
+    : assert(_command != null),
+      assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 
@@ -133,11 +136,10 @@ abstract class ProcessUtils {
   factory ProcessUtils({
     required ProcessManager processManager,
     required Logger logger,
-  }) =>
-      _DefaultProcessUtils(
-        processManager: processManager,
-        logger: logger,
-      );
+  }) => _DefaultProcessUtils(
+    processManager: processManager,
+    logger: logger,
+  );
 
   /// Spawns a child process to run the command [cmd].
   ///
@@ -233,8 +235,8 @@ class _DefaultProcessUtils implements ProcessUtils {
   _DefaultProcessUtils({
     required ProcessManager processManager,
     required Logger logger,
-  })  : _processManager = processManager,
-        _logger = logger;
+  }) : _processManager = processManager,
+      _logger = logger;
 
   final ProcessManager _processManager;
 
@@ -269,8 +271,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       );
       final RunResult runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
-      if (throwOnError &&
-          runResult.exitCode != 0 &&
+      if (throwOnError && runResult.exitCode != 0 &&
           (allowedFailures == null || !allowedFailures(runResult.exitCode))) {
         runResult.throwException('Process exited abnormally:\n$runResult');
       }
@@ -284,10 +285,10 @@ class _DefaultProcessUtils implements ProcessUtils {
       timeoutRetries = timeoutRetries - 1;
 
       final Process process = await start(
-        cmd,
-        workingDirectory: workingDirectory,
-        allowReentrantFlutter: allowReentrantFlutter,
-        environment: environment,
+          cmd,
+          workingDirectory: workingDirectory,
+          allowReentrantFlutter: allowReentrantFlutter,
+          environment: environment,
       );
 
       final StringBuffer stdoutBuffer = StringBuffer();
@@ -302,9 +303,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           .asFuture<void>(null);
 
       int? exitCode;
-      exitCode = await process.exitCode
-          .then<int?>((int x) => x)
-          .timeout(timeout, onTimeout: () {
+      exitCode = await process.exitCode.then<int?>((int x) => x).timeout(timeout, onTimeout: () {
         // The process timed out. Kill it.
         _processManager.killPid(process.pid);
         return null;
@@ -336,8 +335,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       // If the process did not timeout. We are done.
       if (exitCode != null) {
         _logger.printTrace(runResult.toString());
-        if (throwOnError &&
-            runResult.exitCode != 0 &&
+        if (throwOnError && runResult.exitCode != 0 &&
             (allowedFailures == null || !allowedFailures(exitCode))) {
           runResult.throwException('Process exited abnormally:\n$runResult');
         }
@@ -381,8 +379,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     );
     final RunResult runResult = RunResult(results, cmd);
 
-    _logger
-        .printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
+    _logger.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
     bool failedExitCode = runResult.exitCode != 0;
     if (allowedFailures != null && failedExitCode) {
@@ -451,38 +448,38 @@ class _DefaultProcessUtils implements ProcessUtils {
       environment: environment,
     );
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .where((String line) => filter == null || filter.hasMatch(line))
-        .listen((String line) {
-      String? mappedLine = line;
-      if (mapFunction != null) {
-        mappedLine = mapFunction(line);
-      }
-      if (mappedLine != null) {
-        final String message = '$prefix$mappedLine';
-        if (stdoutErrorMatcher?.hasMatch(mappedLine) ?? false) {
-          _logger.printError(message, wrap: false);
-        } else if (trace) {
-          _logger.printTrace(message);
-        } else {
-          _logger.printStatus(message, wrap: false);
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .where((String line) => filter == null || filter.hasMatch(line))
+      .listen((String line) {
+        String? mappedLine = line;
+        if (mapFunction != null) {
+          mappedLine = mapFunction(line);
         }
-      }
-    });
+        if (mappedLine != null) {
+          final String message = '$prefix$mappedLine';
+          if (stdoutErrorMatcher?.hasMatch(mappedLine) ?? false) {
+            _logger.printError(message, wrap: false);
+          } else if (trace) {
+            _logger.printTrace(message);
+          } else {
+            _logger.printStatus(message, wrap: false);
+          }
+        }
+      });
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .where((String line) => filter == null || filter.hasMatch(line))
-        .listen((String line) {
-      String? mappedLine = line;
-      if (mapFunction != null) {
-        mappedLine = mapFunction(line);
-      }
-      if (mappedLine != null) {
-        _logger.printError('$prefix$mappedLine', wrap: false);
-      }
-    });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .where((String line) => filter == null || filter.hasMatch(line))
+      .listen((String line) {
+        String? mappedLine = line;
+        if (mapFunction != null) {
+          mappedLine = mapFunction(line);
+        }
+        if (mappedLine != null) {
+          _logger.printError('$prefix$mappedLine', wrap: false);
+        }
+      });
 
     // Wait for stdout to be fully processed
     // because process.exitCode may complete first causing flaky tests.
@@ -514,8 +511,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     try {
-      return _processManager.runSync(cli, environment: environment).exitCode ==
-          0;
+      return _processManager.runSync(cli, environment: environment).exitCode == 0;
     } on Exception catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
@@ -534,17 +530,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     try {
-      return (await _processManager.run(cli, environment: environment))
-              .exitCode ==
-          0;
+      return (await _processManager.run(cli, environment: environment)).exitCode == 0;
     } on Exception catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }
   }
 
-  Map<String, String>? _environment(
-    bool allowReentrantFlutter, [
+  Map<String, String>? _environment(bool allowReentrantFlutter, [
     Map<String, String>? environment,
   ]) {
     if (allowReentrantFlutter) {
@@ -558,7 +551,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     return environment;
   }
 
-  void _traceCommand(List<String> args, {String? workingDirectory}) {
+  void _traceCommand(List<String> args, { String? workingDirectory }) {
     final String argsText = args.join(' ');
     if (workingDirectory == null) {
       _logger.printTrace('executing: $argsText');

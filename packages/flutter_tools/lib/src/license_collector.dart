@@ -24,7 +24,9 @@ import 'base/file_system.dart';
 /// example, a package might itself contain code from multiple third-party
 /// sources, and might need to include a license for each one.
 class LicenseCollector {
-  LicenseCollector({required FileSystem fileSystem}) : _fileSystem = fileSystem;
+  LicenseCollector({
+    required FileSystem fileSystem
+  }) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
 
@@ -58,8 +60,9 @@ class LicenseCollector {
       }
 
       dependencies.add(file);
-      final List<String> rawLicenses =
-          file.readAsStringSync().split(licenseSeparator);
+      final List<String> rawLicenses = file
+        .readAsStringSync()
+        .split(licenseSeparator);
       for (final String rawLicense in rawLicenses) {
         List<String> packageNames = <String>[];
         String? licenseText;
@@ -74,19 +77,17 @@ class LicenseCollector {
           packageNames = <String>[package.name];
           licenseText = rawLicense;
         }
-        packageLicenses
-            .putIfAbsent(licenseText, () => <String>{})
-            .addAll(packageNames);
+        packageLicenses.putIfAbsent(licenseText, () => <String>{}).addAll(packageNames);
         allPackages.addAll(packageNames);
       }
     }
 
-    final List<String> combinedLicensesList =
-        packageLicenses.keys.map<String>((String license) {
-      final List<String> packageNames = packageLicenses[license]!.toList()
-        ..sort();
-      return '${packageNames.join('\n')}\n\n$license';
-    }).toList();
+    final List<String> combinedLicensesList = packageLicenses.keys
+      .map<String>((String license) {
+        final List<String> packageNames = packageLicenses[license]!.toList()
+          ..sort();
+        return '${packageNames.join('\n')}\n\n$license';
+      }).toList();
     combinedLicensesList.sort();
 
     /// Append additional LICENSE files as specified in the pubspec.yaml.
@@ -96,8 +97,9 @@ class LicenseCollector {
       for (final File license in additionalLicenses[package]!) {
         if (!license.existsSync()) {
           errorMessages.add(
-              'package $package specified an additional license at ${license.path}, but this file '
-              'does not exist.');
+            'package $package specified an additional license at ${license.path}, but this file '
+            'does not exist.'
+          );
           continue;
         }
         dependencies.add(license);
@@ -106,13 +108,15 @@ class LicenseCollector {
         } on FormatException catch (err) {
           // File has an invalid encoding.
           errorMessages.add(
-              'package $package specified an additional license at ${license.path}, but this file '
-              'could not be read:\n$err');
+            'package $package specified an additional license at ${license.path}, but this file '
+            'could not be read:\n$err'
+          );
         } on FileSystemException catch (err) {
           // File cannot be parsed.
           errorMessages.add(
-              'package $package specified an additional license at ${license.path}, but this file '
-              'could not be read:\n$err');
+            'package $package specified an additional license at ${license.path}, but this file '
+            'could not be read:\n$err'
+          );
         }
       }
     }
@@ -125,8 +129,8 @@ class LicenseCollector {
     }
 
     final String combinedLicenses = combinedLicensesList
-        .followedBy(additionalLicenseText)
-        .join(licenseSeparator);
+      .followedBy(additionalLicenseText)
+      .join(licenseSeparator);
 
     return LicenseResult(
       combinedLicenses: combinedLicenses,

@@ -9,6 +9,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+
 Future<void> main() async {
   await task(() async {
     try {
@@ -22,11 +23,9 @@ Future<void> main() async {
             '--debug',
             '--target-platform=android-arm',
           ]);
-          final File apk = File(
-              '${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
+          final File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
           if (!apk.existsSync()) {
-            throw TaskResult.failure(
-                "Expected ${apk.path} to exist, but it doesn't");
+            throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
           }
           // https://github.com/flutter/flutter/issues/72185
           await checkApkContainsMethods(apk, <String>[

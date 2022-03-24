@@ -20,11 +20,15 @@
 ///  * [listEquals], which does something similar for lists.
 ///  * [mapEquals], which does something similar for maps.
 bool setEquals<T>(Set<T>? a, Set<T>? b) {
-  if (a == null) return b == null;
-  if (b == null || a.length != b.length) return false;
-  if (identical(a, b)) return true;
+  if (a == null)
+    return b == null;
+  if (b == null || a.length != b.length)
+    return false;
+  if (identical(a, b))
+    return true;
   for (final T value in a) {
-    if (!b.contains(value)) return false;
+    if (!b.contains(value))
+      return false;
   }
   return true;
 }
@@ -45,11 +49,15 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
 ///  * [setEquals], which does something similar for sets.
 ///  * [mapEquals], which does something similar for maps.
 bool listEquals<T>(List<T>? a, List<T>? b) {
-  if (a == null) return b == null;
-  if (b == null || a.length != b.length) return false;
-  if (identical(a, b)) return true;
+  if (a == null)
+    return b == null;
+  if (b == null || a.length != b.length)
+    return false;
+  if (identical(a, b))
+    return true;
   for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index]) return false;
+    if (a[index] != b[index])
+      return false;
   }
   return true;
 }
@@ -70,9 +78,12 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 ///  * [setEquals], which does something similar for sets.
 ///  * [listEquals], which does something similar for lists.
 bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
-  if (a == null) return b == null;
-  if (b == null || a.length != b.length) return false;
-  if (identical(a, b)) return true;
+  if (a == null)
+    return b == null;
+  if (b == null || a.length != b.length)
+    return false;
+  if (identical(a, b))
+    return true;
   for (final T key in a.keys) {
     if (!b.containsKey(key) || b[key] != a[key]) {
       return false;
@@ -80,6 +91,7 @@ bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
   }
   return true;
 }
+
 
 /// Returns the position of `value` in the `sortedList`, if it exists.
 ///
@@ -158,8 +170,7 @@ void mergeSort<T>(
   _mergeSort<T>(list, compare, middle, end, scratchSpace, 0);
   final int firstTarget = end - firstLength;
   _mergeSort<T>(list, compare, start, middle, list, firstTarget);
-  _merge<T>(compare, list, firstTarget, end, scratchSpace, 0, secondLength,
-      list, start);
+  _merge<T>(compare, list, firstTarget, end, scratchSpace, 0, secondLength, list, start);
 }
 
 /// Returns a [Comparator] that asserts that its first argument is comparable.
@@ -167,8 +178,7 @@ Comparator<T> _defaultCompare<T>() {
   // If we specify Comparable<T> here, it fails if the type is an int, because
   // int isn't a subtype of comparable. Leaving out the type implicitly converts
   // it to a num, which is a comparable.
-  return (T value1, T value2) =>
-      (value1 as Comparable<dynamic>).compareTo(value2);
+  return (T value1, T value2) => (value1 as Comparable<dynamic>).compareTo(value2);
 }
 
 /// Sort a list between `start` (inclusive) and `end` (exclusive) using
@@ -335,13 +345,11 @@ void _merge<T>(
       }
       // Second list empties first. Flushing first list here.
       target[targetOffset++] = firstElement;
-      target.setRange(targetOffset, targetOffset + (firstEnd - cursor1),
-          firstList, cursor1);
+      target.setRange(targetOffset, targetOffset + (firstEnd - cursor1), firstList, cursor1);
       return;
     }
   }
   // First list empties first. Reached by break above.
   target[targetOffset++] = secondElement;
-  target.setRange(
-      targetOffset, targetOffset + (secondEnd - cursor2), secondList, cursor2);
+  target.setRange(targetOffset, targetOffset + (secondEnd - cursor2), secondList, cursor2);
 }

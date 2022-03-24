@@ -36,8 +36,7 @@ void main() {
     );
   });
 
-  testWidgets('Underflowing ListView should relayout for additional children',
-      (WidgetTester tester) async {
+  testWidgets('Underflowing ListView should relayout for additional children', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5950
 
     await tester.pumpWidget(
@@ -66,9 +65,7 @@ void main() {
     expect(find.text('200'), findsOneWidget);
   });
 
-  testWidgets(
-      'Underflowing ListView contentExtent should track additional children',
-      (WidgetTester tester) async {
+  testWidgets('Underflowing ListView contentExtent should track additional children', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -105,8 +102,7 @@ void main() {
     expect(list.geometry!.scrollExtent, equals(0.0));
   });
 
-  testWidgets('Overflowing ListView should relayout for missing children',
-      (WidgetTester tester) async {
+  testWidgets('Overflowing ListView should relayout for missing children', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -147,9 +143,7 @@ void main() {
     expect(find.text('400'), findsNothing);
   });
 
-  testWidgets(
-      'Overflowing ListView should not relayout for additional children',
-      (WidgetTester tester) async {
+  testWidgets('Overflowing ListView should not relayout for additional children', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -183,8 +177,7 @@ void main() {
     expect(find.text('100'), findsNothing);
   });
 
-  testWidgets('Overflowing ListView should become scrollable',
-      (WidgetTester tester) async {
+  testWidgets('Overflowing ListView should become scrollable', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5920
     // When a ListView's viewport hasn't overflowed, scrolling is disabled.
     // When children are added that cause it to overflow, scrolling should
@@ -219,4 +212,5 @@ void main() {
 
     expect(scrollable.position.maxScrollExtent, 100.0);
   });
+
 }

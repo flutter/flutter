@@ -35,11 +35,9 @@ void main() {
         logReader.dispose();
       });
 
-      testWithoutContext('discovers uri if logs already produced output',
-          () async {
+      testWithoutContext('discovers uri if logs already produced output', () async {
         logReader.addLine('HELLO WORLD');
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:9999');
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
         final Uri uri = (await discoverer.uri)!;
         expect(uri.port, 9999);
         expect('$uri', 'http://127.0.0.1:9999');
@@ -47,11 +45,9 @@ void main() {
 
       testWithoutContext('does not discover uri with no host', () async {
         final Future<Uri?> pendingUri = discoverer.uri;
-        logReader
-            .addLine('The Dart VM service is listening on http12asdasdsd9999');
+        logReader.addLine('The Dart VM service is listening on http12asdasdsd9999');
         await Future<void>.delayed(const Duration(milliseconds: 10));
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:9999');
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
 
         await Future<void>.delayed(Duration.zero);
 
@@ -61,12 +57,9 @@ void main() {
         expect('$uri', 'http://127.0.0.1:9999');
       });
 
-      testWithoutContext(
-          'discovers uri if logs already produced output and no listener is attached',
-          () async {
+      testWithoutContext('discovers uri if logs already produced output and no listener is attached', () async {
         logReader.addLine('HELLO WORLD');
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:9999');
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
 
         await Future<void>.delayed(Duration.zero);
 
@@ -76,43 +69,35 @@ void main() {
         expect('$uri', 'http://127.0.0.1:9999');
       });
 
-      testWithoutContext(
-          'uri throws if logs produce bad line and no listener is attached',
-          () async {
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:apple');
+      testWithoutContext('uri throws if logs produce bad line and no listener is attached', () async {
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:apple');
 
         await Future<void>.delayed(Duration.zero);
 
         expect(discoverer.uri, throwsA(isFormatException));
       });
 
-      testWithoutContext('discovers uri if logs not yet produced output',
-          () async {
+      testWithoutContext('discovers uri if logs not yet produced output', () async {
         final Future<Uri?> uriFuture = discoverer.uri;
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:3333');
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:3333');
         final Uri uri = (await uriFuture)!;
         expect(uri.port, 3333);
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
       testWithoutContext('discovers uri with Ascii Esc code', () async {
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:3333\x1b[');
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:3333\x1b[');
         final Uri uri = (await discoverer.uri)!;
         expect(uri.port, 3333);
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
       testWithoutContext('uri throws if logs produce bad line', () async {
-        logReader.addLine(
-            'The Dart VM service is listening on http://127.0.0.1:apple');
+        logReader.addLine('The Dart VM service is listening on http://127.0.0.1:apple');
         expect(discoverer.uri, throwsA(isFormatException));
       });
 
-      testWithoutContext('uri is null when the log reader closes early',
-          () async {
+      testWithoutContext('uri is null when the log reader closes early', () async {
         final Future<Uri?> uriFuture = discoverer.uri;
         await logReader.dispose();
 
@@ -130,38 +115,30 @@ void main() {
         expect(actualUri, timeoutUri);
       });
 
-      testWithoutContext('discovers uri if log line contains Android prefix',
-          () async {
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:52584');
+      testWithoutContext('discovers uri if log line contains Android prefix', () async {
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:52584');
         final Uri uri = (await discoverer.uri)!;
         expect(uri.port, 52584);
         expect('$uri', 'http://127.0.0.1:52584');
       });
 
-      testWithoutContext('discovers uri if log line contains auth key',
-          () async {
+      testWithoutContext('discovers uri if log line contains auth key', () async {
         final Future<Uri?> uriFuture = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = (await uriFuture)!;
         expect(uri.port, 54804);
         expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
       });
 
-      testWithoutContext('discovers uri if log line contains non-localhost',
-          () async {
+      testWithoutContext('discovers uri if log line contains non-localhost', () async {
         final Future<Uri?> uriFuture = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = (await uriFuture)!;
         expect(uri.port, 54804);
         expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
       });
 
-      testWithoutContext(
-          'skips uri if port does not match the requested vmservice - requested last',
-          () async {
+      testWithoutContext('skips uri if port does not match the requested vmservice - requested last', () async {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
@@ -170,18 +147,14 @@ void main() {
           logger: BufferLogger.test(),
         );
         final Future<Uri?> uriFuture = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
         final Uri uri = (await uriFuture)!;
         expect(uri.port, 12346);
         expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
       });
 
-      testWithoutContext(
-          'skips uri if port does not match the requested vmservice - requested first',
-          () async {
+      testWithoutContext('skips uri if port does not match the requested vmservice - requested first', () async {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
@@ -190,29 +163,22 @@ void main() {
           logger: BufferLogger.test(),
         );
         final Future<Uri?> uriFuture = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
         final Uri uri = (await uriFuture)!;
         expect(uri.port, 12346);
         expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
       });
 
-      testWithoutContext('first uri in the stream is the last one from the log',
-          () async {
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+      testWithoutContext('first uri in the stream is the last one from the log', () async {
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
         final Uri uri = await discoverer.uris.first;
         expect(uri.port, 12345);
         expect('$uri', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
       });
 
-      testWithoutContext(
-          'first uri in the stream is the last one from the log that matches the port',
-          () async {
+      testWithoutContext('first uri in the stream is the last one from the log that matches the port', () async {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
@@ -220,20 +186,15 @@ void main() {
           throttleDuration: const Duration(milliseconds: 200),
           logger: BufferLogger.test(),
         );
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
         final Uri uri = await discoverer.uris.first;
         expect(uri.port, 12345);
         expect('$uri', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
       });
 
-      testWithoutContext(
-          'protocol discovery does not crash if the log reader is closed while delaying',
-          () async {
+      testWithoutContext('protocol discovery does not crash if the log reader is closed while delaying', () async {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
@@ -242,10 +203,8 @@ void main() {
           logger: BufferLogger.test(),
         );
         final Future<List<Uri>> results = discoverer.uris.toList();
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
         await logReader.dispose();
 
         // Give time for throttle to finish.
@@ -269,33 +228,25 @@ void main() {
             discoveredUris.add(uri);
           });
 
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
 
           time.elapse(kThrottleDuration);
 
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12343/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12344/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12343/PTwjm8Ii8qg=/');
 
           time.elapse(kThrottleDuration);
 
           expect(discoveredUris.length, 2);
           expect(discoveredUris[0].port, 12345);
-          expect(
-              '${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
           expect(discoveredUris[1].port, 12343);
-          expect(
-              '${discoveredUris[1]}', 'http://127.0.0.1:12343/PTwjm8Ii8qg=/');
+          expect('${discoveredUris[1]}', 'http://127.0.0.1:12343/PTwjm8Ii8qg=/');
         });
       });
 
-      testWithoutContext(
-          'uris in the stream are throttled when they match the port',
-          () async {
+      testWithoutContext('uris in the stream are throttled when they match the port', () async {
         const Duration kThrottleTimeInMilliseconds = Duration(milliseconds: 10);
 
         FakeAsync().run((FakeAsync time) {
@@ -312,27 +263,21 @@ void main() {
             discoveredUris.add(uri);
           });
 
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
 
           time.elapse(kThrottleTimeInMilliseconds);
 
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qc=/');
-          logReader.addLine(
-              'I/flutter : The Dart VM service is listening on http://127.0.0.1:12344/PTwjm8Ii8qf=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12345/PTwjm8Ii8qc=/');
+          logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:12344/PTwjm8Ii8qf=/');
 
           time.elapse(kThrottleTimeInMilliseconds);
 
           expect(discoveredUris.length, 2);
           expect(discoveredUris[0].port, 12345);
-          expect(
-              '${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
+          expect('${discoveredUris[0]}', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
           expect(discoveredUris[1].port, 12345);
-          expect(
-              '${discoveredUris[1]}', 'http://127.0.0.1:12345/PTwjm8Ii8qc=/');
+          expect('${discoveredUris[1]}', 'http://127.0.0.1:12345/PTwjm8Ii8qc=/');
         });
       });
     });
@@ -349,8 +294,7 @@ void main() {
 
         // Get next port future.
         final Future<Uri?> nextUri = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = (await nextUri)!;
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
@@ -371,8 +315,7 @@ void main() {
 
         // Get next port future.
         final Future<Uri?> nextUri = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = (await nextUri)!;
         expect(uri.port, 1243);
         expect('$uri', 'http://127.0.0.1:1243/PTwjm8Ii8qg=/');
@@ -393,8 +336,7 @@ void main() {
 
         // Get next port future.
         final Future<Uri?> nextUri = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = (await nextUri)!;
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
@@ -415,8 +357,7 @@ void main() {
 
         // Get next port future.
         final Future<Uri?> nextUri = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = (await nextUri)!;
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
@@ -437,8 +378,7 @@ void main() {
 
         // Get next port future.
         final Future<Uri?> nextUri = discoverer.uri;
-        logReader.addLine(
-            'I/flutter : The Dart VM service is listening on http://[::1]:54777/PTwjm8Ii8qg=/\x1b[');
+        logReader.addLine('I/flutter : The Dart VM service is listening on http://[::1]:54777/PTwjm8Ii8qg=/\x1b[');
         final Uri uri = (await nextUri)!;
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
@@ -456,7 +396,7 @@ class MockPortForwarder extends DevicePortForwarder {
   final int? availablePort;
 
   @override
-  Future<int> forward(int devicePort, {int? hostPort}) async {
+  Future<int> forward(int devicePort, { int? hostPort }) async {
     hostPort ??= 0;
     if (hostPort == 0) {
       return availablePort!;

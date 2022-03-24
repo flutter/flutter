@@ -11,8 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase
-    with GestureBinding, SchedulerBinding {
+class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -24,8 +23,7 @@ class TestGestureFlutterBinding extends BindingBase
   /// Provides access to the features exposed by this class. The binding must
   /// be initialized before using this getter; this is typically done by calling
   /// [TestGestureFlutterBinding.ensureInitialized].
-  static TestGestureFlutterBinding get instance =>
-      BindingBase.checkInstance(_instance);
+  static TestGestureFlutterBinding get instance => BindingBase.checkInstance(_instance);
   static TestGestureFlutterBinding? _instance;
 
   /// Returns an instance of the [TestGestureFlutterBinding], creating and
@@ -42,13 +40,13 @@ class TestGestureFlutterBinding extends BindingBase
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null) callback?.call(event);
+    if (callback != null)
+      callback?.call(event);
   }
 }
 
 void main() {
-  final TestGestureFlutterBinding binding =
-      TestGestureFlutterBinding.ensureInitialized();
+  final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
 
   test('Pointer tap events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -61,8 +59,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    GestureBinding.instance.platformDispatcher.onPointerDataPacket
-        ?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerUpEvent>());
@@ -80,8 +77,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    GestureBinding.instance.platformDispatcher.onPointerDataPacket
-        ?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerMoveEvent>());
@@ -90,31 +86,28 @@ void main() {
 
   test('Pointer hover events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add),
-        ui.PointerData(change: ui.PointerChange.hover),
-        ui.PointerData(change: ui.PointerChange.hover),
-        ui.PointerData(change: ui.PointerChange.remove),
-        ui.PointerData(change: ui.PointerChange.add),
-        ui.PointerData(change: ui.PointerChange.hover),
-      ],
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add),
+          ui.PointerData(change: ui.PointerChange.hover),
+          ui.PointerData(change: ui.PointerChange.hover),
+          ui.PointerData(change: ui.PointerChange.remove),
+          ui.PointerData(change: ui.PointerChange.add),
+          ui.PointerData(change: ui.PointerChange.hover),
+        ],
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
-    GestureBinding.instance.pointerRouter
-        .addGlobalRoute(pointerRouterEvents.add);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    GestureBinding.instance.platformDispatcher.onPointerDataPacket
-        ?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerHoverEvent>());
     expect(events[1], isA<PointerHoverEvent>());
     expect(events[2], isA<PointerHoverEvent>());
-    expect(pointerRouterEvents.length, 6,
-        reason: 'pointerRouterEvents contains: $pointerRouterEvents');
+    expect(pointerRouterEvents.length, 6, reason: 'pointerRouterEvents contains: $pointerRouterEvents');
     expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
     expect(pointerRouterEvents[1], isA<PointerHoverEvent>());
     expect(pointerRouterEvents[2], isA<PointerHoverEvent>());
@@ -134,8 +127,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    GestureBinding.instance.platformDispatcher.onPointerDataPacket
-        ?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerCancelEvent>());
@@ -152,11 +144,11 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = (PointerEvent event) {
       events.add(event);
-      if (event is PointerDownEvent) binding.cancelPointer(event.pointer);
+      if (event is PointerDownEvent)
+        binding.cancelPointer(event.pointer);
     };
 
-    GestureBinding.instance.platformDispatcher.onPointerDataPacket
-        ?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerCancelEvent>());
@@ -173,9 +165,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-            packet.data, GestureBinding.instance.window.devicePixelRatio)
-        .toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -187,17 +177,13 @@ void main() {
 
   test('Can expand pointer scroll events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add),
-        ui.PointerData(
-            change: ui.PointerChange.hover,
-            signalKind: ui.PointerSignalKind.scroll),
-      ],
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add),
+          ui.PointerData(change: ui.PointerChange.hover, signalKind: ui.PointerSignalKind.scroll),
+        ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-            packet.data, GestureBinding.instance.window.devicePixelRatio)
-        .toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -205,36 +191,18 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for touch when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) *
-        GestureBinding.instance.window.devicePixelRatio;
+    final Offset location = const Offset(10.0, 10.0) * GestureBinding.instance.window.devicePixelRatio;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        ui.PointerData(
-            change: ui.PointerChange.add,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.hover,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.down,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.up,
-            physicalX: location.dx,
-            physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, physicalX: location.dx, physicalY: location.dy),
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-            packet.data, GestureBinding.instance.window.devicePixelRatio)
-        .toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -249,40 +217,19 @@ void main() {
     expect(events[4].buttons, equals(0));
   });
 
-  test('Should not synthesize kPrimaryButton for touch when a button is set',
-      () {
-    final Offset location = const Offset(10.0, 10.0) *
-        GestureBinding.instance.window.devicePixelRatio;
+  test('Should not synthesize kPrimaryButton for touch when a button is set', () {
+    final Offset location = const Offset(10.0, 10.0) * GestureBinding.instance.window.devicePixelRatio;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        ui.PointerData(
-            change: ui.PointerChange.add,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.hover,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.down,
-            buttons: kSecondaryButton,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.move,
-            buttons: kSecondaryButton,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.up,
-            physicalX: location.dx,
-            physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, buttons: kSecondaryButton, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryButton, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, physicalX: location.dx, physicalY: location.dy),
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-            packet.data, GestureBinding.instance.window.devicePixelRatio)
-        .toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -298,46 +245,23 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for stylus when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) *
-        GestureBinding.instance.window.devicePixelRatio;
+    final Offset location = const Offset(10.0, 10.0) * GestureBinding.instance.window.devicePixelRatio;
     for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.stylus,
       PointerDeviceKind.invertedStylus,
     ]) {
+
       final ui.PointerDataPacket packet = ui.PointerDataPacket(
         data: <ui.PointerData>[
-          ui.PointerData(
-              change: ui.PointerChange.add,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.hover,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.down,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.move,
-              buttons: kSecondaryStylusButton,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.up,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryStylusButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(
-              packet.data, GestureBinding.instance.window.devicePixelRatio)
-          .toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -353,46 +277,20 @@ void main() {
     }
   });
 
-  test(
-      'Should synthesize kPrimaryButton for unknown devices when no button is set',
-      () {
-    final Offset location = const Offset(10.0, 10.0) *
-        GestureBinding.instance.window.devicePixelRatio;
+  test('Should synthesize kPrimaryButton for unknown devices when no button is set', () {
+    final Offset location = const Offset(10.0, 10.0) * GestureBinding.instance.window.devicePixelRatio;
     const PointerDeviceKind kind = PointerDeviceKind.unknown;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        ui.PointerData(
-            change: ui.PointerChange.add,
-            kind: kind,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.hover,
-            kind: kind,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.down,
-            kind: kind,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.move,
-            buttons: kSecondaryButton,
-            kind: kind,
-            physicalX: location.dx,
-            physicalY: location.dy),
-        ui.PointerData(
-            change: ui.PointerChange.up,
-            kind: kind,
-            physicalX: location.dx,
-            physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-            packet.data, GestureBinding.instance.window.devicePixelRatio)
-        .toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -408,46 +306,21 @@ void main() {
   });
 
   test('Should not synthesize kPrimaryButton for mouse', () {
-    final Offset location = const Offset(10.0, 10.0) *
-        GestureBinding.instance.window.devicePixelRatio;
+    final Offset location = const Offset(10.0, 10.0) * GestureBinding.instance.window.devicePixelRatio;
     for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.mouse,
     ]) {
       final ui.PointerDataPacket packet = ui.PointerDataPacket(
         data: <ui.PointerData>[
-          ui.PointerData(
-              change: ui.PointerChange.add,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.hover,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.down,
-              kind: kind,
-              buttons: kMiddleMouseButton,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.move,
-              kind: kind,
-              buttons: kMiddleMouseButton | kSecondaryMouseButton,
-              physicalX: location.dx,
-              physicalY: location.dy),
-          ui.PointerData(
-              change: ui.PointerChange.up,
-              kind: kind,
-              physicalX: location.dx,
-              physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.down, kind: kind, buttons: kMiddleMouseButton, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.move, kind: kind, buttons: kMiddleMouseButton | kSecondaryMouseButton, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(
-              packet.data, GestureBinding.instance.window.devicePixelRatio)
-          .toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -457,8 +330,7 @@ void main() {
       expect(events[2], isA<PointerDownEvent>());
       expect(events[2].buttons, equals(kMiddleMouseButton));
       expect(events[3], isA<PointerMoveEvent>());
-      expect(events[3].buttons,
-          equals(kMiddleMouseButton | kSecondaryMouseButton));
+      expect(events[3].buttons, equals(kMiddleMouseButton | kSecondaryMouseButton));
       expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
     }

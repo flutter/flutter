@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/widgets/will_pop_scope/will_pop_scope.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/will_pop_scope/will_pop_scope.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('pressing shouldPop button changes shouldPop',
-      (WidgetTester tester) async {
+  testWidgets('pressing shouldPop button changes shouldPop', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
@@ -29,7 +27,6 @@ void main() {
     expect(find.byType(example.MyStatefulWidget), findsOneWidget);
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
-    expect(find.byType(example.MyStatefulWidget, skipOffstage: false),
-        findsNWidgets(2));
+    expect(find.byType(example.MyStatefulWidget, skipOffstage: false), findsNWidgets(2));
   });
 }

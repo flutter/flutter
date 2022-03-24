@@ -87,13 +87,10 @@ Future<void> expectFileClosesAllPorts(String filename) async {
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
   final String flutterRoot = platform.environment['FLUTTER_ROOT']!;
-  final String dartPath =
-      fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
   final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
-  final String scriptPath =
-      fs.path.join(packageRoot, 'test', 'foundation', filename);
-  final ProcessResult result =
-      await Process.run(dartPath, <String>[scriptPath]);
+  final String scriptPath = fs.path.join(packageRoot, 'test', 'foundation', filename);
+  final ProcessResult result = await Process.run(dartPath, <String>[scriptPath]);
   expect(result.exitCode, 0);
 }
 
@@ -191,8 +188,7 @@ void main() {
     expect(await computeInstanceMethod(10), 100);
     expect(computeInvalidInstanceMethod(10), throwsArgumentError);
 
-    expect(await compute(testDebugName, null, debugLabel: 'debug_name'),
-        'debug_name');
+    expect(await compute(testDebugName, null, debugLabel: 'debug_name'), 'debug_name');
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 
   group('compute closes all ports', () {

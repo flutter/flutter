@@ -11,8 +11,7 @@ void main() {
     'opacity_peephole_col_of_alpha_save_layer_rows',
     <ScrollableButtonRoute>[
       ScrollableButtonRoute(kScrollableName, kOpacityPeepholeRouteName),
-      ScrollableButtonRoute(kOpacityScrollableName,
-          kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName),
+      ScrollableButtonRoute(kOpacityScrollableName, kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName),
     ],
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 10),

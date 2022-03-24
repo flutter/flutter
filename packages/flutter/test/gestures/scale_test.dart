@@ -249,10 +249,8 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('Rejects scale gestures from unallowed device kinds',
-      (GestureTester tester) {
-    final ScaleGestureRecognizer scale =
-        ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
+  testGesture('Rejects scale gestures from unallowed device kinds', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartScale = false;
     scale.onStart = (ScaleStartDetails details) {
@@ -283,11 +281,8 @@ void main() {
     scale.dispose();
   });
 
-  testGesture(
-      'Scale gestures starting from allowed device kinds cannot be ended from unallowed devices',
-      (GestureTester tester) {
-    final ScaleGestureRecognizer scale =
-        ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
+  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
@@ -351,27 +346,16 @@ void main() {
 
   testGesture('Scale gesture competes with drag', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag =
-        HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) {
-      log.add('scale-start');
-    };
-    scale.onUpdate = (ScaleUpdateDetails details) {
-      log.add('scale-update');
-    };
-    scale.onEnd = (ScaleEndDetails details) {
-      log.add('scale-end');
-    };
+    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
+    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
+    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
 
-    drag.onStart = (DragStartDetails details) {
-      log.add('drag-start');
-    };
-    drag.onEnd = (DragEndDetails details) {
-      log.add('drag-end');
-    };
+    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
+    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
 
     final TestPointer pointer1 = TestPointer();
 
@@ -388,8 +372,7 @@ void main() {
 
     // scale will win if focal point delta exceeds 18.0*2
 
-    tester.route(pointer1
-        .move(const Offset(10.0, 50.0))); // delta of 40.0 exceeds 18.0*2
+    tester.route(pointer1.move(const Offset(10.0, 50.0))); // delta of 40.0 exceeds 18.0*2
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -608,7 +591,7 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedDelta, const Offset(10.0, 10.0));
     updatedDelta = null;
-    expect(updatedRotation, -math.pi);
+    expect(updatedRotation, - math.pi);
     updatedRotation = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
@@ -673,16 +656,13 @@ void main() {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
     int pointerCountOfStart = 0;
-    scale.onStart = (ScaleStartDetails details) =>
-        pointerCountOfStart = details.pointerCount;
+    scale.onStart = (ScaleStartDetails details) => pointerCountOfStart = details.pointerCount;
 
     int pointerCountOfUpdate = 0;
-    scale.onUpdate = (ScaleUpdateDetails details) =>
-        pointerCountOfUpdate = details.pointerCount;
+    scale.onUpdate = (ScaleUpdateDetails details) => pointerCountOfUpdate = details.pointerCount;
 
     int pointerCountOfEnd = 0;
-    scale.onEnd =
-        (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
+    scale.onEnd = (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
 
     final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
@@ -703,12 +683,10 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
     // Two pointers in contact with the screen now.
-    expect(pointerCountOfEnd,
-        2); // Additional pointer down will trigger an end event.
+    expect(pointerCountOfEnd, 2); // Additional pointer down will trigger an end event.
 
     tester.route(pointer2.move(const Offset(0.0, 10.0)));
-    expect(pointerCountOfStart,
-        2); // The new pointer move will trigger a start event.
+    expect(pointerCountOfStart, 2); // The new pointer move will trigger a start event.
     expect(pointerCountOfUpdate, 2);
 
     tester.route(pointer1.up());
@@ -726,21 +704,17 @@ void main() {
     scale.dispose();
   });
 
-  testWidgets(
-      'ScaleGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
         ScaleGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
         );
       },
       throwsA(
-        isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
       ),
     );
   });

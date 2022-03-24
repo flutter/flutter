@@ -25,8 +25,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   const MatchesGoldenFile(this.key, this.version);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version)
-      : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
@@ -48,8 +47,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Element element = elements.single;
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
-    final TestWidgetsFlutterBinding binding =
-        TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     final Element e = binding.renderViewElement!;
 
     // Unlike `flutter_tester`, we don't have the ability to render an element
@@ -63,8 +61,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success =
-            await webGoldenComparator.compare(size.width, size.height, key);
+        final bool success = await webGoldenComparator.compare(size.width, size.height, key);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
@@ -77,8 +74,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   @override
   Description describe(Description description) {
     final Uri testNameUri = webGoldenComparator.getTestUri(key, version);
-    return description.add(
-        'one widget whose rasterized image matches golden image "$testNameUri"');
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 

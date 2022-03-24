@@ -39,7 +39,9 @@ void main() {
   );
   final Platform windowsPlatform = FakePlatform(
     operatingSystem: 'windows',
-    environment: const <String, String>{'FLUTTER_ROOT': '/'},
+    environment: const <String, String>{
+      'FLUTTER_ROOT': '/'
+    },
   );
   FakeFuchsiaSdk fuchsiaSdk;
 
@@ -57,8 +59,7 @@ void main() {
       fileSystem.file('lib/main.dart').createSync(recursive: true);
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+        createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsToolExit(message: '"build fuchsia" is currently disabled'),
       );
     }, overrides: <Type, Generator>{
@@ -71,8 +72,7 @@ void main() {
       final BuildCommand command = BuildCommand();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+        createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
@@ -89,8 +89,7 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+        createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
@@ -103,7 +102,8 @@ void main() {
     testUsingContext('on Windows platform', () async {
       final BuildCommand command = BuildCommand();
       const String appName = 'app_name';
-      fileSystem.file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
+      fileSystem
+        .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
         ..createSync(recursive: true)
         ..writeAsStringSync('{}');
       fileSystem.file('.packages').createSync();
@@ -112,8 +112,7 @@ void main() {
 
       final bool supported = BuildFuchsiaCommand(verboseHelp: false).supported;
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+        createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         supported ? throwsToolExit() : throwsA(isA<UsageException>()),
       );
     }, overrides: <Type, Generator>{
@@ -126,19 +125,17 @@ void main() {
     testUsingContext('there is no Fuchsia kernel compiler', () async {
       final BuildCommand command = BuildCommand();
       const String appName = 'app_name';
-      fileSystem.file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
+      fileSystem
+        .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
         ..createSync(recursive: true)
         ..writeAsStringSync('{}');
       fileSystem.file('.packages').createSync();
-      fileSystem
-          .file(fileSystem.path.join('lib', 'main.dart'))
-          .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+        createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
@@ -152,22 +149,19 @@ void main() {
   testUsingContext('Fuchsia build parts fit together right', () async {
     final BuildCommand command = BuildCommand();
     const String appName = 'app_name';
-    fileSystem.file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{}');
-    fileSystem.file('.packages').createSync();
     fileSystem
-        .file(fileSystem.path.join('lib', 'main.dart'))
-        .createSync(recursive: true);
+        .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+    fileSystem.file('.packages').createSync();
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync('name: $appName');
 
     await createTestCommandRunner(command)
-        .run(const <String>['build', 'fuchsia']);
+      .run(const <String>['build', 'fuchsia']);
     final String farPath = fileSystem.path.join(
-      getFuchsiaBuildDirectory(),
-      'pkg',
-      'app_name-0.far',
+      getFuchsiaBuildDirectory(), 'pkg', 'app_name-0.far',
     );
 
     expect(fileSystem.file(farPath), exists);
@@ -197,23 +191,17 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
 
   @override
   Future<bool> build(String buildPath, String manifestPath) async {
-    if (!fileSystem
-            .file(fileSystem.path.join(buildPath, 'meta', 'package'))
-            .existsSync() ||
+    if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fileSystem.file(manifestPath).existsSync()) {
       return false;
     }
-    fileSystem
-        .file(fileSystem.path.join(buildPath, 'meta.far'))
-        .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join(buildPath, 'meta.far')).createSync(recursive: true);
     return true;
   }
 
   @override
   Future<bool> archive(String buildPath, String manifestPath) async {
-    if (!fileSystem
-            .file(fileSystem.path.join(buildPath, 'meta', 'package'))
-            .existsSync() ||
+    if (!fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fileSystem.file(manifestPath).existsSync()) {
       return false;
     }
@@ -236,8 +224,7 @@ class FakeFuchsiaKernelCompiler extends Fake implements FuchsiaKernelCompiler {
   }) async {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
-    final String manifestPath =
-        fileSystem.path.join(outDir, '$appName.dilpmanifest');
+    final String manifestPath = fileSystem.path.join(outDir, '$appName.dilpmanifest');
     fileSystem.file(manifestPath).createSync(recursive: true);
   }
 }

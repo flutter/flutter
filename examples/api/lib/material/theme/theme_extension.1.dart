@@ -107,19 +107,20 @@ class Home extends StatelessWidget {
     final MyColors myColors = Theme.of(context).extension<MyColors>()!;
     return Material(
       child: Center(
-          child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(width: 100, height: 100, color: myColors.blue),
-          const SizedBox(width: 10),
-          Container(width: 100, height: 100, color: myColors.red),
-          const SizedBox(width: 50),
-          IconButton(
-            icon: Icon(isLightTheme ? Icons.nightlight : Icons.wb_sunny),
-            onPressed: toggleTheme,
-          ),
-        ],
-      )),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(width: 100, height: 100, color: myColors.blue),
+            const SizedBox(width: 10),
+            Container(width: 100, height: 100, color: myColors.red),
+            const SizedBox(width: 50),
+            IconButton(
+              icon: Icon(isLightTheme ? Icons.nightlight : Icons.wb_sunny),
+              onPressed: toggleTheme,
+            ),
+          ],
+        )
+      ),
     );
   }
 }

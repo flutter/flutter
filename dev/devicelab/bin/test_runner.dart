@@ -10,10 +10,10 @@ import 'package:flutter_devicelab/command/test.dart';
 import 'package:flutter_devicelab/command/upload_results.dart';
 import 'package:flutter_devicelab/common.dart';
 
-final CommandRunner<void> runner = CommandRunner<void>(
-    'devicelab_runner', 'DeviceLab test runner for recording test results')
-  ..addCommand(TestCommand())
-  ..addCommand(UploadResultsCommand());
+final CommandRunner<void> runner =
+    CommandRunner<void>('devicelab_runner', 'DeviceLab test runner for recording test results')
+      ..addCommand(TestCommand())
+      ..addCommand(UploadResultsCommand());
 
 Future<void> main(List<String> rawArgs) async {
   unawaited(runner.run(rawArgs).catchError((dynamic error) {

@@ -43,8 +43,7 @@ Future<void> main() async {
           throw TaskResult.failure('Did not detect watch companion');
         }
         if (buildOutput.contains('-sdk iphoneos -destination')) {
-          throw TaskResult.failure(
-              '-sdk must be omitted for app with watch companion');
+          throw TaskResult.failure('-sdk must be omitted for app with watch companion');
         }
       });
 
@@ -97,7 +96,6 @@ Future<void> _checkFlutterFrameworkArchs(String frameworkPath) async {
   }
 
   if (archs.contains('x86_64')) {
-    throw TaskResult.failure(
-        '$frameworkPath x86_64 architecture unexpectedly present');
+    throw TaskResult.failure('$frameworkPath x86_64 architecture unexpectedly present');
   }
 }

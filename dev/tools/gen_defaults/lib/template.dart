@@ -80,8 +80,7 @@ abstract class TokenTemplate {
   ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
   String shape(String componentToken) {
-    final Map<String, dynamic> shape =
-        tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
+    final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
         return 'const RoundedRectangleBorder(borderRadius: '
@@ -93,8 +92,7 @@ abstract class TokenTemplate {
       case 'SHAPE_FAMILY_CIRCULAR':
         return 'const StadiumBorder()';
     }
-    print(
-        'Unsupported shape family type: ${shape['family']} for $componentToken');
+    print('Unsupported shape family type: ${shape['family']} for $componentToken');
     return '';
   }
 

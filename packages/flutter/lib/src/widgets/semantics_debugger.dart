@@ -32,9 +32,9 @@ class SemanticsDebugger extends StatefulWidget {
       fontSize: 10.0,
       height: 0.8,
     ),
-  })  : assert(child != null),
-        assert(labelStyle != null),
-        super(key: key);
+  }) : assert(child != null),
+       assert(labelStyle != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -48,8 +48,7 @@ class SemanticsDebugger extends StatefulWidget {
   State<SemanticsDebugger> createState() => _SemanticsDebuggerState();
 }
 
-class _SemanticsDebuggerState extends State<SemanticsDebugger>
-    with WidgetsBindingObserver {
+class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
   late _SemanticsClient _client;
 
   @override
@@ -99,8 +98,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger>
   Offset? _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation =
-          event.position * WidgetsBinding.instance.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -125,7 +123,8 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger>
   void _handlePanEnd(DragEndDetails details) {
     final double vx = details.velocity.pixelsPerSecond.dx;
     final double vy = details.velocity.pixelsPerSecond.dy;
-    if (vx.abs() == vy.abs()) return;
+    if (vx.abs() == vy.abs())
+      return;
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0) {
         _performAction(_lastPointerDownLocation!, SemanticsAction.decrease);
@@ -168,8 +167,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger>
         onTap: _handleTap,
         onLongPress: _handleLongPress,
         onPanEnd: _handlePanEnd,
-        excludeFromSemantics:
-            true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
+        excludeFromSemantics: true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
@@ -208,8 +206,7 @@ class _SemanticsClient extends ChangeNotifier {
 }
 
 class _SemanticsDebuggerPainter extends CustomPainter {
-  const _SemanticsDebuggerPainter(this.owner, this.generation,
-      this.pointerPosition, this.devicePixelRatio, this.labelStyle);
+  const _SemanticsDebuggerPainter(this.owner, this.generation, this.pointerPosition, this.devicePixelRatio, this.labelStyle);
 
   final PipelineOwner owner;
   final int generation;
@@ -226,7 +223,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final SemanticsNode? rootNode = _rootSemanticsNode;
     canvas.save();
     canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
-    if (rootNode != null) _paint(canvas, rootNode, _findDepth(rootNode));
+    if (rootNode != null)
+      _paint(canvas, rootNode, _findDepth(rootNode));
     if (pointerPosition != null) {
       final Paint paint = Paint();
       paint.color = const Color(0x7F0090FF);
@@ -237,9 +235,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SemanticsDebuggerPainter oldDelegate) {
-    return owner != oldDelegate.owner ||
-        generation != oldDelegate.generation ||
-        pointerPosition != oldDelegate.pointerPosition;
+    return owner != oldDelegate.owner
+        || generation != oldDelegate.generation
+        || pointerPosition != oldDelegate.pointerPosition;
   }
 
   @visibleForTesting
@@ -249,8 +247,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
     bool wantsTap = false;
     if (data.hasFlag(SemanticsFlag.hasCheckedState)) {
-      annotations
-          .add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
+      annotations.add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
       wantsTap = true;
     }
     if (data.hasFlag(SemanticsFlag.isTextField)) {
@@ -259,25 +256,29 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
 
     if (data.hasAction(SemanticsAction.tap)) {
-      if (!wantsTap) annotations.add('button');
+      if (!wantsTap)
+        annotations.add('button');
     } else {
-      if (wantsTap) annotations.add('disabled');
+      if (wantsTap)
+        annotations.add('disabled');
     }
 
     if (data.hasAction(SemanticsAction.longPress))
       annotations.add('long-pressable');
 
-    final bool isScrollable = data.hasAction(SemanticsAction.scrollLeft) ||
-        data.hasAction(SemanticsAction.scrollRight) ||
-        data.hasAction(SemanticsAction.scrollUp) ||
-        data.hasAction(SemanticsAction.scrollDown);
+    final bool isScrollable = data.hasAction(SemanticsAction.scrollLeft)
+        || data.hasAction(SemanticsAction.scrollRight)
+        || data.hasAction(SemanticsAction.scrollUp)
+        || data.hasAction(SemanticsAction.scrollDown);
 
-    final bool isAdjustable = data.hasAction(SemanticsAction.increase) ||
-        data.hasAction(SemanticsAction.decrease);
+    final bool isAdjustable = data.hasAction(SemanticsAction.increase)
+        || data.hasAction(SemanticsAction.decrease);
 
-    if (isScrollable) annotations.add('scrollable');
+    if (isScrollable)
+      annotations.add('scrollable');
 
-    if (isAdjustable) annotations.add('adjustable');
+    if (isAdjustable)
+      annotations.add('adjustable');
 
     assert(data.attributedLabel != null);
     final String message;
@@ -291,8 +292,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       } else {
         switch (data.textDirection!) {
           case TextDirection.rtl:
-            label =
-                '${Unicode.RLI}${data.attributedLabel.string}${Unicode.PDF}';
+            label = '${Unicode.RLI}${data.attributedLabel.string}${Unicode.PDF}';
             break;
           case TextDirection.ltr:
             label = data.attributedLabel.string;
@@ -311,7 +311,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   void _paintMessage(Canvas canvas, SemanticsNode node) {
     final String message = getMessage(node);
-    if (message.isEmpty) return;
+    if (message.isEmpty)
+      return;
     final Rect rect = node.rect;
     canvas.save();
     canvas.clipRect(rect);
@@ -320,18 +321,17 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         style: labelStyle,
         text: message,
       )
-      ..textDirection = TextDirection
-          .ltr // _getMessage always returns LTR text, even if node.label is RTL
+      ..textDirection = TextDirection.ltr // _getMessage always returns LTR text, even if node.label is RTL
       ..textAlign = TextAlign.center
       ..layout(maxWidth: rect.width);
 
-    textPainter.paint(
-        canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
+    textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
     canvas.restore();
   }
 
   int _findDepth(SemanticsNode node) {
-    if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode) return 1;
+    if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode)
+      return 1;
     int childrenDepth = 0;
     node.visitChildren((SemanticsNode child) {
       childrenDepth = math.max(childrenDepth, _findDepth(child));
@@ -342,11 +342,11 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   void _paint(Canvas canvas, SemanticsNode node, int rank) {
     canvas.save();
-    if (node.transform != null) canvas.transform(node.transform!.storage);
+    if (node.transform != null)
+      canvas.transform(node.transform!.storage);
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
-      final Color lineColor =
-          Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
+      final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
       final Rect innerRect = rect.deflate(rank * 1.0);
       if (innerRect.isEmpty) {
         final Paint fill = Paint()

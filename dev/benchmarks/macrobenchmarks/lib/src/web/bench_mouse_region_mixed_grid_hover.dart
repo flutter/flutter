@@ -85,8 +85,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance
-          .addPostFrameCallback((Duration timeStamp) async {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
         _tester.start();
         registerDidStop(_tester.stop);
       });
@@ -110,8 +109,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,
             physics: const ClampingScrollPhysics(),
-            itemBuilder: (BuildContext context, int rowIndex) =>
-                _NestedMouseRegion(
+            itemBuilder: (BuildContext context, int rowIndex) => _NestedMouseRegion(
               nests: 10,
               child: Row(
                 children: List<Widget>.generate(
@@ -123,8 +121,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
                       child: Container(
                         decoration: BoxDecoration(
                           border: _getBorder(columnIndex, rowIndex),
-                          color: Color.fromARGB(
-                              255, rowIndex * 20 % 256, 127, 127),
+                          color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
                         ),
                         width: containerSize,
                         height: containerSize,
@@ -175,7 +172,6 @@ class _Tester {
       kind: PointerDeviceKind.mouse,
     );
   }
-
   TestGesture? _gesture;
 
   Duration currentTime = Duration.zero;
@@ -185,7 +181,8 @@ class _Tester {
     final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
-    if (onDataPoint != null) onDataPoint(stopwatch.elapsed);
+    if (onDataPoint != null)
+      onDataPoint(stopwatch.elapsed);
     await _UntilNextFrame.wait();
   }
 

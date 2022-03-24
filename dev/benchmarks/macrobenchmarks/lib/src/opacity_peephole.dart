@@ -44,24 +44,17 @@ int _green(double v) => _red(1 - v);
 int _blue(double v) => 0;
 
 class OpacityPeepholeCase {
-  OpacityPeepholeCase.forValue(
-      {required String route,
-      required String name,
-      required ValueBuilder builder})
+  OpacityPeepholeCase.forValue({required String route, required String name, required ValueBuilder builder})
       : this.forAnimation(
-          route: route,
-          name: name,
-          builder: (Animation<double> animation) => AnimatedBuilder(
-            animation: animation,
-            builder: (BuildContext context, Widget? child) =>
-                builder(animation.value),
-          ),
-        );
+    route: route,
+    name: name,
+    builder: (Animation<double> animation) => AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) => builder(animation.value),
+    ),
+  );
 
-  OpacityPeepholeCase.forAnimation(
-      {required this.route,
-      required this.name,
-      required AnimationBuilder builder})
+  OpacityPeepholeCase.forAnimation({required this.route, required this.name, required AnimationBuilder builder})
       : animationBuilder = builder;
 
   final String route;
@@ -76,18 +69,19 @@ class OpacityPeepholeCase {
 List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   // Tests that Opacity can hand down value to a simple child
   OpacityPeepholeCase.forValue(
-      route: kOpacityPeepholeOneRectRouteName,
-      name: 'One Big Rectangle',
-      builder: (double v) {
-        return Opacity(
-          opacity: _opacity(v),
-          child: Container(
-            width: 300,
-            height: 400,
-            color: Color.fromARGB(255, _red(v), _green(v), _blue(v)),
-          ),
-        );
-      }),
+    route: kOpacityPeepholeOneRectRouteName,
+    name: 'One Big Rectangle',
+    builder: (double v) {
+      return Opacity(
+        opacity: _opacity(v),
+        child: Container(
+          width: 300,
+          height: 400,
+          color: Color.fromARGB(255, _red(v), _green(v), _blue(v)),
+        ),
+      );
+    }
+  ),
   // Tests that a column of Opacity widgets can individually hand their values down to simple children
   OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeColumnOfOpacityRouteName,
@@ -131,8 +125,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
                     Positioned.fromRelativeRect(
                       rect: RelativeRect.fromLTRB(i, i, i, i),
                       child: Container(
-                        color: Color.fromARGB(
-                            255, _red(childV), _green(childV), _blue(childV)),
+                        color: Color.fromARGB(255, _red(childV), _green(childV), _blue(childV)),
                       ),
                     ),
                 ],
@@ -140,7 +133,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
             ),
           ),
         );
-      }),
+      }
+  ),
   // Tests that an Opacity can hand a value down to a Column of simple non-overlapping children
   OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOpacityOfColumnRouteName,
@@ -190,8 +184,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
                       child: Container(
                         width: 30,
                         height: 30,
-                        color: Color.fromARGB(
-                            255, _red(colV), _green(colV), _blue(colV)),
+                        color: Color.fromARGB(255, _red(colV), _green(colV), _blue(colV)),
                       ),
                     ),
                   ),
@@ -223,8 +216,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
                     // RepaintBoundary here to avoid combining the 70 children into a single Picture
                     child: RepaintBoundary(
                       child: Container(
-                        color: Color.fromARGB(
-                            255, _red(colV), _green(colV), _blue(colV)),
+                        color: Color.fromARGB(255, _red(colV), _green(colV), _blue(colV)),
                       ),
                     ),
                   ),
@@ -263,8 +255,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
                             child: Container(
                               width: 30,
                               height: 30,
-                              color: Color.fromARGB(
-                                  255, _red(colV), _green(colV), _blue(colV)),
+                              color: Color.fromARGB(255, _red(colV), _green(colV), _blue(colV)),
                             ),
                           ),
                         ),
@@ -287,8 +278,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
           width: 300,
           height: 400,
           child: Center(
-            child: Text(
-              'Hello, World',
+            child: Text('Hello, World',
               style: TextStyle(fontSize: 48),
             ),
           ),
@@ -309,23 +299,18 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               const int numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
-              final double hGap =
-                  (size.width - numCols * rectWidth) / (numCols + 1);
-              final double vGap =
-                  (size.height - numRows * rectHeight) / (numRows + 1);
+              final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
+              final double vGap = (size.height - numRows * rectHeight) / (numRows + 1);
               final double gap = min(hGap, vGap);
-              final double xOffset =
-                  (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
-              final double yOffset =
-                  (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
+              final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
+              final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
               final Paint rectPaint = Paint();
               for (int r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
                 double cv = v;
                 for (int c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
-                  rectPaint.color = Color.fromRGBO(
-                      _red(cv), _green(cv), _blue(cv), _opacity(cv));
+                  rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), _opacity(cv));
                   final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.drawRect(rect, rectPaint);
                 }
@@ -349,15 +334,11 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               const int numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
-              final double hGap =
-                  (size.width - numCols * rectWidth) / (numCols + 1);
-              final double vGap =
-                  (size.height - numRows * rectHeight) / (numRows + 1);
+              final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
+              final double vGap = (size.height - numRows * rectHeight) / (numRows + 1);
               final double gap = min(hGap, vGap);
-              final double xOffset =
-                  (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
-              final double yOffset =
-                  (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
+              final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
+              final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
               final Paint rectPaint = Paint();
               final Paint layerPaint = Paint();
               for (int r = 0; r < numRows; r++, v = 1 - v) {
@@ -365,10 +346,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
                 double cv = v;
                 for (int c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
-                  rectPaint.color =
-                      Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
-                  layerPaint.color =
-                      Color.fromRGBO(255, 255, 255, _opacity(cv));
+                  rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
+                  layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(cv));
                   final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.saveLayer(null, layerPaint);
                   canvas.drawRect(rect, rectPaint);
@@ -394,15 +373,11 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               const int numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
-              final double hGap =
-                  (size.width - numCols * rectWidth) / (numCols + 1);
-              final double vGap =
-                  (size.height - numRows * rectHeight) / (numRows + 1);
+              final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
+              final double vGap = (size.height - numRows * rectHeight) / (numRows + 1);
               final double gap = min(hGap, vGap);
-              final double xOffset =
-                  (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
-              final double yOffset =
-                  (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
+              final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
+              final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
               final Paint rectPaint = Paint();
               final Paint layerPaint = Paint();
               for (int r = 0; r < numRows; r++, v = 1 - v) {
@@ -412,8 +387,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
                 double cv = v;
                 for (int c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
-                  rectPaint.color =
-                      Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
+                  rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
                   final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.drawRect(rect, rectPaint);
                 }
@@ -453,16 +427,14 @@ class VariantPage extends StatefulWidget {
   State<VariantPage> createState() => VariantPageState();
 }
 
-class VariantPageState extends State<VariantPage>
-    with SingleTickerProviderStateMixin {
+class VariantPageState extends State<VariantPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
 
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 4));
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4));
     _controller.repeat(reverse: true);
   }
 

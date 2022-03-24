@@ -23,27 +23,15 @@ void main() {
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(3)), isTrue);
     expect(ValueKey<num>(nonconst(3)) == ValueKey<int>(nonconst(3)), isFalse);
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(2)), isFalse);
-    expect(
-        const ValueKey<double>(double.nan) ==
-            const ValueKey<double>(double.nan),
-        isFalse);
+    expect(const ValueKey<double>(double.nan) == const ValueKey<double>(double.nan), isFalse);
 
     expect(Key(nonconst('')) == ValueKey<String>(nonconst('')), isTrue);
-    expect(ValueKey<String>(nonconst('')) == ValueKey<String>(nonconst('')),
-        isTrue);
-    expect(TestValueKey<String>(nonconst('')) == ValueKey<String>(nonconst('')),
-        isFalse);
-    expect(
-        TestValueKey<String>(nonconst('')) ==
-            TestValueKey<String>(nonconst('')),
-        isTrue);
+    expect(ValueKey<String>(nonconst('')) == ValueKey<String>(nonconst('')), isTrue);
+    expect(TestValueKey<String>(nonconst('')) == ValueKey<String>(nonconst('')), isFalse);
+    expect(TestValueKey<String>(nonconst('')) == TestValueKey<String>(nonconst('')), isTrue);
 
-    expect(ValueKey<String>(nonconst('')) == ValueKey<dynamic>(nonconst('')),
-        isFalse);
-    expect(
-        TestValueKey<String>(nonconst('')) ==
-            TestValueKey<dynamic>(nonconst('')),
-        isFalse);
+    expect(ValueKey<String>(nonconst('')) == ValueKey<dynamic>(nonconst('')), isFalse);
+    expect(TestValueKey<String>(nonconst('')) == TestValueKey<dynamic>(nonconst('')), isFalse);
 
     expect(UniqueKey() == UniqueKey(), isFalse);
     final UniqueKey k = UniqueKey();
@@ -55,16 +43,12 @@ void main() {
     expect(ObjectKey(k) == ObjectKey(k), isTrue);
 
     final NotEquals constNotEquals = nonconst(const NotEquals());
-    expect(
-        ValueKey<NotEquals>(constNotEquals) ==
-            ValueKey<NotEquals>(constNotEquals),
-        isFalse);
+    expect(ValueKey<NotEquals>(constNotEquals) == ValueKey<NotEquals>(constNotEquals), isFalse);
     expect(ObjectKey(constNotEquals) == ObjectKey(constNotEquals), isTrue);
 
     final Object constObject = nonconst(const Object());
     expect(ObjectKey(constObject) == ObjectKey(constObject), isTrue);
-    expect(ObjectKey(nonconst(Object())) == ObjectKey(nonconst(Object())),
-        isFalse);
+    expect(ObjectKey(nonconst(Object())) == ObjectKey(nonconst(Object())), isFalse);
 
     expect(const ValueKey<bool>(true), hasOneLineDescription);
     expect(UniqueKey(), hasOneLineDescription);

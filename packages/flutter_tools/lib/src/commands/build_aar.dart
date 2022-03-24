@@ -17,8 +17,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({required bool verboseHelp})
-      : super(verboseHelp: verboseHelp) {
+  BuildAarCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',
@@ -28,8 +27,7 @@ class BuildAarCommand extends BuildSubCommand {
       ..addFlag(
         'profile',
         defaultsTo: true,
-        help:
-            'Build a version of the current project specialized for performance profiling.',
+        help: 'Build a version of the current project specialized for performance profiling.',
       )
       ..addFlag(
         'release',
@@ -52,19 +50,13 @@ class BuildAarCommand extends BuildSubCommand {
       ..addMultiOption(
         'target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-        allowed: <String>[
-          'android-arm',
-          'android-arm64',
-          'android-x86',
-          'android-x64'
-        ],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
       )
       ..addOption(
         'output-dir',
-        help:
-            'The absolute path to the directory where the repository is generated. '
-            'By default, this is "<current-directory>android/build".',
+        help: 'The absolute path to the directory where the repository is generated. '
+              'By default, this is "<current-directory>android/build".',
       );
   }
 
@@ -75,10 +67,9 @@ class BuildAarCommand extends BuildSubCommand {
   bool get reportNullSafety => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      <DevelopmentArtifact>{
-        DevelopmentArtifact.androidGenSnapshot,
-      };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.androidGenSnapshot,
+  };
 
   @override
   Future<CustomDimensions> get usageValues async {
@@ -103,8 +94,7 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
-  final String description =
-      'Build a repository containing an AAR and a POM file.\n\n'
+  final String description = 'Build a repository containing an AAR and a POM file.\n\n'
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
       'To learn more about how to use these artifacts, see '
@@ -123,27 +113,24 @@ class BuildAarCommand extends BuildSubCommand {
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
     final String? buildNumberArg = stringArg('build-number');
-    final String buildNumber = argParser.options.containsKey('build-number') &&
-            buildNumberArg != null &&
-            buildNumberArg.isNotEmpty
-        ? buildNumberArg
-        : '1.0';
+    final String buildNumber = argParser.options.containsKey('build-number')
+      && buildNumberArg != null
+      && buildNumberArg.isNotEmpty
+      ? buildNumberArg
+      : '1.0';
 
-    final File targetFile =
-        globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
-    for (final String buildMode in const <String>[
-      'debug',
-      'profile',
-      'release'
-    ]) {
+    final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
+    for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
-        androidBuildInfo.add(AndroidBuildInfo(
-          await getBuildInfo(
-            forcedBuildMode: BuildMode.fromName(buildMode),
-            forcedTargetFile: targetFile,
-          ),
-          targetArchs: targetArchitectures,
-        ));
+        androidBuildInfo.add(
+          AndroidBuildInfo(
+            await getBuildInfo(
+              forcedBuildMode: BuildMode.fromName(buildMode),
+              forcedTargetFile: targetFile,
+            ),
+            targetArchs: targetArchitectures,
+          )
+        );
       }
     }
     if (androidBuildInfo.isEmpty) {
@@ -168,7 +155,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return FlutterProject.current();
     }
-    return FlutterProject.fromDirectory(globals.fs
-        .directory(findProjectRoot(globals.fs, remainingArguments.first)));
+    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(globals.fs, remainingArguments.first)));
   }
 }

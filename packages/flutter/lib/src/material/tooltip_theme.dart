@@ -139,18 +139,17 @@ class TooltipThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TooltipThemeData? lerp(
-      TooltipThemeData? a, TooltipThemeData? b, double t) {
-    if (a == null && b == null) return null;
+  static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
+    if (a == null && b == null)
+      return null;
     assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
-      preferBelow: t < 0.5 ? a?.preferBelow : b?.preferBelow,
-      excludeFromSemantics:
-          t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
+      preferBelow: t < 0.5 ? a?.preferBelow: b?.preferBelow,
+      excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
     );
@@ -158,66 +157,56 @@ class TooltipThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        height,
-        padding,
-        margin,
-        verticalOffset,
-        preferBelow,
-        excludeFromSemantics,
-        decoration,
-        textStyle,
-        waitDuration,
-        showDuration,
-        triggerMode,
-        enableFeedback,
-      );
+    height,
+    padding,
+    margin,
+    verticalOffset,
+    preferBelow,
+    excludeFromSemantics,
+    decoration,
+    textStyle,
+    waitDuration,
+    showDuration,
+    triggerMode,
+    enableFeedback,
+  );
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is TooltipThemeData &&
-        other.height == height &&
-        other.padding == padding &&
-        other.margin == margin &&
-        other.verticalOffset == verticalOffset &&
-        other.preferBelow == preferBelow &&
-        other.excludeFromSemantics == excludeFromSemantics &&
-        other.decoration == decoration &&
-        other.textStyle == textStyle &&
-        other.waitDuration == waitDuration &&
-        other.showDuration == showDuration &&
-        other.triggerMode == triggerMode &&
-        other.enableFeedback == enableFeedback;
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is TooltipThemeData
+        && other.height == height
+        && other.padding == padding
+        && other.margin == margin
+        && other.verticalOffset == verticalOffset
+        && other.preferBelow == preferBelow
+        && other.excludeFromSemantics == excludeFromSemantics
+        && other.decoration == decoration
+        && other.textStyle == textStyle
+        && other.waitDuration == waitDuration
+        && other.showDuration == showDuration
+        && other.triggerMode == triggerMode
+        && other.enableFeedback == enableFeedback;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin,
-        defaultValue: null));
-    properties.add(
-        DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position',
-        value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
-    properties.add(FlagProperty('semantics',
-        value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
-    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TooltipTriggerMode>(
-        'triggerMode', triggerMode,
-        defaultValue: null));
-    properties.add(FlagProperty('enableFeedback',
-        value: enableFeedback, ifTrue: 'true', showName: true));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
+    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
+    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
+    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
   }
 }
 
@@ -264,8 +253,7 @@ class TooltipTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;
@@ -280,8 +268,7 @@ class TooltipTheme extends InheritedTheme {
   /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
   static TooltipThemeData of(BuildContext context) {
-    final TooltipTheme? tooltipTheme =
-        context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
+    final TooltipTheme? tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 

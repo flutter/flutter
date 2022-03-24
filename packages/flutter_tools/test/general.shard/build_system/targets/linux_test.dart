@@ -19,9 +19,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 
 void main() {
-  testWithoutContext(
-      'Copies files to correct cache directory, excluding unrelated code on a x64 host',
-      () async {
+  testWithoutContext('Copies files to correct cache directory, excluding unrelated code on a x64 host', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
     setUpCacheDirectory(fileSystem, artifacts);
@@ -40,42 +38,24 @@ void main() {
 
     await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
 
-    expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'),
-        exists);
-    expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'),
-        isNot(exists));
+    expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+    expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
 
     // Check if the target files are copied correctly.
-    final String headersPathForX64 = artifacts.getArtifactPath(
-        Artifact.linuxHeaders,
-        platform: TargetPlatform.linux_x64,
-        mode: BuildMode.debug);
-    final String headersPathForArm64 = artifacts.getArtifactPath(
-        Artifact.linuxHeaders,
-        platform: TargetPlatform.linux_arm64,
-        mode: BuildMode.debug);
-    expect(fileSystem.file('linux/flutter/ephemeral/$headersPathForX64/foo.h'),
-        exists);
-    expect(
-        fileSystem.file('linux/flutter/ephemeral/$headersPathForArm64/foo.h'),
-        isNot(exists));
+    final String headersPathForX64 = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: TargetPlatform.linux_x64, mode: BuildMode.debug);
+    final String headersPathForArm64 = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: TargetPlatform.linux_arm64, mode: BuildMode.debug);
+    expect(fileSystem.file('linux/flutter/ephemeral/$headersPathForX64/foo.h'), exists);
+    expect(fileSystem.file('linux/flutter/ephemeral/$headersPathForArm64/foo.h'), isNot(exists));
 
-    final String icuDataPathForX64 = artifacts.getArtifactPath(Artifact.icuData,
-        platform: TargetPlatform.linux_x64);
-    final String icuDataPathForArm64 = artifacts.getArtifactPath(
-        Artifact.icuData,
-        platform: TargetPlatform.linux_arm64);
-    expect(
-        fileSystem.file('linux/flutter/ephemeral/$icuDataPathForX64'), exists);
-    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForArm64'),
-        isNot(exists));
+    final String icuDataPathForX64 = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.linux_x64);
+    final String icuDataPathForArm64 = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.linux_arm64);
+    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForX64'), exists);
+    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForArm64'), isNot(exists));
   });
 
   // This test is basically the same logic as the above test.
   // The difference is the target CPU architecture.
-  testWithoutContext(
-      'Copies files to correct cache directory, excluding unrelated code on a arm64 host',
-      () async {
+  testWithoutContext('Copies files to correct cache directory, excluding unrelated code on a arm64 host', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
     setUpCacheDirectory(fileSystem, artifacts);
@@ -94,35 +74,19 @@ void main() {
 
     await const UnpackLinux(TargetPlatform.linux_arm64).build(testEnvironment);
 
-    expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'),
-        exists);
-    expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'),
-        isNot(exists));
+    expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+    expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
 
     // Check if the target files are copied correctly.
-    final String headersPathForX64 = artifacts.getArtifactPath(
-        Artifact.linuxHeaders,
-        platform: TargetPlatform.linux_x64,
-        mode: BuildMode.debug);
-    final String headersPathForArm64 = artifacts.getArtifactPath(
-        Artifact.linuxHeaders,
-        platform: TargetPlatform.linux_arm64,
-        mode: BuildMode.debug);
-    expect(fileSystem.file('linux/flutter/ephemeral/$headersPathForX64/foo.h'),
-        isNot(exists));
-    expect(
-        fileSystem.file('linux/flutter/ephemeral/$headersPathForArm64/foo.h'),
-        exists);
+    final String headersPathForX64 = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: TargetPlatform.linux_x64, mode: BuildMode.debug);
+    final String headersPathForArm64 = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: TargetPlatform.linux_arm64, mode: BuildMode.debug);
+    expect(fileSystem.file('linux/flutter/ephemeral/$headersPathForX64/foo.h'), isNot(exists));
+    expect(fileSystem.file('linux/flutter/ephemeral/$headersPathForArm64/foo.h'), exists);
 
-    final String icuDataPathForX64 = artifacts.getArtifactPath(Artifact.icuData,
-        platform: TargetPlatform.linux_x64);
-    final String icuDataPathForArm64 = artifacts.getArtifactPath(
-        Artifact.icuData,
-        platform: TargetPlatform.linux_arm64);
-    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForX64'),
-        isNot(exists));
-    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForArm64'),
-        exists);
+    final String icuDataPathForX64 = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.linux_x64);
+    final String icuDataPathForArm64 = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.linux_arm64);
+    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForX64'), isNot(exists));
+    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPathForArm64'), exists);
   });
 
   // Only required for the test below that still depends on the context.
@@ -131,8 +95,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext('DebugBundleLinuxAssets copies artifacts to out directory',
-      () async {
+  testUsingContext('DebugBundleLinuxAssets copies artifacts to out directory', () async {
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -152,29 +115,27 @@ void main() {
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.dill').createSync();
-    fileSystem
-        .file('bundle.sksl')
-        .writeAsStringSync(json.encode(<String, Object>{
-          'engineRevision': '2',
-          'platform': 'ios',
-          'data': <String, Object>{
-            'A': 'B',
-          }
-        }));
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
-    await const DebugBundleLinuxAssets(TargetPlatform.linux_x64)
-        .build(testEnvironment);
+    await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
 
-    final Directory output =
-        testEnvironment.outputDir.childDirectory('flutter_assets');
+    final Directory output = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
 
     expect(output.childFile('kernel_blob.bin'), exists);
     expect(output.childFile('AssetManifest.json'), exists);
     expect(output.childFile('version.json'), exists);
     // SkSL
     expect(output.childFile('io.flutter.shaders.json'), exists);
-    expect(output.childFile('io.flutter.shaders.json').readAsStringSync(),
-        '{"data":{"A":"B"}}');
+    expect(output.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
 
     // No bundled fonts
     expect(output.childFile('FontManifest.json'), isNot(exists));
@@ -183,16 +144,12 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext("DebugBundleLinuxAssets' name depends on target platforms",
-      () async {
-    expect(const DebugBundleLinuxAssets(TargetPlatform.linux_x64).name,
-        'debug_bundle_linux-x64_assets');
-    expect(const DebugBundleLinuxAssets(TargetPlatform.linux_arm64).name,
-        'debug_bundle_linux-arm64_assets');
+  testWithoutContext("DebugBundleLinuxAssets' name depends on target platforms", () async {
+    expect(const DebugBundleLinuxAssets(TargetPlatform.linux_x64).name, 'debug_bundle_linux-x64_assets');
+    expect(const DebugBundleLinuxAssets(TargetPlatform.linux_arm64).name, 'debug_bundle_linux-arm64_assets');
   });
 
-  testUsingContext('ProfileBundleLinuxAssets copies artifacts to out directory',
-      () async {
+  testUsingContext('ProfileBundleLinuxAssets copies artifacts to out directory', () async {
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -209,13 +166,12 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64))
-        .build(testEnvironment);
-    await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64)
-        .build(testEnvironment);
-    final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
-    final Directory assetsDir =
-        testEnvironment.outputDir.childDirectory('flutter_assets');
+    await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64)).build(testEnvironment);
+    await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+    final Directory libDir = testEnvironment.outputDir
+      .childDirectory('lib');
+    final Directory assetsDir = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
 
     expect(libDir.childFile('libapp.so'), exists);
     expect(assetsDir.childFile('AssetManifest.json'), exists);
@@ -227,16 +183,12 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext(
-      "ProfileBundleLinuxAssets' name depends on target platforms", () async {
-    expect(const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).name,
-        'profile_bundle_linux-x64_assets');
-    expect(const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64).name,
-        'profile_bundle_linux-arm64_assets');
+  testWithoutContext("ProfileBundleLinuxAssets' name depends on target platforms", () async {
+    expect(const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).name, 'profile_bundle_linux-x64_assets');
+    expect(const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64).name, 'profile_bundle_linux-arm64_assets');
   });
 
-  testUsingContext('ReleaseBundleLinuxAssets copies artifacts to out directory',
-      () async {
+  testUsingContext('ReleaseBundleLinuxAssets copies artifacts to out directory', () async {
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -253,13 +205,12 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64))
-        .build(testEnvironment);
-    await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64)
-        .build(testEnvironment);
-    final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
-    final Directory assetsDir =
-        testEnvironment.outputDir.childDirectory('flutter_assets');
+    await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64)).build(testEnvironment);
+    await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+    final Directory libDir = testEnvironment.outputDir
+      .childDirectory('lib');
+    final Directory assetsDir = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
 
     expect(libDir.childFile('libapp.so'), exists);
     expect(assetsDir.childFile('AssetManifest.json'), exists);
@@ -271,58 +222,27 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext(
-      "ReleaseBundleLinuxAssets' name depends on target platforms", () async {
-    expect(const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).name,
-        'release_bundle_linux-x64_assets');
-    expect(const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64).name,
-        'release_bundle_linux-arm64_assets');
+  testWithoutContext("ReleaseBundleLinuxAssets' name depends on target platforms", () async {
+    expect(const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).name, 'release_bundle_linux-x64_assets');
+    expect(const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64).name, 'release_bundle_linux-arm64_assets');
   });
 }
 
 void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
-  final String desktopPathForX64 = artifacts.getArtifactPath(
-      Artifact.linuxDesktopPath,
-      platform: TargetPlatform.linux_x64,
-      mode: BuildMode.debug);
-  final String desktopPathForArm64 = artifacts.getArtifactPath(
-      Artifact.linuxDesktopPath,
-      platform: TargetPlatform.linux_arm64,
-      mode: BuildMode.debug);
-  fileSystem
-      .file('$desktopPathForX64/unrelated-stuff')
-      .createSync(recursive: true);
-  fileSystem
-      .file('$desktopPathForX64/libflutter_linux_gtk.so')
-      .createSync(recursive: true);
-  fileSystem
-      .file('$desktopPathForArm64/unrelated-stuff')
-      .createSync(recursive: true);
-  fileSystem
-      .file('$desktopPathForArm64/libflutter_linux_gtk.so')
-      .createSync(recursive: true);
+  final String desktopPathForX64 = artifacts.getArtifactPath(Artifact.linuxDesktopPath, platform: TargetPlatform.linux_x64, mode: BuildMode.debug);
+  final String desktopPathForArm64 = artifacts.getArtifactPath(Artifact.linuxDesktopPath, platform: TargetPlatform.linux_arm64, mode: BuildMode.debug);
+  fileSystem.file('$desktopPathForX64/unrelated-stuff').createSync(recursive: true);
+  fileSystem.file('$desktopPathForX64/libflutter_linux_gtk.so').createSync(recursive: true);
+  fileSystem.file('$desktopPathForArm64/unrelated-stuff').createSync(recursive: true);
+  fileSystem.file('$desktopPathForArm64/libflutter_linux_gtk.so').createSync(recursive: true);
 
-  final String headersPathForX64 = artifacts.getArtifactPath(
-      Artifact.linuxHeaders,
-      platform: TargetPlatform.linux_x64,
-      mode: BuildMode.debug);
-  final String headersPathForArm64 = artifacts.getArtifactPath(
-      Artifact.linuxHeaders,
-      platform: TargetPlatform.linux_arm64,
-      mode: BuildMode.debug);
+  final String headersPathForX64 = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: TargetPlatform.linux_x64, mode: BuildMode.debug);
+  final String headersPathForArm64 = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: TargetPlatform.linux_arm64, mode: BuildMode.debug);
   fileSystem.file('$headersPathForX64/foo.h').createSync(recursive: true);
   fileSystem.file('$headersPathForArm64/foo.h').createSync(recursive: true);
 
-  fileSystem
-      .file(artifacts.getArtifactPath(Artifact.icuData,
-          platform: TargetPlatform.linux_x64))
-      .createSync();
-  fileSystem
-      .file(artifacts.getArtifactPath(Artifact.icuData,
-          platform: TargetPlatform.linux_arm64))
-      .createSync();
+  fileSystem.file(artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.linux_x64)).createSync();
+  fileSystem.file(artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.linux_arm64)).createSync();
 
-  fileSystem
-      .file('packages/flutter_tools/lib/src/build_system/targets/linux.dart')
-      .createSync(recursive: true);
+  fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/linux.dart').createSync(recursive: true);
 }

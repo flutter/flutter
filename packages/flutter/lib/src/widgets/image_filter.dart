@@ -27,15 +27,14 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
     Key? key,
     required this.imageFilter,
     Widget? child,
-  })  : assert(imageFilter != null),
-        super(key: key, child: child);
+  }) : assert(imageFilter != null),
+       super(key: key, child: child);
 
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _ImageFilterRenderObject(imageFilter);
+  RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter);
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
@@ -45,8 +44,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<ImageFilter>('imageFilter', imageFilter));
+    properties.add(DiagnosticsProperty<ImageFilter>('imageFilter', imageFilter));
   }
 }
 

@@ -32,8 +32,7 @@ class CleanCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -79,14 +78,11 @@ class CleanCommand extends FlutterCommand {
       'Cleaning Xcode workspace...',
     );
     try {
-      final XcodeProjectInterpreter xcodeProjectInterpreter =
-          globals.xcodeProjectInterpreter!;
+      final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
-      final XcodeProjectInfo projectInfo =
-          await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
+      final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
       for (final String scheme in projectInfo.schemes) {
-        await xcodeProjectInterpreter
-            .cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
+        await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
       }
     } on Exception catch (error) {
       globals.printTrace('Could not clean Xcode workspace: $error');
@@ -114,7 +110,8 @@ class CleanCommand extends FlutterCommand {
     } on FileSystemException catch (error) {
       final String path = file.path;
       if (globals.platform.isWindows) {
-        globals.printError('Failed to remove $path. '
+        globals.printError(
+          'Failed to remove $path. '
             'A program may still be using a file in the directory or the directory itself. '
             'To find and stop such a program, see: '
             'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');

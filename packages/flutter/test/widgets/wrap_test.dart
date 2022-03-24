@@ -9,12 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void verify(WidgetTester tester, List<Offset> answerKey) {
-  final List<Offset> testAnswers = tester
-      .renderObjectList<RenderBox>(find.byType(SizedBox))
-      .map<Offset>(
-        (RenderBox target) => target.localToGlobal(Offset.zero),
-      )
-      .toList();
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero),
+  ).toList();
   expect(testAnswers, equals(answerKey));
 }
 
@@ -131,6 +128,7 @@ void main() {
       const Offset(0.0, 100.0),
       const Offset(300.0, 150.0),
     ]);
+
   });
 
   testWidgets('Basic Wrap test (RTL)', (WidgetTester tester) async {
@@ -248,13 +246,12 @@ void main() {
       const Offset(0.0, 400.0),
       const Offset(300.0, 400.0),
     ]);
+
   });
 
   testWidgets('Empty wrap', (WidgetTester tester) async {
-    await tester
-        .pumpWidget(Center(child: Wrap(alignment: WrapAlignment.center)));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(Size.zero));
+    await tester.pumpWidget(Center(child: Wrap(alignment: WrapAlignment.center)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(Size.zero));
   });
 
   testWidgets('Wrap alignment (LTR)', (WidgetTester tester) async {
@@ -268,8 +265,7 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(95.0, 0.0),
       const Offset(200.0, 0.0),
@@ -286,8 +282,7 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(200.0, 0.0),
@@ -304,8 +299,7 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(30.0, 0.0),
       const Offset(195.0, 0.0),
@@ -322,8 +316,7 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(45.0, 0.0),
       const Offset(195.0, 0.0),
@@ -342,8 +335,7 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(605.0, 0.0),
       const Offset(400.0, 0.0),
@@ -360,8 +352,7 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(700.0, 0.0),
       const Offset(400.0, 0.0),
@@ -378,8 +369,7 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(670.0, 0.0),
       const Offset(405.0, 0.0),
@@ -396,8 +386,7 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(655.0, 0.0),
       const Offset(405.0, 0.0),
@@ -418,8 +407,7 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 230.0),
       const Offset(100.0, 230.0),
@@ -440,8 +428,7 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(100.0, 0.0),
@@ -462,8 +449,7 @@ void main() {
         SizedBox(width: 500.0, height: 70.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 75.0),
       const Offset(100.0, 75.0),
@@ -484,8 +470,7 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 115.0),
       const Offset(100.0, 115.0),
@@ -493,6 +478,7 @@ void main() {
       const Offset(0.0, 265.0),
       const Offset(0.0, 425.0),
     ]);
+
   });
 
   testWidgets('Wrap runAlignment (UP)', (WidgetTester tester) async {
@@ -509,8 +495,7 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 360.0),
       const Offset(100.0, 350.0),
@@ -532,8 +517,7 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 590.0),
       const Offset(100.0, 580.0),
@@ -555,8 +539,7 @@ void main() {
         SizedBox(width: 500.0, height: 70.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 515.0),
       const Offset(100.0, 505.0),
@@ -578,8 +561,7 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 475.0),
       const Offset(100.0, 465.0),
@@ -587,6 +569,7 @@ void main() {
       const Offset(0.0, 295.0),
       const Offset(0.0, 115.0),
     ]);
+
   });
 
   testWidgets('Shrink-wrapping Wrap test', (WidgetTester tester) async {
@@ -606,8 +589,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(600.0, 70.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(600.0, 70.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 20.0),
       const Offset(100.0, 10.0),
@@ -631,8 +613,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(700.0, 60.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(700.0, 60.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(400.0, 10.0),
@@ -657,8 +638,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(500.0, 130.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(500.0, 130.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(0.0, 20.0),
@@ -687,8 +667,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(150.0, 510.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(150.0, 510.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(0.0, 260.0),
@@ -716,8 +695,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(270.0, 250.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 250.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(22.0, 0.0),
@@ -736,8 +714,7 @@ void main() {
       ],
     ));
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)),
-        isNot(paints..clipRect()));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)), isNot(paints..clipRect()));
 
     await tester.pumpWidget(Wrap(
       textDirection: TextDirection.ltr,
@@ -748,8 +725,7 @@ void main() {
       ],
     ));
 
-    expect(
-        tester.renderObject<RenderBox>(find.byType(Wrap)), paints..clipRect());
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)), paints..clipRect());
   });
 
   testWidgets('Hit test children in wrap', (WidgetTester tester) async {
@@ -769,9 +745,7 @@ void main() {
           height: 300.0,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () {
-              log.add('hit');
-            },
+            onTap: () { log.add('hit'); },
           ),
         ),
       ],
@@ -790,8 +764,7 @@ void main() {
     expect(log, equals(<String>['hit']));
   });
 
-  testWidgets('RenderWrap toStringShallow control test',
-      (WidgetTester tester) async {
+  testWidgets('RenderWrap toStringShallow control test', (WidgetTester tester) async {
     await tester.pumpWidget(Wrap(alignment: WrapAlignment.center));
 
     final RenderBox wrap = tester.renderObject(find.byType(Wrap));
@@ -837,8 +810,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size,
-        const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
     expect(
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
       within<Size>(from: const Size(100.0, 200.0), distance: 0.001),
@@ -858,8 +830,7 @@ void main() {
       ],
     ));
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(210.0, 0.0),
@@ -868,8 +839,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Object exactly matches container width',
-      (WidgetTester tester) async {
+  testWidgets('Object exactly matches container width', (WidgetTester tester) async {
     await tester.pumpWidget(
       Column(
         children: <Widget>[
@@ -885,8 +855,7 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 10.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
     verify(tester, <Offset>[Offset.zero]);
 
     await tester.pumpWidget(
@@ -905,28 +874,23 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
-        equals(const Size(800.0, 30.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 30.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(0.0, 20.0),
     ]);
   });
 
-  testWidgets('Wrap can set and update clipBehavior',
-      (WidgetTester tester) async {
+  testWidgets('Wrap can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr));
-    final RenderWrap renderObject =
-        tester.allRenderObjects.whereType<RenderWrap>().first;
+    final RenderWrap renderObject = tester.allRenderObjects.whereType<RenderWrap>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(
-        Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
+    await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('Horizontal wrap - IntrinsicsHeight',
-      (WidgetTester tester) async {
+  testWidgets('Horizontal wrap - IntrinsicsHeight', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       Directionality(
@@ -937,15 +901,13 @@ void main() {
               color: Colors.green,
               child: Wrap(
                 children: <Widget>[
-                  const Text('Start',
-                      style: TextStyle(height: 1.0, fontSize: 16)),
+                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
                   Row(
                     children: const <Widget>[
                       SizedBox(height: 40, width: 60),
                     ],
                   ),
-                  const Text('End',
-                      style: TextStyle(height: 1.0, fontSize: 16)),
+                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
                 ],
               ),
             ),
@@ -972,15 +934,13 @@ void main() {
               child: Wrap(
                 direction: Axis.vertical,
                 children: <Widget>[
-                  const Text('Start',
-                      style: TextStyle(height: 1.0, fontSize: 16)),
+                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
                   Column(
                     children: const <Widget>[
                       SizedBox(height: 40, width: 60),
                     ],
                   ),
-                  const Text('End',
-                      style: TextStyle(height: 1.0, fontSize: 16)),
+                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
                 ],
               ),
             ),
@@ -992,7 +952,6 @@ void main() {
     // The column takes up the full height, therefore the "Start" and "End" text
     // are placed to the left and right of it and the total width is the sum of
     // the individual widths.
-    expect(tester.getSize(find.byType(IntrinsicWidth)).width,
-        5 * 16 + 60 + 3 * 16);
+    expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
   });
 }

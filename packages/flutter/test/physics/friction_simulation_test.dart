@@ -28,8 +28,7 @@ void main() {
   });
 
   test('Friction simulation negative velocity', () {
-    final FrictionSimulation friction =
-        FrictionSimulation(0.135, 100.0, -100.0);
+    final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, -100.0);
 
     expect(friction.x(0.0), moreOrLessEquals(100.0));
     expect(friction.dx(0.0), moreOrLessEquals(-100.0));

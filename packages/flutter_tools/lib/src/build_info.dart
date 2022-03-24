@@ -36,19 +36,18 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath =
-        '.packages', // TODO(zanderso): make this required and remove the default.
+    this.packagesPath = '.packages', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
-  })  : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
-        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
-        fileSystemRoots = fileSystemRoots ?? const <String>[],
-        dartDefines = dartDefines ?? const <String>[],
-        dartExperiments = dartExperiments ?? const <String>[];
+  }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
+       extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
+       fileSystemRoots = fileSystemRoots ?? const <String>[],
+       dartDefines = dartDefines ?? const <String>[],
+       dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
 
@@ -165,14 +164,10 @@ class BuildInfo {
   /// and skips the check and potential invalidation of files.
   final bool assumeInitializeFromDillUpToDate;
 
-  static const BuildInfo debug =
-      BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null,
-      treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null,
-      treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null,
-      treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
 
   /// Returns whether a debug build is requested.
   ///
@@ -220,22 +215,28 @@ class BuildInfo {
     // the Environment map.
     return <String, String>{
       kBuildMode: getNameForBuildMode(mode),
-      if (dartDefines.isNotEmpty) kDartDefines: encodeDartDefines(dartDefines),
-      if (dartObfuscation != null) kDartObfuscation: dartObfuscation.toString(),
+      if (dartDefines.isNotEmpty)
+        kDartDefines: encodeDartDefines(dartDefines),
+      if (dartObfuscation != null)
+        kDartObfuscation: dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         kExtraFrontEndOptions: extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null) kSplitDebugInfo: splitDebugInfoPath!,
+      if (splitDebugInfoPath != null)
+        kSplitDebugInfo: splitDebugInfoPath!,
       if (trackWidgetCreation != null)
         kTrackWidgetCreation: trackWidgetCreation.toString(),
       if (treeShakeIcons != null)
         kIconTreeShakerFlag: treeShakeIcons.toString(),
-      if (bundleSkSLPath != null) kBundleSkSLPath: bundleSkSLPath!,
-      if (codeSizeDirectory != null) kCodeSizeDirectory: codeSizeDirectory!,
+      if (bundleSkSLPath != null)
+        kBundleSkSLPath: bundleSkSLPath!,
+      if (codeSizeDirectory != null)
+        kCodeSizeDirectory: codeSizeDirectory!,
       if (fileSystemRoots.isNotEmpty)
         kFileSystemRoots: fileSystemRoots.join(','),
-      if (fileSystemScheme != null) kFileSystemScheme: fileSystemScheme!,
+      if (fileSystemScheme != null)
+        kFileSystemScheme: fileSystemScheme!,
     };
   }
 
@@ -253,15 +254,20 @@ class BuildInfo {
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null) 'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
+      if (splitDebugInfoPath != null)
+        'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
       if (trackWidgetCreation != null)
         'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
-      if (treeShakeIcons != null) 'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      if (treeShakeIcons != null)
+        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
-      if (bundleSkSLPath != null) 'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      if (packagesPath != null) 'PACKAGE_CONFIG': packagesPath,
-      if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (bundleSkSLPath != null)
+        'BUNDLE_SKSL_PATH': bundleSkSLPath!,
+      if (packagesPath != null)
+        'PACKAGE_CONFIG': packagesPath,
+      if (codeSizeDirectory != null)
+        'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
   }
 
@@ -272,20 +278,26 @@ class BuildInfo {
     return <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      if (dartObfuscation != null) '-Pdart-obfuscation=$dartObfuscation',
+      if (dartObfuscation != null)
+        '-Pdart-obfuscation=$dartObfuscation',
       if (extraFrontEndOptions.isNotEmpty)
         '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
       if (extraGenSnapshotOptions.isNotEmpty)
         '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
-      if (splitDebugInfoPath != null) '-Psplit-debug-info=$splitDebugInfoPath',
+      if (splitDebugInfoPath != null)
+        '-Psplit-debug-info=$splitDebugInfoPath',
       if (trackWidgetCreation != null)
         '-Ptrack-widget-creation=$trackWidgetCreation',
-      if (treeShakeIcons != null) '-Ptree-shake-icons=$treeShakeIcons',
+      if (treeShakeIcons != null)
+        '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (bundleSkSLPath != null) '-Pbundle-sksl-path=$bundleSkSLPath',
-      if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
-      for (String projectArg in androidProjectArgs) '-P$projectArg',
+      if (bundleSkSLPath != null)
+        '-Pbundle-sksl-path=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-Pcode-size-directory=$codeSizeDirectory',
+      for (String projectArg in androidProjectArgs)
+        '-P$projectArg',
     ];
   }
 }
@@ -404,8 +416,7 @@ enum EnvironmentType {
   simulator,
 }
 
-String? validatedBuildNumberForPlatform(
-    TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
+String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -426,8 +437,7 @@ String? validatedBuildNumberForPlatform(
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      logger.printTrace(
-          'Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -445,8 +455,7 @@ String? validatedBuildNumberForPlatform(
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      logger.printTrace(
-          'Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -454,8 +463,7 @@ String? validatedBuildNumberForPlatform(
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(
-    TargetPlatform targetPlatform, String? buildName, Logger logger) {
+String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -476,8 +484,7 @@ String? validatedBuildNameForPlatform(
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      logger.printTrace(
-          'Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      logger.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
@@ -624,8 +631,7 @@ DarwinArch getDarwinArchForName(String arch) {
   throw Exception('Unsupported MacOS arch name "$arch"');
 }
 
-String getNameForTargetPlatform(TargetPlatform platform,
-    {DarwinArch? darwinArch}) {
+String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
@@ -692,7 +698,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
-    case 'linux-arm64':
+   case 'linux-arm64':
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
@@ -797,8 +803,7 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
     return 'build';
   }
 
-  final String buildDir =
-      localConfig.getValue('build-dir') as String? ?? 'build';
+  final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {
     throw Exception(
         'build-dir config setting in ${globals.config.configPath} must be relative');
@@ -839,9 +844,9 @@ String getWebBuildDirectory() {
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
-  final String arch = (targetPlatform == null)
-      ? _getCurrentHostPlatformArchName()
-      : getNameForTargetPlatformArch(targetPlatform);
+  final String arch = (targetPlatform == null) ?
+      _getCurrentHostPlatformArchName() :
+      getNameForTargetPlatformArch(targetPlatform);
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
@@ -947,10 +952,8 @@ const String kIconTreeShakerFlag = 'TreeShakeIcons';
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
 
-final Converter<String, String> _defineEncoder =
-    utf8.encoder.fuse(base64.encoder);
-final Converter<String, String> _defineDecoder =
-    base64.decoder.fuse(utf8.decoder);
+final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
+final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 
 /// Encode a List of dart defines in a base64 string.
 ///
@@ -967,34 +970,32 @@ String encodeDartDefines(List<String> defines) {
   return defines.map(_defineEncoder.convert).join(',');
 }
 
-List<String> decodeCommaSeparated(
-    Map<String, String> environmentDefines, String key) {
-  if (!environmentDefines.containsKey(key) ||
-      environmentDefines[key]!.isEmpty) {
-    return <String>[];
-  }
-  return environmentDefines[key]!.split(',').cast<String>().toList();
-}
-
-/// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
-List<String> decodeDartDefines(
-    Map<String, String> environmentDefines, String key) {
-  if (!environmentDefines.containsKey(key) ||
-      environmentDefines[key]!.isEmpty) {
+List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String key) {
+  if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
     return <String>[];
   }
   return environmentDefines[key]!
-      .split(',')
-      .map<Object>(_defineDecoder.convert)
-      .cast<String>()
-      .toList();
+    .split(',')
+    .cast<String>()
+    .toList();
+}
+
+/// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
+List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
+  if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
+    return <String>[];
+  }
+  return environmentDefines[key]!
+    .split(',')
+    .map<Object>(_defineDecoder.convert)
+    .cast<String>()
+    .toList();
 }
 
 /// The null safety runtime mode the app should be built in.
 enum NullSafetyMode {
   sound,
   unsound,
-
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
 }

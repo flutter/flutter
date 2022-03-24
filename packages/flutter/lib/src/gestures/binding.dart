@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
@@ -37,12 +38,10 @@ class SamplingClock {
 // SchedulerBinding's `currentSystemFrameTimeStamp` is used to determine
 // sample time.
 class _Resampler {
-  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged,
-      this._samplingInterval);
+  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged, this._samplingInterval);
 
   // Resamplers used to filter incoming pointer events.
-  final Map<int, PointerEventResampler> _resamplers =
-      <int, PointerEventResampler>{};
+  final Map<int, PointerEventResampler> _resamplers = <int, PointerEventResampler>{};
 
   // Flag to track if a frame callback has been scheduled.
   bool _frameCallbackScheduled = false;
@@ -118,8 +117,7 @@ class _Resampler {
     // updated into account. This allows us to advance sample
     // time without having to receive frame callbacks.
     final int samplingIntervalUs = _samplingInterval.inMicroseconds;
-    final int elapsedIntervals =
-        _frameTimeAge.elapsedMicroseconds ~/ samplingIntervalUs;
+    final int elapsedIntervals = _frameTimeAge.elapsedMicroseconds ~/ samplingIntervalUs;
     final int elapsedUs = elapsedIntervals * samplingIntervalUs;
     final Duration frameTime = _frameTime + Duration(microseconds: elapsedUs);
 
@@ -168,8 +166,7 @@ class _Resampler {
         _frameTimeAge.reset();
         // Reset timer to match phase of latest frame callback.
         _timer?.cancel();
-        _timer =
-            Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
+        _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
         // Trigger an immediate sample time change.
         _onSampleTimeChanged();
       });
@@ -256,8 +253,7 @@ const Duration _samplingInterval = Duration(microseconds: 16667);
 ///
 /// When a [PointerUpEvent] is received, the [GestureArenaManager.sweep] method
 /// is invoked to force the gesture arena logic to terminate if necessary.
-mixin GestureBinding on BindingBase
-    implements HitTestable, HitTestDispatcher, HitTestTarget {
+mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
   @override
   void initInstances() {
     super.initInstances();
@@ -284,9 +280,9 @@ mixin GestureBinding on BindingBase
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
-    _pendingPointerEvents.addAll(
-        PointerEventConverter.expand(packet.data, window.devicePixelRatio));
-    if (!locked) _flushPointerEventQueue();
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
+    if (!locked)
+      _flushPointerEventQueue();
   }
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
@@ -350,9 +346,7 @@ mixin GestureBinding on BindingBase
 
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent ||
-        event is PointerSignalEvent ||
-        event is PointerHoverEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
@@ -360,7 +354,8 @@ mixin GestureBinding on BindingBase
         _hitTests[event.pointer] = hitTestResult;
       }
       assert(() {
-        if (debugPrintHitTestResults) debugPrint('$event: $hitTestResult');
+        if (debugPrintHitTestResults)
+          debugPrint('$event: $hitTestResult');
         return true;
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
@@ -416,12 +411,10 @@ mixin GestureBinding on BindingBase
           exception: exception,
           stack: stack,
           library: 'gesture library',
-          context: ErrorDescription(
-              'while dispatching a non-hit-tested pointer event'),
+          context: ErrorDescription('while dispatching a non-hit-tested pointer event'),
           event: event,
           informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<PointerEvent>('Event', event,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
           ],
         ));
       }
@@ -439,10 +432,8 @@ mixin GestureBinding on BindingBase
           event: event,
           hitTestEntry: entry,
           informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<PointerEvent>('Event', event,
-                style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<HitTestTarget>('Target', entry.target,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty),
           ],
         ));
       }
@@ -481,7 +472,8 @@ mixin GestureBinding on BindingBase
     if (!locked) {
       if (resamplingEnabled) {
         _resampler.sample(samplingOffset, _samplingClock);
-      } else {
+      }
+      else {
         _resampler.stop();
       }
     }
@@ -491,7 +483,8 @@ mixin GestureBinding on BindingBase
     SamplingClock value = SamplingClock();
     assert(() {
       final SamplingClock? debugValue = debugSamplingClock;
-      if (debugValue != null) value = debugValue;
+      if (debugValue != null)
+        value = debugValue;
       return true;
     }());
     return value;
@@ -543,13 +536,13 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     InformationCollector? informationCollector,
     bool silent = false,
   }) : super(
-          exception: exception,
-          stack: stack,
-          library: library,
-          context: context,
-          informationCollector: informationCollector,
-          silent: silent,
-        );
+    exception: exception,
+    stack: stack,
+    library: library,
+    context: context,
+    informationCollector: informationCollector,
+    silent: silent,
+  );
 
   /// The pointer event that was being routed when the exception was raised.
   final PointerEvent? event;

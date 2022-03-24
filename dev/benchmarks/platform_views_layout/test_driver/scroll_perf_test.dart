@@ -35,15 +35,13 @@ void main() {
 
         // Scroll down
         for (int i = 0; i < 5; i += 1) {
-          await driver.scroll(
-              list, 0.0, -300.0, const Duration(milliseconds: 300));
+          await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i += 1) {
-          await driver.scroll(
-              list, 0.0, 300.0, const Duration(milliseconds: 300));
+          await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       });
@@ -55,8 +53,7 @@ void main() {
     test('platform_views_scroll_perf', () async {
       // Disable frame sync, since there are ongoing animations.
       await driver.runUnsynchronized(() async {
-        await testScrollPerf(
-            'platform-views-scroll', 'platform_views_scroll_perf');
+        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf');
       });
     }, timeout: Timeout.none);
   });

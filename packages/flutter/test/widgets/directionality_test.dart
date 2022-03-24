@@ -48,11 +48,7 @@ void main() {
         child: inner,
       ),
     );
-    expect(log, <TextDirection>[
-      TextDirection.ltr,
-      TextDirection.rtl,
-      TextDirection.ltr
-    ]);
+    expect(log, <TextDirection>[TextDirection.ltr, TextDirection.rtl, TextDirection.ltr]);
   });
 
   testWidgets('Directionality default', (WidgetTester tester) async {
@@ -82,8 +78,7 @@ void main() {
       ),
     );
     expect(Directionality.maybeOf(noDirectionality.currentContext!), isNull);
-    expect(Directionality.maybeOf(hasDirectionality.currentContext!),
-        TextDirection.rtl);
+    expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 
   testWidgets('Directionality.of', (WidgetTester tester) async {
@@ -100,14 +95,11 @@ void main() {
         ),
       ),
     );
-    expect(
-        () => Directionality.of(noDirectionality.currentContext!),
-        throwsA(isAssertionError.having(
-          (AssertionError e) => e.message,
-          'message',
-          contains('No Directionality widget found.'),
-        )));
-    expect(Directionality.of(hasDirectionality.currentContext!),
-        TextDirection.rtl);
+    expect(() => Directionality.of(noDirectionality.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No Directionality widget found.'),
+    )));
+    expect(Directionality.of(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 }

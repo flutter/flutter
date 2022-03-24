@@ -12,32 +12,30 @@ import 'test_data.dart';
 /// Creates an infinite list of Material cards and scrolls it.
 class BenchCardInfiniteScroll extends WidgetRecorder {
   BenchCardInfiniteScroll.forward()
-      : initialOffset = 0.0,
-        finalOffset = 30000.0,
-        super(name: benchmarkName);
+    : initialOffset = 0.0,
+      finalOffset = 30000.0,
+      super(name: benchmarkName);
 
   BenchCardInfiniteScroll.backward()
-      : initialOffset = 30000.0,
-        finalOffset = 0.0,
-        super(name: benchmarkNameBackward);
+    : initialOffset = 30000.0,
+      finalOffset = 0.0,
+      super(name: benchmarkNameBackward);
 
   static const String benchmarkName = 'bench_card_infinite_scroll';
-  static const String benchmarkNameBackward =
-      'bench_card_infinite_scroll_backward';
+  static const String benchmarkNameBackward = 'bench_card_infinite_scroll_backward';
 
   final double initialOffset;
   final double finalOffset;
 
   @override
   Widget createWidget() => MaterialApp(
-        title: 'Infinite Card Scroll Benchmark',
-        home: _InfiniteScrollCards(initialOffset, finalOffset),
-      );
+    title: 'Infinite Card Scroll Benchmark',
+    home: _InfiniteScrollCards(initialOffset, finalOffset),
+  );
 }
 
 class _InfiniteScrollCards extends StatefulWidget {
-  const _InfiniteScrollCards(this.initialOffset, this.finalOffset, {Key? key})
-      : super(key: key);
+  const _InfiniteScrollCards(this.initialOffset, this.finalOffset, {Key? key}) : super(key: key);
 
   final double initialOffset;
   final double finalOffset;

@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Foo extends StatefulWidget {
-  const Foo({Key? key}) : super(key: key);
+  const Foo({ Key? key }) : super(key: key);
   @override
   FooState createState() => FooState();
 }
@@ -25,12 +25,8 @@ class FooState extends State<Foo> {
             children: <Widget>[
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    /* this is needed to trigger the original bug this is regression-testing */
-                  });
-                  scrollController.animateTo(200.0,
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.linear);
+                  setState(() { /* this is needed to trigger the original bug this is regression-testing */ });
+                  scrollController.animateTo(200.0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                 },
                 child: const DecoratedBox(
                   decoration: BoxDecoration(color: Color(0x00000000)),
@@ -92,13 +88,9 @@ void main() {
         child: Foo(),
       ),
     );
-    expect(
-        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
-        0.0);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
     await tester.tap(find.byType(GestureDetector).first);
     await tester.pumpAndSettle();
-    expect(
-        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
-        200.0);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 200.0);
   });
 }

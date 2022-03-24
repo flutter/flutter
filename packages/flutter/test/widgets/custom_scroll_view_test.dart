@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/96024
-  testWidgets('CustomScrollView.center update test 1',
-      (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 1', (WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     late StateSetter setState;
     bool hasKey = false;
@@ -17,8 +16,7 @@ void main() {
       child: CustomScrollView(
         center: centerKey,
         slivers: <Widget>[
-          const SliverToBoxAdapter(
-              key: Key('a'), child: SizedBox(height: 100.0)),
+          const SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
           StatefulBuilder(
             key: centerKey,
             builder: (BuildContext context, StateSetter setter) {
@@ -51,8 +49,7 @@ void main() {
     // Pass without throw.
   });
 
-  testWidgets('CustomScrollView.center update test 2',
-      (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 2', (WidgetTester tester) async {
     const List<Widget> slivers1 = <Widget>[
       SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('b'), child: SizedBox(height: 100.0)),
@@ -97,13 +94,11 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.descendant(
-          of: find.byKey(const Key('a')), matching: find.byType(SizedBox))),
+      tester.getRect(find.descendant(of: find.byKey(const Key('a')), matching: find.byType(SizedBox))),
       const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0),
     );
     expect(
-      tester.getRect(find.descendant(
-          of: find.byKey(const Key('b')), matching: find.byType(SizedBox))),
+      tester.getRect(find.descendant(of: find.byKey(const Key('b')), matching: find.byType(SizedBox))),
       const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0),
     );
   });

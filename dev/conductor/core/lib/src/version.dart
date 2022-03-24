@@ -36,8 +36,7 @@ final Map<VersionType, RegExp> versionPatterns = <VersionType, RegExp>{
   VersionType.stable: RegExp(r'^(\d+)\.(\d+)\.(\d+)$'),
   VersionType.development: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$'),
   VersionType.latest: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre\.(\d+)$'),
-  VersionType.gitDescribe:
-      RegExp(r'^(\d+)\.(\d+)\.(\d+)-((\d+)\.(\d+)\.pre-)?(\d+)-g[a-f0-9]+$'),
+  VersionType.gitDescribe: RegExp(r'^(\d+)\.(\d+)\.(\d+)-((\d+)\.(\d+)\.pre-)?(\d+)-g[a-f0-9]+$'),
 };
 
 class Version {
@@ -82,8 +81,7 @@ class Version {
 
     versionString = versionString.trim();
     // stable tag
-    Match? match =
-        versionPatterns[VersionType.stable]!.firstMatch(versionString);
+    Match? match = versionPatterns[VersionType.stable]!.firstMatch(versionString);
     if (match != null) {
       // parse stable
       final List<int> parts = match
@@ -101,10 +99,8 @@ class Version {
     match = versionPatterns[VersionType.development]!.firstMatch(versionString);
     if (match != null) {
       // parse development
-      final List<int> parts = match
-          .groups(<int>[1, 2, 3, 4, 5])
-          .map((String? s) => int.parse(s!))
-          .toList();
+      final List<int> parts =
+          match.groups(<int>[1, 2, 3, 4, 5]).map((String? s) => int.parse(s!)).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -118,14 +114,11 @@ class Version {
     match = versionPatterns[VersionType.latest]!.firstMatch(versionString);
     if (match != null) {
       // parse latest
-      final List<int> parts = match
-          .groups(
-            <int>[1, 2, 3, 4, 5, 6],
-          )
-          .map(
-            (String? s) => int.parse(s!),
-          )
-          .toList();
+      final List<int> parts = match.groups(
+        <int>[1, 2, 3, 4, 5, 6],
+      ).map(
+        (String? s) => int.parse(s!),
+      ).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -171,8 +164,7 @@ class Version {
     int? nextM = previousVersion.m;
     int? nextN = previousVersion.n;
     if (nextVersionType == null) {
-      if (previousVersion.type == VersionType.latest ||
-          previousVersion.type == VersionType.gitDescribe) {
+      if (previousVersion.type == VersionType.latest || previousVersion.type == VersionType.gitDescribe) {
         nextVersionType = VersionType.development;
       } else {
         nextVersionType = previousVersion.type;
@@ -198,8 +190,7 @@ class Version {
         nextZ += 1;
         break;
       case 'm':
-        assert(false,
-            "Do not increment 'm' via Version.increment, use instead Version.fromCandidateBranch()");
+        assert(false, "Do not increment 'm' via Version.increment, use instead Version.fromCandidateBranch()");
         break;
       case 'n':
         // Hotfix to internal roll.
@@ -230,8 +221,7 @@ class Version {
       y = int.parse(match.group(2)!);
       m = int.parse(match.group(3)!);
     } on Exception {
-      throw ConductorException(
-          'branch named $branchName not recognized as a valid candidate branch');
+      throw ConductorException('branch named $branchName not recognized as a valid candidate branch');
     }
 
     return Version(
@@ -275,8 +265,7 @@ class Version {
   /// Will throw a [ConductorException] if the version is not possible given the
   /// [candidateBranch] and [incrementLetter].
   void ensureValid(String candidateBranch, ReleaseType releaseType) {
-    final RegExpMatch? branchMatch =
-        releaseCandidateBranchRegex.firstMatch(candidateBranch);
+    final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
     if (branchMatch == null) {
       throw ConductorException(
         'Candidate branch $candidateBranch does not match the pattern '
@@ -302,9 +291,7 @@ class Version {
     }
 
     // stable type versions don't have an m field set
-    if (type != VersionType.stable &&
-        releaseType != ReleaseType.STABLE_HOTFIX &&
-        releaseType != ReleaseType.STABLE_INITIAL) {
+    if (type != VersionType.stable && releaseType != ReleaseType.STABLE_HOTFIX && releaseType != ReleaseType.STABLE_INITIAL) {
       final String branchM = branchMatch.group(3)!;
       if (m != int.tryParse(branchM)) {
         throw ConductorException(

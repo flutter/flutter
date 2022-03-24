@@ -27,9 +27,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext(
-      'checkAppAndroidManifestComponentLoadingUnitMapping checks runs',
-      () async {
+  testUsingContext('checkAppAndroidManifestComponentLoadingUnitMapping checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -44,16 +42,11 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot =
-        AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle =
-        AndroidAotDeferredComponentsBundle(androidAotBundle);
-    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget =
-        DeferredComponentsGenSnapshotValidatorTarget(
-      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[
-        androidDefBundle
-      ],
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
+      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
       nonDeferredComponentsDependencies: <Target>[],
       title: 'test checks',
       exitOnFail: false,
@@ -64,8 +57,7 @@ void main() {
     // We check the inputs to determine if the task was executed.
     expect(validatorTarget.validator.inputs.length, 3);
     expect(validatorTarget.validator.inputs[0].path, 'project/pubspec.yaml');
-    expect(validatorTarget.validator.inputs[1].path,
-        'project/android/app/src/main/AndroidManifest.xml');
+    expect(validatorTarget.validator.inputs[1].path, 'project/android/app/src/main/AndroidManifest.xml');
   });
 
   testUsingContext('checkAgainstLoadingUnitsCache checks runs', () async {
@@ -83,16 +75,11 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot =
-        AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle =
-        AndroidAotDeferredComponentsBundle(androidAotBundle);
-    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget =
-        DeferredComponentsGenSnapshotValidatorTarget(
-      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[
-        androidDefBundle
-      ],
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
+      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
       nonDeferredComponentsDependencies: <Target>[],
       title: 'test checks',
       exitOnFail: false,
@@ -102,8 +89,7 @@ void main() {
 
     // We check the inputs to determine if the task was executed.
     expect(validatorTarget.validator.inputs.length, 3);
-    expect(validatorTarget.validator.inputs[2].path,
-        'project/deferred_components_loading_units.yaml');
+    expect(validatorTarget.validator.inputs[2].path, 'project/deferred_components_loading_units.yaml');
   });
 
   testUsingContext('writeLoadingUnitsCache task runs', () async {
@@ -121,16 +107,11 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot =
-        AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle =
-        AndroidAotDeferredComponentsBundle(androidAotBundle);
-    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget =
-        DeferredComponentsGenSnapshotValidatorTarget(
-      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[
-        androidDefBundle
-      ],
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
+      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
       nonDeferredComponentsDependencies: <Target>[],
       title: 'test checks',
       exitOnFail: false,
@@ -140,7 +121,6 @@ void main() {
 
     // We check the inputs to determine if the task was executed.
     expect(validatorTarget.validator.outputs.length, 1);
-    expect(validatorTarget.validator.outputs[0].path,
-        'project/deferred_components_loading_units.yaml');
+    expect(validatorTarget.validator.outputs[0].path, 'project/deferred_components_loading_units.yaml');
   });
 }

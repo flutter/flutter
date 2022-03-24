@@ -12,7 +12,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Image loads asset variant based on device pixel ratio',
-      (WidgetTester tester) async {
+          (WidgetTester tester) async {
     await app.main();
     await tester.pumpAndSettle();
 
@@ -26,8 +26,7 @@ void main() {
     // will guarantee that the current frame is done rendering.
     await Future<void>.delayed(Duration.zero);
 
-    final List<html.ImageElement> imageElements =
-        findElements('img').cast<html.ImageElement>();
+    final List<html.ImageElement> imageElements = findElements('img').cast<html.ImageElement>();
     expect(imageElements.length, 2);
     expect(imageElements[0].naturalWidth, 1.5 * 64);
     expect(imageElements[0].naturalHeight, 1.5 * 64);

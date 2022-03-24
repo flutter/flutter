@@ -13,8 +13,7 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
 
   await task(() async {
-    final String projectDirectory =
-        '${flutterDirectory.path}/dev/integration_tests/flutter_gallery';
+    final String projectDirectory = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery';
 
     await inDirectory(projectDirectory, () async {
       section('Build clean');

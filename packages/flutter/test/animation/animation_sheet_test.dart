@@ -15,10 +15,8 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('correctly records frames using display',
-      (WidgetTester tester) async {
-    final AnimationSheetBuilder builder =
-        AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+  testWidgets('correctly records frames using display', (WidgetTester tester) async {
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
       builder.record(
@@ -46,19 +44,15 @@ void main() {
     );
 
     // This test verifies deprecated methods.
-    final Widget display =
-        await builder.display(); // ignore: deprecated_member_use
-    await tester.binding
-        .setSurfaceSize(builder.sheetSize()); // ignore: deprecated_member_use
+    final Widget display = await builder.display(); // ignore: deprecated_member_use
+    await tester.binding.setSurfaceSize(builder.sheetSize()); // ignore: deprecated_member_use
     await tester.pumpWidget(display);
 
-    await expectLater(find.byWidget(display),
-        matchesGoldenFile('test.animation_sheet_builder.records.png'));
+    await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('correctly wraps a row', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder =
-        AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     const Duration duration = Duration(seconds: 2);
     await tester.pumpFrames(
@@ -68,20 +62,15 @@ void main() {
     );
 
     // This test verifies deprecated methods.
-    final Widget display =
-        await builder.display(); // ignore: deprecated_member_use
-    await tester.binding.setSurfaceSize(
-        builder.sheetSize(maxWidth: 80)); // ignore: deprecated_member_use
+    final Widget display = await builder.display(); // ignore: deprecated_member_use
+    await tester.binding.setSurfaceSize(builder.sheetSize(maxWidth: 80)); // ignore: deprecated_member_use
     await tester.pumpWidget(display);
 
-    await expectLater(find.byWidget(display),
-        matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
+    await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('correctly records frames using collate',
-      (WidgetTester tester) async {
-    final AnimationSheetBuilder builder =
-        AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
       builder.record(
@@ -114,8 +103,7 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents',
-      (WidgetTester tester) async {
+  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
@@ -145,6 +133,7 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of
@@ -160,8 +149,7 @@ class _DecuplePixels extends StatefulWidget {
   State<StatefulWidget> createState() => _DecuplePixelsState();
 }
 
-class _DecuplePixelsState extends State<_DecuplePixels>
-    with SingleTickerProviderStateMixin<_DecuplePixels> {
+class _DecuplePixelsState extends State<_DecuplePixels> with SingleTickerProviderStateMixin<_DecuplePixels> {
   late AnimationController _controller;
 
   @override

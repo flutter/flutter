@@ -14,8 +14,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp = false})
-      : super(verboseHelp: verboseHelp) {
+  BuildApkCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -37,21 +36,14 @@ class BuildApkCommand extends BuildSubCommand {
     addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
-      ..addFlag(
-        'split-per-abi',
+      ..addFlag('split-per-abi',
         negatable: false,
         help: 'Whether to split the APKs per ABIs. '
-            'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
+              'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
       )
-      ..addMultiOption(
-        'target-platform',
+      ..addMultiOption('target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-        allowed: <String>[
-          'android-arm',
-          'android-arm64',
-          'android-x86',
-          'android-x64'
-        ],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -61,24 +53,21 @@ class BuildApkCommand extends BuildSubCommand {
   final String name = 'apk';
 
   @override
-  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation')
-      ? DeprecationBehavior.ignore
-      : DeprecationBehavior.exit;
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      <DevelopmentArtifact>{
-        DevelopmentArtifact.androidGenSnapshot,
-      };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.androidGenSnapshot,
+  };
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'
-      "This command can build debug and release versions of your application. 'debug' builds support "
-      "debugging and a quick development cycle. 'release' builds don't support debugging and are "
-      'suitable for deploying to app stores. If you are deploying the app to the Play Store, '
-      "it's recommended to use app bundles or split the APK to reduce the APK size. Learn more at:\n\n"
-      ' * https://developer.android.com/guide/app-bundle\n'
-      ' * https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split';
+    "This command can build debug and release versions of your application. 'debug' builds support "
+    "debugging and a quick development cycle. 'release' builds don't support debugging and are "
+    'suitable for deploying to app stores. If you are deploying the app to the Play Store, '
+    "it's recommended to use app bundles or split the APK to reduce the APK size. Learn more at:\n\n"
+    ' * https://developer.android.com/guide/app-bundle\n'
+    ' * https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split';
 
   @override
   Future<CustomDimensions> get usageValues async {
@@ -111,8 +100,7 @@ class BuildApkCommand extends BuildSubCommand {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
-      targetArchs:
-          stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
       multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);

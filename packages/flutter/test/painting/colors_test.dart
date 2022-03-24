@@ -13,19 +13,16 @@ void main() {
     const HSVColor color = HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6);
 
     expect(color, hasOneLineDescription);
-    expect(color.hashCode,
-        equals(const HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6).hashCode));
+    expect(color.hashCode, equals(const HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6).hashCode));
 
     expect(color.withAlpha(0.8), const HSVColor.fromAHSV(0.8, 28.0, 0.3, 0.6));
     expect(color.withHue(123.0), const HSVColor.fromAHSV(0.7, 123.0, 0.3, 0.6));
-    expect(color.withSaturation(0.9),
-        const HSVColor.fromAHSV(0.7, 28.0, 0.9, 0.6));
+    expect(color.withSaturation(0.9), const HSVColor.fromAHSV(0.7, 28.0, 0.9, 0.6));
     expect(color.withValue(0.1), const HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.1));
 
     expect(color.toColor(), const Color(0xb399816b));
 
-    final HSVColor result = HSVColor.lerp(
-        color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25)!;
+    final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25)!;
     expect(result.alpha, moreOrLessEquals(0.6));
     expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
@@ -99,8 +96,7 @@ void main() {
       output.add(color);
       // Check that it's reversible. Discontinuities at the ends for saturation,
       // so we skip those.
-      if (value >= _doubleColorPrecision &&
-          value <= (1.0 - _doubleColorPrecision)) {
+      if (value >= _doubleColorPrecision && value <= (1.0 - _doubleColorPrecision)) {
         expect(
           HSVColor.fromColor(color),
           within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
@@ -213,20 +209,16 @@ void main() {
     const HSLColor color = HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.6);
 
     expect(color, hasOneLineDescription);
-    expect(color.hashCode,
-        equals(const HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.6).hashCode));
+    expect(color.hashCode, equals(const HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.6).hashCode));
 
     expect(color.withAlpha(0.8), const HSLColor.fromAHSL(0.8, 28.0, 0.3, 0.6));
     expect(color.withHue(123.0), const HSLColor.fromAHSL(0.7, 123.0, 0.3, 0.6));
-    expect(color.withSaturation(0.9),
-        const HSLColor.fromAHSL(0.7, 28.0, 0.9, 0.6));
-    expect(
-        color.withLightness(0.1), const HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.1));
+    expect(color.withSaturation(0.9), const HSLColor.fromAHSL(0.7, 28.0, 0.9, 0.6));
+    expect(color.withLightness(0.1), const HSLColor.fromAHSL(0.7, 28.0, 0.3, 0.1));
 
     expect(color.toColor(), const Color(0xb3b8977a));
 
-    final HSLColor result = HSLColor.lerp(
-        color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25)!;
+    final HSLColor result = HSLColor.lerp(color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25)!;
     expect(result.alpha, moreOrLessEquals(0.6));
     expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
@@ -300,8 +292,7 @@ void main() {
       output.add(color);
       // Check that it's reversible. Discontinuities at the ends for saturation,
       // so we skip those.
-      if (lightness >= _doubleColorPrecision &&
-          lightness <= (1.0 - _doubleColorPrecision)) {
+      if (lightness >= _doubleColorPrecision && lightness <= (1.0 - _doubleColorPrecision)) {
         expect(
           HSLColor.fromColor(color),
           within<HSLColor>(distance: _doubleColorPrecision, from: hslColor),
@@ -436,19 +427,15 @@ void main() {
   });
 
   test('ColorDiagnosticsProperty includes valueProperties in JSON', () {
-    ColorProperty property =
-        ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
-    final Map<String, Object> valueProperties = property.toJsonMap(
-            const DiagnosticsSerializationDelegate())['valueProperties']!
-        as Map<String, Object>;
+    ColorProperty property = ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
+    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties']! as Map<String, Object>;
     expect(valueProperties['alpha'], 10);
     expect(valueProperties['red'], 20);
     expect(valueProperties['green'], 30);
     expect(valueProperties['blue'], 40);
 
     property = ColorProperty('foo', null);
-    final Map<String, Object?> json =
-        property.toJsonMap(const DiagnosticsSerializationDelegate());
+    final Map<String, Object?> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json.containsKey('valueProperties'), isFalse);
   });
 

@@ -12,6 +12,7 @@ Future<void> main() async {
     final FlutterDriver driver = await FlutterDriver.connect();
     await driver.forceGC();
 
+
     final Timeline timeline = await driver.traceAction(() async {
       await driver.requestData('waitForAnimation');
     });

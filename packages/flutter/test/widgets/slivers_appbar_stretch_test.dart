@@ -43,9 +43,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets(
-        'fills overscroll after reverse direction input - scrolling header',
-        (WidgetTester tester) async {
+    testWidgets('fills overscroll after reverse direction input - scrolling header', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -79,13 +77,11 @@ void main() {
       expect(header.child!.size.height, equals(100.0));
       expect(tester.getCenter(find.text('Test')).dy, 28.0);
       // First scroll the header away
-      final TestGesture gesture =
-          await tester.startGesture(tester.getCenter(find.byKey(anchor)));
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(anchor)));
       await gesture.moveBy(const Offset(0.0, -100.0));
       await tester.pump(const Duration(milliseconds: 10));
       expect(header.child!.size.height, equals(56.0));
-      expect(
-          tester.getCenter(find.text('Test', skipOffstage: false)).dy, -28.0);
+      expect(tester.getCenter(find.text('Test', skipOffstage: false)).dy, -28.0);
       // With the same gesture, scroll back and into overscroll
       await gesture.moveBy(const Offset(0.0, 200.0));
       await tester.pump(const Duration(milliseconds: 10));
@@ -96,9 +92,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets(
-        'fills overscroll after reverse direction input - floating header',
-        (WidgetTester tester) async {
+    testWidgets('fills overscroll after reverse direction input - floating header', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -133,13 +127,11 @@ void main() {
       expect(header.child!.size.height, equals(100.0));
       expect(tester.getCenter(find.text('Test')).dy, 28.0);
       // First scroll the header away
-      final TestGesture gesture =
-          await tester.startGesture(tester.getCenter(find.byKey(anchor)));
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(anchor)));
       await gesture.moveBy(const Offset(0.0, -100.0));
       await tester.pump(const Duration(milliseconds: 10));
       expect(header.child!.size.height, equals(56.0));
-      expect(
-          tester.getCenter(find.text('Test', skipOffstage: false)).dy, -28.0);
+      expect(tester.getCenter(find.text('Test', skipOffstage: false)).dy, -28.0);
       // With the same gesture, scroll back and into overscroll
       await gesture.moveBy(const Offset(0.0, 200.0));
       await tester.pump(const Duration(milliseconds: 10));
@@ -150,8 +142,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('does not stretch without overscroll physics',
-        (WidgetTester tester) async {
+    testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -263,8 +254,7 @@ void main() {
       expect(didTrigger, isTrue);
     });
 
-    testWidgets('stretch callback not triggered without overscroll physics',
-        (WidgetTester tester) async {
+    testWidgets('stretch callback not triggered without overscroll physics', (WidgetTester tester) async {
       bool didTrigger = false;
       const Key anchor = Key('drag');
       await tester.pumpWidget(
@@ -303,8 +293,7 @@ void main() {
       expect(didTrigger, isFalse);
     });
 
-    testWidgets('asserts reasonable trigger offset',
-        (WidgetTester tester) async {
+    testWidgets('asserts reasonable trigger offset', (WidgetTester tester) async {
       expect(
         () {
           return MaterialApp(
@@ -371,8 +360,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('does not stretch without overscroll physics',
-        (WidgetTester tester) async {
+    testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -444,8 +432,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('does not fill overscroll without proper physics',
-        (WidgetTester tester) async {
+    testWidgets('does not fill overscroll without proper physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -510,8 +497,7 @@ void main() {
           ),
         ),
       );
-      final RenderSliverFloatingPinnedPersistentHeader header =
-          tester.renderObject(
+      final RenderSliverFloatingPinnedPersistentHeader header = tester.renderObject(
         find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
@@ -519,8 +505,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('does not fill overscroll without proper physics',
-        (WidgetTester tester) async {
+    testWidgets('does not fill overscroll without proper physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -548,8 +533,7 @@ void main() {
           ),
         ),
       );
-      final RenderSliverFloatingPinnedPersistentHeader header =
-          tester.renderObject(
+      final RenderSliverFloatingPinnedPersistentHeader header = tester.renderObject(
         find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));

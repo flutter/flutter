@@ -31,8 +31,9 @@ class StatefulWrapper extends StatefulWidget {
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
+
   void trigger() {
-    setState(() {/* for test purposes */});
+    setState(() { /* for test purposes */ });
   }
 
   @override
@@ -40,21 +41,17 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 void main() {
-  testWidgets('Moving global key inside a LayoutBuilder',
-      (WidgetTester tester) async {
-    final GlobalKey<StatefulWrapperState> key =
-        GlobalKey<StatefulWrapperState>();
+  testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
+    final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
-      LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
+      LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         return Wrapper(
           child: StatefulWrapper(key: key, child: Container(height: 100.0)),
         );
       }),
     );
     await tester.pumpWidget(
-      LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
+      LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         key.currentState!.trigger();
         return StatefulWrapper(key: key, child: Container(height: 100.0));
       }),
@@ -63,10 +60,8 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Moving global key inside a SliverLayoutBuilder',
-      (WidgetTester tester) async {
-    final GlobalKey<StatefulWrapperState> key =
-        GlobalKey<StatefulWrapperState>();
+  testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
+    final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
 
     await tester.pumpWidget(
       Directionality(
@@ -76,9 +71,7 @@ void main() {
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
                 return SliverToBoxAdapter(
-                  child: Wrapper(
-                      child: StatefulWrapper(
-                          key: key, child: Container(height: 100.0))),
+                  child: Wrapper(child: StatefulWrapper(key: key, child: Container(height: 100.0))),
                 );
               },
             ),
@@ -96,8 +89,7 @@ void main() {
               builder: (BuildContext context, SliverConstraints constraint) {
                 key.currentState!.trigger();
                 return SliverToBoxAdapter(
-                  child: StatefulWrapper(
-                      key: key, child: Container(height: 100.0)),
+                  child: StatefulWrapper(key: key, child: Container(height: 100.0)),
                 );
               },
             ),

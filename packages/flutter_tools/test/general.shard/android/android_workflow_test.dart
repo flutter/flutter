@@ -70,8 +70,7 @@ void main() {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
       androidSdk: androidSdk,
-      operatingSystemUtils: CustomFakeOperatingSystemUtils(
-          hostPlatform: HostPlatform.linux_arm64),
+      operatingSystemUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
 
     expect(androidWorkflow.appliesToHostPlatform, false);
@@ -95,8 +94,7 @@ void main() {
     expect(androidWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext(
-      'AndroidWorkflow cannot list emulators if emulatorPath is null', () {
+  testWithoutContext('AndroidWorkflow cannot list emulators if emulatorPath is null', () {
     final FakeAndroidSdk androidSdk = FakeAndroidSdk();
     androidSdk.adbPath = 'path/to/adb';
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
@@ -127,9 +125,7 @@ void main() {
     expect(androidWorkflow.canListEmulators, true);
   });
 
-  testWithoutContext(
-      'licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager',
-      () async {
+  testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -143,15 +139,12 @@ void main() {
       androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
-    final LicensesAccepted licenseStatus =
-        await licenseValidator.licensesAccepted;
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
     expect(licenseStatus, LicensesAccepted.unknown);
   });
 
-  testWithoutContext(
-      'licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager',
-      () async {
+  testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -165,8 +158,7 @@ void main() {
       androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
-    final LicensesAccepted licenseStatus =
-        await licenseValidator.licensesAccepted;
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
     expect(licenseStatus, LicensesAccepted.unknown);
   });
@@ -177,8 +169,7 @@ void main() {
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: 'asdasassad',
+      ], stdout: 'asdasassad',
     ));
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       androidSdk: sdk,
@@ -196,8 +187,7 @@ void main() {
     expect(result, LicensesAccepted.unknown);
   });
 
-  testWithoutContext('licensesAccepted works for all licenses accepted',
-      () async {
+  testWithoutContext('licensesAccepted works for all licenses accepted', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     const String output = '''
 [=======================================] 100% Computing updates...
@@ -207,8 +197,7 @@ All SDK package licenses accepted.
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: output,
+      ], stdout: output,
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -227,8 +216,7 @@ All SDK package licenses accepted.
     expect(result, LicensesAccepted.all);
   });
 
-  testWithoutContext('licensesAccepted works for some licenses accepted',
-      () async {
+  testWithoutContext('licensesAccepted works for some licenses accepted', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     const String output = '''
 [=======================================] 100% Computing updates...
@@ -239,8 +227,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: output,
+      ], stdout: output,
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -259,8 +246,7 @@ Review licenses that have not been accepted (y/N)?
     expect(result, LicensesAccepted.some);
   });
 
-  testWithoutContext('licensesAccepted works for no licenses accepted',
-      () async {
+  testWithoutContext('licensesAccepted works for no licenses accepted', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     const String output = '''
 [=======================================] 100% Computing updates...
@@ -271,8 +257,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: output,
+      ], stdout: output,
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -316,8 +301,7 @@ Review licenses that have not been accepted (y/N)?
     expect(await licenseValidator.runLicenseManager(), isTrue);
   });
 
-  testWithoutContext('runLicenseManager errors when sdkmanager is not found',
-      () async {
+  testWithoutContext('runLicenseManager errors when sdkmanager is not found', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
@@ -336,8 +320,7 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
   });
 
-  testWithoutContext('runLicenseManager errors when sdkmanager fails to run',
-      () async {
+  testWithoutContext('runLicenseManager errors when sdkmanager fails to run', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
@@ -356,8 +339,7 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
   });
 
-  testWithoutContext('detects license-only SDK installation with cmdline-tools',
-      () async {
+  testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
@@ -369,8 +351,7 @@ Review licenses that have not been accepted (y/N)?
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      platform: FakePlatform()
-        ..environment = <String, String>{'HOME': '/home/me'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
     ).validate();
 
@@ -382,8 +363,7 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationMessage licenseMessage = validationResult.messages.last;
     expect(licenseMessage.type, ValidationMessageType.hint);
-    expect(licenseMessage.message,
-        UserMessages().androidSdkLicenseOnly(kAndroidHome));
+    expect(licenseMessage.message, UserMessages().androidSdkLicenseOnly(kAndroidHome));
   });
 
   testWithoutContext('detects minimum required SDK and buildtools', () async {
@@ -391,8 +371,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         'which',
         'java',
-      ],
-      exitCode: 1,
+      ], exitCode: 1,
     ));
     final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 28
@@ -402,7 +381,7 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
-      // Test with invalid SDK and build tools
+    // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
       ..latestVersion = sdkVersion;
@@ -419,8 +398,7 @@ Review licenses that have not been accepted (y/N)?
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      platform: FakePlatform()
-        ..environment = <String, String>{'HOME': '/home/me'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
     );
 
@@ -450,8 +428,7 @@ Review licenses that have not been accepted (y/N)?
     validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.partial); // No Java binary
     expect(
-      validationResult.messages
-          .any((ValidationMessage message) => message.message == errorMessage),
+      validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
       isFalse,
     );
   });
@@ -469,8 +446,7 @@ Review licenses that have not been accepted (y/N)?
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      platform: FakePlatform()
-        ..environment = <String, String>{'HOME': '/home/me'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
     );
 
@@ -495,8 +471,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         'home/java/bin/java',
         '-version',
-      ],
-      stderr: javaVersionText,
+      ], stderr: javaVersionText,
     ));
     final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 29
@@ -511,19 +486,14 @@ Review licenses that have not been accepted (y/N)?
       ..sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.latestVersion = sdkVersion;
 
-    final String errorMessage =
-        UserMessages().androidJavaMinimumVersion(javaVersionText);
+    final String errorMessage = UserMessages().androidJavaMinimumVersion(javaVersionText);
 
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
       androidStudio: null, // ignore: avoid_redundant_argument_values
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()
-        ..environment = <String, String>{
-          'HOME': '/home/me',
-          'JAVA_HOME': 'home/java'
-        },
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
@@ -533,32 +503,28 @@ Review licenses that have not been accepted (y/N)?
       errorMessage,
     );
     expect(
-      validationResult.messages.any((ValidationMessage message) =>
-          message.message.contains('Unable to locate Android SDK')),
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
+      ),
       false,
     );
   });
 
-  testWithoutContext(
-      'Mentions `flutter config --android-sdk if user has no AndroidSdk`',
-      () async {
+  testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null, // ignore: avoid_redundant_argument_values
       androidStudio: null, // ignore: avoid_redundant_argument_values
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()
-        ..environment = <String, String>{
-          'HOME': '/home/me',
-          'JAVA_HOME': 'home/java'
-        },
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
 
     expect(
-      validationResult.messages.any((ValidationMessage message) =>
-          message.message.contains('flutter config --android-sdk')),
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
+      ),
       true,
     );
   });
@@ -613,11 +579,10 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   String get platformName => '';
 }
 
-class CustomFakeOperatingSystemUtils extends Fake
-    implements OperatingSystemUtils {
-  CustomFakeOperatingSystemUtils(
-      {HostPlatform hostPlatform = HostPlatform.linux_x64})
-      : _hostPlatform = hostPlatform;
+class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  CustomFakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
 
   final HostPlatform _hostPlatform;
 

@@ -26,15 +26,11 @@ void main() {
     flutter = FlutterRunTestDriver(tempDirectory);
 
     await flutter.run(
-        withDebugger: true,
-        startPaused: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+      withDebugger: true, startPaused: true, chrome: true,
+      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
-    await flutter.resume(
-        waitForNextPause: true); // Now we should be on the breakpoint.
-    expect((await flutter.getSourceLocation()).line,
-        equals(project.breakpointLine));
+    await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
+    expect((await flutter.getSourceLocation()).line, equals(project.breakpointLine));
 
     // Issue 5 steps, ensuring that we end up on the annotated lines each time.
     for (int i = 1; i <= project.numberOfSteps; i += 1) {
@@ -47,8 +43,8 @@ void main() {
       final int expectedLine = project.lineForStep(i);
 
       expect(actualLine, equals(expectedLine),
-          reason:
-              'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine');
+        reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
+      );
     }
   });
 

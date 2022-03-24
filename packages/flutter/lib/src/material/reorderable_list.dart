@@ -85,21 +85,21 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(scrollDirection != null),
-        assert(onReorder != null),
-        assert(children != null),
-        assert(
-          itemExtent == null || prototypeItem == null,
-          'You can only pass itemExtent or prototypeItem, not both',
-        ),
-        assert(
-          children.every((Widget w) => w.key != null),
-          'All children of this widget must have a key.',
-        ),
-        assert(buildDefaultDragHandles != null),
-        itemBuilder = ((BuildContext context, int index) => children[index]),
-        itemCount = children.length,
-        super(key: key);
+  }) : assert(scrollDirection != null),
+       assert(onReorder != null),
+       assert(children != null),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
+       assert(
+         children.every((Widget w) => w.key != null),
+         'All children of this widget must have a key.',
+       ),
+       assert(buildDefaultDragHandles != null),
+       itemBuilder = ((BuildContext context, int index) => children[index]),
+       itemCount = children.length,
+       super(key: key);
 
   /// Creates a reorderable list from widget items that are created on demand.
   ///
@@ -155,15 +155,15 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(scrollDirection != null),
-        assert(itemCount >= 0),
-        assert(onReorder != null),
-        assert(
-          itemExtent == null || prototypeItem == null,
-          'You can only pass itemExtent or prototypeItem, not both',
-        ),
-        assert(buildDefaultDragHandles != null),
-        super(key: key);
+  }) : assert(scrollDirection != null),
+       assert(itemCount >= 0),
+       assert(onReorder != null),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
+       assert(buildDefaultDragHandles != null),
+       super(key: key);
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -277,12 +277,12 @@ class ReorderableListView extends StatefulWidget {
 class _ReorderableListViewState extends State<ReorderableListView> {
   Widget _wrapWithSemantics(Widget child, int index) {
     void reorder(int startIndex, int endIndex) {
-      if (startIndex != endIndex) widget.onReorder(startIndex, endIndex);
+      if (startIndex != endIndex)
+        widget.onReorder(startIndex, endIndex);
     }
 
     // First, determine which semantics actions apply.
-    final Map<CustomSemanticsAction, VoidCallback> semanticsActions =
-        <CustomSemanticsAction, VoidCallback>{};
+    final Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
 
     // Create the appropriate semantics actions.
     void moveToStart() => reorder(index, 0);
@@ -292,22 +292,18 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     // before index+2, which is after the space at index+1.
     void moveAfter() => reorder(index, index + 2);
 
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     // If the item can move to before its current position in the list.
     if (index > 0) {
-      semanticsActions[
-              CustomSemanticsAction(label: localizations.reorderItemToStart)] =
-          moveToStart;
+      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
       String reorderItemBefore = localizations.reorderItemUp;
       if (widget.scrollDirection == Axis.horizontal) {
         reorderItemBefore = Directionality.of(context) == TextDirection.ltr
             ? localizations.reorderItemLeft
             : localizations.reorderItemRight;
       }
-      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] =
-          moveBefore;
+      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
     }
 
     // If the item can move to after its current position in the list.
@@ -318,11 +314,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             ? localizations.reorderItemRight
             : localizations.reorderItemLeft;
       }
-      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] =
-          moveAfter;
-      semanticsActions[
-              CustomSemanticsAction(label: localizations.reorderItemToEnd)] =
-          moveToEnd;
+      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
+      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
     }
 
     // We pass toWrap with a GlobalKey into the item so that when it
@@ -353,8 +346,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     // TODO(goderbauer): The semantics stuff should probably happen inside
     //   _ReorderableItem so the widget versions can have them as well.
     final Widget itemWithSemantics = _wrapWithSemantics(item, index);
-    final Key itemGlobalKey =
-        _ReorderableListViewChildGlobalKey(item.key!, this);
+    final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
     if (widget.buildDefaultDragHandles) {
       switch (Theme.of(context).platform) {
@@ -456,50 +448,26 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           if (widget.reverse) {
-            headerPadding = EdgeInsets.fromLTRB(
-                0, padding.top, padding.right, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(
-                widget.footer != null ? 0 : padding.left,
-                padding.top,
-                widget.header != null ? 0 : padding.right,
-                padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(
-                padding.left, padding.top, 0, padding.bottom);
+            headerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(widget.footer != null ? 0 : padding.left, padding.top, widget.header != null ? 0 : padding.right, padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
           } else {
-            headerPadding = EdgeInsets.fromLTRB(
-                padding.left, padding.top, 0, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(
-                widget.header != null ? 0 : padding.left,
-                padding.top,
-                widget.footer != null ? 0 : padding.right,
-                padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(
-                0, padding.top, padding.right, padding.bottom);
+            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(widget.header != null ? 0 : padding.left, padding.top, widget.footer != null ? 0 : padding.right, padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
           }
           break;
         case Axis.vertical:
           if (widget.reverse) {
-            headerPadding = EdgeInsets.fromLTRB(
-                padding.left, 0, padding.right, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(
-                padding.left,
-                widget.footer != null ? 0 : padding.top,
-                padding.right,
-                widget.header != null ? 0 : padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(
-                padding.left, padding.top, padding.right, 0);
+            headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(padding.left, widget.footer != null ? 0 : padding.top, padding.right, widget.header != null ? 0 : padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
           } else {
-            headerPadding = EdgeInsets.fromLTRB(
-                padding.left, padding.top, padding.right, 0);
-            listPadding = EdgeInsets.fromLTRB(
-                padding.left,
-                widget.header != null ? 0 : padding.top,
-                padding.right,
-                widget.footer != null ? 0 : padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(
-                padding.left, 0, padding.right, padding.bottom);
+            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+            listPadding = EdgeInsets.fromLTRB(padding.left, widget.header != null ? 0 : padding.top, padding.right, widget.footer != null ? 0 : padding.bottom);
+            footerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
           }
-          break;
+         break;
       }
     }
 
@@ -552,18 +520,18 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 // of the objects used to generate widgets.
 @optionalTypeArgs
 class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
-  const _ReorderableListViewChildGlobalKey(this.subKey, this.state)
-      : super(subKey);
+  const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
   final Key subKey;
   final State state;
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is _ReorderableListViewChildGlobalKey &&
-        other.subKey == subKey &&
-        other.state == state;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ReorderableListViewChildGlobalKey
+        && other.subKey == subKey
+        && other.state == state;
   }
 
   @override
