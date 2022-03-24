@@ -137,12 +137,19 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    await writeWorkingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
-
     MigrateUtils.deleteTempDirectories(
       paths: <String>[],
       directories: migrateResult.tempDirectories,
     );
+
+    await writeWorkingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
+
+    logger.printStatus('Check the status of the migration with:');
+    MigrateUtils.printCommandText('flutter migrate status', logger);
+    logger.printStatus('Check the abandon the current migration with:');
+    MigrateUtils.printCommandText('flutter migrate abandon', logger);
+    logger.printStatus('Resolve merge conflicts and accept changes with:');
+    MigrateUtils.printCommandText('flutter migrate apply', logger);
 
     return const FlutterCommandResult(ExitStatus.success);
   }

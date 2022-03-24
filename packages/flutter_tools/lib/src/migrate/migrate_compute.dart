@@ -10,7 +10,6 @@ import '../base/terminal.dart';
 import '../cache.dart';
 import '../commands/migrate.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -145,7 +144,13 @@ Future<MigrateResult?> computeMigration({
   if (flutterProject == null) {
     flutterProject = FlutterProject.current();
   }
-  final Status statusTicker = logger.startProgress('Computing migration');
+
+  logger.printStatus('Computing migration');
+  final Status status = logger.startSpinner();
+  // final Status status = logger.startProgress('Computing migration', progressIndicatorPadding: 50);
+  status.pause();
+  logger.printStatus('Obtaining revisions.');
+  status.resume();
 
   final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
   final MigrateConfig config = metadata.migrateConfig;
@@ -158,7 +163,6 @@ Future<MigrateResult?> computeMigration({
   final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
   final String fallbackRevision = await getFallbackBaseRevision(metadata, version);
   targetRevision ??= version.frameworkRevision;
-  print(targetRevision);
   String rootBaseRevision = '';
   final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
   final Set<String> revisions = Set<String>();
@@ -198,6 +202,9 @@ Future<MigrateResult?> computeMigration({
       unmanagedFiles.add(fileSystem.path.join(basePath, localPath));
     }
   }
+  status.pause();
+  logger.printStatus('Generating base reference app');
+  status.resume();
 
   final MigrateResult migrateResult = MigrateResult.empty();
 
@@ -228,7 +235,6 @@ Future<MigrateResult?> computeMigration({
   Directory targetFlutterDirectory = fileSystem.directory(Cache.flutterRoot!);
   // Clone base flutter
   final List<Directory> sdkTempDirs = <Directory>[];
-  if (verbose) logger.printStatus('Creating base app.');
   if (baseAppPath == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
     for (String revision in revisionsList) {
@@ -250,7 +256,6 @@ Future<MigrateResult?> computeMigration({
       }
       bool sdkAvailable = false;
       int index = 0;
-      if (verbose) logger.printStatus('Cloning SDK revision $revision');
       do {
         if (index < revisionsToTry.length) {
           final String activeRevision = revisionsToTry[index++];
@@ -261,6 +266,9 @@ Future<MigrateResult?> computeMigration({
           } else {
             sdkDir = await MigrateUtils.createTempDirectory('flutter_$activeRevision');
             migrateResult.sdkDirs[activeRevision] = sdkDir;
+            status.pause();
+            logger.printStatus('Cloning SDK $activeRevision');
+            status.resume();
             sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
             revisionToFlutterSdkDir[revision] = sdkDir;
           }
@@ -271,7 +279,9 @@ Future<MigrateResult?> computeMigration({
           sdkAvailable = true;
         }
       } while (!sdkAvailable);
-      if (verbose) logger.printStatus('Creating base app for platforms $platforms with $revision SDK.');
+      status.pause();
+      logger.printStatus('Creating base app for platforms $platforms with $revision SDK.');
+      status.resume();
       await MigrateUtils.createFromTemplates(
         sdkDir.childDirectory('bin').absolute.path,
         name: name,
@@ -299,6 +309,9 @@ Future<MigrateResult?> computeMigration({
 
   if (targetAppPath == null) {
     // Create target
+    status.pause();
+    logger.printStatus('Creating target app.');
+    status.resume();
     if (verbose) logger.printStatus('Creating target app.');
     await MigrateUtils.createFromTemplates(
       targetFlutterDirectory.childDirectory('bin').absolute.path,
@@ -312,7 +325,9 @@ Future<MigrateResult?> computeMigration({
   await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
 
   // Generate diffs. These diffs are used to determine if a file is newly added, needs merging, or deleted (rare).
-  if (verbose) logger.printStatus('Diffing base app and target app.');
+  status.pause();
+  logger.printStatus('Diffing base and target reference app.');
+  status.resume();
   final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
   final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
   int modifiedFilesCount = 0;
@@ -346,6 +361,9 @@ Future<MigrateResult?> computeMigration({
   if (verbose) logger.printStatus('$modifiedFilesCount files were modified between base and target apps.');
 
   // Check for any new files that were added in the new template
+  status.pause();
+  logger.printStatus('Finding newly added files');
+  status.resume();
   for (final FileSystemEntity entity in generatedTargetFiles) {
     if (entity is! File) {
       continue;
@@ -367,6 +385,9 @@ Future<MigrateResult?> computeMigration({
     MetadataCustomMerge(logger: logger),
   ];
 
+  status.pause();
+  logger.printStatus('Merging changes with existing project.');
+  status.resume();
   // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
@@ -485,6 +506,9 @@ Future<MigrateResult?> computeMigration({
     }
   }
 
+  status.pause();
+  logger.printStatus('Cleaning up temp directories.');
+  status.resume();
   if (deleteTempDirectories) {
     // Don't delete user-provided directories
     if (!customBaseAppDir) {
@@ -495,6 +519,7 @@ Future<MigrateResult?> computeMigration({
     }
     migrateResult.tempDirectories.addAll(migrateResult.sdkDirs.values);
   }
+  status.stop();
   return migrateResult;
 }
 
@@ -543,6 +568,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   manifest.writeFile();
 
   logger.printBox('Working directory created at `${workingDir.path}`');
+  logger.printStatus(''); // newline
 
   checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
 }

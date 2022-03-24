@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../globals.dart' as globals;
 import '../migrate/migrate_compute.dart';
 import '../migrate/migrate_utils.dart';
 
@@ -183,7 +182,7 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
   }
   if (logger != null) {
     logger.printStatus(printout);
-    logger.printStatus(redPrintout, color: TerminalColor.red);
+    logger.printStatus(redPrintout, color: TerminalColor.red, newline: false);
   }
   return result;
 }

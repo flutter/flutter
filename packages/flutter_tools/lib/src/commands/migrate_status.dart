@@ -48,6 +48,9 @@ class MigrateStatusCommand extends FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
+  /// Manually marks the lines in a diff that should be printed unformatted for visbility.
+  final Set<int> _initialDiffLines = <int>{0, 1};
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = FlutterProject.current();
@@ -67,7 +70,14 @@ class MigrateStatusCommand extends FlutterCommand {
     for (final String localPath in manifest.mergedFiles) {
       DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDir.childFile(localPath));
       if (result.diff != '') {
+        // Print with different colors for better visibility.
+        int lineNumber = -1;
         for (final String line in result.diff.split('\n')) {
+          lineNumber++;
+          if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('&&') || _initialDiffLines.contains(lineNumber)) {
+            logger.printStatus(line);
+            continue;
+          }
           if (line.startsWith('-')) {
             logger.printStatus(line, color: TerminalColor.red);
             continue;
@@ -76,12 +86,17 @@ class MigrateStatusCommand extends FlutterCommand {
             logger.printStatus(line, color: TerminalColor.green);
             continue;
           }
-          logger.printStatus(line);
+          logger.printStatus(line, color: TerminalColor.grey);
         }
       }
     }
 
+    logger.printBox('Working directory at `${workingDir.path}`');
+
     checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
+
+    logger.printStatus('Resolve conflicts and accept changes with:');
+    MigrateUtils.printCommandText('flutter migrate apply', logger);
 
     return const FlutterCommandResult(ExitStatus.success);
   }
