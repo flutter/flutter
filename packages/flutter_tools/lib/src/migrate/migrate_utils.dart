@@ -110,6 +110,8 @@ class MigrateUtils {
   }
 
   /// Runs the git 3-way merge on three files and returns the results as a MergeResult.
+  ///
+  /// Passing the same path for base and current will perform a two-way fast forward merge.
   static Future<MergeResult> gitMergeFile({
     required String base,
     required String current,

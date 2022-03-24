@@ -81,7 +81,7 @@ class MigrateStatusCommand extends FlutterCommand {
       }
     }
 
-    checkAndPrintMigrateStatus(manifest, workingDir);
+    checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
 
     return const FlutterCommandResult(ExitStatus.success);
   }

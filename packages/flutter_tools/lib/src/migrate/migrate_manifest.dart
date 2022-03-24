@@ -137,7 +137,7 @@ class MigrateManifest {
 /// Returns true if the migration working directory has all conflicts resolved and prints the migration status.
 ///
 /// The migration status printout lists all added, deleted, merged, and conflicted files.
-bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, bool print = true}) {
+bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, Logger? logger}) {
   String printout = '';
   String redPrintout = '';
   bool result = true;
@@ -181,9 +181,9 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
     }
     result = false;
   }
-  if (print) {
-    globals.logger.printStatus(printout);
-    globals.logger.printStatus(redPrintout, color: TerminalColor.red);
+  if (logger != null) {
+    logger.printStatus(printout);
+    logger.printStatus(redPrintout, color: TerminalColor.red);
   }
   return result;
 }
