@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' as ui
+    show
+        ParagraphStyle,
+        TextStyle,
+        StrutStyle,
+        lerpDouble,
+        Shadow,
+        FontFeature,
+        TextHeightBehavior,
+        TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -491,13 +500,12 @@ class TextStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     String? package,
     this.overflow,
-  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
-       _fontFamilyFallback = fontFamilyFallback,
-       _package = package,
-       assert(inherit != null),
-       assert(color == null || foreground == null, _kColorForegroundWarning),
-       assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
-
+  })  : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+        _fontFamilyFallback = fontFamilyFallback,
+        _package = package,
+        assert(inherit != null),
+        assert(color == null || foreground == null, _kColorForegroundWarning),
+        assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
 
   /// Whether null values are replaced with their value in an ancestor text
   /// style (e.g., in a [TextSpan] tree).
@@ -563,7 +571,9 @@ class TextStyle with Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String>? get fontFamilyFallback => _package != null && _fontFamilyFallback != null ? _fontFamilyFallback!.map((String str) => 'packages/$_package/$str').toList() : _fontFamilyFallback;
+  List<String>? get fontFamilyFallback => _package != null && _fontFamilyFallback != null
+      ? _fontFamilyFallback!.map((String str) => 'packages/$_package/$str').toList()
+      : _fontFamilyFallback;
   final List<String>? _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
@@ -823,8 +833,7 @@ class TextStyle with Diagnosticable {
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
     String? newDebugLabel;
     assert(() {
-      if (this.debugLabel != null)
-        newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
+      if (this.debugLabel != null) newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
       return true;
     }());
 
@@ -933,8 +942,7 @@ class TextStyle with Diagnosticable {
 
     String? modifiedDebugLabel;
     assert(() {
-      if (debugLabel != null)
-        modifiedDebugLabel = '($debugLabel).apply';
+      if (debugLabel != null) modifiedDebugLabel = '($debugLabel).apply';
       return true;
     }());
 
@@ -945,7 +953,9 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? _fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontWeight: fontWeight == null
+          ? null
+          : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
@@ -960,7 +970,9 @@ class TextStyle with Diagnosticable {
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
-      decorationThickness: decorationThickness == null ? null : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
+      decorationThickness: decorationThickness == null
+          ? null
+          : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
       overflow: overflow ?? this.overflow,
       package: package ?? _package,
       debugLabel: modifiedDebugLabel,
@@ -989,10 +1001,8 @@ class TextStyle with Diagnosticable {
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
   TextStyle merge(TextStyle? other) {
-    if (other == null)
-      return this;
-    if (!other.inherit)
-      return other;
+    if (other == null) return this;
+    if (!other.inherit) return other;
 
     String? mergedDebugLabel;
     assert(() {
@@ -1051,7 +1061,8 @@ class TextStyle with Diagnosticable {
 
     String? lerpDebugLabel;
     assert(() {
-      lerpDebugLabel = 'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
+      lerpDebugLabel =
+          'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
       return true;
     }());
 
@@ -1118,7 +1129,8 @@ class TextStyle with Diagnosticable {
     return TextStyle(
       inherit: b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
-      backgroundColor: a.background == null && b.background == null ? Color.lerp(a.backgroundColor, b.backgroundColor, t) : null,
+      backgroundColor:
+          a.background == null && b.background == null ? Color.lerp(a.backgroundColor, b.backgroundColor, t) : null,
       fontSize: ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
       fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t),
       fontStyle: t < 0.5 ? a.fontStyle : b.fontStyle,
@@ -1129,21 +1141,22 @@ class TextStyle with Diagnosticable {
       leadingDistribution: t < 0.5 ? a.leadingDistribution : b.leadingDistribution,
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
-        ? t < 0.5
-          ? a.foreground ?? (Paint()..color = a.color!)
-          : b.foreground ?? (Paint()..color = b.color!)
-        : null,
+          ? t < 0.5
+              ? a.foreground ?? (Paint()..color = a.color!)
+              : b.foreground ?? (Paint()..color = b.color!)
+          : null,
       background: (a.background != null || b.background != null)
-        ? t < 0.5
-          ? a.background ?? (Paint()..color = a.backgroundColor!)
-          : b.background ?? (Paint()..color = b.backgroundColor!)
-        : null,
+          ? t < 0.5
+              ? a.background ?? (Paint()..color = a.backgroundColor!)
+              : b.background ?? (Paint()..color = b.backgroundColor!)
+          : null,
       shadows: t < 0.5 ? a.shadows : b.shadows,
       fontFeatures: t < 0.5 ? a.fontFeatures : b.fontFeatures,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
-      decorationThickness: ui.lerpDouble(a.decorationThickness ?? b.decorationThickness, b.decorationThickness ?? a.decorationThickness, t),
+      decorationThickness: ui.lerpDouble(
+          a.decorationThickness ?? b.decorationThickness, b.decorationThickness ?? a.decorationThickness, t),
       debugLabel: lerpDebugLabel,
       fontFamily: t < 0.5 ? a._fontFamily : b._fontFamily,
       fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : b.fontFamilyFallback,
@@ -1153,7 +1166,7 @@ class TextStyle with Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
+  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) {
     return ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -1172,10 +1185,7 @@ class TextStyle with Diagnosticable {
       height: height,
       locale: locale,
       foreground: foreground,
-      background: background ?? (backgroundColor != null
-        ? (Paint()..color = backgroundColor!)
-        : null
-      ),
+      background: background ?? (backgroundColor != null ? (Paint()..color = backgroundColor!) : null),
       shadows: shadows,
       fontFeatures: fontFeatures,
     );
@@ -1207,8 +1217,8 @@ class TextStyle with Diagnosticable {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
     final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
-    final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
-      ?? (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
+    final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior ??
+        (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -1220,16 +1230,18 @@ class TextStyle with Diagnosticable {
       fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
-      strutStyle: strutStyle == null ? null : ui.StrutStyle(
-        fontFamily: strutStyle.fontFamily,
-        fontFamilyFallback: strutStyle.fontFamilyFallback,
-        fontSize: strutStyle.fontSize == null ? null : strutStyle.fontSize! * textScaleFactor,
-        height: strutStyle.height,
-        leading: strutStyle.leading,
-        fontWeight: strutStyle.fontWeight,
-        fontStyle: strutStyle.fontStyle,
-        forceStrutHeight: strutStyle.forceStrutHeight,
-      ),
+      strutStyle: strutStyle == null
+          ? null
+          : ui.StrutStyle(
+              fontFamily: strutStyle.fontFamily,
+              fontFamilyFallback: strutStyle.fontFamilyFallback,
+              fontSize: strutStyle.fontSize == null ? null : strutStyle.fontSize! * textScaleFactor,
+              height: strutStyle.height,
+              leading: strutStyle.leading,
+              fontWeight: strutStyle.fontWeight,
+              fontStyle: strutStyle.fontStyle,
+              forceStrutHeight: strutStyle.forceStrutHeight,
+            ),
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -1243,8 +1255,7 @@ class TextStyle with Diagnosticable {
   ///
   ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
   RenderComparison compareTo(TextStyle other) {
-    if (identical(this, other))
-      return RenderComparison.identical;
+    if (identical(this, other)) return RenderComparison.identical;
     if (inherit != other.inherit ||
         fontFamily != other.fontFamily ||
         fontSize != other.fontSize ||
@@ -1261,90 +1272,85 @@ class TextStyle with Diagnosticable {
         !listEquals(shadows, other.shadows) ||
         !listEquals(fontFeatures, other.fontFeatures) ||
         !listEquals(fontFamilyFallback, other.fontFamilyFallback) ||
-        overflow != other.overflow)
-      return RenderComparison.layout;
+        overflow != other.overflow) return RenderComparison.layout;
     if (color != other.color ||
         backgroundColor != other.backgroundColor ||
         decoration != other.decoration ||
         decorationColor != other.decorationColor ||
         decorationStyle != other.decorationStyle ||
-        decorationThickness != other.decorationThickness)
-      return RenderComparison.paint;
+        decorationThickness != other.decorationThickness) return RenderComparison.paint;
     return RenderComparison.identical;
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is TextStyle
-        && other.inherit == inherit
-        && other.color == color
-        && other.backgroundColor == backgroundColor
-        && other.fontSize == fontSize
-        && other.fontWeight == fontWeight
-        && other.fontStyle == fontStyle
-        && other.letterSpacing == letterSpacing
-        && other.wordSpacing == wordSpacing
-        && other.textBaseline == textBaseline
-        && other.height == height
-        && other.leadingDistribution == leadingDistribution
-        && other.locale == locale
-        && other.foreground == foreground
-        && other.background == background
-        && listEquals(other.shadows, shadows)
-        && listEquals(other.fontFeatures, fontFeatures)
-        && other.decoration == decoration
-        && other.decorationColor == decorationColor
-        && other.decorationStyle == decorationStyle
-        && other.decorationThickness == decorationThickness
-        && other.fontFamily == fontFamily
-        && listEquals(other.fontFamilyFallback, fontFamilyFallback)
-        && other._package == _package
-        && other.overflow == overflow;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is TextStyle &&
+        other.inherit == inherit &&
+        other.color == color &&
+        other.backgroundColor == backgroundColor &&
+        other.fontSize == fontSize &&
+        other.fontWeight == fontWeight &&
+        other.fontStyle == fontStyle &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.textBaseline == textBaseline &&
+        other.height == height &&
+        other.leadingDistribution == leadingDistribution &&
+        other.locale == locale &&
+        other.foreground == foreground &&
+        other.background == background &&
+        listEquals(other.shadows, shadows) &&
+        listEquals(other.fontFeatures, fontFeatures) &&
+        other.decoration == decoration &&
+        other.decorationColor == decorationColor &&
+        other.decorationStyle == decorationStyle &&
+        other.decorationThickness == decorationThickness &&
+        other.fontFamily == fontFamily &&
+        listEquals(other.fontFamilyFallback, fontFamilyFallback) &&
+        other._package == _package &&
+        other.overflow == overflow;
   }
 
   @override
   int get hashCode => Object.hash(
-    inherit,
-    color,
-    backgroundColor,
-    fontSize,
-    fontWeight,
-    fontStyle,
-    letterSpacing,
-    wordSpacing,
-    textBaseline,
-    height,
-    leadingDistribution,
-    locale,
-    foreground,
-    background,
-    shadows == null ? null : Object.hashAll(shadows!),
-    fontFeatures == null ? null : Object.hashAll(fontFeatures!),
-    decoration,
-    decorationColor,
-    decorationStyle,
-    Object.hash(
-      decorationThickness,
-      fontFamily,
-      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback!),
-      _package,
-      overflow,
-    ),
-  );
+        inherit,
+        color,
+        backgroundColor,
+        fontSize,
+        fontWeight,
+        fontStyle,
+        letterSpacing,
+        wordSpacing,
+        textBaseline,
+        height,
+        leadingDistribution,
+        locale,
+        foreground,
+        background,
+        shadows == null ? null : Object.hashAll(shadows!),
+        fontFeatures == null ? null : Object.hashAll(fontFeatures!),
+        decoration,
+        decorationColor,
+        decorationStyle,
+        Object.hash(
+          decorationThickness,
+          fontFamily,
+          fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback!),
+          _package,
+          overflow,
+        ),
+      );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextStyle');
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
     super.debugFillProperties(properties);
-    if (debugLabel != null)
-      properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
+    if (debugLabel != null) properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[
       ColorProperty('${prefix}color', color, defaultValue: null),
       ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null),
@@ -1370,39 +1376,41 @@ class TextStyle with Diagnosticable {
     styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(EnumProperty<ui.TextLeadingDistribution>('${prefix}leadingDistribution', leadingDistribution, defaultValue: null));
+    styles.add(EnumProperty<ui.TextLeadingDistribution>('${prefix}leadingDistribution', leadingDistribution,
+        defaultValue: null));
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null || decorationThickness != null) {
       final List<String> decorationDescription = <String>[];
-      if (decorationStyle != null)
-        decorationDescription.add(decorationStyle!.name);
+      if (decorationStyle != null) decorationDescription.add(decorationStyle!.name);
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(ColorProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+      styles.add(
+          ColorProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
-      if (decorationColor != null)
-        decorationDescription.add('$decorationColor');
+      if (decorationColor != null) decorationDescription.add('$decorationColor');
 
       // Intentionally collide with the property 'decoration' added below.
       // Tools that show hidden properties could choose the first property
       // matching the name to disambiguate.
-      styles.add(DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
-      if (decoration != null)
-        decorationDescription.add('$decoration');
+      styles.add(DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration,
+          defaultValue: null, level: DiagnosticLevel.hidden));
+      if (decoration != null) decorationDescription.add('$decoration');
       assert(decorationDescription.isNotEmpty);
       styles.add(MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
       styles.add(DoubleProperty('${prefix}decorationThickness', decorationThickness, unit: 'x', defaultValue: null));
     }
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
-    properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
+    properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit,
+        level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     styles.forEach(properties.add);
 
     if (!styleSpecified)
-      properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
+      properties.add(FlagProperty('inherit',
+          value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
 
     styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
   }

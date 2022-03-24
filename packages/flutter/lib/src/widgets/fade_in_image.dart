@@ -94,16 +94,16 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-  }) : assert(placeholder != null),
-       assert(image != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+  })  : assert(placeholder != null),
+        assert(image != null),
+        assert(fadeOutDuration != null),
+        assert(fadeOutCurve != null),
+        assert(fadeInDuration != null),
+        assert(fadeInCurve != null),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in memory while
   /// loading the final image from the network.
@@ -158,20 +158,21 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : assert(placeholder != null),
-       assert(image != null),
-       assert(placeholderScale != null),
-       assert(imageScale != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
-       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
-       super(key: key);
+  })  : assert(placeholder != null),
+        assert(image != null),
+        assert(placeholderScale != null),
+        assert(imageScale != null),
+        assert(fadeOutDuration != null),
+        assert(fadeOutCurve != null),
+        assert(fadeInDuration != null),
+        assert(fadeInCurve != null),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        placeholder = ResizeImage.resizeIfNeeded(
+            placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
+        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
+        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
   /// while loading the final image from the network.
@@ -230,21 +231,23 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : assert(placeholder != null),
-       assert(image != null),
-       placeholder = placeholderScale != null
-         ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
-         : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
-       assert(imageScale != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
-       super(key: key);
+  })  : assert(placeholder != null),
+        assert(image != null),
+        placeholder = placeholderScale != null
+            ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight,
+                ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
+            : ResizeImage.resizeIfNeeded(
+                placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
+        assert(imageScale != null),
+        assert(fadeOutDuration != null),
+        assert(fadeOutCurve != null),
+        assert(fadeInDuration != null),
+        assert(fadeInCurve != null),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
+        super(key: key);
 
   /// Image displayed while the target [image] is loading.
   final ImageProvider placeholder;
@@ -463,14 +466,14 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
     required this.fadeOutCurve,
     required this.fadeInDuration,
     required this.fadeInCurve,
-  }) : assert(target != null),
-       assert(placeholder != null),
-       assert(isTargetLoaded != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       super(key: key, duration: fadeInDuration + fadeOutDuration);
+  })  : assert(target != null),
+        assert(placeholder != null),
+        assert(isTargetLoaded != null),
+        assert(fadeOutDuration != null),
+        assert(fadeOutCurve != null),
+        assert(fadeInDuration != null),
+        assert(fadeInCurve != null),
+        super(key: key, duration: fadeInDuration + fadeOutDuration);
 
   final Widget target;
   final ProxyAnimation targetProxyAnimation;
@@ -517,12 +520,13 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
         tween: ConstantTween<double>(0),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
-    ]))..addStatusListener((AnimationStatus status) {
-      if (_placeholderOpacityAnimation!.isCompleted) {
-        // Need to rebuild to remove placeholder now that it is invisible.
-        setState(() {});
-      }
-    });
+    ]))
+      ..addStatusListener((AnimationStatus status) {
+        if (_placeholderOpacityAnimation!.isCompleted) {
+          // Need to rebuild to remove placeholder now that it is invisible.
+          setState(() {});
+        }
+      });
 
     _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(

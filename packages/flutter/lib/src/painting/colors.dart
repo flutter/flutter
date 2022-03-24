@@ -59,7 +59,8 @@ Color _colorFromHue(
     green = 0.0;
     blue = secondary;
   }
-  return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
+  return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(),
+      ((blue + match) * 0xFF).round());
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [value].
@@ -89,18 +90,18 @@ class HSVColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(value != null),
-      assert(alpha >= 0.0),
-      assert(alpha <= 1.0),
-      assert(hue >= 0.0),
-      assert(hue <= 360.0),
-      assert(saturation >= 0.0),
-      assert(saturation <= 1.0),
-      assert(value >= 0.0),
-      assert(value <= 1.0);
+      : assert(alpha != null),
+        assert(hue != null),
+        assert(saturation != null),
+        assert(value != null),
+        assert(alpha >= 0.0),
+        assert(alpha <= 1.0),
+        assert(hue >= 0.0),
+        assert(hue <= 360.0),
+        assert(saturation >= 0.0),
+        assert(saturation <= 1.0),
+        assert(value >= 0.0),
+        assert(value <= 1.0);
 
   /// Creates an [HSVColor] from an RGB [Color].
   ///
@@ -199,12 +200,9 @@ class HSVColor {
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b!._scaleAlpha(t);
-    if (b == null)
-      return a._scaleAlpha(1.0 - t);
+    if (a == null && b == null) return null;
+    if (a == null) return b!._scaleAlpha(t);
+    if (b == null) return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
       lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
@@ -215,13 +213,12 @@ class HSVColor {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    return other is HSVColor
-        && other.alpha == alpha
-        && other.hue == hue
-        && other.saturation == saturation
-        && other.value == value;
+    if (identical(this, other)) return true;
+    return other is HSVColor &&
+        other.alpha == alpha &&
+        other.hue == hue &&
+        other.saturation == saturation &&
+        other.value == value;
   }
 
   @override
@@ -258,18 +255,18 @@ class HSLColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSLColor.fromAHSL(this.alpha, this.hue, this.saturation, this.lightness)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(lightness != null),
-      assert(alpha >= 0.0),
-      assert(alpha <= 1.0),
-      assert(hue >= 0.0),
-      assert(hue <= 360.0),
-      assert(saturation >= 0.0),
-      assert(saturation <= 1.0),
-      assert(lightness >= 0.0),
-      assert(lightness <= 1.0);
+      : assert(alpha != null),
+        assert(hue != null),
+        assert(saturation != null),
+        assert(lightness != null),
+        assert(alpha >= 0.0),
+        assert(alpha <= 1.0),
+        assert(hue >= 0.0),
+        assert(hue <= 360.0),
+        assert(saturation >= 0.0),
+        assert(saturation <= 1.0),
+        assert(lightness >= 0.0),
+        assert(lightness <= 1.0);
 
   /// Creates an [HSLColor] from an RGB [Color].
   ///
@@ -288,9 +285,8 @@ class HSLColor {
     final double hue = _getHue(red, green, blue, max, delta);
     final double lightness = (max + min) / 2.0;
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
-    final double saturation = lightness == 1.0
-      ? 0.0
-      : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0));
+    final double saturation =
+        lightness == 1.0 ? 0.0 : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0));
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
@@ -383,12 +379,9 @@ class HSLColor {
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b!._scaleAlpha(t);
-    if (b == null)
-      return a._scaleAlpha(1.0 - t);
+    if (a == null && b == null) return null;
+    if (a == null) return b!._scaleAlpha(t);
+    if (b == null) return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
       lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
@@ -399,13 +392,12 @@ class HSLColor {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    return other is HSLColor
-        && other.alpha == alpha
-        && other.hue == hue
-        && other.saturation == saturation
-        && other.lightness == lightness;
+    if (identical(this, other)) return true;
+    return other is HSLColor &&
+        other.alpha == alpha &&
+        other.hue == hue &&
+        other.saturation == saturation &&
+        other.lightness == lightness;
   }
 
   @override
@@ -443,13 +435,9 @@ class ColorSwatch<T> extends Color {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return super == other
-        && other is ColorSwatch<T>
-        && mapEquals<T, Color>(other._swatch, _swatch);
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return super == other && other is ColorSwatch<T> && mapEquals<T, Color>(other._swatch, _swatch);
   }
 
   @override
@@ -471,15 +459,17 @@ class ColorProperty extends DiagnosticsProperty<Color> {
     Object? defaultValue = kNoDefaultValue,
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null),
-       super(name, value,
-         defaultValue: defaultValue,
-         showName: showName,
-         style: style,
-         level: level,
-       );
+  })  : assert(showName != null),
+        assert(style != null),
+        assert(level != null),
+        super(
+          name,
+          value,
+          defaultValue: defaultValue,
+          showName: showName,
+          style: style,
+          level: level,
+        );
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

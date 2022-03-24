@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestParentData {
-  TestParentData({ this.top, this.right, this.bottom, this.left });
+  TestParentData({this.top, this.right, this.bottom, this.left});
 
   final double? top;
   final double? right;
@@ -504,21 +504,19 @@ class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
 class RenderOne extends RenderProxyBox {
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! DummyParentData)
-      child.parentData = DummyParentData();
+    if (child.parentData is! DummyParentData) child.parentData = DummyParentData();
   }
 }
 
 class RenderAnother extends RenderProxyBox {
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! DummyParentData)
-      child.parentData = DummyParentData();
+    if (child.parentData is! DummyParentData) child.parentData = DummyParentData();
   }
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ Key? key, required this.child }) : super(key: key);
+  const DummyWidget({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 

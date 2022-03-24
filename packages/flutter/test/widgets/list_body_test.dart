@@ -27,11 +27,10 @@ void expectRects(WidgetTester tester, List<Rect> expected) {
 }
 
 void main() {
-
   testWidgets('ListBody down', (WidgetTester tester) async {
     await tester.pumpWidget(Flex(
       direction: Axis.vertical,
-      children: <Widget>[ ListBody(children: children) ],
+      children: <Widget>[ListBody(children: children)],
     ));
 
     expectRects(
@@ -48,7 +47,7 @@ void main() {
   testWidgets('ListBody up', (WidgetTester tester) async {
     await tester.pumpWidget(Flex(
       direction: Axis.vertical,
-      children: <Widget>[ ListBody(reverse: true, children: children) ],
+      children: <Widget>[ListBody(reverse: true, children: children)],
     ));
 
     expectRects(
@@ -131,14 +130,16 @@ void main() {
     }
     expect(errors, isNotEmpty);
     expect(errors.first.exception, isFlutterError);
-    expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   RenderListBody must have unlimited space along its main axis.\n'
-      '   RenderListBody does not clip or resize its children, so it must\n'
-      '   be placed in a parent that does not constrain the main axis.\n'
-      '   You probably want to put the RenderListBody inside a\n'
-      '   RenderViewport with a matching main axis.\n',
-    ));
+    expect(
+        (errors.first.exception as FlutterError).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   RenderListBody must have unlimited space along its main axis.\n'
+          '   RenderListBody does not clip or resize its children, so it must\n'
+          '   be placed in a parent that does not constrain the main axis.\n'
+          '   You probably want to put the RenderListBody inside a\n'
+          '   RenderViewport with a matching main axis.\n',
+        ));
   });
 
   testWidgets('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
@@ -179,17 +180,19 @@ void main() {
     }
     expect(errors, isNotEmpty);
     expect(errors.first.exception, isFlutterError);
-    expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   RenderListBody must have a bounded constraint for its cross axis.\n'
-      '   RenderListBody forces its children to expand to fit the\n'
-      "   RenderListBody's container, so it must be placed in a parent that\n"
-      '   constrains the cross axis to a finite dimension.\n'
-      '   If you are attempting to nest a RenderListBody with one direction\n'
-      '   inside one of another direction, you will want to wrap the inner\n'
-      '   one inside a box that fixes the dimension in that direction, for\n'
-      '   example, a RenderIntrinsicWidth or RenderIntrinsicHeight object.\n'
-      '   This is relatively expensive, however.\n',
-    ));
+    expect(
+        (errors.first.exception as FlutterError).toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   RenderListBody must have a bounded constraint for its cross axis.\n'
+          '   RenderListBody forces its children to expand to fit the\n'
+          "   RenderListBody's container, so it must be placed in a parent that\n"
+          '   constrains the cross axis to a finite dimension.\n'
+          '   If you are attempting to nest a RenderListBody with one direction\n'
+          '   inside one of another direction, you will want to wrap the inner\n'
+          '   one inside a box that fixes the dimension in that direction, for\n'
+          '   example, a RenderIntrinsicWidth or RenderIntrinsicHeight object.\n'
+          '   This is relatively expensive, however.\n',
+        ));
   });
 }

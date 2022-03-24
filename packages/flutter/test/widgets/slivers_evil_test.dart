@@ -45,7 +45,7 @@ class TestBehavior extends ScrollBehavior {
 }
 
 class TestScrollPhysics extends ClampingScrollPhysics {
-  const TestScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const TestScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -103,14 +103,17 @@ void main() {
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverToBoxAdapter(key: centerKey, child: Container(height: 520.0)), // ------------------------ CENTER ------------------------
+                      SliverToBoxAdapter(
+                          key: centerKey,
+                          child: Container(height: 520.0)), // ------------------------ CENTER ------------------------
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), pinned: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPadding(
                         padding: const EdgeInsets.all(50.0),
-                        sliver: SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                        sliver:
+                            SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
@@ -196,7 +199,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
-
   });
 
   testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {

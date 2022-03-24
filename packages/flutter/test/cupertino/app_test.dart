@@ -171,7 +171,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -209,7 +209,8 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
-  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available',
+      (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
@@ -238,7 +239,8 @@ class MockScrollBehavior extends ScrollBehavior {
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(
+    Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -254,7 +256,8 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   }
 }
 
-class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
+    with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
     required this.builder,
     this.onPopPage,
@@ -292,7 +295,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
         const CupertinoPage<void>(
-          child:  Text('base'),
+          child: Text('base'),
         ),
         CupertinoPage<void>(
           key: ValueKey<String?>(routeInformation.location),

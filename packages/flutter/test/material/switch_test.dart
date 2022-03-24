@@ -65,7 +65,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) { },
+                onChanged: (bool newValue) {},
               ),
             ),
           ),
@@ -85,7 +85,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) { },
+                onChanged: (bool newValue) {},
               ),
             ),
           ),
@@ -241,12 +241,12 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                    value: value,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               ),
             );
@@ -357,9 +357,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x52000000), // Black with 32% opacity
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x52000000), // Black with 32% opacity
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -373,9 +373,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.blue[600]!.withAlpha(0x80),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.blue[600]!.withAlpha(0x80),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -407,9 +407,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.black12,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -439,9 +439,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.black12,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -483,9 +483,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.blue[500],
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.blue[500],
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -498,9 +498,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.green[500],
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.green[500],
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -631,7 +631,8 @@ void main() {
   testWidgets('switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
+        (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -675,7 +676,8 @@ void main() {
   testWidgets('switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
+        (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -689,6 +691,7 @@ void main() {
                 value = newValue;
               });
             }
+
             return Material(
               child: MergeSemantics(
                 child: ListTile(
@@ -749,7 +752,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${platform.name}');
@@ -762,7 +765,12 @@ void main() {
       expect(value, isTrue, reason: 'on ${platform.name}');
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows
+    ]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.
@@ -784,11 +792,13 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Switch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                } : null,
+                onChanged: enabled
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 focusColor: Colors.orange[500],
                 autofocus: true,
                 focusNode: focusNode,
@@ -798,6 +808,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
 
     await tester.pumpAndSettle();
@@ -806,9 +817,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x801e88e5),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -825,9 +836,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x52000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x52000000),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -844,9 +855,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x1f000000),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -874,6 +885,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
@@ -892,11 +904,13 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Switch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                } : null,
+                onChanged: enabled
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 hoverColor: Colors.orange[500],
               );
             }),
@@ -904,15 +918,16 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x801e88e5),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -931,9 +946,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x801e88e5),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -948,9 +963,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x1f000000),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -968,11 +983,13 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Switch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                } : null,
+                onChanged: enabled
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 focusColor: Colors.orange[500],
                 autofocus: true,
               );
@@ -981,6 +998,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -1114,11 +1132,13 @@ void main() {
               child: Center(
                 child: Switch(
                   value: value,
-                  onChanged: !enabled ? null : (bool newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  },
+                  onChanged: !enabled
+                      ? null
+                      : (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
                 ),
               ),
             );
@@ -1127,15 +1147,21 @@ void main() {
       ),
     );
 
-    final ToggleableStateMixin oldSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
+    final ToggleableStateMixin oldSwitchState =
+        tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
-    stateSetter(() { value = false; });
+    stateSetter(() {
+      value = false;
+    });
     await tester.pump();
     // Disable the switch when the implicit animation begins.
-    stateSetter(() { enabled = false; });
+    stateSetter(() {
+      enabled = false;
+    });
     await tester.pump();
 
-    final ToggleableStateMixin updatedSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
+    final ToggleableStateMixin updatedSwitchState =
+        tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
     expect(updatedSwitchState.isInteractive, false);
     expect(updatedSwitchState, oldSwitchState);
@@ -1162,8 +1188,7 @@ void main() {
       return inactiveEnabledThumbColor;
     }
 
-    final MaterialStateProperty<Color> thumbColor =
-      MaterialStateColor.resolveWith(getThumbColor);
+    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -1175,7 +1200,7 @@ void main() {
                 child: Switch(
                   thumbColor: thumbColor,
                   value: active,
-                  onChanged: enabled ? (_) { } : null,
+                  onChanged: enabled ? (_) {} : null,
                 ),
               ),
             );
@@ -1190,9 +1215,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.black12,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1207,9 +1232,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.black12,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1224,9 +1249,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x52000000), // Black with 32% opacity,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x52000000), // Black with 32% opacity,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1241,9 +1266,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.black12,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1268,8 +1293,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> thumbColor =
-      MaterialStateColor.resolveWith(getThumbColor);
+    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch() {
       return Directionality(
@@ -1283,7 +1307,7 @@ void main() {
                   autofocus: true,
                   value: true,
                   thumbColor: thumbColor,
-                  onChanged: (_) { },
+                  onChanged: (_) {},
                 ),
               ),
             );
@@ -1299,9 +1323,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x801e88e5),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1321,9 +1345,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: const Color(0x801e88e5),
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1352,8 +1376,7 @@ void main() {
       return inactiveEnabledTrackColor;
     }
 
-    final MaterialStateProperty<Color> trackColor =
-      MaterialStateColor.resolveWith(getTrackColor);
+    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -1365,7 +1388,7 @@ void main() {
                 child: Switch(
                   trackColor: trackColor,
                   value: active,
-                  onChanged: enabled ? (_) { } : null,
+                  onChanged: enabled ? (_) {} : null,
                 ),
               ),
             );
@@ -1380,9 +1403,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          ),
+          color: inactiveDisabledTrackColor,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        ),
       reason: 'Inactive disabled switch track should use this value',
     );
 
@@ -1393,9 +1416,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: activeDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          ),
+          color: activeDisabledTrackColor,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        ),
       reason: 'Active disabled switch should match these colors',
     );
 
@@ -1406,9 +1429,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: inactiveEnabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          ),
+          color: inactiveEnabledTrackColor,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        ),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1419,9 +1442,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          ),
+          color: inactiveDisabledTrackColor,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        ),
       reason: 'Inactive disabled switch should match these colors',
     );
   });
@@ -1442,8 +1465,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> trackColor =
-      MaterialStateColor.resolveWith(getTrackColor);
+    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
 
     Widget buildSwitch() {
       return Directionality(
@@ -1457,7 +1479,7 @@ void main() {
                   autofocus: true,
                   value: true,
                   trackColor: trackColor,
-                  onChanged: (_) { },
+                  onChanged: (_) {},
                 ),
               ),
             );
@@ -1473,9 +1495,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: focusedTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          ),
+          color: focusedTrackColor,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        ),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1490,9 +1512,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: hoveredTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          ),
+          color: hoveredTrackColor,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        ),
       reason: 'Inactive enabled switch should match these colors',
     );
   });
@@ -1508,8 +1530,7 @@ void main() {
       return Colors.black;
     }
 
-    final MaterialStateProperty<Color> thumbColor =
-      MaterialStateColor.resolveWith(getThumbColor);
+    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
@@ -1523,7 +1544,7 @@ void main() {
                   child: Switch(
                     thumbColor: thumbColor,
                     value: active,
-                    onChanged: enabled ? (_) { } : null,
+                    onChanged: enabled ? (_) {} : null,
                   ),
                 ),
               ),
@@ -1541,9 +1562,9 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
-          )
+          color: Colors.black12,
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1579,6 +1600,7 @@ void main() {
       }
       return null;
     }
+
     const double splashRadius = 24.0;
 
     Widget buildSwitch({bool active = false, bool focused = false, bool useOverlay = true}) {
@@ -1588,7 +1610,7 @@ void main() {
             focusNode: focusNode,
             autofocus: focused,
             value: active,
-            onChanged: (_) { },
+            onChanged: (_) {},
             thumbColor: MaterialStateProperty.all(thumbColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
@@ -1698,7 +1720,7 @@ void main() {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: show ? Switch(value: true, onChanged: (_) { }) : Container(),
+            child: show ? Switch(value: true, onChanged: (_) {}) : Container(),
           ),
         ),
       );
@@ -1750,7 +1772,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('do not crash when previous imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+    testWidgets('do not crash when previous imageProvider completes after Switch is disposed',
+        (WidgetTester tester) async {
       final DelayedImageProvider imageProvider1 = DelayedImageProvider(image);
       final DelayedImageProvider imageProvider2 = DelayedImageProvider(image);
 

@@ -32,8 +32,7 @@ void debugRestoreHttpRequestFactory() {
 ///
 /// NetworkImage on the web does not support decoding to a specified size.
 @immutable
-class NetworkImage
-    extends image_provider.ImageProvider<image_provider.NetworkImage>
+class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage>
     implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
   ///
@@ -61,8 +60,7 @@ class NetworkImage
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents =
-        StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
@@ -77,9 +75,9 @@ class NetworkImage
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
-        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-      ];
+            DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+          ];
       return true;
     }());
     return collector;
@@ -103,8 +101,7 @@ class NetworkImage
     // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
     if (key.headers?.isNotEmpty ?? false) {
-      final Completer<html.HttpRequest> completer =
-          Completer<html.HttpRequest>();
+      final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();
       final html.HttpRequest request = httpRequestFactory();
 
       request.open('GET', key.url, async: true);
@@ -119,15 +116,13 @@ class NetworkImage
         final bool fileUri = status == 0; // file:// URIs have status of 0.
         final bool notModified = status == 304;
         final bool unknownRedirect = status > 307 && status < 400;
-        final bool success =
-            accepted || fileUri || notModified || unknownRedirect;
+        final bool success = accepted || fileUri || notModified || unknownRedirect;
 
         if (success) {
           completer.complete(request);
         } else {
           completer.completeError(e);
-          throw image_provider.NetworkImageLoadException(
-              statusCode: request.status ?? 400, uri: resolved);
+          throw image_provider.NetworkImageLoadException(statusCode: request.status ?? 400, uri: resolved);
         }
       });
 
@@ -140,8 +135,7 @@ class NetworkImage
       final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
 
       if (bytes.lengthInBytes == 0)
-        throw image_provider.NetworkImageLoadException(
-            statusCode: request.status!, uri: resolved);
+        throw image_provider.NetworkImageLoadException(statusCode: request.status!, uri: resolved);
 
       return decode(bytes);
     } else {
@@ -151,8 +145,7 @@ class NetworkImage
       return ui.webOnlyInstantiateImageCodecFromUrl(
         resolved,
         chunkCallback: (int bytes, int total) {
-          chunkEvents.add(ImageChunkEvent(
-              cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
+          chunkEvents.add(ImageChunkEvent(cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
         },
       ) as Future<ui.Codec>;
     }
@@ -170,6 +163,5 @@ class NetworkImage
   int get hashCode => Object.hash(url, scale);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
 }

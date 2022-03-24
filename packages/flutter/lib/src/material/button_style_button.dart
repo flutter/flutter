@@ -40,9 +40,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.autofocus,
     required this.clipBehavior,
     required this.child,
-  }) : assert(autofocus != null),
-       assert(clipBehavior != null),
-       super(key: key);
+  })  : assert(autofocus != null),
+        assert(clipBehavior != null),
+        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -230,8 +230,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     assert(defaultStyle != null);
 
     T? effectiveValue<T>(T? Function(ButtonStyle? style) getProperty) {
-      final T? widgetValue  = getProperty(widgetStyle);
-      final T? themeValue   = getProperty(themeStyle);
+      final T? widgetValue = getProperty(widgetStyle);
+      final T? themeValue = getProperty(themeStyle);
       final T? defaultValue = getProperty(defaultStyle);
       return widgetValue ?? themeValue ?? defaultValue;
     }
@@ -268,7 +268,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
-    final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+    final InteractiveInkFeatureFactory? resolvedSplashFactory =
+        effectiveValue((ButtonStyle? style) => style?.splashFactory);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -300,33 +301,31 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     // reduce the horizontal padding to zero.
     final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
-    final EdgeInsetsGeometry padding = resolvedPadding!
-      .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    final EdgeInsetsGeometry padding =
+        resolvedPadding!.add(EdgeInsets.fromLTRB(dx, dy, dx, dy)).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly
     // animates its elevation but not its color. SKIA renders non-zero
     // elevations as a shadow colored fill behind the Material's background.
-    if (resolvedAnimationDuration! > Duration.zero
-        && _elevation != null
-        && _backgroundColor != null
-        && _elevation != resolvedElevation
-        && _backgroundColor!.value != resolvedBackgroundColor!.value
-        && _backgroundColor!.opacity == 1
-        && resolvedBackgroundColor.opacity < 1
-        && resolvedElevation == 0) {
+    if (resolvedAnimationDuration! > Duration.zero &&
+        _elevation != null &&
+        _backgroundColor != null &&
+        _elevation != resolvedElevation &&
+        _backgroundColor!.value != resolvedBackgroundColor!.value &&
+        _backgroundColor!.opacity == 1 &&
+        resolvedBackgroundColor.opacity < 1 &&
+        resolvedElevation == 0) {
       if (_controller?.duration != resolvedAnimationDuration) {
         _controller?.dispose();
         _controller = AnimationController(
           duration: resolvedAnimationDuration,
           vsync: this,
-        )
-        ..addStatusListener((AnimationStatus status) {
-          if (status == AnimationStatus.completed) {
-            setState(() { }); // Rebuild with the final background color.
-          }
-        });
+        )..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              setState(() {}); // Rebuild with the final background color.
+            }
+          });
       }
       resolvedBackgroundColor = _backgroundColor; // Defer changing the background color.
       _controller!.value = 0;
@@ -453,37 +452,32 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
-      return;
+    if (_minSize == value) return;
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
-      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    if (child != null) return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
-      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    if (child != null) return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
-      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    if (child != null) return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
-      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    if (child != null) return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
@@ -518,7 +512,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (super.hitTest(result, position: position)) {
       return true;
     }

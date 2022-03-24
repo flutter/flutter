@@ -16,7 +16,6 @@ void main() {
   });
 
   group('alignment', () {
-
     testWidgets('default alignment is MainAxisAlignment.end', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -30,7 +29,7 @@ void main() {
 
       final Finder child = find.byType(SizedBox);
       // Should be positioned to the right of the bar,
-      expect(tester.getRect(child).left, 782.0);  // bar width - default padding - 10
+      expect(tester.getRect(child).left, 782.0); // bar width - default padding - 10
       expect(tester.getRect(child).right, 792.0); // bar width - default padding
     });
 
@@ -52,7 +51,7 @@ void main() {
 
       final Finder child = find.byType(SizedBox);
       // Should be positioned in the center
-      expect(tester.getRect(child).left, 395.0);  // (bar width - padding) / 2 - 10 / 2
+      expect(tester.getRect(child).left, 395.0); // (bar width - padding) / 2 - 10 / 2
       expect(tester.getRect(child).right, 405.0); // (bar width - padding) / 2 - 10 / 2 + 10
     });
 
@@ -75,14 +74,12 @@ void main() {
 
       final Finder child = find.byType(SizedBox);
       // Should be positioned on the left
-      expect(tester.getRect(child).left, 8.0);   // padding
+      expect(tester.getRect(child).left, 8.0); // padding
       expect(tester.getRect(child).right, 18.0); // padding + 10
     });
-
   });
 
   group('mainAxisSize', () {
-
     testWidgets('Default mainAxisSize is MainAxisSize.max', (WidgetTester tester) async {
       const Key buttonBarKey = Key('row');
       const Key child0Key = Key('child0');
@@ -185,7 +182,8 @@ void main() {
       expect(childRect.left, ((800.0 - buttonBarRect.width) / 2.0) + 200.0);
     });
 
-    testWidgets('ButtonBar.mainAxisSize overrides ButtonBarTheme.mainAxisSize and default', (WidgetTester tester) async {
+    testWidgets('ButtonBar.mainAxisSize overrides ButtonBarTheme.mainAxisSize and default',
+        (WidgetTester tester) async {
       const Key buttonBarKey = Key('row');
       const Key child0Key = Key('child0');
       const Key child1Key = Key('child1');
@@ -239,7 +237,6 @@ void main() {
   });
 
   group('button properties override ButtonTheme', () {
-
     testWidgets('default button properties override ButtonTheme properties', (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(
@@ -263,7 +260,8 @@ void main() {
       expect(buttonTheme.layoutBehavior, equals(ButtonBarLayoutBehavior.padded));
     });
 
-    testWidgets('ButtonBarTheme button properties override defaults and ButtonTheme properties', (WidgetTester tester) async {
+    testWidgets('ButtonBarTheme button properties override defaults and ButtonTheme properties',
+        (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
@@ -296,7 +294,8 @@ void main() {
       expect(buttonTheme.layoutBehavior, equals(ButtonBarLayoutBehavior.constrained));
     });
 
-    testWidgets('ButtonBar button properties override ButtonBarTheme, defaults and ButtonTheme properties', (WidgetTester tester) async {
+    testWidgets('ButtonBar button properties override ButtonBarTheme, defaults and ButtonTheme properties',
+        (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
@@ -334,12 +333,11 @@ void main() {
       expect(buttonTheme.alignedDropdown, equals(true));
       expect(buttonTheme.layoutBehavior, equals(ButtonBarLayoutBehavior.constrained));
     });
-
   });
 
   group('layoutBehavior', () {
-
-    testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
+    testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         SingleChildScrollView(
           child: ListBody(
@@ -410,7 +408,8 @@ void main() {
     });
 
     testWidgets(
-      "ButtonBar's children overflow defaults - MainAxisAlignment.end", (WidgetTester tester) async {
+      "ButtonBar's children overflow defaults - MainAxisAlignment.end",
+      (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
         final Key keyTwo = UniqueKey();
         await tester.pumpWidget(
@@ -494,7 +493,8 @@ void main() {
     testWidgets(
       "ButtonBar's children default to MainAxisAlignment.start for horizontal "
       'alignment when overflowing in spaceBetween, spaceAround and spaceEvenly '
-      'cases when overflowing.', (WidgetTester tester) async {
+      'cases when overflowing.',
+      (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
         final Key keyTwo = UniqueKey();
         await tester.pumpWidget(

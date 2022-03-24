@@ -49,11 +49,13 @@ void main() {
       ),
     );
 
-    expect(() => CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No CupertinoLocalizations found'),
-    )));
+    expect(
+        () => CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!),
+        throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+          'message',
+          contains('No CupertinoLocalizations found'),
+        )));
 
     expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!), isA<CupertinoLocalizations>());
   });

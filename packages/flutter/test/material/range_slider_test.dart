@@ -417,7 +417,8 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -467,7 +468,8 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -517,7 +519,8 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -569,7 +572,8 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -621,7 +625,8 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -671,7 +676,8 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -721,7 +727,8 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -773,7 +780,8 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -825,7 +833,8 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     RangeValues? startValues;
     RangeValues? endValues;
@@ -879,7 +888,8 @@ void main() {
     expect(endValues!.end, moreOrLessEquals(70, epsilon: 1));
   });
 
-  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     late RangeValues startValues;
     late RangeValues endValues;
@@ -942,22 +952,22 @@ void main() {
 
   ThemeData _buildTheme() {
     return ThemeData(
-        platform: TargetPlatform.android,
-        primarySwatch: Colors.blue,
-        sliderTheme: const SliderThemeData(
-          disabledThumbColor: Color(0xff000001),
-          disabledActiveTickMarkColor: Color(0xff000002),
-          disabledActiveTrackColor: Color(0xff000003),
-          disabledInactiveTickMarkColor: Color(0xff000004),
-          disabledInactiveTrackColor: Color(0xff000005),
-          activeTrackColor: Color(0xff000006),
-          activeTickMarkColor: Color(0xff000007),
-          inactiveTrackColor: Color(0xff000008),
-          inactiveTickMarkColor: Color(0xff000009),
-          overlayColor: Color(0xff000010),
-          thumbColor: Color(0xff000011),
-          valueIndicatorColor: Color(0xff000012),
-        ),
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+      sliderTheme: const SliderThemeData(
+        disabledThumbColor: Color(0xff000001),
+        disabledActiveTickMarkColor: Color(0xff000002),
+        disabledActiveTrackColor: Color(0xff000003),
+        disabledInactiveTickMarkColor: Color(0xff000004),
+        disabledInactiveTrackColor: Color(0xff000005),
+        activeTrackColor: Color(0xff000006),
+        activeTickMarkColor: Color(0xff000007),
+        inactiveTrackColor: Color(0xff000008),
+        inactiveTickMarkColor: Color(0xff000009),
+        overlayColor: Color(0xff000010),
+        thumbColor: Color(0xff000011),
+        valueIndicatorColor: Color(0xff000012),
+      ),
     );
   }
 
@@ -969,9 +979,11 @@ void main() {
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
-      values = newValues;
-    };
+    final ValueChanged<RangeValues>? onChanged = !enabled
+        ? null
+        : (RangeValues newValues) {
+            values = newValues;
+          };
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
@@ -994,7 +1006,8 @@ void main() {
     );
   }
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1023,7 +1036,8 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -1051,7 +1065,8 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color',
+      (WidgetTester tester) async {
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -1078,7 +1093,8 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
@@ -1111,7 +1127,8 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1141,12 +1158,13 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
-
 
     await tester.pumpWidget(_buildThemedApp(
       theme: theme,
@@ -1182,7 +1200,8 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1202,7 +1221,9 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors',
+      (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = _buildTheme();
@@ -1229,7 +1250,8 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing',
+      (WidgetTester tester) async {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
@@ -1240,9 +1262,11 @@ void main() {
       int? divisions,
       bool enabled = true,
     }) {
-      final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
-        values = newValues;
-      };
+      final ValueChanged<RangeValues>? onChanged = !enabled
+          ? null
+          : (RangeValues newValues) {
+              values = newValues;
+            };
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -1285,7 +1309,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgets(
+      'Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.5, 0.75);
     const Color fillColor = Color(0xf55f5f5f);
 
@@ -1298,6 +1324,7 @@ void main() {
       void onChanged(RangeValues newValues) {
         values = newValues;
       }
+
       return MaterialApp(
         home: Scaffold(
           // The builder is used to pass the context from the MaterialApp widget
@@ -1324,7 +1351,9 @@ void main() {
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
                             );
                           },
                         ),
@@ -1350,14 +1379,14 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-      // Represents the raised button wth next text.
-      ..path(color: Colors.black)
-      ..paragraph()
-      // Represents the range slider.
-      ..path(color: fillColor)
-      ..paragraph()
-      ..path(color: fillColor)
-      ..paragraph(),
+        // Represents the raised button wth next text.
+        ..path(color: Colors.black)
+        ..paragraph()
+        // Represents the range slider.
+        ..path(color: fillColor)
+        ..paragraph()
+        ..path(color: fillColor)
+        ..paragraph(),
     );
 
     // Represents the Raised Button and Range Slider.
@@ -1371,11 +1400,11 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-       paints
-         ..path(color: fillColor)
-         ..paragraph()
-         ..path(color: fillColor)
-         ..paragraph(),
+        paints
+          ..path(color: fillColor)
+          ..paragraph()
+          ..path(color: fillColor)
+          ..paragraph(),
       ),
     );
 
@@ -1527,7 +1556,8 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale', (WidgetTester tester) async {
+  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale',
+      (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1693,7 +1723,7 @@ void main() {
               child: RangeSlider(
                 values: const RangeValues(10.0, 12.0),
                 max: 100.0,
-                onChanged: (RangeValues v) { },
+                onChanged: (RangeValues v) {},
               ),
             ),
           ),
@@ -1707,9 +1737,9 @@ void main() {
       tester.getSemantics(find.byType(RangeSlider)),
       matchesSemantics(
         scopesRoute: true,
-        children:<Matcher>[
+        children: <Matcher>[
           matchesSemantics(
-            children:  <Matcher>[
+            children: <Matcher>[
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
@@ -1751,8 +1781,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -1768,7 +1799,8 @@ void main() {
     ]);
   });
 
-  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (WidgetTester tester) async {
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -1796,18 +1828,23 @@ void main() {
       renderObject,
       paints
         // left inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(-24.0, 3.0, -12.0, 7.0, topLeft: const Radius.circular(2.0), bottomLeft: const Radius.circular(2.0)))
+        ..rrect(
+            rrect: RRect.fromLTRBAndCorners(-24.0, 3.0, -12.0, 7.0,
+                topLeft: const Radius.circular(2.0), bottomLeft: const Radius.circular(2.0)))
         // active track RRect
         ..rect(rect: const Rect.fromLTRB(-12.0, 2.0, 0.0, 8.0))
         // right inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        ..rrect(
+            rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0,
+                topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
         // thumbs
         ..circle(x: -12.0, y: 5.0, radius: 10.0)
         ..circle(x: 0.0, y: 5.0, radius: 10.0),
     );
   });
 
-  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (WidgetTester tester) async {
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1879,12 +1916,14 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late Rect activeTrackRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
-        return false;
-      activeTrackRect = arguments[0] as Rect;
-      return true;
-    }));
+    expect(
+        renderObject,
+        paints
+          ..something((Symbol method, List<dynamic> arguments) {
+            if (method != #drawRect) return false;
+            activeTrackRect = arguments[0] as Rect;
+            return true;
+          }));
 
     // The 1st thumb should at one-third(5 / 15) of the Slider.
     // The 2nd thumb should at (8 / 15) of the Slider.

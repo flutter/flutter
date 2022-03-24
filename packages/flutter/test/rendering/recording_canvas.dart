@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 /// Used by [TestRecordingCanvas] to trace canvas calls.
 class RecordedInvocation {
   /// Create a record for an invocation list.
-  const RecordedInvocation(this.invocation, { required this.stack });
+  const RecordedInvocation(this.invocation, {required this.stack});
 
   /// The method that was called and its arguments.
   ///
@@ -27,11 +27,12 @@ class RecordedInvocation {
   String toString() => _describeInvocation(invocation);
 
   /// Converts [stack] to a string using the [FlutterError.defaultStackFilter] logic.
-  String stackToString({ String indent = '' }) {
+  String stackToString({String indent = ''}) {
     assert(indent != null);
-    return indent + FlutterError.defaultStackFilter(
-      stack.toString().trimRight().split('\n'),
-    ).join('\n$indent');
+    return indent +
+        FlutterError.defaultStackFilter(
+          stack.toString().trimRight().split('\n'),
+        ).join('\n$indent');
   }
 }
 
@@ -182,11 +183,11 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  void noSuchMethod(Invocation invocation) { }
+  void noSuchMethod(Invocation invocation) {}
 }
 
 class _MethodCall implements Invocation {
-  _MethodCall(this._name, [ this._arguments = const <dynamic>[]]);
+  _MethodCall(this._name, [this._arguments = const <dynamic>[]]);
   final Symbol _name;
   final List<dynamic> _arguments;
   @override
@@ -204,12 +205,11 @@ class _MethodCall implements Invocation {
   @override
   List<dynamic> get positionalArguments => _arguments;
   @override
-  List<Type> get typeArguments => const <Type> [];
+  List<Type> get typeArguments => const <Type>[];
 }
 
 String _valueName(Object? value) {
-  if (value is double)
-    return value.toStringAsFixed(1);
+  if (value is double) return value.toStringAsFixed(1);
   return value.toString();
 }
 

@@ -13,9 +13,11 @@ void main() {
     expect(theme.textTheme, ButtonTextTheme.normal);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(theme.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
-    ));
+    expect(
+        theme.shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        ));
     expect(theme.alignedDropdown, false);
     expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
   });
@@ -62,7 +64,7 @@ void main() {
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: FlatButton(
-                  onPressed: () { },
+                  onPressed: () {},
                   child: const Text('b'), // intrinsic width < minimum width
                 ),
               ),
@@ -76,9 +78,11 @@ void main() {
     expect(layoutBehavior, ButtonBarLayoutBehavior.padded);
     expect(constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
-    ));
+    expect(
+        shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        ));
     expect(alignedDropdown, false);
     expect(colorScheme, ThemeData.light().colorScheme);
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
@@ -91,9 +95,11 @@ void main() {
     expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(theme.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
-    ));
+    expect(
+        theme.shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        ));
     expect(theme.alignedDropdown, false);
     expect(theme.colorScheme, null);
 
@@ -163,9 +169,11 @@ void main() {
     expect(textTheme, ButtonTextTheme.normal);
     expect(constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
-    ));
+    expect(
+        shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        ));
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
@@ -202,7 +210,7 @@ void main() {
                 child: Directionality(
                   textDirection: TextDirection.ltr,
                   child: RaisedButton(
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('b'), // intrinsic width < minimum width
                   ),
                 ),
@@ -226,7 +234,7 @@ void main() {
   testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
     final Key dropdownKey = UniqueKey();
 
-    Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {
+    Widget buildFrame({required bool alignedDropdown, required TextDirection textDirection}) {
       return MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return Directionality(
@@ -246,7 +254,7 @@ void main() {
                       width: 200.0,
                       child: DropdownButton<String>(
                         key: dropdownKey,
-                        onChanged: (String? value) { },
+                        onChanged: (String? value) {},
                         value: 'foo',
                         items: const <DropdownMenuItem<String>>[
                           DropdownMenuItem<String>(
@@ -328,77 +336,79 @@ void main() {
     expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
   });
 
-  testWidgets('button theme with stateful color changes color in states', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+  testWidgets(
+    'button theme with stateful color changes color in states',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(0x00000001);
-    const Color hoverColor = Color(0x00000002);
-    const Color focusedColor = Color(0x00000003);
-    const Color defaultColor = Color(0x00000004);
+      const Color pressedColor = Color(0x00000001);
+      const Color hoverColor = Color(0x00000002);
+      const Color focusedColor = Color(0x00000003);
+      const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        return pressedColor;
+      Color getTextColor(Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          return pressedColor;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusedColor;
+        }
+        return defaultColor;
       }
-      if (states.contains(MaterialState.hovered)) {
-        return hoverColor;
-      }
-      if (states.contains(MaterialState.focused)) {
-        return focusedColor;
-      }
-      return defaultColor;
-    }
 
-    const ColorScheme colorScheme = ColorScheme.light();
+      const ColorScheme colorScheme = ColorScheme.light();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: ButtonTheme(
-              colorScheme: colorScheme.copyWith(
-                primary: MaterialStateColor.resolveWith(getTextColor),
-              ),
-              textTheme: ButtonTextTheme.primary,
-              child: FlatButton(
-                onPressed: () {},
-                focusNode: focusNode,
-                child: const Text('FlatButton'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ButtonTheme(
+                colorScheme: colorScheme.copyWith(
+                  primary: MaterialStateColor.resolveWith(getTextColor),
+                ),
+                textTheme: ButtonTextTheme.primary,
+                child: FlatButton(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  child: const Text('FlatButton'),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style!.color!;
-    }
+      Color textColor() {
+        return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style!.color!;
+      }
 
-    // Default, not disabled.
-    expect(textColor(), equals(defaultColor));
+      // Default, not disabled.
+      expect(textColor(), equals(defaultColor));
 
-    // Focused.
-    focusNode.requestFocus();
-    await tester.pumpAndSettle();
-    expect(textColor(), focusedColor);
+      // Focused.
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+      expect(textColor(), focusedColor);
 
-    // Hovered.
-    final Offset center = tester.getCenter(find.byType(FlatButton));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(center);
-    await tester.pumpAndSettle();
-    expect(textColor(), hoverColor);
+      // Hovered.
+      final Offset center = tester.getCenter(find.byType(FlatButton));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+      expect(textColor(), hoverColor);
 
-    // Highlighted (pressed).
-    await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    expect(textColor(), pressedColor);
-  },
+      // Highlighted (pressed).
+      await gesture.down(center);
+      await tester.pump(); // Start the splash and highlight animations.
+      await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+      expect(textColor(), pressedColor);
+    },
   );
 }

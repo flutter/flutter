@@ -24,11 +24,13 @@ void main() {
   testWidgets('Default PageTransitionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => const Text('page b'),
     };
 
@@ -45,16 +47,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android',
+      (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => const Text('page b'),
     };
 
@@ -83,11 +88,13 @@ void main() {
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => const Text('page b'),
     };
 
@@ -123,11 +130,13 @@ void main() {
   testWidgets('PageTransitionsTheme override builds a _ZoomPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => const Text('page b'),
     };
 
@@ -167,20 +176,24 @@ void main() {
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          builtCount++; // Increase [builtCount] each time the widget build
-          return TextButton(
-            child: const Text('pop'),
-            onPressed: () { Navigator.pop(context); },
-          );
-        },
-      ),
+            builder: (BuildContext context, StateSetter setState) {
+              builtCount++; // Increase [builtCount] each time the widget build
+              return TextButton(
+                child: const Text('pop'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
     };
 
     await tester.pumpWidget(

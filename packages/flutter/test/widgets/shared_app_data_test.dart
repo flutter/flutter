@@ -32,12 +32,10 @@ void main() {
                         return Text(SharedAppData.getValue<String, String>(context, 'child1Text', () => 'null'));
                       },
                     ),
-                    Builder(
-                      builder: (BuildContext context) {
-                        child2BuildCount += 1;
-                        return Text(SharedAppData.getValue<String, String>(context, 'child2Text', () => 'null'));
-                      }
-                    ),
+                    Builder(builder: (BuildContext context) {
+                      child2BuildCount += 1;
+                      return Text(SharedAppData.getValue<String, String>(context, 'child2Text', () => 'null'));
+                    }),
                   ],
                 ),
               );

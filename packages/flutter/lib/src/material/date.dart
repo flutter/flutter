@@ -30,18 +30,13 @@ class DateUtils {
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
-    return
-      dateA?.year == dateB?.year &&
-      dateA?.month == dateB?.month &&
-      dateA?.day == dateB?.day;
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
   }
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
   static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-    return
-      dateA?.year == dateB?.year &&
-      dateA?.month == dateB?.month;
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
   }
 
   /// Determines the number of months between two [DateTime] objects.
@@ -69,7 +64,7 @@ class DateUtils {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  static  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+  static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
     return DateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
@@ -214,9 +209,9 @@ class DateTimeRange {
   DateTimeRange({
     required this.start,
     required this.end,
-  }) : assert(start != null),
-       assert(end != null),
-       assert(!start.isAfter(end));
+  })  : assert(start != null),
+        assert(end != null),
+        assert(!start.isAfter(end));
 
   /// The start of the range of dates.
   final DateTime start;
@@ -231,11 +226,8 @@ class DateTimeRange {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DateTimeRange
-      && other.start == start
-      && other.end == end;
+    if (other.runtimeType != runtimeType) return false;
+    return other is DateTimeRange && other.start == start && other.end == end;
   }
 
   @override

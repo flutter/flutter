@@ -37,7 +37,9 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(home: PhysicalShape(clipBehavior: Clip.antiAlias, color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()))),
+      const MaterialApp(
+          home: PhysicalShape(
+              clipBehavior: Clip.antiAlias, color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()))),
     );
 
     expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));

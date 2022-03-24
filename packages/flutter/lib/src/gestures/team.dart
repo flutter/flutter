@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'arena.dart';
 import 'binding.dart';
 
@@ -36,8 +35,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     _close();
     _winner ??= _owner.captain ?? _members[0];
     for (final GestureArenaMember member in _members) {
-      if (member != _winner)
-        member.rejectGesture(pointer);
+      if (member != _winner) member.rejectGesture(pointer);
     }
     _winner!.acceptGesture(pointer);
   }
@@ -46,8 +44,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   void rejectGesture(int pointer) {
     assert(_pointer == pointer);
     _close();
-    for (final GestureArenaMember member in _members)
-      member.rejectGesture(pointer);
+    for (final GestureArenaMember member in _members) member.rejectGesture(pointer);
   }
 
   void _close() {
@@ -66,13 +63,11 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   }
 
   void _resolve(GestureArenaMember member, GestureDisposition disposition) {
-    if (_resolved)
-      return;
+    if (_resolved) return;
     if (disposition == GestureDisposition.rejected) {
       _members.remove(member);
       member.rejectGesture(_pointer);
-      if (_members.isEmpty)
-        _entry!.resolve(disposition);
+      if (_members.isEmpty) _entry!.resolve(disposition);
     } else {
       assert(disposition == GestureDisposition.accepted);
       _winner ??= _owner.captain ?? member;

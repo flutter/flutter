@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
@@ -14,7 +13,7 @@ import 'system_channels.dart';
 @immutable
 class ClipboardData {
   /// Creates data for the system clipboard.
-  const ClipboardData({ this.text });
+  const ClipboardData({this.text});
 
   /// Plain text variant of this clipboard data.
   final String? text;
@@ -55,8 +54,7 @@ class Clipboard {
       'Clipboard.getData',
       format,
     );
-    if (result == null)
-      return null;
+    if (result == null) return null;
     return ClipboardData(text: result['text'] as String?);
   }
 

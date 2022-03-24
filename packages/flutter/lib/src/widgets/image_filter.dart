@@ -27,8 +27,8 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
     Key? key,
     required this.imageFilter,
     Widget? child,
-  }) : assert(imageFilter != null),
-       super(key: key, child: child);
+  })  : assert(imageFilter != null),
+        super(key: key, child: child);
 
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;

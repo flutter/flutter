@@ -48,7 +48,6 @@ void main() {
     expect(typography.white, equals(whiteCopy));
   });
 
-
   test('TextTheme merges properly in the presence of null fields.', () {
     const TextTheme partialTheme = TextTheme(headline6: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);

@@ -38,7 +38,9 @@ void main() {
     expect(Icons.access_time_sharp.matchTextDirection, false);
   });
 
-  testWidgets('Adaptive icons are correct on cupertino platforms', (WidgetTester tester) async {
+  testWidgets(
+    'Adaptive icons are correct on cupertino platforms',
+    (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
     },
@@ -48,7 +50,9 @@ void main() {
     }),
   );
 
-  testWidgets('Adaptive icons are correct on non-cupertino platforms', (WidgetTester tester) async {
+  testWidgets(
+    'Adaptive icons are correct on non-cupertino platforms',
+    (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
     },
@@ -124,7 +128,7 @@ Future<void> _loadIconFont() async {
   );
 
   final Future<ByteData> bytes = Future<ByteData>.value(
-      iconFont.readAsBytesSync().buffer.asByteData(),
+    iconFont.readAsBytesSync().buffer.asByteData(),
   );
 
   await (FontLoader('MaterialIcons')..addFont(bytes)).load();

@@ -14,7 +14,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              onPressed: () { },
+              onPressed: () {},
               child: const Text('button'),
             ),
           ),
@@ -80,12 +80,12 @@ void main() {
       alignment: alignment,
     );
 
-    Widget buildFrame({ ButtonStyle? buttonStyle, ButtonStyle? themeStyle, ButtonStyle? overallStyle }) {
+    Widget buildFrame({ButtonStyle? buttonStyle, ButtonStyle? themeStyle, ButtonStyle? overallStyle}) {
       final Widget child = Builder(
         builder: (BuildContext context) {
           return TextButton(
             style: buttonStyle,
-            onPressed: () { },
+            onPressed: () {},
             child: const Text('button'),
           );
         },
@@ -98,10 +98,12 @@ void main() {
           body: Center(
             // If the TextButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.textButtonTheme.
-            child: themeStyle == null ? child : TextButtonTheme(
-              data: TextButtonThemeData(style: themeStyle),
-              child: child,
-            ),
+            child: themeStyle == null
+                ? child
+                : TextButtonTheme(
+                    data: TextButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );
@@ -118,9 +120,9 @@ void main() {
     );
 
     const Set<MaterialState> enabled = <MaterialState>{};
-    const Set<MaterialState> disabled = <MaterialState>{ MaterialState.disabled };
-    const Set<MaterialState> hovered = <MaterialState>{ MaterialState.hovered };
-    const Set<MaterialState> focused = <MaterialState>{ MaterialState.focused };
+    const Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -139,7 +141,8 @@ void main() {
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
       expect(tester.getSize(find.byType(TextButton)), const Size(200, 200));
-      final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+      final Align align =
+          tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
       expect(align.alignment, alignment);
     }
 
@@ -164,18 +167,21 @@ void main() {
     // Same as the previous tests with empty ButtonStyle's instead of null.
 
     testWidgets('Button style overrides defaults, empty theme and overall styles', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: style, themeStyle: const ButtonStyle(), overallStyle: const ButtonStyle()));
+      await tester.pumpWidget(
+          buildFrame(buttonStyle: style, themeStyle: const ButtonStyle(), overallStyle: const ButtonStyle()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
     testWidgets('Button theme style overrides defaults, empty button and overall styles', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), themeStyle: style, overallStyle: const ButtonStyle()));
+      await tester.pumpWidget(
+          buildFrame(buttonStyle: const ButtonStyle(), themeStyle: style, overallStyle: const ButtonStyle()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgets('Overall Theme button theme style overrides defaults, null theme and empty overall style', (WidgetTester tester) async {
+    testWidgets('Overall Theme button theme style overrides defaults, null theme and empty overall style',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), overallStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
@@ -187,7 +193,7 @@ void main() {
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
 
-    Widget buildFrame({ Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor }) {
+    Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme).copyWith(
           shadowColor: overallShadowColor,
@@ -206,7 +212,7 @@ void main() {
                     style: TextButton.styleFrom(
                       shadowColor: shadowColor,
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('button'),
                   );
                 },

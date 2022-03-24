@@ -22,8 +22,7 @@ Future<void> main() async {
       MaterialApp(
         home: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) +
-                   Border.all(),
+            shape: Border.all(color: Colors.white) + Border.all(),
             image: DecorationImage(
               image: image,
             ),
@@ -45,8 +44,7 @@ Future<void> main() async {
       MaterialApp(
         home: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) +
-                   Border.all(),
+            shape: Border.all(color: Colors.white) + Border.all(),
             color: Colors.blue,
           ),
         ),

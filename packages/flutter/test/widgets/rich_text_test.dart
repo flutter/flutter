@@ -22,22 +22,24 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
-      children: <Matcher>[
+    expect(
+        tester.getSemantics(find.byType(RichText)),
         matchesSemantics(
-          label: 'root',
-        ),
-        matchesSemantics(
-          label: 'one',
-        ),
-        matchesSemantics(
-          label: 'two',
-        ),
-        matchesSemantics(
-          label: 'three',
-        ),
-      ],
-    ));
+          children: <Matcher>[
+            matchesSemantics(
+              label: 'root',
+            ),
+            matchesSemantics(
+              label: 'one',
+            ),
+            matchesSemantics(
+              label: 'two',
+            ),
+            matchesSemantics(
+              label: 'three',
+            ),
+          ],
+        ));
   });
 
   testWidgets('TextSpan Locale works', (WidgetTester tester) async {
@@ -45,48 +47,37 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: RichText(
-          text: TextSpan(
-            text: 'root',
-            locale: const Locale('es', 'MX'),
-            children: <InlineSpan>[
-              TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
-              const WidgetSpan(
-                child: SizedBox(),
-              ),
-              TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
-            ]
-          ),
+          text: TextSpan(text: 'root', locale: const Locale('es', 'MX'), children: <InlineSpan>[
+            TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+            const WidgetSpan(
+              child: SizedBox(),
+            ),
+            TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+          ]),
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
-      children: <Matcher>[
+    expect(
+        tester.getSemantics(find.byType(RichText)),
         matchesSemantics(
-          attributedLabel: AttributedString(
-            'root',
-            attributes: <StringAttribute>[
-              LocaleStringAttribute(range: const TextRange(start: 0, end: 4), locale: const Locale('es', 'MX')),
-            ]
-          ),
-        ),
-        matchesSemantics(
-          attributedLabel: AttributedString(
-            'one',
-            attributes: <StringAttribute>[
-              LocaleStringAttribute(range: const TextRange(start: 0, end: 3), locale: const Locale('es', 'MX')),
-            ]
-          ),
-        ),
-        matchesSemantics(
-          attributedLabel: AttributedString(
-            'three',
-            attributes: <StringAttribute>[
-              LocaleStringAttribute(range: const TextRange(start: 0, end: 5), locale: const Locale('es', 'MX')),
-            ]
-          ),
-        ),
-      ],
-    ));
+          children: <Matcher>[
+            matchesSemantics(
+              attributedLabel: AttributedString('root', attributes: <StringAttribute>[
+                LocaleStringAttribute(range: const TextRange(start: 0, end: 4), locale: const Locale('es', 'MX')),
+              ]),
+            ),
+            matchesSemantics(
+              attributedLabel: AttributedString('one', attributes: <StringAttribute>[
+                LocaleStringAttribute(range: const TextRange(start: 0, end: 3), locale: const Locale('es', 'MX')),
+              ]),
+            ),
+            matchesSemantics(
+              attributedLabel: AttributedString('three', attributes: <StringAttribute>[
+                LocaleStringAttribute(range: const TextRange(start: 0, end: 5), locale: const Locale('es', 'MX')),
+              ]),
+            ),
+          ],
+        ));
   });
 
   testWidgets('TextSpan spellOut works', (WidgetTester tester) async {
@@ -94,48 +85,37 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: RichText(
-          text: TextSpan(
-              text: 'root',
-              spellOut: true,
-              children: <InlineSpan>[
-                TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
-                const WidgetSpan(
-                  child: SizedBox(),
-                ),
-                TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
-              ]
-          ),
+          text: TextSpan(text: 'root', spellOut: true, children: <InlineSpan>[
+            TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+            const WidgetSpan(
+              child: SizedBox(),
+            ),
+            TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+          ]),
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
-      children: <Matcher>[
+    expect(
+        tester.getSemantics(find.byType(RichText)),
         matchesSemantics(
-          attributedLabel: AttributedString(
-              'root',
-              attributes: <StringAttribute>[
+          children: <Matcher>[
+            matchesSemantics(
+              attributedLabel: AttributedString('root', attributes: <StringAttribute>[
                 SpellOutStringAttribute(range: const TextRange(start: 0, end: 4)),
-              ]
-          ),
-        ),
-        matchesSemantics(
-          attributedLabel: AttributedString(
-              'one',
-              attributes: <StringAttribute>[
+              ]),
+            ),
+            matchesSemantics(
+              attributedLabel: AttributedString('one', attributes: <StringAttribute>[
                 SpellOutStringAttribute(range: const TextRange(start: 0, end: 3)),
-              ]
-          ),
-        ),
-        matchesSemantics(
-          attributedLabel: AttributedString(
-              'three',
-              attributes: <StringAttribute>[
+              ]),
+            ),
+            matchesSemantics(
+              attributedLabel: AttributedString('three', attributes: <StringAttribute>[
                 SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
-              ]
-          ),
-        ),
-      ],
-    ));
+              ]),
+            ),
+          ],
+        ));
   });
 
   testWidgets('WidgetSpan calculate correct intrinsic heights', (WidgetTester tester) async {
@@ -189,26 +169,28 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
-    expect(description, unorderedMatches(<dynamic>[
-      contains('textAlign: center'),
-      contains('textDirection: rtl'),
-      contains('softWrap: no wrapping except at line break characters'),
-      contains('overflow: ellipsis'),
-      contains('textScaleFactor: 1.3'),
-      contains('maxLines: 1'),
-      contains('textWidthBasis: longestLine'),
-      contains('text: "rich text"'),
-      contains('locale: zh_HK'),
-      allOf(startsWith('strutStyle: StrutStyle('), contains('size: 16.0')),
-      allOf(
-        startsWith('textHeightBehavior: TextHeightBehavior('),
-        contains('applyHeightToFirstAscent: false'),
-        contains('applyHeightToLastDescent: true'),
-      ),
-    ]));
+    expect(
+        description,
+        unorderedMatches(<dynamic>[
+          contains('textAlign: center'),
+          contains('textDirection: rtl'),
+          contains('softWrap: no wrapping except at line break characters'),
+          contains('overflow: ellipsis'),
+          contains('textScaleFactor: 1.3'),
+          contains('maxLines: 1'),
+          contains('textWidthBasis: longestLine'),
+          contains('text: "rich text"'),
+          contains('locale: zh_HK'),
+          allOf(startsWith('strutStyle: StrutStyle('), contains('size: 16.0')),
+          allOf(
+            startsWith('textHeightBehavior: TextHeightBehavior('),
+            contains('applyHeightToFirstAscent: false'),
+            contains('applyHeightToLastDescent: true'),
+          ),
+        ]));
   });
 }

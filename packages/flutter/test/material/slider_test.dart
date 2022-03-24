@@ -213,7 +213,6 @@ void main() {
     int startValueUpdates = 0;
     int endValueUpdates = 0;
 
-
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -615,10 +614,10 @@ void main() {
       bool enabled = true,
     }) {
       final ValueChanged<double>? onChanged = !enabled
-        ? null
-        : (double d) {
-            value = d;
-          };
+          ? null
+          : (double d) {
+              value = d;
+            };
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -647,7 +646,11 @@ void main() {
     final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Check default theme for enabled widget.
-    expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
+    expect(
+        material,
+        paints
+          ..rrect(color: sliderTheme.activeTrackColor)
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(material, paints..shadow(color: const Color(0xff000000)));
     expect(material, paints..circle(color: sliderTheme.thumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
@@ -658,7 +661,11 @@ void main() {
 
     // Test setting only the activeColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1));
-    expect(material, paints..rrect(color: customColor1)..rrect(color: sliderTheme.inactiveTrackColor));
+    expect(
+        material,
+        paints
+          ..rrect(color: customColor1)
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(material, paints..shadow(color: Colors.black));
     expect(material, paints..circle(color: customColor1));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
@@ -668,7 +675,11 @@ void main() {
 
     // Test setting only the inactiveColor.
     await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-    expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: customColor1));
+    expect(
+        material,
+        paints
+          ..rrect(color: sliderTheme.activeTrackColor)
+          ..rrect(color: customColor1));
     expect(material, paints..shadow(color: Colors.black));
     expect(material, paints..circle(color: sliderTheme.thumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
@@ -677,7 +688,11 @@ void main() {
 
     // Test setting both activeColor and inactiveColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
-    expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
+    expect(
+        material,
+        paints
+          ..rrect(color: customColor1)
+          ..rrect(color: customColor2));
     expect(material, paints..shadow(color: Colors.black));
     expect(material, paints..circle(color: customColor1));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
@@ -687,7 +702,11 @@ void main() {
 
     // Test colors for discrete slider.
     await tester.pumpWidget(buildApp(divisions: 3));
-    expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
+    expect(
+        material,
+        paints
+          ..rrect(color: sliderTheme.activeTrackColor)
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
       material,
       paints
@@ -708,7 +727,11 @@ void main() {
       inactiveColor: customColor2,
       divisions: 3,
     ));
-    expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
+    expect(
+        material,
+        paints
+          ..rrect(color: customColor1)
+          ..rrect(color: customColor2));
     expect(
       material,
       paints
@@ -735,7 +758,11 @@ void main() {
         ..rrect(color: sliderTheme.disabledActiveTrackColor)
         ..rrect(color: sliderTheme.disabledInactiveTrackColor),
     );
-    expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
+    expect(
+        material,
+        paints
+          ..shadow(color: Colors.black)
+          ..circle(color: sliderTheme.disabledThumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
@@ -903,10 +930,10 @@ void main() {
           child: Material(
             child: Center(
               child: GestureDetector(
-                onHorizontalDragUpdate: (_) { },
+                onHorizontalDragUpdate: (_) {},
                 child: Slider(
                   value: 0.0,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                   onChangeStart: (double value) {
                     startFired += 1;
                   },
@@ -1094,7 +1121,8 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.renderObject(find.byType(Overlay)),
+    expect(
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1152,7 +1180,7 @@ void main() {
                 max: 100.0,
                 divisions: divisions,
                 value: 0.25,
-                onChanged: (double newValue) { },
+                onChanged: (double newValue) {},
               ),
             ),
           ),
@@ -1315,7 +1343,6 @@ void main() {
     await testReparenting(true);
   });
 
-
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -1325,7 +1352,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double v) { },
+            onChanged: (double v) {},
           ),
         ),
       ),
@@ -1476,7 +1503,9 @@ void main() {
     );
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux}));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1491,7 +1520,7 @@ void main() {
               child: Slider(
                 value: 100.0,
                 max: 200.0,
-                onChanged: (double v) { },
+                onChanged: (double v) {},
               ),
             ),
           ),
@@ -1517,7 +1546,12 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider
+                          ],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
@@ -1587,7 +1621,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1598,7 +1632,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double v) { },
+            onChanged: (double v) {},
           ),
         ),
       ),
@@ -1756,7 +1790,7 @@ void main() {
     );
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}));
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1770,7 +1804,7 @@ void main() {
             max: 200.0,
             divisions: 10,
             semanticFormatterCallback: (double value) => value.round().toString(),
-            onChanged: (double v) { },
+            onChanged: (double v) {},
           ),
         ),
       ),
@@ -1794,7 +1828,12 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider
+                          ],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
@@ -1831,11 +1870,13 @@ void main() {
                 ),
                 child: Slider(
                   value: value,
-                  onChanged: enabled ? (double newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  } : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 ),
@@ -1845,6 +1886,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
 
     // Check that the overlay shows when focused.
@@ -1879,11 +1921,13 @@ void main() {
                 ),
                 child: Slider(
                   value: value,
-                  onChanged: enabled ? (double newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  } : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 ),
               );
             }),
@@ -1891,6 +1935,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
 
     // Slider does not have overlay when enabled and not hovered.
@@ -1962,7 +2007,13 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows
+      }));
 
   testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2003,7 +2054,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2047,7 +2098,13 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows
+      }));
 
   testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2091,7 +2148,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2109,37 +2166,41 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            textDirection: TextDirection.ltr,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                id: 2,
+                id: 1,
+                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    id: 2,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 4,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasEnabledState,
-                          SemanticsFlag.isEnabled,
-                          SemanticsFlag.isFocusable,
-                          SemanticsFlag.isSlider,
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSlider,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.increase,
+                              SemanticsAction.decrease,
+                              SemanticsAction.didGainAccessibilityFocus,
+                            ],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.increase,
-                          SemanticsAction.decrease,
-                          SemanticsAction.didGainAccessibilityFocus,
-                        ],
-                        value: '50%',
-                        increasedValue: '55%',
-                        decreasedValue: '45%',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -2147,18 +2208,16 @@ void main() {
               ),
             ],
           ),
-        ],
-      ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
 
     expect(focusNode.hasFocus, isFalse);
     semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}));
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
     final ThemeData baseTheme = ThemeData(
@@ -2167,7 +2226,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({ required SliderThemeData sliderTheme, int? divisions, bool enabled = true }) {
+    Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
       return MaterialApp(
         home: Directionality(
@@ -2205,13 +2264,16 @@ void main() {
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
 
-
       final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       expect(
         valueIndicatorBox,
         isVisible
-            ? (paints..path(color: theme.valueIndicatorColor)..paragraph())
-            : isNot(paints..path(color: theme.valueIndicatorColor)..paragraph()),
+            ? (paints
+              ..path(color: theme.valueIndicatorColor)
+              ..paragraph())
+            : isNot(paints
+              ..path(color: theme.valueIndicatorColor)
+              ..paragraph()),
       );
       await gesture.up();
     }
@@ -2284,7 +2346,9 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgets(
+      'Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.',
+      (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     const Color fillColor = Color(0xf55f5f5f);
     double value = 0.0;
@@ -2320,7 +2384,9 @@ void main() {
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
                             );
                           },
                         ),
@@ -2419,7 +2485,12 @@ void main() {
       await gesture.up();
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows
+    ]) {
       value = 0.5;
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.
@@ -2444,7 +2515,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
+              final SliderThemeData sliderTheme =
+                  SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
               return Material(
                 child: Center(
                   child: IntrinsicHeight(
@@ -2487,7 +2559,7 @@ void main() {
                 child: Slider(
                   mouseCursor: SystemMouseCursors.text,
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -2516,7 +2588,7 @@ void main() {
                 child: Slider.adaptive(
                   mouseCursor: SystemMouseCursors.text,
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -2538,7 +2610,7 @@ void main() {
                 cursor: SystemMouseCursors.forbidden,
                 child: Slider(
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -2555,7 +2627,7 @@ void main() {
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
 
-    Widget buildFrame({ required bool enabled }) {
+    Widget buildFrame({required bool enabled}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -2570,7 +2642,7 @@ void main() {
                     dragged: draggedCursor,
                   ),
                   value: 0.5,
-                  onChanged: enabled ? (double newValue) { } : null,
+                  onChanged: enabled ? (double newValue) {} : null,
                 ),
               ),
             ),
@@ -2615,8 +2687,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'value: 50.0',
@@ -2693,11 +2766,19 @@ void main() {
       renderObject,
       paints
         // active track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        ..rrect(
+            rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0,
+                topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
         // inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        ..rrect(
+            rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0,
+                topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
         // thumb
-        ..circle(x: 5.0, y: 5.0, radius: 10.0, ),
+        ..circle(
+          x: 5.0,
+          y: 5.0,
+          radius: 10.0,
+        ),
     );
   });
 
@@ -2728,19 +2809,20 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late RRect activeTrackRRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRRect)
-        return false;
-      activeTrackRRect = arguments[0] as RRect;
-      return true;
-    }));
+    expect(
+        renderObject,
+        paints
+          ..something((Symbol method, List<dynamic> arguments) {
+            if (method != #drawRRect) return false;
+            activeTrackRRect = arguments[0] as RRect;
+            return true;
+          }));
 
     // The thumb should at one-third(5 / 15) of the Slider.
     // The right of the active track shape is the position of the thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
-
 
   testWidgets('Slider paints thumbColor', (WidgetTester tester) async {
     const Color color = Color(0xffffc107);
@@ -2759,13 +2841,11 @@ void main() {
     await tester.pumpWidget(sliderAdaptive);
     await tester.pumpAndSettle();
 
-    final MaterialInkController material =
-        Material.of(tester.element(find.byType(Slider)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
     expect(material, paints..circle(color: color));
   });
 
-  testWidgets('Slider.adaptive paints thumbColor on Android',
-      (WidgetTester tester) async {
+  testWidgets('Slider.adaptive paints thumbColor on Android', (WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
     final Widget sliderAdaptive = MaterialApp(
@@ -2782,13 +2862,11 @@ void main() {
     await tester.pumpWidget(sliderAdaptive);
     await tester.pumpAndSettle();
 
-    final MaterialInkController material =
-        Material.of(tester.element(find.byType(Slider)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
     expect(material, paints..circle(color: color));
   });
 
-  testWidgets('If thumbColor is null, it defaults to CupertinoColors.white',
-      (WidgetTester tester) async {
+  testWidgets('If thumbColor is null, it defaults to CupertinoColors.white', (WidgetTester tester) async {
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Material(
@@ -2802,8 +2880,7 @@ void main() {
     await tester.pumpWidget(sliderAdaptive);
     await tester.pumpAndSettle();
 
-    final MaterialInkController material =
-        Material.of(tester.element(find.byType(CupertinoSlider)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byType(CupertinoSlider)))!;
     expect(
       material,
       paints
@@ -2816,8 +2893,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider.adaptive passes thumbColor to CupertinoSlider',
-      (WidgetTester tester) async {
+  testWidgets('Slider.adaptive passes thumbColor to CupertinoSlider', (WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
     final Widget sliderAdaptive = MaterialApp(
@@ -2834,11 +2910,16 @@ void main() {
     await tester.pumpWidget(sliderAdaptive);
     await tester.pumpAndSettle();
 
-    final MaterialInkController material =
-        Material.of(tester.element(find.byType(CupertinoSlider)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byType(CupertinoSlider)))!;
     expect(
       material,
-      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: color),
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: color),
     );
   });
 }

@@ -24,7 +24,7 @@ void main() {
                   const Text('Moar text!!1'),
                   MaterialButton(
                     child: const Text('Button'),
-                    onPressed: () { },
+                    onPressed: () {},
                   ),
                 ],
               ),
@@ -34,45 +34,47 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            elevation: 1.0,
-            thickness: 0.0,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                id: 2,
-                label: 'I am text!',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                id: 3,
-                label: 'Moar text!!1',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                id: 4,
-                label: 'Button',
-                textDirection: TextDirection.ltr,
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocusable,
+                id: 1,
+                elevation: 1.0,
+                thickness: 0.0,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    label: 'I am text!',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    id: 3,
+                    label: 'Moar text!!1',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    id: 4,
+                    label: 'Button',
+                    textDirection: TextDirection.ltr,
+                    actions: <SemanticsAction>[
+                      SemanticsAction.tap,
+                    ],
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.isEnabled,
+                      SemanticsFlag.isFocusable,
+                    ],
+                  ),
                 ],
               ),
             ],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-      ignoreRect: true,
-    ));
+          ignoreTransform: true,
+          ignoreRect: true,
+        ));
 
     semantics.dispose();
   });
@@ -99,19 +101,21 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            label: 'First child\nSecond child',
-            textDirection: TextDirection.ltr,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                label: 'First child\nSecond child',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-      ignoreRect: true,
-    ));
+          ignoreTransform: true,
+          ignoreRect: true,
+        ));
 
     semantics.dispose();
   });

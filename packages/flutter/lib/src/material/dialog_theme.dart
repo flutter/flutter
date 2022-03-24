@@ -115,17 +115,15 @@ class DialogTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DialogTheme
-        && other.backgroundColor == backgroundColor
-        && other.elevation == elevation
-        && other.shape == shape
-        && other.alignment == alignment
-        && other.titleTextStyle == titleTextStyle
-        && other.contentTextStyle == contentTextStyle;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is DialogTheme &&
+        other.backgroundColor == backgroundColor &&
+        other.elevation == elevation &&
+        other.shape == shape &&
+        other.alignment == alignment &&
+        other.titleTextStyle == titleTextStyle &&
+        other.contentTextStyle == contentTextStyle;
   }
 
   @override

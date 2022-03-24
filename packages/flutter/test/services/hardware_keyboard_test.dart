@@ -12,60 +12,45 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
     await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
-    expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
     await simulateKeyDownEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock, LogicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock, LogicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
     await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock, LogicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock, LogicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
     await simulateKeyUpEvent(LogicalKeyboardKey.numLock);
-    expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
+    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
     await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
+        equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock, LogicalKeyboardKey.numpad1}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{}));
+        equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock, LogicalKeyboardKey.numpad1}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{}));
 
     await simulateKeyUpEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
-    expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{}));
+    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.numLock}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{}));
 
     await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
-    expect(HardwareKeyboard.instance.physicalKeysPressed,
-      equals(<PhysicalKeyboardKey>{}));
-    expect(HardwareKeyboard.instance.logicalKeysPressed,
-      equals(<LogicalKeyboardKey>{}));
-    expect(HardwareKeyboard.instance.lockModesEnabled,
-      equals(<KeyboardLockMode>{}));
+    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
@@ -76,17 +61,15 @@ void main() {
     });
     // While ShiftLeft is held (the event of which was skipped), press keyA.
     // ignore: prefer_const_declarations
-    final Map<String, dynamic> rawMessage = kIsWeb ? (
-      KeyEventSimulator.getKeyData(
-        LogicalKeyboardKey.keyA,
-        platform: 'web',
-      )..['metaState'] = RawKeyEventDataWeb.modifierShift
-    ) : (
-      KeyEventSimulator.getKeyData(
-        LogicalKeyboardKey.keyA,
-        platform: 'android',
-      )..['metaState'] = RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift
-    );
+    final Map<String, dynamic> rawMessage = kIsWeb
+        ? (KeyEventSimulator.getKeyData(
+            LogicalKeyboardKey.keyA,
+            platform: 'web',
+          )..['metaState'] = RawKeyEventDataWeb.modifierShift)
+        : (KeyEventSimulator.getKeyData(
+            LogicalKeyboardKey.keyA,
+            platform: 'android',
+          )..['metaState'] = RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift);
     tester.binding.keyEventManager.handleRawKeyMessage(rawMessage);
     expect(events, hasLength(2));
     expect(events[0].physicalKey, PhysicalKeyboardKey.shiftLeft);
@@ -114,8 +97,7 @@ void main() {
 
     // Only the Service binding handler.
 
-    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      false);
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), false);
     expect(logs, <int>[1]);
     logs.clear();
 
@@ -126,17 +108,16 @@ void main() {
       logs.add(2);
       return handler2Result;
     }
+
     HardwareKeyboard.instance.addHandler(handler2);
 
-    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), false);
     expect(logs, <int>[2, 1]);
     logs.clear();
 
     handler2Result = true;
 
-    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      true);
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), true);
     expect(logs, <int>[2, 1]);
     logs.clear();
 
@@ -148,24 +129,22 @@ void main() {
       logs.add(3);
       return handler3Result;
     }
+
     HardwareKeyboard.instance.addHandler(handler3);
 
-    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), false);
     expect(logs, <int>[2, 3, 1]);
     logs.clear();
 
     handler2Result = true;
 
-    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      true);
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), true);
     expect(logs, <int>[2, 3, 1]);
     logs.clear();
 
     handler3Result = true;
 
-    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), true);
     expect(logs, <int>[2, 3, 1]);
     logs.clear();
 
@@ -175,22 +154,19 @@ void main() {
 
     handler3Result = false;
     handler2Result = false;
-    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      false);
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), false);
     expect(logs, <int>[2, 3, 2, 1]);
     logs.clear();
 
     handler2Result = true;
-    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), true);
     expect(logs, <int>[2, 3, 2, 1]);
     logs.clear();
 
     // Remove handler2 once.
 
     HardwareKeyboard.instance.removeHandler(handler2);
-    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      true);
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), true);
     expect(logs, <int>[3, 2, 1]);
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.all());
@@ -238,12 +214,15 @@ void main() {
     expect(events[2], isA<KeyUpEvent>());
     expect(events[2].logicalKey, LogicalKeyboardKey.shiftLeft);
     expect(events[2].synthesized, true);
-    expect(ServicesBinding.instance.keyboard.physicalKeysPressed, equals(<PhysicalKeyboardKey>{
-      PhysicalKeyboardKey.keyA,
-    }));
-  }, variant: const KeySimulatorTransitModeVariant(<KeyDataTransitMode>{
-    KeyDataTransitMode.rawKeyData,
-  }));
+    expect(
+        ServicesBinding.instance.keyboard.physicalKeysPressed,
+        equals(<PhysicalKeyboardKey>{
+          PhysicalKeyboardKey.keyA,
+        }));
+  },
+      variant: const KeySimulatorTransitModeVariant(<KeyDataTransitMode>{
+        KeyDataTransitMode.rawKeyData,
+      }));
 
   testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -265,14 +244,16 @@ void main() {
     });
 
     // Dispatch a solitary synthesized event.
-    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
-      timeStamp: Duration.zero,
-      type: ui.KeyEventType.down,
-      logical: LogicalKeyboardKey.keyA.keyId,
-      physical: PhysicalKeyboardKey.keyA.usbHidUsage,
-      character: null,
-      synthesized: true,
-    )), false);
+    expect(
+        ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
+          timeStamp: Duration.zero,
+          type: ui.KeyEventType.down,
+          logical: LogicalKeyboardKey.keyA.keyId,
+          physical: PhysicalKeyboardKey.keyA.usbHidUsage,
+          character: null,
+          synthesized: true,
+        )),
+        false);
     expect(logs, <int>[2, 1]);
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
@@ -299,30 +280,36 @@ void main() {
     );
 
     // On macOS, a CapsLock tap yields a down event and a synthesized up event.
-    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
-      timeStamp: Duration.zero,
-      type: ui.KeyEventType.down,
-      logical: LogicalKeyboardKey.capsLock.keyId,
-      physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
-      character: null,
-      synthesized: false,
-    )), false);
-    expect(ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
-      timeStamp: Duration.zero,
-      type: ui.KeyEventType.up,
-      logical: LogicalKeyboardKey.capsLock.keyId,
-      physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
-      character: null,
-      synthesized: true,
-    )), false);
-    expect(await ServicesBinding.instance.keyEventManager.handleRawKeyMessage(<String, dynamic>{
-      'type': 'keydown',
-      'keymap': 'macos',
-      'keyCode': 0x00000039,
-      'characters': '',
-      'charactersIgnoringModifiers': '',
-      'modifiers': 0x10000,
-    }), equals(<String, dynamic>{'handled': false}));
+    expect(
+        ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
+          timeStamp: Duration.zero,
+          type: ui.KeyEventType.down,
+          logical: LogicalKeyboardKey.capsLock.keyId,
+          physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
+          character: null,
+          synthesized: false,
+        )),
+        false);
+    expect(
+        ServicesBinding.instance.keyEventManager.handleKeyData(ui.KeyData(
+          timeStamp: Duration.zero,
+          type: ui.KeyEventType.up,
+          logical: LogicalKeyboardKey.capsLock.keyId,
+          physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
+          character: null,
+          synthesized: true,
+        )),
+        false);
+    expect(
+        await ServicesBinding.instance.keyEventManager.handleRawKeyMessage(<String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'macos',
+          'keyCode': 0x00000039,
+          'characters': '',
+          'charactersIgnoringModifiers': '',
+          'modifiers': 0x10000,
+        }),
+        equals(<String, dynamic>{'handled': false}));
 
     expect(logs, <String>['RawKeyDownEvent', 'KeyDownEvent', 'KeyUpEvent']);
     logs.clear();
@@ -397,12 +384,10 @@ void main() {
 
     // Simulate a key down event.
     FlutterErrorDetails? record;
-    await _runWhileOverridingOnError(
-      () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
-        record = details;
-      }
-    );
+    await _runWhileOverridingOnError(() => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+      record = details;
+    });
 
     // ... the error should be caught.
     expect(record, isNotNull);
@@ -416,12 +401,10 @@ void main() {
     record = null;
 
     // Simulate a key up event.
-    await _runWhileOverridingOnError(
-      () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
-        record = details;
-      }
-    );
+    await _runWhileOverridingOnError(() => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+      record = details;
+    });
     // If the previous state (key down) wasn't recorded, this key up event will
     // trigger assertions.
     expect(record, isNull);
@@ -437,12 +420,10 @@ void main() {
 
     // Simulate a key down event.
     FlutterErrorDetails? record;
-    await _runWhileOverridingOnError(
-      () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
-        record = details;
-      }
-    );
+    await _runWhileOverridingOnError(() => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+      record = details;
+    });
 
     // ... the error should be caught.
     expect(record, isNotNull);
@@ -456,19 +437,15 @@ void main() {
     record = null;
 
     // Simulate a key up event.
-    await _runWhileOverridingOnError(
-      () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
-        record = details;
-      }
-    );
+    await _runWhileOverridingOnError(() => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+      record = details;
+    });
     // If the previous state (key down) wasn't recorded, this key up event will
     // trigger assertions.
     expect(record, isNull);
   }, variant: KeySimulatorTransitModeVariant.all());
 }
-
-
 
 Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
   final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;

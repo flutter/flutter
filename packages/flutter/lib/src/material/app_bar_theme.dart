@@ -32,7 +32,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use systemOverlayStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-    this.brightness,
+        this.brightness,
     Color? color,
     Color? backgroundColor,
     this.foregroundColor,
@@ -45,7 +45,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-    this.textTheme,
+        this.textTheme,
     this.centerTitle,
     this.titleSpacing,
     this.toolbarHeight,
@@ -56,12 +56,12 @@ class AppBarTheme with Diagnosticable {
       'This property is obsolete and is false by default. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-    this.backwardsCompatibility,
-  }) : assert(
-         color == null || backgroundColor == null,
-         'The color and backgroundColor parameters mean the same thing. Only specify one.',
-       ),
-       backgroundColor = backgroundColor ?? color;
+        this.backwardsCompatibility,
+  })  : assert(
+          color == null || backgroundColor == null,
+          'The color and backgroundColor parameters mean the same thing. Only specify one.',
+        ),
+        backgroundColor = backgroundColor ?? color;
 
   /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
@@ -232,7 +232,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use systemOverlayStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-    Brightness? brightness,
+        Brightness? brightness,
     Color? color,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -244,7 +244,7 @@ class AppBarTheme with Diagnosticable {
       'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-    TextTheme? textTheme,
+        TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,
     double? toolbarHeight,
@@ -255,7 +255,7 @@ class AppBarTheme with Diagnosticable {
       'This property is obsolete and is false by default. '
       'This feature was deprecated after v2.4.0-0.0.pre.',
     )
-    bool? backwardsCompatibility,
+        bool? backwardsCompatibility,
   }) {
     assert(
       color == null || backgroundColor == null,
@@ -315,47 +315,45 @@ class AppBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    brightness,
-    backgroundColor,
-    foregroundColor,
-    elevation,
-    shadowColor,
-    shape,
-    iconTheme,
-    actionsIconTheme,
-    textTheme,
-    centerTitle,
-    titleSpacing,
-    toolbarHeight,
-    toolbarTextStyle,
-    titleTextStyle,
-    systemOverlayStyle,
-    backwardsCompatibility,
-  );
+        brightness,
+        backgroundColor,
+        foregroundColor,
+        elevation,
+        shadowColor,
+        shape,
+        iconTheme,
+        actionsIconTheme,
+        textTheme,
+        centerTitle,
+        titleSpacing,
+        toolbarHeight,
+        toolbarTextStyle,
+        titleTextStyle,
+        systemOverlayStyle,
+        backwardsCompatibility,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is AppBarTheme
-        && other.brightness == brightness
-        && other.backgroundColor == backgroundColor
-        && other.foregroundColor == foregroundColor
-        && other.elevation == elevation
-        && other.shadowColor == shadowColor
-        && other.shape == shape
-        && other.iconTheme == iconTheme
-        && other.actionsIconTheme == actionsIconTheme
-        && other.textTheme == textTheme
-        && other.centerTitle == centerTitle
-        && other.titleSpacing == titleSpacing
-        && other.toolbarHeight == toolbarHeight
-        && other.toolbarTextStyle == toolbarTextStyle
-        && other.titleTextStyle == titleTextStyle
-        && other.systemOverlayStyle == systemOverlayStyle
-        && other.backwardsCompatibility == backwardsCompatibility;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is AppBarTheme &&
+        other.brightness == brightness &&
+        other.backgroundColor == backgroundColor &&
+        other.foregroundColor == foregroundColor &&
+        other.elevation == elevation &&
+        other.shadowColor == shadowColor &&
+        other.shape == shape &&
+        other.iconTheme == iconTheme &&
+        other.actionsIconTheme == actionsIconTheme &&
+        other.textTheme == textTheme &&
+        other.centerTitle == centerTitle &&
+        other.titleSpacing == titleSpacing &&
+        other.toolbarHeight == toolbarHeight &&
+        other.toolbarTextStyle == toolbarTextStyle &&
+        other.titleTextStyle == titleTextStyle &&
+        other.systemOverlayStyle == systemOverlayStyle &&
+        other.backwardsCompatibility == backwardsCompatibility;
   }
 
   @override

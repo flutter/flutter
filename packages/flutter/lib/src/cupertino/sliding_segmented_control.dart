@@ -36,7 +36,7 @@ const CupertinoDynamicColor _kThumbColor = CupertinoDynamicColor.withBrightness(
 // The amount of space by which to inset each separator.
 const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 6);
 const double _kSeparatorWidth = 1;
-const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth/2);
+const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
 
 // The minimum scale factor of the thumb, when being pressed on for a sufficient
 // amount of time.
@@ -157,8 +157,8 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
             curve: Curves.ease,
             child: AnimatedDefaultTextStyle(
               style: DefaultTextStyle.of(context)
-                .style
-                .merge(TextStyle(fontWeight: widget.highlighted ? FontWeight.w500 : FontWeight.normal)),
+                  .style
+                  .merge(TextStyle(fontWeight: widget.highlighted ? FontWeight.w500 : FontWeight.normal)),
               duration: _kHighlightAnimationDuration,
               curve: Curves.ease,
               child: ScaleTransition(
@@ -319,15 +319,15 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
-  }) : assert(children != null),
-       assert(children.length >= 2),
-       assert(padding != null),
-       assert(onValueChanged != null),
-       assert(
-         groupValue == null || children.keys.contains(groupValue),
-         'The groupValue must be either null or one of the keys in the children map.',
-       ),
-       super(key: key);
+  })  : assert(children != null),
+        assert(children.length >= 2),
+        assert(padding != null),
+        assert(onValueChanged != null),
+        assert(
+          groupValue == null || children.keys.contains(groupValue),
+          'The groupValue must be either null or one of the keys in the children map.',
+        ),
+        super(key: key);
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -415,11 +415,14 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
 
 class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
-  late final AnimationController thumbController = AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
+  late final AnimationController thumbController =
+      AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
   Animatable<Rect?>? thumbAnimatable;
 
-  late final AnimationController thumbScaleController = AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
-  late Animation<double> thumbScaleAnimation = thumbScaleController.drive(Tween<double>(begin: 1, end: _kMinThumbScale));
+  late final AnimationController thumbScaleController =
+      AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
+  late Animation<double> thumbScaleAnimation =
+      thumbScaleController.drive(Tween<double>(begin: 1, end: _kMinThumbScale));
 
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
@@ -445,7 +448,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     tap.onTapUp = onTapUp;
 
     // Empty callback to enable the long press recognizer.
-    longPress.onLongPress = () { };
+    longPress.onLongPress = () {};
 
     highlighted = widget.groupValue;
   }
@@ -511,9 +514,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     assert(renderBox.hasSize);
     final Size size = renderBox.size;
-    final Offset offCenter = details.localPosition - Offset(size.width/2, size.height/2);
-    final double l2 = math.pow(math.max(0.0, offCenter.dx.abs() - size.width/2), 2)
-                    + math.pow(math.max(0.0, offCenter.dy.abs() - size.height/2), 2) as double;
+    final Offset offCenter = details.localPosition - Offset(size.width / 2, size.height / 2);
+    final double l2 = math.pow(math.max(0.0, offCenter.dx.abs() - size.width / 2), 2) +
+        math.pow(math.max(0.0, offCenter.dy.abs() - size.height / 2), 2) as double;
     return l2 > _kTouchYDistanceThreshold;
   }
 
@@ -522,7 +525,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   // This animation must be synced with the segment scale animation (see the
   // _Segment widget) to make the overall animation look natural when the thumb
   // is not sliding.
-  void _playThumbScaleAnimation({ required bool isExpanding }) {
+  void _playThumbScaleAnimation({required bool isExpanding}) {
     assert(isExpanding != null);
     thumbScaleAnimation = thumbScaleController.drive(
       Tween<double>(
@@ -534,9 +537,10 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   void onHighlightChangedByGesture(T newValue) {
-    if (highlighted == newValue)
-      return;
-    setState(() { highlighted = newValue; });
+    if (highlighted == newValue) return;
+    setState(() {
+      highlighted = newValue;
+    });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
     // paint method will create a new tween to drive the animation with.
@@ -549,13 +553,14 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
   void onPressedChangedByGesture(T? newValue) {
     if (pressed != newValue)
-      setState(() { pressed = newValue; });
+      setState(() {
+        pressed = newValue;
+      });
   }
 
   void onTapUp(TapUpDetails details) {
     // No gesture should interfere with an ongoing thumb drag.
-    if (isThumbDragging)
-      return;
+    if (isThumbDragging) return;
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue) {
@@ -579,9 +584,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       onPressedChangedByGesture(segment);
       onHighlightChangedByGesture(segment);
     } else {
-      final T? segment = _hasDraggedTooFar(details)
-        ? null
-        : segmentForXPosition(details.localPosition.dx);
+      final T? segment = _hasDraggedTooFar(details) ? null : segmentForXPosition(details.localPosition.dx);
       onPressedChangedByGesture(segment);
     }
   }
@@ -653,7 +656,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       children.add(
         Semantics(
           button: true,
-          onTap: () { widget.onValueChanged(entry.key); },
+          onTap: () {
+            widget.onValueChanged(entry.key);
+          },
           inMutuallyExclusiveGroup: true,
           selected: widget.groupValue == entry.key,
           child: _Segment<T>(
@@ -743,7 +748,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   }
 }
 
-class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
+class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> {}
 
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
 //
@@ -778,17 +783,18 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 //    different segment). The reverse animation has the same duration and timing
 //    function.
 class _RenderSegmentedControl<T> extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
+    with
+        ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
     required int? highlightedIndex,
     required Color thumbColor,
     required double thumbScale,
     required this.state,
-  }) : _highlightedIndex = highlightedIndex,
-       _thumbColor = thumbColor,
-       _thumbScale = thumbScale,
-       assert(state != null);
+  })  : _highlightedIndex = highlightedIndex,
+        _thumbColor = thumbColor,
+        _thumbScale = thumbScale,
+        assert(state != null);
 
   final _SegmentedControlState<T> state;
 
@@ -815,8 +821,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
 
     _thumbScale = value;
-    if (state.highlighted != null)
-      markNeedsPaint();
+    if (state.highlighted != null) markNeedsPaint();
   }
 
   int? get highlightedIndex => _highlightedIndex;
@@ -967,7 +972,8 @@ class _RenderSegmentedControl<T> extends RenderBox
     double start = 0;
     while (child != null) {
       child.layout(index.isEven ? childConstraints : separatorConstraints, parentUsesSize: true);
-      final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedControlContainerBoxParentData;
       final Offset childOffset = Offset(start, 0);
       childParentData.offset = childOffset;
       start += child.size.width;
@@ -992,12 +998,12 @@ class _RenderSegmentedControl<T> extends RenderBox
   Rect? moveThumbRectInBound(Rect? thumbRect, List<RenderBox> children) {
     assert(hasSize);
     assert(children.length >= 2);
-    if (thumbRect == null)
-      return null;
+    if (thumbRect == null) return null;
 
     final Offset firstChildOffset = (children.first.parentData! as _SegmentedControlContainerBoxParentData).offset;
     final double leftMost = firstChildOffset.dx;
-    final double rightMost = (children.last.parentData! as _SegmentedControlContainerBoxParentData).offset.dx + children.last.size.width;
+    final double rightMost =
+        (children.last.parentData! as _SegmentedControlContainerBoxParentData).offset.dx + children.last.size.width;
     assert(rightMost > leftMost);
 
     // Ignore the horizontal position and the height of `thumbRect`, and
@@ -1023,7 +1029,8 @@ class _RenderSegmentedControl<T> extends RenderBox
     if (highlightedChildIndex != null) {
       final RenderBox selectedChild = children[highlightedChildIndex * 2];
 
-      final _SegmentedControlContainerBoxParentData childParentData = selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData =
+          selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
       final Rect newThumbRect = _kThumbInsets.inflateRect(childParentData.offset & selectedChild.size);
 
       // Update thumb animation's tween, in case the end rect changed (e.g., a
@@ -1039,7 +1046,7 @@ class _RenderSegmentedControl<T> extends RenderBox
           // without restarting the animation.
           final Rect startingRect = moveThumbRectInBound(currentThumbRect, children) ?? newThumbRect;
           state.thumbAnimatable = RectTween(begin: startingRect, end: newThumbRect)
-            .chain(CurveTween(curve: Interval(state.thumbController.value, 1)));
+              .chain(CurveTween(curve: Interval(state.thumbController.value, 1)));
         }
       } else {
         state.thumbAnimatable = null;
@@ -1067,19 +1074,21 @@ class _RenderSegmentedControl<T> extends RenderBox
   final Paint separatorPaint = Paint();
   void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
     assert(child != null);
-    final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
+    final _SegmentedControlContainerBoxParentData childParentData =
+        child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, offset + childParentData.offset);
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child) {
     assert(child != null);
-    final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
+    final _SegmentedControlContainerBoxParentData childParentData =
+        child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
   void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
     // Colors extracted from https://developer.apple.com/design/resources/.
-    const List<BoxShadow> thumbShadow = <BoxShadow> [
+    const List<BoxShadow> thumbShadow = <BoxShadow>[
       BoxShadow(
         color: Color(0x1F000000),
         offset: Offset(0, 3),
@@ -1110,12 +1119,12 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     assert(position != null);
     RenderBox? child = lastChild;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData! as _SegmentedControlContainerBoxParentData;
+          child.parentData! as _SegmentedControlContainerBoxParentData;
       if ((childParentData.offset & child.size).contains(position)) {
         return result.addWithPaintOffset(
           offset: childParentData.offset,

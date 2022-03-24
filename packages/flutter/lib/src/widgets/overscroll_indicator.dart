@@ -90,12 +90,12 @@ class GlowingOverscrollIndicator extends StatefulWidget {
     required this.color,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
-  }) : assert(showLeading != null),
-       assert(showTrailing != null),
-       assert(axisDirection != null),
-       assert(color != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+  })  : assert(showLeading != null),
+        assert(showTrailing != null),
+        assert(axisDirection != null),
+        assert(color != null),
+        assert(notificationPredicate != null),
+        super(key: key);
 
   /// Whether to show the overscroll glow on the side with negative scroll
   /// offsets.
@@ -203,8 +203,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   final Map<bool, bool> _accepted = <bool, bool>{false: true, true: true};
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
-      return false;
+    if (!widget.notificationPredicate(notification)) return false;
 
     // Update the paint offset with the current scroll position. This makes
     // sure that the glow effect correctly scrolls in line with the current
@@ -217,9 +216,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     // in this case, we should move the glow up 10.0 pixels and should not
     // overflow the scrollable widget's edge. https://github.com/flutter/flutter/issues/64149.
     _leadingController!._paintOffsetScrollPixels =
-      -math.min(notification.metrics.pixels - notification.metrics.minScrollExtent, _leadingController!._paintOffset);
-    _trailingController!._paintOffsetScrollPixels =
-      -math.min(notification.metrics.maxScrollExtent - notification.metrics.pixels, _trailingController!._paintOffset);
+        -math.min(notification.metrics.pixels - notification.metrics.minScrollExtent, _leadingController!._paintOffset);
+    _trailingController!._paintOffsetScrollPixels = -math.min(
+        notification.metrics.maxScrollExtent - notification.metrics.pixels, _trailingController!._paintOffset);
 
     if (notification is OverscrollNotification) {
       _GlowController? controller;
@@ -232,7 +231,8 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       }
       final bool isLeading = controller == _leadingController;
       if (_lastNotificationType is! OverscrollNotification) {
-        final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
+        final OverscrollIndicatorNotification confirmationNotification =
+            OverscrollIndicatorNotification(leading: isLeading);
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
         if (_accepted[isLeading]!) {
@@ -256,10 +256,12 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             final Offset position = renderer.globalToLocal(notification.dragDetails!.globalPosition);
             switch (notification.metrics.axis) {
               case Axis.horizontal:
-                controller!.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
+                controller!
+                    .pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
                 break;
               case Axis.vertical:
-                controller!.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
+                controller!
+                    .pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
                 break;
             }
           }
@@ -317,13 +319,12 @@ class _GlowController extends ChangeNotifier {
     required TickerProvider vsync,
     required Color color,
     required Axis axis,
-  }) : assert(vsync != null),
-       assert(color != null),
-       assert(axis != null),
-       _color = color,
-       _axis = axis {
-    _glowController = AnimationController(vsync: vsync)
-      ..addStatusListener(_changePhase);
+  })  : assert(vsync != null),
+        assert(color != null),
+        assert(axis != null),
+        _color = color,
+        _axis = axis {
+    _glowController = AnimationController(vsync: vsync)..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
       parent: _glowController,
       curve: Curves.decelerate,
@@ -359,8 +360,7 @@ class _GlowController extends ChangeNotifier {
   Color _color;
   set color(Color value) {
     assert(color != null);
-    if (color == value)
-      return;
+    if (color == value) return;
     _color = value;
     notifyListeners();
   }
@@ -369,8 +369,7 @@ class _GlowController extends ChangeNotifier {
   Axis _axis;
   set axis(Axis value) {
     assert(axis != null);
-    if (axis == value)
-      return;
+    if (axis == value) return;
     _axis = value;
     notifyListeners();
   }
@@ -460,13 +459,11 @@ class _GlowController extends ChangeNotifier {
   }
 
   void scrollEnd() {
-    if (_state == _GlowState.pull)
-      _recede(_recedeTime);
+    if (_state == _GlowState.pull) _recede(_recedeTime);
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed)
-      return;
+    if (status != AnimationStatus.completed) return;
     switch (_state) {
       case _GlowState.absorb:
         _recede(_recedeTime);
@@ -482,8 +479,7 @@ class _GlowController extends ChangeNotifier {
   }
 
   void _recede(Duration duration) {
-    if (_state == _GlowState.recede || _state == _GlowState.idle)
-      return;
+    if (_state == _GlowState.recede || _state == _GlowState.idle) return;
     _pullRecedeTimer?.cancel();
     _pullRecedeTimer = null;
     _glowOpacityTween.begin = _glowOpacity.value;
@@ -498,7 +494,8 @@ class _GlowController extends ChangeNotifier {
   void _tickDisplacement(Duration elapsed) {
     if (_displacementTickerLastElapsed != null) {
       final double t = (elapsed.inMicroseconds - _displacementTickerLastElapsed!.inMicroseconds).toDouble();
-      _displacement = _displacementTarget - (_displacementTarget - _displacement) * math.pow(2.0, -t / _crossAxisHalfTime.inMicroseconds);
+      _displacement = _displacementTarget -
+          (_displacementTarget - _displacement) * math.pow(2.0, -t / _crossAxisHalfTime.inMicroseconds);
       notifyListeners();
     }
     if (nearEqual(_displacementTarget, _displacement, Tolerance.defaultTolerance.distance)) {
@@ -510,8 +507,7 @@ class _GlowController extends ChangeNotifier {
   }
 
   void paint(Canvas canvas, Size size) {
-    if (_glowOpacity.value == 0.0)
-      return;
+    if (_glowOpacity.value == 0.0) return;
     final double baseGlowScale = size.width > size.height ? size.height / size.width : 1.0;
     final double radius = size.width * 3.0 / 2.0;
     final double height = math.min(size.height, size.width * _widthToHeightFactor);
@@ -540,8 +536,8 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     required this.axisDirection,
     Listenable? repaint,
   }) : super(
-    repaint: repaint,
-  );
+          repaint: repaint,
+        );
 
   /// The controller for the overscroll glow on the side with negative scroll offsets.
   ///
@@ -558,9 +554,9 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 
   static const double piOver2 = math.pi / 2.0;
 
-  void _paintSide(Canvas canvas, Size size, _GlowController? controller, AxisDirection axisDirection, GrowthDirection growthDirection) {
-    if (controller == null)
-      return;
+  void _paintSide(Canvas canvas, Size size, _GlowController? controller, AxisDirection axisDirection,
+      GrowthDirection growthDirection) {
+    if (controller == null) return;
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
         controller.paint(canvas, size);
@@ -597,8 +593,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GlowingOverscrollIndicatorPainter oldDelegate) {
-    return oldDelegate.leadingController != leadingController
-        || oldDelegate.trailingController != trailingController;
+    return oldDelegate.leadingController != leadingController || oldDelegate.trailingController != trailingController;
   }
 
   @override
@@ -649,9 +644,9 @@ class StretchingOverscrollIndicator extends StatefulWidget {
     required this.axisDirection,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
-  }) : assert(axisDirection != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+  })  : assert(axisDirection != null),
+        assert(notificationPredicate != null),
+        super(key: key);
 
   /// {@macro flutter.overscroll.axisDirection}
   final AxisDirection axisDirection;
@@ -694,13 +689,13 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   bool _accepted = true;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
-      return false;
+    if (!widget.notificationPredicate(notification)) return false;
 
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
       if (_lastNotification.runtimeType is! OverscrollNotification) {
-        final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
+        final OverscrollIndicatorNotification confirmationNotification =
+            OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
         confirmationNotification.dispatch(context);
         _accepted = confirmationNotification._accepted;
       }
@@ -719,7 +714,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             // amount of overscroll - https://github.com/flutter/flutter/issues/11884
             final double viewportDimension = notification.metrics.viewportDimension;
             final double distanceForPull =
-              (notification.overscroll.abs() / viewportDimension) + _stretchController.pullDistance;
+                (notification.overscroll.abs() / viewportDimension) + _stretchController.pullDistance;
             final double clampedOverscroll = distanceForPull.clamp(0, 1.0);
             _stretchController.pull(clampedOverscroll);
           }
@@ -736,21 +731,13 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     // Accounts for reversed scrollables by checking the AxisDirection
     switch (widget.axisDirection) {
       case AxisDirection.up:
-        return overscroll > 0
-            ? AlignmentDirectional.topCenter
-            : AlignmentDirectional.bottomCenter;
+        return overscroll > 0 ? AlignmentDirectional.topCenter : AlignmentDirectional.bottomCenter;
       case AxisDirection.right:
-        return overscroll > 0
-            ? AlignmentDirectional.centerEnd
-            : AlignmentDirectional.centerStart;
+        return overscroll > 0 ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
       case AxisDirection.down:
-        return overscroll > 0
-            ? AlignmentDirectional.bottomCenter
-            : AlignmentDirectional.topCenter;
+        return overscroll > 0 ? AlignmentDirectional.bottomCenter : AlignmentDirectional.topCenter;
       case AxisDirection.left:
-        return overscroll > 0
-            ? AlignmentDirectional.centerStart
-            : AlignmentDirectional.centerEnd;
+        return overscroll > 0 ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd;
     }
   }
 
@@ -784,9 +771,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               break;
           }
 
-          final AlignmentDirectional alignment = _getAlignmentForAxisDirection(
-            _lastOverscrollNotification?.overscroll ?? 0.0
-          );
+          final AlignmentDirectional alignment =
+              _getAlignmentForAxisDirection(_lastOverscrollNotification?.overscroll ?? 0.0);
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
 
@@ -800,8 +786,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           // screen size in the main axis. If the viewport takes up the whole
           // screen, overflow from transforming the viewport is irrelevant.
           return ClipRect(
-            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
-              ? Clip.hardEdge : Clip.none,
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize ? Clip.hardEdge : Clip.none,
             child: transform,
           );
         },
@@ -818,9 +803,8 @@ enum _StretchState {
 }
 
 class _StretchController extends ChangeNotifier {
-  _StretchController({ required TickerProvider vsync }) {
-    _stretchController = AnimationController(vsync: vsync)
-      ..addStatusListener(_changePhase);
+  _StretchController({required TickerProvider vsync}) {
+    _stretchController = AnimationController(vsync: vsync)..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
       parent: _stretchController,
       curve: Curves.decelerate,
@@ -866,7 +850,7 @@ class _StretchController extends ChangeNotifier {
     assert(normalizedOverscroll >= 0.0);
     _pullDistance = normalizedOverscroll;
     _stretchSizeTween.begin = _stretchSize.value;
-    final double linearIntensity =_stretchIntensity * _pullDistance;
+    final double linearIntensity = _stretchIntensity * _pullDistance;
     final double exponentialIntensity = _stretchIntensity * (1 - math.exp(-_pullDistance * _exponentialScalar));
     _stretchSizeTween.end = linearIntensity + exponentialIntensity;
     _stretchController.duration = _stretchDuration;
@@ -882,13 +866,11 @@ class _StretchController extends ChangeNotifier {
   }
 
   void scrollEnd() {
-    if (_state == _StretchState.pull)
-      _recede(_stretchDuration);
+    if (_state == _StretchState.pull) _recede(_stretchDuration);
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed)
-      return;
+    if (status != AnimationStatus.completed) return;
     switch (_state) {
       case _StretchState.absorb:
         _recede(_stretchDuration);
@@ -904,8 +886,7 @@ class _StretchController extends ChangeNotifier {
   }
 
   void _recede(Duration duration) {
-    if (_state == _StretchState.recede || _state == _StretchState.idle)
-      return;
+    if (_state == _StretchState.recede || _state == _StretchState.idle) return;
     _stretchSizeTween.begin = _stretchSize.value;
     _stretchSizeTween.end = 0.0;
     _stretchController.duration = duration;

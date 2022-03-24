@@ -169,7 +169,8 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view =
+        RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -182,7 +183,8 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view =
+        RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -247,8 +249,7 @@ void main() {
   test('LeaderLayer.applyTransform can be called after retained rendering', () {
     void expectTransform(RenderObject leader) {
       final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
-      final Matrix4 expected = Matrix4.identity()
-        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 expected = Matrix4.identity()..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
       final Matrix4 transformed = Matrix4.identity();
       leaderLayer.applyTransform(null, transformed);
       expect(transformed, expected);
@@ -257,7 +258,7 @@ void main() {
     final LayerLink link = LayerLink();
     late RenderLeaderLayer leader;
     final RenderRepaintBoundary root = RenderRepaintBoundary(
-      child:RenderRepaintBoundary(
+      child: RenderRepaintBoundary(
         child: leader = RenderLeaderLayer(link: link),
       ),
     );
@@ -338,7 +339,8 @@ void main() {
     layer.debugFillProperties(builder);
     return builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
@@ -543,7 +545,9 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);

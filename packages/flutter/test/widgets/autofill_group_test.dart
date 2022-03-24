@@ -76,7 +76,9 @@ void main() {
     expect(scopeState.autofillClients.toList(), <State<TextField>>[clientState1]);
 
     // Add to scope.
-    setState(() { client2 = const TextField(autofillHints: <String>['2']); });
+    setState(() {
+      client2 = const TextField(autofillHints: <String>['2']);
+    });
 
     await tester.pump();
 
@@ -85,7 +87,9 @@ void main() {
     expect(scopeState.autofillClients.length, 2);
 
     // Remove from scope again.
-    setState(() { client2 = const TextField(autofillHints: null); });
+    setState(() {
+      client2 = const TextField(autofillHints: null);
+    });
 
     await tester.pump();
 
@@ -158,7 +162,7 @@ void main() {
     const Key group3 = Key('group3');
     const TextField placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
 
-    List<Widget> children = const <Widget> [
+    List<Widget> children = const <Widget>[
       AutofillGroup(
         key: group1,
         child: AutofillGroup(child: placeholder),
@@ -192,7 +196,7 @@ void main() {
 
     // Remove the first topmost group group1. Should commit.
     setState(() {
-      children = const <Widget> [
+      children = const <Widget>[
         AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
         AutofillGroup(
           key: group3,
@@ -212,7 +216,7 @@ void main() {
 
     // Remove the topmost group group2. Should cancel.
     setState(() {
-      children = const <Widget> [
+      children = const <Widget>[
         AutofillGroup(
           key: group3,
           child: AutofillGroup(child: placeholder),
@@ -231,7 +235,7 @@ void main() {
 
     // Remove the inner group within group3. No action.
     setState(() {
-      children = const <Widget> [
+      children = const <Widget>[
         AutofillGroup(
           key: group3,
           child: placeholder,
@@ -250,7 +254,7 @@ void main() {
 
     // Remove the topmosts group group3. Should commit.
     setState(() {
-      children = const <Widget> [];
+      children = const <Widget>[];
     });
 
     await tester.pump();

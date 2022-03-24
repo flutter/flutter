@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-Widget wrap({ required Widget child }) {
+Widget wrap({required Widget child}) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: Directionality(
@@ -29,7 +29,9 @@ void main() {
     await tester.pumpWidget(wrap(
       child: SwitchListTile(
         value: true,
-        onChanged: (bool value) { log.add(value); },
+        onChanged: (bool value) {
+          log.add(value);
+        },
         title: const Text('Hello'),
       ),
     ));
@@ -46,20 +48,20 @@ void main() {
         children: <Widget>[
           SwitchListTile(
             value: true,
-            onChanged: (bool value) { },
+            onChanged: (bool value) {},
             title: const Text('AAA'),
             secondary: const Text('aaa'),
           ),
           CheckboxListTile(
             value: true,
-            onChanged: (bool? value) { },
+            onChanged: (bool? value) {},
             title: const Text('BBB'),
             secondary: const Text('bbb'),
           ),
           RadioListTile<bool>(
             value: true,
             groupValue: false,
-            onChanged: (bool? value) { },
+            onChanged: (bool? value) {},
             title: const Text('CCC'),
             secondary: const Text('ccc'),
           ),
@@ -68,51 +70,53 @@ void main() {
     ));
 
     // This test verifies that the label and the control get merged.
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.hasToggledState,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isFocusable,
-            SemanticsFlag.isToggled,
+    expect(
+        semantics,
+        hasSemantics(TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasToggledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isToggled,
+              ],
+              actions: SemanticsAction.tap.index,
+              label: 'aaa\nAAA',
+            ),
+            TestSemantics.rootChild(
+              id: 3,
+              rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+              transform: Matrix4.translationValues(0.0, 56.0, 0.0),
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isChecked,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: SemanticsAction.tap.index,
+              label: 'bbb\nBBB',
+            ),
+            TestSemantics.rootChild(
+              id: 5,
+              rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+              transform: Matrix4.translationValues(0.0, 112.0, 0.0),
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+              ],
+              actions: SemanticsAction.tap.index,
+              label: 'CCC\nccc',
+            ),
           ],
-          actions: SemanticsAction.tap.index,
-          label: 'aaa\nAAA',
-        ),
-        TestSemantics.rootChild(
-          id: 3,
-          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          transform: Matrix4.translationValues(0.0, 56.0, 0.0),
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isChecked,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isFocusable,
-          ],
-          actions: SemanticsAction.tap.index,
-          label: 'bbb\nBBB',
-        ),
-        TestSemantics.rootChild(
-          id: 5,
-          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          transform: Matrix4.translationValues(0.0, 112.0, 0.0),
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isFocusable,
-            SemanticsFlag.isInMutuallyExclusiveGroup,
-          ],
-          actions: SemanticsAction.tap.index,
-          label: 'CCC\nccc',
-        ),
-      ],
-    )));
+        )));
 
     semantics.dispose();
   });
@@ -123,15 +127,16 @@ void main() {
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(8.0)),
         child: Directionality(
-        textDirection: TextDirection.ltr,
-        child:
-          StatefulBuilder(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Material(
                 child: SwitchListTile(
                   value: value,
                   onChanged: (bool newValue) {
-                    setState(() { value = newValue; });
+                    setState(() {
+                      value = newValue;
+                    });
                   },
                   activeColor: Colors.red[500],
                   activeTrackColor: Colors.green[500],
@@ -194,7 +199,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       expect(find.byType(CupertinoSwitch), findsOneWidget);
@@ -204,7 +209,12 @@ void main() {
       expect(value, isTrue, reason: 'on ${platform.name}');
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows
+    ]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.
@@ -401,7 +411,7 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({Color? activeColor, Color? toggleableActiveColor}) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
           toggleableActiveColor: toggleableActiveColor,
@@ -413,7 +423,7 @@ void main() {
               selected: true,
               title: const Text('title'),
               value: true,
-              onChanged: (bool? value) { },
+              onChanged: (bool? value) {},
             ),
           ),
         ),
@@ -522,8 +532,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: Center(
-          child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return Container(
               width: 100,
               height: 100,
@@ -549,12 +558,11 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(key))),
-      paints
-        ..rect(
+        Material.of(tester.element(find.byKey(key))),
+        paints
+          ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
-    );
+          ));
   });
 }

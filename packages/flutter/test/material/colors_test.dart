@@ -13,7 +13,7 @@ void main() {
     const MaterialColor color = MaterialColor(
       500,
       <int, Color>{
-         50: Color(0x00000050),
+        50: Color(0x00000050),
         100: Color(0x00000100),
         200: Color(0x00000200),
         300: Color(0x00000300),
@@ -81,5 +81,4 @@ void main() {
       }
     }
   });
-
 }

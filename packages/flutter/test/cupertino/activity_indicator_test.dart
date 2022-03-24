@@ -154,8 +154,7 @@ void main() {
     // first tick was changed to be at 12 o'clock.
     expect(
       find.byType(CupertinoActivityIndicator),
-      paints
-        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
+      paints..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
     );
   });
 
@@ -179,9 +178,7 @@ void main() {
 
     expect(
       find.byType(CupertinoActivityIndicator),
-      paints
-        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
-                color: const Color(0x935d3fd3)),
+      paints..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10), color: const Color(0x935d3fd3)),
     );
   });
 }

@@ -108,7 +108,7 @@ void main() {
   testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp());
     expect(_getTextStyle(tester).color, CupertinoColors.label);
-    expect(_getIcon(tester).color,  CupertinoColors.label);
+    expect(_getIcon(tester).color, CupertinoColors.label);
   });
 
   testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
@@ -121,5 +121,4 @@ void main() {
     await tester.pumpWidget(_getApp(isDefaultAction: true));
     expect(_getTextStyle(tester).fontWeight, kDefaultActionWeight);
   });
-
 }

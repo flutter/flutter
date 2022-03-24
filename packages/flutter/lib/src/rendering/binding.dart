@@ -77,8 +77,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
-          if (debugPaintSizeEnabled == value)
-            return Future<void>.value();
+          if (debugPaintSizeEnabled == value) return Future<void>.value();
           debugPaintSizeEnabled = value;
           return _forceRepaint();
         },
@@ -87,8 +86,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugPaintBaselinesEnabled',
         getter: () async => debugPaintBaselinesEnabled,
         setter: (bool value) {
-          if (debugPaintBaselinesEnabled == value)
-            return Future<void>.value();
+          if (debugPaintBaselinesEnabled == value) return Future<void>.value();
           debugPaintBaselinesEnabled = value;
           return _forceRepaint();
         },
@@ -99,15 +97,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         setter: (bool value) {
           final bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
-          if (repaint)
-            return _forceRepaint();
+          if (repaint) return _forceRepaint();
           return Future<void>.value();
         },
       );
       registerServiceExtension(
         name: 'debugDumpLayerTree',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
+          final String data =
+              RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
           return <String, Object>{
             'data': data,
           };
@@ -117,8 +115,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugDisableClipLayers',
         getter: () async => debugDisableClipLayers,
         setter: (bool value) {
-          if (debugDisableClipLayers == value)
-            return Future<void>.value();
+          if (debugDisableClipLayers == value) return Future<void>.value();
           debugDisableClipLayers = value;
           return _forceRepaint();
         },
@@ -127,8 +124,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugDisablePhysicalShapeLayers',
         getter: () async => debugDisablePhysicalShapeLayers,
         setter: (bool value) {
-          if (debugDisablePhysicalShapeLayers == value)
-            return Future<void>.value();
+          if (debugDisablePhysicalShapeLayers == value) return Future<void>.value();
           debugDisablePhysicalShapeLayers = value;
           return _forceRepaint();
         },
@@ -137,8 +133,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugDisableOpacityLayers',
         getter: () async => debugDisableOpacityLayers,
         setter: (bool value) {
-          if (debugDisableOpacityLayers == value)
-            return Future<void>.value();
+          if (debugDisableOpacityLayers == value) return Future<void>.value();
           debugDisableOpacityLayers = value;
           return _forceRepaint();
         },
@@ -160,8 +155,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance.renderView.debugSemantics
-            ?.toStringDeep() ?? 'Semantics not collected.';
+          final String data =
+              RendererBinding.instance.renderView.debugSemantics?.toStringDeep() ?? 'Semantics not collected.';
           return <String, Object>{
             'data': data,
           };
@@ -171,7 +166,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
         callback: (Map<String, String> parameters) async {
           final String data = RendererBinding.instance.renderView.debugSemantics
-            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ?? 'Semantics not collected.';
+                  ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ??
+              'Semantics not collected.';
           return <String, Object>{
             'data': data,
           };
@@ -181,16 +177,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'profileRenderObjectPaints',
         getter: () async => debugProfilePaintsEnabled,
         setter: (bool value) async {
-          if (debugProfilePaintsEnabled != value)
-            debugProfilePaintsEnabled = value;
+          if (debugProfilePaintsEnabled != value) debugProfilePaintsEnabled = value;
         },
       );
       registerBoolServiceExtension(
         name: 'profileRenderObjectLayouts',
         getter: () async => debugProfileLayoutsEnabled,
         setter: (bool value) async {
-          if (debugProfileLayoutsEnabled != value)
-            debugProfileLayoutsEnabled = value;
+          if (debugProfileLayoutsEnabled != value) debugProfileLayoutsEnabled = value;
         },
       );
     }
@@ -210,6 +204,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
     renderView.prepareInitialFrame();
   }
+
   bool _debugIsRenderViewInitialized = false;
 
   /// The object that manages state about currently connected mice, for hover
@@ -224,6 +219,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _pipelineOwner.rootNode! as RenderView;
+
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
@@ -245,7 +241,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// See [dart:ui.PlatformDispatcher.onTextScaleFactorChanged].
   @protected
-  void handleTextScaleFactorChanged() { }
+  void handleTextScaleFactorChanged() {}
 
   /// Called when the platform brightness changes.
   ///
@@ -281,7 +277,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// See [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
   @protected
-  void handlePlatformBrightnessChanged() { }
+  void handlePlatformBrightnessChanged() {}
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
@@ -321,7 +317,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // pressed. When the button is pressed, normal hit test uses a cached
       // result, but MouseTracker requires that the hit test is re-executed to
       // update the hovering events.
-      () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
+      () => (hitTestResult == null || event is PointerMoveEvent)
+          ? renderView.hitTestMouseTrackers(event.position)
+          : hitTestResult,
     );
     super.dispatchEvent(event, hitTestResult);
   }
@@ -428,8 +426,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     // Always schedule a warm up frame even if the deferral count is not down to
     // zero yet since the removal of a deferral may uncover new deferrals that
     // are lower in the widget tree.
-    if (!_firstFrameSent)
-      scheduleWarmUpFrame();
+    if (!_firstFrameSent) scheduleWarmUpFrame();
   }
 
   /// Call this to pretend that no frames have been sent to the engine yet.
@@ -564,7 +561,8 @@ void debugDumpLayerTree() {
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ??
+      'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
@@ -585,7 +583,8 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// rendering layer directly. If you are writing to a higher-level
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding (see [WidgetsFlutterBinding]).
-class RenderingFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, SemanticsBinding, PaintingBinding, RendererBinding {
+class RenderingFlutterBinding extends BindingBase
+    with GestureBinding, SchedulerBinding, ServicesBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Creates a binding for the rendering layer.
   ///
   /// The `root` render box is attached directly to the [renderView] and is
@@ -593,7 +592,7 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// This binding does not automatically schedule any frames. Callers are
   /// responsible for deciding when to first call [scheduleFrame].
-  RenderingFlutterBinding({ RenderBox? root }) {
+  RenderingFlutterBinding({RenderBox? root}) {
     assert(renderView != null);
     renderView.child = root;
   }
@@ -607,8 +606,7 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   /// if you are using it directly. If you are using the widgets framework,
   /// see [WidgetsFlutterBinding.ensureInitialized].
   static RendererBinding ensureInitialized() {
-    if (RendererBinding._instance == null)
-      RenderingFlutterBinding();
+    if (RendererBinding._instance == null) RenderingFlutterBinding();
     return RendererBinding.instance;
   }
 }

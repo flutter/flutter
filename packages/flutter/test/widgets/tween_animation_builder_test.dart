@@ -60,7 +60,6 @@ void main() {
     expect(values, <int>[100]);
   });
 
-
   testWidgets('No initial animation when begin=end', (WidgetTester tester) async {
     final List<int> values = <int>[];
     int endCount = 0;
@@ -352,7 +351,8 @@ void main() {
     expect(values, everyElement(100));
   });
 
-  testWidgets('Setting same tween and direction while gapless animation is in progress works', (WidgetTester tester) async {
+  testWidgets('Setting same tween and direction while gapless animation is in progress works',
+      (WidgetTester tester) async {
     final List<int> values = <int>[];
     Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
@@ -393,15 +393,15 @@ void main() {
     await tester.pumpWidget(
       TweenAnimationBuilder<Size?>(
         duration: const Duration(seconds: 1),
-        tween: SizeTween(end: const Size(10,10)),
+        tween: SizeTween(end: const Size(10, 10)),
         builder: (BuildContext context, Size? s, Widget? child) {
           values.add(s);
           return const Placeholder();
         },
       ),
     );
-    expect(values, <Size>[const Size(10,10)]);
+    expect(values, <Size>[const Size(10, 10)]);
     await tester.pump(const Duration(seconds: 2));
-    expect(values, <Size>[const Size(10,10)]);
+    expect(values, <Size>[const Size(10, 10)]);
   });
 }

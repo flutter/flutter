@@ -33,7 +33,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   /// Creates a [OutlinedButtonThemeData].
   ///
   /// The [style] may be null.
-  const OutlinedButtonThemeData({ this.style });
+  const OutlinedButtonThemeData({this.style});
 
   /// Overrides for [OutlinedButton]'s default style.
   ///
@@ -46,9 +46,8 @@ class OutlinedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two outlined button themes.
   static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null)
-      return null;
+    assert(t != null);
+    if (a == null && b == null) return null;
     return OutlinedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
@@ -59,10 +58,8 @@ class OutlinedButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
     return other is OutlinedButtonThemeData && other.style == style;
   }
 
@@ -92,7 +89,8 @@ class OutlinedButtonTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  })  : assert(data != null),
+        super(key: key, child: child);
 
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;

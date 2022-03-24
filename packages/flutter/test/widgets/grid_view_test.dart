@@ -63,8 +63,7 @@ void main() {
     await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
-    for (int i = 0; i < 4; ++i)
-      expect(find.text(kStates[i]), findsNothing);
+    for (int i = 0; i < 4; ++i) expect(find.text(kStates[i]), findsNothing);
 
     for (int i = 4; i < 12; ++i) {
       await tester.tap(find.text(kStates[i]));
@@ -167,12 +166,14 @@ void main() {
 
     expect(tester.getSize(find.text('4')), equals(const Size(200.0 / 0.75, 200.0)));
 
-    expect(log, equals(<int>[
-      0, 1, 2, // col 0
-      3, 4, 5, // col 1
-      6, 7, 8, // col 2
-      9, 10, 11, // col 3 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          0, 1, 2, // col 0
+          3, 4, 5, // col 1
+          6, 7, 8, // col 2
+          9, 10, 11, // col 3 (in cached area)
+        ]));
     log.clear();
 
     for (int i = 0; i < 9; i++) {
@@ -189,14 +190,16 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[
-      30, 31, 32, // col 10 (in cached area)
-      33, 34, 35, // col 11
-      36, 37, 38, // col 12
-      39, 40, 41, // col 13
-      42, 43, 44, // col 14
-      45, 46, 47, // col 15 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          30, 31, 32, // col 10 (in cached area)
+          33, 34, 35, // col 11
+          36, 37, 38, // col 12
+          39, 40, 41, // col 13
+          42, 43, 44, // col 14
+          45, 46, 47, // col 15 (in cached area)
+        ]));
     log.clear();
 
     for (int i = 0; i < 33; i++) {
@@ -214,14 +217,16 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[
-      6, 7, 8, // col2 (in cached area)
-      9, 10, 11, // col 3
-      12, 13, 14, // col 4
-      15, 16, 17, // col 5
-      18, 19, 20, // col 6
-      21, 22, 23, // col 7 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          6, 7, 8, // col2 (in cached area)
+          9, 10, 11, // col 3
+          12, 13, 14, // col 4
+          15, 16, 17, // col 5
+          18, 19, 20, // col 6
+          21, 22, 23, // col 7 (in cached area)
+        ]));
     log.clear();
 
     for (int i = 0; i < 9; i++) {
@@ -259,13 +264,15 @@ void main() {
 
     expect(tester.getSize(find.text('4')), equals(const Size(200.0, 200.0)));
 
-    expect(log, equals(<int>[
-      0, 1, 2, 3, // row 0
-      4, 5, 6, 7, // row 1
-      8, 9, 10, 11, // row 2
-      12, 13, 14, 15, // row 3 (in cached area)
-      16, 17, 18, 19, // row 4 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          0, 1, 2, 3, // row 0
+          4, 5, 6, 7, // row 1
+          8, 9, 10, 11, // row 2
+          12, 13, 14, 15, // row 3 (in cached area)
+          16, 17, 18, 19, // row 4 (in cached area)
+        ]));
     for (int i = 0; i < 12; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
@@ -293,13 +300,15 @@ void main() {
       ),
     );
 
-    expect(log, equals(<int>[
-      0, 1, 2, 3, // row 0
-      4, 5, 6, 7, // row 1
-      8, 9, 10, 11, // row 2
-      12, 13, 14, 15, // row 3 (in cached area)
-      16, 17, 18, 19, // row 4 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          0, 1, 2, 3, // row 0
+          4, 5, 6, 7, // row 1
+          8, 9, 10, 11, // row 2
+          12, 13, 14, 15, // row 3 (in cached area)
+          16, 17, 18, 19, // row 4 (in cached area)
+        ]));
     log.clear();
 
     expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
@@ -354,13 +363,15 @@ void main() {
 
     expect(tester.getSize(find.text('4')), equals(const Size(200.0, 200.0)));
 
-    expect(log, equals(<int>[
-      0, 1, 2, 3, // row 0
-      4, 5, 6, 7, // row 1
-      8, 9, 10, 11, // row 2
-      12, 13, 14, 15, // row 3 (in cached area)
-      16, 17, 18, 19, // row 4 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          0, 1, 2, 3, // row 0
+          4, 5, 6, 7, // row 1
+          8, 9, 10, 11, // row 2
+          12, 13, 14, 15, // row 3 (in cached area)
+          16, 17, 18, 19, // row 4 (in cached area)
+        ]));
     for (int i = 0; i < 12; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
@@ -388,13 +399,15 @@ void main() {
       ),
     );
 
-    expect(log, equals(<int>[
-      0, 1, 2, 3, // row 0
-      4, 5, 6, 7, // row 1
-      8, 9, 10, 11, // row 2
-      12, 13, 14, 15, // row 3 (in cached area)
-      16, 17, 18, 19, // row 4 (in cached area)
-    ]));
+    expect(
+        log,
+        equals(<int>[
+          0, 1, 2, 3, // row 0
+          4, 5, 6, 7, // row 1
+          8, 9, 10, 11, // row 2
+          12, 13, 14, 15, // row 3 (in cached area)
+          16, 17, 18, 19, // row 4 (in cached area)
+        ]));
     log.clear();
 
     expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
@@ -419,15 +432,24 @@ void main() {
             child: GridView.count(
               cacheExtent: 0.0,
               crossAxisCount: 2,
-              children: <Widget>[ container, container, container, container ],
+              children: <Widget>[container, container, container, container],
             ),
           ),
         ),
       ),
     );
 
-    expect(find.byType(GridView), paints..rect(color: green)..rect(color: green));
-    expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
+    expect(
+        find.byType(GridView),
+        paints
+          ..rect(color: green)
+          ..rect(color: green));
+    expect(
+        find.byType(GridView),
+        isNot(paints
+          ..rect(color: green)
+          ..rect(color: green)
+          ..rect(color: green)));
   });
 
   testWidgets('GridView in zero context', (WidgetTester tester) async {
@@ -666,7 +688,7 @@ void main() {
         child: GridView.custom(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           childrenDelegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Container(height: 2000.0),
+            (BuildContext context, int index) => Container(height: 2000.0),
             childCount: 1,
           ),
           clipBehavior: Clip.antiAlias,
@@ -707,7 +729,8 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected', (WidgetTester tester) async {
+  testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected',
+      (WidgetTester tester) async {
     const int crossAxisCount = 4;
     const double mainAxisExtent = 100.0;
 
@@ -759,15 +782,17 @@ void main() {
     expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
   });
 
-  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent throws assertion error when maxCrossAxisExtent is 0', (WidgetTester tester) async {
+  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent throws assertion error when maxCrossAxisExtent is 0',
+      (WidgetTester tester) async {
     const double maxCrossAxisExtent = 0;
 
-    expect(() => Directionality(
-      textDirection: TextDirection.ltr,
-      child: GridView.extent(
-        maxCrossAxisExtent: maxCrossAxisExtent,
-      ),
-    ), throwsAssertionError);
-
+    expect(
+        () => Directionality(
+              textDirection: TextDirection.ltr,
+              child: GridView.extent(
+                maxCrossAxisExtent: maxCrossAxisExtent,
+              ),
+            ),
+        throwsAssertionError);
   });
 }

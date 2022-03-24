@@ -538,7 +538,8 @@ void main() {
     final Key key = UniqueKey();
     dynamic semanticEvent;
     int? radioValue = 2;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
+        (dynamic message) async {
       semanticEvent = message;
     });
 
@@ -620,7 +621,7 @@ void main() {
             groupValue: true,
             value: true,
             title: const Text('Title'),
-            onChanged: (_){},
+            onChanged: (_) {},
             contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
           ),
         ),
@@ -712,7 +713,7 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({Color? activeColor, Color? toggleableActiveColor}) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
           toggleableActiveColor: toggleableActiveColor,
@@ -725,7 +726,7 @@ void main() {
               title: const Text('title'),
               value: false,
               groupValue: true,
-              onChanged: (bool? newValue) { },
+              onChanged: (bool? newValue) {},
             ),
           ),
         ),

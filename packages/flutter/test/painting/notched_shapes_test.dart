@@ -115,8 +115,7 @@ bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
     for (double i = 0.0; i < 1; i += 0.01) {
       final double x = i * radius * math.cos(theta);
       final double y = i * radius * math.sin(theta);
-      if (path.contains(Offset(x,y) + circleBounds.center))
-        return false;
+      if (path.contains(Offset(x, y) + circleBounds.center)) return false;
     }
   }
   return true;

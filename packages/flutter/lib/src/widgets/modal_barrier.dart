@@ -137,9 +137,11 @@ class ModalBarrier extends StatelessWidget {
               cursor: SystemMouseCursors.basic,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: color == null ? null : ColoredBox(
-                  color: color!,
-                ),
+                child: color == null
+                    ? null
+                    : ColoredBox(
+                        color: color!,
+                      ),
               ),
             ),
           ),
@@ -225,8 +227,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
 // It is similar to [TapGestureRecognizer.onTapDown], but accepts any single
 // button, which means the gesture also takes parts in gesture arenas.
 class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
-  _AnyTapGestureRecognizer({ Object? debugOwner })
-    : super(debugOwner: debugOwner);
+  _AnyTapGestureRecognizer({Object? debugOwner}) : super(debugOwner: debugOwner);
 
   VoidCallback? onAnyTapUp;
   VoidCallback? onAnyTapCancel;
@@ -273,7 +274,6 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
   }
 }
 
-
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
   const _AnyTapGestureRecognizerFactory({this.onAnyTapUp, this.onAnyTapCancel});
 
@@ -297,9 +297,9 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
     Key? key,
     required this.child,
     required this.onDismiss,
-  }) : assert(child != null),
-       assert(onDismiss != null),
-       super(key: key);
+  })  : assert(child != null),
+        assert(onDismiss != null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   /// See [RawGestureDetector.child].

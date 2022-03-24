@@ -61,7 +61,6 @@ class DisposableBuildContext<T extends State> {
     return true;
   }
 
-
   /// Marks the [BuildContext] as disposed.
   ///
   /// Creators of this object must call [dispose] when their [Element] is

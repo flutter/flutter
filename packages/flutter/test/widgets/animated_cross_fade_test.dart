@@ -262,7 +262,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
   });
 
-  Widget crossFadeWithWatcher({ bool towardsSecond = false }) {
+  Widget crossFadeWithWatcher({bool towardsSecond = false}) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnimatedCrossFade(
@@ -287,7 +287,8 @@ void main() {
     }
   });
 
-  testWidgets('AnimatedCrossFade switches off TickerMode and semantics on faded out widget', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade switches off TickerMode and semantics on faded out widget',
+      (WidgetTester tester) async {
     ExcludeSemantics findSemantics() {
       return tester.widget(find.descendant(
         of: find.byKey(const ValueKey<CrossFadeState>(CrossFadeState.showFirst)),
@@ -410,8 +411,7 @@ void main() {
     expect(hiddenNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('AnimatedCrossFade second child do not receive touch events',
-      (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade second child do not receive touch events', (WidgetTester tester) async {
     int numberOfTouchEventNoticed = 0;
 
     Future<void> buildAnimatedFrame(CrossFadeState crossFadeState) {
@@ -424,11 +424,11 @@ void main() {
             child: AnimatedCrossFade(
               firstChild: const Text('AAA'),
               secondChild: TextButton(
-                  style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
-                  onPressed: () {
-                    numberOfTouchEventNoticed++;
-                  },
-                  child: const Text('BBB'),
+                style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
+                onPressed: () {
+                  numberOfTouchEventNoticed++;
+                },
+                child: const Text('BBB'),
               ),
               crossFadeState: crossFadeState,
               duration: const Duration(milliseconds: 50),
@@ -439,8 +439,7 @@ void main() {
     }
 
     Future<void> touchSecondButton() async {
-      final TestGesture gestureTouchSecondButton = await tester
-          .startGesture(const Offset(150, 300));
+      final TestGesture gestureTouchSecondButton = await tester.startGesture(const Offset(150, 300));
 
       return gestureTouchSecondButton.up();
     }
@@ -471,7 +470,7 @@ class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with Singl
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((_) { })..start();
+    ticker = createTicker((_) {})..start();
   }
 
   @override

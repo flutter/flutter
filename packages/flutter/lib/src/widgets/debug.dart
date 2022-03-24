@@ -123,10 +123,8 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
     assert(widget != null);
-    if (widget.key == null)
-      continue;
-    if (!keySet.add(widget.key!))
-      return widget.key;
+    if (widget.key == null) continue;
+    if (!keySet.add(widget.key!)) return widget.key;
   }
   return null;
 }
@@ -175,8 +173,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(items);
-    if (nonUniqueKey != null)
-      throw FlutterError('Duplicate key found: $nonUniqueKey.');
+    if (nonUniqueKey != null) throw FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
   }());
   return false;
@@ -276,15 +273,15 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// with the more generic advice regarding [Directionality].
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hint, String? alternative }) {
+bool debugCheckHasDirectionality(BuildContext context, {String? why, String? hint, String? alternative}) {
   assert(() {
-    if (context.widget is! Directionality && context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
+    if (context.widget is! Directionality &&
+        context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
       why = why == null ? '' : ' $why';
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Directionality widget ancestor$why.\n'),
-        if (hint != null)
-          ErrorHint(hint),
+        if (hint != null) ErrorHint(hint),
         context.describeWidget('The specific widget that could not find a Directionality ancestor was'),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
@@ -295,8 +292,7 @@ bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hi
           'values, and to resolve EdgeInsetsDirectional, '
           'AlignmentDirectional, and other *Directional objects.',
         ),
-        if (alternative != null)
-          ErrorHint(alternative),
+        if (alternative != null) ErrorHint(alternative),
       ]);
     }
     return true;

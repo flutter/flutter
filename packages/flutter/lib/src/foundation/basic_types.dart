@@ -181,18 +181,17 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  List<E> toList({ bool growable = true }) {
+  List<E> toList({bool growable = true}) {
     _precacheEntireList();
     return List<E>.of(_results, growable: growable);
   }
 
   void _precacheEntireList() {
-    while (_fillNext()) { }
+    while (_fillNext()) {}
   }
 
   bool _fillNext() {
-    if (!_prefillIterator.moveNext())
-      return false;
+    if (!_prefillIterator.moveNext()) return false;
     _results.add(_prefillIterator.current);
     return true;
   }
@@ -214,11 +213,9 @@ class _LazyListIterator<E> implements Iterator<E> {
 
   @override
   bool moveNext() {
-    if (_index >= _owner._results.length)
-      return false;
+    if (_index >= _owner._results.length) return false;
     _index += 1;
-    if (_index == _owner._results.length)
-      return _owner._fillNext();
+    if (_index == _owner._results.length) return _owner._fillNext();
     return true;
   }
 }

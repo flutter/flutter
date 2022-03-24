@@ -47,11 +47,11 @@ class SafeArea extends StatelessWidget {
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+  })  : assert(left != null),
+        assert(top != null),
+        assert(right != null),
+        assert(bottom != null),
+        super(key: key);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -97,8 +97,7 @@ class SafeArea extends StatelessWidget {
     final MediaQueryData data = MediaQuery.of(context);
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
-    if (maintainBottomViewPadding)
-      padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    if (maintainBottomViewPadding) padding = padding.copyWith(bottom: data.viewPadding.bottom);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -160,11 +159,11 @@ class SliverSafeArea extends StatelessWidget {
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     required this.sliver,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+  })  : assert(left != null),
+        assert(top != null),
+        assert(right != null),
+        assert(bottom != null),
+        super(key: key);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;

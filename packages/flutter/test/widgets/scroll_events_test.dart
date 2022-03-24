@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _buildScroller({ required List<String> log }) {
+Widget _buildScroller({required List<String> log}) {
   return NotificationListener<ScrollNotification>(
     onNotification: (ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
@@ -26,10 +26,12 @@ Widget _buildScroller({ required List<String> log }) {
 }
 
 void main() {
-  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { required Duration duration }) {
+  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, {required Duration duration}) {
     final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
+    scrollable.position
+        .animateTo(newScrollOffset, duration: duration, curve: Curves.linear)
+        .whenComplete(completer.complete);
     return completer;
   }
 
@@ -101,12 +103,15 @@ void main() {
 
     jumpTo(tester, 100.0);
     expect(completer.isCompleted, isFalse);
-    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end', 'scroll-start', 'scroll-update', 'scroll-end']));
+    expect(log,
+        equals(<String>['scroll-start', 'scroll-update', 'scroll-end', 'scroll-start', 'scroll-update', 'scroll-end']));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end', 'scroll-start', 'scroll-update', 'scroll-end']));
+    expect(log,
+        equals(<String>['scroll-start', 'scroll-update', 'scroll-end', 'scroll-start', 'scroll-update', 'scroll-end']));
     expect(completer.isCompleted, isTrue);
     await tester.pump(const Duration(milliseconds: 1500));
-    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end', 'scroll-start', 'scroll-update', 'scroll-end']));
+    expect(log,
+        equals(<String>['scroll-start', 'scroll-update', 'scroll-end', 'scroll-start', 'scroll-update', 'scroll-end']));
     expect(completer.isCompleted, isTrue);
   });
 

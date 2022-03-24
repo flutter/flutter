@@ -38,9 +38,9 @@ void main() {
     const SwitchThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -57,9 +57,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'thumbColor: MaterialStateProperty.all(Color(0xfffffff0))');
     expect(description[1], 'trackColor: MaterialStateProperty.all(Color(0xfffffff1))');
@@ -370,6 +370,7 @@ void main() {
       }
       return null;
     }
+
     const double splashRadius = 24.0;
 
     Widget buildSwitch({required bool active}) {
@@ -383,7 +384,7 @@ void main() {
         home: Scaffold(
           body: Switch(
             value: active,
-            onChanged: (_) { },
+            onChanged: (_) {},
           ),
         ),
       );

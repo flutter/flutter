@@ -130,8 +130,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale and wide text',
-      (WidgetTester tester) async {
+  testWidgets('Slider value indicator large text scale and wide text', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -215,8 +214,8 @@ Future<void> _buildValueIndicatorStaticSlider(
                 data: MediaQueryData(textScaleFactor: textScale),
                 child: SliderTheme(
                   data: Theme.of(context).sliderTheme.copyWith(
-                    showValueIndicator: ShowValueIndicator.always,
-                  ),
+                        showValueIndicator: ShowValueIndicator.always,
+                      ),
                   child: Slider(
                     value: value,
                     label: value.toStringAsFixed(decimalCount),

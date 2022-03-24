@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -78,17 +77,13 @@ class _GestureArena {
       buffer.write('<empty>');
     } else {
       buffer.write(members.map<String>((GestureArenaMember member) {
-        if (member == eagerWinner)
-          return '$member (eager winner)';
+        if (member == eagerWinner) return '$member (eager winner)';
         return '$member';
       }).join(', '));
     }
-    if (isOpen)
-      buffer.write(' [open]');
-    if (isHeld)
-      buffer.write(' [held]');
-    if (hasPendingSweep)
-      buffer.write(' [hasPendingSweep]');
+    if (isOpen) buffer.write(' [open]');
+    if (isHeld) buffer.write(' [held]');
+    if (hasPendingSweep) buffer.write(' [hasPendingSweep]');
     return buffer.toString();
   }
 }
@@ -119,8 +114,7 @@ class GestureArenaManager {
   /// Called after the framework has finished dispatching the pointer down event.
   void close(int pointer) {
     final _GestureArena? state = _arenas[pointer];
-    if (state == null)
-      return; // This arena either never existed or has been resolved.
+    if (state == null) return; // This arena either never existed or has been resolved.
     state.isOpen = false;
     assert(_debugLogDiagnostic(pointer, 'Closing', state));
     _tryToResolveArena(pointer, state);
@@ -141,8 +135,7 @@ class GestureArenaManager {
   ///  * [release]
   void sweep(int pointer) {
     final _GestureArena? state = _arenas[pointer];
-    if (state == null)
-      return; // This arena either never existed or has been resolved.
+    if (state == null) return; // This arena either never existed or has been resolved.
     assert(!state.isOpen);
     if (state.isHeld) {
       state.hasPendingSweep = true;
@@ -156,8 +149,7 @@ class GestureArenaManager {
       assert(_debugLogDiagnostic(pointer, 'Winner: ${state.members.first}'));
       state.members.first.acceptGesture(pointer);
       // Give all the other members the bad news.
-      for (int i = 1; i < state.members.length; i++)
-        state.members[i].rejectGesture(pointer);
+      for (int i = 1; i < state.members.length; i++) state.members[i].rejectGesture(pointer);
     }
   }
 
@@ -175,8 +167,7 @@ class GestureArenaManager {
   ///  * [release]
   void hold(int pointer) {
     final _GestureArena? state = _arenas[pointer];
-    if (state == null)
-      return; // This arena either never existed or has been resolved.
+    if (state == null) return; // This arena either never existed or has been resolved.
     state.isHeld = true;
     assert(_debugLogDiagnostic(pointer, 'Holding', state));
   }
@@ -192,12 +183,10 @@ class GestureArenaManager {
   ///  * [hold]
   void release(int pointer) {
     final _GestureArena? state = _arenas[pointer];
-    if (state == null)
-      return; // This arena either never existed or has been resolved.
+    if (state == null) return; // This arena either never existed or has been resolved.
     state.isHeld = false;
     assert(_debugLogDiagnostic(pointer, 'Releasing', state));
-    if (state.hasPendingSweep)
-      sweep(pointer);
+    if (state.hasPendingSweep) sweep(pointer);
   }
 
   /// Reject or accept a gesture recognizer.
@@ -205,15 +194,14 @@ class GestureArenaManager {
   /// This is called by calling [GestureArenaEntry.resolve] on the object returned from [add].
   void _resolve(int pointer, GestureArenaMember member, GestureDisposition disposition) {
     final _GestureArena? state = _arenas[pointer];
-    if (state == null)
-      return; // This arena has already resolved.
-    assert(_debugLogDiagnostic(pointer, '${ disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting" }: $member'));
+    if (state == null) return; // This arena has already resolved.
+    assert(_debugLogDiagnostic(
+        pointer, '${disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting"}: $member'));
     assert(state.members.contains(member));
     if (disposition == GestureDisposition.rejected) {
       state.members.remove(member);
       member.rejectGesture(pointer);
-      if (!state.isOpen)
-        _tryToResolveArena(pointer, state);
+      if (!state.isOpen) _tryToResolveArena(pointer, state);
     } else {
       assert(disposition == GestureDisposition.accepted);
       if (state.isOpen) {
@@ -240,8 +228,7 @@ class GestureArenaManager {
   }
 
   void _resolveByDefault(int pointer, _GestureArena state) {
-    if (!_arenas.containsKey(pointer))
-      return; // Already resolved earlier.
+    if (!_arenas.containsKey(pointer)) return; // Already resolved earlier.
     assert(_arenas[pointer] == state);
     assert(!state.isOpen);
     final List<GestureArenaMember> members = state.members;
@@ -258,18 +245,18 @@ class GestureArenaManager {
     assert(!state.isOpen);
     _arenas.remove(pointer);
     for (final GestureArenaMember rejectedMember in state.members) {
-      if (rejectedMember != member)
-        rejectedMember.rejectGesture(pointer);
+      if (rejectedMember != member) rejectedMember.rejectGesture(pointer);
     }
     member.acceptGesture(pointer);
   }
 
-  bool _debugLogDiagnostic(int pointer, String message, [ _GestureArena? state ]) {
+  bool _debugLogDiagnostic(int pointer, String message, [_GestureArena? state]) {
     assert(() {
       if (debugPrintGestureArenaDiagnostics) {
         final int? count = state?.members.length;
         final String s = count != 1 ? 's' : '';
-        debugPrint('Gesture arena ${pointer.toString().padRight(4)} ❙ $message${ count != null ? " with $count member$s." : ""}');
+        debugPrint(
+            'Gesture arena ${pointer.toString().padRight(4)} ❙ $message${count != null ? " with $count member$s." : ""}');
       }
       return true;
     }());

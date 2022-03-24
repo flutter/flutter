@@ -73,8 +73,7 @@ class DrawerThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
-      return null;
+    if (a == null && b == null) return null;
     return DrawerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       scrimColor: Color.lerp(a?.scrimColor, b?.scrimColor, t),
@@ -85,23 +84,21 @@ class DrawerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    scrimColor,
-    elevation,
-    shape,
-  );
+        backgroundColor,
+        scrimColor,
+        elevation,
+        shape,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DrawerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.scrimColor == scrimColor
-        && other.elevation == elevation
-        && other.shape == shape;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is DrawerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.scrimColor == scrimColor &&
+        other.elevation == elevation &&
+        other.shape == shape;
   }
 
   @override
@@ -128,7 +125,8 @@ class DrawerTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  })  : assert(data != null),
+        super(key: key, child: child);
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.

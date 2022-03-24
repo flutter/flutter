@@ -48,10 +48,12 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(Container));
     expect(box, isNotNull);
 
-    expect(box, paints
-      ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0xFF00FF00))
-      ..rect(rect: const Rect.fromLTWH(26.0, 43.0, 25.0, 33.0), color: const Color(0xFFFFFF00))
-      ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0x7F0000FF)),
+    expect(
+      box,
+      paints
+        ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0xFF00FF00))
+        ..rect(rect: const Rect.fromLTWH(26.0, 43.0, 25.0, 33.0), color: const Color(0xFFFFFF00))
+        ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0x7F0000FF)),
     );
 
     expect(box, hasAGoodToStringDeep);
@@ -518,9 +520,8 @@ void main() {
   });
 
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Container(
-        decoration: const BoxDecoration(
+    await tester.pumpWidget(Container(
+      decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       child: const SizedBox(),
@@ -571,8 +572,10 @@ void main() {
           ),
         ),
       );
-      await expectLater(find.byType(Container), matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'));
+      await expectLater(
+          find.byType(Container), matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'));
     }
+
     await test(const BoxDecoration());
     await test(const UnderlineTabIndicator());
     await test(const ShapeDecoration(shape: StadiumBorder()));
@@ -582,7 +585,9 @@ void main() {
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(
-      onTap: () { tapped = true; },
+      onTap: () {
+        tapped = true;
+      },
       child: Container(
         decoration: const BoxDecoration(color: Colors.black),
       ),
@@ -593,7 +598,9 @@ void main() {
     tapped = false;
 
     await tester.pumpWidget(GestureDetector(
-      onTap: () { tapped = true; },
+      onTap: () {
+        tapped = true;
+      },
       child: Container(
         foregroundDecoration: const BoxDecoration(color: Colors.black),
       ),
@@ -604,7 +611,9 @@ void main() {
     tapped = false;
 
     await tester.pumpWidget(GestureDetector(
-      onTap: () { tapped = true; },
+      onTap: () {
+        tapped = true;
+      },
       child: Container(
         color: Colors.black,
       ),
@@ -616,7 +625,9 @@ void main() {
 
     // Everything but color or decorations
     await tester.pumpWidget(GestureDetector(
-      onTap: () { tapped = true; },
+      onTap: () {
+        tapped = true;
+      },
       child: Center(
         child: Container(
           alignment: Alignment.bottomRight,
@@ -633,14 +644,13 @@ void main() {
     expect(tapped, false);
   });
 
-  testWidgets('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Container(
+  testWidgets('Container discards alignment when the child parameter is null and constraints is not Tight',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(Container(
         decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(1)),
-      ),
-      alignment: Alignment.centerLeft
-    ));
+          borderRadius: BorderRadius.all(Radius.circular(1)),
+        ),
+        alignment: Alignment.centerLeft));
 
     expect(
       find.byType(Align),
@@ -695,5 +705,5 @@ class _MockCanvas extends Fake implements Canvas {
   }
 
   @override
-  void drawRect(Rect rect, Paint paint) { }
+  void drawRect(Rect rect, Paint paint) {}
 }

@@ -181,8 +181,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           validator: validator,
           autovalidateMode: autovalidateMode,
           builder: (FormFieldState<String> field) {
-            final _CupertinoTextFormFieldRowState state =
-                field as _CupertinoTextFormFieldRowState;
+            final _CupertinoTextFormFieldRowState state = field as _CupertinoTextFormFieldRowState;
 
             void onChangedHandler(String value) {
               field.didChange(value);
@@ -273,11 +272,9 @@ class CupertinoTextFormFieldRow extends FormField<String> {
 class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   TextEditingController? _controller;
 
-  TextEditingController? get _effectiveController =>
-      _cupertinoTextFormFieldRow.controller ?? _controller;
+  TextEditingController? get _effectiveController => _cupertinoTextFormFieldRow.controller ?? _controller;
 
-  CupertinoTextFormFieldRow get _cupertinoTextFormFieldRow =>
-      super.widget as CupertinoTextFormFieldRow;
+  CupertinoTextFormFieldRow get _cupertinoTextFormFieldRow => super.widget as CupertinoTextFormFieldRow;
 
   @override
   void initState() {
@@ -297,8 +294,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
       _cupertinoTextFormFieldRow.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && _cupertinoTextFormFieldRow.controller == null) {
-        _controller =
-            TextEditingController.fromValue(oldWidget.controller!.value);
+        _controller = TextEditingController.fromValue(oldWidget.controller!.value);
       }
 
       if (_cupertinoTextFormFieldRow.controller != null) {

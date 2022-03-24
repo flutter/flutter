@@ -128,13 +128,15 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   Cannot call paintChild twice for the same child.\n'
-      '   The flow delegate of type DuplicatePainterOpacityFlowDelegate\n'
-      '   attempted to paint child 0 multiple times, which is not\n'
-      '   permitted.\n',
-    ));
+    expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   Cannot call paintChild twice for the same child.\n'
+          '   The flow delegate of type DuplicatePainterOpacityFlowDelegate\n'
+          '   attempted to paint child 0 multiple times, which is not\n'
+          '   permitted.\n',
+        ));
   });
 
   testWidgets('Flow opacity layer', (WidgetTester tester) async {
@@ -148,8 +150,7 @@ void main() {
       ),
     );
     ContainerLayer? layer = RendererBinding.instance.renderView.debugLayer;
-    while (layer != null && layer is! OpacityLayer)
-      layer = layer.firstChild as ContainerLayer?;
+    while (layer != null && layer is! OpacityLayer) layer = layer.firstChild as ContainerLayer?;
     expect(layer, isA<OpacityLayer>());
     final OpacityLayer? opacityLayer = layer as OpacityLayer?;
     expect(opacityLayer!.alpha, equals(opacity * 255));
@@ -171,7 +172,7 @@ void main() {
     final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    for(final Clip clip in Clip.values) {
+    for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
         Flow(
           delegate: OpacityFlowDelegate(opacity),
@@ -200,7 +201,7 @@ void main() {
     final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    for(final Clip clip in Clip.values) {
+    for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
         Flow.unwrapped(
           delegate: OpacityFlowDelegate(opacity),

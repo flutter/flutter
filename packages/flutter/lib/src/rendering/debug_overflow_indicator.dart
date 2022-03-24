@@ -143,8 +143,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'LEFT OVERFLOWED BY ${_formatPixels(overflow.left)} PIXELS',
-        labelOffset: markerRect.centerLeft +
-            const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
+        labelOffset: markerRect.centerLeft + const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
         rotation: math.pi / 2.0,
         side: _OverflowSide.left,
       ));
@@ -159,8 +158,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'RIGHT OVERFLOWED BY ${_formatPixels(overflow.right)} PIXELS',
-        labelOffset: markerRect.centerRight -
-            const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
+        labelOffset:
+            markerRect.centerRight - const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
         rotation: -math.pi / 2.0,
         side: _OverflowSide.right,
       ));
@@ -189,8 +188,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'BOTTOM OVERFLOWED BY ${_formatPixels(overflow.bottom)} PIXELS',
-        labelOffset: markerRect.bottomCenter -
-            const Offset(0.0, _indicatorFontSizePixels + _indicatorLabelPaddingPixels),
+        labelOffset:
+            markerRect.bottomCenter - const Offset(0.0, _indicatorFontSizePixels + _indicatorLabelPaddingPixels),
         side: _OverflowSide.bottom,
       ));
     }
@@ -244,8 +243,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         informationCollector: () => <DiagnosticsNode>[
           // debugCreator should only be set in DebugMode, but we want the
           // treeshaker to know that.
-          if (kDebugMode && debugCreator != null)
-            DiagnosticsDebugCreator(debugCreator!),
+          if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
           ...overflowHints!,
           describeForError('The specific $runtimeType in question is'),
           // TODO(jacobr): this line is ascii art that it would be nice to
@@ -272,10 +270,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
-    if (overflow.left <= 0.0 &&
-        overflow.right <= 0.0 &&
-        overflow.top <= 0.0 &&
-        overflow.bottom <= 0.0) {
+    if (overflow.left <= 0.0 && overflow.right <= 0.0 && overflow.top <= 0.0 && overflow.bottom <= 0.0) {
       return;
     }
 

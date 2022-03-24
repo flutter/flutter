@@ -27,7 +27,7 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
 class TestStrategy {
   int allowedPriority = 10000;
 
-  bool shouldRunTaskWithPriority({ required int priority, required SchedulerBinding scheduler }) {
+  bool shouldRunTaskWithPriority({required int priority, required SchedulerBinding scheduler}) {
     return priority >= allowedPriority;
   }
 }
@@ -46,26 +46,25 @@ void main() {
     final List<int> executedTasks = <int>[];
 
     void scheduleAddingTask(int x) {
-      scheduler.scheduleTask(() { executedTasks.add(x); }, Priority.idle + x);
+      scheduler.scheduleTask(() {
+        executedTasks.add(x);
+      }, Priority.idle + x);
     }
 
     input.forEach(scheduleAddingTask);
 
     strategy.allowedPriority = 100;
-    for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), isFalse);
+    for (int i = 0; i < 3; i += 1) expect(scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks.isEmpty, isTrue);
 
     strategy.allowedPriority = 50;
-    for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i == 0 ? isTrue : isFalse);
+    for (int i = 0; i < 3; i += 1) expect(scheduler.handleEventLoopCallback(), i == 0 ? isTrue : isFalse);
     expect(executedTasks, hasLength(1));
     expect(executedTasks.single, equals(80));
     executedTasks.clear();
 
     strategy.allowedPriority = 20;
-    for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+    for (int i = 0; i < 3; i += 1) expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(23));
     expect(executedTasks[1], equals(23));
@@ -75,24 +74,21 @@ void main() {
     scheduleAddingTask(19);
     scheduleAddingTask(5);
     scheduleAddingTask(97);
-    for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+    for (int i = 0; i < 3; i += 1) expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(99));
     expect(executedTasks[1], equals(97));
     executedTasks.clear();
 
     strategy.allowedPriority = 10;
-    for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+    for (int i = 0; i < 3; i += 1) expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(19));
     expect(executedTasks[1], equals(11));
     executedTasks.clear();
 
     strategy.allowedPriority = 1;
-    for (int i = 0; i < 4; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 3 ? isTrue : isFalse);
+    for (int i = 0; i < 4; i += 1) expect(scheduler.handleEventLoopCallback(), i < 3 ? isTrue : isFalse);
     expect(executedTasks, hasLength(3));
     expect(executedTasks[0], equals(5));
     expect(executedTasks[1], equals(3));
@@ -113,7 +109,9 @@ void main() {
         // Run it twice without processing the queued tasks.
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleWarmUpFrame();
-        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
+        scheduler.scheduleTask(() {
+          taskExecuted = true;
+        }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
@@ -140,15 +138,16 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    SchedulerBinding.instance.platformDispatcher.onReportTimings!(<FrameTiming>[FrameTiming(
-      vsyncStart: 5000,
-      buildStart: 10000,
-      buildFinish: 15000,
-      rasterStart: 16000,
-      rasterFinish: 20000,
-      rasterFinishWallTime: 20010,
-      frameNumber: 1991
-    )]);
+    SchedulerBinding.instance.platformDispatcher.onReportTimings!(<FrameTiming>[
+      FrameTiming(
+          vsyncStart: 5000,
+          buildStart: 10000,
+          buildFinish: 15000,
+          rasterStart: 16000,
+          rasterFinish: 20000,
+          rasterFinishWallTime: 20010,
+          frameNumber: 1991)
+    ]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));

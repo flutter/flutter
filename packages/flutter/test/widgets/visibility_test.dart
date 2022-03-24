@@ -9,7 +9,7 @@ import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
-  const TestState({ Key? key, required this.child, required this.log }) : super(key: key);
+  const TestState({Key? key, required this.child, required this.log}) : super(key: key);
   final Widget child;
   final List<String> log;
   @override
@@ -22,6 +22,7 @@ class _TestStateState extends State<TestState> {
     super.initState();
     widget.log.add('created new state');
   }
+
   @override
   Widget build(BuildContext context) {
     return widget.child;
@@ -34,7 +35,9 @@ void main() {
     final List<String> log = <String>[];
 
     final Widget testChild = GestureDetector(
-      onTap: () { log.add('tap'); },
+      onTap: () {
+        log.add('tap');
+      },
       child: Builder(
         builder: (BuildContext context) {
           final bool animating = TickerMode.of(context);

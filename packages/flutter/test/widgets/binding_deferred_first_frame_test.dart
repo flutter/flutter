@@ -113,8 +113,6 @@ class _DeferringWidgetState extends State<_DeferringWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return doneLoading
-        ? const Text(_actualContent)
-        : const Text(_loading);
+    return doneLoading ? const Text(_actualContent) : const Text(_loading);
   }
 }

@@ -80,6 +80,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
+
   /// ImageStreamCompleters with at least one listener. These images may or may
   /// not fit into the _pendingImages or _cache objects.
   ///
@@ -92,6 +93,7 @@ class ImageCache {
   /// evicted when adding a new entry.
   int get maximumSize => _maximumSize;
   int _maximumSize = _kDefaultSize;
+
   /// Changes the maximum cache size.
   ///
   /// If the new size is smaller than the current number of elements, the
@@ -101,14 +103,14 @@ class ImageCache {
   set maximumSize(int value) {
     assert(value != null);
     assert(value >= 0);
-    if (value == maximumSize)
-      return;
+    if (value == maximumSize) return;
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
-      timelineTask = TimelineTask()..start(
-        'ImageCache.setMaximumSize',
-        arguments: <String, dynamic>{'value': value},
-      );
+      timelineTask = TimelineTask()
+        ..start(
+          'ImageCache.setMaximumSize',
+          arguments: <String, dynamic>{'value': value},
+        );
     }
     _maximumSize = value;
     if (maximumSize == 0) {
@@ -131,6 +133,7 @@ class ImageCache {
   /// maximum bytes.
   int get maximumSizeBytes => _maximumSizeBytes;
   int _maximumSizeBytes = _kDefaultSizeBytes;
+
   /// Changes the maximum cache bytes.
   ///
   /// If the new size is smaller than the current size in bytes, the
@@ -140,14 +143,14 @@ class ImageCache {
   set maximumSizeBytes(int value) {
     assert(value != null);
     assert(value >= 0);
-    if (value == _maximumSizeBytes)
-      return;
+    if (value == _maximumSizeBytes) return;
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
-      timelineTask = TimelineTask()..start(
-        'ImageCache.setMaximumSizeBytes',
-        arguments: <String, dynamic>{'value': value},
-      );
+      timelineTask = TimelineTask()
+        ..start(
+          'ImageCache.setMaximumSizeBytes',
+          arguments: <String, dynamic>{'value': value},
+        );
     }
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
@@ -234,7 +237,7 @@ class ImageCache {
   /// See also:
   ///
   ///  * [ImageProvider], for providing images to the [Image] widget.
-  bool evict(Object key, { bool includeLive = true }) {
+  bool evict(Object key, {bool includeLive = true}) {
     assert(includeLive != null);
     if (includeLive) {
       // Remove from live images - the cache will not be able to mark
@@ -318,18 +321,19 @@ class ImageCache {
   /// `onError` is also provided. When an exception is caught resolving an image,
   /// no completers are cached and `null` is returned instead of a new
   /// completer.
-  ImageStreamCompleter? putIfAbsent(Object key, ImageStreamCompleter Function() loader, { ImageErrorListener? onError }) {
+  ImageStreamCompleter? putIfAbsent(Object key, ImageStreamCompleter Function() loader, {ImageErrorListener? onError}) {
     assert(key != null);
     assert(loader != null);
     TimelineTask? timelineTask;
     TimelineTask? listenerTask;
     if (!kReleaseMode) {
-      timelineTask = TimelineTask()..start(
-        'ImageCache.putIfAbsent',
-        arguments: <String, dynamic>{
-          'key': key.toString(),
-        },
-      );
+      timelineTask = TimelineTask()
+        ..start(
+          'ImageCache.putIfAbsent',
+          arguments: <String, dynamic>{
+            'key': key.toString(),
+          },
+        );
     }
     ImageStreamCompleter? result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
@@ -588,17 +592,15 @@ class ImageCacheStatus {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageCacheStatus
-        && other.pending == pending
-        && other.keepAlive == keepAlive
-        && other.live == live;
+    return other is ImageCacheStatus && other.pending == pending && other.keepAlive == keepAlive && other.live == live;
   }
 
   @override
   int get hashCode => Object.hash(pending, keepAlive, live);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ImageCacheStatus')}(pending: $pending, live: $live, keepAlive: $keepAlive)';
+  String toString() =>
+      '${objectRuntimeType(this, 'ImageCacheStatus')}(pending: $pending, live: $live, keepAlive: $keepAlive)';
 }
 
 /// Base class for [_CachedImage] and [_LiveImage].
@@ -609,8 +611,8 @@ abstract class _CachedImageBase {
   _CachedImageBase(
     this.completer, {
     this.sizeBytes,
-  }) : assert(completer != null),
-       handle = completer.keepAlive();
+  })  : assert(completer != null),
+        handle = completer.keepAlive();
 
   final ImageStreamCompleter completer;
   int? sizeBytes;
@@ -630,8 +632,7 @@ abstract class _CachedImageBase {
 }
 
 class _CachedImage extends _CachedImageBase {
-  _CachedImage(ImageStreamCompleter completer, {int? sizeBytes})
-      : super(completer, sizeBytes: sizeBytes);
+  _CachedImage(ImageStreamCompleter completer, {int? sizeBytes}) : super(completer, sizeBytes: sizeBytes);
 }
 
 class _LiveImage extends _CachedImageBase {

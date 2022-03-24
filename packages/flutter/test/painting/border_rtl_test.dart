@@ -16,24 +16,43 @@ class SillyBorder extends BoxBorder {
 void main() {
   test('BoxBorder.lerp', () {
     // names of the form fooAtX are foo, lerped X% of the way to null
-    const BoxBorder directionalWithMagentaTop5 = BorderDirectional(top: BorderSide(color: Color(0xFFFF00FF), width: 5.0));
-    const BoxBorder directionalWithMagentaTop5At25 = BorderDirectional(top: BorderSide(color: Color(0x3F3F003F), width: 1.25));
-    const BoxBorder directionalWithMagentaTop5At75 = BorderDirectional(top: BorderSide(color: Color(0xBFBF00BF), width: 3.75));
-    const BoxBorder directionalWithSides10 = BorderDirectional(start: BorderSide(width: 10.0), end: BorderSide(width: 20.0));
-    const BoxBorder directionalWithSides10At25 = BorderDirectional(start: BorderSide(width: 2.5, color: Color(0x3F000000)), end: BorderSide(width: 5.0, color: Color(0x3F000000)));
-    const BoxBorder directionalWithSides10At50 = BorderDirectional(start: BorderSide(width: 5.0, color: Color(0x7F000000)), end: BorderSide(width: 10.0, color: Color(0x7F000000)));
-    const BoxBorder directionalWithSides10At75 = BorderDirectional(start: BorderSide(width: 7.5, color: Color(0xBF000000)), end: BorderSide(width: 15.0, color: Color(0xBF000000)));
-    const BoxBorder directionalWithSides20 = BorderDirectional(start: BorderSide(width: 20.0), end: BorderSide(width: 40.0));
-    const BoxBorder directionalWithSides30 = BorderDirectional(start: BorderSide(width: 30.0), end: BorderSide(width: 60.0));
+    const BoxBorder directionalWithMagentaTop5 =
+        BorderDirectional(top: BorderSide(color: Color(0xFFFF00FF), width: 5.0));
+    const BoxBorder directionalWithMagentaTop5At25 =
+        BorderDirectional(top: BorderSide(color: Color(0x3F3F003F), width: 1.25));
+    const BoxBorder directionalWithMagentaTop5At75 =
+        BorderDirectional(top: BorderSide(color: Color(0xBFBF00BF), width: 3.75));
+    const BoxBorder directionalWithSides10 =
+        BorderDirectional(start: BorderSide(width: 10.0), end: BorderSide(width: 20.0));
+    const BoxBorder directionalWithSides10At25 = BorderDirectional(
+        start: BorderSide(width: 2.5, color: Color(0x3F000000)), end: BorderSide(width: 5.0, color: Color(0x3F000000)));
+    const BoxBorder directionalWithSides10At50 = BorderDirectional(
+        start: BorderSide(width: 5.0, color: Color(0x7F000000)),
+        end: BorderSide(width: 10.0, color: Color(0x7F000000)));
+    const BoxBorder directionalWithSides10At75 = BorderDirectional(
+        start: BorderSide(width: 7.5, color: Color(0xBF000000)),
+        end: BorderSide(width: 15.0, color: Color(0xBF000000)));
+    const BoxBorder directionalWithSides20 =
+        BorderDirectional(start: BorderSide(width: 20.0), end: BorderSide(width: 40.0));
+    const BoxBorder directionalWithSides30 =
+        BorderDirectional(start: BorderSide(width: 30.0), end: BorderSide(width: 60.0));
     const BoxBorder directionalWithTop10 = BorderDirectional(top: BorderSide(width: 10.0));
-    const BoxBorder directionalWithYellowTop10 = BorderDirectional(top: BorderSide(color: Color(0xFFFFFF00), width: 10.0));
-    const BoxBorder directionalWithYellowTop5 = BorderDirectional(top: BorderSide(color: Color(0xFFFFFF00), width: 5.0));
+    const BoxBorder directionalWithYellowTop10 =
+        BorderDirectional(top: BorderSide(color: Color(0xFFFFFF00), width: 10.0));
+    const BoxBorder directionalWithYellowTop5 =
+        BorderDirectional(top: BorderSide(color: Color(0xFFFFFF00), width: 5.0));
     const BoxBorder visualWithMagentaTop10 = Border(top: BorderSide(color: Color(0xFFFF00FF), width: 10.0));
     const BoxBorder visualWithMagentaTop5 = Border(top: BorderSide(color: Color(0xFFFF00FF), width: 5.0));
     const BoxBorder visualWithSides10 = Border(left: BorderSide(width: 10.0), right: BorderSide(width: 20.0));
-    const BoxBorder visualWithSides10At25 = Border(left: BorderSide(width: 2.5, color: Color(0x3F000000)), right: BorderSide(width: 5.0, color: Color(0x3F000000)));
-    const BoxBorder visualWithSides10At50 = Border(left: BorderSide(width: 5.0, color: Color(0x7F000000)), right: BorderSide(width: 10.0, color: Color(0x7F000000)));
-    const BoxBorder visualWithSides10At75 = Border(left: BorderSide(width: 7.5, color: Color(0xBF000000)), right: BorderSide(width: 15.0, color: Color(0xBF000000)));
+    const BoxBorder visualWithSides10At25 = Border(
+        left: BorderSide(width: 2.5, color: Color(0x3F000000)),
+        right: BorderSide(width: 5.0, color: Color(0x3F000000)));
+    const BoxBorder visualWithSides10At50 = Border(
+        left: BorderSide(width: 5.0, color: Color(0x7F000000)),
+        right: BorderSide(width: 10.0, color: Color(0x7F000000)));
+    const BoxBorder visualWithSides10At75 = Border(
+        left: BorderSide(width: 7.5, color: Color(0xBF000000)),
+        right: BorderSide(width: 15.0, color: Color(0xBF000000)));
     const BoxBorder visualWithSides20 = Border(left: BorderSide(width: 20.0), right: BorderSide(width: 40.0));
     const BoxBorder visualWithSides30 = Border(left: BorderSide(width: 30.0), right: BorderSide(width: 60.0));
     const BoxBorder visualWithTop10 = Border(top: BorderSide(width: 10.0));
@@ -50,7 +69,8 @@ void main() {
     expect(BoxBorder.lerp(null, directionalWithTop10, -1.0), const BorderDirectional());
     expect(BoxBorder.lerp(directionalWithTop10, visualWithTop100, -1.0), const Border());
     expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, -1.0), visualWithSides20);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, -1.0), const Border(top: BorderSide(color: Color(0xFFFFFF00), width: 5.0)));
+    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, -1.0),
+        const Border(top: BorderSide(color: Color(0xFFFFFF00), width: 5.0)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, -1.0), visualWithSides30);
     expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, -1.0), directionalWithYellowTop10);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), -1.0), throwsFlutterError);
@@ -62,7 +82,8 @@ void main() {
     expect(BoxBorder.lerp(null, directionalWithTop10, 0.0), const BorderDirectional());
     expect(BoxBorder.lerp(directionalWithTop10, visualWithTop100, 0.0), visualWithTop10);
     expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.0), visualWithSides10);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.0), const Border(top: BorderSide(color: Color(0xFFFFFF00), width: 5.0)));
+    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.0),
+        const Border(top: BorderSide(color: Color(0xFFFFFF00), width: 5.0)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, 0.0), visualWithSides10);
     expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.0), directionalWithYellowTop5);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), 0.0), throwsFlutterError);
@@ -73,10 +94,15 @@ void main() {
     expect(BoxBorder.lerp(directionalWithTop10, null, 0.25), const BorderDirectional(top: BorderSide(width: 7.5)));
     expect(BoxBorder.lerp(null, directionalWithTop10, 0.25), const BorderDirectional(top: BorderSide(width: 2.5)));
     expect(BoxBorder.lerp(directionalWithTop10, visualWithTop100, 0.25), const Border(top: BorderSide(width: 32.5)));
-    expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.25), visualWithSides10At75 + directionalWithMagentaTop5At25);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.25), Border(top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.25)!)));
+    expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.25),
+        visualWithSides10At75 + directionalWithMagentaTop5At25);
+    expect(
+        BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.25),
+        Border(
+            top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.25)!)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, 0.25), visualWithSides10At50);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.25), visualWithYellowTop5At75 + directionalWithSides10At25);
+    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.25),
+        visualWithYellowTop5At75 + directionalWithSides10At25);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), 0.25), throwsFlutterError);
 
     expect(BoxBorder.lerp(null, null, 0.75), null);
@@ -85,10 +111,15 @@ void main() {
     expect(BoxBorder.lerp(directionalWithTop10, null, 0.75), const BorderDirectional(top: BorderSide(width: 2.5)));
     expect(BoxBorder.lerp(null, directionalWithTop10, 0.75), const BorderDirectional(top: BorderSide(width: 7.5)));
     expect(BoxBorder.lerp(directionalWithTop10, visualWithTop100, 0.75), const Border(top: BorderSide(width: 77.5)));
-    expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.75), visualWithSides10At25 + directionalWithMagentaTop5At75);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.75), Border(top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.75)!)));
+    expect(BoxBorder.lerp(visualWithSides10, directionalWithMagentaTop5, 0.75),
+        visualWithSides10At25 + directionalWithMagentaTop5At75);
+    expect(
+        BoxBorder.lerp(visualWithYellowTop5, directionalWithMagentaTop5, 0.75),
+        Border(
+            top: BorderSide(width: 5.0, color: Color.lerp(const Color(0xFFFFFF00), const Color(0xFFFF00FF), 0.75)!)));
     expect(BoxBorder.lerp(visualWithSides10, directionalWithSides10, 0.75), directionalWithSides10At50);
-    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.75), visualWithYellowTop5At25 + directionalWithSides10At75);
+    expect(BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.75),
+        visualWithYellowTop5At25 + directionalWithSides10At75);
     expect(() => BoxBorder.lerp(SillyBorder(), const Border(), 0.75), throwsFlutterError);
 
     expect(BoxBorder.lerp(null, null, 1.0), null);
@@ -133,26 +164,29 @@ void main() {
         'ShapeBorder.lerp instead.\n',
       ),
     );
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   BoxBorder.lerp can only interpolate Border and BorderDirectional\n'
-      '   classes.\n'
-      '   BoxBorder.lerp() was called with two objects of type SillyBorder\n'
-      '   and Border:\n'
-      '     SillyBorder()\n'
-      '     Border.all(BorderSide(Color(0xff000000), 0.0,\n'
-      '   BorderStyle.none))\n'
-      '   However, only Border and BorderDirectional classes are supported\n'
-      '   by this method.\n'
-      '   For a more general interpolation method, consider using\n'
-      '   ShapeBorder.lerp instead.\n',
-    ));
+    expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   BoxBorder.lerp can only interpolate Border and BorderDirectional\n'
+          '   classes.\n'
+          '   BoxBorder.lerp() was called with two objects of type SillyBorder\n'
+          '   and Border:\n'
+          '     SillyBorder()\n'
+          '     Border.all(BorderSide(Color(0xff000000), 0.0,\n'
+          '   BorderStyle.none))\n'
+          '   However, only Border and BorderDirectional classes are supported\n'
+          '   by this method.\n'
+          '   For a more general interpolation method, consider using\n'
+          '   ShapeBorder.lerp instead.\n',
+        ));
   });
 
   test('BoxBorder.getInnerPath / BoxBorder.getOuterPath', () {
     // for Border, BorderDirectional
     const Border border = Border(top: BorderSide(width: 10.0), right: BorderSide(width: 20.0));
-    const BorderDirectional borderDirectional = BorderDirectional(top: BorderSide(width: 10.0), end: BorderSide(width: 20.0));
+    const BorderDirectional borderDirectional =
+        BorderDirectional(top: BorderSide(width: 10.0), end: BorderSide(width: 20.0));
     expect(
       border.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       isPathThat(
@@ -509,8 +543,10 @@ void main() {
 
     // adding tops and sides
     expect(const Border(left: side1) + const BorderDirectional(top: side2), const Border(left: side1, top: side2));
-    expect(const BorderDirectional(start: side1) + const Border(top: side2), const BorderDirectional(start: side1, top: side2));
-    expect(const Border(top: side2) + const BorderDirectional(start: side1), const BorderDirectional(start: side1, top: side2));
+    expect(const BorderDirectional(start: side1) + const Border(top: side2),
+        const BorderDirectional(start: side1, top: side2));
+    expect(const Border(top: side2) + const BorderDirectional(start: side1),
+        const BorderDirectional(start: side1, top: side2));
     expect(const BorderDirectional(top: side2) + const Border(left: side1), const Border(left: side1, top: side2));
 
     // adding incompatible tops and bottoms
@@ -534,23 +570,33 @@ void main() {
 
     expect((borderWithLeft + borderDirectionalWithStart).toString(), '$borderWithLeft + $borderDirectionalWithStart');
     expect((borderWithLeft + borderDirectionalWithEnd).toString(), '$borderWithLeft + $borderDirectionalWithEnd');
-    expect((borderWithLeft + borderDirectionalWithoutSides).toString(), '${const Border(left: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderWithLeft + borderDirectionalWithoutSides).toString(),
+        '${const Border(left: side1, top: doubleSide2, bottom: doubleSide2)}');
     expect((borderWithRight + borderDirectionalWithStart).toString(), '$borderWithRight + $borderDirectionalWithStart');
     expect((borderWithRight + borderDirectionalWithEnd).toString(), '$borderWithRight + $borderDirectionalWithEnd');
-    expect((borderWithRight + borderDirectionalWithoutSides).toString(), '${const Border(right: side1, top: doubleSide2, bottom: doubleSide2)}');
-    expect((borderWithoutSides + borderDirectionalWithStart).toString(), '${const BorderDirectional(start: side1, top: doubleSide2, bottom: doubleSide2)}');
-    expect((borderWithoutSides + borderDirectionalWithEnd).toString(), '${const BorderDirectional(end: side1, top: doubleSide2, bottom: doubleSide2)}');
-    expect((borderWithoutSides + borderDirectionalWithoutSides).toString(), '${const Border(top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderWithRight + borderDirectionalWithoutSides).toString(),
+        '${const Border(right: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderWithoutSides + borderDirectionalWithStart).toString(),
+        '${const BorderDirectional(start: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderWithoutSides + borderDirectionalWithEnd).toString(),
+        '${const BorderDirectional(end: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderWithoutSides + borderDirectionalWithoutSides).toString(),
+        '${const Border(top: doubleSide2, bottom: doubleSide2)}');
 
     expect((borderDirectionalWithStart + borderWithLeft).toString(), '$borderDirectionalWithStart + $borderWithLeft');
     expect((borderDirectionalWithEnd + borderWithLeft).toString(), '$borderDirectionalWithEnd + $borderWithLeft');
-    expect((borderDirectionalWithoutSides + borderWithLeft).toString(), '${const Border(left: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderDirectionalWithoutSides + borderWithLeft).toString(),
+        '${const Border(left: side1, top: doubleSide2, bottom: doubleSide2)}');
     expect((borderDirectionalWithStart + borderWithRight).toString(), '$borderDirectionalWithStart + $borderWithRight');
     expect((borderDirectionalWithEnd + borderWithRight).toString(), '$borderDirectionalWithEnd + $borderWithRight');
-    expect((borderDirectionalWithoutSides + borderWithRight).toString(), '${const Border(right: side1, top: doubleSide2, bottom: doubleSide2)}');
-    expect((borderDirectionalWithStart + borderWithoutSides).toString(), '${const BorderDirectional(start: side1, top: doubleSide2, bottom: doubleSide2)}');
-    expect((borderDirectionalWithEnd + borderWithoutSides).toString(), '${const BorderDirectional(end: side1, top: doubleSide2, bottom: doubleSide2)}');
-    expect((borderDirectionalWithoutSides + borderWithoutSides).toString(), '${const Border(top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderDirectionalWithoutSides + borderWithRight).toString(),
+        '${const Border(right: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderDirectionalWithStart + borderWithoutSides).toString(),
+        '${const BorderDirectional(start: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderDirectionalWithEnd + borderWithoutSides).toString(),
+        '${const BorderDirectional(end: side1, top: doubleSide2, bottom: doubleSide2)}');
+    expect((borderDirectionalWithoutSides + borderWithoutSides).toString(),
+        '${const Border(top: doubleSide2, bottom: doubleSide2)}');
   });
 
   test('BorderDirectional.scale', () {
@@ -569,7 +615,8 @@ void main() {
 
   test('BorderDirectional.lerp', () {
     const BorderDirectional directionalWithTop10 = BorderDirectional(top: BorderSide(width: 10.0));
-    const BorderDirectional atMinus100 = BorderDirectional(start: BorderSide(width: 0.0), end: BorderSide(width: 300.0));
+    const BorderDirectional atMinus100 =
+        BorderDirectional(start: BorderSide(width: 0.0), end: BorderSide(width: 300.0));
     const BorderDirectional at0 = BorderDirectional(start: BorderSide(width: 100.0), end: BorderSide(width: 200.0));
     const BorderDirectional at25 = BorderDirectional(start: BorderSide(width: 125.0), end: BorderSide(width: 175.0));
     const BorderDirectional at75 = BorderDirectional(start: BorderSide(width: 175.0), end: BorderSide(width: 125.0));
@@ -577,33 +624,41 @@ void main() {
     const BorderDirectional at200 = BorderDirectional(start: BorderSide(width: 300.0), end: BorderSide(width: 0.0));
 
     expect(BorderDirectional.lerp(null, null, -1.0), null);
-    expect(BorderDirectional.lerp(directionalWithTop10, null, -1.0), const BorderDirectional(top: BorderSide(width: 20.0)));
+    expect(BorderDirectional.lerp(directionalWithTop10, null, -1.0),
+        const BorderDirectional(top: BorderSide(width: 20.0)));
     expect(BorderDirectional.lerp(null, directionalWithTop10, -1.0), const BorderDirectional());
     expect(BorderDirectional.lerp(at0, at100, -1.0), atMinus100);
 
     expect(BorderDirectional.lerp(null, null, 0.0), null);
-    expect(BorderDirectional.lerp(directionalWithTop10, null, 0.0), const BorderDirectional(top: BorderSide(width: 10.0)));
+    expect(
+        BorderDirectional.lerp(directionalWithTop10, null, 0.0), const BorderDirectional(top: BorderSide(width: 10.0)));
     expect(BorderDirectional.lerp(null, directionalWithTop10, 0.0), const BorderDirectional());
     expect(BorderDirectional.lerp(at0, at100, 0.0), at0);
 
     expect(BorderDirectional.lerp(null, null, 0.25), null);
-    expect(BorderDirectional.lerp(directionalWithTop10, null, 0.25), const BorderDirectional(top: BorderSide(width: 7.5)));
-    expect(BorderDirectional.lerp(null, directionalWithTop10, 0.25), const BorderDirectional(top: BorderSide(width: 2.5)));
+    expect(
+        BorderDirectional.lerp(directionalWithTop10, null, 0.25), const BorderDirectional(top: BorderSide(width: 7.5)));
+    expect(
+        BorderDirectional.lerp(null, directionalWithTop10, 0.25), const BorderDirectional(top: BorderSide(width: 2.5)));
     expect(BorderDirectional.lerp(at0, at100, 0.25), at25);
 
     expect(BorderDirectional.lerp(null, null, 0.75), null);
-    expect(BorderDirectional.lerp(directionalWithTop10, null, 0.75), const BorderDirectional(top: BorderSide(width: 2.5)));
-    expect(BorderDirectional.lerp(null, directionalWithTop10, 0.75), const BorderDirectional(top: BorderSide(width: 7.5)));
+    expect(
+        BorderDirectional.lerp(directionalWithTop10, null, 0.75), const BorderDirectional(top: BorderSide(width: 2.5)));
+    expect(
+        BorderDirectional.lerp(null, directionalWithTop10, 0.75), const BorderDirectional(top: BorderSide(width: 7.5)));
     expect(BorderDirectional.lerp(at0, at100, 0.75), at75);
 
     expect(BorderDirectional.lerp(null, null, 1.0), null);
     expect(BorderDirectional.lerp(directionalWithTop10, null, 1.0), const BorderDirectional());
-    expect(BorderDirectional.lerp(null, directionalWithTop10, 1.0), const BorderDirectional(top: BorderSide(width: 10.0)));
+    expect(
+        BorderDirectional.lerp(null, directionalWithTop10, 1.0), const BorderDirectional(top: BorderSide(width: 10.0)));
     expect(BorderDirectional.lerp(at0, at100, 1.0), at100);
 
     expect(BorderDirectional.lerp(null, null, 2.0), null);
     expect(BorderDirectional.lerp(directionalWithTop10, null, 2.0), const BorderDirectional());
-    expect(BorderDirectional.lerp(null, directionalWithTop10, 2.0), const BorderDirectional(top: BorderSide(width: 20.0)));
+    expect(
+        BorderDirectional.lerp(null, directionalWithTop10, 2.0), const BorderDirectional(top: BorderSide(width: 20.0)));
     expect(BorderDirectional.lerp(at0, at100, 2.0), at200);
   });
 
@@ -611,7 +666,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
+            .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
       },
       paints
         ..path(
@@ -623,7 +678,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
+            .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
       },
       paints
         ..path(
@@ -635,7 +690,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+            .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
       },
       paintsAssertion, // no TextDirection
     );

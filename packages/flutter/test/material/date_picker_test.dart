@@ -30,8 +30,10 @@ void main() {
   String? helpText;
   TextInputType? keyboardType;
 
-  final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
-  final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
+  final Finder nextMonthIcon =
+      find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
+  final Finder previousMonthIcon =
+      find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
   final Finder switchToInputIcon = find.byIcon(Icons.edit);
   final Finder switchToCalendarIcon = find.byIcon(Icons.calendar_today);
 
@@ -335,7 +337,8 @@ void main() {
       );
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle();
-      final Material defaultDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+      final Material defaultDialogMaterial =
+          tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
       expect(defaultDialogMaterial.shape, datePickerDefaultDialogTheme.shape);
       expect(defaultDialogMaterial.elevation, datePickerDefaultDialogTheme.elevation);
 
@@ -370,41 +373,42 @@ void main() {
       );
       await tester.pump(); // start theme animation
       await tester.pump(const Duration(seconds: 5)); // end theme animation
-      final Material themeDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+      final Material themeDialogMaterial =
+          tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
       expect(themeDialogMaterial.shape, customDialogTheme.shape);
       expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
     });
 
     testWidgets('OK Cancel button layout', (WidgetTester tester) async {
-       Widget buildFrame(TextDirection textDirection) {
-         return MaterialApp(
-           home: Material(
-             child: Center(
-               child: Builder(
-                 builder: (BuildContext context) {
-                   return ElevatedButton(
-                     child: const Text('X'),
-                     onPressed: () {
-                       showDatePicker(
-                         context: context,
-                         initialDate: DateTime(2016, DateTime.january, 15),
-                         firstDate:DateTime(2001),
-                         lastDate: DateTime(2031, DateTime.december, 31),
-                         builder: (BuildContext context, Widget? child) {
-                           return Directionality(
-                             textDirection: textDirection,
-                             child: child ?? const SizedBox(),
-                           );
-                         },
-                       );
-                     },
-                   );
-                 },
-               ),
-             ),
-           ),
-         );
-       }
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showDatePicker(
+                        context: context,
+                        initialDate: DateTime(2016, DateTime.january, 15),
+                        firstDate: DateTime(2001),
+                        lastDate: DateTime(2031, DateTime.december, 31),
+                        builder: (BuildContext context, Widget? child) {
+                          return Directionality(
+                            textDirection: textDirection,
+                            child: child ?? const SizedBox(),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
 
       // Default landscape layout.
 
@@ -811,39 +815,47 @@ void main() {
 
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         // Header
-        expect(tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
-          label: 'SELECT DATE\nFri, Jan 15',
-        ));
+        expect(
+            tester.getSemantics(find.text('SELECT DATE')),
+            matchesSemantics(
+              label: 'SELECT DATE\nFri, Jan 15',
+            ));
 
         // Input mode toggle button
-        expect(tester.getSemantics(switchToInputIcon), matchesSemantics(
-          label: 'Switch to input',
-          isButton: true,
-          hasTapAction: true,
-          isEnabled: true,
-          hasEnabledState: true,
-          isFocusable: true,
-        ));
+        expect(
+            tester.getSemantics(switchToInputIcon),
+            matchesSemantics(
+              label: 'Switch to input',
+              isButton: true,
+              hasTapAction: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+            ));
 
         // The semantics of the CalendarDatePicker are tested in its tests.
 
         // Ok/Cancel buttons
-        expect(tester.getSemantics(find.text('OK')), matchesSemantics(
-          label: 'OK',
-          isButton: true,
-          hasTapAction: true,
-          isEnabled: true,
-          hasEnabledState: true,
-          isFocusable: true,
-        ));
-        expect(tester.getSemantics(find.text('CANCEL')), matchesSemantics(
-          label: 'CANCEL',
-          isButton: true,
-          hasTapAction: true,
-          isEnabled: true,
-          hasEnabledState: true,
-          isFocusable: true,
-        ));
+        expect(
+            tester.getSemantics(find.text('OK')),
+            matchesSemantics(
+              label: 'OK',
+              isButton: true,
+              hasTapAction: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+            ));
+        expect(
+            tester.getSemantics(find.text('CANCEL')),
+            matchesSemantics(
+              label: 'CANCEL',
+              isButton: true,
+              hasTapAction: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+            ));
       });
     });
 
@@ -854,39 +866,47 @@ void main() {
       initialEntryMode = DatePickerEntryMode.input;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         // Header
-        expect(tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
-          label: 'SELECT DATE\nFri, Jan 15',
-        ));
+        expect(
+            tester.getSemantics(find.text('SELECT DATE')),
+            matchesSemantics(
+              label: 'SELECT DATE\nFri, Jan 15',
+            ));
 
         // Input mode toggle button
-        expect(tester.getSemantics(switchToCalendarIcon), matchesSemantics(
-          label: 'Switch to calendar',
-          isButton: true,
-          hasTapAction: true,
-          isEnabled: true,
-          hasEnabledState: true,
-          isFocusable: true,
-        ));
+        expect(
+            tester.getSemantics(switchToCalendarIcon),
+            matchesSemantics(
+              label: 'Switch to calendar',
+              isButton: true,
+              hasTapAction: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+            ));
 
         // The semantics of the InputDatePickerFormField are tested in its tests.
 
         // Ok/Cancel buttons
-        expect(tester.getSemantics(find.text('OK')), matchesSemantics(
-          label: 'OK',
-          isButton: true,
-          hasTapAction: true,
-          isEnabled: true,
-          hasEnabledState: true,
-          isFocusable: true,
-        ));
-        expect(tester.getSemantics(find.text('CANCEL')), matchesSemantics(
-          label: 'CANCEL',
-          isButton: true,
-          hasTapAction: true,
-          isEnabled: true,
-          hasEnabledState: true,
-          isFocusable: true,
-        ));
+        expect(
+            tester.getSemantics(find.text('OK')),
+            matchesSemantics(
+              label: 'OK',
+              isButton: true,
+              hasTapAction: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+            ));
+        expect(
+            tester.getSemantics(find.text('CANCEL')),
+            matchesSemantics(
+              label: 'CANCEL',
+              isButton: true,
+              hasTapAction: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+            ));
       });
     });
   });
@@ -1370,7 +1390,8 @@ class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
   _RestorableDatePickerDialogTestWidgetState createState() => _RestorableDatePickerDialogTestWidgetState();
 }
 
-class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePickerDialogTestWidget> with RestorationMixin {
+class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePickerDialogTestWidget>
+    with RestorationMixin {
   @override
   String? get restorationId => 'scaffold_state';
 
@@ -1396,7 +1417,9 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
 
   void _selectDate(DateTime? newSelectedDate) {
     if (newSelectedDate != null) {
-      setState(() { _selectedDate.value = newSelectedDate; });
+      setState(() {
+        _selectedDate.value = newSelectedDate;
+      });
     }
   }
 

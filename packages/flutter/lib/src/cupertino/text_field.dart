@@ -16,7 +16,8 @@ import 'icons.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart'
+    show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
@@ -94,8 +95,8 @@ enum OverlayVisibilityMode {
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
-  }) : _state = state,
-       super(delegate: state);
+  })  : _state = state,
+        super(delegate: state);
 
   final _CupertinoTextFieldState _state;
 
@@ -269,70 +270,70 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-  }) : assert(textAlign != null),
-       assert(readOnly != null),
-       assert(autofocus != null),
-       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(enableSuggestions != null),
-       assert(scrollPadding != null),
-       assert(dragStartBehavior != null),
-       assert(selectionHeightStyle != null),
-       assert(selectionWidthStyle != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(minLines == null || minLines > 0),
-       assert(
-         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         "minLines can't be greater than maxLines",
-       ),
-       assert(expands != null),
-       assert(
-         !expands || (maxLines == null && minLines == null),
-         'minLines and maxLines must be null when expands is true.',
-       ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(maxLength == null || maxLength > 0),
-       assert(clearButtonMode != null),
-       assert(prefixMode != null),
-       assert(suffixMode != null),
-       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-       assert(
-         !identical(textInputAction, TextInputAction.newline) ||
-         maxLines == 1 ||
-         !identical(keyboardType, TextInputType.text),
-         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
-       ),
-       assert(enableIMEPersonalizedLearning != null),
-       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     ))),
-       super(key: key);
+  })  : assert(textAlign != null),
+        assert(readOnly != null),
+        assert(autofocus != null),
+        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
+        assert(obscureText != null),
+        assert(autocorrect != null),
+        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+        assert(enableSuggestions != null),
+        assert(scrollPadding != null),
+        assert(dragStartBehavior != null),
+        assert(selectionHeightStyle != null),
+        assert(selectionWidthStyle != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          "minLines can't be greater than maxLines",
+        ),
+        assert(expands != null),
+        assert(
+          !expands || (maxLines == null && minLines == null),
+          'minLines and maxLines must be null when expands is true.',
+        ),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+        assert(maxLength == null || maxLength > 0),
+        assert(clearButtonMode != null),
+        assert(prefixMode != null),
+        assert(suffixMode != null),
+        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+        assert(
+          !identical(textInputAction, TextInputAction.newline) ||
+              maxLines == 1 ||
+              !identical(keyboardType, TextInputType.text),
+          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+        ),
+        assert(enableIMEPersonalizedLearning != null),
+        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+        toolbarOptions = toolbarOptions ??
+            (obscureText
+                ? (readOnly
+                    // No point in even offering "Select All" in a read-only obscured
+                    // field.
+                    ? const ToolbarOptions()
+                    // Writable, but obscured.
+                    : const ToolbarOptions(
+                        selectAll: true,
+                        paste: true,
+                      ))
+                : (readOnly
+                    // Read-only, not obscured.
+                    ? const ToolbarOptions(
+                        selectAll: true,
+                        copy: true,
+                      )
+                    // Writable, not obscured.
+                    : const ToolbarOptions(
+                        copy: true,
+                        cut: true,
+                        selectAll: true,
+                        paste: true,
+                      ))),
+        super(key: key);
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -430,71 +431,71 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-  }) : assert(textAlign != null),
-       assert(readOnly != null),
-       assert(autofocus != null),
-       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(enableSuggestions != null),
-       assert(scrollPadding != null),
-       assert(dragStartBehavior != null),
-       assert(selectionHeightStyle != null),
-       assert(selectionWidthStyle != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(minLines == null || minLines > 0),
-       assert(
-         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         "minLines can't be greater than maxLines",
-       ),
-       assert(expands != null),
-       assert(
-         !expands || (maxLines == null && minLines == null),
-         'minLines and maxLines must be null when expands is true.',
-       ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(maxLength == null || maxLength > 0),
-       assert(clearButtonMode != null),
-       assert(prefixMode != null),
-       assert(suffixMode != null),
-       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-       assert(
-         !identical(textInputAction, TextInputAction.newline) ||
-         maxLines == 1 ||
-         !identical(keyboardType, TextInputType.text),
-         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
-       ),
-       assert(clipBehavior != null),
-       assert(enableIMEPersonalizedLearning != null),
-       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     ))),
-       super(key: key);
+  })  : assert(textAlign != null),
+        assert(readOnly != null),
+        assert(autofocus != null),
+        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
+        assert(obscureText != null),
+        assert(autocorrect != null),
+        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+        assert(enableSuggestions != null),
+        assert(scrollPadding != null),
+        assert(dragStartBehavior != null),
+        assert(selectionHeightStyle != null),
+        assert(selectionWidthStyle != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          "minLines can't be greater than maxLines",
+        ),
+        assert(expands != null),
+        assert(
+          !expands || (maxLines == null && minLines == null),
+          'minLines and maxLines must be null when expands is true.',
+        ),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+        assert(maxLength == null || maxLength > 0),
+        assert(clearButtonMode != null),
+        assert(prefixMode != null),
+        assert(suffixMode != null),
+        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+        assert(
+          !identical(textInputAction, TextInputAction.newline) ||
+              maxLines == 1 ||
+              !identical(keyboardType, TextInputType.text),
+          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+        ),
+        assert(clipBehavior != null),
+        assert(enableIMEPersonalizedLearning != null),
+        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+        toolbarOptions = toolbarOptions ??
+            (obscureText
+                ? (readOnly
+                    // No point in even offering "Select All" in a read-only obscured
+                    // field.
+                    ? const ToolbarOptions()
+                    // Writable, but obscured.
+                    : const ToolbarOptions(
+                        selectAll: true,
+                        paste: true,
+                      ))
+                : (readOnly
+                    // Read-only, not obscured.
+                    ? const ToolbarOptions(
+                        selectAll: true,
+                        copy: true,
+                      )
+                    // Writable, not obscured.
+                    : const ToolbarOptions(
+                        copy: true,
+                        cut: true,
+                        selectAll: true,
+                        paste: true,
+                      ))),
+        super(key: key);
 
   /// Controls the text being edited.
   ///
@@ -797,20 +798,25 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType,
+        defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType,
+        defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
+    properties
+        .add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
-    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
+    properties.add(
+        FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties
+        .add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
@@ -818,11 +824,14 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(
+        DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
-class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
+class _CupertinoTextFieldState extends State<CupertinoTextField>
+    with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField>
+    implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
   RestorableTextEditingController? _controller;
@@ -831,8 +840,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
-    ?? LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement();
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement =>
+      widget.maxLengthEnforcement ?? LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement();
 
   bool _showSelectionHandles = false;
 
@@ -893,9 +902,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller = value == null ? RestorableTextEditingController() : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -928,21 +935,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
-      return false;
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) return false;
 
     // On iOS, we don't show handles when the selection is collapsed.
-    if (_effectiveController.selection.isCollapsed)
-      return false;
+    if (_effectiveController.selection.isCollapsed) return false;
 
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
+    if (cause == SelectionChangedCause.keyboard) return false;
 
-    if (cause == SelectionChangedCause.scribble)
-      return true;
+    if (cause == SelectionChangedCause.scribble) return true;
 
-    if (_effectiveController.text.isNotEmpty)
-      return true;
+    if (_effectiveController.text.isNotEmpty) return true;
 
     return false;
   }
@@ -958,8 +960,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
         return;
@@ -994,17 +995,19 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   bool _showPrefixWidget(TextEditingValue text) {
-    return widget.prefix != null && _shouldShowAttachment(
-      attachment: widget.prefixMode,
-      hasText: text.text.isNotEmpty,
-    );
+    return widget.prefix != null &&
+        _shouldShowAttachment(
+          attachment: widget.prefixMode,
+          hasText: text.text.isNotEmpty,
+        );
   }
 
   bool _showSuffixWidget(TextEditingValue text) {
-    return widget.suffix != null && _shouldShowAttachment(
-      attachment: widget.suffixMode,
-      hasText: text.text.isNotEmpty,
-    );
+    return widget.suffix != null &&
+        _shouldShowAttachment(
+          attachment: widget.suffixMode,
+          hasText: text.text.isNotEmpty,
+        );
   }
 
   bool _showClearButton(TextEditingValue text) {
@@ -1017,9 +1020,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   // True if any surrounding decoration widgets will be shown.
   bool get _hasDecoration {
     return widget.placeholder != null ||
-      widget.clearButtonMode != OverlayVisibilityMode.never ||
-      widget.prefix != null ||
-      widget.suffix != null;
+        widget.clearButtonMode != OverlayVisibilityMode.never ||
+        widget.prefix != null ||
+        widget.suffix != null;
   }
 
   // Provide default behavior if widget.textAlignVertical is not set.
@@ -1081,14 +1084,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           else if (_showClearButton(text))
             GestureDetector(
               key: _clearGlobalKey,
-              onTap: widget.enabled ?? true ? () {
-                // Special handle onChanged for ClearButton
-                // Also call onChanged when the clear button is tapped.
-                final bool textChanged = _effectiveController.text.isNotEmpty;
-                _effectiveController.clear();
-                if (widget.onChanged != null && textChanged)
-                  widget.onChanged!(_effectiveController.text);
-              } : null,
+              onTap: widget.enabled ?? true
+                  ? () {
+                      // Special handle onChanged for ClearButton
+                      // Also call onChanged when the clear button is tapped.
+                      final bool textChanged = _effectiveController.text.isNotEmpty;
+                      _effectiveController.clear();
+                      if (widget.onChanged != null && textChanged) widget.onChanged!(_effectiveController.text);
+                    }
+                  : null,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: Icon(
@@ -1102,6 +1106,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       },
     );
   }
+
   // AutofillClient implementation start.
   @override
   String get autofillId => _editableText.autofillId;
@@ -1113,13 +1118,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
     final AutofillConfiguration autofillConfiguration = autofillHints != null
-      ? AutofillConfiguration(
-          uniqueIdentifier: autofillId,
-          autofillHints: autofillHints,
-          currentEditingValue: _effectiveController.value,
-          hintText: widget.placeholder,
-        )
-      : AutofillConfiguration.disabled;
+        ? AutofillConfiguration(
+            uniqueIdentifier: autofillId,
+            autofillHints: autofillHints,
+            currentEditingValue: _effectiveController.value,
+            hintText: widget.placeholder,
+          )
+        : AutofillConfiguration.disabled;
 
     return _editableText.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
   }
@@ -1190,17 +1195,18 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
-          ? side
-          : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+            ? side
+            : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
       }
+
       resolvedBorder = border == null || border.runtimeType != Border
-        ? border
-        : Border(
-          top: resolveBorderSide(border.top),
-          left: resolveBorderSide(border.left),
-          bottom: resolveBorderSide(border.bottom),
-          right: resolveBorderSide(border.right),
-        );
+          ? border
+          : Border(
+              top: resolveBorderSide(border.top),
+              left: resolveBorderSide(border.left),
+              bottom: resolveBorderSide(border.bottom),
+              right: resolveBorderSide(border.right),
+            );
     }
 
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
@@ -1242,8 +1248,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             expands: widget.expands,
             // Only show the selection highlight when the text field is focused.
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
-            selectionControls: widget.selectionEnabled
-              ? textSelectionControls : null,
+            selectionControls: widget.selectionEnabled ? textSelectionControls : null,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
@@ -1279,12 +1284,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     return Semantics(
       enabled: enabled,
-      onTap: !enabled || widget.readOnly ? null : () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
-        }
-        _requestKeyboard();
-      },
+      onTap: !enabled || widget.readOnly
+          ? null
+          : () {
+              if (!controller.selection.isValid) {
+                controller.selection = TextSelection.collapsed(offset: controller.text.length);
+              }
+              _requestKeyboard();
+            },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: IgnorePointer(
         ignoring: !enabled,

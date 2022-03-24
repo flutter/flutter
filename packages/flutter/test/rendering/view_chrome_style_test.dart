@@ -73,8 +73,7 @@ void main() {
         "statusBarColor isn't set when view covers less than half of the system status bar",
         (WidgetTester tester) async {
           setupTestDevice();
-          const double lessThanHalfOfTheStatusBarHeight =
-              statusBarHeight / 2.0 - 1;
+          const double lessThanHalfOfTheStatusBarHeight = statusBarHeight / 2.0 - 1;
           await tester.pumpWidget(const Align(
             alignment: Alignment.topCenter,
             child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -98,8 +97,7 @@ void main() {
         'statusBarColor is set when view covers more than half of tye system status bar',
         (WidgetTester tester) async {
           setupTestDevice();
-          const double moreThanHalfOfTheStatusBarHeight =
-              statusBarHeight / 2.0 + 1;
+          const double moreThanHalfOfTheStatusBarHeight = statusBarHeight / 2.0 + 1;
           await tester.pumpWidget(const Align(
             alignment: Alignment.topCenter,
             child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -179,8 +177,7 @@ void main() {
         "systemNavigationBarColor isn't set when view covers less than half of navigation bar",
         (WidgetTester tester) async {
           setupTestDevice();
-          const double lessThanHalfOfTheNavigationBarHeight =
-              navigationBarHeight / 2.0 - 1;
+          const double lessThanHalfOfTheNavigationBarHeight = navigationBarHeight / 2.0 - 1;
           await tester.pumpWidget(const Align(
             alignment: Alignment.bottomCenter,
             child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -204,8 +201,7 @@ void main() {
         'systemNavigationBarColor is set when view covers more than half of navigation bar',
         (WidgetTester tester) async {
           setupTestDevice();
-          const double moreThanHalfOfTheNavigationBarHeight =
-              navigationBarHeight / 2.0 + 1;
+          const double moreThanHalfOfTheNavigationBarHeight = navigationBarHeight / 2.0 + 1;
           await tester.pumpWidget(const Align(
             alignment: Alignment.bottomCenter,
             child: AnnotatedRegion<SystemUiOverlayStyle>(

@@ -311,8 +311,7 @@ class ButtonStyle with Diagnosticable {
   /// In other words, [style] is used to fill in unspecified (null) fields
   /// this ButtonStyle.
   ButtonStyle merge(ButtonStyle? style) {
-    if (style == null)
-      return this;
+    if (style == null) return this;
     return copyWith(
       textStyle: textStyle ?? style.textStyle,
       backgroundColor: backgroundColor ?? style.backgroundColor,
@@ -338,71 +337,74 @@ class ButtonStyle with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    textStyle,
-    backgroundColor,
-    foregroundColor,
-    overlayColor,
-    shadowColor,
-    elevation,
-    padding,
-    minimumSize,
-    fixedSize,
-    maximumSize,
-    side,
-    shape,
-    mouseCursor,
-    visualDensity,
-    tapTargetSize,
-    animationDuration,
-    enableFeedback,
-    alignment,
-    splashFactory,
-  );
+        textStyle,
+        backgroundColor,
+        foregroundColor,
+        overlayColor,
+        shadowColor,
+        elevation,
+        padding,
+        minimumSize,
+        fixedSize,
+        maximumSize,
+        side,
+        shape,
+        mouseCursor,
+        visualDensity,
+        tapTargetSize,
+        animationDuration,
+        enableFeedback,
+        alignment,
+        splashFactory,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is ButtonStyle
-        && other.textStyle == textStyle
-        && other.backgroundColor == backgroundColor
-        && other.foregroundColor == foregroundColor
-        && other.overlayColor == overlayColor
-        && other.shadowColor == shadowColor
-        && other.elevation == elevation
-        && other.padding == padding
-        && other.minimumSize == minimumSize
-        && other.fixedSize == fixedSize
-        && other.maximumSize == maximumSize
-        && other.side == side
-        && other.shape == shape
-        && other.mouseCursor == mouseCursor
-        && other.visualDensity == visualDensity
-        && other.tapTargetSize == tapTargetSize
-        && other.animationDuration == animationDuration
-        && other.enableFeedback == enableFeedback
-        && other.alignment == alignment
-        && other.splashFactory == splashFactory;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is ButtonStyle &&
+        other.textStyle == textStyle &&
+        other.backgroundColor == backgroundColor &&
+        other.foregroundColor == foregroundColor &&
+        other.overlayColor == overlayColor &&
+        other.shadowColor == shadowColor &&
+        other.elevation == elevation &&
+        other.padding == padding &&
+        other.minimumSize == minimumSize &&
+        other.fixedSize == fixedSize &&
+        other.maximumSize == maximumSize &&
+        other.side == side &&
+        other.shape == shape &&
+        other.mouseCursor == mouseCursor &&
+        other.visualDensity == visualDensity &&
+        other.tapTargetSize == tapTargetSize &&
+        other.animationDuration == animationDuration &&
+        other.enableFeedback == enableFeedback &&
+        other.alignment == alignment &&
+        other.splashFactory == splashFactory;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(EnumProperty<MaterialTapTargetSize>('tapTargetSize', tapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: null));
@@ -412,17 +414,16 @@ class ButtonStyle with Diagnosticable {
 
   /// Linearly interpolate between two [ButtonStyle]s.
   static ButtonStyle? lerp(ButtonStyle? a, ButtonStyle? b, double t) {
-    assert (t != null);
-    if (a == null && b == null)
-      return null;
+    assert(t != null);
+    if (a == null && b == null) return null;
     return ButtonStyle(
       textStyle: _lerpProperties<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
       backgroundColor: _lerpProperties<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      foregroundColor:  _lerpProperties<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
+      foregroundColor: _lerpProperties<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
       overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       shadowColor: _lerpProperties<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
       elevation: _lerpProperties<double?>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding:  _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      padding: _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
       minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
@@ -438,24 +439,24 @@ class ButtonStyle with Diagnosticable {
     );
   }
 
-  static MaterialStateProperty<T?>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction ) {
+  static MaterialStateProperty<T?>? _lerpProperties<T>(
+      MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
-      return null;
+    if (a == null && b == null) return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
-    if (a == null && b == null)
-      return null;
+  static MaterialStateProperty<BorderSide?>? _lerpSides(
+      MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
+    if (a == null && b == null) return null;
     return _LerpSides(a, b, t);
   }
 
   // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static MaterialStateProperty<OutlinedBorder?>? _lerpShapes(MaterialStateProperty<OutlinedBorder?>? a, MaterialStateProperty<OutlinedBorder?>? b, double t) {
-    if (a == null && b == null)
-      return null;
+  static MaterialStateProperty<OutlinedBorder?>? _lerpShapes(
+      MaterialStateProperty<OutlinedBorder?>? a, MaterialStateProperty<OutlinedBorder?>? b, double t) {
+    if (a == null && b == null) return null;
     return _LerpShapes(a, b, t);
   }
 }
@@ -487,8 +488,7 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
   BorderSide? resolve(Set<MaterialState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
-    if (resolvedA == null && resolvedB == null)
-      return null;
+    if (resolvedA == null && resolvedB == null) return null;
     if (resolvedA == null)
       return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
     if (resolvedB == null)

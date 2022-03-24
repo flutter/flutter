@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
@@ -106,10 +105,8 @@ class SystemNavigator {
   /// [routeInformationUpdated] together.
   ///
   /// The `previousRouteName` argument is ignored.
-  @Deprecated(
-    'Use routeInformationUpdated instead. '
-    'This feature was deprecated after v2.3.0-1.0.pre.'
-  )
+  @Deprecated('Use routeInformationUpdated instead. '
+      'This feature was deprecated after v2.3.0-1.0.pre.')
   static Future<void> routeUpdated({
     String? routeName,
     String? previousRouteName,

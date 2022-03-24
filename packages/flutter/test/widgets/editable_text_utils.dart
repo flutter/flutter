@@ -20,6 +20,7 @@ RenderEditable findRenderEditable(WidgetTester tester) {
     }
     child.visitChildren(recursiveFinder);
   }
+
   root.visitChildren(recursiveFinder);
   expect(renderEditable, isNotNull);
   return renderEditable;

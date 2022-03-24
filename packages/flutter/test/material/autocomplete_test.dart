@@ -215,7 +215,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode,
+                VoidCallback onFieldSubmitted) {
               return Container(key: fieldKey);
             },
           ),
@@ -239,7 +240,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               return Container(key: optionsKey);
             },
           ),
@@ -281,7 +283,7 @@ void main() {
   testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
     const double desiredHeight = 150.0;
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
+        home: Scaffold(
       body: Autocomplete<String>(
         optionsMaxHeight: desiredHeight,
         optionsBuilder: (TextEditingValue textEditingValue) {
@@ -307,11 +309,11 @@ void main() {
     expect(resultingHeight, equals(desiredHeight));
   });
 
-  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
+  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight',
+      (WidgetTester tester) async {
     // Returns a Future with the height of the default [Autocomplete] options widget
     // after the provided text had been entered into the [Autocomplete] field.
-    Future<double> _getDefaultOptionsHeight(
-        WidgetTester tester, String enteredText) async {
+    Future<double> _getDefaultOptionsHeight(WidgetTester tester, String enteredText) async {
       final Finder listFinder = find.byType(ListView);
       final Finder inputFinder = find.byType(TextFormField);
       final TextFormField field = inputFinder.evaluate().first.widget as TextFormField;
@@ -325,7 +327,7 @@ void main() {
 
     const double maxOptionsHeight = 250.0;
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
+        home: Scaffold(
       body: Autocomplete<String>(
         optionsMaxHeight: maxOptionsHeight,
         optionsBuilder: (TextEditingValue textEditingValue) {
@@ -405,7 +407,8 @@ void main() {
   // Ensures that the option with the given label has a given background color
   // if given, or no background if color is null.
   void checkOptionHighlight(WidgetTester tester, String label, Color? color) {
-    final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
+    final RenderBox renderBox =
+        tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
     if (color != null) {
       // Check to see that the container is painted with the highlighted background color.
       expect(renderBox, paints..rect(color: color));

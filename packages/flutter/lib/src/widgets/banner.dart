@@ -64,12 +64,12 @@ class BannerPainter extends CustomPainter {
     required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(textDirection != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(repaint: PaintingBinding.instance.systemFonts);
+  })  : assert(message != null),
+        assert(textDirection != null),
+        assert(location != null),
+        assert(color != null),
+        assert(textStyle != null),
+        super(repaint: PaintingBinding.instance.systemFonts);
 
   /// The message to show in the banner.
   final String message;
@@ -123,8 +123,7 @@ class BannerPainter extends CustomPainter {
 
   void _prepare() {
     _paintShadow = _shadow.toPaint();
-    _paintBanner = Paint()
-      ..color = color;
+    _paintBanner = Paint()..color = color;
     _textPainter = TextPainter(
       text: TextSpan(style: textStyle, text: message),
       textAlign: TextAlign.center,
@@ -135,8 +134,7 @@ class BannerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!_prepared)
-      _prepare();
+    if (!_prepared) _prepare();
     canvas
       ..translate(_translationX(size.width), _translationY(size.height))
       ..rotate(_rotation)
@@ -149,10 +147,10 @@ class BannerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BannerPainter oldDelegate) {
-    return message != oldDelegate.message
-        || location != oldDelegate.location
-        || color != oldDelegate.color
-        || textStyle != oldDelegate.textStyle;
+    return message != oldDelegate.message ||
+        location != oldDelegate.location ||
+        color != oldDelegate.color ||
+        textStyle != oldDelegate.textStyle;
   }
 
   @override
@@ -247,11 +245,11 @@ class Banner extends StatelessWidget {
     this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(key: key);
+  })  : assert(message != null),
+        assert(location != null),
+        assert(color != null),
+        assert(textStyle != null),
+        super(key: key);
 
   /// The widget to show behind the banner.
   ///

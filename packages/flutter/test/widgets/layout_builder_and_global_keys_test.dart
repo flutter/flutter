@@ -31,9 +31,8 @@ class StatefulWrapper extends StatefulWidget {
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
-
   void trigger() {
-    setState(() { /* for test purposes */ });
+    setState(() {/* for test purposes */});
   }
 
   @override

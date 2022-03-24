@@ -33,7 +33,8 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (WidgetTester tester) async {
+  testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation',
+      (WidgetTester tester) async {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
@@ -91,7 +92,8 @@ void main() {
     expect(find.text(errorText('bar')!), findsOneWidget);
   });
 
-  testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (WidgetTester tester) async {
+  testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called',
+      (WidgetTester tester) async {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 

@@ -59,8 +59,7 @@ class GridTileBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BoxDecoration? decoration;
-    if (backgroundColor != null)
-      decoration = BoxDecoration(color: backgroundColor);
+    if (backgroundColor != null) decoration = BoxDecoration(color: backgroundColor);
 
     final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
       start: leading != null ? 8.0 : 16.0,
@@ -78,8 +77,7 @@ class GridTileBar extends StatelessWidget {
           data: const IconThemeData(color: Colors.white),
           child: Row(
             children: <Widget>[
-              if (leading != null)
-                Padding(padding: const EdgeInsetsDirectional.only(end: 8.0), child: leading),
+              if (leading != null) Padding(padding: const EdgeInsetsDirectional.only(end: 8.0), child: leading),
               if (title != null && subtitle != null)
                 Expanded(
                   child: Column(
@@ -110,8 +108,7 @@ class GridTileBar extends StatelessWidget {
                     child: title ?? subtitle!,
                   ),
                 ),
-              if (trailing != null)
-                Padding(padding: const EdgeInsetsDirectional.only(start: 8.0), child: trailing),
+              if (trailing != null) Padding(padding: const EdgeInsetsDirectional.only(start: 8.0), child: trailing),
             ],
           ),
         ),

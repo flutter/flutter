@@ -228,20 +228,20 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
-  }) : assert(routes != null),
-       assert(navigatorObservers != null),
-       assert(title != null),
-       assert(debugShowMaterialGrid != null),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       routeInformationProvider = null,
-       routeInformationParser = null,
-       routerDelegate = null,
-       backButtonDispatcher = null,
-       super(key: key);
+  })  : assert(routes != null),
+        assert(navigatorObservers != null),
+        assert(title != null),
+        assert(debugShowMaterialGrid != null),
+        assert(showPerformanceOverlay != null),
+        assert(checkerboardRasterCacheImages != null),
+        assert(checkerboardOffscreenLayers != null),
+        assert(showSemanticsDebugger != null),
+        assert(debugShowCheckedModeBanner != null),
+        routeInformationProvider = null,
+        routeInformationParser = null,
+        routerDelegate = null,
+        backButtonDispatcher = null,
+        super(key: key);
 
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   const MaterialApp.router({
@@ -276,24 +276,24 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
-  }) : assert(routeInformationParser != null),
-       assert(routerDelegate != null),
-       assert(title != null),
-       assert(debugShowMaterialGrid != null),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       navigatorObservers = null,
-       navigatorKey = null,
-       onGenerateRoute = null,
-       home = null,
-       onGenerateInitialRoutes = null,
-       onUnknownRoute = null,
-       routes = null,
-       initialRoute = null,
-       super(key: key);
+  })  : assert(routeInformationParser != null),
+        assert(routerDelegate != null),
+        assert(title != null),
+        assert(debugShowMaterialGrid != null),
+        assert(showPerformanceOverlay != null),
+        assert(checkerboardRasterCacheImages != null),
+        assert(checkerboardOffscreenLayers != null),
+        assert(showSemanticsDebugger != null),
+        assert(debugShowCheckedModeBanner != null),
+        navigatorObservers = null,
+        navigatorKey = null,
+        onGenerateRoute = null,
+        home = null,
+        onGenerateInitialRoutes = null,
+        onUnknownRoute = null,
+        routes = null,
+        initialRoute = null,
+        super(key: key);
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -748,13 +748,11 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
   /// overscroll indicator is the [GlowingOverscrollIndicator].
   const MaterialScrollBehavior({
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       super(androidOverscrollIndicator: androidOverscrollIndicator);
+    @Deprecated('Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+        'This feature was deprecated after v2.13.0-0.0.pre.')
+        AndroidOverscrollIndicator? androidOverscrollIndicator,
+  })  : _androidOverscrollIndicator = androidOverscrollIndicator,
+        super(androidOverscrollIndicator: androidOverscrollIndicator);
 
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
@@ -793,9 +791,8 @@ class MaterialScrollBehavior extends ScrollBehavior {
     if (Theme.of(context).useMaterial3) {
       indicator = AndroidOverscrollIndicator.stretch;
     } else {
-      indicator = _androidOverscrollIndicator
-        ?? Theme.of(context).androidOverscrollIndicator
-        ?? androidOverscrollIndicator;
+      indicator =
+          _androidOverscrollIndicator ?? Theme.of(context).androidOverscrollIndicator ?? androidOverscrollIndicator;
     }
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
@@ -842,8 +839,7 @@ class _MaterialAppState extends State<MaterialApp> {
   // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null)
-        ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
       DefaultMaterialLocalizations.delegate,
       DefaultCupertinoLocalizations.delegate,
     ];
@@ -861,8 +857,8 @@ class _MaterialAppState extends State<MaterialApp> {
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-    final bool useDarkTheme = mode == ThemeMode.dark
-      || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
+    final bool useDarkTheme =
+        mode == ThemeMode.dark || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
     ThemeData? theme;
 
@@ -880,23 +876,23 @@ class _MaterialAppState extends State<MaterialApp> {
       child: AnimatedTheme(
         data: theme,
         child: widget.builder != null
-          ? Builder(
-              builder: (BuildContext context) {
-                // Why are we surrounding a builder with a builder?
-                //
-                // The widget.builder may contain code that invokes
-                // Theme.of(), which should return the theme we selected
-                // above in AnimatedTheme. However, if we invoke
-                // widget.builder() directly as the child of AnimatedTheme
-                // then there is no Context separating them, and the
-                // widget.builder() will not find the theme. Therefore, we
-                // surround widget.builder with yet another builder so that
-                // a context separates them and Theme.of() correctly
-                // resolves to the theme we passed to AnimatedTheme.
-                return widget.builder!(context, child);
-              },
-            )
-          : child ?? const SizedBox.shrink(),
+            ? Builder(
+                builder: (BuildContext context) {
+                  // Why are we surrounding a builder with a builder?
+                  //
+                  // The widget.builder may contain code that invokes
+                  // Theme.of(), which should return the theme we selected
+                  // above in AnimatedTheme. However, if we invoke
+                  // widget.builder() directly as the child of AnimatedTheme
+                  // then there is no Context separating them, and the
+                  // widget.builder() will not find the theme. Therefore, we
+                  // surround widget.builder with yet another builder so that
+                  // a context separates them and Theme.of() correctly
+                  // resolves to the theme we passed to AnimatedTheme.
+                  return widget.builder!(context, child);
+                },
+              )
+            : child ?? const SizedBox.shrink(),
       ),
     );
   }
@@ -982,8 +978,7 @@ class _MaterialAppState extends State<MaterialApp> {
     result = Focus(
       canRequestFocus: false,
       onKey: (FocusNode node, RawKeyEvent event) {
-        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape)
-          return KeyEventResult.ignored;
+        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) return KeyEventResult.ignored;
         return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
       },
       child: result,

@@ -180,7 +180,8 @@ void main() {
   // ┌───┐ ┌───┐ ┌───┐ ┌───┐
   // │ J │<│ K │<│ L │<│ M │
   // └───┘ └───┘ └───┘ └───┘
-  testTraversal('Semantics traverses vertical groups, then horizontal groups, then knots', (TraversalTester tester) async {
+  testTraversal('Semantics traverses vertical groups, then horizontal groups, then knots',
+      (TraversalTester tester) async {
     final Map<String, Rect> children = <String, Rect>{
       'A': Offset.zero & tenByTen,
       'B': const Offset(20.0, 0.0) & tenByTen,
@@ -295,48 +296,50 @@ class TraversalTester {
   }) async {
     assert(children is LinkedHashMap);
     await tester.pumpWidget(
-        Directionality(
+      Directionality(
+        textDirection: textDirection,
+        child: Semantics(
           textDirection: textDirection,
-          child: Semantics(
-            textDirection: textDirection,
-            child: CustomMultiChildLayout(
-              delegate: TestLayoutDelegate(children),
-              children: children.keys.map<Widget>((String label) {
-                return LayoutId(
-                  id: label,
-                  child: Semantics(
-                    container: true,
-                    explicitChildNodes: true,
-                    label: label,
-                    child: SizedBox(
-                      width: children[label]!.width,
-                      height: children[label]!.height,
-                    ),
+          child: CustomMultiChildLayout(
+            delegate: TestLayoutDelegate(children),
+            children: children.keys.map<Widget>((String label) {
+              return LayoutId(
+                id: label,
+                child: Semantics(
+                  container: true,
+                  explicitChildNodes: true,
+                  label: label,
+                  child: SizedBox(
+                    width: children[label]!.width,
+                    height: children[label]!.height,
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-    );
-
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            textDirection: textDirection,
-            children: expectedTraversal.split(' ').map<TestSemantics>((String label) {
-              return TestSemantics(
-                label: label,
+                ),
               );
             }).toList(),
           ),
-        ],
+        ),
       ),
-      ignoreTransform: true,
-      ignoreRect: true,
-      ignoreId: true,
-    ));
+    );
+
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                textDirection: textDirection,
+                children: expectedTraversal.split(' ').map<TestSemantics>((String label) {
+                  return TestSemantics(
+                    label: label,
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+          ignoreRect: true,
+          ignoreId: true,
+        ));
   }
 
   void dispose() {
@@ -345,7 +348,6 @@ class TraversalTester {
 }
 
 class TestLayoutDelegate extends MultiChildLayoutDelegate {
-
   TestLayoutDelegate(this.children);
 
   final Map<String, Rect> children;

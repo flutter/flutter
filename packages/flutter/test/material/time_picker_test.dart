@@ -14,7 +14,8 @@ import 'feedback_tester.dart';
 
 final Finder _hourControl = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
 final Finder _minuteControl = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
-final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == 'TimePickerDialog');
+final Finder _timePickerDialog =
+    find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == 'TimePickerDialog');
 
 class _TimePickerLauncher extends StatefulWidget {
   const _TimePickerLauncher({
@@ -103,11 +104,11 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
 }
 
 Future<Offset?> startPicker(
-    WidgetTester tester,
-    ValueChanged<TimeOfDay?> onChanged, {
-      TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
-      String? restorationId,
-    }) async {
+  WidgetTester tester,
+  ValueChanged<TimeOfDay?> onChanged, {
+  TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+  String? restorationId,
+}) async {
   await tester.pumpWidget(MaterialApp(
     restorationScopeId: 'app',
     locale: const Locale('en', 'US'),
@@ -119,11 +120,14 @@ Future<Offset?> startPicker(
   ));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return entryMode == TimePickerEntryMode.dial ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial'))) : null;
+  return entryMode == TimePickerEntryMode.dial
+      ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')))
+      : null;
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
+  final MaterialLocalizations materialLocalizations =
+      MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -142,22 +146,30 @@ void _tests() {
   testWidgets('tap-select an hour', (WidgetTester tester) async {
     TimeOfDay? result;
 
-    Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
+    Offset center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time;
+    }))!;
     await tester.tapAt(Offset(center.dx, center.dy - 50.0)); // 12:00 AM
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
-    center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
+    center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time;
+    }))!;
     await tester.tapAt(Offset(center.dx + 50.0, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
-    center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
+    center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time;
+    }))!;
     await tester.tapAt(Offset(center.dx, center.dy + 50.0));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
-    center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
+    center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time;
+    }))!;
     await tester.tapAt(Offset(center.dx, center.dy + 50.0));
     await tester.tapAt(Offset(center.dx - 50, center.dy));
     await finishPicker(tester);
@@ -167,7 +179,9 @@ void _tests() {
   testWidgets('drag-select an hour', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }))!;
     final Offset hour0 = Offset(center.dx, center.dy - 50.0); // 12:00 AM
     final Offset hour3 = Offset(center.dx + 50.0, center.dy);
     final Offset hour6 = Offset(center.dx, center.dy + 50.0);
@@ -181,21 +195,33 @@ void _tests() {
     await finishPicker(tester);
     expect(result.hour, 0);
 
-    expect(await startPicker(tester, (TimeOfDay? time) { result = time!; }), equals(center));
+    expect(
+        await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }),
+        equals(center));
     gesture = await tester.startGesture(hour0);
     await gesture.moveBy(hour3 - hour0);
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, 3);
 
-    expect(await startPicker(tester, (TimeOfDay? time) { result = time!; }), equals(center));
+    expect(
+        await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }),
+        equals(center));
     gesture = await tester.startGesture(hour3);
     await gesture.moveBy(hour6 - hour3);
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, equals(6));
 
-    expect(await startPicker(tester, (TimeOfDay? time) { result = time!; }), equals(center));
+    expect(
+        await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }),
+        equals(center));
     gesture = await tester.startGesture(hour6);
     await gesture.moveBy(hour9 - hour6);
     await gesture.up();
@@ -206,7 +232,9 @@ void _tests() {
   testWidgets('tap-select switches from hour to minute', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
 
@@ -220,7 +248,9 @@ void _tests() {
   testWidgets('drag-select switches from hour to minute', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }))!;
     final Offset hour3 = Offset(center.dx + 50.0, center.dy);
     final Offset hour6 = Offset(center.dx, center.dy + 50.0);
     final Offset hour9 = Offset(center.dx - 50.0, center.dy);
@@ -239,7 +269,9 @@ void _tests() {
   testWidgets('tap-select rounds down to nearest 5 minute increment', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min46 = Offset(center.dx - 50.0, center.dy - 5); // 46 mins
 
@@ -253,7 +285,9 @@ void _tests() {
   testWidgets('tap-select rounds up to nearest 5 minute increment', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min48 = Offset(center.dx - 50.0, center.dy - 15); // 48 mins
 
@@ -278,14 +312,14 @@ void _tests() {
     });
 
     testWidgets('tap-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) {}))!;
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
       expect(feedback.hapticCount, 1);
     });
 
     testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) {}))!;
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await tester.pump(kFastFeedbackInterval);
       await tester.tapAt(Offset(center.dx, center.dy + 50.0));
@@ -294,7 +328,7 @@ void _tests() {
     });
 
     testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) {}))!;
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await tester.pump(kSlowFeedbackInterval);
       await tester.tapAt(Offset(center.dx, center.dy + 50.0));
@@ -305,7 +339,7 @@ void _tests() {
     });
 
     testWidgets('drag-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) {}))!;
       final Offset hour0 = Offset(center.dx, center.dy - 50.0);
       final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
@@ -317,7 +351,7 @@ void _tests() {
     });
 
     testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) {}))!;
       final Offset hour0 = Offset(center.dx, center.dy - 50.0);
       final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
@@ -333,7 +367,7 @@ void _tests() {
     });
 
     testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) {}))!;
       final Offset hour0 = Offset(center.dx, center.dy - 50.0);
       final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
@@ -473,11 +507,14 @@ void _tests() {
   testWidgets('can increment and decrement hours', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Future<void> actAndExpect({ required String initialValue, required SemanticsAction action, required String finalValue }) async {
-      final SemanticsNode elevenHours = semantics.nodesWith(
-        value: 'Select hours $initialValue',
-        ancestor: tester.renderObject(_hourControl).debugSemantics,
-      ).single;
+    Future<void> actAndExpect(
+        {required String initialValue, required SemanticsAction action, required String finalValue}) async {
+      final SemanticsNode elevenHours = semantics
+          .nodesWith(
+            value: 'Select hours $initialValue',
+            ancestor: tester.renderObject(_hourControl).debugSemantics,
+          )
+          .single;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
       await tester.pumpAndSettle();
       expect(
@@ -540,11 +577,14 @@ void _tests() {
   testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Future<void> actAndExpect({ required String initialValue, required SemanticsAction action, required String finalValue }) async {
-      final SemanticsNode elevenHours = semantics.nodesWith(
-        value: 'Select minutes $initialValue',
-        ancestor: tester.renderObject(_minuteControl).debugSemantics,
-      ).single;
+    Future<void> actAndExpect(
+        {required String initialValue, required SemanticsAction action, required String finalValue}) async {
+      final SemanticsNode elevenHours = semantics
+          .nodesWith(
+            value: 'Select minutes $initialValue',
+            ancestor: tester.renderObject(_minuteControl).debugSemantics,
+          )
+          .single;
       tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
       await tester.pumpAndSettle();
       expect(
@@ -590,7 +630,8 @@ void _tests() {
     tester.binding.window.devicePixelRatioTestValue = 1;
     await mediaQueryBoilerplate(tester, false);
 
-    final Size dayPeriodControlSize = tester.getSize(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'));
+    final Size dayPeriodControlSize =
+        tester.getSize(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'));
     expect(dayPeriodControlSize.width, greaterThanOrEqualTo(48.0));
     // Height should be double the minimum size to account for both AM/PM stacked.
     expect(dayPeriodControlSize.height, greaterThanOrEqualTo(48.0 * 2));
@@ -972,7 +1013,9 @@ void _testsInput() {
 
   testWidgets('Initial time is the default', (WidgetTester tester) async {
     late TimeOfDay result;
-    await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }, entryMode: TimePickerEntryMode.input);
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 7, minute: 0)));
   });
@@ -989,7 +1032,6 @@ void _testsInput() {
     expect(find.text(hourLabelText), findsOneWidget);
   });
 
-
   testWidgets('Minute label text is used - Input', (WidgetTester tester) async {
     const String minuteLabelText = 'Custom minute label';
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, minuteLabelText: minuteLabelText);
@@ -1001,7 +1043,8 @@ void _testsInput() {
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, errorInvalidText: errorInvalidText);
     // Input invalid time (hour) to force validation error
     await tester.enterText(find.byType(TextField).first, '88');
-    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(TextButton).first));
+    final MaterialLocalizations materialLocalizations =
+        MaterialLocalizations.of(tester.element(find.byType(TextButton).first));
     // Tap the ok button to trigger the validation error with custom translation
     await tester.tap(find.text(materialLocalizations.okButtonLabel));
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -1018,7 +1061,8 @@ void _testsInput() {
   testWidgets('Switching to dial entry mode triggers entry callback', (WidgetTester tester) async {
     bool triggeredCallback = false;
 
-    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, onEntryModeChange: (TimePickerEntryMode mode) {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input,
+        onEntryModeChange: (TimePickerEntryMode mode) {
       if (mode == TimePickerEntryMode.dial) {
         triggeredCallback = true;
       }
@@ -1129,7 +1173,9 @@ void _testsInput() {
 
   testWidgets('Entered text returns time', (WidgetTester tester) async {
     late TimeOfDay result;
-    await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }, entryMode: TimePickerEntryMode.input);
     await tester.enterText(find.byType(TextField).first, '9');
     await tester.enterText(find.byType(TextField).last, '12');
     await finishPicker(tester);
@@ -1138,7 +1184,9 @@ void _testsInput() {
 
   testWidgets('Toggle to dial mode keeps selected time', (WidgetTester tester) async {
     late TimeOfDay result;
-    await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) {
+      result = time!;
+    }, entryMode: TimePickerEntryMode.input);
     await tester.enterText(find.byType(TextField).first, '8');
     await tester.enterText(find.byType(TextField).last, '15');
     await tester.tap(find.byIcon(Icons.access_time));
@@ -1148,7 +1196,9 @@ void _testsInput() {
 
   testWidgets('Invalid text prevents dismissing', (WidgetTester tester) async {
     TimeOfDay? result;
-    await startPicker(tester, (TimeOfDay? time) { result = time; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) {
+      result = time;
+    }, entryMode: TimePickerEntryMode.input);
 
     // Invalid hour.
     await tester.enterText(find.byType(TextField).first, '88');
@@ -1170,10 +1220,13 @@ void _testsInput() {
 
   // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
   testWidgets('Ensure hour/minute fields are top-aligned with the separator', (WidgetTester tester) async {
-    await startPicker(tester, (TimeOfDay? time) { }, entryMode: TimePickerEntryMode.input);
-    final double hourFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
-    final double minuteFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
-    final double separatorTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
+    await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input);
+    final double hourFieldTop =
+        tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
+    final double minuteFieldTop =
+        tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
+    final double separatorTop =
+        tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
     expect(hourFieldTop, separatorTop);
     expect(minuteFieldTop, separatorTop);
   });
@@ -1182,7 +1235,9 @@ void _testsInput() {
     TimeOfDay? result;
     final Offset center = (await startPicker(
       tester,
-      (TimeOfDay? time) { result = time; },
+      (TimeOfDay? time) {
+        result = time;
+      },
       restorationId: 'restorable_time_picker',
     ))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
@@ -1212,7 +1267,9 @@ void _testsInput() {
     TimeOfDay? result;
     await startPicker(
       tester,
-      (TimeOfDay? time) { result = time; },
+      (TimeOfDay? time) {
+        result = time;
+      },
       entryMode: TimePickerEntryMode.input,
       restorationId: 'restorable_time_picker',
     );
@@ -1243,7 +1300,9 @@ void _testsInput() {
     TimeOfDay? result;
     final Offset center = (await startPicker(
       tester,
-      (TimeOfDay? time) { result = time; },
+      (TimeOfDay? time) {
+        result = time;
+      },
       restorationId: 'restorable_time_picker',
     ))!;
 

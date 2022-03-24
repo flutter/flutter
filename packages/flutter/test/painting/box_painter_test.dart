@@ -31,10 +31,12 @@ void main() {
 
     expect(BorderSide.lerp(side1, side2, 0.0), equals(side1));
     expect(BorderSide.lerp(side1, side2, 1.0), equals(side2));
-    expect(BorderSide.lerp(side1, side2, 0.5), equals(BorderSide(
-      color: Color.lerp(const Color(0xFF000000), const Color(0xFF00FFFF), 0.5)!,
-      width: 1.5,
-    )));
+    expect(
+        BorderSide.lerp(side1, side2, 0.5),
+        equals(BorderSide(
+          color: Color.lerp(const Color(0xFF000000), const Color(0xFF00FFFF), 0.5)!,
+          width: 1.5,
+        )));
 
     final BorderSide side3 = side2.copyWith(style: BorderStyle.none);
     BorderSide interpolated = BorderSide.lerp(side2, side3, 0.2);
@@ -147,8 +149,10 @@ void main() {
   });
 
   test('BoxShadow toString test', () {
-    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.normal'));
-    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.solid'));
+    expect(const BoxShadow(blurRadius: 4.0).toString(),
+        equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.normal'));
+    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(),
+        equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.solid'));
   });
 
   testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {
@@ -294,7 +298,9 @@ void main() {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
-                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), color: Colors.green, spreadRadius: 2)],
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), color: Colors.green, spreadRadius: 2)
+                  ],
                 ),
                 width: 64,
                 height: 64,
@@ -327,7 +333,14 @@ void main() {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
-                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.outer, color: Colors.red, spreadRadius: 2)],
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        blurRadius: 16.0,
+                        offset: Offset(4, 4),
+                        blurStyle: BlurStyle.outer,
+                        color: Colors.red,
+                        spreadRadius: 2)
+                  ],
                 ),
                 width: 64,
                 height: 64,
@@ -360,7 +373,14 @@ void main() {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
-                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.solid, color: Colors.purple, spreadRadius: 2)],
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        blurRadius: 16.0,
+                        offset: Offset(4, 4),
+                        blurStyle: BlurStyle.solid,
+                        color: Colors.purple,
+                        spreadRadius: 2)
+                  ],
                 ),
                 width: 64,
                 height: 64,
@@ -392,7 +412,14 @@ void main() {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
-                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.inner, color: Colors.amber, spreadRadius: 2)],
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        blurRadius: 16.0,
+                        offset: Offset(4, 4),
+                        blurStyle: BlurStyle.inner,
+                        color: Colors.amber,
+                        spreadRadius: 2)
+                  ],
                 ),
                 width: 64,
                 height: 64,

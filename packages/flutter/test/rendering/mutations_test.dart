@@ -13,7 +13,7 @@ class RenderLayoutTestBox extends RenderProxyBox {
   final VoidCallback onLayout;
 
   @override
-  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+  void layout(Constraints constraints, {bool parentUsesSize = false}) {
     // Doing this in tests is ok, but if you're writing your own
     // render object, you want to override performLayout(), not
     // layout(). Overriding layout() would remove many critical
@@ -27,7 +27,7 @@ class RenderLayoutTestBox extends RenderProxyBox {
   bool get sizedByParent => true;
 
   @override
-  void performLayout() { }
+  void performLayout() {}
 }
 
 void main() {
@@ -38,8 +38,12 @@ void main() {
     bool movedChild1 = false;
     bool movedChild2 = false;
     final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
-    block.add(child1 = RenderLayoutTestBox(() { movedChild1 = true; }));
-    block.add(child2 = RenderLayoutTestBox(() { movedChild2 = true; }));
+    block.add(child1 = RenderLayoutTestBox(() {
+      movedChild1 = true;
+    }));
+    block.add(child2 = RenderLayoutTestBox(() {
+      movedChild2 = true;
+    }));
 
     expect(movedChild1, isFalse);
     expect(movedChild2, isFalse);
