@@ -6,40 +6,14 @@
 
 #include <string>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
 namespace flutter {
 
-namespace {
-bool EndsWith(const std::string& str, const std::string& ending) {
-  if (str.size() >= ending.size()) {
-    return (0 ==
-            str.compare(str.size() - ending.size(), ending.size(), ending));
-  } else {
-    return false;
-  }
-}
-
-Dart_Handle FindDartPluginRegistrantLibrary() {
-  // TODO(99308): Instead of finding this, it could be passed down from the
-  // tool.
-  Dart_Handle libraries = Dart_GetLoadedLibraries();
-  intptr_t length = 0;
-  Dart_ListLength(libraries, &length);
-  for (intptr_t i = 0; i < length; ++i) {
-    Dart_Handle library = Dart_ListGetAt(libraries, i);
-    std::string library_name =
-        tonic::DartConverter<std::string>::FromDart(Dart_ToString(library));
-    if (EndsWith(library_name,
-                 "dart_tool/flutter_build/dart_plugin_registrant.dart'")) {
-      return library;
-    }
-  }
-  return Dart_Null();
-}
-}  // namespace
+const char* dart_plugin_registrant_library_override = nullptr;
 
 bool InvokeDartPluginRegistrantIfAvailable(Dart_Handle library_handle) {
   TRACE_EVENT0("flutter", "InvokeDartPluginRegistrantIfAvailable");
@@ -65,12 +39,30 @@ bool InvokeDartPluginRegistrantIfAvailable(Dart_Handle library_handle) {
 }
 
 bool FindAndInvokeDartPluginRegistrant() {
-  auto dart_plugin_registrant_library = FindDartPluginRegistrantLibrary();
-  if (!Dart_IsNull(dart_plugin_registrant_library)) {
-    return InvokeDartPluginRegistrantIfAvailable(
-        dart_plugin_registrant_library);
-  } else {
+  std::string library_name =
+      dart_plugin_registrant_library_override == nullptr
+          ? "package:flutter/src/dart_plugin_registrant.dart"
+          : dart_plugin_registrant_library_override;
+  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart(library_name));
+  if (Dart_IsError(library)) {
     return false;
   }
+  Dart_Handle registrant_file_uri =
+      Dart_GetField(library, tonic::ToDart("dartPluginRegistrantLibrary"));
+  if (Dart_IsError(registrant_file_uri)) {
+    // TODO(gaaclarke): Find a way to remove this branch so the field is
+    // required. I couldn't get it working with unit tests.
+    return InvokeDartPluginRegistrantIfAvailable(library);
+  }
+
+  std::string registrant_file_uri_string =
+      tonic::DartConverter<std::string>::FromDart(registrant_file_uri);
+  if (registrant_file_uri_string.empty()) {
+    FML_LOG(ERROR) << "Unexpected empty dartPluginRegistrantLibrary.";
+    return false;
+  }
+
+  Dart_Handle registrant_library = Dart_LookupLibrary(registrant_file_uri);
+  return InvokeDartPluginRegistrantIfAvailable(registrant_library);
 }
 }  // namespace flutter

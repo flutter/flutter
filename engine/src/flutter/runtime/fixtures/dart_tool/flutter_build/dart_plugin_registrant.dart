@@ -4,6 +4,7 @@
 
 import 'dart:isolate';
 import 'dart:ui';
+import 'dart:io' show Platform;
 
 void passMessage(String message) native 'PassMessage';
 
