@@ -55,7 +55,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--no-codesign'],
+          options: <String>['ios', '--no-codesign', '--verbose'],
         );
       });
 
