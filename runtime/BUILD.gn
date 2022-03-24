@@ -187,6 +187,7 @@ if (enable_unittests) {
     public_deps = [
       ":plugin_registrant",
       "//flutter/fml",
+      "//flutter/runtime:dart_plugin_registrant",
       "//flutter/testing",
       "//flutter/testing:fixture_test",
     ]

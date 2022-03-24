@@ -16,6 +16,8 @@
 namespace flutter {
 namespace testing {
 
+const char* GetSourcePath();
+
 //------------------------------------------------------------------------------
 /// @brief      Returns the directory containing the test fixture for the target
 ///             if this target has fixtures configured. If there are no

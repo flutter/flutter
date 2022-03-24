@@ -9,6 +9,10 @@
 
 namespace flutter {
 
+/// The name of the library where the Dart Plugin Registrant will be looked for.
+/// This is available for testing.
+extern const char* dart_plugin_registrant_library_override;
+
 /// Looks for the Dart Plugin Registrant in `library_handle` and invokes it if
 /// it is found.
 /// @return `true` when the registrant has been invoked.
