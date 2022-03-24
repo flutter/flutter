@@ -59,12 +59,14 @@ bool VmoFromFilename(const std::string& filename,
   // Note: the implementation here cannot be shared with VmoFromFilenameAt
   // because fdio_open_fd_at does not aim to provide POSIX compatibility, and
   // thus does not handle AT_FDCWD as dirfd.
-  uint32_t flags = fuchsia::io::OPEN_RIGHT_READABLE |
-                   (executable ? fuchsia::io::OPEN_RIGHT_EXECUTABLE : 0);
-  zx_status_t status;
-  int fd;
+  auto flags = fuchsia::io::OPEN_RIGHT_READABLE;
+  if (executable) {
+    flags |= fuchsia::io::OPEN_RIGHT_EXECUTABLE;
+  }
 
-  status = fdio_open_fd(filename.c_str(), flags, &fd);
+  int fd;
+  const zx_status_t status =
+      fdio_open_fd(filename.c_str(), static_cast<uint32_t>(flags), &fd);
   if (status != ZX_OK) {
     FX_LOGF(ERROR, LOG_TAG, "fdio_open_fd(\"%s\", %08x) failed: %s",
             filename.c_str(), flags, zx_status_get_string(status));
@@ -79,11 +81,14 @@ bool VmoFromFilenameAt(int dirfd,
                        const std::string& filename,
                        bool executable,
                        fuchsia::mem::Buffer* buffer) {
-  uint32_t flags = fuchsia::io::OPEN_RIGHT_READABLE |
-                   (executable ? fuchsia::io::OPEN_RIGHT_EXECUTABLE : 0);
-  zx_status_t status;
+  auto flags = fuchsia::io::OPEN_RIGHT_READABLE;
+  if (executable) {
+    flags |= fuchsia::io::OPEN_RIGHT_EXECUTABLE;
+  }
+
   int fd;
-  status = fdio_open_fd_at(dirfd, filename.c_str(), flags, &fd);
+  const zx_status_t status = fdio_open_fd_at(dirfd, filename.c_str(),
+                                             static_cast<uint32_t>(flags), &fd);
   if (status != ZX_OK) {
     FX_LOGF(ERROR, LOG_TAG, "fdio_open_fd_at(%d, \"%s\", %08x) failed: %s",
             dirfd, filename.c_str(), flags, zx_status_get_string(status));

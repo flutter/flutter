@@ -4,6 +4,7 @@
 
 #include "file_in_namespace_buffer.h"
 
+#include <fuchsia/io/cpp/fidl.h>
 #include <lib/fdio/directory.h>
 #include <zircon/status.h>
 
@@ -15,17 +16,6 @@
 #include "runtime/dart/utils/vmo.h"
 
 namespace flutter_runner {
-
-namespace {
-
-// TODO(kaushikiska): Use these constants from ::llcpp::fuchsia::io
-// Can read from target object.
-constexpr uint32_t OPEN_RIGHT_READABLE = 1u;
-
-// Connection can map target object executable.
-constexpr uint32_t OPEN_RIGHT_EXECUTABLE = 8u;
-
-}  // namespace
 
 FileInNamespaceBuffer::FileInNamespaceBuffer(int namespace_fd,
                                              const char* path,
@@ -84,15 +74,16 @@ std::unique_ptr<fml::Mapping> LoadFile(int namespace_fd,
 
 std::unique_ptr<fml::FileMapping> MakeFileMapping(const char* path,
                                                   bool executable) {
-  uint32_t flags = OPEN_RIGHT_READABLE;
+  auto flags = fuchsia::io::OPEN_RIGHT_READABLE;
   if (executable) {
-    flags |= OPEN_RIGHT_EXECUTABLE;
+    flags |= fuchsia::io::OPEN_RIGHT_EXECUTABLE;
   }
 
   // The returned file descriptor is compatible with standard posix operations
   // such as close, mmap, etc. We only need to treat open/open_at specially.
   int fd;
-  const zx_status_t status = fdio_open_fd(path, flags, &fd);
+  const zx_status_t status =
+      fdio_open_fd(path, static_cast<uint32_t>(flags), &fd);
   if (status != ZX_OK) {
     return nullptr;
   }
