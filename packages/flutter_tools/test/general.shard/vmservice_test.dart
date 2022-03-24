@@ -459,6 +459,14 @@ void main() {
           method: 'getVMTimeline',
           errorCode: RPCErrorCodes.kServiceDisappeared,
         ),
+        const FakeVmServiceRequest(
+          method: kRenderFrameWithRasterStatsMethod,
+          args: <String, dynamic>{
+            'viewId': '1',
+            'isolateId': '12',
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
       ]
     );
 
@@ -481,6 +489,10 @@ void main() {
 
     final vm_service.Response timeline = await fakeVmServiceHost.vmService.getTimeline();
     expect(timeline, isNull);
+
+    final Map<String, Object> rasterStats =
+      await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: '1', uiIsolateId: '12');
+    expect(rasterStats, isNull);
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
