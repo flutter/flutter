@@ -324,14 +324,14 @@ void main() {
 
   testWidgets(
       '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
-      (tester) async {
-    final link = LayerLink();
+      (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
     await tester.pumpWidget(
       CompositedTransformTarget(
         link: link,
         child: CompositedTransformFollower(
           link: link,
-          child: _CustomWidget(),
+          child: const _CustomWidget(),
         ),
       ),
     );
