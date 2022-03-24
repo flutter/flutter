@@ -12,6 +12,19 @@ import 'inherited_theme.dart';
 
 /// The selection style to apply to descendant [EditableText] widgets which
 /// don't have an explicit style.
+///
+/// The [CupertinoApp] automatically creates this widget with selectionColor
+/// sets to [CupertinoThemeData.primaryColor] with 0.2 opacity and cursorColor
+/// sets to [CupertinoThemeData.primaryColor].
+///
+/// The [MaterialApp] automatically creates this widget with
+/// [ThemeData.textSelectionTheme]. If it is null, it then sets the selection
+/// color to [ThemeData.colorScheme.primary] with 0.4 opacity and cursorColor
+/// to [ThemeData.colorScheme.primary].
+///
+/// See also:
+///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
+///    the subtree.
 class DefaultSelectionStyle extends InheritedTheme {
   /// Creates a default selection style widget that specifies the selection
   /// properties for all widgets below it in the widget tree.
