@@ -259,11 +259,43 @@ struct Matrix {
 
   Matrix operator-(const Vector3& t) const { return Translate(-t); }
 
-  Matrix operator*(const Vector3& s) const { return Scale(s); }
-
   Matrix operator*(const Matrix& m) const { return Multiply(m); }
 
   Matrix operator+(const Matrix& m) const;
+
+  constexpr Vector4 operator*(const Vector4& v) const {
+    return Vector4(v.x * m[0] + v.y * m[4] + v.z * m[8] + v.w * m[12],
+                   v.x * m[1] + v.y * m[5] + v.z * m[9] + v.w * m[13],
+                   v.x * m[2] + v.y * m[6] + v.z * m[10] + v.w * m[14],
+                   v.x * m[3] + v.y * m[7] + v.z * m[11] + v.w * m[15]);
+  }
+
+  constexpr Vector3 operator*(const Vector3& v) const {
+    return Vector3(v.x * m[0] + v.y * m[4] + v.z * m[8] + m[12],
+                   v.x * m[1] + v.y * m[5] + v.z * m[9] + m[13],
+                   v.x * m[2] + v.y * m[6] + v.z * m[10] + m[14]);
+  }
+
+  constexpr Point operator*(const Point& v) const {
+    return Point(v.x * m[0] + v.y * m[4] + m[12],
+                 v.x * m[1] + v.y * m[5] + m[13]);
+  }
+
+  constexpr Vector4 TransformDirection(const Vector4& v) const {
+    return Vector4(v.x * m[0] + v.y * m[4] + v.z * m[8],
+                   v.x * m[1] + v.y * m[5] + v.z * m[9],
+                   v.x * m[2] + v.y * m[6] + v.z * m[10], v.w);
+  }
+
+  constexpr Vector3 TransformDirection(const Vector3& v) const {
+    return Vector3(v.x * m[0] + v.y * m[4] + v.z * m[8],
+                   v.x * m[1] + v.y * m[5] + v.z * m[9],
+                   v.x * m[2] + v.y * m[6] + v.z * m[10]);
+  }
+
+  constexpr Vector2 TransformDirection(const Vector2& v) const {
+    return Vector2(v.x * m[0] + v.y * m[4], v.x * m[1] + v.y * m[5]);
+  }
 
   template <class T>
   static constexpr Matrix MakeOrthographic(TSize<T> size) {
@@ -279,17 +311,9 @@ struct Matrix {
 static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,
               "The matrix must be of consistent size.");
 
-inline Vector4 operator*(const Vector4& v, const Matrix& m) {
-  return Vector4(v.x * m.m[0] + v.y * m.m[4] + v.z * m.m[8] + v.w * m.m[12],
-                 v.x * m.m[1] + v.y * m.m[5] + v.z * m.m[9] + v.w * m.m[13],
-                 v.x * m.m[2] + v.y * m.m[6] + v.z * m.m[10] + v.w * m.m[14],
-                 v.x * m.m[3] + v.y * m.m[7] + v.z * m.m[11] + v.w * m.m[15]);
-}
-
 }  // namespace impeller
 
 namespace std {
-
 inline std::ostream& operator<<(std::ostream& out, const impeller::Matrix& m) {
   out << "(";
   for (size_t i = 0; i < 4u; i++) {

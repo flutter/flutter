@@ -142,6 +142,76 @@ TEST(GeometryTest, TestRecomposition2) {
   ASSERT_MATRIX_NEAR(matrix, Matrix{result.value()});
 }
 
+TEST(GeometryTest, MatrixVectorMultiplication) {
+  {
+    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeScale({2.0, 2.0, 2.0});
+    auto vector = Vector4(10, 20, 30, 2);
+
+    Vector4 result = matrix * vector;
+    auto expected = Vector4(160, 220, 260, 2);
+    ASSERT_VECTOR4_NEAR(result, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeScale({2.0, 2.0, 2.0});
+    auto vector = Vector3(10, 20, 30);
+
+    Vector3 result = matrix * vector;
+    auto expected = Vector3(60, 120, 160);
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeScale({2.0, 2.0, 2.0});
+    auto vector = Point(10, 20);
+
+    Point result = matrix * vector;
+    auto expected = Point(60, 120);
+    ASSERT_POINT_NEAR(result, expected);
+  }
+}
+
+TEST(GeometryTest, MatrixTransformDirection) {
+  {
+    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeScale({2.0, 2.0, 2.0});
+    auto vector = Vector4(10, 20, 30, 2);
+
+    Vector4 result = matrix.TransformDirection(vector);
+    auto expected = Vector4(-40, 20, 60, 2);
+    ASSERT_VECTOR4_NEAR(result, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeScale({2.0, 2.0, 2.0});
+    auto vector = Vector3(10, 20, 30);
+
+    Vector3 result = matrix.TransformDirection(vector);
+    auto expected = Vector3(-40, 20, 60);
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+                  Matrix::MakeRotationZ(Radians{M_PI_2}) *
+                  Matrix::MakeScale({2.0, 2.0, 2.0});
+    auto vector = Point(10, 20);
+
+    Point result = matrix.TransformDirection(vector);
+    auto expected = Point(-40, 20);
+    ASSERT_POINT_NEAR(result, expected);
+  }
+}
+
 TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
   auto q2 = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
@@ -567,6 +637,13 @@ TEST(GeometryTest, PointReflect) {
   }
 }
 
+TEST(GeometryTest, PointAbs) {
+  Point a(-1, -2);
+  auto a_abs = a.Abs();
+  auto expected = Point(1, 2);
+  ASSERT_POINT_NEAR(a_abs, expected);
+}
+
 TEST(GeometryTest, ColorPremultiply) {
   {
     Color a(1.0, 0.5, 0.2, 0.5);
@@ -720,6 +797,21 @@ TEST(GeometryTest, RectContainsRect) {
     Rect b(0, 0, 300, 300);
     ASSERT_FALSE(a.Contains(b));
   }
+}
+
+TEST(GeometryTest, RectGetPoints) {
+  Rect r(100, 200, 300, 400);
+  auto points = r.GetPoints();
+  ASSERT_POINT_NEAR(points[0], Point(100, 200));
+  ASSERT_POINT_NEAR(points[1], Point(400, 200));
+  ASSERT_POINT_NEAR(points[2], Point(100, 600));
+  ASSERT_POINT_NEAR(points[3], Point(400, 600));
+}
+
+TEST(GeometryTest, RectMakePointBounds) {
+  auto r = Rect::MakePointBounds({Point(1, 5), Point(4, -1), Point(0, 6)});
+  auto expected = Rect(0, -1, 4, 7);
+  ASSERT_RECT_NEAR(r, expected);
 }
 
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {

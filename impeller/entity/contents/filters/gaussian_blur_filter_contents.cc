@@ -4,7 +4,12 @@
 
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
 
+#include <valarray>
+
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
@@ -16,29 +21,38 @@ DirectionalGaussianBlurFilterContents::DirectionalGaussianBlurFilterContents() =
 DirectionalGaussianBlurFilterContents::
     ~DirectionalGaussianBlurFilterContents() = default;
 
-void DirectionalGaussianBlurFilterContents::SetRadius(Scalar radius) {
-  radius_ = std::max(radius, 1e-3f);
-}
-
-void DirectionalGaussianBlurFilterContents::SetDirection(Vector2 direction) {
-  direction_ = direction.Normalize();
-}
-
-void DirectionalGaussianBlurFilterContents::SetClipBorder(bool clip) {
-  clip_ = clip;
+void DirectionalGaussianBlurFilterContents::SetBlurVector(Vector2 blur_vector) {
+  if (blur_vector.GetLengthSquared() < kEhCloseEnough) {
+    blur_vector_ = Vector2(0, kEhCloseEnough);
+    return;
+  }
+  blur_vector_ = blur_vector;
 }
 
 bool DirectionalGaussianBlurFilterContents::RenderFilter(
-    const std::vector<std::shared_ptr<Texture>>& input_textures,
+    const std::vector<Snapshot>& input_textures,
     const ContentContext& renderer,
-    RenderPass& pass) const {
+    RenderPass& pass,
+    const Matrix& transform) const {
+  if (input_textures.empty()) {
+    return true;
+  }
+
   using VS = GaussianBlurPipeline::VertexShader;
   using FS = GaussianBlurPipeline::FragmentShader;
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
-  ISize size = FilterContents::GetOutputSize();
-  Point uv_offset = clip_ ? (Point(radius_, radius_) / size) : Point();
+  // Because this filter is intended to be used with only one input  parameter,
+  // and GetBounds just increases the input size by a factor of the direction,
+  // we we can just scale up the UVs by the same amount and don't need to worry
+  // about mapping the UVs to destination rect (like we do in
+  // BlendFilterContents).
+
+  auto size = pass.GetRenderTargetSize();
+  auto transformed_blur = transform.TransformDirection(blur_vector_);
+  auto uv_offset = transformed_blur.Abs() / size;
+
   // LTRB
   Scalar uv[4] = {
       -uv_offset.x,
@@ -59,12 +73,10 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
   VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(size);
   frame_info.texture_size = Point(size);
-  frame_info.blur_radius = radius_;
-  frame_info.blur_direction = direction_;
+  frame_info.blur_radius = transformed_blur.GetLength();
+  frame_info.blur_direction = transformed_blur.Normalize();
 
-  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
   auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
 
   Command cmd;
@@ -73,29 +85,26 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   options.blend_mode = Entity::BlendMode::kSource;
   cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
   cmd.BindVertices(vtx_buffer);
+
+  const auto& [texture, _] = input_textures[0];
+  FS::BindTextureSampler(cmd, texture, sampler);
+
+  frame_info.mvp = Matrix::MakeOrthographic(size);
+  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
   VS::BindFrameInfo(cmd, uniform_view);
-  for (const auto& texture : input_textures) {
-    FS::BindTextureSampler(cmd, texture, sampler);
-    pass.AddCommand(cmd);
-  }
+
+  pass.AddCommand(cmd);
 
   return true;
 }
 
-ISize DirectionalGaussianBlurFilterContents::GetOutputSize(
-    const InputTextures& input_textures) const {
-  ISize size;
-  if (auto filter =
-          std::get_if<std::shared_ptr<FilterContents>>(&input_textures[0])) {
-    size = filter->get()->GetOutputSize();
-  } else if (auto texture =
-                 std::get_if<std::shared_ptr<Texture>>(&input_textures[0])) {
-    size = texture->get()->GetSize();
-  } else {
-    FML_UNREACHABLE();
-  }
-
-  return size + (clip_ ? ISize(radius_ * 2, radius_ * 2) : ISize());
+Rect DirectionalGaussianBlurFilterContents::GetBounds(
+    const Entity& entity) const {
+  auto bounds = FilterContents::GetBounds(entity);
+  auto transformed_blur =
+      entity.GetTransformation().TransformDirection(blur_vector_).Abs();
+  auto extent = bounds.size + transformed_blur * 2;
+  return Rect(bounds.origin - transformed_blur, Size(extent.x, extent.y));
 }
 
 }  // namespace impeller

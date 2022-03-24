@@ -681,36 +681,53 @@ TEST_F(EntityTest, GaussianBlurFilter) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({450, 150});
-      ImGui::SetNextWindowPos({200, 450});
+      ImGui::SetNextWindowSize({500, 170});
+      ImGui::SetNextWindowPos({300, 550});
     }
 
     ImGui::Begin("Controls");
+    static float blur_amount[2] = {20, 20};
+    ImGui::SliderFloat2("Blur", &blur_amount[0], 0, 200);
+    static Color cover_color(1, 0, 0, 0.2);
+    ImGui::ColorEdit4("Cover color", reinterpret_cast<float*>(&cover_color));
     static float offset[2] = {500, 400};
-    ImGui::SliderFloat2("Position offset", &offset[0], 0, 1000);
-    static float scale = 1;
-    ImGui::SliderFloat("Scale", &scale, 0, 1);
-    static float blur_radius = 20;
-    ImGui::SliderFloat("Blur radius", &blur_radius, 0, 200);
-    static bool clip_border = true;
-    ImGui::Checkbox("Clip", &clip_border);
+    ImGui::SliderFloat2("Translation", &offset[0], 0,
+                        pass.GetRenderTargetSize().width);
+    static float rotation = 0;
+    ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
+    static float scale[2] = {0.8, 0.8};
+    ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
+    static float skew[2] = {0, 0};
+    ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
+    ImGui::End();
 
     auto blend = FilterContents::MakeBlend(Entity::BlendMode::kPlus,
                                            {boston, bridge, bridge});
 
     auto blur =
-        FilterContents::MakeGaussianBlur(blend, blur_radius, clip_border);
+        FilterContents::MakeGaussianBlur(blend, blur_amount[0], blur_amount[1]);
 
-    auto output_size = Size(blur->GetOutputSize());
-    Rect bounds(Point(offset[0], offset[1]) - output_size / 2 * scale,
-                output_size * scale);
-
-    ImGui::End();
+    auto rect = Rect(-Point(boston->GetSize()) / 2, Size(boston->GetSize()));
+    auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
+               Matrix::MakeRotation(rotation, Vector4(0, 0, 1, 1)) *
+               Matrix::MakeScale(Vector3(scale[0], scale[1])) *
+               Matrix::MakeSkew(skew[0], skew[1]);
 
     Entity entity;
-    entity.SetPath(PathBuilder{}.AddRect(bounds).TakePath());
+    entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
     entity.SetContents(blur);
-    return entity.Render(context, pass);
+    entity.SetTransformation(ctm);
+
+    entity.Render(context, pass);
+
+    // The following entity renders the expected transformed input.
+    Entity cover_entity;
+    cover_entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
+    cover_entity.SetContents(SolidColorContents::Make(cover_color));
+    cover_entity.SetTransformation(ctm);
+
+    cover_entity.Render(context, pass);
+    return true;
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }

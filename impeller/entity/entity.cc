@@ -39,11 +39,11 @@ bool Entity::AddsToCoverage() const {
 }
 
 std::optional<Rect> Entity::GetCoverage() const {
-  if (!adds_to_coverage_) {
+  if (!adds_to_coverage_ || !contents_) {
     return std::nullopt;
   }
 
-  return path_.GetBoundingBox();
+  return contents_->GetBounds(*this);
 }
 
 void Entity::SetContents(std::shared_ptr<Contents> contents) {

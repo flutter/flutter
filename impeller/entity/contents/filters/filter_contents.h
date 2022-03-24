@@ -18,7 +18,7 @@ class Pipeline;
 class FilterContents : public Contents {
  public:
   using InputVariant =
-      std::variant<std::shared_ptr<Texture>, std::shared_ptr<FilterContents>>;
+      std::variant<std::shared_ptr<Texture>, std::shared_ptr<Contents>>;
   using InputTextures = std::vector<InputVariant>;
 
   static std::shared_ptr<FilterContents> MakeBlend(
@@ -27,14 +27,13 @@ class FilterContents : public Contents {
 
   static std::shared_ptr<FilterContents> MakeDirectionalGaussianBlur(
       InputVariant input_texture,
-      Scalar radius,
-      Vector2 direction,
-      bool clip_border = false);
+      Vector2 blur_vector);
 
-  static std::shared_ptr<FilterContents> MakeGaussianBlur(
-      InputVariant input_texture,
-      Scalar radius,
-      bool clip_border = false);
+  static std::shared_ptr<FilterContents>
+  MakeGaussianBlur(InputVariant input_texture, Scalar sigma_x, Scalar sigma_y);
+
+  static Rect GetBoundsForInput(const Entity& entity,
+                                const InputVariant& input);
 
   FilterContents();
 
@@ -53,26 +52,21 @@ class FilterContents : public Contents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  /// @brief Renders dependency filters, creates a subpass, and calls the
-  ///        `RenderFilter` defined by the subclasses.
-  std::optional<std::shared_ptr<Texture>> RenderFilterToTexture(
-      const ContentContext& renderer,
-      const Entity& entity,
-      RenderPass& pass) const;
+  // |Contents|
+  Rect GetBounds(const Entity& entity) const override;
 
-  /// @brief Fetch the size of the output texture.
-  ISize GetOutputSize() const;
+  // |Contents|
+  virtual std::optional<Snapshot> RenderToTexture(
+      const ContentContext& renderer,
+      const Entity& entity) const override;
 
  private:
   /// @brief Takes a set of zero or more input textures and writes to an output
   ///        texture.
-  virtual bool RenderFilter(
-      const std::vector<std::shared_ptr<Texture>>& input_textures,
-      const ContentContext& renderer,
-      RenderPass& pass) const = 0;
-
-  /// @brief Determines the size of the output texture.
-  virtual ISize GetOutputSize(const InputTextures& input_textures) const;
+  virtual bool RenderFilter(const std::vector<Snapshot>& input_textures,
+                            const ContentContext& renderer,
+                            RenderPass& pass,
+                            const Matrix& transform) const = 0;
 
   InputTextures input_textures_;
   Rect destination_;

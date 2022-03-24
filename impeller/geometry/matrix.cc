@@ -249,7 +249,7 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
      *  prhs by the inverse.
      */
 
-    result.perspective = rightHandSide * perpectiveMatrix.Invert().Transpose();
+    result.perspective = perpectiveMatrix.Invert().Transpose() * rightHandSide;
 
     /*
      *  Clear the perspective partition.
