@@ -4,7 +4,9 @@
 
 #include "flutter/runtime/dart_isolate.h"
 
+#include <cstdlib>
 #include "flutter/fml/paths.h"
+#include "flutter/runtime/dart_plugin_registrant.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/dart_isolate_runner.h"
@@ -23,6 +25,30 @@ const std::string elf_file_name = "plugin_registrant_app_elf_snapshot.so";
 class DartIsolateTest : public FixtureTest {
  public:
   DartIsolateTest() : FixtureTest(kernel_file_name, elf_file_name, "") {}
+
+  void OverrideDartPluginRegistrant(const std::string& override_value) {
+    dart_plugin_registrant_library_ = override_value;
+    dart_plugin_registrant_library_override =
+        dart_plugin_registrant_library_.c_str();
+  }
+
+  void SetUp() override {
+    std::string source_path = GetSourcePath();
+    if (source_path[0] != '/') {
+      // On windows we need an extra '/' prefix.
+      source_path = "/" + source_path;
+    }
+    std::string registrant_uri = std::string("file://") + source_path +
+                                 "flutter/runtime/fixtures/dart_tool/"
+                                 "flutter_build/dart_plugin_registrant.dart";
+    OverrideDartPluginRegistrant(registrant_uri);
+  }
+
+  void TearDown() override {
+    dart_plugin_registrant_library_override = nullptr;
+  }
+
+  std::string dart_plugin_registrant_library_;
 };
 
 TEST_F(DartIsolateTest, DartPluginRegistrantIsPresent) {

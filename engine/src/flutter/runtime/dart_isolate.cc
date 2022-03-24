@@ -706,7 +706,12 @@ bool DartIsolate::RunFromLibrary(std::optional<std::string> library_name,
                                ? tonic::ToDart(entrypoint.value().c_str())
                                : tonic::ToDart("main");
 
-  InvokeDartPluginRegistrantIfAvailable(library_handle);
+  if (!FindAndInvokeDartPluginRegistrant()) {
+    // TODO(gaaclarke): Remove once the framework PR lands that uses `--source`
+    // to compile the Dart Plugin Registrant
+    // (https://github.com/flutter/flutter/pull/100572).
+    InvokeDartPluginRegistrantIfAvailable(library_handle);
+  }
 
   auto user_entrypoint_function =
       ::Dart_GetField(library_handle, entrypoint_handle);

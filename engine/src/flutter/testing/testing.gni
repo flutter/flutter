@@ -27,11 +27,13 @@ template("fixtures_location") {
 
   location_path = rebase_path(invoker.assets_dir)
   testing_assets_path = rebase_path("$root_out_dir/gen/flutter/testing/assets")
+  source_path = rebase_path("//")
 
   # Array of source lines. We use a list to ensure a trailing newline is
   # emitted by write_file() to comply with -Wnewline-eof.
   location_source = [
     "namespace flutter { namespace testing { ",
+    "const char* GetSourcePath() {return \"$source_path\";} ",
     "const char* GetFixturesPath() {return \"$location_path\";} ",
     "const char* GetTestingAssetsPath() {return \"$testing_assets_path\";} ",
     "}}",
