@@ -149,6 +149,9 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       List<TextSpan> tsTreeChildren = <TextSpan>[];
       int text_pointer = 0;
 
+      TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline)) ?? TextStyle(decoration: TextDecoration.underline);
+      TextStyle misspelledJointStyle = overrideTextSpanStyle(style, misspelledStyle);
+
       if (scssSpans_consumed_index < spellCheckSuggestions.length) {
           int scss_pointer = scssSpans_consumed_index;
           SpellCheckerSuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
@@ -162,14 +165,14 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
               // if the next suggestion is further down the line than the current words
               if ((currScssSpan.start-text_consumed_index) > text_pointer) {
                   end_index = (currScssSpan.start-text_consumed_index) < text.length ? (currScssSpan.start-text_consumed_index) : text.length;
-                  tsTreeChildren.add(TextSpan(style: isComposing? style?.merge(const TextStyle(decoration: TextDecoration.underline)) : style,
+                  tsTreeChildren.add(TextSpan(style: isComposing ? composingStyle : style,
                                               text: text.substring(text_pointer, end_index)));
                   text_pointer = end_index;
               }
               // if the next suggestion is where the current word is
               else {
                   end_index = (currScssSpan.end - text_consumed_index + 1) < text.length ? (currScssSpan.end - text_consumed_index + 1) : text.length;
-                  tsTreeChildren.add(TextSpan(style: isComposing ? style?.merge(const TextStyle(decoration: TextDecoration.underline)) :  TextStyle(color: Color(0xfff44336),),//overrideTextSpanStyle(style, misspelledStyle),
+                  tsTreeChildren.add(TextSpan(style: isComposing ? composingStyle : misspelledJointStyle,
                                               text: text.substring((currScssSpan.start-text_consumed_index), end_index)));
 
                   text_pointer = end_index;
@@ -181,14 +184,14 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
 
           // Add remaining text if there is any
           if (text_pointer < text.length) {
-              tsTreeChildren.add(TextSpan(style: style, text: text.substring(text_pointer, text.length)));
+              tsTreeChildren.add(TextSpan(style: isComposing ? composingStyle : style, text: text.substring(text_pointer, text.length)));
               text_consumed_index = text.length + text_consumed_index;
           }
           scssSpans_consumed_index = scss_pointer;
           return tsTreeChildren;
       } else {
           text_consumed_index = text.length;
-          return <TextSpan>[TextSpan(text: text, style: style)];
+          return <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)];
       }
   }
 

@@ -2600,7 +2600,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
                 spellCheckResultsFuture!.then((results) {
               _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
-          renderEditable.text = buildTextSpan();
+          // renderEditable.text = buildTextSpan();
       });
         }
       } catch (exception, stack) {
