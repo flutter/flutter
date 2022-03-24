@@ -18,7 +18,7 @@ dependencies:
   path: 1.8.1
 
   # Testing utilities for dealing with async calls and time.
-  fake_async: 1.2.0
+  fake_async: 1.3.0
   clock: 1.1.0
 
   # We import stack_trace because the test packages uses it and we
@@ -45,4 +45,4 @@ dependencies:
 dev_dependencies:
   file: 6.1.2
 
-# PUBSPEC CHECKSUM: 9506
+# PUBSPEC CHECKSUM: 3e07
