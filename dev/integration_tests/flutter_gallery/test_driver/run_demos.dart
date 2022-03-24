@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_gallery/demo_lists.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,9 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// Demo names are formatted as 'DEMO_NAME@DEMO_CATEGORY' (see
 /// `demo_lists.dart` for more examples).
 final List<String> kSkippedDemos = <String>[
-  // The CI uses Chromium, which lacks the video codecs to run this demo.
-  if (kIsWeb)
-    'Video@Media',
+  // This demo is flaky on CI due to hitting the network.
+  // See: https://github.com/flutter/flutter/issues/100497
+  'Video@Media',
 ];
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
