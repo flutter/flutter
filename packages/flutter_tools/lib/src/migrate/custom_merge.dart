@@ -8,7 +8,6 @@ import '../base/file_system.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
 import '../migrate/migrate_utils.dart';
 
 /// Handles the custom/manual merging of one file at `localPath`.
