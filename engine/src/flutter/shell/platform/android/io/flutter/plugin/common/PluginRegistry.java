@@ -25,8 +25,7 @@ import io.flutter.view.TextureRegistry;
  * <p>In v1 Android applications, an auto-generated and auto-updated plugin registrant class
  * (GeneratedPluginRegistrant) makes use of a {@link PluginRegistry} to register contributions from
  * each plugin mentioned in the application's pubspec file. The generated registrant class is, again
- * by default, called from the application's main {@link android.app.Activity}, which defaults to an
- * instance of {@link io.flutter.app.FlutterActivity}, itself a {@link PluginRegistry}.
+ * by default, called from the application's main {@link android.app.Activity}.
  */
 public interface PluginRegistry {
   /**
@@ -82,9 +81,7 @@ public interface PluginRegistry {
      * Returns the {@link android.app.Activity} that forms the plugin's operating context.
      *
      * <p>Plugin authors should not assume the type returned by this method is any specific subclass
-     * of {@code Activity} (such as {@link io.flutter.app.FlutterActivity} or {@link
-     * io.flutter.app.FlutterFragmentActivity}), as applications are free to use any activity
-     * subclass.
+     * of {@code Activity}, as applications are free to use any activity subclass.
      *
      * <p>When there is no foreground activity in the application, this will return null. If a
      * {@link Context} is needed, use context() to get the application's context.

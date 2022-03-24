@@ -153,11 +153,6 @@ embedding_source_jar_path = "$root_out_dir/$embedding_sources_jar_filename"
 android_java_sources = [
   "io/flutter/FlutterInjector.java",
   "io/flutter/Log.java",
-  "io/flutter/app/FlutterActivity.java",
-  "io/flutter/app/FlutterActivityDelegate.java",
-  "io/flutter/app/FlutterActivityEvents.java",
-  "io/flutter/app/FlutterApplication.java",
-  "io/flutter/app/FlutterFragmentActivity.java",
   "io/flutter/app/FlutterPlayStoreSplitApplication.java",
   "io/flutter/app/FlutterPluginRegistry.java",
   "io/flutter/embedding/android/AndroidTouchProcessor.java",
