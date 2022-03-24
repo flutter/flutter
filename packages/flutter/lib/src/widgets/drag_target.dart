@@ -154,6 +154,11 @@ enum DragAnchor {
 /// user lifts their finger while on top of a [DragTarget], that target is given
 /// the opportunity to accept the [data] carried by the draggable.
 ///
+/// The [ignoringFeedbackPointer] defaults to true, which means that
+/// the [feedback] widget ignores the pointer during hit testing. Similarly,
+/// [ignoringFeedbackSemantics] defaults to true, and the [feedback] also ignores
+/// semantics when building the semantics tree.
+///
 /// On multitouch devices, multiple drags can occur simultaneously because there
 /// can be multiple pointers in contact with the device at once. To limit the
 /// number of simultaneous drags, use the [maxSimultaneousDrags] property. The
