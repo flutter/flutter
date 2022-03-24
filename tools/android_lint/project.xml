@@ -56,8 +56,13 @@
     <src file="../../../flutter/shell/platform/android/test/io/flutter/view/VsyncWaiterTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/FlutterInjectorTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/external/FlutterLaunchTests.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterActivity.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEvents.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterApplication.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDelegate.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/Preconditions.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/ViewUtils.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/Predicate.java" />

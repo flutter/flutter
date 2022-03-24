@@ -1182,6 +1182,11 @@ FILE: ../../../flutter/shell/platform/android/flutter_main.h
 FILE: ../../../flutter/shell/platform/android/flutter_shell_native_unittests.cc
 FILE: ../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/Log.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDelegate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEvents.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterApplication.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java
