@@ -130,13 +130,14 @@ class MigrateStartCommand extends FlutterCommand {
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
       platforms: platforms,
+      fileSystem: fileSystem,
       logger: logger,
     );
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    await writeWorkingDir(migrateResult, verbose: _verbose);
+    await writeWorkingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
 
     MigrateUtils.deleteTempDirectories(
       paths: <String>[],
