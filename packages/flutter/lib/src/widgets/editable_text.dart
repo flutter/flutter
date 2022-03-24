@@ -169,15 +169,16 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
     // composing.isValid && composing.isNormalized && composing.end <= text.length;
-
-    if (!value.isComposingRangeValid || !withComposing) {
-      return TextSpan(style: style, text: text);
-    }
+    bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing;
 
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null && spellCheckConfiguration.spellCheckResults!.length > 0) {
-        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, value, style, false);
+        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, value, style, composingWithinCurrentTextRange);
+
     }
     else {
+      if (composingWithinCurrentTextRange) {
+        return TextSpan(style: style, text: text);
+      }
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
           ?? const TextStyle(decoration: TextDecoration.underline);
       return TextSpan(
@@ -2572,6 +2573,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
+  Future<List<SpellCheckerSuggestionSpan>>? spellCheckResultsFuture;
+
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommitted
@@ -2585,7 +2588,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool textChanged = _value.text != value.text
                           || (!_value.composing.isCollapsed && value.composing.isCollapsed);
     final bool selectionChanged = _value.selection != value.selection;
-
     if (textChanged) {
       try {
         value = widget.inputFormatters?.fold<TextEditingValue>(
@@ -2594,12 +2596,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) ?? value;
 
         if (value.text.length > 0 && _spellCheckEnabled!) {
-          //TODO(camillesimon): Check if spell check is enabled throughout the framework, including here.
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
-          spellCheckResultsFuture.then((results) {
-            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
-          });
+          spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+                spellCheckResultsFuture!.then((results) {
+              _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
+          renderEditable.text = buildTextSpan();
+      });
         }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
