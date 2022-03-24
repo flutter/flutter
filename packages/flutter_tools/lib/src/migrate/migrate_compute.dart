@@ -127,7 +127,7 @@ class MigrateResult {
 ///  - Call `flutter create` with target revision (target is typically current flutter version)
 ///  - Diff base revision generated app with target revision generated app
 ///  - Compute all newly added files between base and target revisions
-///  - Compute 3 way merge of all files that are modifed by user and flutter
+///  - Compute merge of all files that are modifed by user and flutter
 ///  - Track temp dirs to be deleted
 Future<MigrateResult?> computeMigration({
     bool verbose = false,
@@ -138,6 +138,7 @@ Future<MigrateResult?> computeMigration({
     String? targetRevision,
     bool deleteTempDirectories = true,
     List<SupportedPlatform>? platforms,
+    bool preferTwoWayMerge = false,
     required FileSystem fileSystem,
     required Logger logger,
   }) async {
@@ -145,11 +146,13 @@ Future<MigrateResult?> computeMigration({
     flutterProject = FlutterProject.current();
   }
 
-  logger.printStatus('Computing migration');
+  logger.printStatus('Computing migration - this command may take a while to complete.');
+  // We keep a spinner going and print periodic progress messages
+  // to assure the developer that the command is still working due to
+  // the long expected runtime.
   final Status status = logger.startSpinner();
-  // final Status status = logger.startProgress('Computing migration', progressIndicatorPadding: 50);
   status.pause();
-  logger.printStatus('Obtaining revisions.');
+  logger.printStatus('Obtaining revisions.', indent: 2, color: TerminalColor.grey);
   status.resume();
 
   final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
@@ -203,7 +206,7 @@ Future<MigrateResult?> computeMigration({
     }
   }
   status.pause();
-  logger.printStatus('Generating base reference app');
+  logger.printStatus('Generating base reference app', indent: 2, color: TerminalColor.grey);
   status.resume();
 
   final MigrateResult migrateResult = MigrateResult.empty();
@@ -267,7 +270,7 @@ Future<MigrateResult?> computeMigration({
             sdkDir = await MigrateUtils.createTempDirectory('flutter_$activeRevision');
             migrateResult.sdkDirs[activeRevision] = sdkDir;
             status.pause();
-            logger.printStatus('Cloning SDK $activeRevision');
+            logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
             status.resume();
             sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
             revisionToFlutterSdkDir[revision] = sdkDir;
@@ -280,7 +283,7 @@ Future<MigrateResult?> computeMigration({
         }
       } while (!sdkAvailable);
       status.pause();
-      logger.printStatus('Creating base app for platforms $platforms with $revision SDK.');
+      logger.printStatus('Creating base app for $platforms with revision $revision.', indent: 2, color: TerminalColor.grey);
       status.resume();
       await MigrateUtils.createFromTemplates(
         sdkDir.childDirectory('bin').absolute.path,
@@ -303,14 +306,13 @@ Future<MigrateResult?> computeMigration({
           mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
         }
       }
-
     }
   }
 
   if (targetAppPath == null) {
     // Create target
     status.pause();
-    logger.printStatus('Creating target app.');
+    logger.printStatus('Creating target app with revision $targetRevision.', indent: 2, color: TerminalColor.grey);
     status.resume();
     if (verbose) logger.printStatus('Creating target app.');
     await MigrateUtils.createFromTemplates(
@@ -326,7 +328,7 @@ Future<MigrateResult?> computeMigration({
 
   // Generate diffs. These diffs are used to determine if a file is newly added, needs merging, or deleted (rare).
   status.pause();
-  logger.printStatus('Diffing base and target reference app.');
+  logger.printStatus('Diffing base and target reference app.', indent: 2, color: TerminalColor.grey);
   status.resume();
   final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
   final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
@@ -362,7 +364,7 @@ Future<MigrateResult?> computeMigration({
 
   // Check for any new files that were added in the new template
   status.pause();
-  logger.printStatus('Finding newly added files');
+  logger.printStatus('Finding newly added files', indent: 2, color: TerminalColor.grey);
   status.resume();
   for (final FileSystemEntity entity in generatedTargetFiles) {
     if (entity is! File) {
@@ -386,7 +388,7 @@ Future<MigrateResult?> computeMigration({
   ];
 
   status.pause();
-  logger.printStatus('Merging changes with existing project.');
+  logger.printStatus('Merging changes with existing project.', indent: 2, color: TerminalColor.grey);
   status.resume();
   // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
@@ -476,7 +478,7 @@ Future<MigrateResult?> computeMigration({
         MergeType mergeType = mergeTypeMap[localPath] ?? MergeType.twoWay;
         // Use two way merge if diff between base and target are the same.
         // This prevents the three way merge re-deleting the base->target changes.
-        if (userDiff.diff.substring(userDiff.diff.indexOf('@@')) == targetDiff.diff.substring(targetDiff.diff.indexOf('@@'))) {
+        if (preferTwoWayMerge || userDiff.diff.substring(userDiff.diff.indexOf('@@')) == targetDiff.diff.substring(targetDiff.diff.indexOf('@@'))) {
           mergeType = MergeType.twoWay;
         }
         switch (mergeType) {
@@ -507,7 +509,7 @@ Future<MigrateResult?> computeMigration({
   }
 
   status.pause();
-  logger.printStatus('Cleaning up temp directories.');
+  logger.printStatus('Cleaning up temp directories.', indent: 2, color: TerminalColor.grey);
   status.resume();
   if (deleteTempDirectories) {
     // Don't delete user-provided directories
@@ -550,7 +552,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
       file.writeAsBytesSync(result.mergedBytes!, flush: true);
     }
   }
-
+  // Write all files that are newly added in targetl
   for (final FilePendingMigration addedFile in migrateResult.addedFiles) {
     final File file = workingDir.childFile(addedFile.localPath);
     file.createSync(recursive: true);
@@ -561,6 +563,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
     }
   }
 
+  // Write the MigrateManifest.
   final MigrateManifest manifest = MigrateManifest(
     migrateRootDir: workingDir,
     migrateResult: migrateResult,
@@ -570,5 +573,6 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   logger.printBox('Working directory created at `${workingDir.path}`');
   logger.printStatus(''); // newline
 
+  // output the manifest contents.
   checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
 }

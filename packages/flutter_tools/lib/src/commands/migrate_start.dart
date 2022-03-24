@@ -64,6 +64,12 @@ class MigrateStartCommand extends FlutterCommand {
       defaultsTo: null,
       valueHelp: '',
     );
+    argParser.addFlag(
+      'prefer-two-way-merge',
+      negatable: false,
+      defaultsTo: false,
+      help: "",
+    );
   }
 
   final bool _verbose;
@@ -130,6 +136,7 @@ class MigrateStartCommand extends FlutterCommand {
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
       platforms: platforms,
+      preferTwoWayMerge: boolArg('prefer-two-way-merge'),
       fileSystem: fileSystem,
       logger: logger,
     );
