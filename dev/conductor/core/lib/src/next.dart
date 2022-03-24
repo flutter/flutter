@@ -303,7 +303,9 @@ class NextContext extends Context {
               dryRun: true,
           );
 
-          final bool response = await prompt('Are you ready to publish this release?');
+          final bool response = await prompt(
+            'Are you ready to publish version ${state.releaseVersion} to ${state.releaseChannel}?',
+          );
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);
